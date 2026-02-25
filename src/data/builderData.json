@@ -1,0 +1,634 @@
+{
+    "Accessories_&_Markings": [],
+    "Body_Type": [
+        {
+            "id": "athletic",
+            "name": "Athletic",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875380/Athletic_nag0pk.webp"
+        },
+        {
+            "id": "curvy",
+            "name": "Curvy",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875381/Curvy_om9zdw.webp"
+        },
+        {
+            "id": "heavy",
+            "name": "Heavy",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875381/Heavy_lgmgvh.webp"
+        },
+        {
+            "id": "lean",
+            "name": "Lean",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875381/Lean_c2lpwf.webp"
+        },
+        {
+            "id": "muscular",
+            "name": "Muscular",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875381/Muscular_w1zm3n.webp"
+        },
+        {
+            "id": "skinny",
+            "name": "Skinny",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875382/Skinny_awnphi.webp"
+        },
+        {
+            "id": "slim",
+            "name": "Slim",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875382/Slim_azmg34.webp"
+        }
+    ],
+    "Character_Type": [
+        {
+            "id": "alien",
+            "name": "Alien",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875383/Alien_f0bvq9.webp"
+        },
+        {
+            "id": "amphibian",
+            "name": "Amphibian",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771868802/Amphibian_cfegkz.webp"
+        },
+        {
+            "id": "ant",
+            "name": "Ant",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771868774/Ant_pf43jp.webp"
+        },
+        {
+            "id": "bee",
+            "name": "Bee",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771868775/Bee_cqye2o.webp"
+        },
+        {
+            "id": "beetle",
+            "name": "Beetle",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771868775/Beetle_btnfdo.webp"
+        },
+        {
+            "id": "crocodile",
+            "name": "Crocodile",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875385/Crocodile_dxjgjv.webp"
+        },
+        {
+            "id": "elf",
+            "name": "Elf",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771868787/Elf_bqcl7z.webp"
+        },
+        {
+            "id": "human",
+            "name": "Human",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771868778/Human_cj7ppd.webp"
+        },
+        {
+            "id": "iguana",
+            "name": "Iguana",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875387/Iguana_aqirdc.webp"
+        },
+        {
+            "id": "lizard",
+            "name": "Lizard",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875388/Lizard_hm6wjf.webp"
+        },
+        {
+            "id": "mantis",
+            "name": "Mantis",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771868779/Mantis_xhdgc2.webp"
+        },
+        {
+            "id": "octopus",
+            "name": "Octopus",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875388/Octopus_e72hsw.webp"
+        },
+        {
+            "id": "reptile",
+            "name": "Reptile",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771868781/Reptile_cw2wxj.webp"
+        }
+    ],
+    "Ears": [
+        {
+            "id": "elf",
+            "name": "Elf",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875389/Elf_ntpcet.webp"
+        },
+        {
+            "id": "human",
+            "name": "Human",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771868781/Human_x50axe.webp"
+        },
+        {
+            "id": "no_ears",
+            "name": "No Ears",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875390/No_Ears_am67av.webp"
+        },
+        {
+            "id": "wing_ears",
+            "name": "Wing Ears",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771869292/Wing_Ears_dscs88.webp"
+        }
+    ],
+    "Ears\u22c5_1": [
+        {
+            "id": "elf",
+            "name": "Elf",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771868787/Elf_bqcl7z.webp"
+        },
+        {
+            "id": "human",
+            "name": "Human",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771868778/Human_cj7ppd.webp"
+        },
+        {
+            "id": "no_ears",
+            "name": "No Ears",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875390/No_Ears_am67av.webp"
+        },
+        {
+            "id": "wing_ears",
+            "name": "Wing Ears",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771869292/Wing_Ears_dscs88.webp"
+        }
+    ],
+    "Ethnicity_-_Origin_Base": [
+        {
+            "id": "african",
+            "name": "African",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771869291/African_erzl3h.webp"
+        },
+        {
+            "id": "asian",
+            "name": "Asian",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771869291/Asian_afmzrt.webp"
+        },
+        {
+            "id": "european",
+            "name": "European",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771869293/European_tskjmt.webp"
+        },
+        {
+            "id": "indian",
+            "name": "Indian",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875397/Indian_ehy1ou.webp"
+        },
+        {
+            "id": "middle_eastern",
+            "name": "Middle Eastern",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875397/Middle_Eastern_dx4v3u.webp"
+        },
+        {
+            "id": "mixed",
+            "name": "Mixed",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771869294/Mixed_oyvgza.webp"
+        }
+    ],
+    "Eyes_-_Details": [
+        {
+            "id": "blind_eye",
+            "name": "Blind eye",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771869306/Blind_eye_s7mkgi.webp"
+        },
+        {
+            "id": "different_eye_colors",
+            "name": "Different eye colors",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875405/Different_eye_colors_hltuva.webp"
+        },
+        {
+            "id": "glowing_eye",
+            "name": "Glowing eye",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771869305/Glowing_eye_e9quds.webp"
+        },
+        {
+            "id": "scarred_eye",
+            "name": "Scarred eye",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771869307/Scarred_eye_h6vvyv.webp"
+        }
+    ],
+    "Eyes_-_Type": [
+        {
+            "id": "human",
+            "name": "Human",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771869308/Human_peg0nl.webp"
+        },
+        {
+            "id": "mechanical",
+            "name": "Mechanical",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875408/Mechanical_rdx2qj.webp"
+        },
+        {
+            "id": "reptile",
+            "name": "Reptile",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771869310/Reptile_cwelgo.webp"
+        }
+    ],
+    "Eye_Color": [
+        {
+            "id": "amber",
+            "name": "Amber",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875398/Amber_bdierh.webp"
+        },
+        {
+            "id": "black",
+            "name": "Black",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771869298/Black_jullua.webp"
+        },
+        {
+            "id": "blue",
+            "name": "Blue",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771869298/Blue_dpjvb1.webp"
+        },
+        {
+            "id": "brown",
+            "name": "Brown",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771869305/Brown_dsbx16.webp"
+        },
+        {
+            "id": "deep_brown",
+            "name": "Deep Brown",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875400/Deep_Brown_o1p6zy.webp"
+        },
+        {
+            "id": "green",
+            "name": "Green",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875401/Green_h3y3s0.webp"
+        },
+        {
+            "id": "grey",
+            "name": "Grey",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771869300/Grey_ecb6da.webp"
+        },
+        {
+            "id": "purple",
+            "name": "Purple",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875402/Purple_nizxfs.webp"
+        },
+        {
+            "id": "red",
+            "name": "Red",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771869302/Red_rwgprg.webp"
+        },
+        {
+            "id": "white",
+            "name": "White",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875403/White_kejyxc.webp"
+        }
+    ],
+    "Face_Skin_Material": [
+        {
+            "id": "amphibian_skin",
+            "name": "Amphibian skin",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875409/Amphibian_skin_m3l1gb.webp"
+        },
+        {
+            "id": "fish_skin",
+            "name": "Fish skin",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771869311/Fish_skin_klmchg.webp"
+        },
+        {
+            "id": "fur",
+            "name": "Fur",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771869311/Fur_fvfhau.webp"
+        },
+        {
+            "id": "human_skin",
+            "name": "Human skin",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771869312/Human_skin_jq7jy2.webp"
+        },
+        {
+            "id": "metallic",
+            "name": "Metallic",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875412/Metallic_d6uhob.webp"
+        },
+        {
+            "id": "scales",
+            "name": "Scales",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875413/Scales_gyivki.webp"
+        }
+    ],
+    "Gender": [
+        {
+            "id": "female",
+            "name": "Female",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771869315/Female_ihr6om.webp"
+        },
+        {
+            "id": "male",
+            "name": "Male",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875415/Male_ahweo2.webp"
+        },
+        {
+            "id": "non_binary",
+            "name": "Non binary",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771869317/Non-binary_degj8z.webp"
+        },
+        {
+            "id": "trans_man",
+            "name": "Trans man",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771869316/Trans_man_da6rk5.webp"
+        },
+        {
+            "id": "trans_woman",
+            "name": "Trans woman",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771869318/Trans_woman_frfcnf.webp"
+        }
+    ],
+    "Hair_-_Head_Growth": [
+        {
+            "id": "afro",
+            "name": "Afro",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771869319/Afro_cnjwwl.webp"
+        },
+        {
+            "id": "bald",
+            "name": "Bald",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875468/Bald_ucav4u.webp"
+        },
+        {
+            "id": "fur",
+            "name": "Fur",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875468/Fur_b2pwvg.webp"
+        },
+        {
+            "id": "long_hair",
+            "name": "Long hair",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875470/Long_hair_aoy6qr.webp"
+        },
+        {
+            "id": "punk_hairstyle",
+            "name": "Punk hairstyle",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875469/Punk_hairstyle_vpmv7u.webp"
+        },
+        {
+            "id": "short_hair",
+            "name": "Short hair",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771869321/Short_hair_sgqoqr.webp"
+        },
+        {
+            "id": "spines",
+            "name": "Spines",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771869323/Spines_gdsryu.webp"
+        },
+        {
+            "id": "tentacles",
+            "name": "Tentacles",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875471/Tentacles_u6x63t.webp"
+        }
+    ],
+    "Horns": [
+        {
+            "id": "antlers",
+            "name": "Antlers",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771869325/Antlers_kvwads.webp"
+        },
+        {
+            "id": "big_horns",
+            "name": "Big Horns",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875472/Big_Horns_d7nja1.webp"
+        },
+        {
+            "id": "small_horns",
+            "name": "Small Horns",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771869325/Small_Horns_umf96q.webp"
+        }
+    ],
+    "Left_Arm": [
+        {
+            "id": "cute_arm",
+            "name": "Cute arm",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875473/Cute_arm_lphvfk.webp"
+        },
+        {
+            "id": "mechanical_arm",
+            "name": "Mechanical arm",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875473/Mechanical_arm_lf4lj1.webp"
+        },
+        {
+            "id": "none",
+            "name": "None",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875474/None_bfs4xj.webp"
+        },
+        {
+            "id": "normal_arm",
+            "name": "Normal arm",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875485/Normal_arm_nvtpwy.webp"
+        },
+        {
+            "id": "prosthetic_arm",
+            "name": "Prosthetic arm",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875486/Prosthetic_arm_gn4ex4.webp"
+        },
+        {
+            "id": "robotic_arm",
+            "name": "Robotic arm",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875475/Robotic_arm_jloj03.webp"
+        }
+    ],
+    "Left_Leg": [
+        {
+            "id": "cute_leg",
+            "name": "Cute leg",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875476/Cute_leg_eu41uj.webp"
+        },
+        {
+            "id": "mechanical_leg",
+            "name": "Mechanical leg",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875487/Mechanical_leg_bgv24w.webp"
+        },
+        {
+            "id": "none",
+            "name": "None",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875474/None_bfs4xj.webp"
+        },
+        {
+            "id": "normal_leg",
+            "name": "Normal leg",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875477/Normal_leg_rsze7i.webp"
+        },
+        {
+            "id": "prosthetic_leg",
+            "name": "Prosthetic leg",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875479/Prosthetic_leg_dcn5ou.webp"
+        },
+        {
+            "id": "robotic_leg",
+            "name": "Robotic leg",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875479/Robotic_leg_qlswxh.webp"
+        }
+    ],
+    "Mouth_&_Teeth": [],
+    "Rendering_Style": [
+        {
+            "id": "2d_illustration",
+            "name": "2D illustration",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771869331/2D_illustration_rxbjqp.webp"
+        },
+        {
+            "id": "anime",
+            "name": "Anime",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875482/Anime_dtih54.webp"
+        },
+        {
+            "id": "cartoon",
+            "name": "Cartoon",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771869333/Cartoon_qofd7e.webp"
+        },
+        {
+            "id": "hyper_realistic",
+            "name": "Hyper realistic",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771869336/Hyper-realistic_bx6cpy.webp"
+        }
+    ],
+    "Right_Arm": [
+        {
+            "id": "cute_arm",
+            "name": "Cute arm",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875473/Cute_arm_lphvfk.webp"
+        },
+        {
+            "id": "mechanical_arm",
+            "name": "Mechanical arm",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875473/Mechanical_arm_lf4lj1.webp"
+        },
+        {
+            "id": "none",
+            "name": "None",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875474/None_bfs4xj.webp"
+        },
+        {
+            "id": "normal_arm",
+            "name": "Normal arm",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875485/Normal_arm_nvtpwy.webp"
+        },
+        {
+            "id": "prosthetic_arm",
+            "name": "Prosthetic arm",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875486/Prosthetic_arm_gn4ex4.webp"
+        },
+        {
+            "id": "robotic_arm",
+            "name": "Robotic arm",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875475/Robotic_arm_jloj03.webp"
+        }
+    ],
+    "Right_Leg": [
+        {
+            "id": "cute_leg",
+            "name": "Cute leg",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875476/Cute_leg_eu41uj.webp"
+        },
+        {
+            "id": "mechanical_leg",
+            "name": "Mechanical leg",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875487/Mechanical_leg_bgv24w.webp"
+        },
+        {
+            "id": "none",
+            "name": "None",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875474/None_bfs4xj.webp"
+        },
+        {
+            "id": "normal_leg",
+            "name": "Normal leg",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875477/Normal_leg_rsze7i.webp"
+        },
+        {
+            "id": "prosthetic_leg",
+            "name": "Prosthetic leg",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875479/Prosthetic_leg_dcn5ou.webp"
+        },
+        {
+            "id": "robotic_leg",
+            "name": "Robotic leg",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875479/Robotic_leg_qlswxh.webp"
+        }
+    ],
+    "Skin_Color": [
+        {
+            "id": "mixed_colors",
+            "name": "Mixed colors",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875490/Mixed_colors_dlc9ld.webp"
+        }
+    ],
+    "Skin_Conditions": [
+        {
+            "id": "albinism",
+            "name": "Albinism",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771869338/Albinism_jqqspu.webp"
+        },
+        {
+            "id": "birthmarks",
+            "name": "Birthmarks",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875491/Birthmarks_gyc68m.webp"
+        },
+        {
+            "id": "burns",
+            "name": "Burns",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771869339/Burns_ouibqs.webp"
+        },
+        {
+            "id": "cracked___dry_skin",
+            "name": "Cracked   dry skin",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875491/Cracked_-_dry_skin_m8pubn.webp"
+        },
+        {
+            "id": "freckles",
+            "name": "Freckles",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875492/Freckles_p2qghz.webp"
+        },
+        {
+            "id": "pigmentation",
+            "name": "Pigmentation",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771869341/Pigmentation_ndppfz.webp"
+        },
+        {
+            "id": "scars",
+            "name": "Scars",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875493/Scars_lsiy2h.webp"
+        },
+        {
+            "id": "vitiligo",
+            "name": "Vitiligo",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875494/Vitiligo_uhldzy.webp"
+        },
+        {
+            "id": "wrinkled_skin",
+            "name": "Wrinkled skin",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771869344/Wrinkled_skin_njii5l.webp"
+        }
+    ],
+    "Surface_Pattern": [
+        {
+            "id": "chess_pattern",
+            "name": "Chess pattern",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771869344/Chess_pattern_bh1nxa.webp"
+        },
+        {
+            "id": "cowhide_pattern",
+            "name": "Cowhide Pattern",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771869345/Cowhide_Pattern_jk6ldh.webp"
+        },
+        {
+            "id": "giraffe_pattern",
+            "name": "Giraffe pattern",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771869347/Giraffe_pattern_feepjs.webp"
+        },
+        {
+            "id": "solid",
+            "name": "Solid",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771869346/Solid_ezfnfl.webp"
+        },
+        {
+            "id": "spots",
+            "name": "Spots",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875495/Spots_nvkxwl.webp"
+        },
+        {
+            "id": "stripes",
+            "name": "Stripes",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771869349/Stripes_rhlxxq.webp"
+        },
+        {
+            "id": "veins_visible",
+            "name": "Veins visible",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875498/Veins_visible_c4ewed.webp"
+        }
+    ]
+}
