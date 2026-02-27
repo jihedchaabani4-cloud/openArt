@@ -21,6 +21,7 @@ export default function RootLayout({ children }) {
     <html lang="en" className="dark" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black text-white overflow-hidden`}
+        suppressHydrationWarning
       >
         {children}
       </body>

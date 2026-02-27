@@ -3,6 +3,7 @@
 import * as React from "react"
 import { useStudioStore } from "@/store/useStudioStore"
 import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
 
 export function Sidebar() {
     const { characters, activeCharacterId, selectCharacter } = useStudioStore()
@@ -17,10 +18,10 @@ export function Sidebar() {
                 {characters.map((char) => {
                     const isActive = activeCharacterId === char.id
                     return (
-                        <button
+                        <Button
+                            variant="studio-sidebar-char"
                             key={char.id}
                             onClick={() => selectCharacter(char.id)}
-                            className="group relative flex flex-col items-center gap-2"
                         >
                             <div className={cn(
                                 "w-14 h-14 rounded-2xl overflow-hidden border-2 transition-all duration-300",
@@ -40,7 +41,7 @@ export function Sidebar() {
                             {isActive && (
                                 <div className="absolute -left-4 top-1/2 -translate-y-1/2 w-1.5 h-8 bg-[#D4FF00] rounded-r-full shadow-[0_0_10px_rgba(212,255,0,0.5)]" />
                             )}
-                        </button>
+                        </Button>
                     )
                 })}
             </div>

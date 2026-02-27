@@ -4,6 +4,7 @@ import * as React from "react"
 import { useCharacterStore } from "@/store/useCharacterStore"
 import { cn } from "@/lib/utils"
 import { User } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
 export function HistoryTimeline() {
     const { nodes, activeNodeId, setActiveNode } = useCharacterStore()
@@ -35,10 +36,10 @@ export function HistoryTimeline() {
                     )}
 
                     {/* Card */}
-                    <button
+                    <Button
+                        variant="studio-timeline-card"
                         onClick={() => setActiveNode(node.id)}
                         className={cn(
-                            "flex-1 group relative mb-2 p-2 rounded-lg transition-all flex items-center gap-3",
                             isActive
                                 ? "bg-lime-400/10 border border-lime-400/50 shadow-[0_0_20px_rgba(163,230,53,0.1)]"
                                 : "bg-transparent border border-transparent hover:bg-white/5 opacity-40 hover:opacity-100"
@@ -69,7 +70,7 @@ export function HistoryTimeline() {
                                 {node.prompt || "Initial creation"}
                             </span>
                         </div>
-                    </button>
+                    </Button>
                 </div>
 
                 {/* Recursively render children */}

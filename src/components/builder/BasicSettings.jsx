@@ -27,44 +27,35 @@ import builderData from "@/data/builderData.json"
 
 export function BasicSettings() {
     // ── Connect to unified store ──────────────────────────────────────────────
-    const { nodes, activeNodeId, updateActiveNodeData } = useStudioStore()
-    const characterData = nodes[activeNodeId]?.data || {}
+    const { stagedDna, updateActiveNodeData } = useStudioStore()
+    const characterData = stagedDna || {}
 
-    const {
-        age,
-        Character_Type: selectedType,
-        Gender: selectedGender,
-        "Ethnicity_-_Origin_Base": selectedEthnicity,
-        skin: selectedSkin,
-        Eye_Color: selectedEyeColor,
-        Skin_Conditions: selectedSkinCondition
-    } = characterData
+    // Safely extract from nested structure or fallback to flat if old node
+    const core = characterData.identity_dna?.core || characterData
+    const selectedType = core.character_type || characterData.Character_Type
+    const selectedGender = core.gender || characterData.Gender
+    const selectedEthnicity = core.ethnicity || characterData["Ethnicity_-_Origin_Base"]
+    const selectedSkin = core.skin || characterData.skin
+    const selectedEyeColor = core.eye_color || characterData.Eye_Color
+    const selectedSkinCondition = core.skin_conditions || characterData.Skin_Conditions
+    const ageValue = core.age || characterData.age
 
     const characterTypes = builderData["Character_Type"] || []
     const genders = builderData["Gender"] || []
     const ethnicities = builderData["Ethnicity_-_Origin_Base"] || []
     const eyeColors = builderData["Eye_Color"] || []
     const skinConditions = builderData["Skin_Conditions"] || []
-
     const skinColors = [
-        "bg-[#0a0a0a]", "bg-[#1a0f0a]", "bg-[#ffffff]", "bg-[#6b16a2]", "bg-[#cc8e6c]",
-        "bg-[#9d9d16]", "bg-[#555555]", "bg-[#064e3b]", "bg-[#2563eb]", "bg-[#881337]",
-        "bg-slate-200", "bg-linear-to-tr from-blue-300 via-yellow-200 to-pink-300"
+        "bg-[#FFE0BD]", "bg-[#F3C99F]", "bg-[#E0AC69]", "bg-[#8D5524]", "bg-[#C68642]",
+        "bg-[#3C2012]", "bg-[#26140A]", "bg-[#EAC086]", "bg-[#5C381A]", "bg-[#4B2C11]"
     ]
 
-    const currentAge = Array.isArray(age) ? age[0] : (age ?? 25)
-    const ageCategory = React.useMemo(() => {
-        if (currentAge >= 60) return "Senior"
-        if (currentAge >= 35) return "Mature"
-        if (currentAge >= 18) return "Adult"
-        return "Young"
-    }, [currentAge])
+    const ageCategory = core.age_stage || "Adult"
 
     const handleCategoryChange = (cat) => {
-        if (cat === "Young") updateActiveNodeData("age", [12])
-        if (cat === "Adult") updateActiveNodeData("age", [25])
-        if (cat === "Mature") updateActiveNodeData("age", [45])
-        if (cat === "Senior") updateActiveNodeData("age", [75])
+        const ageMap = { Young: 12, Adult: 25, Mature: 45, Senior: 75 }
+        updateActiveNodeData("identity_dna.core.age", ageMap[cat])
+        updateActiveNodeData("identity_dna.core.age_stage", cat)
     }
 
     return (
@@ -77,32 +68,34 @@ export function BasicSettings() {
                         <AccordionTrigger className="px-5 py-3 hover:no-underline hover:bg-white/2 group transition-colors">
                             <div className="flex items-center gap-3 w-full pr-4 text-left">
                                 <UserCircle className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                                <span className="text-xs font-bold tracking-wide uppercase text-muted-foreground group-data-[state=open]:text-white">Character Type</span>
+                                <span className="text-xs font-normal tracking-wide uppercase text-muted-foreground group-data-[state=open]:text-white">Character Type</span>
                             </div>
                         </AccordionTrigger>
                         <AccordionContent className="px-3 pb-3 pt-1">
-                            <div className="grid grid-cols-3 gap-1">
+                            <div className="grid grid-cols-3 gap-2">
                                 {characterTypes.map((type) => {
                                     const isActive = selectedType === type.name
                                     return (
-                                        <button
+                                        <Button
+                                            variant="studio-option-tile"
+                                            size="tile"
                                             key={type.id}
-                                            onClick={() => updateActiveNodeData("Character_Type", type.name)}
+                                            onClick={() => updateActiveNodeData("identity_dna.core.character_type", type.name)}
                                             className={cn(
-                                                "group relative aspect-square overflow-hidden rounded-2xl border-2 transition-all duration-300",
+                                                "relative",
                                                 isActive ? "border-[#D4FF00] shadow-[0_0_20px_rgba(212,255,0,0.3)]" : "border-white/5 opacity-60 hover:opacity-100"
                                             )}
                                         >
-                                            <img src={type.url} alt={type.name} className="h-full w-full object-cover" />
-                                            <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent flex items-end p-2">
-                                                <span className="text-[9px] font-black text-white uppercase tracking-wider">{type.name}</span>
+                                            <img src={type.url} alt={type.name} className="w-full h-full object-cover" />
+                                            <div className="absolute inset-0 bg-linear-to-t from-black/85 via-black/30 to-transparent flex items-end p-2">
+                                                <span className="text-[9px] font-normal text-white uppercase tracking-wider line-clamp-1 w-full text-center">{type.name}</span>
                                             </div>
                                             {isActive && (
                                                 <div className="absolute top-1.5 right-1.5 w-4 h-4 bg-[#D4FF00] rounded-full flex items-center justify-center z-10">
                                                     <Check className="w-2.5 h-2.5 text-black" />
                                                 </div>
                                             )}
-                                        </button>
+                                        </Button>
                                     )
                                 })}
                             </div>
@@ -114,7 +107,7 @@ export function BasicSettings() {
                         <AccordionTrigger className="px-5 py-3 hover:no-underline hover:bg-white/2 group transition-colors">
                             <div className="flex items-center gap-3 w-full pr-4 text-left">
                                 <Dna className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                                <span className="text-xs font-bold tracking-wide uppercase text-muted-foreground group-data-[state=open]:text-white">Gender</span>
+                                <span className="text-xs font-normal tracking-wide uppercase text-muted-foreground group-data-[state=open]:text-white">Gender</span>
                             </div>
                         </AccordionTrigger>
                         <AccordionContent className="px-3 pb-3 pt-1">
@@ -123,9 +116,9 @@ export function BasicSettings() {
                                     <Button
                                         key={g.id}
                                         variant={selectedGender === g.name ? "secondary" : "outline"}
-                                        onClick={() => updateActiveNodeData("Gender", g.name)}
+                                        onClick={() => updateActiveNodeData("identity_dna.core.gender", g.name)}
                                         className={cn(
-                                            "h-12 text-[10px] font-black uppercase tracking-widest border-2 transition-all rounded-lg",
+                                            "h-12 text-[10px] font-normal uppercase tracking-widest border-2 transition-all rounded-lg",
                                             selectedGender === g.name
                                                 ? "bg-[#D4FF00] text-black border-[#D4FF00] shadow-xl scale-[1.02]"
                                                 : "hover:bg-white/5 text-muted-foreground border-white/5 opacity-60"
@@ -143,60 +136,65 @@ export function BasicSettings() {
                         <AccordionTrigger className="px-5 py-3 hover:no-underline hover:bg-white/2 group transition-colors">
                             <div className="flex items-center gap-3 w-full pr-4 text-left">
                                 <Globe className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                                <span className="text-xs font-bold tracking-wide uppercase text-muted-foreground group-data-[state=open]:text-white">Ethnicity</span>
+                                <span className="text-xs font-normal tracking-wide uppercase text-muted-foreground group-data-[state=open]:text-white">Ethnicity</span>
                             </div>
                         </AccordionTrigger>
                         <AccordionContent className="px-3 pb-3 pt-1">
-                            <div className="grid grid-cols-3 gap-1">
+                            <div className="grid grid-cols-3 gap-2">
                                 {ethnicities.map((e) => {
                                     const isActive = selectedEthnicity === e.name
                                     return (
-                                        <button
+                                        <Button
+                                            variant="studio-option-tile"
+                                            size="tile"
                                             key={e.id}
-                                            onClick={() => updateActiveNodeData("Ethnicity_-_Origin_Base", e.name)}
+                                            onClick={() => updateActiveNodeData("identity_dna.core.ethnicity", e.name)}
                                             className={cn(
-                                                "group relative h-24 overflow-hidden rounded-2xl border-2 transition-all duration-300",
+                                                "relative aspect-3/4",
                                                 isActive ? "border-[#D4FF00] shadow-[0_0_20px_rgba(212,255,0,0.3)]" : "border-white/5 opacity-60 hover:opacity-100"
                                             )}
                                         >
-                                            <img src={e.url} alt={e.name} className="h-full w-full object-cover" />
-                                            <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent flex items-end p-2">
-                                                <span className="text-[9px] font-black text-white uppercase tracking-wider">{e.name}</span>
+                                            <img src={e.url} alt={e.name} className="w-full h-full object-cover" />
+                                            <div className="absolute inset-0 bg-linear-to-t from-black/85 via-black/30 to-transparent flex items-end p-2">
+                                                <span className="text-[9px] font-normal text-white uppercase tracking-wider line-clamp-1 w-full text-center">{e.name}</span>
                                             </div>
                                             {isActive && (
                                                 <div className="absolute top-1.5 right-1.5 w-4 h-4 bg-[#D4FF00] rounded-full flex items-center justify-center z-10">
                                                     <Check className="w-2.5 h-2.5 text-black" />
                                                 </div>
                                             )}
-                                        </button>
+                                        </Button>
                                     )
                                 })}
                             </div>
                         </AccordionContent>
                     </AccordionItem>
+                    {/* ... rest follows pattern ... */}
 
                     {/* Skin Color */}
                     <AccordionItem value="skin" className="border-b border-white/5">
                         <AccordionTrigger className="px-5 py-3 hover:no-underline hover:bg-white/2 group transition-colors">
                             <div className="flex items-center gap-3 w-full pr-4 text-left">
                                 <Palette className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                                <span className="text-xs font-bold tracking-wide uppercase text-muted-foreground group-data-[state=open]:text-white">Skin Color</span>
+                                <span className="text-xs font-normal tracking-wide uppercase text-muted-foreground group-data-[state=open]:text-white">Skin Color</span>
                             </div>
                         </AccordionTrigger>
                         <AccordionContent className="px-3 pb-3 pt-1">
                             <div className="grid grid-cols-5 gap-1.5">
                                 {skinColors.map((color, idx) => {
-                                    const isActive = selectedSkin === idx
+                                    const isActive = Number(selectedSkin) === idx
                                     return (
-                                        <button
+                                        <Button
+                                            variant="studio-option-tile-sm"
+                                            size="tile"
                                             key={idx}
-                                            onClick={() => updateActiveNodeData("skin", idx)}
+                                            onClick={() => updateActiveNodeData("identity_dna.core.skin", idx)}
                                             className={cn(
-                                                "relative aspect-square rounded-lg border-2 transition-all overflow-hidden",
+                                                "relative overflow-hidden p-0 aspect-square min-w-0",
                                                 isActive ? "border-[#D4FF00] shadow-[0_0_12px_rgba(212,255,0,0.4)]" : "border-white/5 hover:border-white/20"
                                             )}
                                         >
-                                            <div className={cn("w-full h-full", color)} />
+                                            <div className={cn("absolute inset-0", color)} />
                                             {isActive && (
                                                 <div className="absolute inset-0 flex items-center justify-center">
                                                     <div className="w-4 h-4 bg-[#D4FF00] rounded-full flex items-center justify-center">
@@ -204,7 +202,7 @@ export function BasicSettings() {
                                                     </div>
                                                 </div>
                                             )}
-                                        </button>
+                                        </Button>
                                     )
                                 })}
                             </div>
@@ -216,30 +214,32 @@ export function BasicSettings() {
                         <AccordionTrigger className="px-5 py-3 hover:no-underline hover:bg-white/2 group transition-colors">
                             <div className="flex items-center gap-3 w-full pr-4 text-left">
                                 <Eye className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                                <span className="text-xs font-bold tracking-wide uppercase text-muted-foreground group-data-[state=open]:text-white">Eye Color</span>
+                                <span className="text-xs font-normal tracking-wide uppercase text-muted-foreground group-data-[state=open]:text-white">Eye Color</span>
                             </div>
                         </AccordionTrigger>
                         <AccordionContent className="px-3 pb-3 pt-1">
                             <div className="grid grid-cols-3 gap-1">
                                 {eyeColors.map((eye) => (
-                                    <button
+                                    <Button
+                                        variant="studio-option-tile"
+                                        size="tile"
                                         key={eye.id}
-                                        onClick={() => updateActiveNodeData("Eye_Color", eye.name)}
+                                        onClick={() => updateActiveNodeData("identity_dna.core.eye_color", eye.name)}
                                         className={cn(
-                                            "group relative aspect-square overflow-hidden rounded-2xl border-2 transition-all duration-300",
+                                            "relative",
                                             selectedEyeColor === eye.name ? "border-[#D4FF00] shadow-[0_0_20px_rgba(212,255,0,0.3)]" : "border-white/5 opacity-60 hover:opacity-100"
                                         )}
                                     >
-                                        <img src={eye.url} alt={eye.name} className="h-full w-full object-cover" />
-                                        <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent flex items-end p-2">
-                                            <span className="text-[9px] font-black text-white uppercase tracking-wider">{eye.name}</span>
+                                        <img src={eye.url} alt={eye.name} className="w-full h-full object-cover" />
+                                        <div className="absolute inset-0 bg-linear-to-t from-black/85 via-black/30 to-transparent flex items-end p-2">
+                                            <span className="text-[9px] font-normal text-white uppercase tracking-wider line-clamp-1 w-full text-center">{eye.name}</span>
                                         </div>
                                         {selectedEyeColor === eye.name && (
                                             <div className="absolute top-1.5 right-1.5 w-4 h-4 bg-[#D4FF00] rounded-full flex items-center justify-center z-10">
                                                 <Check className="w-2.5 h-2.5 text-black" />
                                             </div>
                                         )}
-                                    </button>
+                                    </Button>
                                 ))}
                             </div>
                         </AccordionContent>
@@ -256,24 +256,26 @@ export function BasicSettings() {
                         <AccordionContent className="px-3 pb-3 pt-1">
                             <div className="grid grid-cols-3 gap-1">
                                 {skinConditions.map((cond) => (
-                                    <button
+                                    <Button
+                                        variant="studio-option-tile"
+                                        size="tile"
                                         key={cond.id}
-                                        onClick={() => updateActiveNodeData("Skin_Conditions", cond.name)}
+                                        onClick={() => updateActiveNodeData("identity_dna.core.skin_conditions", cond.name)}
                                         className={cn(
-                                            "group relative aspect-square overflow-hidden rounded-2xl border-2 transition-all duration-300",
+                                            "relative",
                                             selectedSkinCondition === cond.name ? "border-[#D4FF00] shadow-[0_0_20px_rgba(212,255,0,0.3)]" : "border-white/5 opacity-60 hover:opacity-100"
                                         )}
                                     >
-                                        <img src={cond.url} alt={cond.name} className="h-full w-full object-cover" />
-                                        <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent flex items-end p-2">
-                                            <span className="text-[9px] font-black text-white uppercase tracking-wider">{cond.name}</span>
+                                        <img src={cond.url} alt={cond.name} className="w-full h-full object-cover" />
+                                        <div className="absolute inset-0 bg-linear-to-t from-black/85 via-black/30 to-transparent flex items-end p-2">
+                                            <span className="text-[9px] font-black text-white uppercase tracking-wider line-clamp-1 w-full text-center">{cond.name}</span>
                                         </div>
                                         {selectedSkinCondition === cond.name && (
                                             <div className="absolute top-1.5 right-1.5 w-4 h-4 bg-[#D4FF00] rounded-full flex items-center justify-center z-10">
                                                 <Check className="w-2.5 h-2.5 text-black" />
                                             </div>
                                         )}
-                                    </button>
+                                    </Button>
                                 ))}
                             </div>
                         </AccordionContent>

@@ -1,5 +1,31 @@
 {
-    "Accessories_&_Markings": [],
+    "Accessories_&_Markings": [
+        {
+            "id": "tattoos",
+            "name": "Tattoos",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875380/Athletic_nag0pk.webp"
+        },
+        {
+            "id": "piercing",
+            "name": "Piercing",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875380/Athletic_nag0pk.webp"
+        },
+        {
+            "id": "scarification",
+            "name": "Scarification",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875380/Athletic_nag0pk.webp"
+        },
+        {
+            "id": "symbols_markings",
+            "name": "Symbols / markings",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875380/Athletic_nag0pk.webp"
+        },
+        {
+            "id": "cyber_markings",
+            "name": "Cyber markings",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875380/Athletic_nag0pk.webp"
+        }
+    ],
     "Body_Type": [
         {
             "id": "athletic",
@@ -453,7 +479,43 @@
             "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875479/Robotic_leg_qlswxh.webp"
         }
     ],
-    "Mouth_&_Teeth": [],
+    "Mouth_&_Teeth": [
+        {
+            "id": "different_teeth",
+            "name": "Different teeth",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875380/Athletic_nag0pk.webp"
+        },
+        {
+            "id": "forked_tongue",
+            "name": "Forked tongue",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875380/Athletic_nag0pk.webp"
+        },
+        {
+            "id": "large_mouth",
+            "name": "Large mouth",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875380/Athletic_nag0pk.webp"
+        },
+        {
+            "id": "no_teeth",
+            "name": "No teeth",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875380/Athletic_nag0pk.webp"
+        },
+        {
+            "id": "sharp_teeth",
+            "name": "Sharp teeth",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875380/Athletic_nag0pk.webp"
+        },
+        {
+            "id": "small_mouth",
+            "name": "Small mouth",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875380/Athletic_nag0pk.webp"
+        },
+        {
+            "id": "two_tongues",
+            "name": "Two tongues",
+            "url": "https://res.cloudinary.com/dsak0vfdj/image/upload/v1771875380/Athletic_nag0pk.webp"
+        }
+    ],
     "Rendering_Style": [
         {
             "id": "2d_illustration",

@@ -4,6 +4,7 @@ import * as React from "react"
 import { useStudioStore } from "@/store/useStudioStore"
 import { cn } from "@/lib/utils"
 import { User } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
 export function StudioTimeline() {
     const { nodes, activeNodeId, selectNode, activeCharacterId } = useStudioStore()
@@ -35,10 +36,11 @@ export function StudioTimeline() {
                     )}
 
                     {/* Node Thumbnail */}
-                    <button
+                    <Button
+                        variant="studio-timeline-card"
                         onClick={() => selectNode(node.id)}
                         className={cn(
-                            "flex-1 group relative mb-3 p-2 rounded-2xl transition-all flex items-center gap-3 border",
+                            "mb-3 rounded-2xl",
                             isActive
                                 ? "bg-[#D4FF00]/10 border-[#D4FF00]/50 shadow-[0_0_20px_rgba(212,255,0,0.15)] scale-[1.02]"
                                 : "bg-transparent border-transparent hover:bg-white/5 opacity-50 hover:opacity-100"
@@ -68,7 +70,7 @@ export function StudioTimeline() {
                                 {node.prompt || "Initial state"}
                             </span>
                         </div>
-                    </button>
+                    </Button>
                 </div>
 
                 {children.length > 0 && (

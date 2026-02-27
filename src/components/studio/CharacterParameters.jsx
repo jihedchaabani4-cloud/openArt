@@ -41,29 +41,48 @@ export function CharacterParameters() {
 
     const [isExpanded, setIsExpanded] = React.useState(false)
 
-    // Extract tags from mergedData
+    // Helper to get nested value
+    const getDeep = (obj, path) => path.split('.').reduce((acc, part) => acc?.[part], obj)
+
+    // Extract tags from nested DNA
     const categories = React.useMemo(() => {
-        if (!mergedData) return {}
+        const dna = activeNode?.dna || activeNode?.data || {}
+        if (!dna) return {}
 
-        const config = {
-            general: ["Character_Type", "Gender", "Ethnicity_-_Origin_Base", "skin", "Eye_Color"],
-            face: ["Eyes_-_Type", "Eyes_-_Details", "Mouth_&_Teeth", "Ears", "Horns", "Face_Skin_Material", "Surface_Pattern"],
-            body: ["Body_Type", "Left_Arm", "Right_Arm", "Left_Leg", "Right_Leg"],
-            style: ["Hair_-_Head_Growth", "Accessories_&_Markings", "Rendering_Style"]
+        const extract = (mapping) => {
+            return Object.values(mapping)
+                .map(path => getDeep(dna, path))
+                .filter(val => val && val !== "" && val !== "None" && !(Array.isArray(val) && val[0] === 0))
+                .map(val => Array.isArray(val) ? val[0] : val)
         }
-
-        const getTags = (keys) => keys
-            .map(key => mergedData[key])
-            .filter(val => val && val !== "" && val !== "None" && !(Array.isArray(val) && val[0] === 0))
-            .map(val => Array.isArray(val) ? val[0] : val)
 
         return {
-            general: getTags(config.general),
-            face: getTags(config.face),
-            body: getTags(config.body),
-            style: getTags(config.style)
+            general: extract({
+                type: "identity_dna.core.character_type",
+                gender: "identity_dna.core.gender",
+                ethnicity: "identity_dna.core.ethnicity",
+                age: "identity_dna.core.age_stage",
+                eyes: "identity_dna.core.eye_color"
+            }),
+            face: extract({
+                details: "identity_dna.sculpt.eye_details",
+                mouth: "identity_dna.sculpt.mouth_teeth",
+                ears: "identity_dna.sculpt.ears",
+                horns: "identity_dna.sculpt.horns",
+                material: "identity_dna.sculpt.face_skin_material",
+                pattern: "identity_dna.sculpt.surface_pattern"
+            }),
+            body: extract({
+                type: "physical_dna.body_type",
+                modifications: "physical_dna.modifications"
+            }),
+            style: extract({
+                hair: "style_dna.hair.style",
+                rendering: "style_dna.rendering_style",
+                outfit: "style_dna.outfit"
+            })
         }
-    }, [mergedData])
+    }, [activeNode])
 
     const hasAdvancedData = React.useMemo(() => {
         return (categories.face?.length > 0 || categories.body?.length > 0 || categories.style?.length > 0)

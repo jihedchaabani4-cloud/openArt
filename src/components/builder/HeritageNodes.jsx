@@ -4,6 +4,7 @@ import * as React from "react"
 import { useCharacterStore } from "@/store/useCharacterStore"
 import { cn } from "@/lib/utils"
 import { User } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
 export function HeritageNodes() {
     const { nodes, activeNodeId, setActiveNode } = useCharacterStore()
@@ -22,11 +23,11 @@ export function HeritageNodes() {
             {nodeList.map((node) => {
                 const isActive = activeNodeId === node.id
                 return (
-                    <button
+                    <Button
+                        variant="studio-heritage-node"
                         key={node.id}
                         onClick={() => setActiveNode(node.id)}
                         className={cn(
-                            "group relative w-14 h-14 rounded-2xl overflow-hidden transition-all duration-300 border-2",
                             isActive
                                 ? "border-lime-400 shadow-[0_0_15px_rgba(163,230,53,0.4)] scale-105 z-10"
                                 : "border-white/10 hover:border-white/30 opacity-60 hover:opacity-100"
@@ -48,7 +49,7 @@ export function HeritageNodes() {
                         {isActive && (
                             <div className="absolute inset-0 bg-lime-400/5 blur-xl pointer-events-none" />
                         )}
-                    </button>
+                    </Button>
                 )
             })}
         </div>

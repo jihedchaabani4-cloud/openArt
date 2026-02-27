@@ -3,6 +3,7 @@
 import * as React from "react"
 import { BasicSettings } from "@/components/builder/BasicSettings"
 import { AdvancedSettings } from "@/components/builder/AdvancedSettings"
+import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
 const TABS = [
@@ -30,18 +31,14 @@ export function RightSidebar() {
                     {TABS.map((tab) => {
                         const isActive = activeTab === tab.id
                         return (
-                            <button
+                            <Button
                                 key={tab.id}
+                                variant={isActive ? "studio-tab-active" : "studio-tab"}
                                 onClick={() => setActiveTab(tab.id)}
-                                className={cn(
-                                    "flex-1 py-2 rounded-lg text-[10px] font-black uppercase tracking-[0.15em] transition-all duration-200 focus:outline-none",
-                                    isActive
-                                        ? "bg-[#D4FF00] text-black shadow-[0_0_12px_rgba(212,255,0,0.3)]"
-                                        : "text-white/30 hover:text-white/60"
-                                )}
+                                className={!isActive ? "text-white/30 hover:text-white/60" : undefined}
                             >
                                 {tab.label}
-                            </button>
+                            </Button>
                         )
                     })}
                 </div>

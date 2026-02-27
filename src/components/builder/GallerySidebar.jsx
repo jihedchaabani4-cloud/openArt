@@ -3,7 +3,7 @@
 import * as React from "react"
 import { Plus, User, AlertCircle } from "lucide-react"
 import { cn } from "@/lib/utils"
-
+import { Button } from "@/components/ui/button"
 import { useCharacterStore } from "@/store/useCharacterStore"
 
 export function GallerySidebar() {
@@ -23,15 +23,15 @@ export function GallerySidebar() {
                     <span className="text-[10px] font-black uppercase tracking-tighter text-white">Studio</span>
                 </div>
 
-                <button
+                <Button
+                    variant="studio-gallery-create"
                     onClick={createNew}
-                    className="w-full aspect-square rounded-2xl border-2 border-dashed border-white/10 hover:border-primary/40 hover:bg-primary/5 transition-all flex flex-col items-center justify-center gap-2 group"
                 >
                     <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
                         <Plus className="w-4 h-4 text-white/40 group-hover:text-primary" />
                     </div>
                     <span className="text-[10px] font-bold text-white/30 group-hover:text-primary tracking-tight">Create new</span>
-                </button>
+                </Button>
             </div>
 
             {/* Gallery List */}
@@ -39,11 +39,12 @@ export function GallerySidebar() {
                 {savedCharacters.map((char) => {
                     const isActive = activeId === char.id
                     return (
-                        <button
+                        <Button
+                            variant="studio-gallery-item"
                             key={char.id}
                             onClick={() => selectCharacter(char)}
                             className={cn(
-                                "w-full group relative flex flex-col gap-2 transition-all",
+                                "w-full",
                                 isActive ? "opacity-100" : "opacity-40 hover:opacity-100"
                             )}
                         >
@@ -69,7 +70,7 @@ export function GallerySidebar() {
                             )}>
                                 {char.name || "Unnamed"}
                             </span>
-                        </button>
+                        </Button>
                     )
                 })}
             </div>
