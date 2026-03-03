@@ -3,10 +3,12 @@
 import * as React from "react"
 /** @jsxImportSource react */
 import { useStudioStore } from "@/store/useStudioStore"
-import { Sparkles, Plus, Image as ImageIcon, Zap, User, AlertCircle, RefreshCcw, ChevronRight, Heart, MoreVertical, Video, Download } from "lucide-react"
+import { Sparkles, Plus, Image as ImageIcon, Zap, User, AlertCircle, RefreshCcw, ChevronRight, Heart, MoreVertical, Video, Download, Trash2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
+import { ImageViewerDialog } from "@/components/studio/dialogs/ImageViewerDialog"
+import AnglesPanel from "./Angles"
 
 // ─── Image-only node box (vertical column, no text) ──────────────────────────
 const NodeCard = React.memo(function NodeCard({ node, childrenMap, activeNodeId, selectNode }) {
@@ -46,16 +48,11 @@ const NodeCard = React.memo(function NodeCard({ node, childrenMap, activeNodeId,
                                 <div className="absolute inset-0 bg-linear-to-t from-[#131517]/50 via-[#131517]/30 to-transparent" />
                             </div>
                         ) : (
-                            <div className="w-full h-full flex items-center justify-center bg-[#5A2020] relative">
-                                <AlertCircle className="w-4 h-4 text-red-400" />
-                                <div
-                                    className="absolute inset-0 z-10 pointer-events-none"
-                                    style={{
-                                        background:
-                                            "linear-gradient(0deg, rgba(0, 0, 0, 0.7) -10.87%, rgba(0, 0, 0, 0) 49.91%)",
-                                    }}
-                                />
-                            </div>
+                            /* ── Error State f Node List — Red background, no icon ── */
+                            <div 
+                                className="w-full h-full" 
+                                style={{ backgroundColor: "#e6483d99" }}
+                            />
                         )}
                         {isActive && <div className="absolute inset-0 bg-[#D4FF00]/10 pointer-events-none" />}
                     </div>
@@ -79,7 +76,7 @@ const NodeCard = React.memo(function NodeCard({ node, childrenMap, activeNodeId,
 // ─── Empty State Portrait (shown when no character is active) ─────────────────
 function EmptyPortrait() {
     return (
-        <div className="rounded-[20px] shadow-2xl relative flex-1 min-h-0 w-full" style={{ aspect_ratio: "0.5625 / 1" }}>
+        <div className="rounded-[20px] shadow-2xl relative flex-1 min-h-0 aspect-[9/16]" style={{ background: "rgba(28, 30, 32, 0.48)" }}>
             <div className="size-full bg-[#1C1E207A] rounded-[20px] flex flex-col items-center justify-center relative pointer-events-none cursor-default">
                 <span 
                     className="rounded-full p-3 mb-6 border border-white/10" 
@@ -109,12 +106,75 @@ function EmptyPortrait() {
 export function MainStage() {
     const {
         nodes, activeNodeId, activeCharacterId, stagedDna,
-        editActiveNode, selectNode, getFullContext
+        createCharacter, selectCharacter, setIsCreating,
+        creationPrompt, setCreationPrompt, creationTab, setCreationTab,
+        randomizeDna,
+        editActiveNode, selectNode, getFullContext,
+        removeCharacter, regenerateNode, characters,
+        updateStagedDna
     } = useStudioStore()
+
+    const activeCharacter = React.useMemo(() => 
+        characters.find(c => c.id === activeCharacterId),
+        [characters, activeCharacterId]
+    )
 
     const [instruction, setInstruction] = React.useState("")
     const [isGenerating, setIsGenerating] = React.useState(false)
+    const [showAngles, setShowAngles] = React.useState(false)
     const inputRef = React.useRef(null)
+
+    const handleCreateCharacter = async (e) => {
+        if (e) e.preventDefault()
+        if (isGenerating) return
+        
+        setIsGenerating(true)
+        try {
+            const finalName = `New Character ${Date.now().toString().slice(-4)}`
+            
+            const charId = await createCharacter(
+                finalName, 
+                stagedDna, 
+                creationTab === "prompt" ? creationPrompt : ""
+            )
+            
+            if (charId) {
+                await selectCharacter(charId)
+                setIsCreating(false)
+            }
+        } catch (error) {
+            console.error("Failed to generate character:", error)
+        } finally {
+            setIsGenerating(false)
+        }
+    }
+
+    const handleRandomize = () => {
+        // Randomize DNA traits only
+        randomizeDna()
+        setCreationTab("builder")
+    }
+
+    const handleDelete = async () => {
+        if (!activeCharacterId) return
+        if (confirm("Are you sure you want to delete this character?")) {
+            await removeCharacter(activeCharacterId)
+            selectCharacter(null)
+        }
+    }
+
+    const handleRegenerate = async () => {
+        if (!activeCharacterId || !activeNodeId) return
+        setIsGenerating(true)
+        try {
+            await regenerateNode(activeNodeId)
+        } catch (error) {
+            console.error("Regenerate failed:", error)
+        } finally {
+            setIsGenerating(false)
+        }
+    }
+
     const activeNode = nodes[activeNodeId]
     const rawViewStatus = activeNode?.status
     const viewStatus =
@@ -187,11 +247,11 @@ export function MainStage() {
     const canGenerate = activeCharacterId && (!activeNode || (activeNode.status !== "processing" && activeNode.status !== "failed" && activeNode.status !== "error"))
 
     return (
-        <div className="flex-1 flex flex-col h-full bg-black relative">
+        <div className="flex-1 flex flex-col h-full bg-[#0F1113] relative">
             {/* ── Grid Background Layer ── */}
             <div className="absolute inset-0 pointer-events-none overflow-hidden">
                 <div className="bg-grid-perspective opacity-40" />
-                <div className="absolute inset-0 bg-radial-to-b from-transparent via-[#131517]/20 to-[#131517]" />
+                <div className="absolute inset-0 bg-radial-to-b from-transparent via-[#0F1113]/20 to-[#0F1113]" />
             </div>
             <style dangerouslySetInnerHTML={{
                 __html: `
@@ -202,13 +262,13 @@ export function MainStage() {
             `}} />
 
             {/* Main Stage Container (Fixed Viewport) */}
-            <div className="flex-1 flex flex-col items-center p-6 min-h-0 bg-black">
+            <div className="flex-1 flex flex-col items-center p-6 min-h-0 bg-[#0F1113]">
 
                 {/* ── Visual Section: History + Current Image ── */}
                 <div className="flex-1 w-full flex items-start justify-center min-h-0 gap-3">
 
                     {/* Heritage Mini-Strip — flat list, newest generated at top */}
-                    <div className="flex flex-col gap-2 py-4 px-2 shrink-0 h-full max-h-[740px] items-center overflow-y-auto scrollbar-hide w-12">
+                    <div className="flex h-[90%] flex-col gap-2 py-4 px-2 shrink- max-h-[740px] items-center overflow-y-auto scrollbar-hide w-12">
                         {!activeCharacterId
                             ? /* Ghost placeholders when no character */ (
                                 [...Array(4)].map((_, i) => (
@@ -232,7 +292,7 @@ export function MainStage() {
                     </div>
 
                     {/* Portrait + Input Container (flex column) */}
-                    <div className="flex flex-col items-center gap-4 w-full max-w-[500px] h-full min-h-0">
+                    <div className="flex flex-col items-center gap-4 h-full min-h-0 w-full max-w-[420px]">
 
                         {/* Portrait Container */}
                         {!activeCharacterId ? (
@@ -240,67 +300,119 @@ export function MainStage() {
                             <EmptyPortrait />
                         ) : (
                             /* ── Real portrait ── */
-                            <div className="relative flex-1 min-h-0 aspect-1/2 w-full rounded-lg overflow-hidden border border-white/10 shadow-[0_0_80px_rgba(0,0,0,0.8)] bg-[#0a0a0a] group/portrait">
-                                {viewStatus === "completed" ? (
-                                    activeNode?.image_url ? (
-                                        <img src={activeNode.image_url} alt="" className="w-full h-full object-cover" />
-                                    ) : (
-                                        <div className="w-full h-full flex flex-col items-center justify-center gap-4 bg-[#0a0a0a]">
-                                            <ImageIcon className="w-8 h-8 text-white/5" />
-                                            <span className="text-[10px] font-normal text-white/10 uppercase tracking-widest">Ready</span>
+                            <ImageViewerDialog nodeId={activeNodeId}>
+                                <div className="relative flex-1 min-h-0 aspect-[9/16] rounded-lg overflow-hidden border border-white/10 shadow-[0_0_80px_rgba(0,0,0,0.8)] bg-[#1C1E207A] group/portrait h-full">
+                                    {viewStatus === "completed" ? (
+                                        activeNode?.image_url ? (
+                                            <img src={activeNode.image_url} alt="" className="w-full h-full object-cover" />
+                                        ) : (
+                                            <div className="w-full h-full flex flex-col items-center justify-center gap-4 bg-[#0a0a0a]">
+                                                <ImageIcon className="w-8 h-8 text-white/5" />
+                                                <span className="text-[10px] font-normal text-white/10 uppercase tracking-widest">Ready</span>
+                                            </div>
+                                        )
+                                    ) : viewStatus === "processing" ? (
+                                        <div className="w-full h-full bg-[#0d0d0d] flex flex-col items-center justify-center gap-4">
+                                            <div className="w-10 h-10 border-4 border-[#D4FF00]/10 border-t-[#D4FF00] rounded-full animate-spin" />
+                                            <span className="text-[10px] font-normal text-[#D4FF00]/60 uppercase tracking-widest">Generating...</span>
                                         </div>
-                                    )
-                                ) : viewStatus === "processing" ? (
-                                    <div className="w-full h-full bg-[#0d0d0d] flex flex-col items-center justify-center gap-4">
-                                        <div className="w-10 h-10 border-4 border-[#D4FF00]/10 border-t-[#D4FF00] rounded-full animate-spin" />
-                                        <span className="text-[10px] font-normal text-[#D4FF00]/60 uppercase tracking-widest">Generating...</span>
-                                    </div>
-                                ) : (
+                                    ) : (
+                                        /* ── Error State — Red background as requested ── */
+                                        <div 
+                                            className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-6 p-6 text-center" 
+                                            style={{ backgroundColor: "#e6483d99" }}
+                                        >
+                                            <div className="flex flex-col items-center gap-3">
+                                                <AlertCircle className="w-12 h-12 text-white/80" />
+                                                <p className="text-[21px] uppercase font-bold tracking-wider text-white leading-tight">
+                                                    Error while generating<br/>character...
+                                                </p>
+                                            </div>
+
+                                            <Button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleRegenerate();
+                                                }}
+                                                disabled={isGenerating}
+                                                className="h-12 px-8 rounded-xl bg-white text-black hover:bg-white/90 transition-all uppercase font-bold tracking-widest text-xs flex items-center justify-center gap-2 shadow-xl active:scale-95"
+                                            >
+                                                {isGenerating ? (
+                                                    <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
+                                                ) : (
+                                                    <>
+                                                        <span>Try Again</span>
+                                                        <RefreshCcw className="w-4 h-4" />
+                                                    </>
+                                                )}
+                                            </Button>
+                                        </div>
+                                    )}
+
+                                    {/* Top-left status badges */}
+                                    {(activeNode?.image_url || viewStatus === "processing") && (
+                                        <div className="absolute top-4 left-4 z-20 flex items-center gap-2">
+                                            {activeNode?.image_url && (
+                                                <span className="px-2 py-1 rounded-lg bg-black/50 backdrop-blur-md border border-white/10 text-[10px] font-mono tracking-widest uppercase text-white/80">
+                                                    Generated
+                                                </span>
+                                            )}
+                                            {viewStatus === "processing" && (
+                                                <span className="px-2 py-1 rounded-lg bg-blue-500/20 backdrop-blur-md border border-blue-500/30 text-[10px] font-mono tracking-widest uppercase text-blue-300 flex items-center gap-1">
+                                                    <span className="inline-block w-3 h-3 border-2 border-blue-300/40 border-t-blue-300 rounded-full animate-spin" />
+                                                    Loading
+                                                </span>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    {/* Global bottom gradient overlay (Always present on top of images) */}
                                     <div
-                                        className="w-full h-full flex flex-col items-center justify-center relative"
+                                        className="absolute inset-0 z-10 pointer-events-none"
                                         style={{
                                             background:
                                                 "linear-gradient(0deg, rgba(0, 0, 0, 0.7) -10.87%, rgba(0, 0, 0, 0) 49.91%)",
                                         }}
                                     />
-                                )}
 
-                                {/* Global bottom gradient overlay */}
-                                <div
-                                    className="absolute inset-0 z-10 pointer-events-none"
-                                    style={{
-                                        background:
-                                            "linear-gradient(0deg, rgba(0, 0, 0, 0.7) -10.87%, rgba(0, 0, 0, 0) 49.91%)",
-                                    }}
-                                />
-
-                                {/* Top Actions Overlay */}
-                                <div className="absolute top-5 right-5 flex flex-col gap-2 opacity-0 group-hover/portrait:opacity-100 transition-opacity duration-300">
-                                    <Button variant="studio-overlay-icon" size="icon">
-                                        <Heart className="w-4 h-4" />
-                                    </Button>
-                                    <Button variant="studio-overlay-icon" size="icon">
-                                        <Download className="w-4 h-4" />
-                                    </Button>
-                                    <Button variant="studio-overlay-icon" size="icon">
-                                        <MoreVertical className="w-4 h-4" />
-                                    </Button>
+                                    {/* Top Actions Overlay (Only if completed) */}
+                                    {viewStatus === "completed" && (
+                                        <div className="absolute top-5 right-5 flex flex-col gap-2 opacity-0 group-hover/portrait:opacity-100 transition-opacity duration-300 z-20">
+                                            <Button 
+                                                variant="studio-overlay-icon" 
+                                                size="icon"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setShowAngles(true);
+                                                }}
+                                            >
+                                                <Video className="w-4 h-4" />
+                                            </Button>
+                                            <Button variant="studio-overlay-icon" size="icon">
+                                                <Heart className="w-4 h-4" />
+                                            </Button>
+                                            <Button variant="studio-overlay-icon" size="icon">
+                                                <Download className="w-4 h-4" />
+                                            </Button>
+                                            <Button variant="studio-overlay-icon" size="icon">
+                                                <MoreVertical className="w-4 h-4" />
+                                            </Button>
+                                        </div>
+                                    )}
                                 </div>
-                            </div>
+                            </ImageViewerDialog>
                         )}
 
                         {/* ── Control Section: Input + Button ── */}
                         <div className="w-full shrink-0">
                             {!activeCharacterId ? (
                                 /* ── Empty State Form (Provided UI) ── */
-                                <form className="w-full flex items-center gap-2.5">
+                                <form onSubmit={handleCreateCharacter} className="w-full flex items-center gap-2.5">
                                     <Button
                                         type="button"
                                         variant="studio-normal"
                                         className="grid items-center justify-center w-14 h-14 rounded-xl bg-[#1C1E207A] border border-white/5 text-white/40 pb-0.5 shadow-[inset_0px_-3px_rgba(0,0,0,0.43)] transition hover:opacity-80 active:opacity-60"
-                                        onClick={() => {
-                                            // Handle Randomize - logic can be added here or in store
-                                        }}
+                                        onClick={handleRandomize}
                                     >
                                         <svg className="w-5 h-5" aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M2.75 18.1875H4.39152C4.65663 18.1875 4.91089 18.0822 5.09841 17.8948L15.9571 7.04268C16.1447 6.85527 16.3989 6.75 16.664 6.75H20.5M2.75 5.75H4.33579C4.601 5.75 4.85536 5.85536 5.04289 6.04289L8.5 9.5M20.5 17.1562H16.5304C16.2622 17.1562 16.0052 17.0485 15.8172 16.8573L13.5 14.5M18.25 3.75L21.25 6.75L18.25 9.75M18.1667 14.0625L21.25 17.1562L18.1667 20.25" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></path>
@@ -309,21 +421,46 @@ export function MainStage() {
 
                                     <Button
                                         type="submit"
+                                        disabled={isGenerating || (creationTab === "prompt" && !creationPrompt.trim())}
                                         className="flex-1 h-14 rounded-xl bg-[#D4FF00] text-black font-normal uppercase tracking-widest shadow-[inset_0px_-3px_rgba(0,0,0,0.43)] hover:bg-[#E5FF4D] flex items-center justify-center gap-2 transition-all active:scale-95"
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            // Logic to trigger creation in sidebar or similar
-                                        }}
                                     >
                                         <span className="flex items-center gap-2">
-                                            Generate Influencer
-                                            <div className="flex items-center gap-1">
-                                                <Sparkles className="w-4 h-4 fill-black" />
-                                                <span className="text-[10px] opacity-60">2</span>
-                                            </div>
+                                            {isGenerating ? "Generating..." : "Generate Influencer"}
+                                            {!isGenerating && (
+                                                <div className="flex items-center gap-1">
+                                                    <Sparkles className="w-4 h-4 fill-black" />
+                                                    <span className="text-[10px] opacity-60">2</span>
+                                                </div>
+                                            )}
                                         </span>
                                     </Button>
                                 </form>
+                            ) : viewStatus === "error" ? (
+                                /* ── Error State Actions ── */
+                                <div className="w-full flex items-center gap-3">
+                                    <Button
+                                        onClick={handleDelete}
+                                        variant="studio-normal"
+                                        className="flex-1 h-14 rounded-xl bg-white/5 border border-white/10 text-white/60 hover:bg-white/10 hover:text-white transition-all uppercase font-medium tracking-widest text-xs flex items-center justify-center gap-2"
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                        <span>Delete</span>
+                                    </Button>
+                                    <Button
+                                        onClick={handleRegenerate}
+                                        disabled={isGenerating}
+                                        className="flex-[2] h-14 rounded-xl bg-[#D4FF00] text-black hover:bg-[#E5FF4D] transition-all uppercase font-bold tracking-widest text-xs flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(212,255,0,0.15)]"
+                                    >
+                                        {isGenerating ? (
+                                            <div className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin" />
+                                        ) : (
+                                            <>
+                                                <span>Regenerate</span>
+                                                <RefreshCcw className="w-4 h-4" />
+                                            </>
+                                        )}
+                                    </Button>
+                                </div>
                             ) : (
                                 /* ── Active State Form (EDIT) ── */
                                 <div
@@ -369,6 +506,31 @@ export function MainStage() {
                     </div>
                 </div>
             </div>
+
+            {/* ── Angles Panel Overlay ── */}
+            {showAngles && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+                    <div className="w-full max-w-[440px] max-h-[90vh] shadow-2xl overflow-hidden rounded-2xl border border-white/10">
+                        <AnglesPanel 
+                            onClose={() => setShowAngles(false)} 
+                            previewImageUrl={activeNode?.image_url}
+                            onGenerate={async (cameraData) => {
+                                 setShowAngles(false);
+                                 if (isGenerating || activeNode?.status === "processing") return;
+                                 setIsGenerating(true);
+                                 
+                                 // Update camera DNA in stagedDna before generating
+                                 updateStagedDna("camera_dna.rotation", cameraData.rotation);
+                                 updateStagedDna("camera_dna.tilt", cameraData.tilt);
+                                 updateStagedDna("camera_dna.zoom", cameraData.zoom);
+                                 
+                                 await editActiveNode("Update camera angle");
+                                 setIsGenerating(false);
+                             }}
+                        />
+                    </div>
+                </div>
+            )}
         </div>
     )
 }

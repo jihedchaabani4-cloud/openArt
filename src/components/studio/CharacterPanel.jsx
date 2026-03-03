@@ -21,28 +21,48 @@ function getDisplayNodeForCharacter(nodes, char) {
         (n) => (n.character_id || n.characterId) === characterId
     )
 
-    if (list.length > 0) {
-        const sorted = [...list].sort(
-            (a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0)
-        )
+    // Global character status (from /api/characters or manually set in store)
+    const characterIsProcessing = char.status === "processing"
 
+    if (list.length > 0) {
+        // Priority 1: Specifically the root_node_id if it exists in the nodes store
         let chosen = null
-        for (const n of sorted) {
-            const s = n.status
-            if (s === "completed" || s === "processing") {
-                chosen = n
-                break
+        if (char.root_node_id) {
+            chosen = list.find(n => n.id === char.root_node_id && n.status === "completed" && n.image_url)
+        }
+
+        // Priority 2: Sort by oldest first to pick the "original" or first generated node
+        if (!chosen) {
+            const sorted = [...list].sort(
+                (a, b) => new Date(a.created_at || 0) - new Date(b.created_at || 0)
+            )
+
+            for (const n of sorted) {
+                const s = n.status
+                if (s === "completed" && n.image_url) {
+                    chosen = n
+                    break
+                }
+            }
+
+            // If no completed node with image, pick the first processing one
+            if (!chosen) {
+                chosen = sorted.find(n => n.status === "processing")
+            }
+
+            if (!chosen) {
+                // All nodes are error/unknown → use oldest as fallback
+                return { node: sorted[0], status: "error" }
             }
         }
 
-        if (!chosen) {
-            // All nodes are error/unknown → use latest as error
-            return { node: sorted[0], status: "error" }
-        }
-
+        // Final status determination:
+        // If the character is globally "processing" (e.g. a new edit is in progress),
+        // we show the "processing" status regardless of which image we use for display.
         const s = chosen.status
-        const normalized =
-            s === "processing"
+        const normalized = characterIsProcessing
+            ? "processing"
+            : s === "processing"
                 ? "processing"
                 : s === "completed"
                     ? "completed"
@@ -52,12 +72,11 @@ function getDisplayNodeForCharacter(nodes, char) {
     }
 
     // No nodes yet in store for this character → fallback to character summary
-    const fallbackStatus =
-        char.status === "processing"
-            ? "processing"
-            : char.status === "completed"
-                ? "completed"
-                : "error"
+    const fallbackStatus = characterIsProcessing
+        ? "processing"
+        : char.status === "completed"
+            ? "completed"
+            : "error"
 
     if (!char.imageUrl && fallbackStatus === "error") {
         return { node: null, status: "error" }
@@ -80,16 +99,16 @@ export function CharacterPanel({ onCreateNew, onSelectCharacter, isCreating, act
 
     return (
         <>
-            <aside className="w-[180px] max-xl:w-[140px] shrink-0 pt-12 max-xl:pt-10 px-3 max-xl:px-2 flex flex-col gap-3 h-screen border-r border-white/5 bg-black">
-                {/* Outer card container — the rounded box with #131517 */}
-                <div className="rounded-[32px] border border-white/[0.06] bg-[#131517] p-2 h-full flex-1 overflow-hidden flex flex-col">
+            <aside className="w-[180px] max-xl:w-[140px] shrink-0 p-4 flex flex-col gap-3 h-screen border-r border-white/5 bg-black">
+                {/* Outer card container — the rounded box with #0F1113 */}
+                <div className="rounded-[32px] border bg-[#1c1e20] p-2 h-full flex-1 outline-[#d9d9d90a] outline-2 outline-offset-8 flex flex-col">
                     <div className="flex-1 overflow-y-auto scrollbar-hide">
-                        <div className="flex flex-col items-center gap-2">
+                        <div className="flex flex-col items-stretch gap-2">
                             {/* Create new tile */}
                             <button
                                 onClick={onCreateNew}
                                 className={cn(
-                                    "group relative w-full aspect-square rounded-[24px] overflow-hidden border-2 transition-all duration-300 flex flex-col items-center justify-center gap-2 bg-white/[0.02] hover:bg-white/[0.04]",
+                                    "group relative w-full aspect-square shrink-0 rounded-[24px] overflow-hidden border-2 transition-all duration-300 flex flex-col items-center justify-center gap-2 bg-white/[0.02] hover:bg-white/[0.04]",
                                     isCreating 
                                         ? "border-[#D4FF00] shadow-[0_0_20px_rgba(212,255,0,0.4)] bg-white/[0.05]" 
                                         : "border-dashed border-white/5 hover:border-[#D4FF00]/30"
@@ -115,18 +134,14 @@ export function CharacterPanel({ onCreateNew, onSelectCharacter, isCreating, act
                                     const isActive = activeCharacterId === char.id && !isCreating
                                     
                                     return (
-                                        <div
+                                        <CharacterCard
                                             key={char.id}
-                                            className="w-full aspect-square shrink-0"
-                                        >
-                                            <CharacterCard
-                                                char={char}
-                                                tileNode={displayNode}
-                                                tileStatus={tileStatus}
-                                                isActive={isActive}
-                                                onClick={() => onSelectCharacter(char.id)}
-                                            />
-                                        </div>
+                                            char={char}
+                                            tileNode={displayNode}
+                                            tileStatus={tileStatus}
+                                            isActive={isActive}
+                                            onClick={() => onSelectCharacter(char.id)}
+                                        />
                                     )
                                 })}
                         </div>

@@ -1,9 +1,10 @@
 import "./globals.css";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Poppins, Geist_Mono } from "next/font/google";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const poppins = Poppins({
+  variable: "--font-poppins",
   subsets: ["latin"],
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
 });
 
 const geistMono = Geist_Mono({
@@ -20,7 +21,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black text-white overflow-hidden`}
+        className={`${poppins.variable} ${geistMono.variable} antialiased bg-[#0F1113] text-white overflow-hidden font-sans`}
         suppressHydrationWarning
       >
         {children}

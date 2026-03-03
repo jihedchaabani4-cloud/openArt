@@ -19,7 +19,7 @@ const buttonVariants = cva(
         ghost:
           "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
         link: "text-primary underline-offset-4 hover:underline",
-        "studio-normal": "flex items-center justify-center gap-3 h-11 rounded-lg bg-white/3 border border-white/8 hover:bg-white/6 hover:border-white/15 transition-all text-white/80 group",
+        "studio-normal": "flex items-center justify-center gap-3 h-11 rounded-lg bg-white/3 border border-white/8 hover:bg-white/6  transition-all text-white/80 group",
         "studio-neon": "flex items-center justify-center gap-3 h-11 rounded-lg bg-[#D4FF00] hover:bg-[#e6ff4d] transition-all text-black font-black uppercase tracking-widest active:scale-[0.98] shadow-[0_0_20px_rgba(212,255,0,0.15)] group",
         "studio-error": "flex items-center justify-center gap-3 h-11 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500 hover:bg-red-500/20 transition-all",
         "studio-overlay-icon":
@@ -29,9 +29,9 @@ const buttonVariants = cva(
         "studio-node-card":
           "flex-1 min-w-0 group relative mb-2 p-2 rounded-lg transition-all duration-200 flex items-center gap-3 border focus:outline-none",
         "studio-option-tile":
-          "group relative aspect-square overflow-hidden rounded-2xl border-2 transition-all duration-300",
+          "group relative aspect-square overflow-hidden rounded-lg border-2 transition-all duration-300",
         "studio-option-tile-tall":
-          "group relative h-24 overflow-hidden rounded-2xl border-2 transition-all duration-300",
+          "group relative h-24 overflow-hidden rounded-lg border-2 transition-all duration-300",
         "studio-option-tile-sm":
           "group relative aspect-square overflow-hidden rounded-lg border-2 transition-all duration-300",
         "studio-tab":
@@ -41,13 +41,13 @@ const buttonVariants = cva(
         "studio-sidebar-char":
           "group relative flex flex-col items-center gap-2 focus:outline-none",
         "studio-gallery-create":
-          "w-full aspect-square rounded-2xl border-2 border-dashed border-white/10 hover:border-primary/40 hover:bg-primary/5 transition-all flex flex-col items-center justify-center gap-2 group",
+          "w-full aspect-square rounded-lg border-2 border-dashed border-white/10 hover:border-primary/40 hover:bg-primary/5 transition-all flex flex-col items-center justify-center gap-2 group",
         "studio-gallery-item":
           "w-full group relative flex flex-col gap-2 transition-all focus:outline-none",
         "studio-timeline-card":
           "flex-1 group relative mb-2 p-2 rounded-lg transition-all flex items-center gap-3 border focus:outline-none",
         "studio-heritage-node":
-          "group relative w-14 h-14 rounded-2xl overflow-hidden transition-all duration-300 border-2 p-0",
+          "group relative w-14 h-14 rounded-lg overflow-hidden transition-all duration-300 border-2 p-0",
       },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",

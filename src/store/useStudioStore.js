@@ -1,6 +1,9 @@
 "use client"
 
 import { create } from "zustand"
+import builderData from "@/data/builderData.json"
+import { io } from "socket.io-client"
+import { api } from "@/lib/api"
 
 // ─── Utils ───────────────────────────────────────────────────────
 const mergeDeep = (target, source) => {
@@ -72,6 +75,11 @@ export const DEFAULT_DNA = {
         emotion: "Neutral",
         gaze_direction: "Frontal"
     },
+    camera_dna: {
+        rotation: 0,
+        tilt: 0,
+        zoom: 0
+    },
     flux_metadata: {
         seed: 0,
         pulid_weight: 0.75,
@@ -87,9 +95,98 @@ export const useStudioStore = create((set, get) => ({
     nodes: {},      // Flattened node map { [nodeId]: node }
     activeCharacterId: null,
     activeNodeId: null,
+    selectedNodeId: null, // Single ID of node dragged into the prompt bar
     stagedDna: { ...DEFAULT_DNA }, // Local staging area for edits
+    creationPrompt: "",
+    creationTab: "builder",
+    isCreating: false,
+    characterName: "New Character",
+    socket: null,
+    isConnected: false,
 
+    initSocket: () => {
+        if (get().socket) return
+
+        const socket = io("http://localhost:5000")
+        
+        socket.on("connect", () => {
+            console.log("🔌 Connected to WebSocket")
+            set({ isConnected: true })
+            socket.emit("join_creation_room")
+            
+            // If we have an active character, rejoin its room
+            const charId = get().activeCharacterId
+            if (charId) {
+                socket.emit("join_character_room", charId)
+            }
+        })
+
+        socket.on("disconnect", () => {
+            console.log("🔌 Disconnected from WebSocket")
+            set({ isConnected: false })
+        })
+
+        socket.on("node_update", (updatedNode) => {
+            console.log("🔌 Received node update:", updatedNode)
+            
+            set((state) => {
+                const newNodes = { ...state.nodes }
+                
+                // Remove any temp nodes for this character if we get a real one
+                Object.keys(newNodes).forEach(id => {
+                    if (id.startsWith('temp-') && newNodes[id].character_id === updatedNode.character_id) {
+                        delete newNodes[id]
+                    }
+                })
+
+                newNodes[updatedNode.id] = {
+                    ...newNodes[updatedNode.id],
+                    ...updatedNode
+                }
+
+                const isCurrentNode = state.activeNodeId === updatedNode.id || state.activeNodeId?.startsWith('temp-')
+                const newState = { nodes: newNodes }
+
+                // If this is the active node and it just finished, update staged DNA to reflect new reality
+                if (isCurrentNode && updatedNode.status === "completed") {
+                    newState.activeNodeId = updatedNode.id
+                    newState.stagedDna = JSON.parse(JSON.stringify(updatedNode.dna || DEFAULT_DNA))
+                }
+
+                // If a node is completed or error, refresh the character list to get the latest thumbnail/status
+                if (updatedNode.status === "completed" || updatedNode.status === "error") {
+                    // Update locally first for immediate feedback
+                    newState.characters = state.characters.map(c => {
+                        if (c.id === updatedNode.character_id) {
+                            return { 
+                                ...c, 
+                                status: updatedNode.status,
+                                imageUrl: updatedNode.image_url || c.imageUrl
+                            }
+                        }
+                        return c
+                    })
+                    
+                    // Then fetch from server to be sure
+                    get().fetchCharacters()
+                }
+
+                return newState
+            })
+        })
+
+        set({ socket })
+    },
+
+    setIsCreating: (val) => set({ isCreating: val }),
+    setCreationPrompt: (prompt) => set({ creationPrompt: prompt }),
+    setCreationTab: (tab) => set({ creationTab: tab }),
     setStagedDna: (dna) => set({ stagedDna: dna }),
+
+    // ─── Selection Actions ──────────────────────────────────────────
+    setNodeSelection: (nodeId) => set({ selectedNodeId: nodeId }),
+    
+    clearNodeSelection: () => set({ selectedNodeId: null }),
 
     updateStagedDna: (path, value) => {
         set((state) => {
@@ -151,11 +248,24 @@ export const useStudioStore = create((set, get) => ({
     // ─── Actions ─────────────────────────────────────────────────────
 
     selectCharacter: async (characterId) => {
+        const { socket, activeCharacterId } = get()
+
+        // 1. Leave old character room if exists
+        if (socket && activeCharacterId) {
+            socket.emit("leave_character_room", activeCharacterId)
+        }
+
         if (!characterId) {
             set({ activeCharacterId: null, activeNodeId: null, stagedDna: { ...DEFAULT_DNA } })
             return
         }
-        set({ activeCharacterId: characterId })
+
+        // 2. Join new character room
+        if (socket) {
+            socket.emit("join_character_room", characterId)
+        }
+
+        set({ activeCharacterId: characterId, isCreating: false })
         await get().fetchTree(characterId)
     },
 
@@ -170,43 +280,32 @@ export const useStudioStore = create((set, get) => ({
     /** fetchCharacters — pull all characters summary */
     fetchCharacters: async () => {
         try {
-            const response = await fetch("http://localhost:5000/api/characters")
-            const json = await response.json()
+            const json = await api.get("/characters")
             if (json.ok) {
                 set({ characters: json.data })
-                if (!get().activeCharacterId && json.data.length > 0) {
+                if (!get().activeCharacterId && !get().isCreating && json.data.length > 0) {
                     await get().selectCharacter(json.data[0].id)
                 }
             }
         } catch (error) {
-            console.error("fetchCharacters failed:", error)
+            console.error("❌ fetchCharacters failed:", error.message)
         }
     },
 
     /** fetchTree — pull all nodes for a specific character */
     fetchTree: async (characterId) => {
         try {
-            const response = await fetch(`http://localhost:5000/api/characters/${characterId}/tree`)
-            const json = await response.json()
-            if (json.nodes) {
-                const nodeMap = {}
-                json.nodes.forEach(n => {
-                    nodeMap[n.id] = n
-                })
-                set((state) => {
-                    const latestNodeId = json.nodes[json.nodes.length - 1]?.id || null
-                    const existingActiveNode = state.nodes[state.activeNodeId]
-                    const shouldUpdateActive = !state.activeNodeId || existingActiveNode?.character_id !== characterId
+            const json = await api.get(`/characters/${characterId}/tree`)
+            const nodesMap = {}
+            json.nodes.forEach(node => {
+                nodesMap[node.id] = node
+            })
+            set({ nodes: nodesMap })
 
-                    const nextActiveNodeId = shouldUpdateActive ? latestNodeId : state.activeNodeId
-                    const nextStagedDna = JSON.parse(JSON.stringify(nodeMap[nextActiveNodeId]?.dna || nodeMap[nextActiveNodeId]?.data || DEFAULT_DNA))
-
-                    return {
-                        nodes: { ...state.nodes, ...nodeMap },
-                        activeNodeId: nextActiveNodeId,
-                        stagedDna: nextStagedDna
-                    }
-                })
+            // Auto-select newest node if none active
+            if (json.nodes.length > 0) {
+                const newest = json.nodes.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0]
+                get().selectNode(newest.id)
             }
         } catch (error) {
             console.error("fetchTree failed:", error)
@@ -214,37 +313,66 @@ export const useStudioStore = create((set, get) => ({
     },
 
     /** createCharacter — Operation A */
-    createCharacter: async (name, initialDna = DEFAULT_DNA, prompt = "") => {
+    createCharacter: async (name, dna, prompt) => {
         try {
-            const body = { name, dna: initialDna };
-            if (prompt) body.prompt = prompt;
-
-            const response = await fetch("http://localhost:5000/api/characters/create-character", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(body)
-            })
-            const json = await response.json()
+            const json = await api.post("/characters/create-character", { name, dna, prompt })
             if (json.character_id) {
-                await get().fetchCharacters()
+                // Add the character and its root node to the store immediately as "processing"
+                set(state => ({
+                    characters: [
+                        {
+                            id: json.character_id,
+                            name: name,
+                            status: "processing",
+                            root_node_id: json.root_node_id,
+                            timestamp: Date.now()
+                        },
+                        ...state.characters
+                    ],
+                    nodes: {
+                        ...state.nodes,
+                        [json.root_node_id]: {
+                            id: json.root_node_id,
+                            character_id: json.character_id,
+                            dna: dna,
+                            status: "processing",
+                            created_at: new Date().toISOString()
+                        }
+                    },
+                    activeCharacterId: json.character_id,
+                    activeNodeId: json.root_node_id,
+                    isCreating: false // Creation dialog is done, now we show the "Generating" state in the panel
+                }))
+
+                // Join the character room for updates
+                const socket = get().socket
+                if (socket) {
+                    socket.emit("join_character_room", json.character_id)
+                }
+
                 return json.character_id
             }
-            return null
         } catch (error) {
             console.error("createCharacter failed:", error)
-            return null
         }
     },
 
     /** editNode — Operation B */
-    editActiveNode: async (command) => {
-        const { activeCharacterId, activeNodeId, nodes, getChanges } = get()
+    editActiveNode: async (command, targetNodeId = null) => {
+        const { activeCharacterId, activeNodeId, nodes, getChanges, selectNode } = get()
         if (!activeCharacterId) return
 
-        // Fallback to latest node if activeNodeId is missing
-        let parentId = activeNodeId
+        // Use provided targetNodeId or fall back to activeNodeId
+        let parentId = targetNodeId || activeNodeId
+        
+        // If we switched targetNodeId, we should select it first to ensure DNA context is right
+        if (targetNodeId && targetNodeId !== activeNodeId) {
+            selectNode(targetNodeId)
+        }
+
+        // Fallback to latest node if parentId is still missing
         if (!parentId) {
-            const charNodes = Object.values(nodes).filter(n => n.character_id === activeCharacterId)
+            const charNodes = Object.values(nodes).filter(n => (n.character_id || n.characterId) === activeCharacterId)
             if (charNodes.length > 0) {
                 parentId = charNodes[charNodes.length - 1].id
             }
@@ -261,9 +389,12 @@ export const useStudioStore = create((set, get) => ({
             return
         }
 
-        // Temporary "Processing" state (character_id so panel shows spinner for this character)
+        // Temporary "Processing" state
         const tempId = `temp-${Date.now()}`
         set(state => ({
+            characters: state.characters.map(c => 
+                c.id === activeCharacterId ? { ...c, status: "processing" } : c
+            ),
             nodes: {
                 ...state.nodes,
                 [tempId]: {
@@ -271,7 +402,7 @@ export const useStudioStore = create((set, get) => ({
                     character_id: activeCharacterId,
                     status: "processing",
                     edit_command: command || "Edit traits",
-                    parent_id: activeNodeId,
+                    parent_id: parentId,
                     created_at: new Date().toISOString()
                 }
             },
@@ -279,28 +410,34 @@ export const useStudioStore = create((set, get) => ({
         }))
 
         try {
-            const response = await fetch("http://localhost:5000/api/characters/edit-node", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    character_id: activeCharacterId,
-                    parent_node_id: activeNodeId.startsWith('temp') ? get().nodes[activeNodeId].parent_id : activeNodeId,
-                    edit_command: command || "Edit traits",
-                    changes: changes
-                })
+            const json = await api.post("/characters/edit-node", {
+                character_id: activeCharacterId,
+                parent_node_id: parentId.startsWith('temp') ? get().nodes[parentId].parent_id : parentId,
+                edit_command: command || "Edit traits",
+                changes: changes
             })
-            const json = await response.json()
             if (json.status === "success") {
-                await get().fetchTree(activeCharacterId)
                 return json.new_node_id
             }
         } catch (error) {
             console.error("editNode failed:", error)
+            alert(error.message || "Failed to start edit generation")
             set(state => {
                 const newNodes = { ...state.nodes }
                 delete newNodes[tempId]
-                return { nodes: newNodes, activeNodeId } // Fallback
+                return { nodes: newNodes, activeNodeId: parentId } // Fallback to parent
             })
+        }
+    },
+
+    regenerateNode: async (nodeId) => {
+        try {
+            const json = await api.post("/characters/regenerate-node", { node_id: nodeId })
+            return json.status === "success"
+        } catch (error) {
+            console.error("regenerateNode failed:", error)
+            alert(error.message || "Failed to regenerate node")
+            return false
         }
     },
 
@@ -321,19 +458,125 @@ export const useStudioStore = create((set, get) => ({
         })
     },
 
+    /** removeNode — Delete specific node from tree */
+    removeNode: async (nodeId) => {
+        try {
+            const json = await api.post(`/characters/delete-node`, { node_id: nodeId })
+            if (json.status === "success") {
+                const charId = get().activeCharacterId
+                if (charId) {
+                    await get().fetchTree(charId) // Refresh tree to see remaining nodes
+                }
+            } else if (json.status === "character_deleted") {
+                // If the whole character was deleted (last node), refresh character list
+                set({ 
+                    activeCharacterId: null, 
+                    activeNodeId: null, 
+                    nodes: {}, 
+                     characterName: "New Character",
+                     isCreating: true,
+                     creationPrompt: "",
+                     creationTab: "builder",
+                     stagedDna: JSON.parse(JSON.stringify(DEFAULT_DNA))
+                  })
+                 await get().fetchCharacters()
+            }
+        } catch (error) {
+            console.error("removeNode failed:", error)
+            alert(error.message || "Failed to delete node")
+        }
+    },
+
+    renameCharacter: async (characterId, newName) => {
+        try {
+            const json = await api.post(`/characters/${characterId}/rename`, { name: newName })
+            if (json.status === "success") {
+                set(state => ({
+                    characters: state.characters.map(c => 
+                        c.id === characterId ? { ...c, name: newName } : c
+                    ),
+                    characterName: characterId === state.activeCharacterId ? newName : state.characterName
+                }))
+            }
+        } catch (error) {
+            console.error("renameCharacter failed:", error)
+        }
+    },
+
     /** removeCharacter — Operation C */
     removeCharacter: async (characterId) => {
         try {
             // First hit for confirmation/info, then with confirmed=true
-            const response = await fetch(`http://localhost:5000/api/characters/${characterId}?confirmed=true`, {
-                method: "DELETE"
-            })
-            const json = await response.json()
+            const json = await api.delete(`/characters/${characterId}?confirmed=true`)
             if (json.status === "deleted") {
+                // If the deleted character was the active one, reset state
+                if (get().activeCharacterId === characterId) {
+                    set({ 
+                        activeCharacterId: null, 
+                        activeNodeId: null, 
+                        nodes: {}, 
+                        characterName: "New Character",
+                        isCreating: true,
+                        creationPrompt: "",
+                        creationTab: "builder",
+                        stagedDna: JSON.parse(JSON.stringify(DEFAULT_DNA))
+                    })
+                }
                 await get().fetchCharacters()
             }
         } catch (error) {
             console.error("removeCharacter failed:", error)
+            alert(error.message || "Failed to delete character")
         }
+    },
+
+    randomizeDna: () => {
+        const dna = JSON.parse(JSON.stringify(DEFAULT_DNA))
+        
+        const getRandom = (arr) => arr && arr.length > 0 ? arr[Math.floor(Math.random() * arr.length)].name : null
+
+        // Identity Core
+        dna.identity_dna.core.character_type = getRandom(builderData["Character_Type"]) || "Human"
+        dna.identity_dna.core.gender = getRandom(builderData["Gender"]) || "Female"
+        dna.identity_dna.core.ethnicity = getRandom(builderData["Ethnicity_-_Origin_Base"]) || "Caucasian"
+        dna.identity_dna.core.eye_color = getRandom(builderData["Eye_Color"]) || "Blue"
+        
+        const ages = ["Young", "Adult", "Mature", "Senior"]
+        const ageMap = { Young: 12, Adult: 25, Mature: 45, Senior: 75 }
+        const randomAge = ages[Math.floor(Math.random() * ages.length)]
+        dna.identity_dna.core.age_stage = randomAge
+        dna.identity_dna.core.age = ageMap[randomAge]
+
+        // Sculpt
+        dna.identity_dna.sculpt.eye_details = getRandom(builderData["Eyes_-_Type"]) || "Normal"
+        dna.identity_dna.sculpt.mouth_teeth = getRandom(builderData["Mouth_&_Teeth"]) || "Normal"
+        dna.identity_dna.sculpt.ears = getRandom(builderData["Ears"]) || "Human"
+        dna.identity_dna.sculpt.horns = getRandom(builderData["Horns"]) || "None"
+        dna.identity_dna.sculpt.face_skin_material = getRandom(builderData["Face_Skin_Material"]) || "Normal"
+        dna.identity_dna.sculpt.surface_pattern = getRandom(builderData["Surface_Pattern"]) || "None"
+
+        // Physical
+        dna.physical_dna.body_type = getRandom(builderData["Body_Type"]) || "Slim"
+        dna.physical_dna.left_arm = getRandom(builderData["Left_Arm"]) || "Normal arm"
+        dna.physical_dna.right_arm = getRandom(builderData["Right_Arm"]) || "Normal arm"
+        dna.physical_dna.left_leg = getRandom(builderData["Left_Leg"]) || "Normal leg"
+        dna.physical_dna.right_leg = getRandom(builderData["Right_Leg"]) || "Normal leg"
+
+        // Style
+        dna.style_dna.hair.style = getRandom(builderData["Hair_-_Head_Growth"]) || "Long straight"
+        dna.style_dna.rendering_style = getRandom(builderData["Rendering_Style"]) || "Photorealistic"
+        
+        // Accessories (randomly pick 0-2)
+        const accs = builderData["Accessories_&_Markings"] || []
+        if (accs.length > 0) {
+            const count = Math.floor(Math.random() * 3)
+            const picked = []
+            for(let i=0; i<count; i++) {
+                picked.push(accs[Math.floor(Math.random() * accs.length)].name)
+            }
+            dna.style_dna.accessories = [...new Set(picked)]
+        }
+
+        set({ stagedDna: dna })
     }
 }))
