@@ -1,5 +1,5 @@
-import { StudioLayout } from "@/components/studio/StudioLayout";
+import { StudioLayoutV2 } from "@/components/studio/StudioLayoutV2";
 
 export default function Home() {
-  return <StudioLayout />;
+  return <StudioLayoutV2 />;
 }

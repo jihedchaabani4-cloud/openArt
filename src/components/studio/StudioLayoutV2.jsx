@@ -4,18 +4,18 @@ import * as React from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useStudioStore } from "@/store/useStudioStore"
 import { CharacterPanel } from "./CharacterPanel"
-import { CharacterCreatorV2 } from "./CharacterCreatorV2"
 import ImagePromptBar from "@/components/features/promptbar"
+import CinemaPromptBar from "@/components/features/CinemaPromptBar"
 import ImageStatusView from "@/components/skeleton/ImageStatusView"
 import { ImageViewerDialog } from "./dialogs/ImageViewerDialog"
-import { X, RefreshCcw, Trash2 } from "lucide-react"
+import { X, RefreshCcw, Trash2, Check } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 export function StudioLayoutV2() {
     const { 
         characters, fetchCharacters, activeCharacterId, selectCharacter,
         isCreating, setIsCreating, nodes, initSocket,
-        regenerateNode, removeNode, selectedNodeId
+        regenerateNode, removeNode, selectedNodeId, studioMode
     } = useStudioStore()
 
     const [actionNode, setActionNode] = React.useState(null)
@@ -56,102 +56,93 @@ export function StudioLayoutV2() {
             {/* ── Main Content Area ── */}
             <main className="flex-1 flex flex-col relative min-w-0">
                 
-                {/* ── Content: Grid OR CharacterCreator ── */}
+                {/* ── Content: Grid OR Empty ── */}
                 <div className="flex-1 overflow-y-auto overflow-x-hidden p-6  scrollbar-hide">
                     <AnimatePresence mode="wait">
-                        {isCreating ? (
-                            <motion.div
-                                key="creator-container"
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: 10 }}
-                                transition={{ duration: 0.4 }}
-                                className="h-full w-full flex gap-6"
-                            >
-                                {/* ── Left: Tutorial Video ── */}
-                                <div className="flex-1 h-full relative rounded-[32px] border border-white/5 bg-[#1C1E207A] overflow-hidden shadow-[0_32px_120px_rgba(0,0,0,0.6)]">
-                                    <video 
-                                        src="/ai-influencer-main (1).mp4" 
-                                        autoPlay 
-                                        muted 
-                                        loop 
-                                        playsInline
-                                        className="w-full h-full object-cover"
-                                    />
-                                    
-                                    {/* Header badges */}
-                                    <div className="absolute top-4 left-4 z-10 flex items-center gap-2">
-                                        <span className="px-2 py-1 rounded-lg bg-black/40 backdrop-blur-md border border-white/10 text-[10px] font-mono tracking-widest uppercase text-white/80">
-                                            Tutorial
-                                        </span>
-                                        <span className="px-2 py-1 rounded-lg bg-[#D4FF00]/20 backdrop-blur-md border border-[#D4FF00]/20 text-[10px] font-mono tracking-widest uppercase text-[#D4FF00]">
-                                            Live
-                                        </span>
-                                    </div>
-
-                                    {/* Bottom helper bar */}
-                                    <div className="absolute bottom-4 left-4 right-4 z-10">
-                                        <div className="bg-black/40 backdrop-blur-md rounded-2xl border border-white/10 p-3">
-                                            <div className="flex items-center justify-between">
-                                                <span className="text-[11px] text-white/70 font-medium tracking-wide">AI Influencer DNA System</span>
-                                                <span className="text-[10px] text-white/40 uppercase tracking-widest">Tutorial Mode</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                {/* ── Right: Settings column ── */}
-                                <div className="w-[700px]">
-                                    <CharacterCreatorV2 />
-                                </div>
-                            </motion.div>
-                        ) : (
-                            <motion.div 
-                                key={activeCharacterId || 'empty'}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -20 }}
-                                transition={{ duration: 0.4, ease: "easeOut" }}
-                                className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-1"
-                            >
+                        <motion.div 
+                            key={activeCharacterId || 'empty'}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -20 }}
+                            transition={{ duration: 0.4, ease: "easeOut" }}
+                            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-1"
+                        >
                                 {activeCharacterNodes.length > 0 ? (
                                     activeCharacterNodes.map((node, index) => (
-                                        <ImageViewerDialog key={node.id} nodeId={node.id}>
-                                            <div 
-                                                draggable 
-                                                onDragStart={(e) => {
-                                                    e.dataTransfer.setData("nodeId", node.id)
-                                                    e.dataTransfer.effectAllowed = "copy"
-                                                }}
-                                                className={cn(
-                                                    "cursor-grab active:cursor-grabbing transition-all duration-300 rounded-xl overflow-hidden",
-                                                    selectedNodeId === node.id ? "ring-4 ring-white shadow-[0_0_20px_rgba(255,255,255,0.4)]" : "ring-0 ring-transparent"
-                                                )}
-                                            >
-                                                <ImageStatusView
-                                                    status={node.status}
-                                                    src={node.image_url}
-                                                    label={node.model || "Flux Pro"}
-                                                    aspect="9/16"
-                                                    className="shadow-2xl transition-transform duration-300 hover:scale-[1.02]"
-                                                />
-
-                                                {/* ── Error State Regenerate Button ── */}
-                                                {(node.status === "error" || node.status === "failed") && (
-                                                    <div className="absolute inset-0 z-20 flex items-center justify-center p-4">
-                                                        <button
-                                                            onClick={(e) => {
-                                                                e.stopPropagation()
-                                                                regenerateNode(node.id)
-                                                            }}
-                                                            className="group/regen flex items-center gap-2 px-3 py-2 bg-white text-black rounded-lg font-bold text-[10px] uppercase tracking-widest shadow-2xl hover:bg-[#D4FF00] transition-colors active:scale-95"
-                                                        >
-                                                            <RefreshCcw className="w-3 h-3 group-hover/regen:animate-spin" />
-                                                            Regenerate
-                                                        </button>
+                                        <div 
+                                            key={node.id}
+                                            draggable 
+                                            onDragStart={(e) => {
+                                                e.dataTransfer.setData("nodeId", node.id)
+                                                e.dataTransfer.effectAllowed = "copy"
+                                            }}
+                                            onClick={() => {
+                                                if (node.status === "completed") {
+                                                    useStudioStore.getState().setNodeSelection(node.id)
+                                                }
+                                            }}
+                                            className={cn(
+                                                "group cursor-grab active:cursor-grabbing transition-all duration-300 rounded-xl overflow-hidden relative",
+                                                selectedNodeId === node.id ? "ring-4 ring-white shadow-[0_0_20px_rgba(255,255,255,0.4)]" : "ring-0 ring-transparent"
+                                            )}
+                                        >
+                                            {selectedNodeId === node.id && node.status === "completed" && (
+                                                    <div className="absolute top-3 left-3 z-30 flex items-center justify-center w-6 h-6 bg-white text-black rounded-full shadow-[0_0_15px_rgba(255,255,255,0.6)] animate-in zoom-in duration-300">
+                                                        <Check className="w-4 h-4 stroke-[3]" />
                                                     </div>
                                                 )}
-                                            </div>
-                                        </ImageViewerDialog>
+
+                                                {/* ── Error State Buttons ── */}
+                                            {(node.status === "error" || node.status === "failed") && (
+                                                <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 p-4 bg-black/50 backdrop-blur-[2px]">
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation()
+                                                            regenerateNode(node.id)
+                                                        }}
+                                                        className="group/regen w-full max-w-[140px] flex items-center justify-center gap-2 px-4 py-2.5 bg-white text-black rounded-xl font-bold text-[10px] uppercase tracking-widest shadow-2xl hover:bg-[#D4FF00] transition-all active:scale-95"
+                                                    >
+                                                        <RefreshCcw className="w-3.5 h-3.5 group-hover/regen:animate-spin" />
+                                                        Regenerate
+                                                    </button>
+                                                    
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation()
+                                                            if (confirm("Are you sure you want to delete this generation?")) {
+                                                                removeNode(node.id)
+                                                            }
+                                                        }}
+                                                        className="group/delete w-full max-w-[140px] flex items-center justify-center gap-2 px-4 py-2.5 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white border border-red-500/20 hover:border-red-500 rounded-xl font-bold text-[10px] uppercase tracking-widest transition-all active:scale-95 backdrop-blur-md"
+                                                    >
+                                                        <Trash2 className="w-3.5 h-3.5" />
+                                                        Delete
+                                                    </button>
+                                                </div>
+                                            )}
+                                            
+                                            {/* ── Action Buttons (Hover) ── */}
+                                            {node.status === "completed" && (
+                                                <div className="absolute top-2 right-2 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-auto">
+                                                    <ImageViewerDialog nodeId={node.id}>
+                                                        <button 
+                                                            className="flex items-center gap-1 px-2 py-1 bg-white/90 text-black rounded-md text-[10px] font-bold uppercase tracking-widest shadow hover:bg-white transition-colors active:scale-95"
+                                                            onClick={(e) => e.stopPropagation()}
+                                                        >
+                                                            View
+                                                        </button>
+                                                    </ImageViewerDialog>
+                                                </div>
+                                            )}
+
+                                            <ImageStatusView
+                                                status={node.status}
+                                                src={node.image_url}
+                                                label={node.model || "Flux Pro"}
+                                                aspect="9/16"
+                                                className="shadow-2xl transition-transform duration-300 hover:scale-[1.02]"
+                                            />
+                                        </div>
                                     ))
                                 ) : (
                                     <div className="col-span-full h-[60vh] flex flex-col items-center justify-center opacity-30 gap-4">
@@ -162,21 +153,22 @@ export function StudioLayoutV2() {
                                     </div>
                                 )}
                             </motion.div>
-                        )}
                     </AnimatePresence>
                 </div>
 
                 {/* ── Bottom Floating Prompt Bar ── */}
-                {!isCreating && (
-                    <div className="absolute bottom-8 inset-x-0 z-30 flex justify-center px-6 pointer-events-none">
-                        <div className="w-full max-w-[850px] pointer-events-auto">
-                            {/* Custom wrapper to match the image style */}
-                            <div className="shadow-[0_24px_80px_rgba(0,0,0,0.8)] rounded-[24px]">
+                <div className="absolute bottom-8 inset-x-0 z-30 flex justify-center px-6 pointer-events-none">
+                    <div className="w-full max-w-[850px] pointer-events-auto">
+                        {/* Custom wrapper to match the image style */}
+                        <div className="shadow-[0_24px_80px_rgba(0,0,0,0.8)] rounded-[24px]">
+                            {studioMode === "cinema" ? (
+                                <CinemaPromptBar hideBackground={true} />
+                            ) : (
                                 <ImagePromptBar hideBackground={true} />
-                            </div>
+                            )}
                         </div>
                     </div>
-                )}
+                </div>
 
                 {/* Ambient glow in background */}
                 <div className="absolute inset-0 pointer-events-none z-0">

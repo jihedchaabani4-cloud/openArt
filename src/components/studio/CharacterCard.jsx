@@ -67,7 +67,7 @@ export function CharacterCard({ char, tileNode = null, tileStatus, isActive, onC
                             onSelect={(e) => e.preventDefault()}
                         >
                             <Edit2 className="w-4 h-4 text-white/40" />
-                            <span className="text-[13px] font-medium">Rename</span>
+                            <span className="text-[13px] font-normal">Rename</span>
                         </DropdownMenuItem>
                     </RenameCharacterDialog>
 
@@ -81,7 +81,7 @@ export function CharacterCard({ char, tileNode = null, tileStatus, isActive, onC
                             onSelect={(e) => e.preventDefault()}
                         >
                             <Trash2 className="w-4 h-4" />
-                            <span className="text-[13px] font-medium">Delete</span>
+                            <span className="text-[13px] font-normal">Delete</span>
                         </DropdownMenuItem>
                     </DeleteNodeDialog>
                 </DropdownMenuContent>
@@ -126,7 +126,7 @@ export function CharacterCard({ char, tileNode = null, tileStatus, isActive, onC
                             className="w-full h-full flex flex-col items-start justify-center p-2 text-center" 
                             style={{ backgroundColor: "#e6483d99" }}
                         >
-                            <span className="text-[13px] font-bold text-white uppercase tracking-widest leading-tight">
+                            <span className="text-[13px] font-normal text-white uppercase tracking-widest leading-tight">
                                 Error while <br />generating<br />character
                             </span>
                         </div>

@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { useStudioStore } from "@/store/useStudioStore"
+import { useStudioStore, DEFAULT_DNA } from "@/store/useStudioStore"
 import { cn } from "@/lib/utils"
 import { BasicSettings } from "@/components/builder/BasicSettings"
 import { AdvancedSettings } from "@/components/builder/AdvancedSettings"
@@ -46,17 +46,7 @@ export function CharacterCreatorV2() {
 
     const handleReset = () => {
         setCreationPrompt("")
-        setStagedDna({
-            character_name: "",
-            identity_dna: {
-                core: { character_type: "Human", gender: "Female", ethnicity: "Arab", age_stage: "Young Adult", eye_color: "Amber", skin_conditions: [] },
-                sculpt: { eye_details: "Sharp", nose: "Straight", lips: "Full", jawline: "Defined", mouth_teeth: "Normal", ears: "Human", horns: "None", face_skin_material: "Natural", surface_pattern: "None" }
-            },
-            physical_dna: { body_type: "Athletic", height: "Tall", left_arm: "Normal arm", right_arm: "Normal arm", left_leg: "Normal leg", right_leg: "Normal leg", modifications: [] },
-            style_dna: { hair: { style: "Cyber-mohawk", color: "Neon Pink" }, rendering_style: "Photorealistic", outfit: "Futuristic techwear jacket", accessories: [], markings: [] },
-            environment: { location: "Neo-Tokyo Street", lighting: "Neon glow", weather: "Rainy night", time_of_day: "Night" },
-            expression_dna: { emotion: "Confident", gaze_direction: "Frontal" }
-        })
+        setStagedDna(DEFAULT_DNA)
     }
 
     return (

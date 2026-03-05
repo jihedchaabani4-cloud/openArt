@@ -81,13 +81,13 @@ const NodeCard = React.memo(function NodeCard({ node, depth, childrenMap, active
                     {/* Node Info Text */}
                     <div className="flex flex-col items-start min-w-0 flex-1">
                         <span className={cn(
-                            "text-[10px] font-bold uppercase tracking-[0.1em] leading-none",
+                            "text-[9px] font-normal uppercase tracking-[0.12em] leading-none",
                             isActive ? "text-[#D4FF00]" : "text-white/30"
                         )}>
                             {isRoot ? "ORIGIN" : "VARIATION"}
                         </span>
                         <span className={cn(
-                            "text-[12px] font-medium mt-1 truncate w-full leading-tight tracking-tight",
+                            "text-[10px] font-normal mt-1 truncate w-full leading-tight",
                             isActive ? "text-white/90" : "text-white/25 group-hover:text-white/50"
                         )}>
                             {node.edit_command || "Initial state"}
@@ -97,8 +97,8 @@ const NodeCard = React.memo(function NodeCard({ node, depth, childrenMap, active
                     {/* Branch Indicator */}
                     {children.length > 0 && (
                         <div className="flex items-center gap-1 shrink-0">
-                            <GitBranch className="w-3 h-3 text-white/20" />
-                            <span className="text-[11px] font-bold text-white/20">{children.length}</span>
+                            <GitBranch className="w-2.5 h-2.5 text-white/20" />
+                            <span className="text-[8px] text-white/20 font-normal">{children.length}</span>
                         </div>
                     )}
                 </Button>
@@ -197,18 +197,18 @@ export function HeritageTree({ isInsideDialog = false }) {
                     <div className="space-y-4">
                         <div className="flex items-center gap-2 px-1">
                             <Info className="w-3.5 h-3.5 text-white/40" />
-                            <span className="text-[12px] font-semibold uppercase tracking-[0.08em] text-white/40">Node Information</span>
+                            <span className="text-[12px] font-normal uppercase tracking-[0.08em] text-white/40">Node Information</span>
                         </div>
                         <div className="bg-white/3 border border-white/5 rounded-2xl overflow-hidden divide-y divide-white/5">
                             <div className="flex justify-between items-center py-[14px] px-4">
-                                <span className="text-[14px] text-white/30 font-medium">Status</span>
+                                <span className="text-[14px] text-white/30 font-normal">Status</span>
                                 <div className="flex items-center gap-1.5">
                                     <div className={cn(
                                         "w-1 h-1 rounded-full shadow-[0_0_4px_currentColor]", 
                                         isProcessing ? "text-yellow-400 animate-pulse" : (activeNode?.status === "completed" ? "text-[#D4FF00]" : "text-red-500")
                                     )} style={{ backgroundColor: 'currentColor' }} />
                                     <span className={cn(
-                                        "text-[14px] font-medium", 
+                                        "text-[14px] font-normal", 
                                         isProcessing ? "text-yellow-400" : (activeNode?.status === "completed" ? "text-white" : "text-red-500")
                                     )}>
                                         {isProcessing ? "Generating..." : statusText}
@@ -217,18 +217,18 @@ export function HeritageTree({ isInsideDialog = false }) {
                             </div>
                     
                             <div className="flex justify-between items-center py-[14px] px-4">
-                                <span className="text-[14px] text-white/30 font-medium">Seed</span>
-                                <span className="text-[14px] font-medium text-white tracking-tight">{metadata.seed || "Random"}</span>
+                                <span className="text-[14px] text-white/30 font-normal">Seed</span>
+                                <span className="text-[14px] font-normal text-white tracking-tight">{metadata.seed || "Random"}</span>
                             </div>
                             {metadata.pulid_weight && (
                                 <div className="flex justify-between items-center py-[14px] px-4">
-                                    <span className="text-[14px] text-white/30 font-medium">Identity Strength</span>
-                                    <span className="text-[14px] font-medium text-white">{(metadata.pulid_weight * 100).toFixed(0)}%</span>
+                                    <span className="text-[14px] text-white/30 font-normal">Identity Strength</span>
+                                    <span className="text-[14px] font-normal text-white">{(metadata.pulid_weight * 100).toFixed(0)}%</span>
                                 </div>
                             )}
                             <div className="flex justify-between items-center py-[14px] px-4">
-                                <span className="text-[14px] text-white/30 font-medium">Created</span>
-                                <span className="text-[14px] font-medium text-[#D4FF00]">{createdAtStr}</span>
+                                <span className="text-[14px] text-white/30 font-normal">Created</span>
+                                <span className="text-[14px] font-normal text-[#D4FF00]">{createdAtStr}</span>
                             </div>
                         </div>
                     </div>
@@ -244,7 +244,7 @@ export function HeritageTree({ isInsideDialog = false }) {
                                         <path d="M3.75 11.25C3.33579 11.25 3 11.5858 3 12C3 12.4142 3.33579 12.75 3.75 12.75H9.25C9.66421 12.75 10 12.4142 10 12C10 11.5858 9.66421 11.25 9.25 11.25H3.75Z" fill="currentColor"></path>
                                         <path d="M3.75 17.5C3.33579 17.5 3 17.8358 3 18.25C3 18.6642 3.33579 19 3.75 19H7.25C7.66421 19 8 18.6642 8 18.25C8 17.8358 7.66421 17.5 7.25 17.5H3.75Z" fill="currentColor"></path>
                                     </svg>
-                                    <span className="text-[12px] font-semibold uppercase tracking-[0.08em] text-white/40">Prompt</span>
+                                    <span className="text-[12px] font-normal uppercase tracking-[0.08em] text-white/40">Prompt</span>
                                 </div>
                                 <button 
                                     type="button" 
@@ -255,7 +255,7 @@ export function HeritageTree({ isInsideDialog = false }) {
                                         setTimeout(() => setIsCopied(false), 2000);
                                     }}
                                     className={cn(
-                                        "text-[12px] font-semibold uppercase tracking-wider transition-all duration-200 border rounded-lg px-2.5 py-1.5",
+                                        "text-[12px] font-normal uppercase tracking-wider transition-all duration-200 border rounded-lg px-2.5 py-1.5",
                                         isCopied 
                                             ? "text-white border-white/20 bg-white/10" 
                                             : "text-[#D4FF00] border-[#D4FF00]/20 bg-[#D4FF00]/5 hover:text-white"
@@ -284,7 +284,7 @@ export function HeritageTree({ isInsideDialog = false }) {
                                         onClick={() => setIsPromptExpanded(!isPromptExpanded)}
                                         className="py-2.5 px-4 flex items-center gap-1 border-t border-white/5 w-full cursor-pointer hover:bg-white/5 transition-colors group"
                                     >
-                                        <span className="text-[11px] font-semibold uppercase tracking-wider text-white/30 group-hover:text-white/60">
+                                        <span className="text-[11px] font-normal uppercase tracking-wider text-white/30 group-hover:text-white/60">
                                             {isPromptExpanded ? "Show less" : "Show full prompt"}
                                         </span>
                                         <svg 
@@ -318,7 +318,7 @@ export function HeritageTree({ isInsideDialog = false }) {
                                                 <path fillRule="evenodd" clipRule="evenodd" d="M11 2C15.2174 2 18.6702 5.26397 18.9756 9.40332C18.9892 9.58687 19.0454 9.76579 19.1475 9.91895L20.832 12.4453C21.1262 12.8869 21.024 13.4814 20.5996 13.7998L19.4004 14.6992C19.1485 14.888 19 15.1842 19 15.499V17C19 18.1046 18.1046 19 17 19H14V21C14 21.5523 13.5523 22 13 22H7C6.44772 22 6 21.5523 6 21V16.7217C5.99988 16.4185 5.8596 16.1341 5.63477 15.9307C4.01868 14.4681 3 12.3538 3 10C3 5.58172 6.58172 2 11 2ZM11 6.5C10.7891 6.5 10.6001 6.63034 10.5244 6.82715L9.93457 8.36035C9.83299 8.62433 9.62433 8.83299 9.36035 8.93457L7.82715 9.52441C7.63034 9.60011 7.5 9.78914 7.5 10C7.5 10.2109 7.63034 10.3999 7.82715 10.4756L9.36035 11.0654C9.62433 11.167 9.83299 11.3757 9.93457 11.6396L10.5244 13.1729C10.6001 13.3697 10.7891 13.5 11 13.5C11.2109 13.5 11.3999 13.3697 11.4756 13.1729L12.0654 11.6396C12.167 11.3757 12.3757 11.167 12.6396 11.0654L14.1729 10.4756C14.3697 10.3999 14.5 10.2109 14.5 10C14.5 9.78914 14.3697 9.60011 14.1729 9.52441L12.6396 8.93457C12.3757 8.83299 12.167 8.62433 12.0654 8.36035L11.4756 6.82715C11.3999 6.63034 11.2109 6.5 11 6.5Z" fill="currentColor"></path>
                                             </svg>
                                         </div>
-                                        <p className="text-white/40 font-semibold text-[12px] uppercase tracking-wider">Character parameters</p>
+                                        <p className="text-white/40 font-normal text-[12px] uppercase tracking-wider">Character parameters</p>
                                     </div>
                                 </div>
                             </div>
@@ -329,7 +329,7 @@ export function HeritageTree({ isInsideDialog = false }) {
                                         <div className="flex flex-col min-h-0 gap-3">
                                             <div className="flex flex-wrap gap-1">
                                                 {traits.map((t, i) => (
-                                                    <Badge key={i} variant="studio" className="rounded-lg px-2 py-1 text-xs font-medium">
+                                                    <Badge key={i} variant="studio" className="rounded-lg px-2 py-1 text-xs font-normal">
                                                         {t}
                                                     </Badge>
                                                 ))}
@@ -345,11 +345,11 @@ export function HeritageTree({ isInsideDialog = false }) {
                                                         <path d="M12 1C10.3431 1 9 2.34315 9 4C9 5.65685 10.3431 7 12 7C13.6569 7 15 5.65685 15 4C15 2.34315 13.6569 1 12 1Z" fill="currentColor"></path>
                                                         <path d="M7.75 8C6.7835 8 6 8.7835 6 9.75V15.25C6 16.2165 6.7835 17 7.75 17H8V21.75C8 22.4404 8.55964 23 9.25 23H14.75C15.4404 23 16 22.4404 16 21.75V17H16.25C17.2165 17 18 16.2165 18 15.25V9.75C18 8.7835 17.2165 8 16.25 8H7.75Z" fill="currentColor"></path>
                                                     </svg>
-                                                    <span className="text-[14px] font-semibold text-white/60">Body</span>
+                                                    <span className="text-[14px] font-normal text-white/60">Body</span>
                                                 </div>
                                                 <div className="flex flex-wrap gap-1">
                                                     {physicalTraits.map((t, i) => (
-                                                        <Badge key={i} variant="studio" className="rounded-lg px-2 py-1 text-xs font-medium">
+                                                        <Badge key={i} variant="studio" className="rounded-lg px-2 py-1 text-xs font-normal">
                                                             {t}
                                                         </Badge>
                                                     ))}
@@ -363,7 +363,7 @@ export function HeritageTree({ isInsideDialog = false }) {
                                         onClick={() => setIsParamsExpanded(!isParamsExpanded)}
                                         className="py-2 px-4 flex items-center gap-1 border-t border-white/5 w-full cursor-pointer hover:bg-white/5 transition-colors group"
                                     >
-                                        <span className="flex text-xs font-semibold text-white/30 group-hover:text-white/60">
+                                        <span className="flex text-xs font-normal text-white/30 group-hover:text-white/60">
                                             {isParamsExpanded ? "Show less" : "Show more"}
                                         </span>
                                         <svg 
@@ -390,7 +390,7 @@ export function HeritageTree({ isInsideDialog = false }) {
                     <div className={cn("space-y-4 pt-2 transition-opacity duration-300", isProcessing && "opacity-50 pointer-events-none")}>
                         <div className="flex items-center gap-2 px-1">
                             <Settings className="w-3.5 h-3.5 text-white/40" />
-                            <span className="text-[12px] font-semibold uppercase tracking-[0.08em] text-white/40">Actions</span>
+                            <span className="text-[12px] font-normal uppercase tracking-[0.08em] text-white/40">Actions</span>
                         </div>
 
                         <Button 
@@ -399,7 +399,7 @@ export function HeritageTree({ isInsideDialog = false }) {
                             className="w-full h-[48px] px-6 shadow-[0_0_20px_rgba(212,255,0,0.15)] group rounded-2xl"
                         >
                             <Play className="w-4 h-4 fill-black transition-transform group-hover:scale-110" />
-                            <span className="text-[14px] font-semibold uppercase tracking-widest">Simulate Motion</span>
+                            <span className="text-[14px] font-normal uppercase tracking-widest">Simulate Motion</span>
                         </Button>
 
                         <div className="grid grid-cols-2 gap-3">
@@ -416,7 +416,7 @@ export function HeritageTree({ isInsideDialog = false }) {
                                 className="h-[48px] px-4 rounded-xl"
                             >
                                 <Download className="w-3.5 h-3.5 text-white/40 group-hover:text-white/80" />
-                                <span className="text-[14px] font-medium uppercase tracking-wider">Download</span>
+                                <span className="text-[14px] font-normal uppercase tracking-wider">Download</span>
                             </Button>
                             <DeleteNodeDialog 
                                 itemName="node" 
@@ -429,7 +429,7 @@ export function HeritageTree({ isInsideDialog = false }) {
                                     className="h-[48px] px-4 rounded-xl flex-1"
                                 >
                                     <Trash2 className="w-3.5 h-3.5" />
-                                    <span className="text-[14px] font-medium uppercase tracking-wider">Delete</span>
+                                    <span className="text-[14px] font-normal uppercase tracking-wider">Delete</span>
                                 </Button>
                             </DeleteNodeDialog>
                         </div>

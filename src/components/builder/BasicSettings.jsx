@@ -253,23 +253,29 @@ export function BasicSettings() {
                     </AccordionItem>
 
                     {/* Skin Conditions */}
-                    <AccordionItem value="conditions" className="">
+                    <AccordionItem value="conditions" className="border-b border-white/5">
                         <AccordionTrigger className="px-5 py-3 hover:no-underline hover:bg-white/2 group transition-colors">
                             <div className="flex items-center gap-3 w-full pr-4 text-left">
                                 <Zap className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                                <span className="text-xs font-bold tracking-wide uppercase text-muted-foreground group-data-[state=open]:text-white">Skin Conditions</span>
+                                <span className="text-xs font-normal tracking-wide uppercase text-muted-foreground group-data-[state=open]:text-white">Skin Conditions</span>
                             </div>
                         </AccordionTrigger>
                         <AccordionContent className="px-3 pb-3 pt-1">
-                            <div className="grid grid-cols-3 gap-1">
+                            <div className="grid grid-cols-3 gap-2">
                                 {skinConditions.map((cond) => {
-                                    const isActive = selectedSkinCondition === cond.name
+                                    const isActive = selectedSkinCondition?.includes(cond.name)
                                     return (
                                         <Button
                                             variant="studio-option-tile"
                                             size="tile"
                                             key={cond.id}
-                                            onClick={() => updateActiveNodeData("identity_dna.core.skin_conditions", isActive ? "" : cond.name)}
+                                            onClick={() => {
+                                                const current = selectedSkinCondition || []
+                                                const next = current.includes(cond.name)
+                                                    ? current.filter(c => c !== cond.name)
+                                                    : [...current, cond.name]
+                                                updateActiveNodeData("identity_dna.core.skin_conditions", next)
+                                            }}
                                             className={cn(
                                                 "relative",
                                                 isActive ? "border-[#D4FF00] shadow-[0_0_20px_rgba(212,255,0,0.3)]" : "border-white/5 opacity-60 hover:opacity-100"
@@ -277,7 +283,7 @@ export function BasicSettings() {
                                         >
                                             <img src={cond.url} alt={cond.name} className="w-full h-full object-cover" />
                                             <div className="absolute inset-0 bg-linear-to-t from-black/85 via-black/30 to-transparent flex items-end p-2">
-                                                <span className="text-[9px] font-black text-white uppercase tracking-wider line-clamp-1 w-full text-center">{cond.name}</span>
+                                                <span className="text-[9px] font-normal text-white uppercase tracking-wider line-clamp-1 w-full text-center">{cond.name}</span>
                                             </div>
                                             {isActive && (
                                                 <div className="absolute top-1.5 right-1.5 w-4 h-4 bg-[#D4FF00] rounded-full flex items-center justify-center z-10">
@@ -296,26 +302,27 @@ export function BasicSettings() {
                         <AccordionTrigger className="px-5 py-3 hover:no-underline hover:bg-white/2 group transition-colors">
                             <div className="flex items-center gap-3 w-full pr-4 text-left">
                                 <User className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                                <span className="text-xs font-bold tracking-wide uppercase text-muted-foreground group-data-[state=open]:text-white">Age</span>
+                                <span className="text-xs font-normal tracking-wide uppercase text-muted-foreground group-data-[state=open]:text-white">Age</span>
                             </div>
                         </AccordionTrigger>
-                        <AccordionContent className="px-5 pb-5 pt-2">
-                            <div className="grid grid-cols-4 gap-1">
-                                {["Young", "Adult", "Mature", "Senior"].map((cat) => (
-                                    <Button
-                                        key={cat}
-                                        variant={ageCategory === cat ? "secondary" : "outline"}
-                                        onClick={() => handleCategoryChange(cat)}
-                                        className={cn(
-                                            "h-9 text-[9px] font-bold border-white/10 transition-all px-1",
-                                            ageCategory === cat
-                                                ? "bg-[#D4FF00]/20 text-[#D4FF00] border-[#D4FF00]/40"
-                                                : "hover:bg-white/5 text-muted-foreground"
-                                        )}
-                                    >
-                                        {cat}
-                                    </Button>
-                                ))}
+                        <AccordionContent className="px-5 pb-6 pt-2">
+                            <div className="space-y-6">
+                                <div className="flex justify-between items-center bg-white/2 rounded-xl p-3 border border-white/5">
+                                    {["Young", "Adult", "Mature", "Senior"].map((cat) => (
+                                        <button
+                                            key={cat}
+                                            onClick={() => handleCategoryChange(cat)}
+                                            className={cn(
+                                                "h-9 text-[9px] font-normal border-white/10 transition-all px-1",
+                                                ageCategory === cat
+                                                    ? "text-[#D4FF00] font-normal tracking-widest scale-110"
+                                                    : "text-white/30 hover:text-white/60"
+                                            )}
+                                        >
+                                            {cat.toUpperCase()}
+                                        </button>
+                                    ))}
+                                </div>
                             </div>
                         </AccordionContent>
                     </AccordionItem>

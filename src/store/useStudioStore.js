@@ -22,80 +22,52 @@ const mergeDeep = (target, source) => {
     return target
 }
 
-// ─── DNA v3.0 Schema (Nested Structure) ──────────────────────────
+// ─── DNA v4.0 Schema (Selector DNA) ──────────────────────────
 export const DEFAULT_DNA = {
-    character_name: "",
-    identity_dna: {
-        core: {
-            character_type: "Human",
-            gender: "Female",
-            ethnicity: "Caucasian",
-            age_stage: "Adult",
-            eye_color: "Blue",
-            skin_conditions: []
-        },
-        sculpt: {
-            eye_details: "Normal",
-            nose: "Default",
-            lips: "Natural",
-            jawline: "Soft",
-            mouth_teeth: "Normal",
-            ears: "Human",
-            horns: "None",
-            face_skin_material: "Normal",
-            surface_pattern: "None"
-        }
+  version: 4,
+  identity_dna: {
+    core: {
+      character_type: "Human",
+      gender: "Female",
+      ethnicity: "Caucasian",
+      eye_color: "Blue",
+      age_stage: "Adult"
     },
-    physical_dna: {
-        body_type: "Slim",
-        height: "Average",
-        left_arm: "Normal arm",
-        right_arm: "Normal arm",
-        left_leg: "Normal leg",
-        right_leg: "Normal leg",
-        modifications: []
-    },
-    style_dna: {
-        hair: {
-            style: "Long straight",
-            color: "Blonde"
-        },
-        rendering_style: "Photorealistic",
-        outfit: "Casual wear",
-        accessories: [],
-        markings: []
-    },
-    environment: {
-        location: "Outdoor",
-        lighting: "Natural sun",
-        weather: "",
-        time_of_day: "Daytime"
-    },
-    expression_dna: {
-        emotion: "Neutral",
-        gaze_direction: "Frontal"
-    },
-    camera_dna: {
-        rotation: 0,
-        tilt: 0,
-        zoom: 0
-    },
-    flux_metadata: {
-        seed: 0,
-        pulid_weight: 0.75,
-        edit_type: "text-to-image",
-        mask_target: "",
-        generated_prompt: ""
+    sculpt: {
+      eye_details: "Normal",
+      mouth_teeth: "Normal",
+      ears: "Human",
+      horns: "None",
+      face_skin_material: "Normal",
+      surface_pattern: "None"
     }
+  },
+  physical_dna: {
+    body_type: "Slim",
+    left_arm: "Normal arm",
+    right_arm: "Normal arm",
+    left_leg: "Normal leg",
+    right_leg: "Normal leg"
+  },
+  style_dna: {
+    hair: {
+      style: "Long hair"
+    },
+    rendering_style: "Photorealistic",
+    accessories: []
+  }
 }
 
 // ─── Store ─────────────────────────────────────────────────────────────────────
 export const useStudioStore = create((set, get) => ({
     characters: [], // List of characters from backend
+    workspaces: [], // List of workspaces from backend
     nodes: {},      // Flattened node map { [nodeId]: node }
     activeCharacterId: null,
     activeNodeId: null,
+    activeWorkspaceId: null,
     selectedNodeId: null, // Single ID of node dragged into the prompt bar
+    studioMode: "image", // "image" or "cinema"
     stagedDna: { ...DEFAULT_DNA }, // Local staging area for edits
     creationPrompt: "",
     creationTab: "builder",
@@ -179,9 +151,11 @@ export const useStudioStore = create((set, get) => ({
     },
 
     setIsCreating: (val) => set({ isCreating: val }),
+    setStudioMode: (mode) => set({ studioMode: mode }),
     setCreationPrompt: (prompt) => set({ creationPrompt: prompt }),
     setCreationTab: (tab) => set({ creationTab: tab }),
     setStagedDna: (dna) => set({ stagedDna: dna }),
+    setActiveWorkspaceId: (id) => set({ activeWorkspaceId: id }),
 
     // ─── Selection Actions ──────────────────────────────────────────
     setNodeSelection: (nodeId) => set({ selectedNodeId: nodeId }),
@@ -198,6 +172,7 @@ export const useStudioStore = create((set, get) => ({
                 current = current[keys[i]]
             }
             current[keys[keys.length - 1]] = value
+            console.log(`🧬 DNA Staged Update [${path}]:`, value);
             return { stagedDna: newDna }
         })
     },
@@ -277,10 +252,45 @@ export const useStudioStore = create((set, get) => ({
         })
     },
 
+    /** fetchWorkspaces — pull all workspaces */
+    fetchWorkspaces: async () => {
+        try {
+            const json = await api.get("/workspaces")
+            if (json.ok) {
+                set({ workspaces: json.data })
+                if (!get().activeWorkspaceId && json.data.length > 0) {
+                    set({ activeWorkspaceId: json.data[0].id })
+                }
+            }
+        } catch (error) {
+            console.error("❌ fetchWorkspaces failed:", error.message)
+        }
+    },
+
+    /** createWorkspace — create new workspace in DB */
+    createWorkspace: async (name) => {
+        try {
+            const json = await api.post("/workspaces", { 
+                name
+            })
+            if (json.ok) {
+                set(state => ({
+                    workspaces: [...state.workspaces, json.data],
+                    activeWorkspaceId: json.data.id
+                }))
+                return json.data
+            }
+        } catch (error) {
+            console.error("❌ createWorkspace failed:", error.message)
+        }
+    },
+
     /** fetchCharacters — pull all characters summary */
     fetchCharacters: async () => {
+        const { activeWorkspaceId } = get()
         try {
-            const json = await api.get("/characters")
+            const url = activeWorkspaceId ? `/characters?workspace_id=${activeWorkspaceId}` : "/characters"
+            const json = await api.get(url)
             if (json.ok) {
                 set({ characters: json.data })
                 if (!get().activeCharacterId && !get().isCreating && json.data.length > 0) {
@@ -314,6 +324,7 @@ export const useStudioStore = create((set, get) => ({
 
     /** createCharacter — Operation A */
     createCharacter: async (name, dna, prompt) => {
+        console.log("🧬 Sending DNA to Backend (Create):", JSON.stringify(dna, null, 2));
         try {
             const json = await api.post("/characters/create-character", { name, dna, prompt })
             if (json.character_id) {
@@ -384,6 +395,7 @@ export const useStudioStore = create((set, get) => ({
         }
 
         const changes = getChanges()
+        console.log("🧬 Sending DNA Changes to Backend:", JSON.stringify(changes, null, 2));
         if (Object.keys(changes).length === 0 && !command) {
             console.log("No changes to apply")
             return
@@ -431,6 +443,8 @@ export const useStudioStore = create((set, get) => ({
     },
 
     regenerateNode: async (nodeId) => {
+        const node = get().nodes[nodeId];
+        console.log(`🧬 Regenerating Node ${nodeId} with DNA:`, JSON.stringify(node?.dna, null, 2));
         try {
             const json = await api.post("/characters/regenerate-node", { node_id: nodeId })
             return json.status === "success"
@@ -530,41 +544,41 @@ export const useStudioStore = create((set, get) => ({
         }
     },
 
+    /** randomizeDna — Randomizes all selector fields using builderData */
     randomizeDna: () => {
+        const getRandom = (key) => {
+            const items = builderData[key] || []
+            if (items.length === 0) return null
+            return items[Math.floor(Math.random() * items.length)].name
+        }
+        
         const dna = JSON.parse(JSON.stringify(DEFAULT_DNA))
         
-        const getRandom = (arr) => arr && arr.length > 0 ? arr[Math.floor(Math.random() * arr.length)].name : null
-
         // Identity Core
-        dna.identity_dna.core.character_type = getRandom(builderData["Character_Type"]) || "Human"
-        dna.identity_dna.core.gender = getRandom(builderData["Gender"]) || "Female"
-        dna.identity_dna.core.ethnicity = getRandom(builderData["Ethnicity_-_Origin_Base"]) || "Caucasian"
-        dna.identity_dna.core.eye_color = getRandom(builderData["Eye_Color"]) || "Blue"
-        
-        const ages = ["Young", "Adult", "Mature", "Senior"]
-        const ageMap = { Young: 12, Adult: 25, Mature: 45, Senior: 75 }
-        const randomAge = ages[Math.floor(Math.random() * ages.length)]
-        dna.identity_dna.core.age_stage = randomAge
-        dna.identity_dna.core.age = ageMap[randomAge]
+        dna.identity_dna.core.character_type = getRandom("Character_Type") || "Human"
+        dna.identity_dna.core.gender = getRandom("Gender") || "Female"
+        dna.identity_dna.core.ethnicity = getRandom("Ethnicity_-_Origin_Base") || "Caucasian"
+        dna.identity_dna.core.eye_color = getRandom("Eye_Color") || "Blue"
+        dna.identity_dna.core.age_stage = ["Young", "Adult", "Mature", "Senior"][Math.floor(Math.random() * 4)]
 
         // Sculpt
-        dna.identity_dna.sculpt.eye_details = getRandom(builderData["Eyes_-_Type"]) || "Normal"
-        dna.identity_dna.sculpt.mouth_teeth = getRandom(builderData["Mouth_&_Teeth"]) || "Normal"
-        dna.identity_dna.sculpt.ears = getRandom(builderData["Ears"]) || "Human"
-        dna.identity_dna.sculpt.horns = getRandom(builderData["Horns"]) || "None"
-        dna.identity_dna.sculpt.face_skin_material = getRandom(builderData["Face_Skin_Material"]) || "Normal"
-        dna.identity_dna.sculpt.surface_pattern = getRandom(builderData["Surface_Pattern"]) || "None"
+        dna.identity_dna.sculpt.eye_details = getRandom("Eyes_-_Type") || "Normal"
+        dna.identity_dna.sculpt.mouth_teeth = getRandom("Mouth_&_Teeth") || "Normal"
+        dna.identity_dna.sculpt.ears = getRandom("Ears") || "Human"
+        dna.identity_dna.sculpt.horns = getRandom("Horns") || "None"
+        dna.identity_dna.sculpt.face_skin_material = getRandom("Face_Skin_Material") || "Normal"
+        dna.identity_dna.sculpt.surface_pattern = getRandom("Surface_Pattern") || "None"
 
         // Physical
-        dna.physical_dna.body_type = getRandom(builderData["Body_Type"]) || "Slim"
-        dna.physical_dna.left_arm = getRandom(builderData["Left_Arm"]) || "Normal arm"
-        dna.physical_dna.right_arm = getRandom(builderData["Right_Arm"]) || "Normal arm"
-        dna.physical_dna.left_leg = getRandom(builderData["Left_Leg"]) || "Normal leg"
-        dna.physical_dna.right_leg = getRandom(builderData["Right_Leg"]) || "Normal leg"
+        dna.physical_dna.body_type = getRandom("Body_Type") || "Slim"
+        dna.physical_dna.left_arm = getRandom("Right_Arm") || "Normal arm" // Using Right_Arm pool for both
+        dna.physical_dna.right_arm = getRandom("Right_Arm") || "Normal arm"
+        dna.physical_dna.left_leg = getRandom("Right_Leg") || "Normal leg"
+        dna.physical_dna.right_leg = getRandom("Right_Leg") || "Normal leg"
 
         // Style
-        dna.style_dna.hair.style = getRandom(builderData["Hair_-_Head_Growth"]) || "Long straight"
-        dna.style_dna.rendering_style = getRandom(builderData["Rendering_Style"]) || "Photorealistic"
+        dna.style_dna.hair.style = getRandom("Hair_-_Head_Growth") || "Long hair"
+        dna.style_dna.rendering_style = getRandom("Rendering_Style") || "Photorealistic"
         
         // Accessories (randomly pick 0-2)
         const accs = builderData["Accessories_&_Markings"] || []

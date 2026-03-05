@@ -4,7 +4,6 @@ import * as React from "react"
 import { useStudioStore } from "@/store/useStudioStore"
 import { cn } from "@/lib/utils"
 import { Plus } from "lucide-react"
-import { CharacterCreator } from "./CharacterCreator"
 import { Button } from "@/components/ui/button"
 import { CharacterCard } from "./CharacterCard"
 
@@ -95,7 +94,7 @@ function getDisplayNodeForCharacter(nodes, char) {
 }
 
 export function CharacterPanel({ onCreateNew, onSelectCharacter, isCreating, activeCharacterId }) {
-    const { characters, nodes } = useStudioStore()
+    const { characters, nodes, studioMode } = useStudioStore()
 
     return (
         <>
@@ -105,25 +104,27 @@ export function CharacterPanel({ onCreateNew, onSelectCharacter, isCreating, act
                     <div className="flex-1 overflow-y-auto scrollbar-hide">
                         <div className="flex flex-col items-stretch gap-2">
                             {/* Create new tile */}
-                            <button
-                                onClick={onCreateNew}
-                                className={cn(
-                                    "group relative w-full aspect-square shrink-0 rounded-[24px] overflow-hidden border-2 transition-all duration-300 flex flex-col items-center justify-center gap-2 bg-white/[0.02] hover:bg-white/[0.04]",
-                                    isCreating 
-                                        ? "border-[#D4FF00] shadow-[0_0_20px_rgba(212,255,0,0.4)] bg-white/[0.05]" 
-                                        : "border-dashed border-white/5 hover:border-[#D4FF00]/30"
-                                )}
-                            >
-                                <div className={cn(
-                                    "w-8 h-8 max-xl:w-6 max-xl:h-6 rounded-[10px] flex items-center justify-center transition-colors",
-                                    isCreating ? "bg-[#D4FF00]/20" : "bg-white/5"
-                                )}>
-                                    <Plus className={cn("w-4 h-4 max-xl:w-3 max-xl:h-3 transition-colors", isCreating ? "text-[#D4FF00]" : "text-white/70")} />
-                                </div>
-                                <span className={cn("text-sm max-xl:text-xs font-normal transition-colors", isCreating ? "text-white" : "text-white/50 group-hover:text-white")}>
-                                    Create new
-                                </span>
-                            </button>
+                            {studioMode !== "cinema" && (
+                                <button
+                                    onClick={onCreateNew}
+                                    className={cn(
+                                        "group relative w-full aspect-square shrink-0 rounded-[24px] overflow-hidden border-2 transition-all duration-300 flex flex-col items-center justify-center gap-2 bg-white/[0.02] hover:bg-white/[0.04]",
+                                        isCreating 
+                                            ? "border-[#D4FF00] shadow-[0_0_20px_rgba(212,255,0,0.4)] bg-white/[0.05]" 
+                                            : "border-dashed border-white/5 hover:border-[#D4FF00]/30"
+                                    )}
+                                >
+                                    <div className={cn(
+                                        "w-8 h-8 max-xl:w-6 max-xl:h-6 rounded-[10px] flex items-center justify-center transition-colors",
+                                        isCreating ? "bg-[#D4FF00]/20" : "bg-white/5"
+                                    )}>
+                                        <Plus className={cn("w-4 h-4 max-xl:w-3 max-xl:h-3 transition-colors", isCreating ? "text-[#D4FF00]" : "text-white/70")} />
+                                    </div>
+                                    <span className={cn("text-sm max-xl:text-xs font-normal transition-colors", isCreating ? "text-white" : "text-white/50 group-hover:text-white")}>
+                                        Create new
+                                    </span>
+                                </button>
+                            )}
 
                             {/* Character tiles */}
                             {[...characters]

@@ -6,7 +6,6 @@ import { useStudioStore } from "@/store/useStudioStore"
 import { CharacterPanel } from "./CharacterPanel"
 import { MainStage } from "@/components/builder/MainStage"
 import { HeritageTree } from "./HeritageTree"
-import { CharacterCreator } from "./CharacterCreator"
 import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -80,7 +79,7 @@ export function StudioLayout() {
                 </motion.div>
             </main>
 
-            {/* ── Col 3: Character Heritage OR Creator (320px) ───*/}
+            {/* ── Col 3: Character Heritage (320px) ───*/}
             <motion.div
                 initial={{ x: 100, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
@@ -88,29 +87,16 @@ export function StudioLayout() {
                 className="relative z-10 shrink-0 h-full w-[450px] max-w-[450px] max-lg:w-[320px]"
             >
                 <AnimatePresence mode="wait">
-                    {isCreating || (noCharacters && !activeCharacterId) ? (
-                        <motion.div
-                            key="creator"
-                            initial={{ x: 20, opacity: 0 }}
-                            animate={{ x: 0, opacity: 1 }}
-                            exit={{ x: 20, opacity: 0 }}
-                            transition={{ duration: 0.2 }}
-                            className="h-full"
-                        >
-                            <CharacterCreator />
-                        </motion.div>
-                    ) : (
-                        <motion.div
-                            key="heritage"
-                            initial={{ x: 20, opacity: 0 }}
-                            animate={{ x: 0, opacity: 1 }}
-                            exit={{ x: 20, opacity: 0 }}
-                            transition={{ duration: 0.2 }}
-                            className="h-full"
-                        >
-                            <HeritageTree />
-                        </motion.div>
-                    )}
+                    <motion.div
+                        key="heritage"
+                        initial={{ x: 20, opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        exit={{ x: 20, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="h-full"
+                    >
+                        <HeritageTree />
+                    </motion.div>
                 </AnimatePresence>
             </motion.div>
         </div>

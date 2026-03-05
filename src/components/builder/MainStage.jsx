@@ -324,7 +324,7 @@ export function MainStage() {
                                         >
                                             <div className="flex flex-col items-center gap-3">
                                                 <AlertCircle className="w-12 h-12 text-white/80" />
-                                                <p className="text-[21px] uppercase font-bold tracking-wider text-white leading-tight">
+                                                <p className="text-[21px] uppercase font-normal tracking-wider text-white leading-tight">
                                                     Error while generating<br/>character...
                                                 </p>
                                             </div>
@@ -335,7 +335,7 @@ export function MainStage() {
                                                     handleRegenerate();
                                                 }}
                                                 disabled={isGenerating}
-                                                className="h-12 px-8 rounded-xl bg-white text-black hover:bg-white/90 transition-all uppercase font-bold tracking-widest text-xs flex items-center justify-center gap-2 shadow-xl active:scale-95"
+                                                className="h-12 px-8 rounded-xl bg-white text-black hover:bg-white/90 transition-all uppercase font-normal tracking-widest text-xs flex items-center justify-center gap-2 shadow-xl active:scale-95"
                                             >
                                                 {isGenerating ? (
                                                     <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
@@ -441,7 +441,7 @@ export function MainStage() {
                                     <Button
                                         onClick={handleDelete}
                                         variant="studio-normal"
-                                        className="flex-1 h-14 rounded-xl bg-white/5 border border-white/10 text-white/60 hover:bg-white/10 hover:text-white transition-all uppercase font-medium tracking-widest text-xs flex items-center justify-center gap-2"
+                                        className="flex-1 h-14 rounded-xl bg-white/5 border border-white/10 text-white/60 hover:bg-white/10 hover:text-white transition-all uppercase font-normal tracking-widest text-xs flex items-center justify-center gap-2"
                                     >
                                         <Trash2 className="w-4 h-4" />
                                         <span>Delete</span>
@@ -449,7 +449,7 @@ export function MainStage() {
                                     <Button
                                         onClick={handleRegenerate}
                                         disabled={isGenerating}
-                                        className="flex-[2] h-14 rounded-xl bg-[#D4FF00] text-black hover:bg-[#E5FF4D] transition-all uppercase font-bold tracking-widest text-xs flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(212,255,0,0.15)]"
+                                        className="flex-[2] h-14 rounded-xl bg-[#D4FF00] text-black hover:bg-[#E5FF4D] transition-all uppercase font-normal tracking-widest text-xs flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(212,255,0,0.15)]"
                                     >
                                         {isGenerating ? (
                                             <div className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin" />
@@ -488,7 +488,7 @@ export function MainStage() {
                                         onClick={handleGenerate}
                                         disabled={!instruction.trim() || isGenerating || !canGenerate}
                                         variant="studio-neon"
-                                        className="h-[34px] sm:h-[47px] px-4 py-2 sm:px-6 sm:py-3 rounded-xl flex items-center gap-1 shrink-0 uppercase font-bold transition-transform"
+                                        className="h-[34px] sm:h-[47px] px-4 py-2 sm:px-6 sm:py-3 rounded-xl flex items-center gap-1 shrink-0 uppercase font-normal transition-transform"
                                     >
                                         {isGenerating ? (
                                             <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />

@@ -370,7 +370,7 @@ export default function AnglesPanel({ onClose, onGenerate, previewImageUrl }) {
 
   return (
     <div
-      className="flex flex-col h-full max-h-full"
+      className="flex flex-col h-full min-w-[400px] max-h-full"
       style={{ backgroundColor: "#0f0f0f", borderRadius: 16, border: "1px solid rgba(255,255,255,0.08)" }}
     >
       <div className="flex items-center gap-2 p-3 pb-1.5" style={{ color: "white" }}>
