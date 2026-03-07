@@ -17,7 +17,7 @@ import { BasicSettings } from "@/components/builder/BasicSettings"
 import { AdvancedSettings } from "@/components/builder/AdvancedSettings"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { DeleteNodeDialog } from "./dialogs/DeleteNodeDialog"
+import { DeleteNodeDialog } from "../dialogs/DeleteNodeDialog"
 
 // ─── Tabs Configuration ───────────────────────────────────────────────────────
 const TABS = [
@@ -439,4 +439,3 @@ export function HeritageTree({ isInsideDialog = false }) {
         </aside>
     )
 }
-

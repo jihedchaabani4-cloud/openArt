@@ -12,24 +12,28 @@ import {
 import { X } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { HeritageTree } from "../HeritageTree"
+import { ImageInfoSidebar } from "./ImageInfoSidebar"
 
-export function ImageViewerDialog({ children, nodeId }) {
+export function ImageViewerDialog({ children, nodeId, item, src, title, showSidebar = true, isVideo = false }) {
     const { nodes } = useStudioStore()
     const [isOpen, setOpen] = React.useState(false)
 
-    const node = nodes[nodeId]
+    const node = nodeId ? nodes[nodeId] : null
+    const finalSrc = src || node?.image_url
+    const finalTitle = title || node?.edit_command || "Initial State"
+    const status = node ? node.status : "completed" // assume completed if direct src provided
     
-    if (!node) return children
+    if (!finalSrc) return children
 
     return (
         <Dialog open={isOpen} onOpenChange={(val) => {
-            if (node.status !== "completed") return
+            if (status !== "completed") return
             setOpen(val)
         }}>
             <DialogTrigger asChild>
                 <div className={cn(
                     "h-full w-full",
-                    node.status === "completed" ? "cursor-pointer" : "cursor-default"
+                    status === "completed" ? "cursor-pointer" : "cursor-default"
                 )}>
                     {children}
                 </div>
@@ -42,45 +46,64 @@ export function ImageViewerDialog({ children, nodeId }) {
             >
                 {/* ── Accessibility: Hidden Title ── */}
                 <DialogTitle className="sr-only">
-                    Image Viewer: {node.edit_command || "Initial State"}
+                    {isVideo ? 'Video' : 'Image'} Viewer: {finalTitle}
                 </DialogTitle>
 
                 {/* ── Background: Improved Blurred Image ── */}
                 <div className="absolute inset-0 overflow-hidden bg-page-overlay">
-                    <div 
-                        className="absolute inset-0 scale-110 blur-[16px] bg-cover bg-center bg-no-repeat transition-opacity duration-300 opacity-100"
-                        style={{ 
-                            backgroundImage: `url(${node.image_url})`, 
-                        }}
-                    />
+                    {!isVideo && (
+                        <div 
+                            className="absolute inset-0 scale-110 blur-[16px] bg-cover bg-center bg-no-repeat transition-opacity duration-300 opacity-100"
+                            style={{ 
+                                backgroundImage: `url(${finalSrc})`, 
+                            }}
+                        />
+                    )}
                     {/* Darker overlay to make the main image pop */}
                     <div className="absolute inset-0 bg-black/40" />
                 </div>
 
-                {/* ── Close Button ── */}
-                <div className="absolute top-6 right-6 z-50">
-                    <DialogClose asChild>
-                        <button className="p-3 rounded-full bg-white/5 hover:bg-white/10 text-white transition-all duration-300 border border-white/10 group backdrop-blur-md">
-                            <X className="w-6 h-6 opacity-40 group-hover:opacity-100" />
-                        </button>
-                    </DialogClose>
-                </div>
+                {/* ── Close Button (Fallback when Sidebar not showing info) ── */}
+                {!item && (
+                    <div className=" top-6 right-6 z-50">
+                        <DialogClose asChild>
+                            <button className="p-3 rounded-full bg-white/5 hover:bg-white/10 text-white transition-all duration-300 border border-white/10 group backdrop-blur-md">
+                                <X className="w-6 h-6 opacity-40 group-hover:opacity-100" />
+                            </button>
+                        </DialogClose>
+                    </div>
+                )}
 
                 {/* ── Main Content Container ── */}
                 <div className="relative z-10 flex w-full h-full overflow-hidden">
-                    {/* ── Image Section (Left) ── */}
+                    {/* ── Content Section (Left) ── */}
                     <div className="flex-1 flex items-center justify-center p-8 min-w-0">
-                        <img 
-                            src={node.image_url} 
-                            alt="" 
-                            className="max-w-full max-h-full object-contain shadow-2xl rounded-lg"
-                        />
+                        {isVideo ? (
+                            <video 
+                                src={finalSrc} 
+                                controls 
+                                autoPlay
+                                className="max-w-full max-h-full shadow-2xl rounded-lg"
+                            />
+                        ) : (
+                            <img 
+                                src={finalSrc} 
+                                alt="" 
+                                className="max-w-full max-h-full object-contain shadow-2xl rounded-lg"
+                            />
+                        )}
                     </div>
 
-                    {/* ── Heritage Sidebar (Right) ── */}
-                    <div className="w-[450px] max-w-[450px] h-full ">
-                        <HeritageTree isInsideDialog={true} />
-                    </div>
+                    {/* ── Sidebar (Right) ── */}
+                    {showSidebar && (
+                        <div className="w-[400px] max-w-[400px] h-full p-4 flex flex-col">
+                            {nodeId ? (
+                                <HeritageTree isInsideDialog={true} />
+                            ) : item ? (
+                                <ImageInfoSidebar item={item} />
+                            ) : null}
+                        </div>
+                    )}
                 </div>
             </DialogContent>
         </Dialog>

@@ -22,16 +22,19 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useStudioStore } from "@/store/useStudioStore"
+import { useCinemaStore } from "@/store/useCinemaStudioStore"
+import { WorkspaceSettingsDialog } from "../dialogs/WorkspaceSettingsDialog"
 
 export function StudioNavbar() {
     const { 
         workspaces, fetchWorkspaces, createWorkspace, 
-        activeWorkspaceId, setActiveWorkspaceId, fetchCharacters,
-        studioMode, setStudioMode
+        activeWorkspaceId, setActiveWorkspaceId,
+        studioMode, setStudioMode, fetchCharacters
     } = useStudioStore()
 
-    const [activeFilter, setActiveFilter] = React.useState("all")
+    const { activeFilter, setActiveFilter } = useCinemaStore()
     const [isCreateDialogOpen, setIsCreateDialogOpen] = React.useState(false)
+    const [isSettingsOpen, setIsSettingsOpen] = React.useState(false)
     const [newWorkspaceName, setNewWorkspaceName] = React.useState("")
 
     React.useEffect(() => {
@@ -143,7 +146,10 @@ export function StudioNavbar() {
                             </DialogContent>
                         </Dialog>
 
-                        <DropdownMenuItem className="flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer text-white/40 hover:text-white focus:bg-white/5 focus:text-white">
+                        <DropdownMenuItem 
+                            onClick={() => setIsSettingsOpen(true)}
+                            className="flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer text-white/40 hover:text-white focus:bg-white/5 focus:text-white"
+                        >
                             <Settings className="size-4" />
                             <span className="text-sm font-normal">Workspace Settings</span>
                         </DropdownMenuItem>
@@ -185,7 +191,7 @@ export function StudioNavbar() {
                         )}
                     >
                         <Video className="w-4 h-4" />
-                        <span>Cinema</span>
+                        <span>Video</span>
                     </button>
                     <button
                         onClick={() => setStudioMode("audio")}
@@ -233,6 +239,11 @@ export function StudioNavbar() {
             <div className="flex items-center gap-4">
                 {/* Could add user profile or share button here */}
             </div>
+
+            <WorkspaceSettingsDialog 
+                open={isSettingsOpen} 
+                onOpenChange={setIsSettingsOpen} 
+            />
         </div>
     )
 }

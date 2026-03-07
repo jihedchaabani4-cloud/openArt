@@ -4,7 +4,7 @@ import * as React from "react"
 import { Button } from "@/components/ui/button"
 import { Sparkles } from "lucide-react"
 
-export default function Buttongeneretd({
+export default function GeneratedButton({
   onClick,
   disabled = false,
   loading = false,

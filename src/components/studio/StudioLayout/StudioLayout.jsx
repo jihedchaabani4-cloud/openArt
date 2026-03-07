@@ -3,9 +3,9 @@
 import * as React from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useStudioStore } from "@/store/useStudioStore"
-import { CharacterPanel } from "./CharacterPanel"
+import { CharacterPanel } from "../CharacterPanel"
 import { MainStage } from "@/components/builder/MainStage"
-import { HeritageTree } from "./HeritageTree"
+import { HeritageTree } from "../HeritageTree"
 import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -19,7 +19,8 @@ export function StudioLayout() {
 
     React.useEffect(() => {
         initSocket()
-        fetchCharacters().then(() => setHasFetched(true))
+        // fetchCharacters().then(() => setHasFetched(true))
+        setHasFetched(true)
     }, [fetchCharacters, initSocket])
 
     const noCharacters = hasFetched && characters.length === 0

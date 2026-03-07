@@ -1,10 +1,11 @@
-import { useState } from "react";
-import { ModelSelector, MODELS as STUDIO_MODELS } from "./ModelSelector";
+import React, { useState, useRef } from "react";
+import { ModelSelector, MODELS as STUDIO_MODELS } from "../ModelSelector/ModelSelector";
 import { useCinemaStore } from "@/store/useCinemaStudioStore";
-import { X, Image as ImageIcon, Film } from "lucide-react";
+import { X, Image as ImageIcon, Film, Plus } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const RATIOS = ["1:1", "4:3", "3:4", "16:9", "9:16", "2:3", "3:2", "21:9"];
-const RESOLUTIONS = ["2K", "4K"];
+const RESOLUTIONS = ["1K", "2K", "4K"];
 
 const SparkleIcon = () => (
   <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
@@ -27,50 +28,133 @@ const RatioIcon = ({ ratio }) => {
 
 export default function CinemaPromptBar({ hideBackground = false }) {
   const { 
-    activeShotId, addShot, updateShot, activeSceneId, getActiveShot,
+    workspaceId, activeShotId, addShot, updateShot, activeSceneId, getActiveShot,
+    scenes, addScene, fetchAssets, fetchGenerations,
     loading: storeLoading
   } = useCinemaStore()
 
   const activeShot = getActiveShot();
 
+  const textareaRef = useRef(null);
+  const fileInputRef = useRef(null);
   const [prompt, setPrompt] = useState("");
   const [model, setModel] = useState(STUDIO_MODELS[0]);
-  const [resolution, setResolution] = useState("2K");
+  const [resolution, setResolution] = useState("1K");
   const [ratio, setRatio] = useState("16:9");
   const [count, setCount] = useState(1);
   const [generating, setGenerating] = useState(false);
   const [showRatioMenu, setShowRatioMenu] = useState(false);
   const [showResMenu, setShowResMenu] = useState(false);
+  const [showStrengthMenu, setShowStrengthMenu] = useState(false);
+  const [showAssetLibrary, setShowAssetLibrary] = useState(false);
+  const [libraryTab, setLibraryTab] = useState("workspace"); // "workspace", "all", "liked"
   const [isOver, setIsOver] = useState(false);
+
+  const { 
+    allGenerations, fetchAllGenerations, generations,
+    allGenerationsLoading, allGenerationsHasMore 
+  } = useCinemaStore();
+
+  const handleScroll = (e) => {
+    const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+    if (scrollHeight - scrollTop <= clientHeight + 50) {
+      if (libraryTab === "all" && allGenerationsHasMore && !allGenerationsLoading) {
+        fetchAllGenerations();
+      }
+    }
+  };
+
+  const filteredLibrary = React.useMemo(() => {
+    if (libraryTab === "liked") return allGenerations.filter(g => g.is_Like);
+    if (libraryTab === "workspace") return generations;
+    return allGenerations;
+  }, [allGenerations, generations, libraryTab]);
+
+  const handleSelectFromLibrary = (imageUrl) => {
+    if (referenceImages.length >= 4) {
+      alert("You can only add up to 4 reference images.");
+      return;
+    }
+    setReferenceImages(prev => [...prev, imageUrl]);
+    setShowAssetLibrary(false);
+  };
+
+  // Reference Image States
+  const [referenceImages, setReferenceImages] = useState([]); // array of base64 strings
+  const [strength, setStrength] = useState(0.75);
+
+  const handleImageUpload = (e) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    const remainingSlots = 4 - referenceImages.length;
+    if (remainingSlots <= 0) {
+      alert("You can only add up to 4 reference images.");
+      return;
+    }
+
+    const filesToUpload = files.slice(0, remainingSlots);
+    filesToUpload.forEach(file => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setReferenceImages(prev => {
+          if (prev.length >= 4) return prev;
+          return [...prev, reader.result];
+        });
+      };
+      reader.readAsDataURL(file);
+    });
+    setShowAssetLibrary(false);
+  };
+
+  const handleRemoveReference = (index) => {
+    setReferenceImages(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleClearReferences = () => {
+    setReferenceImages([]);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
 
   const handleGenerate = async (e) => {
     e.preventDefault();
-    if (!prompt.trim() || generating || !activeSceneId) return;
+    if (!prompt.trim() || generating) return;
     
+    // Ensure we have a workspaceId
+    if (!workspaceId) {
+      console.error("❌ No active workspace");
+      return;
+    }
+
     setGenerating(true);
     try {
-      // 1. Create a new shot if no active shot exists
-      let shotId = activeShotId;
-      if (!shotId) {
-        const newShot = await addShot({
-          scene_id: activeSceneId,
-          description: prompt,
-          aspect_ratio: ratio,
-          status: 'pending'
-        });
-        shotId = newShot.id;
-      } else {
-        // Update existing shot description
-        await updateShot(shotId, { description: prompt, aspect_ratio: ratio });
-      }
-
-      // 2. Call the backend to generate the cinematic video
-      console.log(`🎬 Triggering generation for shot: ${shotId}`);
+      // Call the backend directly - no forced scene/shot creation
+      console.log(`🎬 Triggering image generation...`);
       const { api } = await import("@/lib/api");
-      const res = await api.post(`/cinema/shots/${shotId}/generate`);
+      const res = await api.post(`/cinema/generate`, {
+        prompt: prompt,
+        ratio: ratio,
+        quality: resolution, 
+        count: count,
+        shot_id: activeShotId,
+        active_scene_id: activeSceneId,
+        workspace_id: workspaceId,
+        image_base64: referenceImages[0] || null, // Send the first for now, or update backend
+        images_base64: referenceImages, // Send all references
+        strength: strength,
+        edit_type: referenceImages.length > 0 ? "img2img" : "txt2img"
+      });
 
       if (res.ok) {
         setPrompt("");
+        if (textareaRef.current) {
+          textareaRef.current.style.height = "auto";
+        }
+        // Refresh store
+        fetchAssets(workspaceId);
+        fetchGenerations(workspaceId);
       } else {
         throw new Error(res.message || "Generation failed");
       }
@@ -93,7 +177,12 @@ export default function CinemaPromptBar({ hideBackground = false }) {
   const handleDrop = (e) => {
     e.preventDefault();
     setIsOver(false);
-    // Removed old node selection logic
+    
+    // Check if it's an image URL being dropped
+    const imageUrl = e.dataTransfer.getData("imageUrl");
+    if (imageUrl) {
+      handleSelectFromLibrary(imageUrl);
+    }
   };
 
   const Pill = ({ children, onClick, active }) => (
@@ -222,33 +311,200 @@ export default function CinemaPromptBar({ hideBackground = false }) {
           >
             {/* References row removed from here */}
 
+          {/* Container for the prompt bar and overlay library */}
+          <div style={{ position: "relative", width: "100%" }}>
+            {/* Asset Library Panel (Floating Above) */}
+            {showAssetLibrary && (
+              <div 
+                className="absolute -top-3 w-full -translate-y-full"
+                style={{ 
+                  zIndex: 100,
+                  opacity: 1, 
+                  display: "block",
+                  animation: "in-from-bottom 0.2s ease-out"
+                }}
+              >
+                <div 
+                  className="rounded-[24px] backdrop-blur-[40px] shadow-[0_20px_40px_rgba(0,0,0,0.4),inset_0_0_0_1px_rgba(255,255,255,0.08)] bg-[linear-gradient(180deg,rgba(25,25,25,0.9)_0%,rgba(15,15,15,0.95)_100%)] w-full max-h-[400px] overflow-hidden flex flex-col border border-white/5"
+                >
+                  {/* Header with Tabs */}
+                  <div className="flex items-center justify-between p-4 border-b border-white/5">
+                    <div className="flex items-center gap-1.5 p-1 bg-white/5 rounded-full">
+                      {[
+                        { id: "workspace", label: "Workspace" },
+                        { id: "all", label: "All Generations" },
+                        { id: "liked", label: "Liked" }
+                      ].map(tab => (
+                        <button 
+                          key={tab.id}
+                          type="button" 
+                          onClick={() => setLibraryTab(tab.id)}
+                          className={cn(
+                            "text-[11px] font-bold px-4 py-1.5 rounded-full transition-all duration-200 uppercase tracking-wider",
+                            libraryTab === tab.id 
+                              ? "bg-white text-black shadow-lg" 
+                              : "text-white/40 hover:text-white/60 hover:bg-white/5"
+                          )}
+                        >
+                          {tab.label}
+                        </button>
+                      ))}
+                    </div>
+                    
+                    <button 
+                      type="button" 
+                      onClick={() => setShowAssetLibrary(false)}
+                      className="size-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/40 hover:text-white transition-colors"
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+
+                  {/* Content Grid (Masonry Style) */}
+                  <div 
+                    onScroll={handleScroll}
+                    className="flex-1 overflow-y-auto p-4 custom-scrollbar"
+                  >
+                    <div className="columns-2 sm:columns-3 md:columns-4 gap-3 space-y-3">
+                      {/* Upload Card */}
+                      <div 
+                        onClick={() => fileInputRef.current?.click()}
+                        className="break-inside-avoid flex flex-col items-center justify-center gap-3 aspect-square rounded-lg bg-white/[0.03] border border-dashed border-white/10 hover:border-[#D4FF00]/40 hover:bg-[#D4FF00]/5 transition-all duration-300 cursor-pointer group"
+                      >
+                        <div className="size-10 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-[#D4FF00]/10 transition-colors">
+                          <Plus size={20} className="text-white/40 group-hover:text-[#D4FF00] transition-colors" />
+                        </div>
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-white/40 group-hover:text-white">Upload</span>
+                      </div>
+
+                      {/* Assets */}
+                      {filteredLibrary.map((item, idx) => {
+                        // Determine aspect ratio class based on item params if available
+                        const ratioStr = item.params?.ratio || "1:1";
+                        let aspect = "aspect-square";
+                        if (ratioStr === "16:9") aspect = "aspect-video";
+                        else if (ratioStr === "9:16") aspect = "aspect-[9/16]";
+                        else if (ratioStr === "4:3") aspect = "aspect-[4/3]";
+                        else if (ratioStr === "3:4") aspect = "aspect-[3/4]";
+                        else if (ratioStr === "2:3") aspect = "aspect-[2/3]";
+                        else if (ratioStr === "3:2") aspect = "aspect-[3/2]";
+                        else if (ratioStr === "21:9") aspect = "aspect-[21/9]";
+
+                        return (
+                          <div 
+                            key={item.id || idx}
+                            draggable
+                            onDragStart={(e) => {
+                              e.dataTransfer.setData("imageUrl", item.file_url || item.asset?.file_url);
+                              e.dataTransfer.effectAllowed = "copy";
+                            }}
+                            onClick={() => handleSelectFromLibrary(item.file_url || item.asset?.file_url)}
+                            className={cn(
+                              "break-inside-avoid relative rounded-lg overflow-hidden cursor-pointer group border border-white/5 hover:border-[#D4FF00]/40 transition-all duration-300",
+                              aspect
+                            )}
+                          >
+                            <img 
+                              src={item.file_url || item.asset?.file_url} 
+                              alt="Asset" 
+                              className="size-full object-cover transition-transform duration-500 group-hover:scale-110" 
+                            />
+                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                              <Plus size={20} className="text-white" />
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Loading indicator for pagination */}
+                    {allGenerationsLoading && (
+                      <div className="w-full flex justify-center py-4">
+                        <div className="size-6 rounded-full border-2 border-white/10 border-t-white/40 animate-spin" />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Prompt input row */}
             <div style={{ display: "flex", gap: "10px", alignItems: "flex-start", marginBottom: "14px" }}>
-              {/* Attach button */}
-              <div style={{ position: "relative", flexShrink: 0, marginTop: "2px" }}>
-                <button
-                  type="button"
-                  style={{
+              {/* Hidden File Input */}
+              <input
+                type="file"
+                ref={fileInputRef}
+                style={{ display: "none" }}
+                accept="image/*"
+                onChange={handleImageUpload}
+              />
+
+              {/* Attach button or Image Previews */}
+              <div style={{ position: "relative", flexShrink: 0, marginTop: "2px", display: "flex", gap: "6px" }}>
+                {referenceImages.map((img, index) => (
+                  <div key={index} style={{
                     width: "36px", height: "36px", borderRadius: "10px",
-                    border: isOver ? "1px solid rgba(255,255,255,0.3)" : "1px solid rgba(255,255,255,0.1)",
-                    background: isOver ? "rgba(255,255,255,0.1)" : "rgba(255,255,255,0.04)",
-                    color: isOver ? "white" : "rgba(255,255,255,0.5)",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    cursor: "pointer",
-                    transition: "all 0.15s",
-                  }}
-                  onMouseEnter={e => e.currentTarget.style.color = "white"}
-                  onMouseLeave={e => e.currentTarget.style.color = "rgba(255,255,255,0.5)"}
-                >
-                  <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
-                    <path d="M9.166 9.166V4.166h1.667v5H15.833v1.667H10.833v5H9.166v-5H4.166V9.166H9.166Z" />
-                  </svg>
-                </button>
+                    border: "1px solid rgba(255,255,255,0.2)",
+                    overflow: "hidden",
+                    position: "relative",
+                  }}>
+                    <img 
+                      src={img} 
+                      alt={`Reference ${index}`} 
+                      style={{ width: "100%", height: "100%", objectFit: "cover" }} 
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveReference(index)}
+                      style={{
+                        position: "absolute",
+                        top: 0,
+                        right: 0,
+                        width: "14px",
+                        height: "14px",
+                        background: "rgba(0,0,0,0.6)",
+                        border: "none",
+                        color: "white",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        cursor: "pointer",
+                        padding: 0,
+                        borderRadius: "0 0 0 4px",
+                      }}
+                    >
+                      <X size={10} />
+                    </button>
+                  </div>
+                ))}
+
+                {/* Add more button - Only show if less than 4 references */}
+                {referenceImages.length < 4 && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      fetchAllGenerations();
+                      setShowAssetLibrary(!showAssetLibrary);
+                    }}
+                    style={{
+                      width: "36px", height: "36px", borderRadius: "10px",
+                      border: isOver || showAssetLibrary ? "1px solid rgba(212, 255, 0, 0.4)" : "1px solid rgba(255,255,255,0.1)",
+                      background: isOver || showAssetLibrary ? "rgba(212, 255, 0, 0.1)" : "rgba(255,255,255,0.04)",
+                      color: isOver || showAssetLibrary ? "#D4FF00" : "rgba(255,255,255,0.5)",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      cursor: "pointer",
+                      transition: "all 0.15s",
+                    }}
+                  >
+                    <Plus size={18} />
+                  </button>
+                )}
               </div>
 
               {/* Textarea */}
               <div style={{ flex: 1, position: "relative" }}>
                 <textarea
+                  ref={textareaRef}
                   value={prompt}
                   onChange={e => setPrompt(e.target.value)}
                   placeholder="Describe the scene you imagine..."
@@ -287,8 +543,22 @@ export default function CinemaPromptBar({ hideBackground = false }) {
 
             {/* Controls row */}
             <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
-  
-
+              {/* Strength selector - Only show if we have a reference image */}
+              {referenceImages.length > 0 && (
+                <Dropdown
+                  value={`${Math.round(strength * 100)}%`}
+                  options={["25%", "50%", "75%", "90%"]}
+                  onChange={(v) => setStrength(parseInt(v) / 100)}
+                  show={showStrengthMenu}
+                  setShow={setShowStrengthMenu}
+                  renderValue={(v) => (
+                    <span style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+                      <ImageIcon size={14} style={{ opacity: 0.6 }} />
+                      {v}
+                    </span>
+                  )}
+                />
+              )}
 
               {/* Resolution */}
               <Dropdown
@@ -437,8 +707,9 @@ export default function CinemaPromptBar({ hideBackground = false }) {
                 )}
               </button>
             </div>
-          </form>
-        </div>
+          </div>
+        </form>
+      </div>
 
         {/* Label */}
         <p style={{

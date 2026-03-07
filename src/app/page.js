@@ -1,5 +1,5 @@
-import { StudioLayoutV2 } from "@/components/studio/StudioLayoutV2";
+import { CinemaStudioView } from "@/components/studio/CinemaStudioView";
 
 export default function Home() {
-  return <StudioLayoutV2 />;
+  return <CinemaStudioView />;
 }

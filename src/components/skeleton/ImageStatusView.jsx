@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Loader2, AlertCircle, Image as ImageIcon, X } from "lucide-react"
+import { Loader2, AlertCircle, Image as ImageIcon, X, RefreshCw, Trash2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 export default function ImageStatusView({
@@ -14,10 +14,13 @@ export default function ImageStatusView({
   rounded = "rounded-md",
   showOverlay = true,
   onCancel,
+  onRetry,
+  children,
 }) {
   const isCompleted = status === "completed"
-  const isProcessing = status === "processing"
+  const isProcessing = status === "processing" || status === "pending"
   const isFailed = status === "failed" || status === "error"
+  const isRejected = status === "rejected"
   const containerStyle = Object.assign(
     { aspectRatio: aspect },
     isProcessing ? { backgroundColor: "#1C1E207A" } : {}
@@ -27,20 +30,25 @@ export default function ImageStatusView({
     <div
       className={cn(
         "relative overflow-hidden border transition-all duration-300",
-        isCompleted ? "border-white/5 bg-white/5 hover:border-white/20" : "",
+        isCompleted ? "border-white/5 bg-white/5" : "",
         isProcessing ? "border-[#1C1E207A]" : "",
         isFailed ? "border-red-500/20 bg-red-500/5" : "",
+        isRejected ? "border-white/10 bg-[#0F1113]" : "",
         rounded,
         className
       )}
       style={containerStyle}
     >
       {isCompleted && src ? (
-        <img
-          src={src}
-          alt={alt}
-          className="w-full h-full object-cover transition-transform duration-700"
-        />
+        <div className="w-full h-full relative">
+          {children ? children : (
+            <img
+              src={src}
+              alt={alt}
+              className="w-full h-full object-cover transition-transform duration-700"
+            />
+          )}
+        </div>
       ) : isProcessing ? (
         <div className="w-full h-full relative">
           <div className="absolute inset-0 pointer-events-none overflow-hidden">
@@ -74,23 +82,72 @@ export default function ImageStatusView({
 
           </section>
         </div>
-      ) : isFailed ? (
-        <>
-          <div 
-            className="absolute inset-0 z-10 flex flex-col items-center justify-start gap-3 p-4 text-center"
-            style={{ backgroundColor: "#e6483d99" }}
-          >
-            <p className="text-[12px] sm:text-[14px] md:text-[16px] uppercase font-bold tracking-wider text-white leading-snug">
-              Error while generating
+      ) : isRejected ? (
+        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-4 p-6 text-center bg-[#0F1113]">
+          <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center mb-2">
+            <AlertCircle className="w-6 h-6 text-red-500" />
+          </div>
+          <div className="space-y-2">
+            <h3 className="text-white font-semibold text-lg">Prompt Rejected</h3>
+            <p className="text-white/60 text-sm leading-relaxed">
+              Your prompt was flagged by our safety filters for containing sensitive or inappropriate content.
             </p>
           </div>
-        </>
+          <button 
+            type="button" 
+            onClick={onCancel}
+            className="button button-md button-primary bg-[#FFFFFF1F] hover:bg-[#FFFFFF2F] transition-colors flex items-center gap-2 px-4 py-2 rounded-lg text-white"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M3 6h18"></path>
+              <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+              <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+            </svg>
+            Delete
+          </button>
+        </div>
+      ) : isFailed ? (
+        <div 
+          className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-4 p-4 text-center"
+          style={{ backgroundColor: "#e6483d99" }}
+        >
+          <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
+            <AlertCircle className="w-5 h-5 text-white" />
+          </div>
+          <p className="text-caption-l uppercase font-semibold font-grotesk text-white">
+            Error while loading<br/>the media...
+          </p>
+          <div className="flex items-center gap-2 mt-2">
+            {onRetry && (
+              <button 
+                type="button" 
+                onClick={onRetry}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/20 hover:bg-white/30 text-white text-[11px] font-bold uppercase transition-colors"
+              >
+                <RefreshCw className="w-3.5 h-3.5" />
+                Retry
+              </button>
+            )}
+            {onCancel && (
+              <button 
+                type="button" 
+                onClick={onCancel}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-red-500/40 hover:bg-red-500/60 text-white text-[11px] font-bold uppercase transition-colors"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                Delete
+              </button>
+            )}
+          </div>
+        </div>
       ) : (
-        <div className="w-full h-full flex flex-col items-center justify-center gap-3">
-          <ImageIcon className="w-6 h-6 text-white/30" />
-          <span className="text-[10px] font-bold uppercase tracking-widest text-white/40">
-            Idle
-          </span>
+        <div 
+          className="w-full h-full flex flex-col items-center justify-center gap-3 p-4 text-center"
+          style={{ backgroundColor: "#e6483d99" }}
+        >
+          <p className="text-caption-l uppercase font-semibold font-grotesk text-white">
+            Error while loading<br/>the media...
+          </p>
         </div>
       )}
 

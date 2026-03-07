@@ -140,7 +140,7 @@ export const useStudioStore = create((set, get) => ({
                     })
                     
                     // Then fetch from server to be sure
-                    get().fetchCharacters()
+                    // get().fetchCharacters()
                 }
 
                 return newState
@@ -155,7 +155,18 @@ export const useStudioStore = create((set, get) => ({
     setCreationPrompt: (prompt) => set({ creationPrompt: prompt }),
     setCreationTab: (tab) => set({ creationTab: tab }),
     setStagedDna: (dna) => set({ stagedDna: dna }),
-    setActiveWorkspaceId: (id) => set({ activeWorkspaceId: id }),
+    setActiveWorkspaceId: (id) => {
+        // Clear workspace-specific data to avoid showing old data
+        set({ 
+            activeWorkspaceId: id,
+            characters: [],
+            nodes: {},
+            activeCharacterId: null,
+            activeNodeId: null,
+            selectedNodeId: null
+        })
+        get().fetchCharacters()
+    },
 
     // ─── Selection Actions ──────────────────────────────────────────
     setNodeSelection: (nodeId) => set({ selectedNodeId: nodeId }),
@@ -259,7 +270,7 @@ export const useStudioStore = create((set, get) => ({
             if (json.ok) {
                 set({ workspaces: json.data })
                 if (!get().activeWorkspaceId && json.data.length > 0) {
-                    set({ activeWorkspaceId: json.data[0].id })
+                    get().setActiveWorkspaceId(json.data[0].id)
                 }
             }
         } catch (error) {
@@ -275,9 +286,9 @@ export const useStudioStore = create((set, get) => ({
             })
             if (json.ok) {
                 set(state => ({
-                    workspaces: [...state.workspaces, json.data],
-                    activeWorkspaceId: json.data.id
+                    workspaces: [...state.workspaces, json.data]
                 }))
+                get().setActiveWorkspaceId(json.data.id)
                 return json.data
             }
         } catch (error) {
@@ -285,11 +296,68 @@ export const useStudioStore = create((set, get) => ({
         }
     },
 
+    /** updateWorkspace — rename workspace */
+    updateWorkspace: async (id, name) => {
+        try {
+            const json = await api.patch(`/workspaces/${id}`, { name })
+            if (json.ok) {
+                set(state => ({
+                    workspaces: state.workspaces.map(ws => ws.id === id ? json.data : ws)
+                }))
+                return json.data
+            }
+        } catch (error) {
+            console.error("❌ updateWorkspace failed:", error.message)
+        }
+    },
+
+    /** deleteWorkspace — remove workspace */
+    deleteWorkspace: async (id) => {
+        try {
+            const json = await api.delete(`/workspaces/${id}`)
+            if (json.ok) {
+                const newWorkspaces = get().workspaces.filter(ws => ws.id !== id)
+                set({ workspaces: newWorkspaces })
+                if (get().activeWorkspaceId === id) {
+                    if (newWorkspaces.length > 0) {
+                        get().setActiveWorkspaceId(newWorkspaces[0].id)
+                    } else {
+                        set({ activeWorkspaceId: null, characters: [], nodes: {} })
+                    }
+                }
+                return true
+            }
+        } catch (error) {
+            console.error("❌ deleteWorkspace failed:", error.message)
+        }
+    },
+
+    /** emptyWorkspace — clear all assets and generations */
+    emptyWorkspace: async (id) => {
+        try {
+            const json = await api.post(`/workspaces/${id}/empty`)
+            if (json.ok) {
+                // Refresh characters and nodes if this is the active workspace
+                if (get().activeWorkspaceId === id) {
+                    get().fetchCharacters()
+                    // If you have a cinema store, you might need to refresh it too
+                    // But here we just clear local state for simplicity
+                    set({ nodes: {}, activeCharacterId: null, activeNodeId: null })
+                }
+                return true
+            }
+        } catch (error) {
+            console.error("❌ emptyWorkspace failed:", error.message)
+        }
+    },
+
     /** fetchCharacters — pull all characters summary */
     fetchCharacters: async () => {
         const { activeWorkspaceId } = get()
+        if (!activeWorkspaceId) return;
+
         try {
-            const url = activeWorkspaceId ? `/characters?workspace_id=${activeWorkspaceId}` : "/characters"
+            const url = `/characters?workspace_id=${activeWorkspaceId}`
             const json = await api.get(url)
             if (json.ok) {
                 set({ characters: json.data })
@@ -324,9 +392,15 @@ export const useStudioStore = create((set, get) => ({
 
     /** createCharacter — Operation A */
     createCharacter: async (name, dna, prompt) => {
+        const { activeWorkspaceId } = get()
         console.log("🧬 Sending DNA to Backend (Create):", JSON.stringify(dna, null, 2));
         try {
-            const json = await api.post("/characters/create-character", { name, dna, prompt })
+            const json = await api.post("/characters/create-character", { 
+                name, 
+                dna, 
+                prompt,
+                workspace_id: activeWorkspaceId
+            })
             if (json.character_id) {
                 // Add the character and its root node to the store immediately as "processing"
                 set(state => ({

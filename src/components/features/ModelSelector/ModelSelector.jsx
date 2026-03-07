@@ -384,33 +384,3 @@ export function ModelSelector({ models = MODELS, defaultId = 1, onChange }) {
     </div>
   )
 }
-
-// ─── Preview ──────────────────────────────────────────────────────────────────
-export default function Preview() {
-  const [picked, setPicked] = useState(null)
-
-  return (
-    <div style={{
-      minHeight: "100vh",
-      background: "#0a0b0d",
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      justifyContent: "center",
-      gap: 24,
-      padding: 40,
-    }}>
-      <ModelSelector onChange={setPicked} />
-      {picked && (
-        <p style={{
-          fontSize: 11.5,
-          color: "rgba(255,255,255,0.25)",
-          fontFamily: "'DM Mono', monospace",
-          letterSpacing: "0.03em",
-        }}>
-          selected → <span style={{ color: "rgba(255,255,255,0.6)" }}>{picked.name}</span>
-        </p>
-      )}
-    </div>
-  )
-}

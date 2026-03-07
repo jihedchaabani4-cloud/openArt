@@ -24,26 +24,50 @@ export const useCinemaStore = create((set, get) => ({
   environments:         [],
   activeEnvironmentId:  null,
 
-  // Projects
+  // Projects (DEPRECATED)
   projects:             [],
   activeProjectId:      null,
 
   // Scenes
-  scenes:               {},  // keyed by project_id
+  scenes:               [],  // Now a simple array for the active workspace
   activeSceneId:        null,
 
   // Shots
   shots:                {},   // keyed by scene_id
   activeShotId:         null,
 
+  // Assets (Images/Videos)
+  assets:               [],
+  generations:          [],
+  allGenerations:       [],
+  allGenerationsPage:   1,
+  allGenerationsHasMore: true,
+  allGenerationsLoading: false,
+  activeFilter:         'all', // 'all' or 'liked'
+
   // ── Init: load everything ──
   init: async (workspaceId) => {
-    set({ workspaceId, loading: true, error: null })
+    // Clear previous workspace state to avoid showing stale data
+    set({ 
+      workspaceId, 
+      loading: true, 
+      error: null,
+      assets: [],
+      generations: [],
+      allGenerations: [],
+      allGenerationsPage: 1,
+      allGenerationsHasMore: true,
+      scenes: [],
+      shots: {},
+      activeFilter: 'all'
+    })
     try {
       await Promise.all([
-        get().fetchCharacters(workspaceId),
         get().fetchEnvironments(workspaceId),
-        get().fetchProjects(workspaceId),
+        get().fetchScenes(workspaceId),
+        get().fetchAssets(workspaceId),
+        get().fetchGenerations(workspaceId),
+        get().fetchAllGenerations(true),
       ])
     } catch (err) {
       set({ error: err.message })
@@ -53,15 +77,82 @@ export const useCinemaStore = create((set, get) => ({
   },
 
   // ══════════════════════════════════════
+  // ASSETS & GENERATIONS
+  // ══════════════════════════════════════
+
+  fetchAssets: async (workspaceId) => {
+    try {
+      const res = await api.get(`/cinema/assets/${workspaceId}`)
+      if (res.ok) set({ assets: res.data ?? [] })
+      else throw new Error(res.message)
+    } catch (err) { set({ error: err.message }) }
+  },
+
+  fetchGenerations: async (workspaceId) => {
+    try {
+      const res = await api.get(`/cinema/generations/${workspaceId}`)
+      if (res.ok) set({ generations: res.data ?? [] })
+      else throw new Error(res.message)
+    } catch (err) { set({ error: err.message }) }
+  },
+
+  fetchAllGenerations: async (reset = false) => {
+    const { allGenerationsPage, allGenerations, allGenerationsLoading, allGenerationsHasMore } = get();
+    
+    if (allGenerationsLoading || (!reset && !allGenerationsHasMore)) return;
+    
+    const pageToFetch = reset ? 1 : allGenerationsPage;
+    
+    set({ allGenerationsLoading: true });
+    try {
+      const res = await api.get(`/cinema/generations?page=${pageToFetch}&limit=10`)
+      if (res.ok) {
+        set({ 
+          allGenerations: reset ? (res.data ?? []) : [...allGenerations, ...(res.data ?? [])],
+          allGenerationsPage: pageToFetch + 1,
+          allGenerationsHasMore: res.hasMore,
+          allGenerationsLoading: false
+        })
+      } else throw new Error(res.message)
+    } catch (err) { 
+      set({ error: err.message, allGenerationsLoading: false }) 
+    }
+  },
+
+  setActiveFilter: (filter) => set({ activeFilter: filter }),
+
+  removeGeneration: async (id) => {
+    try {
+      const res = await api.delete(`/cinema/generations/${id}`)
+      if (res.ok) {
+        set((s) => ({
+          generations: s.generations.filter((g) => g.id !== id)
+        }))
+      } else throw new Error(res.message)
+    } catch (err) { set({ error: err.message }) }
+  },
+
+  toggleLike: async (id, currentStatus) => {
+    try {
+      const res = await api.patch(`/cinema/generations/${id}`, { is_Like: !currentStatus })
+      if (res.ok) {
+        set((s) => ({
+          generations: s.generations.map((g) => g.id === id ? { ...g, is_Like: !currentStatus } : g)
+        }))
+      } else throw new Error(res.message)
+    } catch (err) { set({ error: err.message }) }
+  },
+
+  // ══════════════════════════════════════
   // CHARACTERS
   // ══════════════════════════════════════
 
   fetchCharacters: async (workspaceId) => {
-    try {
-      const res = await api.get(`/cinema/characters/${workspaceId}`)
-      if (res.ok) set({ characters: res.data ?? [] })
-      else throw new Error(res.message)
-    } catch (err) { set({ error: err.message }) }
+    // try {
+    //   const res = await api.get(`/cinema/characters/${workspaceId}`)
+    //   if (res.ok) set({ characters: res.data ?? [] })
+    //   else throw new Error(res.message)
+    // } catch (err) { set({ error: err.message }) }
   },
 
   setActiveCharacter: (id) => set({ activeCharacterId: id }),
@@ -82,7 +173,10 @@ export const useCinemaStore = create((set, get) => ({
           characters: s.characters.map((c) => c.id === id ? { ...c, ...res.data } : c)
         }))
       } else throw new Error(res.message)
-    } catch (err) { set({ error: err.message }) }
+    } catch (err) { 
+      set({ error: err.message })
+      throw err;
+    }
   },
 
   removeCharacter: async (id) => {
@@ -220,14 +314,37 @@ export const useCinemaStore = create((set, get) => ({
   fetchProjects: async (workspaceId) => {
     try {
       const res = await api.get(`/cinema/projects/${workspaceId}`)
-      if (res.ok) set({ projects: res.data ?? [] })
+      if (res.ok) {
+        const projects = res.data ?? []
+        set({ projects })
+        
+        // If workspace is the project, auto-select the first one and load its scenes/shots
+        if (projects.length > 0) {
+            const firstProject = projects[0]
+            set({ activeProjectId: firstProject.id })
+            
+            get().fetchScenes(firstProject.id).then(() => {
+                const scenes = get().scenes[firstProject.id] || []
+                if (scenes.length > 0) {
+                    const firstScene = scenes[0]
+                    set({ activeSceneId: firstScene.id })
+                    get().fetchShots(firstScene.id)
+                }
+            })
+        }
+      }
       else throw new Error(res.message)
     } catch (err) { set({ error: err.message }) }
   },
 
   setActiveProject: (id) => {
     set({ activeProjectId: id, activeSceneId: null, activeShotId: null })
-    if (id) get().fetchScenes(id)
+    if (id) {
+        get().fetchScenes(id).then(() => {
+            const scenes = get().scenes[id] || []
+            scenes.forEach(s => get().fetchShots(s.id))
+        })
+    }
   },
 
   addProject: async (projectData) => {
@@ -265,13 +382,16 @@ export const useCinemaStore = create((set, get) => ({
   // SCENES
   // ══════════════════════════════════════
 
-  fetchScenes: async (projectId) => {
+  fetchScenes: async (workspaceId) => {
     try {
-      const res = await api.get(`/cinema/scenes/${projectId}`)
+      const res = await api.get(`/cinema/scenes/${workspaceId}`)
       if (res.ok) {
-        set((s) => ({
-          scenes: { ...s.scenes, [projectId]: res.data ?? [] }
-        }))
+        const scenes = res.data ?? []
+        set({ scenes })
+        // Auto-select first scene if none active
+        if (scenes.length > 0 && !get().activeSceneId) {
+            get().setActiveScene(scenes[0].id)
+        }
       } else throw new Error(res.message)
     } catch (err) { set({ error: err.message }) }
   },
@@ -285,41 +405,34 @@ export const useCinemaStore = create((set, get) => ({
     try {
       const res = await api.post('/cinema/scenes', sceneData)
       if (res.ok) {
-        const scene = res.data
         set((s) => ({
-          scenes: {
-            ...s.scenes,
-            [scene.project_id]: [...(s.scenes[scene.project_id] ?? []), scene].sort((a, b) => a.scene_order - b.scene_order)
-          }
+          scenes: [...s.scenes, res.data].sort((a, b) => a.scene_order - b.scene_order)
         }))
+        return res.data;
       } else throw new Error(res.message)
-    } catch (err) { set({ error: err.message }) }
+    } catch (err) { 
+      set({ error: err.message });
+      throw err;
+    }
   },
 
   updateScene: async (id, updates) => {
     try {
       const res = await api.patch(`/cinema/scenes/${id}`, updates)
       if (res.ok) {
-        set((s) => {
-          const updated = { ...s.scenes }
-          for (const pid in updated) {
-            updated[pid] = updated[pid].map((sc) => sc.id === id ? { ...sc, ...res.data } : sc)
-          }
-          return { scenes: updated }
-        })
+        set((s) => ({
+          scenes: s.scenes.map((sc) => sc.id === id ? { ...sc, ...res.data } : sc)
+        }))
       } else throw new Error(res.message)
     } catch (err) { set({ error: err.message }) }
   },
 
-  removeScene: async (id, projectId) => {
+  removeScene: async (id) => {
     try {
       const res = await api.delete(`/cinema/scenes/${id}`)
       if (res.ok) {
         set((s) => ({
-          scenes: {
-            ...s.scenes,
-            [projectId]: (s.scenes[projectId] ?? []).filter((sc) => sc.id !== id)
-          },
+          scenes: s.scenes.filter((sc) => sc.id !== id),
           activeSceneId: s.activeSceneId === id ? null : s.activeSceneId,
         }))
       } else throw new Error(res.message)
@@ -356,8 +469,12 @@ export const useCinemaStore = create((set, get) => ({
             [shot.scene_id]: [...(s.shots[shot.scene_id] ?? []), shot].sort((a, b) => a.shot_order - b.shot_order)
           }
         }))
+        return shot;
       } else throw new Error(res.message)
-    } catch (err) { set({ error: err.message }) }
+    } catch (err) { 
+      set({ error: err.message });
+      throw err;
+    }
   },
 
   updateShot: async (id, updates) => {
@@ -406,9 +523,9 @@ export const useCinemaStore = create((set, get) => ({
   },
 
   getActiveScene: () => {
-    const { scenes, activeProjectId, activeSceneId } = get()
-    if (!activeProjectId || !activeSceneId) return null
-    return (scenes[activeProjectId] ?? []).find((s) => s.id === activeSceneId) ?? null
+    const { scenes, activeSceneId } = get()
+    if (!activeSceneId) return null
+    return scenes.find((s) => s.id === activeSceneId) ?? null
   },
 
   getActiveShot: () => {
