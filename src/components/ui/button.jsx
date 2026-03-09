@@ -20,7 +20,7 @@ const buttonVariants = cva(
           "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
         link: "text-primary underline-offset-4 hover:underline",
         "studio-normal": "flex items-center justify-center gap-3 h-11 rounded-lg bg-white/3 border border-white/8 hover:bg-white/6  transition-all text-white/80 group",
-        "studio-neon": "flex items-center justify-center gap-3 h-11 rounded-lg bg-[#D4FF00] hover:bg-[#e6ff4d] transition-all text-black font-normal uppercase tracking-widest active:scale-[0.98] shadow-[0_0_20px_rgba(212,255,0,0.15)] group",
+        "studio-neon": "flex items-center justify-center gap-3 h-11 rounded-lg bg-[#D4FF00] !text-black dark:!text-black hover:bg-[#e6ff4d] transition-all font-semibold uppercase tracking-widest active:scale-[0.98] shadow-[0_0_20px_rgba(212,255,0,0.15)] group",
         "studio-error": "flex items-center justify-center gap-3 h-11 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500 hover:bg-red-500/20 transition-all",
         "studio-overlay-icon":
           "w-9 h-9 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center text-white/70 hover:text-white hover:bg-black/60 transition-all",
@@ -58,6 +58,7 @@ const buttonVariants = cva(
         "icon-xs": "size-6 rounded-md [&_svg:not([class*='size-'])]:size-3",
         "icon-sm": "size-8",
         "icon-lg": "size-10",
+        "studio": "h-[calc(var(--spacing,0.25rem)*12)] min-w-[calc(var(--spacing,0.25rem)*12)] w-auto gap-[calc(var(--spacing,0.25rem)*2)] rounded-[var(--radius-xl,0.75rem)] px-[calc(var(--spacing,0.25rem)*3)] text-[var(--text-md)] leading-[var(--tw-leading,var(--text-md--line-height))] tracking-[var(--tw-tracking,var(--text-md--letter-spacing))]",
         /** Use for image/card tiles so height is not forced — content (image + label) defines size */
         tile: "h-auto min-h-0 p-0 has-[>svg]:p-0",
       },

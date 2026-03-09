@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from "framer-motion"
 import { useStudioStore } from "@/store/useStudioStore"
 import { useCinemaStore } from "@/store/useCinemaStudioStore"
 import { useAudioStore } from "@/store/useAudioStore"
-import { CharacterPanel } from "../CharacterPanel"
 import { StudioNavbar } from "../StudioNavbar"
 import ImagePromptBar from "@/components/features/ImagePromptBar"
 import CinemaPromptBar from "@/components/features/CinemaPromptBar"
@@ -161,52 +160,23 @@ const AudioGridItem = ({ audio }) => (
 
 export function StudioLayoutV2() {
     const { 
-        characters, fetchCharacters, activeCharacterId, selectCharacter,
-        isCreating, setIsCreating, nodes, initSocket,
+        nodes, initSocket,
         regenerateNode, removeNode, selectedNodeId, studioMode,
         activeWorkspaceId
     } = useStudioStore()
 
     const { audios, fetchAudios } = useAudioStore()
 
-    const [actionNode, setActionNode] = React.useState(null)
-
     React.useEffect(() => {
         initSocket()
-        // fetchCharacters()
         if (activeWorkspaceId) {
             fetchAudios(activeWorkspaceId)
         }
-    }, [fetchCharacters, initSocket, activeWorkspaceId, fetchAudios])
-
-    // Get nodes for the active character
-    const activeCharacterNodes = Object.values(nodes)
-        .filter(n => (n.character_id || n.characterId) === activeCharacterId)
-        .sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0))
-
-    const handleSelectCharacter = (id) => {
-        setIsCreating(false)
-        selectCharacter(id)
-    }
-
-    const handleCreateNew = () => {
-        selectCharacter(null)
-        setIsCreating(true)
-    }
+    }, [initSocket, activeWorkspaceId, fetchAudios])
 
     return (
         <div className="flex h-screen w-screen overflow-hidden bg-[#0a0a0a] text-white">
             
-            {/* ── Left Sidebar: Character Selection ── */}
-            <div className="z-20 h-full border-r border-white/5">
-                <CharacterPanel 
-                    isCreating={isCreating}
-                    activeCharacterId={activeCharacterId}
-                    onCreateNew={handleCreateNew}
-                    onSelectCharacter={handleSelectCharacter}
-                />
-            </div>
-
             {/* ── Main Content Area ── */}
             <main className="flex-1 flex flex-col relative min-w-0">
                 
@@ -214,7 +184,7 @@ export function StudioLayoutV2() {
                 <div className="flex-1 overflow-y-auto overflow-x-hidden p-6  scrollbar-hide">
                     <AnimatePresence mode="wait">
                         <motion.div 
-                            key={`${studioMode}-${activeCharacterId}`}
+                            key={`${studioMode}`}
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -20 }}
@@ -222,8 +192,8 @@ export function StudioLayoutV2() {
                             className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-1"
                         >
                                 {studioMode === "image" ? (
-                                    activeCharacterNodes.length > 0 ? (
-                                        activeCharacterNodes.map((node) => (
+                                    nodes.length > 0 ? (
+                                        nodes.map((node) => (
                                             <ImageGridItem 
                                                 key={node.id} 
                                                 node={node} 
@@ -233,7 +203,7 @@ export function StudioLayoutV2() {
                                             />
                                         ))
                                     ) : (
-                                        <EmptyState message="Select a character to view generations" />
+                                        <EmptyState message="No image generations found" />
                                     )
                                 ) : studioMode === "cinema" ? (
                                     <div className="col-span-full h-full flex flex-col items-center justify-center gap-4">

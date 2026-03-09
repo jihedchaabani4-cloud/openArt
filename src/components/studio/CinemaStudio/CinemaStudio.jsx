@@ -98,10 +98,12 @@ const MediaGridItem = ({ item, type }) => {
                 workspace_id: targetWorkspaceId
             };
 
-            if (item.section === 'audio_gen') {
+            if (item.section === 'audio_generator' || item.section === 'audio_gen') {
                 endpoint = "/audio/generate";
-            } else if (!item.section || item.section === 'image_gen') {
+            } else if (!item.section || item.section === 'image_generator' || item.section === 'image_gen') {
                 endpoint = "/images/generate";
+            } else if (item.section === 'cinema_studio') {
+                endpoint = "/cinema/generate";
             }
 
             const res = await api.post(endpoint, payload);
@@ -251,18 +253,24 @@ export function CinemaStudio() {
         let baseData = [];
 
         if (studioMode === "cinema") {
-            baseData = scenes.flatMap(scene => (shots[scene.id] || []).map(s => ({ ...s, _displayType: 'shot' })))
+            // Cinema mode should show videos (shots)
+            baseData = generations
+                .filter(g => g.asset?.asset_type === 'video' || g.section === 'video_generator')
+                .map(g => ({ ...g, _displayType: 'asset' }))
                 .sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0))
         } else if (studioMode === "audio") {
-            // Filter only audio generations
+            // Audio mode should show audio
             baseData = generations
-                .filter(g => g.asset?.asset_type === 'audio' || g.section === 'audio_gen')
+                .filter(g => g.asset?.asset_type === 'audio' || g.section === 'audio_generator' || g.section === 'audio_gen')
                 .map(g => ({ ...g, _displayType: 'asset' }))
                 .sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0))
         } else {
-            // studioMode === "image" - Filter out audio, keep images and videos
+            // Image mode should show all images, including cinematic ones
             baseData = generations
-                .filter(g => !g.asset || (g.asset.asset_type !== 'audio' && g.section !== 'audio_gen'))
+                .filter(g => 
+                    (g.asset?.asset_type === 'image' || g.section === 'image_generator' || g.section === 'cinema_studio' || g.section === 'cinema_image') &&
+                    g.asset?.asset_type !== 'audio' && g.asset?.asset_type !== 'video'
+                )
                 .map(g => ({ ...g, _displayType: 'asset' }))
                 .sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0))
         }
@@ -301,7 +309,7 @@ export function CinemaStudio() {
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: -20 }}
                                 transition={{ duration: 0.4, ease: "easeOut" }}
-                                className="columns-2 md:columns-3 lg:columns-4 xl:columns-5 2xl:columns-6 gap-2"
+                                className="columns-2 md:columns-3 lg:columns-4 xl:columns-4 2xl:columns-4 gap-2"
                             >
                                 {displayContent.map((item) => (
                                     <MediaGridItem key={item.id} item={item} type={item._displayType} />

@@ -59,12 +59,25 @@ export const MODELS = [
     icon: "V",
     iconGradient: "linear-gradient(135deg, #0a0e1a 0%, #05070f 100%)",
   },
+  {
+    id: 6,
+    name: "SDXL Pro",
+    subtitle: "Fast multi-shot generation",
+    badge: "FAST",
+    quality: "1K",
+    durationMin: 1,
+    durationMax: 5,
+    icon: "Sdxl",
+    iconGradient: "linear-gradient(135deg, #2e1a1a 0%, #170d0d 100%)",
+    model_name: "sdxl"
+  },
 ]
 
 const BADGE = {
   EXCLUSIVE: { bg: "rgba(255,196,0,0.12)", border: "rgba(255,196,0,0.3)", color: "#ffc400" },
   NEW:       { bg: "rgba(72,222,128,0.12)", border: "rgba(72,222,128,0.3)", color: "#48de80" },
   PREMIER:   { bg: "rgba(148,130,255,0.12)", border: "rgba(148,130,255,0.3)", color: "#9482ff" },
+  FAST:      { bg: "rgba(0,196,255,0.12)", border: "rgba(0,196,255,0.3)", color: "#00c4ff" },
 }
 
 // ─── Tiny icons ───────────────────────────────────────────────────────────────

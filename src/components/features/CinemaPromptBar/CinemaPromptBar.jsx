@@ -1,5 +1,4 @@
 import React, { useState, useRef } from "react";
-import { ModelSelector, MODELS as STUDIO_MODELS } from "../ModelSelector/ModelSelector";
 import { useCinemaStore } from "@/store/useCinemaStudioStore";
 import { X, Image as ImageIcon, Film, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -38,10 +37,8 @@ export default function CinemaPromptBar({ hideBackground = false }) {
   const textareaRef = useRef(null);
   const fileInputRef = useRef(null);
   const [prompt, setPrompt] = useState("");
-  const [model, setModel] = useState(STUDIO_MODELS[0]);
   const [resolution, setResolution] = useState("1K");
   const [ratio, setRatio] = useState("16:9");
-  const [count, setCount] = useState(1);
   const [generating, setGenerating] = useState(false);
   const [showRatioMenu, setShowRatioMenu] = useState(false);
   const [showResMenu, setShowResMenu] = useState(false);
@@ -137,14 +134,14 @@ export default function CinemaPromptBar({ hideBackground = false }) {
         prompt: prompt,
         ratio: ratio,
         quality: resolution, 
-        count: count,
+        count: 1,
         shot_id: activeShotId,
         active_scene_id: activeSceneId,
         workspace_id: workspaceId,
-        image_base64: referenceImages[0] || null, // Send the first for now, or update backend
-        images_base64: referenceImages, // Send all references
+        image_base64: referenceImages[0] || null,
+        images_base64: referenceImages,
         strength: strength,
-        edit_type: referenceImages.length > 0 ? "img2img" : "txt2img"
+        edit_type: referenceImages.length > 0 ? 'img2img' : 'txt2img'
       });
 
       if (res.ok) {
@@ -621,42 +618,6 @@ export default function CinemaPromptBar({ hideBackground = false }) {
               {/* Divider */}
               <div style={{ width: "1px", height: "20px", background: "rgba(255,255,255,0.08)", flexShrink: 0 }} />
 
-              {/* Count stepper */}
-              <div style={{
-                display: "flex", alignItems: "center", gap: "4px",
-                padding: "0 10px", height: "36px", borderRadius: "10px",
-                border: "1px solid rgba(255,255,255,0.1)",
-                background: "rgba(255,255,255,0.04)",
-              }}>
-                <button
-                  type="button"
-                  disabled={count <= 1}
-                  onClick={() => setCount(c => Math.max(1, c - 1))}
-                  style={{
-                    width: "20px", height: "20px", border: "none", background: "none",
-                    color: count <= 1 ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.6)",
-                    cursor: count <= 1 ? "not-allowed" : "pointer",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    fontFamily: "inherit", fontSize: "18px", lineHeight: 1, padding: 0,
-                  }}
-                >−</button>
-                <span style={{ fontSize: "13px", fontWeight: 600, color: "white", minWidth: "36px", textAlign: "center" }}>
-                  {count}<span style={{ color: "rgba(255,255,255,0.3)", fontWeight: 400 }}>/4</span>
-                </span>
-                <button
-                  type="button"
-                  disabled={count >= 4}
-                  onClick={() => setCount(c => Math.min(4, c + 1))}
-                  style={{
-                    width: "20px", height: "20px", border: "none", background: "none",
-                    color: count >= 4 ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.6)",
-                    cursor: count >= 4 ? "not-allowed" : "pointer",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    fontFamily: "inherit", fontSize: "18px", lineHeight: 1, padding: 0,
-                  }}
-                >+</button>
-              </div>
-
               {/* Spacer */}
               <div style={{ flex: 1 }} />
 
@@ -701,7 +662,7 @@ export default function CinemaPromptBar({ hideBackground = false }) {
                     Generate
                     <span style={{ display: "flex", alignItems: "center", gap: "3px", opacity: 0.7 }}>
                       <SparkleIcon />
-                      <span style={{ fontSize: "12px" }}>{count}</span>
+                      <span style={{ fontSize: "12px" }}>1</span>
                     </span>
                   </>
                 )}

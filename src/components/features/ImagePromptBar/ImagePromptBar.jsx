@@ -3,8 +3,9 @@ import { ModelSelector, MODELS as STUDIO_MODELS } from "../ModelSelector/ModelSe
 import { useStudioStore } from "@/store/useStudioStore";
 import { useCinemaStore } from "@/store/useCinemaStudioStore"; // Multi-modal store
 import { api } from "@/lib/api";
-import { X, Image as ImageIcon, Plus } from "lucide-react";
+import { X, Image as ImageIcon, Plus, AtSign } from "lucide-react";
 import { cn } from "@/lib/utils";
+import ElementsDialog from "../ElementsDialog/ElementsDialog";
 
 const RATIOS = ["1:1", "4:3", "3:4", "16:9", "9:16", "2:3", "3:2", "21:9"];
 const RESOLUTIONS = ["2K", "4K"];
@@ -55,13 +56,26 @@ export default function ImagePromptBar({ hideBackground = false }) {
   const [resolution, setResolution] = useState("2K");
   const [ratio, setRatio] = useState("3:4");
   const [count, setCount] = useState(1);
+  const [showCountMenu, setShowCountMenu] = useState(false);
   const [generating, setGenerating] = useState(false);
+  const [whatsNextLoading, setWhatsNextLoading] = useState(false);
   const [showRatioMenu, setShowRatioMenu] = useState(false);
   const [showResMenu, setShowResMenu] = useState(false);
   const [showStrengthMenu, setShowStrengthMenu] = useState(false);
   const [showAssetLibrary, setShowAssetLibrary] = useState(false);
   const [libraryTab, setLibraryTab] = useState("workspace"); // "workspace", "all", "liked"
   const [isOver, setIsOver] = useState(false);
+  const [showElementsDialog, setShowElementsDialog] = useState(false);
+
+  const handleElementSelect = (element) => {
+    const mention = `@${element.slug}`;
+    setPrompt(prev => {
+      const trimmed = prev.trim();
+      return trimmed ? `${trimmed} ${mention}` : mention;
+    });
+    setShowElementsDialog(false);
+    if (textareaRef.current) textareaRef.current.focus();
+  };
 
   const filteredLibrary = useMemo(() => {
     if (libraryTab === "liked") return allGenerations.filter(g => g.is_Like);
@@ -119,37 +133,41 @@ export default function ImagePromptBar({ hideBackground = false }) {
   };
 
   const handleGenerate = async (e) => {
-    e.preventDefault();
-    if (!prompt.trim() || generating) return;
+    if (e) e.preventDefault();
     
+    // If no prompt but we have a reference image, trigger "What's Next" instead
+    if (!prompt.trim()) {
+      if (referenceImages.length > 0 && !whatsNextLoading && !generating) {
+        return handleWhatsNext();
+      }
+      return;
+    }
+
+    if (generating) return;
     setGenerating(true);
     try {
-      // 1. If we have a selected node (Character Node), use the character edit API
-      if (selectedNodeId && referenceImages.length === 0) {
-        await editActiveNode(prompt, selectedNodeId);
-      } else {
-        // 2. Otherwise, use the NEW general image generation API
-        const res = await api.post("/images/generate", {
-          prompt,
-          workspace_id: activeWorkspaceId,
-          ratio,
-          quality: resolution,
-          count,
-          image_base64: referenceImages[0] || null, // Send first for backward compatibility
-          images_base64: referenceImages, // Send all references
-          strength: strength,
-          edit_type: referenceImages.length > 0 ? "img2img" : "txt2img"
-        });
-        
-        if (res.ok) {
-          // Refresh gallery and history
-          if (activeWorkspaceId) {
-            fetchAssets(activeWorkspaceId);
-            fetchGenerations(activeWorkspaceId);
-          }
-        } else {
-          throw new Error(res.message);
+      // Use the general image generation API
+      const res = await api.post("/images/generate", {
+        prompt,
+        model_name: model.model_name || "flux",
+        workspace_id: activeWorkspaceId,
+        ratio,
+        quality: resolution,
+        count,
+        image_base64: referenceImages[0] || null, // Send first for backward compatibility
+        images_base64: referenceImages, // Send all references
+        strength: strength,
+        edit_type: referenceImages.length > 0 ? "img2img" : "txt2img"
+      });
+      
+      if (res.ok) {
+        // Refresh gallery and history
+        if (activeWorkspaceId) {
+          fetchAssets(activeWorkspaceId);
+          fetchGenerations(activeWorkspaceId);
         }
+      } else {
+        throw new Error(res.message);
       }
       
       // Clear after success
@@ -162,6 +180,34 @@ export default function ImagePromptBar({ hideBackground = false }) {
       console.error("❌ Generation failed:", error);
     } finally {
       setGenerating(false);
+    }
+  };
+
+  const handleWhatsNext = async () => {
+    if (referenceImages.length === 0 || whatsNextLoading) return;
+
+    setWhatsNextLoading(true);
+    try {
+      console.log("🎬 Triggering 'What's Next' flow...");
+      const res = await api.post("/vision/whats-next", {
+        image_base64: referenceImages[0],
+        workspace_id: activeWorkspaceId
+      });
+
+      if (res.ok) {
+        console.log("✅ 'What's Next' batch triggered successfully.");
+        // Refresh gallery and history
+        if (activeWorkspaceId) {
+          fetchAssets(activeWorkspaceId);
+          fetchGenerations(activeWorkspaceId);
+        }
+      } else {
+        throw new Error(res.message);
+      }
+    } catch (error) {
+      console.error("❌ 'What's Next' failed:", error);
+    } finally {
+      setWhatsNextLoading(false);
     }
   };
 
@@ -178,19 +224,11 @@ export default function ImagePromptBar({ hideBackground = false }) {
     e.preventDefault();
     setIsOver(false);
 
-    // 1. Check if it's an image URL being dropped (priority)
+    // Check if it's an image URL being dropped
     const imageUrl = e.dataTransfer.getData("imageUrl");
     if (imageUrl) {
       handleSelectFromLibrary(imageUrl);
       return;
-    }
-
-    // 2. Check for character node drop
-    const nodeId = e.dataTransfer.getData("nodeId");
-    if (nodeId) {
-      setNodeSelection(nodeId);
-      // Sync with the store's active node so editActiveNode works on this node
-      selectNode(nodeId);
     }
   };
 
@@ -545,6 +583,7 @@ export default function ImagePromptBar({ hideBackground = false }) {
                             cursor: "pointer",
                             transition: "all 0.15s",
                           }}
+                          title="Add Reference Image"
                         >
                           <Plus size={18} />
                         </button>
@@ -566,10 +605,34 @@ export default function ImagePromptBar({ hideBackground = false }) {
                         cursor: "pointer",
                         transition: "all 0.15s",
                       }}
+                      title="Add Reference Image"
                     >
                       <Plus size={18} />
                     </button>
                   )}
+
+                  {/* Elements @ Button */}
+                  <button
+                    type="button"
+                    onClick={() => setShowElementsDialog(true)}
+                    style={{
+                      width: "36px",
+                      height: "36px",
+                      borderRadius: "10px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      background: "rgba(255,255,255,0.05)",
+                      border: "1px solid rgba(255,255,255,0.1)",
+                      color: "#D4FF00",
+                      cursor: "pointer",
+                      transition: "all 0.2s",
+                    }}
+                    className="hover:bg-[#D4FF00]/10 hover:border-[#D4FF00]/30"
+                    title="Manage Elements (@)"
+                  >
+                    <AtSign size={18} />
+                  </button>
                 </div>
 
                 {/* Textarea */}
@@ -701,41 +764,26 @@ export default function ImagePromptBar({ hideBackground = false }) {
               {/* Divider */}
               <div style={{ width: "1px", height: "20px", background: "rgba(255,255,255,0.08)", flexShrink: 0 }} />
 
-              {/* Count stepper */}
-              <div style={{
-                display: "flex", alignItems: "center", gap: "4px",
-                padding: "0 10px", height: "36px", borderRadius: "10px",
-                border: "1px solid rgba(255,255,255,0.1)",
-                background: "rgba(255,255,255,0.04)",
-              }}>
-                <button
-                  type="button"
-                  disabled={count <= 1}
-                  onClick={() => setCount(c => Math.max(1, c - 1))}
-                  style={{
-                    width: "20px", height: "20px", border: "none", background: "none",
-                    color: count <= 1 ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.6)",
-                    cursor: count <= 1 ? "not-allowed" : "pointer",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    fontFamily: "inherit", fontSize: "18px", lineHeight: 1, padding: 0,
-                  }}
-                >−</button>
-                <span style={{ fontSize: "13px", fontWeight: 600, color: "white", minWidth: "36px", textAlign: "center" }}>
-                  {count}<span style={{ color: "rgba(255,255,255,0.3)", fontWeight: 400 }}>/4</span>
-                </span>
-                <button
-                  type="button"
-                  disabled={count >= 4}
-                  onClick={() => setCount(c => Math.min(4, c + 1))}
-                  style={{
-                    width: "20px", height: "20px", border: "none", background: "none",
-                    color: count >= 4 ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.6)",
-                    cursor: count >= 4 ? "not-allowed" : "pointer",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    fontFamily: "inherit", fontSize: "18px", lineHeight: 1, padding: 0,
-                  }}
-                >+</button>
-              </div>
+              {/* Count selector */}
+              <Dropdown
+                value={`${count} Image${count > 1 ? "s" : ""}`}
+                options={[1, 2, 4, 6, 8, 10].map(n => `${n} Image${n > 1 ? "s" : ""}`)}
+                onChange={(v) => setCount(parseInt(v))}
+                show={showCountMenu}
+                setShow={setShowCountMenu}
+                renderValue={(v) => (
+                  <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                    <ImageIcon size={14} style={{ opacity: 0.6 }} />
+                    {v}
+                  </span>
+                )}
+                renderOption={(opt) => (
+                  <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <ImageIcon size={12} style={{ opacity: 0.5 }} />
+                    {opt}
+                  </span>
+                )}
+              />
 
               {/* Spacer */}
               <div style={{ flex: 1 }} />
@@ -743,21 +791,27 @@ export default function ImagePromptBar({ hideBackground = false }) {
               {/* Generate button */}
               <button
                 type="submit"
-                disabled={!prompt.trim() || generating}
+                disabled={(generating || whatsNextLoading) || (!prompt.trim() && referenceImages.length === 0)}
                 style={{
                   height: "36px",
                   padding: "0 18px",
                   borderRadius: "10px",
                   border: "1px solid rgba(255,255,255,0.15)",
-                  background: generating
+                  background: (generating || whatsNextLoading)
                     ? "rgba(255,255,255,0.05)"
-                    : !prompt.trim()
+                    : (!prompt.trim() && referenceImages.length === 0)
                       ? "rgba(255,255,255,0.05)"
-                      : "rgba(255,255,255,0.92)",
-                  color: generating || !prompt.trim() ? "rgba(255,255,255,0.3)" : "#0a0a0a",
+                      : (!prompt.trim() && referenceImages.length > 0)
+                        ? "rgba(212, 255, 0, 0.9)" // Yellow highlight for What's Next
+                        : "rgba(255,255,255,0.92)",
+                  color: (generating || whatsNextLoading) || (!prompt.trim() && referenceImages.length === 0) 
+                    ? "rgba(255,255,255,0.3)" 
+                    : (!prompt.trim() && referenceImages.length > 0)
+                      ? "#000"
+                      : "#0a0a0a",
                   fontSize: "13.5px",
                   fontWeight: 600,
-                  cursor: !prompt.trim() || generating ? "not-allowed" : "pointer",
+                  cursor: (generating || whatsNextLoading) || (!prompt.trim() && referenceImages.length === 0) ? "not-allowed" : "pointer",
                   display: "flex",
                   alignItems: "center",
                   gap: "6px",
@@ -766,7 +820,7 @@ export default function ImagePromptBar({ hideBackground = false }) {
                   whiteSpace: "nowrap",
                 }}
               >
-                {generating ? (
+                {generating || whatsNextLoading ? (
                   <>
                     <div style={{
                       width: "13px", height: "13px", borderRadius: "50%",
@@ -774,15 +828,24 @@ export default function ImagePromptBar({ hideBackground = false }) {
                       borderTopColor: "rgba(255,255,255,0.5)",
                       animation: "spin 0.7s linear infinite",
                     }} />
-                    Generating...
+                    {whatsNextLoading ? "Brainstorming..." : (count > 1 ? `Generating ${count} images...` : "Generating...")}
                   </>
                 ) : (
                   <>
-                    Generate
-                    <span style={{ display: "flex", alignItems: "center", gap: "3px", opacity: 0.7 }}>
-                      <SparkleIcon />
-                      <span style={{ fontSize: "12px" }}>{count}</span>
-                    </span>
+                    {!prompt.trim() && referenceImages.length > 0 ? (
+                      <>
+                        What's Next?
+                        <SparkleIcon />
+                      </>
+                    ) : (
+                      <>
+                        {count > 1 ? `Generate ${count} Images` : "Generate"}
+                        <span style={{ display: "flex", alignItems: "center", gap: "3px", opacity: 0.7 }}>
+                          <SparkleIcon />
+                          <span style={{ fontSize: "12px" }}>{count}</span>
+                        </span>
+                      </>
+                    )}
                   </>
                 )}
               </button>
@@ -790,6 +853,12 @@ export default function ImagePromptBar({ hideBackground = false }) {
           </div>
         </form>
       </div>
+
+      <ElementsDialog 
+        open={showElementsDialog} 
+        onOpenChange={setShowElementsDialog}
+        onSelect={handleElementSelect}
+      />
 
         {/* Label */}
         <p style={{

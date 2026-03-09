@@ -29,7 +29,7 @@ export function StudioNavbar() {
     const { 
         workspaces, fetchWorkspaces, createWorkspace, 
         activeWorkspaceId, setActiveWorkspaceId,
-        studioMode, setStudioMode, fetchCharacters
+        studioMode, setStudioMode
     } = useStudioStore()
 
     const { activeFilter, setActiveFilter } = useCinemaStore()
@@ -40,12 +40,6 @@ export function StudioNavbar() {
     React.useEffect(() => {
         fetchWorkspaces()
     }, [fetchWorkspaces])
-
-    React.useEffect(() => {
-        if (activeWorkspaceId) {
-            fetchCharacters()
-        }
-    }, [activeWorkspaceId, fetchCharacters])
 
     const selectedWorkspace = workspaces.find(ws => ws.id === activeWorkspaceId)?.name || "Select Workspace"
 

@@ -2,23 +2,35 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
-function Input({
-  className,
-  type,
-  ...props
-}) {
+const Input = React.forwardRef(({ className, type, icon: Icon, ...props }, ref) => {
+  if (Icon) {
+    return (
+      <label className={cn(
+        "flex h-11 w-full items-center gap-2 rounded-lg border border-white/8 bg-white/3 px-3 py-2.5 text-sm text-white focus-within:border-white/20 transition-all cursor-text",
+        className
+      )}>
+        <Icon className="size-4 text-white/40" />
+        <input
+          type={type}
+          ref={ref}
+          className="bg-transparent border-none outline-none flex-1 placeholder:text-white/40"
+          {...props}
+        />
+      </label>
+    )
+  }
   return (
     <input
       type={type}
-      data-slot="input"
+      ref={ref}
       className={cn(
-        "file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-normal disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
-        "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
-        "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
+        "flex h-11 w-full rounded-lg border border-white/8 bg-white/3 px-3 py-2.5 text-sm text-white placeholder:text-white/40 focus:border-white/20 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 transition-all",
         className
       )}
-      {...props} />
-  );
-}
+      {...props}
+    />
+  )
+})
+Input.displayName = "Input"
 
 export { Input }
