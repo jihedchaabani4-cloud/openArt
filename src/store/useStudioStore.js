@@ -11,9 +11,11 @@ export const useStudioStore = create((set, get) => ({
     nodes: [],      // Image generations list
     activeWorkspaceId: null,
     selectedNodeId: null, // Single ID of node dragged into the prompt bar
-    studioMode: "image", // "image" or "cinema"
+    studioMode: "image", // "image", "video", or "cinema"
     socket: null,
     isConnected: false,
+    elements: [],
+    loadingElements: false,
 
     initSocket: () => {
         if (get().socket) return
@@ -80,7 +82,7 @@ export const useStudioStore = create((set, get) => ({
         if (!workspaceId) return
 
         try {
-            const res = await api.get(`/cinema/generations/${workspaceId}`)
+            const res = await api.get(`/generations/generations/${workspaceId}`)
             if (res.ok) {
                 set({ nodes: res.data })
             }
@@ -96,7 +98,7 @@ export const useStudioStore = create((set, get) => ({
 
     removeNode: async (nodeId) => {
         try {
-            const res = await api.delete(`/cinema/generations/${nodeId}`)
+            const res = await api.delete(`/generations/generations/${nodeId}`)
             if (res.ok) {
                 set((state) => ({
                     nodes: state.nodes.filter(n => n.id !== nodeId),
@@ -105,6 +107,22 @@ export const useStudioStore = create((set, get) => ({
             }
         } catch (err) {
             console.error("❌ removeNode error:", err)
+        }
+    },
+
+    fetchElements: async (force = false) => {
+        if (!force && get().elements.length > 0) return
+
+        set({ loadingElements: true })
+        try {
+            const res = await api.get("/elements")
+            if (res.ok) {
+                set({ elements: res.data || [] })
+            }
+        } catch (err) {
+            console.error("❌ fetchElements error:", err)
+        } finally {
+            set({ loadingElements: false })
         }
     }
 }))

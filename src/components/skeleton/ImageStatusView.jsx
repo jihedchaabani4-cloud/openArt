@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Loader2, AlertCircle, Image as ImageIcon, X, RefreshCw, Trash2 } from "lucide-react"
+import { Loader2, AlertCircle, AlertTriangle, Image as ImageIcon, X, RefreshCw, Trash2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 export default function ImageStatusView({
@@ -15,6 +15,7 @@ export default function ImageStatusView({
   showOverlay = true,
   onCancel,
   onRetry,
+  error,
   children,
 }) {
   const isCompleted = status === "completed"
@@ -108,34 +109,34 @@ export default function ImageStatusView({
         </div>
       ) : isFailed ? (
         <div 
-          className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-4 p-4 text-center"
-          style={{ backgroundColor: "#e6483d99" }}
+          className="absolute inset-0 z-10 flex flex-col justify-between p-5 text-left bg-[#141414]"
         >
-          <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
-            <AlertCircle className="w-5 h-5 text-white" />
+          {/* Top section */}
+          <div className="flex flex-col items-start gap-3">
+            <AlertTriangle className="w-5 h-5 text-white/80" />
+            <div>
+              <p className="text-[14px] font-semibold text-white mb-1">
+                Failed
+              </p>
+              <p className="text-[12px] text-white/60 leading-snug pe-4">
+                {error?.message || "Generation failed. Please try again or send feedback."}
+              </p>
+            </div>
           </div>
-          <p className="text-caption-l uppercase font-semibold font-grotesk text-white">
-            Error while loading<br/>the media...
-          </p>
-          <div className="flex items-center gap-2 mt-2">
-            {onRetry && (
-              <button 
-                type="button" 
-                onClick={onRetry}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/20 hover:bg-white/30 text-white text-[11px] font-bold uppercase transition-colors"
-              >
-                <RefreshCw className="w-3.5 h-3.5" />
-                Retry
-              </button>
-            )}
+
+          {/* Bottom Right Actions */}
+          <div className="flex items-center justify-end gap-2 mt-auto">
             {onCancel && (
               <button 
                 type="button" 
-                onClick={onCancel}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-red-500/40 hover:bg-red-500/60 text-white text-[11px] font-bold uppercase transition-colors"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onCancel();
+                }}
+                className="flex items-center justify-center w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors"
+                title="Delete"
               >
-                <Trash2 className="w-3.5 h-3.5" />
-                Delete
+                <Trash2 className="w-4 h-4" />
               </button>
             )}
           </div>
@@ -154,7 +155,7 @@ export default function ImageStatusView({
 
 
       {showOverlay && isCompleted && (
-        <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/80 pointer-events-none" />
+        <div className="absolute inset-0 bg-linear-to-b from-black/20 via-transparent to-black/80 pointer-events-none" />
       )}
 
       {label && (

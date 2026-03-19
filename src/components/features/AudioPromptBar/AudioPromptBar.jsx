@@ -1,6 +1,6 @@
+
 import { useState, useRef } from "react";
-import { useStudioStore } from "@/store/useStudioStore";
-import { useCinemaStore } from "@/store/useCinemaStudioStore"; // Multi-modal store
+import { useGenerationsStudioStore } from "@/store/useGenerationsStudioStore";
 import { Music, Mic, Volume2, Sparkles } from "lucide-react";
 
 const MOODS = ["Dramatic", "Epic", "Happy", "Sad", "Suspenseful", "Energetic", "Calm"];
@@ -11,8 +11,7 @@ const SparkleIcon = () => (
 );
 
 export default function AudioPromptBar({ hideBackground = false }) {
-  const { activeWorkspaceId } = useStudioStore();
-  const { fetchAssets, fetchGenerations } = useCinemaStore();
+  const { projectId: activeProjectId, activeSessionId, fetchAssets, fetchGenerations } = useGenerationsStudioStore();
   
   const textareaRef = useRef(null);
   const [prompt, setPrompt] = useState("");
@@ -24,7 +23,7 @@ export default function AudioPromptBar({ hideBackground = false }) {
 
   const handleGenerate = async (e) => {
     e.preventDefault();
-    if (!prompt.trim() || generating || !activeWorkspaceId) return;
+    if (!prompt.trim() || generating || !activeProjectId) return;
     
     setGenerating(true);
     try {
@@ -34,7 +33,8 @@ export default function AudioPromptBar({ hideBackground = false }) {
         prompt,
         mood,
         duration,
-        workspace_id: activeWorkspaceId
+        project_id: activeProjectId,
+        session_id: activeSessionId
       });
 
       if (res.ok) {
@@ -43,8 +43,8 @@ export default function AudioPromptBar({ hideBackground = false }) {
           textareaRef.current.style.height = "auto";
         }
         // Refresh store
-        fetchAssets(activeWorkspaceId);
-        fetchGenerations(activeWorkspaceId);
+        fetchAssets(activeProjectId, activeSessionId);
+        fetchGenerations(activeProjectId, activeSessionId);
       } else {
         throw new Error(res.message || "Audio generation failed");
       }

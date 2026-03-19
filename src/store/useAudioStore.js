@@ -5,12 +5,12 @@ export const useAudioStore = create((set, get) => ({
   audios: [],
   loading: false,
   error: null,
-  activeWorkspaceId: null,
+  activeProjectId: null,
 
-  fetchAudios: async (workspaceId) => {
-    set({ loading: true, activeWorkspaceId: workspaceId })
+  fetchAudios: async (projectId) => {
+    set({ loading: true, activeProjectId: projectId })
     try {
-      const res = await api.get(`/audio?workspace_id=${workspaceId}`)
+      const res = await api.get(`/audio?project_id=${projectId}`)
       if (res.ok) set({ audios: res.data ?? [] })
       else set({ audios: [] })
     } catch (err) {

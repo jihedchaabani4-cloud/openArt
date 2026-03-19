@@ -1,5 +1,5 @@
-import { CinemaStudioView } from "@/components/studio/CinemaStudioView";
+import { GenerationsStudioView } from "@/components/studio/GenerationsStudioView";
 
 export default function Home() {
-  return <CinemaStudioView />;
+  return <GenerationsStudioView />;
 }

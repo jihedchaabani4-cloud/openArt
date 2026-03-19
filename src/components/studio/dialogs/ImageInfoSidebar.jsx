@@ -4,11 +4,11 @@ import * as React from "react"
 import { Copy, Info, ChevronDown, ChevronUp, X, Download, Heart, Trash2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { DialogClose } from "@/components/ui/dialog"
-import { useCinemaStore } from "@/store/useCinemaStudioStore"
+import { useGenerationsStudioStore } from "@/store/useGenerationsStudioStore"
 import { DeleteGenerationDialog } from "./DeleteGenerationDialog"
 
-export function ImageInfoSidebar({ item }) {
-    const { removeGeneration, toggleLike } = useCinemaStore()
+export function ImageInfoSidebar({ item, group }) {
+    const { removeGeneration, toggleLike } = useGenerationsStudioStore()
     const [showFullPrompt, setShowFullPrompt] = React.useState(false)
     const [showFullInfo, setShowFullInfo] = React.useState(false)
     const [isPromptLong, setIsPromptLong] = React.useState(false)
@@ -24,15 +24,26 @@ export function ImageInfoSidebar({ item }) {
 
     if (!item) return null
 
-    const prompt = item.params?.prompt || item.prompt || "No prompt available"
-    const model = item.model || "Stable Diffusion"
-    const quality = item.params?.quality || "1K"
-    const ratio = item.params?.ratio || "1:1"
-    const width = item.params?.width || 1024
-    const height = item.params?.height || 1024
+    const prompt = item.params?.prompt || item.prompt || group?.params?.prompt || "No prompt available"
+    const model = item.model || group?.model || "Stable Diffusion"
+    const quality = item.params?.quality || group?.params?.quality || "1K"
+    const ratio = item.params?.ratio || group?.params?.ratio || "1:1"
+    const width = item.params?.width || group?.params?.params?.width || group?.params?.width || ""
+    const height = item.params?.height || group?.params?.params?.height || group?.params?.height || ""
+    const sizeStr = item.params?.size || group?.params?.size || group?.params?.params?.size;
+    
+    let displaySize = `${width}x${height}`;
+    if (sizeStr && typeof sizeStr === 'string' && sizeStr.includes('*')) {
+        displaySize = sizeStr.replace('*', ' x ');
+    } else if (sizeStr && typeof sizeStr === 'string' && sizeStr.includes('x')) {
+        displaySize = sizeStr;
+    }
     const isLiked = item.is_Like || false
     const url = item.file_url || item.asset?.file_url
-    const createdAt = new Date(item.created_at).toLocaleDateString('en-US', {
+    
+    // Date fallback hierarchy: item -> group -> now
+    const rawDate = item.created_at || group?.created_at || new Date().toISOString()
+    const createdAt = new Date(rawDate).toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'long',
         day: 'numeric'
@@ -153,7 +164,7 @@ export function ImageInfoSidebar({ item }) {
                                     !showFullInfo && "max-h-0 overflow-hidden"
                                 )}>
                                     <InfoItem label="Ratio" value={ratio} />
-                                    <InfoItem label="Size" value={`${width}x${height}`} />
+                                    <InfoItem label="Size" value={displaySize} />
                                     <InfoItem label="Created" value={createdAt} />
                                 </div>
                             </div>

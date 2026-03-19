@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils"
 import { HeritageTree } from "../HeritageTree"
 import { ImageInfoSidebar } from "./ImageInfoSidebar"
 
-export function ImageViewerDialog({ children, nodeId, item, src, title, showSidebar = true, isVideo = false }) {
+export function ImageViewerDialog({ children, nodeId, item, group, src, title, showSidebar = true, isVideo = false }) {
     const { nodes } = useStudioStore()
     const [isOpen, setOpen] = React.useState(false)
 
@@ -53,7 +53,7 @@ export function ImageViewerDialog({ children, nodeId, item, src, title, showSide
                 <div className="absolute inset-0 overflow-hidden bg-page-overlay">
                     {!isVideo && (
                         <div 
-                            className="absolute inset-0 scale-110 blur-[16px] bg-cover bg-center bg-no-repeat transition-opacity duration-300 opacity-100"
+                            className="absolute inset-0 scale-110 blur-lg bg-cover bg-center bg-no-repeat transition-opacity duration-300 opacity-100"
                             style={{ 
                                 backgroundImage: `url(${finalSrc})`, 
                             }}
@@ -96,12 +96,8 @@ export function ImageViewerDialog({ children, nodeId, item, src, title, showSide
 
                     {/* ── Sidebar (Right) ── */}
                     {showSidebar && (
-                        <div className="w-[400px] max-w-[400px] h-full p-4 flex flex-col">
-                            {nodeId ? (
-                                <HeritageTree isInsideDialog={true} />
-                            ) : item ? (
-                                <ImageInfoSidebar item={item} />
-                            ) : null}
+                        <div className="w-[320px] shrink-0 h-full hidden lg:block border-l border-white/10 bg-black/50">
+                            <ImageInfoSidebar item={item} group={group} />
                         </div>
                     )}
                 </div>

@@ -3,11 +3,11 @@
 import * as React from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useStudioStore } from "@/store/useStudioStore"
-import { useCinemaStore } from "@/store/useCinemaStudioStore"
+import { useGenerationsStudioStore } from "@/store/useGenerationsStudioStore"
 import { useAudioStore } from "@/store/useAudioStore"
 import { StudioNavbar } from "../StudioNavbar"
 import ImagePromptBar from "@/components/features/ImagePromptBar"
-import CinemaPromptBar from "@/components/features/CinemaPromptBar"
+import GenerationsPromptBar from "@/components/features/GenerationsPromptBar"
 import AudioPromptBar from "@/components/features/AudioPromptBar"
 import ImageStatusView from "@/components/skeleton/ImageStatusView"
 import { ImageViewerDialog } from "../dialogs/ImageViewerDialog"
@@ -21,7 +21,7 @@ const EmptyState = ({ message }) => (
         <div className="w-20 h-20 rounded-full border-2 border-dashed border-white/20 flex items-center justify-center">
             <div className="w-10 h-10 rounded-full bg-white/10 animate-pulse" />
         </div>
-        <p className="text-sm font-medium tracking-wide uppercase tracking-[0.2em]">{message}</p>
+        <p className="text-sm font-medium uppercase tracking-[0.2em]">{message}</p>
     </div>
 )
 
@@ -41,13 +41,13 @@ const ImageGridItem = ({ node, selectedNodeId, onRegenerate, onRemove }) => (
             }
         }}
         className={cn(
-            "group cursor-grab active:cursor-grabbing transition-all duration-300 rounded-xl overflow-hidden relative aspect-[3/4]",
+            "group cursor-grab active:cursor-grabbing transition-all duration-300 rounded-xl overflow-hidden relative aspect-3/4",
             selectedNodeId === node.id ? "ring-4 ring-white shadow-[0_0_20px_rgba(255,255,255,0.4)]" : "ring-0 ring-transparent"
         )}
     >
         {selectedNodeId === node.id && node.status === "completed" && (
             <div className="absolute top-3 left-3 z-30 flex items-center justify-center w-6 h-6 bg-white text-black rounded-full shadow-[0_0_15px_rgba(255,255,255,0.6)] animate-in zoom-in duration-300">
-                <Check className="w-4 h-4 stroke-[3]" />
+                <Check className="w-4 h-4 stroke-3" />
             </div>
         )}
 
@@ -125,7 +125,7 @@ const CinemaGridItem = ({ shot }) => (
             </div>
         )}
         
-        <div className="absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="absolute inset-x-0 bottom-0 p-3 bg-linear-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
             <p className="text-[10px] text-white/90 line-clamp-2 leading-relaxed">
                 {shot.description || "Cinematic Shot"}
             </p>
@@ -189,7 +189,7 @@ export function StudioLayoutV2() {
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -20 }}
                             transition={{ duration: 0.4, ease: "easeOut" }}
-                            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-1"
+                            className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-1"
                         >
                                 {studioMode === "image" ? (
                                     nodes.length > 0 ? (
@@ -211,7 +211,7 @@ export function StudioLayoutV2() {
                                         <p className="text-white/40">Switching to Cinema Studio...</p>
                                         <Button 
                                             variant="studio-neon" 
-                                            onClick={() => window.location.href = '/cinema-studio'}
+                                            onClick={() => window.location.href = '/generations-studio'}
                                         >
                                             Go to Cinema Page
                                         </Button>
@@ -231,7 +231,7 @@ export function StudioLayoutV2() {
 
                 {/* ── Bottom Floating Prompt Bar ── */}
                 <div className="absolute bottom-8 inset-x-0 z-30 flex justify-center px-6 pointer-events-none">
-                    <div className="w-full max-w-[850px] pointer-events-auto">
+                    <div className="w-full max-w-[1100px] pointer-events-auto">
                         {/* Custom wrapper to match the image style */}
                         <div className="shadow-[0_24px_80px_rgba(0,0,0,0.8)] rounded-[24px]">
                             {studioMode === "cinema" ? (

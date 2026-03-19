@@ -12,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useStudioStore } from "@/store/useStudioStore"
-import { useCinemaStore } from "@/store/useCinemaStudioStore"
+import { useGenerationsStudioStore } from "@/store/useGenerationsStudioStore"
 import { Trash2, Eraser, Edit3, AlertTriangle } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -22,7 +22,7 @@ export function WorkspaceSettingsDialog({ open, onOpenChange }) {
         deleteWorkspace, emptyWorkspace 
     } = useStudioStore()
     
-    const { fetchAssets, fetchGenerations } = useCinemaStore()
+    const { fetchAssets, fetchGenerations } = useGenerationsStudioStore()
 
     const workspace = workspaces.find(ws => ws.id === activeWorkspaceId)
     const [name, setName] = React.useState("")

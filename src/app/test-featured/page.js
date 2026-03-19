@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { ModelSelector } from "@/components/features/ModelSelector"
+import { ModelSelector } from "@/components/features/PromptBarComponents/ModelSelector"
 
 export default function TestFeaturedPage() {
   const [selected, setSelected] = React.useState(null)

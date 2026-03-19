@@ -1,1 +1,1 @@
-export { default } from "./ImagePromptBar";
+export { default } from "./index.jsx";
