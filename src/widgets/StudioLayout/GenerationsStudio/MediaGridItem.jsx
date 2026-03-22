@@ -8,7 +8,6 @@ import { getItemMetadata } from "@/shared/lib/generationUtils";
 import {
   useRemoveGenerationItem,
   useToggleLike,
-  useRetryGeneration,
 } from "@/features/generations/api/generationsApi";
 import { Button } from "@/shared/ui/button";
 
@@ -43,12 +42,9 @@ export function MediaGridItem({
   group,
   showPrompt = false,
   className,
-  projectId,
-  activeSessionId,
 }) {
   const { mutate: removeItem } = useRemoveGenerationItem();
   const { mutate: toggleLike } = useToggleLike();
-  const { mutate: retryGeneration } = useRetryGeneration();
 
   const [isOpen, setIsOpen] = useState(false);
 
@@ -65,21 +61,6 @@ export function MediaGridItem({
   const handleDelete = (e) => {
     e?.stopPropagation();
     removeItem({ itemId: item.id });
-  };
-
-  const handleRetry = (e) => {
-    e?.stopPropagation();
-    const isVideo =
-      group?.type === "video" || group?.section === "video_generator";
-    retryGeneration({
-      endpoint: isVideo ? "/video/generated" : "/images/generated",
-      payload: {
-        ...group?.params,
-        prompt,
-        project_id: projectId,
-        session_id: activeSessionId,
-      },
-    });
   };
 
   return (
@@ -114,7 +95,6 @@ export function MediaGridItem({
           error={item.error}
           showOverlay
           onCancel={isError ? handleDelete : undefined}
-          onRetry={["failed", "error"].includes(status) ? handleRetry : undefined}
           className="w-full h-full object-cover"
         >
           {isDone && isVideo && (

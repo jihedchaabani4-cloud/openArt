@@ -3,11 +3,6 @@
 import * as React from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useGenerationsStore } from "@/features/generations/model/useGenerationsStore"
-import { 
-  useRemoveGenerationItem, 
-  useToggleLike, 
-  useRetryGeneration 
-} from "@/features/generations/api/generationsApi"
 import { useFilteredGenerations } from "@/features/generations/model/useFilteredGenerations"
 import { useAssets } from "@/features/media/api/mediaApi"
 import ImagePromptBar from "@/features/prompt-bar"
@@ -74,11 +69,6 @@ export function GenerationsStudio() {
     } = useFilteredGenerations(projectId, activeSessionId)
     
     const { refetch: refetchAssets } = useAssets(projectId, activeSessionId)
-    
-    // Mutations
-    const toggleLikeMutation = useToggleLike()
-    const removeGenerationItemMutation = useRemoveGenerationItem()
-    const retryGenerationMutation = useRetryGeneration()
 
     const loading = generationsLoading;
 
@@ -167,8 +157,6 @@ export function GenerationsStudio() {
                                                                     group={item.group}
                                                                     showPrompt={true}
                                                                     className="mb-4"
-                                                                    projectId={projectId}
-                                                                    activeSessionId={activeSessionId}
                                                                 />
                                                             );
                                                         })}

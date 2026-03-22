@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Loader2, AlertCircle, AlertTriangle, Image as ImageIcon, X, RefreshCw, Trash2 } from "lucide-react"
+import { Loader2, AlertCircle, AlertTriangle, X, Trash2 } from "lucide-react"
 import { cn } from "@/shared/lib/utils"
 
 export default function ImageStatusView({
@@ -14,7 +14,6 @@ export default function ImageStatusView({
   rounded = "rounded-md",
   showOverlay = true,
   onCancel,
-  onRetry,
   error,
   children,
 }) {

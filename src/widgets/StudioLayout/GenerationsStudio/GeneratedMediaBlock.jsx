@@ -1,17 +1,11 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { RotateCcw, Play, Heart, Trash2, Download, ChevronDown, ChevronUp, Pencil } from "lucide-react";
+import { Trash2, Download, ChevronDown, ChevronUp, Pencil } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import { useGenerationsStore } from "@/features/generations/model/useGenerationsStore";
 import { MediaGridItem } from "./MediaGridItem";
-import { 
-  useRemoveGeneration, 
-  useRemoveGenerationItem, 
-  useToggleLike, 
-  useRetryGeneration, 
-  useGenerateMore 
-} from "@/features/generations/api/generationsApi";
-import { getGridClass, getItemMetadata } from "@/shared/lib/generationUtils";
+import { useRemoveGeneration } from "@/features/generations/api/generationsApi";
+import { getGridClass } from "@/shared/lib/generationUtils";
 
 // ─── Icon Button ───
 function IconButton({ icon, onClick, danger = false, title }) {
@@ -32,7 +26,7 @@ function IconButton({ icon, onClick, danger = false, title }) {
 }
 
 // ─── Side Panel ───
-function SidePanel({ group, prompt, modelLabel, onDelete, onRetry, onGenerateMore, onDownload, onEdit }) {
+function SidePanel({ group, prompt, modelLabel, onDelete, onDownload, onEdit }) {
     const [expanded, setExpanded] = useState(false);
 
     const MAX_LENGTH = 80;
@@ -62,7 +56,6 @@ function SidePanel({ group, prompt, modelLabel, onDelete, onRetry, onGenerateMor
             <div className="flex items-center gap-1">
                 <IconButton icon={<Pencil size={15} />}    onClick={onEdit}         title="Edit Parameters" />
                 <IconButton icon={<Download size={15} />}  onClick={onDownload}     title="Download" />
-                <IconButton icon={<RotateCcw size={15} />} onClick={onGenerateMore} title="Generate More" />
                 <IconButton icon={<Trash2 size={15} />}    onClick={onDelete}       title="Delete" danger />
             </div>
 
@@ -135,10 +128,6 @@ function SidePanel({ group, prompt, modelLabel, onDelete, onRetry, onGenerateMor
 export function Session({ group, gridSize = "lg" }) {
     const { setEditTrigger, showDetails } = useGenerationsStore();
     const { mutate: removeGeneration } = useRemoveGeneration();
-    const { mutate: removeGenerationItem } = useRemoveGenerationItem();
-    const { mutate: toggleLike } = useToggleLike();
-    const { mutate: retryGeneration } = useRetryGeneration();
-    const { mutate: generateMore } = useGenerateMore();
 
     const items = (group?.items || []).filter((i) => i.status !== "deleted");
     const prompt =
@@ -158,8 +147,6 @@ export function Session({ group, gridSize = "lg" }) {
         group?.model?.includes("hailuo")   ? "Hailuo"     :
         group?.model?.includes("seedance") ? "Seedance"   : "Standard";
 
-    const handleRetry        = () => retryGeneration(group);
-    const handleGenerateMore = () => generateMore(group);
     const handleDelete       = () => removeGeneration(group.id);
 
     const handleDownload = () => {
@@ -216,8 +203,6 @@ export function Session({ group, gridSize = "lg" }) {
             <div className="flex-1 min-w-0">
                 <div className={cn(gridClass)}>
                     {items.map((item) => {
-                        const { isVideo, url, aspect, status } = getItemMetadata(item, group);
-
                         return (
                             <MediaGridItem 
                                 key={item.id}
@@ -239,8 +224,6 @@ export function Session({ group, gridSize = "lg" }) {
                     prompt={prompt}
                     modelLabel={modelLabel}
                     onDelete={handleDelete}
-                    onRetry={handleRetry}
-                    onGenerateMore={handleGenerateMore}
                     onDownload={handleDownload}
                     onEdit={handleEdit}
                 />

@@ -198,32 +198,3 @@ export function useToggleLike() {
     },
   });
 }
-
-export function useRetryGeneration() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async ({ endpoint, payload }) => {
-      const res = await api.post(endpoint, payload);
-      if (!res.ok) throw new Error(res.message);
-      return res.data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.generations.all() });
-    },
-  });
-}
-
-export function useGenerateMore() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async ({ groupId }) => {
-      const res = await api.post('/images/show-more', { group_id: groupId });
-      if (!res.ok) throw new Error(res.message);
-      return res.data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.generations.all() });
-      queryClient.invalidateQueries({ queryKey: queryKeys.generations.paginated(1) });
-    },
-  });
-}
