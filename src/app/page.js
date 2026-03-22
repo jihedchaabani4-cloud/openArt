@@ -1,5 +1,5 @@
-import { GenerationsStudioView } from "@/components/studio/GenerationsStudioView";
+import { ProjectsPage } from "@/views";
 
 export default function Home() {
-  return <GenerationsStudioView />;
+  return <ProjectsPage />;
 }

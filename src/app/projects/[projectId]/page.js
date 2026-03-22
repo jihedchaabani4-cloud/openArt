@@ -1,19 +1,31 @@
 "use client"
- 
+
 import * as React from "react"
 import { useEffect } from "react"
-import { useGenerationsStudioStore } from "@/store/useGenerationsStudioStore"
-import { GenerationsStudio } from "@/components/studio/GenerationsStudio/GenerationsStudio"
- 
+import { useGenerationsStore } from "@/features/generations/model/useGenerationsStore"
+import { GenerationsStudio } from "@/widgets/StudioLayout/GenerationsStudio/GenerationsStudio"
+import { useSessions } from "@/features/projects/api/projectsApi"
+
 export default function ProjectDetailPage({ params }) {
     const { projectId } = React.use(params)
-    const { init: initGenerations } = useGenerationsStudioStore()
-    
+    const { setSelectedProjectId, activeSessionId, setActiveSessionId } = useGenerationsStore()
+
+    // Set the active project on mount
     useEffect(() => {
         if (projectId) {
-            initGenerations(projectId)
+            setSelectedProjectId(projectId)
         }
-    }, [projectId, initGenerations])
- 
+    }, [projectId, setSelectedProjectId])
+
+    // Fetch sessions for this project
+    const { data: sessions = [] } = useSessions(projectId)
+
+    // Auto-select the most recent session if none is active
+    useEffect(() => {
+        if (sessions.length > 0 && !activeSessionId) {
+            setActiveSessionId(sessions[0].session_id)
+        }
+    }, [sessions, activeSessionId, setActiveSessionId])
+
     return <GenerationsStudio />;
 }

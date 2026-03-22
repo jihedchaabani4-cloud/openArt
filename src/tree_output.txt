@@ -1,0 +1,158 @@
+Structure du dossier pour le volume Windows-SSD
+Le numéro de série du volume est C4E1-DCDE
+C:.
+|   tree_output.txt
+|   
++---app
+|   |   favicon.ico
+|   |   globals.css
+|   |   layout.js
+|   |   page.js
+|   |   
+|   +---apps
+|   |   \---[slug]
+|   |           page.js
+|   |           
+|   +---generations-studio
+|   |       page.js
+|   |       
+|   +---project
+|   |   |   page.js
+|   |   |   
+|   |   \---new
+|   |           page.js
+|   |           
+|   \---projects
+|       \---[projectId]
+|               page.js
+|               
++---components
+|   +---features
+|   |   +---GenerationsPromptBar
+|   |   |       GenerationsPromptBar.jsx
+|   |   |       index.js
+|   |   |       
+|   |   +---ImagePromptBar
+|   |   |   |   index.js
+|   |   |   |   index.jsx
+|   |   |   |   
+|   |   |   +---api
+|   |   |   |       generations.api.js
+|   |   |   |       
+|   |   |   +---components
+|   |   |   |   +---Row1
+|   |   |   |   |       index.jsx
+|   |   |   |   |       MotionControlModeButtons.jsx
+|   |   |   |   |       MotionModeButtons.jsx
+|   |   |   |   |       ReferenceButton.jsx
+|   |   |   |   |       StandardModeButtons.jsx
+|   |   |   |   |       
+|   |   |   |   \---Row2
+|   |   |   |       |   ActionButton.jsx
+|   |   |   |       |   index.jsx
+|   |   |   |       |   ModeItem.jsx
+|   |   |   |       |   ModeSelector.jsx
+|   |   |   |       |   ParamsBar.jsx
+|   |   |   |       |   PromptTextarea.jsx
+|   |   |   |       |   
+|   |   |   |       \---editor
+|   |   |   |               MentionNode.jsx
+|   |   |   |               MentionPlugin.jsx
+|   |   |   |               MentionTag.jsx
+|   |   |   |               PromptEditor.jsx
+|   |   |   |               
+|   |   |   \---hooks
+|   |   |           useImagePromptBar.js
+|   |   |           
+|   |   +---ImportMediaDialog
+|   |   |       ImportMediaDialog.jsx
+|   |   |       
+|   |   +---projects
+|   |   |       GenerationsGrid.jsx
+|   |   |       ProjectCard.jsx
+|   |   |       ProjectsPage.jsx
+|   |   |       
+|   |   \---PromptBarComponents
+|   |           AddReferenceButton.jsx
+|   |           DurationSelector.jsx
+|   |           ManageElementsButton.jsx
+|   |           ModelSelector.jsx
+|   |           ModeSelector.jsx
+|   |           QualitySelector.jsx
+|   |           RatioSelector.jsx
+|   |           SelectorBase.jsx
+|   |           StrengthSelector.jsx
+|   |           VariationSelector.jsx
+|   |           VideoResolutionSelector.jsx
+|   |           
+|   +---skeleton
+|   |       ImageStatusView.jsx
+|   |       
+|   +---studio
+|   |   +---dialogs
+|   |   |       ConfirmDeleteDialog.jsx
+|   |   |       DeleteGenerationDialog.jsx
+|   |   |       DeleteNodeDialog.jsx
+|   |   |       ImageInfoSidebar.jsx
+|   |   |       ImageViewerDialog.jsx
+|   |   |       WorkspaceSettingsDialog.jsx
+|   |   |       
+|   |   +---GeneratedButton
+|   |   |       GeneratedButton.jsx
+|   |   |       index.js
+|   |   |       
+|   |   +---GenerationsStudio
+|   |   |       GeneratedMediaBlock.jsx
+|   |   |       GenerationsStudio.jsx
+|   |   |       
+|   |   +---GenerationsStudioView
+|   |   |       GenerationsStudioView.jsx
+|   |   |       index.js
+|   |   |       
+|   |   +---NewProjectView
+|   |   |       NewProjectView.jsx
+|   |   |       
+|   |   +---StudioLayoutV2
+|   |   |       index.js
+|   |   |       StudioLayoutV2.jsx
+|   |   |       
+|   |   \---StudioNavbar
+|   |           index.js
+|   |           StudioNavbar.jsx
+|   |           
+|   \---ui
+|           accordion.jsx
+|           badge.jsx
+|           button.jsx
+|           card.jsx
+|           dialog.jsx
+|           dropdown-menu.jsx
+|           hover-card.jsx
+|           input.jsx
+|           label.jsx
+|           select.jsx
+|           slider.jsx
+|           tabs.jsx
+|           textarea.jsx
+|           typography.jsx
+|           
++---config
+|       apps.config.js
+|       
++---data
+|       builderData.json
+|       
++---hooks
++---lib
+|       api.js
+|       utils.js
+|       
++---store
+|       useGenerationsStudioStore.js
+|       useProjectStore.js
+|       useStudioStore.js
+|       
++---types
+\---utils
+        generationUtils.js
+        

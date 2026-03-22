@@ -97,11 +97,11 @@ html {
 }
 
 .dark {
-  --background: #0F1113;
+  --background: #000000;
   --foreground: oklch(0.985 0 0);
-  --card: #0F1113;
+  --card: #000000;
   --card-foreground: oklch(0.985 0 0);
-  --popover: #0F1113;
+  --popover: #000000;
   --popover-foreground: oklch(0.985 0 0);
   --primary: oklch(0.922 0 0);
   --primary-foreground: oklch(0.205 0 0);
@@ -120,7 +120,7 @@ html {
   --chart-3: oklch(0.769 0.188 70.08);
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: #0F1113;
+  --sidebar: #000000;
   --sidebar-foreground: oklch(0.985 0 0);
   --sidebar-primary: oklch(0.488 0.243 264.376);
   --sidebar-primary-foreground: oklch(0.985 0 0);
@@ -136,6 +136,14 @@ html {
   }
   body {
     @apply bg-background text-foreground;
+  }
+
+  /* Hide native search clear button */
+  input[type="search"]::-webkit-search-decoration,
+  input[type="search"]::-webkit-search-cancel-button,
+  input[type="search"]::-webkit-search-results-button,
+  input[type="search"]::-webkit-search-results-decoration {
+    display: none;
   }
 }
 
