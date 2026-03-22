@@ -69,11 +69,10 @@ export function MediaGridItem({
 
   const handleRetry = (e) => {
     e?.stopPropagation();
-    const isImageSection =
-      !group?.section ||
-      ["image_generator", "image_gen", "cinema_studio"].includes(group.section);
+    const isVideo =
+      group?.type === "video" || group?.section === "video_generator";
     retryGeneration({
-      endpoint: isImageSection ? "/images/generate" : "/generations/generate",
+      endpoint: isVideo ? "/video/generated" : "/images/generated",
       payload: {
         ...group?.params,
         prompt,

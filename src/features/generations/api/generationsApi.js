@@ -60,7 +60,7 @@ export function useGenerateMutation({ onError } = {}) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ payload, isVideo }) => {
-      const endpoint = isVideo ? '/video/generate' : '/generations/generate';
+      const endpoint = isVideo ? '/video/generated' : '/images/generated';
       const res = await api.post(endpoint, payload);
       if (!res.ok) throw new Error(res.message || 'Generation failed');
       return res;
@@ -217,7 +217,7 @@ export function useGenerateMore() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ groupId }) => {
-      const res = await api.post('/generations/show-more', { group_id: groupId });
+      const res = await api.post('/images/show-more', { group_id: groupId });
       if (!res.ok) throw new Error(res.message);
       return res.data;
     },
