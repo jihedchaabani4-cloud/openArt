@@ -1,85 +1,114 @@
 "use client"
 
-import { ListFilter } from "lucide-react"
+import { ListFilter, CheckSquare, Square, Circle, CircleCheck } from "lucide-react"
+import { cn } from "@/shared/lib/utils"
 import {
   DropdownShell,
   DropdownSection,
-  DropdownSegmented,
-  DropdownChips,
   DropdownFooter,
   DropdownStat,
   DropdownReset,
-  DropdownClearAction,
 } from "@/shared/ui/DropdownShell"
 import { useGenerationsStore } from "../model/useGenerationsStore"
+
+function CheckboxRow({ label, checked, onChange }) {
+  return (
+    <button
+      onClick={() => onChange(!checked)}
+      className="w-full flex items-center justify-between py-2 text-white hover:bg-white/5 px-2 rounded-lg transition-colors"
+    >
+      <span className="text-sm font-medium">{label}</span>
+      {checked ? (
+        <CheckSquare className="size-5 text-white" />
+      ) : (
+        <Square className="size-5 text-white/50" />
+      )}
+    </button>
+  )
+}
+
+function RadioRow({ label, checked, onChange }) {
+  return (
+    <button
+      onClick={() => !checked && onChange()}
+      className="w-full flex items-center justify-between py-2 text-white hover:bg-white/5 px-2 rounded-lg transition-colors"
+    >
+      <span className="text-sm font-medium">{label}</span>
+      {checked ? (
+        <CircleCheck className="size-5 text-white fill-white/10" />
+      ) : (
+        <Circle className="size-5 text-white/50" />
+      )}
+    </button>
+  )
+}
 
 /**
  * [FSD Layer: features/generations]
  * A sleek, modern filter dropdown for the studio Navbar.
  */
-export function GenerationsFilterDropdown({ availableModels = [], filteredCount = 0, total = 0 }) {
-  const { filters, toggleArrayFilter, setFilter, clearFilters } = useGenerationsStore()
+export function GenerationsFilterDropdown({ filteredCount = 0, total = 0 }) {
+  const { filters, setFilter, toggleArrayFilter, clearFilters } = useGenerationsStore()
 
   // Calculate active filters to show a notification badge
   const activeCount =
-    filters.models.length +
-    filters.types.length +
-    filters.aspectRatios.length +
+    (filters.showGenerated ? 1 : 0) +
+    (filters.showImported ? 1 : 0) +
+    (filters.liked ? 1 : 0) +
+    (filters.types.length) +
     (filters.sort !== 'newest' ? 1 : 0) +
-    (filters.prompt ? 1 : 0) +
-    (filters.liked ? 1 : 0)
-
-  const mediaOptions = [
-    { value: "all", label: "All" },
-    { value: "image", label: "Images" },
-    { value: "video", label: "Videos" },
-  ]
-
-  const activeMedia = filters.types.length === 0 ? "all" : filters.types[0]
+    (filters.prompt ? 1 : 0)
 
   return (
     <DropdownShell
       trigger={<ListFilter className="size-5" />}
       isActive={activeCount > 0}
-      panelWidth="w-80"
+      panelWidth="w-64"
     >
-      {/* Model Filtering */}
-      {availableModels.length > 0 && (
-        <DropdownSection
-          label="Model"
-          action={
-            filters.models.length > 0 ? (
-              <DropdownClearAction onClick={() => setFilter("models", [])} />
-            ) : undefined
-          }
-        >
-          <DropdownChips
-            options={availableModels}
-            selected={filters.models}
-            onToggle={(m) => toggleArrayFilter("models", m)}
-            accent="lime"
-          />
-        </DropdownSection>
-      )}
-
-      {/* Media Type */}
-      <DropdownSection label="Media Type">
-        <DropdownSegmented
-          value={activeMedia}
-          onChange={(v) => setFilter("types", v === "all" ? [] : [v])}
-          options={mediaOptions}
+      {/* 1. Sorting */}
+      <DropdownSection label="Trier par" className="mb-4 mt-1 border-b border-white/5 pb-4">
+        <RadioRow
+          label="Le plus récent"
+          checked={filters.sort === 'newest'}
+          onChange={() => setFilter("sort", "newest")}
+        />
+        <RadioRow
+          label="Le plus ancien"
+          checked={filters.sort === 'oldest'}
+          onChange={() => setFilter("sort", "oldest")}
         />
       </DropdownSection>
 
-      {/* Sort Order */}
-      <DropdownSection label="Sort Order" className="mb-6">
-        <DropdownSegmented
-          value={filters.sort}
-          onChange={(v) => setFilter("sort", v)}
-          options={[
-            { value: "newest", label: "Newest" },
-            { value: "oldest", label: "Oldest" },
-          ]}
+      {/* 2. Type Selection */}
+      <DropdownSection label="Type" className="mb-4 border-b border-white/5 pb-4">
+        <CheckboxRow
+          label="Images"
+          checked={filters.types.includes("image")}
+          onChange={() => toggleArrayFilter("types", "image")}
+        />
+        <CheckboxRow
+          label="Vidéos"
+          checked={filters.types.includes("video")}
+          onChange={() => toggleArrayFilter("types", "video")}
+        />
+      </DropdownSection>
+
+      {/* 3. Source & Favorites */}
+      <DropdownSection label="Création" className="mb-2">
+        <CheckboxRow
+          label="Généré"
+          checked={filters.showGenerated}
+          onChange={(v) => setFilter("showGenerated", v)}
+        />
+        <CheckboxRow
+          label="Importé"
+          checked={filters.showImported}
+          onChange={(v) => setFilter("showImported", v)}
+        />
+        <CheckboxRow
+          label="Favoris"
+          checked={filters.liked}
+          onChange={(v) => setFilter("liked", v)}
         />
       </DropdownSection>
 

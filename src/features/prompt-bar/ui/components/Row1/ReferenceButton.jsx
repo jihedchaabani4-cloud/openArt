@@ -2,101 +2,156 @@ import React from "react";
 import { Plus, X, Film } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 
-export function ReferenceButton({ onClick, label, isCompact = false, icon: Icon, media, onRemove }) {
-  const displayIcon = Icon ? <Icon size={18} strokeWidth={1.5} /> : <Plus size={18} strokeWidth={1.5} />;
-  const hasMedia = !!media;
+/**
+ * ── ReferenceButton ──
+ * Empty / Add state
+ */
+export function ReferenceButton({
+  onClick,
+  label,
+  icon: Icon,
+  disabled = false,
+  className,
+}) {
+  const displayIcon = Icon ? (
+    <Icon size={18} strokeWidth={1.5} />
+  ) : (
+    <Plus size={18} strokeWidth={1.5} />
+  );
+
+  return (
+    <div
+      onClick={!disabled ? onClick : undefined}
+      className={cn(
+        "group relative shrink-0",
+        "w-[70px] h-[70px] rounded-lg",
+        "flex flex-col items-center justify-center",
+        "overflow-hidden",
+        "bg-white/5 backdrop-blur-md",
+        "border border-white/10",
+        "transition-all duration-300 ease-out",
+        "hover:shadow-[0_8px_30px_rgba(0,0,0,0.4)]",
+        disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer",
+        className
+      )}
+    >
+      {/* Icon */}
+      <div
+        className={cn(
+          "flex items-center justify-center",
+          "text-white/80",
+          "transition-all duration-300 transform-gpu",
+          label ? "group-hover:-translate-y-1.5" : ""
+        )}
+      >
+        {displayIcon}
+      </div>
+
+      {/* Label (collapsible) */}
+      {label && (
+        <div
+          className={cn(
+            "flex items-center justify-center px-1",
+            "overflow-hidden",
+            "h-0 opacity-0",
+            "group-hover:h-auto group-hover:opacity-100",
+            "transition-all duration-300 ease-in-out"
+          )}
+        >
+          <span className="text-[9px] uppercase tracking-wider text-white/80 text-center leading-[1.1]">
+            {label}
+          </span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+/**
+ * ── ViewReference ──
+ * Filled / Preview state
+ */
+export function ViewReference({
+  media,
+  onRemove,
+  label,
+  className,
+}) {
+  if (!media) return null;
 
   return (
     <div
       className={cn(
-        "relative shrink-0 flex flex-col items-center justify-center",
-        "w-[80px] h-[80px] rounded-[12px] border cursor-pointer group overflow-hidden",
-        "bg-white/3 backdrop-blur-md hover:bg-white/8",
-        "border-white/8 hover:border-white/20",
-        "text-white/50 hover:text-white/90",
-        "transition-all duration-200"
+        "group relative shrink-0",
+        "w-[70px] h-[70px] rounded-lg",
+        "overflow-hidden",
+        "bg-white/5 backdrop-blur-md",
+        "border border-white/10",
+        "transition-all duration-300 ease-out",
+        "hover:border-white/20",
+        "hover:shadow-[0_8px_30px_rgba(0,0,0,0.4)]",
+        className
       )}
-      onClick={!hasMedia ? onClick : undefined}
     >
-      {hasMedia ? (
-        <>
-          {/* Media Content */}
-          <div className="absolute inset-0 z-0">
-            {media.type === 'video' ? (
-              <video
-                src={media.url}
-                className="size-full object-cover transition-transform duration-300 group-hover:scale-105"
-                autoPlay
-                loop
-                muted
-                playsInline
-              />
-            ) : (
-              <img
-                src={media.url}
-                alt="ref"
-                className="size-full object-cover transition-transform duration-300 group-hover:scale-105"
-              />
-            )}
-          </div>
+      {/* Media */}
+      <div className="absolute inset-0 z-0">
+        {media.type === "video" ? (
+          <video
+            src={media.url}
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+            autoPlay
+            loop
+            muted
+            playsInline
+          />
+        ) : (
+          <img
+            src={media.url}
+            alt="reference"
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+          />
+        )}
+      </div>
 
-          {/* Role Badge */}
-          {label && (
-            <div className="absolute top-0 right-0 bg-black/60 backdrop-blur-md px-1.5 py-1 rounded-bl-[8px] text-[10px] font-bold text-white z-10 border-l border-b border-white/5 uppercase tracking-wide">
-              {label}
-            </div>
-          )}
+      {/* Remove Overlay */}
+      <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onRemove?.();
+          }}
+          className="p-2 rounded-full bg-white/20 hover:bg-white/30 transition-all"
+        >
+          <X size={14} className="text-white" />
+        </button>
+      </div>
 
-          {/* Remove Overlay */}
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              onRemove();
-            }}
-            className="absolute inset-0 flex items-center justify-center bg-black/65 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer z-20"
-          >
-            <div className="size-6 rounded-full bg-white/15 flex items-center justify-center hover:bg-white/25 transition-colors">
-              <X size={12} className="text-white" strokeWidth={2.5} />
-            </div>
-          </button>
-          
-          {/* Type indicator (Video) */}
-          {media.type === 'video' && (
-            <div className="absolute top-1 left-1 bg-black/50 backdrop-blur-md rounded-[4px] p-0.5 z-10">
-              <Film size={10} className="text-white" />
-            </div>
-          )}
-        </>
-      ) : (
-        <>
-          {/* Icon */}
-          <div
-            className={cn(
-              "transform-gpu transition-all duration-250 z-10",
-              "ease-[cubic-bezier(0.22,1,0.36,1)]",
-              !isCompact && label && "group-hover:-translate-y-[6px]"
-            )}
-          >
-            {isCompact ? <Plus size={16} strokeWidth={2} /> : displayIcon}
-          </div>
+      {/* Video badge */}
+      {media.type === "video" && (
+        <div className="absolute top-1 left-1 z-10 bg-black/60 p-1 rounded">
+          <Film size={10} className="text-white" />
+        </div>
+      )}
 
-          {/* Label (Empty state tooltip/label) */}
-          {!isCompact && label && (
-            <span
-              className={cn(
-                "absolute bottom-[8px] text-[10px] font-medium uppercase z-10",
-                "tracking-wide text-center leading-tight px-1",
-                "opacity-0 translate-y-[4px]",
-                "transform-gpu transition-all duration-250",
-                "ease-[cubic-bezier(0.22,1,0.36,1)]",
-                "group-hover:opacity-100 group-hover:translate-y-0"
-              )}
-            >
-              {label}
-            </span>
+      {/* Bottom label (collapsible) */}
+      {label && (
+        <div
+          className={cn(
+            "absolute bottom-0 left-0 right-0",
+            "flex items-center justify-center",
+            "bg-black/60 backdrop-blur-md",
+            "overflow-hidden",
+            "h-0",
+            "group-hover:h-[18px]",
+            "transition-all duration-300 ease-in-out"
           )}
-        </>
+        >
+          <span className="text-[10px] text-center uppercase text-white tracking-wide">
+            {label}
+          </span>
+        </div>
       )}
     </div>
   );

@@ -20,7 +20,7 @@ export function StudioNavbarCenter({
     return (
         <div className={cn(
             "shrink-0 flex items-center px-4 justify-center gap-2 relative overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
-            searchExpanded ? "basis-full" : "basis-[40%]"
+            searchExpanded ? "basis-full" : "basis-[38%]"
         )}>
             <div className="flex items-center gap-4 w-full relative">
                 <GenerationsFilterDropdown 

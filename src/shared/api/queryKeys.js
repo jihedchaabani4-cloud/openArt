@@ -23,8 +23,8 @@ export const queryKeys = {
 
     // ── Assets ────────────────────────────────────────────────────────────────
     assets: {
-        all:       ()                          => ['assets'],
-        byProject: (projectId, sessionId)      => ['assets', projectId, sessionId],
+        all:       ()                                     => ['assets'],
+        byProject: (projectId, offset, type, mediaType)   => ['assets', projectId, offset, type, mediaType],
     },
 
     // ── Models ────────────────────────────────────────────────────────────────

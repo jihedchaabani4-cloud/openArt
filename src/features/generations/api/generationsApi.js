@@ -18,8 +18,8 @@ export function useGenerations(projectId, sessionId) {
       if (res.ok === false || res.success === false) throw new Error(res.message || 'Failed to fetch generations');
       return res.data;
     },
-    enabled: !!projectId,
-    staleTime: 10_000, // 10s — live data, updated frequently
+    enabled: !!projectId && !!sessionId, // Fix 1: wait for session before fetching
+    staleTime: 60_000, // Fix 2: 60s — reduces background refetches by 6x
   });
 }
 
@@ -39,10 +39,13 @@ export function useStudioModels() {
   return useQuery({
     queryKey: queryKeys.models.studio(),
     queryFn: async () => {
+      console.log("[useStudioModels] 📡 Fetching models from API...");
       const res = await api.get('/models');
+      console.log("[useStudioModels] ✅ Models received:", res, "models found");
       // The models endpoint specifically uses 'success' instead of 'ok'
       if (res.ok === false || res.success === false) throw new Error(res.message || 'Failed to fetch models');
-      return res.data?.models ?? [];
+      console.log("[useStudioModels] ✅ Models received:", res, "models found");
+      return res.data;
     },
     staleTime: 60 * 60 * 1000, // 1 hour — nearly static data
     gcTime:    24 * 60 * 60 * 1000,
@@ -162,9 +165,24 @@ export function useRemoveGeneration() {
       if (!res.ok) throw new Error(res.message);
       return groupId;
     },
-    onSuccess: () => {
+    onMutate: async (groupId) => {
+      await queryClient.cancelQueries({ queryKey: queryKeys.generations.all() });
+      const previous = queryClient.getQueriesData({ queryKey: queryKeys.generations.all() });
+
+      queryClient.setQueriesData({ queryKey: queryKeys.generations.all() }, (old) => {
+        if (!Array.isArray(old)) return old;
+        return old.filter(g => g.id !== groupId);
+      });
+
+      return { previous };
+    },
+    onError: (_err, _vars, context) => {
+      if (context?.previous) {
+        context.previous.forEach(([key, data]) => queryClient.setQueryData(key, data));
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.generations.all() });
-      queryClient.invalidateQueries({ queryKey: queryKeys.generations.paginated(1) });
     },
   });
 }
@@ -177,9 +195,27 @@ export function useRemoveGenerationItem() {
       if (!res.ok) throw new Error(res.message);
       return itemId;
     },
-    onSuccess: () => {
+    onMutate: async ({ itemId }) => {
+      await queryClient.cancelQueries({ queryKey: queryKeys.generations.all() });
+      const previous = queryClient.getQueriesData({ queryKey: queryKeys.generations.all() });
+
+      queryClient.setQueriesData({ queryKey: queryKeys.generations.all() }, (old) => {
+        if (!Array.isArray(old)) return old;
+        return old.map(group => ({
+          ...group,
+          items: group.items?.filter(item => item.id !== itemId)
+        })).filter(group => group.items?.length > 0);
+      });
+
+      return { previous };
+    },
+    onError: (_err, _vars, context) => {
+      if (context?.previous) {
+        context.previous.forEach(([key, data]) => queryClient.setQueryData(key, data));
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.generations.all() });
-      queryClient.invalidateQueries({ queryKey: queryKeys.generations.paginated(1) });
     },
   });
 }
@@ -192,9 +228,29 @@ export function useToggleLike() {
       if (!res.ok) throw new Error(res.message);
       return itemId;
     },
-    onSuccess: () => {
+    onMutate: async ({ itemId }) => {
+      await queryClient.cancelQueries({ queryKey: queryKeys.generations.all() });
+      const previous = queryClient.getQueriesData({ queryKey: queryKeys.generations.all() });
+
+      queryClient.setQueriesData({ queryKey: queryKeys.generations.all() }, (old) => {
+        if (!Array.isArray(old)) return old;
+        return old.map(group => ({
+          ...group,
+          items: group.items?.map(item => 
+            item.id === itemId ? { ...item, is_liked: !item.is_liked } : item
+          )
+        }));
+      });
+
+      return { previous };
+    },
+    onError: (_err, _vars, context) => {
+      if (context?.previous) {
+        context.previous.forEach(([key, data]) => queryClient.setQueryData(key, data));
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.generations.all() });
-      queryClient.invalidateQueries({ queryKey: queryKeys.generations.paginated(1) });
     },
   });
 }

@@ -91,7 +91,7 @@ export function PromptEditor({
 
   return (
     <LexicalComposer initialConfig={initialConfig}>
-      <div className="relative min-h-[36px] w-full items-start">
+      <div className="relative min-h-[60px] w-full items-start">
         <RichTextPlugin
           contentEditable={
             <ContentEditable

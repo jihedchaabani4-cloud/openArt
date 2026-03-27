@@ -5,7 +5,7 @@ import { Slot } from "radix-ui"
 import { cn } from "@/shared/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-normal transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
+  "inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-normal transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none",
   {
     variants: {
       variant: {
@@ -17,7 +17,8 @@ const buttonVariants = cva(
         secondary:
           "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost:
-          "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
+          "hover:text-accent-foreground ",
+        groupBtn: " rounded-[20px] hover:bg-white/5",
         link: "text-primary underline-offset-4 hover:underline",
         "studio-normal": "flex items-center justify-center gap-3 h-11 rounded-lg bg-white/3 border border-white/8 hover:bg-white/6  transition-all text-white/80 group",
         "studio-neon": "inline-flex items-center justify-center gap-2 h-12 px-6 rounded-xl bg-[#EFFE17] text-black text-sm font-semibold pb-0.5 transition-all hover:opacity-80 active:opacity-60 shadow-[inset_0px_-3px_rgba(0,0,0,0.25)] disabled:opacity-50",

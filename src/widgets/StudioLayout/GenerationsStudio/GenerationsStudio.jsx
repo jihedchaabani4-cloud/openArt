@@ -4,13 +4,13 @@ import * as React from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useGenerationsStore } from "@/features/generations/model/useGenerationsStore"
 import { useFilteredGenerations } from "@/features/generations/model/useFilteredGenerations"
-import { useAssets } from "@/features/media/api/mediaApi"
 import ImagePromptBar from "@/features/prompt-bar"
 
 import { cn } from "@/shared/lib/utils"
 import Masonry from 'react-masonry-css'
 import { MediaGridItem } from "./MediaGridItem"
 import { SessionSidebar } from "../SessionSidebar/SessionSidebar"
+import { Session } from "./GeneratedMediaBlock"
 
 // ─── Sub-Components ──────────────────────────────────────────────────────────
 
@@ -47,8 +47,6 @@ const EmptyState = ({ message }) => (
     </div>
 )
 
-import { Session } from "./GeneratedMediaBlock"
-
 export function GenerationsStudio() {
     // ── FSD Local UI State (Zustand) ──
     const { 
@@ -67,8 +65,6 @@ export function GenerationsStudio() {
         isLoading: generationsLoading, 
         refetch: refetchGenerations 
     } = useFilteredGenerations(projectId, activeSessionId)
-    
-    const { refetch: refetchAssets } = useAssets(projectId, activeSessionId)
 
     const loading = generationsLoading;
 
@@ -79,14 +75,11 @@ export function GenerationsStudio() {
         const hasPending = displayContent.some(g => g.status === 'processing' || g.status === 'pending');
         if (hasPending) {
             const timer = setInterval(() => {
-                refetchAssets();
                 refetchGenerations();
             }, 3000);
             return () => clearInterval(timer);
         }
-    }, [projectId, activeSessionId, displayContent, refetchAssets, refetchGenerations])
-
-    // Generations are already filtered by our custom hook
+    }, [projectId, activeSessionId, displayContent, refetchGenerations])
 
     // Flatten items for Grid mode
     const flatItems = React.useMemo(() => {
@@ -98,12 +91,23 @@ export function GenerationsStudio() {
         );
     }, [displayContent]);
 
+    // Masonry column settings based on gridSize
+    const breakpointColumnsObj = {
+        default: gridSize === "lg" ? 4 : gridSize === "md" ? 6 : 8,
+        1536: gridSize === "lg" ? 4 : gridSize === "md" ? 5 : 6, // 2xl
+        1280: gridSize === "lg" ? 3 : gridSize === "md" ? 4 : 5, // xl
+        1024: gridSize === "lg" ? 3 : 4,                         // lg
+        768: 2,                                                  // md
+        640: 1                                                   // sm
+    };
+
     return (
         <div className="flex h-full w-full overflow-hidden text-white">
+            <SessionSidebar />
             <main className="flex-1 flex flex-col relative min-w-0 overflow-hidden bg-transparent">
 
                 {/* ── Content ── */}
-                <div className="flex-1 overflow-y-auto overflow-x-hidden p-6 scrollbar-hide">
+                <div className="flex-1 overflow-y-auto overflow-x-hidden p-2 scrollbar-hide">
                     <AnimatePresence mode="wait">
                         {loading ? (
                             <motion.div 
@@ -122,7 +126,7 @@ export function GenerationsStudio() {
                                     animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0, y: -16 }}
                                     transition={{ duration: 0.4, ease: "easeOut" }}
-                                    className="flex flex-col gap-5 w-full"
+                                    className="flex flex-col gap-4 w-full  pb-92"
                                 >
                                     {studioLayoutMode === 'grouped' ? (
                                         displayContent.map(group => (
@@ -133,37 +137,24 @@ export function GenerationsStudio() {
                                             />
                                         ))
                                     ) : (
-                                        <div className="w-full">
-                                            {(() => {
-                                                const breakpointColumnsObj = {
-                                                    lg: { default: 3, 1536: 3, 1280: 2, 1024: 2, 768: 1 },
-                                                    md: { default: 4, 1536: 4, 1280: 3, 1024: 2, 768: 2 },
-                                                    sm: { default: 6, 1536: 6, 1280: 5, 1024: 4, 768: 3, 640: 2 }
-                                                }[gridSize] || { default: 3, 1536: 3, 1280: 2, 1024: 2, 768: 1 };
-
-                                                return (
-                                                    <Masonry
-                                                        breakpointCols={breakpointColumnsObj}
-                                                        className="flex w-auto -ml-4"
-                                                        columnClassName="pl-4 bg-clip-padding flex flex-col gap-4"
-                                                    >
-                                                        {flatItems.map(item => {
-                                                            // Remove unused imports in this block, now handled by MediaGridItem
-
-                                                            return (
-                                                                <MediaGridItem 
-                                                                    key={item.id}
-                                                                    item={item}
-                                                                    group={item.group}
-                                                                    showPrompt={true}
-                                                                    className="mb-4"
-                                                                />
-                                                            );
-                                                        })}
-                                                    </Masonry>
-                                                );
-                                            })()}
-                                        </div>
+                                        <Masonry
+                                            breakpointCols={breakpointColumnsObj}
+                                            className="flex w-auto gap-4"
+                                            columnClassName="bg-clip-padding flex flex-col gap-4"
+                                        >
+                                            {flatItems.map(item => (
+                                                <div 
+                                                    key={item.id}
+                                                    className="relative  shrink-0"
+                                                >
+                                                    <MediaGridItem 
+                                                        item={item}
+                                                        group={item.group}
+                                                        showPrompt={true}
+                                                    />
+                                                </div>
+                                            ))}
+                                        </Masonry>
                                     )}
                                 </motion.div>
                         ) : (
@@ -184,11 +175,9 @@ export function GenerationsStudio() {
                 </div>
 
                 {/* ── Bottom Floating Prompt Bar ── */}
-                <div className="absolute bottom-8 inset-x-0 z-30 flex justify-center px-6 pointer-events-none">
-                    <div className="w-full max-w-[1100px] pointer-events-auto">
-                        <div className="">
-                            <ImagePromptBar hideBackground={true} />
-                        </div>
+                <div className="fixed bottom-8 inset-x-0 z-30 flex justify-center px-6 pointer-events-none">
+                    <div className="w-full max-w-[650px] pointer-events-auto">
+                        <ImagePromptBar hideBackground={true} />
                     </div>
                 </div>
 
@@ -202,7 +191,7 @@ export function GenerationsStudio() {
                     }
                 `}</style>
             </main>
-            <SessionSidebar />
+            
         </div>
     )
 }

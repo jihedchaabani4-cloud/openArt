@@ -12,8 +12,10 @@ import { StudioNavbarLeft } from "./ui/StudioNavbarLeft"
 import { StudioNavbarCenter } from "./ui/StudioNavbarCenter"
 import { StudioNavbarRight } from "./ui/StudioNavbarRight"
 import { CreateSessionDialog } from "./ui/CreateSessionDialog"
+import { ActiveFilterTags } from "@/features/generations/ui/ActiveFilterTags"
 
 // Hooks
+
 import { useNavbarScroll } from "./hooks/useNavbarScroll"
 import { useNavbarSearch } from "./hooks/useNavbarSearch"
 import { useProjectEdit } from "./hooks/useProjectEdit"
@@ -29,6 +31,7 @@ export function StudioNavbar() {
         clearPromptOnSubmit, setClearPromptOnSubmit,
         activeSessionId, setActiveSessionId,
         selectedProjectId: activeProjectId,
+        showUploadedMedia, setShowUploadedMedia,
         filters, setFilter,
     } = useGenerationsStore()
 
@@ -99,53 +102,59 @@ export function StudioNavbar() {
             }}
             animate={hidden ? "hidden" : "visible"}
             transition={{ duration: 0.35, ease: "easeInOut" }}
-            className="fixed top-0 left-0 w-full z-50 flex items-stretch bg-black/80 backdrop-blur-xl border-b border-white/5 min-h-[60px] overflow-hidden"
+            className="fixed top-0 left-0 w-full z-50 flex flex-col bg-black/80 backdrop-blur-xl border-b border-white/5 min-h-[60px]"
         >
-            <StudioNavbarLeft 
-                searchExpanded={searchExpanded}
-                activeProjectId={activeProjectId}
-                isEditingName={isEditingName}
-                editInputRef={editInputRef}
-                editedName={editedName}
-                setEditedName={setEditedName}
-                handleSaveEdit={() => handleSaveEdit(updateProjectName)}
-                handleCancelEdit={handleCancelEdit}
-                handleStartEdit={handleStartEdit}
-                selectedProjectName={selectedProjectName}
-                projectSessions={projectSessions}
-                activeSessionId={activeSessionId}
-                setActiveSessionId={setActiveSessionId}
-                selectedSessionName={selectedSessionName}
-                setIsCreateSessionOpen={setIsCreateSessionOpen}
-            />
+            <div className="flex items-stretch min-h-[60px] w-full">
+                <StudioNavbarLeft 
+                    searchExpanded={searchExpanded}
+                    activeProjectId={activeProjectId}
+                    isEditingName={isEditingName}
+                    editInputRef={editInputRef}
+                    editedName={editedName}
+                    setEditedName={setEditedName}
+                    handleSaveEdit={() => handleSaveEdit(updateProjectName)}
+                    handleCancelEdit={handleCancelEdit}
+                    handleStartEdit={handleStartEdit}
+                    selectedProjectName={selectedProjectName}
+                    projectSessions={projectSessions}
+                    activeSessionId={activeSessionId}
+                    setActiveSessionId={setActiveSessionId}
+                    selectedSessionName={selectedSessionName}
+                    setIsCreateSessionOpen={setIsCreateSessionOpen}
+                />
 
-            <StudioNavbarCenter 
-                searchExpanded={searchExpanded}
-                availableModels={availableModels}
-                filteredCount={filteredCount}
-                total={total}
-                searchInputRef={searchInputRef}
-                handleCloseSearch={handleCloseSearch}
-                handleOpenSearch={handleOpenSearch}
-                filters={filters}
-                setFilter={setFilter}
-            />
+                <StudioNavbarCenter 
+                    searchExpanded={searchExpanded}
+                    availableModels={availableModels}
+                    filteredCount={filteredCount}
+                    total={total}
+                    searchInputRef={searchInputRef}
+                    handleCloseSearch={handleCloseSearch}
+                    handleOpenSearch={handleOpenSearch}
+                    filters={filters}
+                    setFilter={setFilter}
+                />
 
-            <StudioNavbarRight 
-                searchExpanded={searchExpanded}
-                studioLayoutMode={studioLayoutMode}
-                setStudioLayoutMode={setStudioLayoutMode}
-                gridSize={gridSize}
-                setGridSize={setGridSize}
-                soundOnHover={soundOnHover}
-                setSoundOnHover={setSoundOnHover}
-                showTileDetails={showTileDetails}
-                setShowTileDetails={setShowTileDetails}
-                showDetails={showDetails}
-                setShowDetails={setShowDetails}
-                clearPromptOnSubmit={clearPromptOnSubmit}
-                setClearPromptOnSubmit={setClearPromptOnSubmit}
-            />
+                <StudioNavbarRight 
+                    searchExpanded={searchExpanded}
+                    studioLayoutMode={studioLayoutMode}
+                    setStudioLayoutMode={setStudioLayoutMode}
+                    gridSize={gridSize}
+                    setGridSize={setGridSize}
+                    soundOnHover={soundOnHover}
+                    setSoundOnHover={setSoundOnHover}
+                    showTileDetails={showTileDetails}
+                    setShowTileDetails={setShowTileDetails}
+                    showDetails={showDetails}
+                    setShowDetails={setShowDetails}
+                    clearPromptOnSubmit={clearPromptOnSubmit}
+                    setClearPromptOnSubmit={setClearPromptOnSubmit}
+                    showUploadedMedia={showUploadedMedia}
+                    setShowUploadedMedia={setShowUploadedMedia}
+                />
+            </div>
+
+            <ActiveFilterTags />
 
             <CreateSessionDialog 
                 isOpen={isCreateSessionOpen}
@@ -154,5 +163,6 @@ export function StudioNavbar() {
                 isCreating={createSessionMutation.isLoading}
             />
         </motion.nav>
+
     )
 }

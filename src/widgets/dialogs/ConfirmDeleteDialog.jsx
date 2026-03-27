@@ -40,22 +40,23 @@ export function ConfirmDeleteDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="bg-[#131517] border-[#1C1F23] text-white rounded-2xl max-w-md w-[calc(100vw-1.5rem)] sm:w-full p-6"
+      variant="small"
+        className="bg-[#1B1B1BBF] border-[#1C1F23] text-white rounded-2xl max-w-md w-[200px] sm:w-full p-6"
         showCloseButton={false}
       >
-        <DialogHeader className="space-y-2 text-left">
-          <DialogTitle className="text-xl font-bold">{title}</DialogTitle>
-          <DialogDescription className="text-white/40 text-[14px] leading-relaxed">
+        <DialogHeader className="text-left mb-6">
+          <DialogTitle className="sr-only">{title}</DialogTitle>
+          <DialogDescription className="text-white/90 text-[14px] font-medium text-center leading-relaxed">
             {description}
           </DialogDescription>
         </DialogHeader>
 
-        <div className="mt-6 flex gap-3 justify-end">
+        <div className="mt-6 flex gap-3 justify-center">
           <DialogClose asChild>
             <button
               type="button"
               disabled={loading}
-              className="h-11 px-7 rounded-xl bg-white/5 hover:bg-white/10 text-white font-semibold text-[14px] transition-colors disabled:opacity-50"
+              className="h-11 px-7 rounded-xl bg-white/5 hover:bg-white/10 text-white font-medium text-[14px] transition-colors disabled:opacity-50"
             >
               {cancelLabel}
             </button>
@@ -64,7 +65,7 @@ export function ConfirmDeleteDialog({
             type="button"
             onClick={handleConfirm}
             disabled={loading}
-            className="h-11 px-7 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-500 font-semibold text-[14px] transition-colors disabled:opacity-50 flex items-center gap-2"
+            className="h-11 px-7 rounded-xl bg-white hover:bg-white/80 text-black font-medium text-[14px] transition-colors disabled:opacity-50 flex items-center gap-2"
           >
             {loading && (
               <span className="size-4 rounded-full border-2 border-current border-t-transparent animate-spin" />

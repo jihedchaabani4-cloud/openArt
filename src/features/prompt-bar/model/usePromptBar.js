@@ -1,297 +1,274 @@
-import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
+// src/features/prompt-bar/model/usePromptBar.js
+// ✅ Slim orchestrator: composes small hooks, owns generate logic only.
+
+import React, { useState, useMemo, useRef, useEffect, useCallback } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useGenerationsStore } from "@/features/generations/model/useGenerationsStore";
-import { useAllGenerations, useStudioModels, useGenerateMutation } from "@/features/generations/api/generationsApi";
+import { useStudioModels, useGenerateMutation } from "@/features/generations/api/generationsApi";
 import { useAssets } from "@/features/media/api/mediaApi";
 import { queryKeys } from "@/shared/api/queryKeys";
+import { buildReferencesPayload } from "@/shared/lib/referenceUtils";
+import { useModelSync } from "./useModelSync";
+import { useMediaUpload } from "./useMediaUpload";
+import { useMediaLibrary } from "@/features/media/model/useMediaLibrary";
 
 export function usePromptBar({ isNewProject = false } = {}) {
-    const {
-        selectedProjectId: projectId,
-        activeSessionId,
-        setActiveSessionId,
-        editTrigger,
-        setEditTrigger,
-    } = useGenerationsStore();
+  // ─── Global store ─────────────────────────────────────────────────────────
+  const {
+    selectedProjectId: projectId,
+    activeSessionId,
+    setActiveSessionId,
+    setEditTrigger,
+    editTrigger,
+    referenceImages,
+    addReference,
+    removeReference,
+    clearReferences,
+    setReferenceImages,
+    swapFrames,
+    generationMode,
+    setGenerationMode,
+  } = useGenerationsStore();
 
-    const queryClient = useQueryClient();
+  const queryClient = useQueryClient();
 
-    // ── Server state (React Query) ─────────────────────────────────────────────
-    const { data: assets = [] } = useAssets(projectId, activeSessionId);
-    const { data: generationsData, isLoading: allGenerationsLoading } = useAllGenerations(1);
-    const { data: studioModels = [], isLoading: studioModelsLoading } = useStudioModels();
+  // ─── Remote data ──────────────────────────────────────────────────────────
+  const lib = useMediaLibrary(projectId);
 
-    const allGenerations    = generationsData?.data    ?? [];
-    const allGenerationsHasMore = generationsData?.hasMore ?? false;
+  const { data: modelsData, isLoading: studioModelsLoading } = useStudioModels();
 
-    // ── Generation mutation ────────────────────────────────────────────────────
-    const [generationError, setGenerationError] = useState(null);
+  const studioModels   = modelsData?.models   ?? [];
+  const studioFamilies = modelsData?.families ?? [];
 
-    const { mutateAsync: runGenerate, isPending: generating } = useGenerateMutation({
-        onError: (err) => setGenerationError(err.message),
-    });
+  // ─── Model sync (extracted hook) ──────────────────────────────────────────
+  const { model, setModel, selectedModel, maxRefs } = useModelSync(
+    studioModels,
+    studioModelsLoading,
+    generationMode
+  );
 
-    // ── Core state ────────────────────────────────────────────────────────────
-    const [prompt,          setPrompt]          = useState("");
-    const [model,           setModel]           = useState(null);
-    const [resolution,      setResolution]      = useState("2K");
-    const [ratio,           setRatio]           = useState("1:1");
-    const [count,           setCount]           = useState(1);
-    const [generationMode,  setGenerationMode]  = useState("image");
-    const [duration,        setDuration]        = useState("5s");
-    const [videoResolution, setVideoResolution] = useState("1080p");
-    const [uploading,       setUploading]       = useState(false);
-    const textareaRef = useRef(null);
+  // ─── Upload + drag-drop (extracted hook) ──────────────────────────────────
+  const upload = useMediaUpload({
+    projectId,
+    activeSessionId,
+    addReference,
+    referenceImages,
+    maxRefs,
+  });
 
-    // ── Selected model object (full data) ─────────────────────────────────────
-    const selectedModel = useMemo(
-        () => studioModels.find(m => m.key === model?.id) || null,
-        [studioModels, model?.id]
+  // ─── Local UI state ───────────────────────────────────────────────────────
+  const [prompt,          setPrompt]          = useState("");
+  const [resolution,      setResolution]      = useState("2K");
+  const [ratio,           setRatio]           = useState("1:1");
+  const [count,           setCount]           = useState(1);
+  const [duration,        setDuration]        = useState("5s");
+  const [videoResolution, setVideoResolution] = useState("1080p");
+  const [generationError, setGenerationError] = useState(null);
+  const textareaRef = useRef(null);
+
+  const { mutateAsync: runGenerate, isPending: generating } = useGenerateMutation({
+    onError: (err) => setGenerationError(err.message),
+  });
+
+  // ─── Sync ratio/resolution & Prune References when model changes ─────────
+  useEffect(() => {
+    if (!selectedModel) return;
+    const support = selectedModel.support || {};
+    
+    // 1. Prune references if they exceed the new model's maximum
+    // Using getState() to avoid adding referenceImages to the dependency array,
+    // which would cause this effect to fire on every reference addition.
+    const currentRefs = useGenerationsStore.getState().referenceImages;
+    const currentMaxRefs = support.references?.max ?? 4;
+    
+    if (currentRefs.length > currentMaxRefs) {
+      setReferenceImages(currentRefs.slice(0, currentMaxRefs));
+    }
+
+    // 2. Sync ratio and resolution
+    // support.ratio may be: [{value, label}] array (new format) or { default, options } object
+    const extractVal = (raw) => {
+      if (Array.isArray(raw)) {
+        const first = raw[0];  // might be string or {value, label}
+        return (first && typeof first === 'object') ? first.value : first;
+      }
+      return raw?.default ?? null;
+    };
+
+    const defRatio = extractVal(support.ratio) ?? "1:1";
+    const defQual  = extractVal(support.quality) ?? "2K";
+    const defVid   = extractVal(support.resolution) ?? "1080p";
+
+    setRatio(defRatio);
+    setResolution(defQual);
+    setVideoResolution(defVid);
+  }, [selectedModel?.key]);
+
+  // ─── Restore state from editTrigger ──────────────────────────────────────
+  // ✅ NOTE: adaptReferences is no longer needed here as a useEffect.
+  //    setGenerationMode in the store already adapts refs automatically.
+  useEffect(() => {
+    if (!editTrigger?.params || studioModels.length === 0) return;
+    const { params } = editTrigger;
+
+    if (params.prompt      !== undefined) setPrompt(params.prompt);
+    if (params.model_name)                setModel({ id: params.model_name });
+    if (params.quality)                   setResolution(params.quality);
+    if (params.ratio)                     setRatio(params.ratio);
+    if (params.count)                     setCount(params.count);
+    if (params.duration)                  setDuration(params.duration);
+    if (params.video_resolution)          setVideoResolution(params.video_resolution);
+    if (params.generation_mode)           setGenerationMode(params.generation_mode);
+
+    setReferenceImages(
+      params.references?.length > 0
+        ? params.references.map((r) => ({
+            url:      r.url,
+            asset_id: r.asset_id,
+            role:     r.role,
+            type:     r.type,
+          }))
+        : []
     );
 
-    const maxRefs = selectedModel?.support?.references?.max ?? 4;
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+      textareaRef.current.style.height = textareaRef.current.scrollHeight + "px";
+      textareaRef.current.focus();
+    }
+  }, [editTrigger, studioModels]);
 
-    // ── Auto-update ratio/resolution when model changes ───────────────────────
-    useEffect(() => {
-        if (!selectedModel) return;
-        setRatio(selectedModel.support?.ratio?.default       || "1:1");
-        setResolution(selectedModel.support?.quality?.default || "2K");
-    }, [selectedModel?.key]);
+  // ─── Library ──────────────────────────────────────────────────────────────
+  const library = lib.items;
 
-    // ── References ────────────────────────────────────────────────────────────
-    const [referenceImages, setReferenceImages] = useState([]);
+  // ─── Reset ────────────────────────────────────────────────────────────────
+  const handleReset = useCallback(() => {
+    setPrompt("");
+    const defaultModel = studioModels[0];
+    if (defaultModel) {
+      setModel({ id: defaultModel.key });
+      setResolution(defaultModel.support?.quality?.default ?? "2K");
+      setRatio(defaultModel.support?.ratio?.default        ?? "1:1");
+    }
+    setCount(1);
+    setDuration("5s");
+    setVideoResolution("1080p");
+    setReferenceImages([]);
+    if (textareaRef.current) textareaRef.current.style.height = "auto";
+  }, [studioModels, setReferenceImages]);
 
-    const handleAddReference = useCallback((asset, role = "normal") => {
-        if (role === "normal") {
-            const normalCount = referenceImages.filter(
-                r => r.role === "normal" || !r.role
-            ).length;
-            if (normalCount >= maxRefs) return;
+  // ─── Generate ─────────────────────────────────────────────────────────────
+  const handleGenerate = useCallback(
+    async (e) => {
+      if (e) e.preventDefault();
+      if (!prompt.trim() || generating) return;
+
+      setGenerationError(null);
+      const isVideo = generationMode !== "image";
+
+      const payload = {
+        prompt,
+        model:            model?.id ?? "nanobana_pro",
+        model_name:       model?.id ?? "nanobana_pro",
+        quality:          resolution,
+        ratio,
+        num_images:       count,
+        duration,
+        video_resolution: videoResolution,
+        section:          (generationMode === "motion" || generationMode === "motion-control") ? "motion" : (isVideo ? "video_studio" : "image_generator"),
+        project_id:       isNewProject ? null : projectId,
+        session_id:       isNewProject ? null : activeSessionId,
+        references:       buildReferencesPayload(referenceImages),
+      };
+
+      try {
+        const res = await runGenerate({ payload, isVideo });
+
+        if (res.project_id && res.session_id) {
+          if (!projectId || projectId !== res.project_id) {
+            useGenerationsStore.getState().setSelectedProjectId(res.project_id);
+          }
+          if (!activeSessionId || activeSessionId !== res.session_id) {
+            setActiveSessionId(res.session_id);
+          }
+          if (isNewProject && window.location.pathname.includes("/project/new")) {
+            window.location.href = `/projects/${res.project_id}`;
+          }
         }
-        setReferenceImages(prev => {
-            const cleaned = (["start", "end", "mc_image", "mc_video"].includes(role))
-                ? prev.filter(r => r.role !== role)
-                : prev;
-            const type    = asset.is_video ? "video" : "image";
-            return [...cleaned, { ...asset, role, type }];
-        });
-    }, [referenceImages, maxRefs]);
 
-    const handleRemoveReference  = useCallback((index) => {
-        setReferenceImages(prev => prev.filter((_, i) => i !== index));
-    }, []);
-
-    const handleClearReferences  = useCallback(() => {
-        setReferenceImages([]);
-    }, []);
-
-    const handleSwapFrames = useCallback(() => {
-        setReferenceImages(prev => {
-            const hasStart = prev.some(r => r.role === "start");
-            const hasEnd   = prev.some(r => r.role === "end");
-            if (!hasStart && !hasEnd) return prev;
-            return prev.map(r => {
-                if (r.role === "start") return { ...r, role: "end"   };
-                if (r.role === "end")   return { ...r, role: "start" };
-                return r;
-            });
-        });
-    }, []);
-
-    // ── Upload from PC → Supabase → add as reference ──────────────────────────
-    const handleUploadFromPC = useCallback(async (file, role = "normal") => {
-        try {
-            setUploading(true);
-
-            const formData = new FormData();
-            formData.append("file",       file);
-            formData.append("project_id", projectId    || "");
-            formData.append("session_id", activeSessionId || "");
-
-            const res  = await fetch("/api/assets/upload", {
-                method: "POST",
-                body:   formData,
-            });
-            const data = await res.json();
-            if (!data.ok) throw new Error(data.error);
-
-            handleAddReference({
-                url:      data.url,
-                asset_id: data.asset_id,
-                type:     data.type,
-                is_video: data.type === "video",
-            }, role);
-
-        } catch (err) {
-            console.error("❌ Upload failed:", err);
-        } finally {
-            setUploading(false);
+        const finalProj = res.project_id ?? projectId;
+        const finalSess = res.session_id  ?? activeSessionId;
+        if (finalProj) {
+          queryClient.invalidateQueries({ queryKey: queryKeys.assets.byProject(finalProj, finalSess) });
+          queryClient.invalidateQueries({ queryKey: queryKeys.generations.byProject(finalProj, finalSess) });
         }
-    }, [projectId, activeSessionId, handleAddReference]);
 
-    // ── Set default model once loaded ─────────────────────────────────────────
-    useEffect(() => {
-        if (!model && studioModels.length > 0) {
-            setModel({ id: studioModels[0].key });
-        }
-    }, [studioModels, model]);
-
-    // ── Edit trigger ──────────────────────────────────────────────────────────
-    useEffect(() => {
-        if (!editTrigger?.params || studioModels.length === 0) return;
-        const { params } = editTrigger;
-
-        if (params.prompt      !== undefined) setPrompt(params.prompt);
-        if (params.model_name)                setModel({ id: params.model_name });
-        if (params.quality)                   setResolution(params.quality);
-        if (params.ratio)                     setRatio(params.ratio);
-        if (params.count)                     setCount(params.count);
-        if (params.duration)                  setDuration(params.duration);
-        if (params.video_resolution)          setVideoResolution(params.video_resolution);
-
-        setReferenceImages(
-            params.references?.length > 0
-                ? params.references.map(r => ({
-                    url:      r.url,
-                    asset_id: r.asset_id,
-                    role:     r.role,
-                    type:     r.type,
-                }))
-                : []
-        );
-
-        if (textareaRef.current) {
-            textareaRef.current.style.height = "auto";
-            textareaRef.current.style.height = textareaRef.current.scrollHeight + "px";
-            textareaRef.current.focus();
-        }
-    }, [editTrigger, studioModels]);
-
-    // ── Library ───────────────────────────────────────────────────────────────
-    const combinedLibrary = useMemo(() => {
-        return [...(assets || []), ...(allGenerations || [])];
-    }, [allGenerations, assets]);
-
-    // ── Reset ─────────────────────────────────────────────────────────────────
-    const handleReset = useCallback(() => {
         setPrompt("");
-        const defaultModel = studioModels[0];
-        if (defaultModel) {
-            setModel({ id: defaultModel.key });
-            setResolution(defaultModel.support?.quality?.default || "2K");
-            setRatio(defaultModel.support?.ratio?.default        || "1:1");
-        }
-        setCount(1);
-        setDuration("5s");
-        setVideoResolution("1080p");
-        setReferenceImages([]);
         if (textareaRef.current) textareaRef.current.style.height = "auto";
-    }, [studioModels]);
+        setEditTrigger(null);
+      } catch {
+        // Error is set via onError callback in useGenerateMutation
+      }
+    },
+    [
+      prompt, generating, generationMode, model, resolution, ratio, count,
+      duration, videoResolution, isNewProject, projectId, activeSessionId,
+      referenceImages, runGenerate, setActiveSessionId, setEditTrigger, queryClient,
+    ]
+  );
 
-    const hasChanges = prompt.trim().length > 0 || referenceImages.length > 0;
+  // ─── Public API ───────────────────────────────────────────────────────────
+  return {
+    // Prompt
+    prompt,       setPrompt,
+    textareaRef,
+    hasChanges:   prompt.trim().length > 0 || referenceImages.length > 0,
 
-    // ── Generate ──────────────────────────────────────────────────────────────
-    const handleGenerate = useCallback(async (e) => {
-        if (e) e.preventDefault();
-        if (!prompt.trim() || generating) return;
+    // Model
+    model,        setModel,
+    selectedModel,
+    studioModels, studioModelsLoading,
+    studioFamilies,
 
-        setGenerationError(null);
+    // Generation params
+    resolution,     setResolution,
+    ratio,          setRatio,
+    count,          setCount,
+    duration,       setDuration,
+    videoResolution, setVideoResolution,
+    generationMode, setGenerationMode,
 
-        const isVideo = generationMode !== "image";
+    // References
+    referenceImages,
+    handleAddReference:   (asset, role = "normal") => addReference(asset, role, maxRefs),
+    handleRemoveReference: removeReference,
+    handleClearReferences: clearReferences,
+    handleSwapFrames:      swapFrames,
+    maxRefs,
 
-        const payload = {
-            prompt,
-            model:            model?.id || "nanobana_pro",
-            model_name:       model?.id || "nanobana_pro",
-            quality:          resolution,
-            ratio,
-            num_images:       count,
-            duration,
-            video_resolution: videoResolution,
-            section:          isVideo ? "video_studio" : "image_generator",
-            project_id:       isNewProject ? null : projectId,
-            session_id:       isNewProject ? null : activeSessionId,
-            references:       referenceImages.map(r => ({
-                url:      r.url,
-                asset_id: r.asset_id,
-                role:     r.role  || "normal",
-                type:     r.type  || "image",
-            })),
-        };
+    // Upload / drag-drop (delegated)
+    ...upload,
 
-        console.log(`🚀 [Frontend] ${isVideo ? 'VIDEO' : 'IMAGE'} Payload:`, JSON.stringify(payload, null, 2));
+    // Library (project-level assets only)
+    library,
+    libraryLoading: lib.loading,
+    libraryHasMore: lib.hasMore,
+    assetSource: lib.source,    
+    setAssetSource: lib.setSource,
+    assetMode: lib.mediaType,      
+    setAssetMode: lib.setMediaType,
+    handleOpenLibrary: lib.handleOpen,
+    handleLoadMoreAssets: lib.handleLoadMore,
 
-        try {
-            const res = await runGenerate({ payload, isVideo });
+    // Generation
+    generating,
+    generationError,
+    clearGenerationError: () => setGenerationError(null),
+    handleGenerate,
 
-            // Sync project/session state if auto-created on the backend
-            if (res.project_id && res.session_id) {
-                if (!projectId || projectId !== res.project_id) {
-                    useGenerationsStore.getState().setSelectedProjectId(res.project_id);
-                }
-                if (!activeSessionId || activeSessionId !== res.session_id) {
-                    setActiveSessionId(res.session_id);
-                }
-
-                if (isNewProject && window.location.pathname.includes("/project/new")) {
-                    window.location.href = `/projects/${res.project_id}`;
-                }
-            }
-
-            // Fine-grained invalidation for the specific project/session
-            const finalProj = res.project_id || projectId;
-            const finalSess = res.session_id  || activeSessionId;
-            if (finalProj) {
-                queryClient.invalidateQueries({
-                    queryKey: queryKeys.assets.byProject(finalProj, finalSess),
-                });
-                queryClient.invalidateQueries({
-                    queryKey: queryKeys.generations.byProject(finalProj, finalSess),
-                });
-            }
-
-            setPrompt("");
-            if (textareaRef.current) textareaRef.current.style.height = "auto";
-            setEditTrigger(null);
-        } catch {
-            // Error is already handled by useGenerateMutation's onError
-        }
-    }, [
-        prompt, generating, generationMode, model, resolution, ratio, count,
-        duration, videoResolution, isNewProject, projectId, activeSessionId,
-        referenceImages, runGenerate, setActiveSessionId, setEditTrigger, queryClient,
-    ]);
-
-    // ── Return ────────────────────────────────────────────────────────────────
-    return {
-        prompt,         setPrompt,
-        model,          setModel,          selectedModel,
-        studioModels,   studioModelsLoading,
-        resolution,     setResolution,
-        ratio,          setRatio,
-        count,          setCount,
-        duration,       setDuration,
-        videoResolution, setVideoResolution,
-        generationMode, setGenerationMode,
-        textareaRef,
-        referenceImages,
-        handleAddReference,
-        handleRemoveReference,
-        handleClearReferences,
-        handleSwapFrames,
-        handleUploadFromPC,
-        uploading,
-        maxRefs,
-        library:         combinedLibrary,
-        libraryLoading:  allGenerationsLoading,
-        libraryHasMore:  allGenerationsHasMore,
-        generating,
-        generationError,
-        clearGenerationError: () => setGenerationError(null),
-        handleGenerate,
-        projectId,
-        activeSessionId,
-        handleReset,
-        hasChanges,
-    };
+    // Session
+    projectId,
+    activeSessionId,
+    handleReset,
+  };
 }

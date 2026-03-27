@@ -70,7 +70,7 @@ export function NewProjectView() {
                 </div>
 
                 {/* ── Bottom Floating Prompt Bar ── */}
-                <div className="absolute bottom-8 inset-x-0 z-30 flex justify-center px-6 pointer-events-none">
+                <div className="fixed bottom-8 inset-x-0 z-30 flex justify-center px-6 pointer-events-none">
                     <div className="w-full max-w-[850px] pointer-events-auto">
                         <div className="">
                             <ImagePromptBar hideBackground={true} isNewProject={true} />

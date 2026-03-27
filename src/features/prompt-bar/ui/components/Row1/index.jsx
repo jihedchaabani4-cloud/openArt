@@ -1,40 +1,76 @@
 import React from 'react';
-import { ReferenceButton } from './ReferenceButton';
-import { StandardModeButtons } from './StandardModeButtons';
-import { MotionModeButtons } from './MotionModeButtons';
-import { MotionControlModeButtons } from './MotionControlModeButtons';
+import { ReferenceButton, ViewReference } from './ReferenceButton';
+import { ImagePlus, Film } from 'lucide-react';
 import { ImportMediaDialog } from "@/widgets/ImportMediaDialog/ImportMediaDialog";
+
+const SwapIcon = () => (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path fillRule="evenodd" clipRule="evenodd" d="M4.57216 3.5C4.25657 3.5 4.00073 3.72386 4.00073 4C4.00073 4.27614 4.25657 4.5 4.57216 4.5L10.0498 4.5L8.73953 5.64645C8.51637 5.84171 8.51637 6.15829 8.73953 6.35355C8.96268 6.54882 9.32449 6.54882 9.54765 6.35355L11.8334 4.35355C12.0565 4.15829 12.0565 3.84171 11.8334 3.64645L9.54765 1.64645C9.32449 1.45118 8.96268 1.45118 8.73953 1.64645C8.51637 1.84171 8.51637 2.15829 8.73953 2.35355L10.0498 3.5L4.57216 3.5ZM9.42775 10.4997C9.74334 10.4997 9.99918 10.2759 9.99918 9.99972C9.99918 9.72358 9.74334 9.49972 9.42775 9.49972L3.95015 9.49972L5.26038 8.35328C5.48354 8.15802 5.48354 7.84143 5.26038 7.64617C5.03722 7.45091 4.67541 7.45091 4.45226 7.64617L2.16654 9.64617C1.94339 9.84143 1.94339 10.158 2.16654 10.3533L4.45226 12.3533C4.67541 12.5485 5.03722 12.5485 5.26038 12.3533C5.48354 12.158 5.48354 11.8414 5.26038 11.6462L3.95015 10.4997L9.42775 10.4997Z" fill="currentColor" />
+    </svg>
+);
+
+const VideoCustomIcon = ({ size = 18, className }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14v-4z" />
+        <rect x="3" y="6" width="12" height="12" rx="2" ry="2" />
+        <path d="M6 15v-4M4 13h4" />
+    </svg>
+);
+
+const ImageUpIcon = ({ size = 18, className }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+        <circle cx="8.5" cy="8.5" r="1.5" />
+        <path d="M21 15l-5-5L5 21" />
+        <path d="M16 10v-5M13.5 7.5L16 5l2.5 2.5" className="text-white bg-black stroke-[3px]" />
+        <path d="M16 10v-5M13.5 7.5L16 5l2.5 2.5" />
+    </svg>
+);
 
 export function Row1({
     referenceImages = [],
     generationMode  = 'image',
-    selectedModel   = null,        // ← زيد
+    selectedModel   = null,
     onAddReference,
     onRemoveReference,
     onSwapFrames,
-    onUploadFromPC,                // ← زيد
-    uploading = false,             // ← زيد
+    onUploadFromPC,
+    uploading = false,
     library = [],
     libraryLoading = false,
     libraryHasMore = false,
     onLoadMore,
+    onOpenLibrary,
+    assetSource,
+    setAssetSource,
+    assetMode,
+    setAssetMode,
     maxRefs = 4,
 }) {
     const [dialogOpen,    setDialogOpen]    = React.useState(false);
     const [internalMode,  setInternalMode]  = React.useState('image');
     const [targetRole,    setTargetRole]    = React.useState('normal');
 
-    // ── من selectedModel مباشرة ────────────────────────────────────────────
     const supportsRefs       = !!selectedModel?.support?.references;
-    const supportsStartFrame = !!selectedModel?.support?.frames?.startFrame;
-    const supportsEndFrame   = !!selectedModel?.support?.frames?.endFrame;
+    const supportsStartFrame = selectedModel?.support?.keyframe 
+        ? !!selectedModel.support.keyframe.start 
+        : !!selectedModel?.support?.frames?.startFrame;
+    const supportsEndFrame = selectedModel?.support?.keyframe 
+        ? !!selectedModel.support.keyframe.end 
+        : !!selectedModel?.support?.frames?.endFrame;
     const supportsSwap       = supportsStartFrame && supportsEndFrame;
 
-    // ── Modes ──────────────────────────────────────────────────────────────
-    const isMotionMode      = generationMode === 'motion';
-    const isVideoMode       = generationMode === 'video';
-    const isMotionOrVideo   = isMotionMode || isVideoMode;
+    const isKeyframeMode    = generationMode === 'keyframe';
     const isMcMode          = generationMode === 'motion-control';
+
+    // ✅ Log model support for debugging
+    React.useEffect(() => {
+        if (selectedModel) {
+            const sStart = selectedModel.support?.keyframe?.start || selectedModel.support?.frames?.startFrame;
+            const sEnd = selectedModel.support?.keyframe?.end || selectedModel.support?.frames?.endFrame;
+            console.log(`[Row1] Model: ${selectedModel.name} | Support Keyframes: Start=${!!sStart}, End=${!!sEnd}`);
+        }
+    }, [selectedModel?.key]);
 
     const hasRefs     = referenceImages.length > 0;
     const startFrame  = referenceImages.find(r => r.role === 'start');
@@ -44,111 +80,127 @@ export function Row1({
     const regularRefs = referenceImages.filter(
         r => !['start', 'end', 'mc_image', 'mc_video'].includes(r.role)
     );
+
     const normalCount = regularRefs.length;
 
     const openDialog = (mode = 'image', role = 'normal') => {
         setInternalMode(mode);
         setTargetRole(role);
         setDialogOpen(true);
+        onOpenLibrary?.(mode);
     };
 
-    // ── لو الموديل ما يدعمش references خالص → ما تعرضش Row1 ──────────────
-    if (!supportsRefs && !isMotionOrVideo && !isMcMode) return null;
+    if (!supportsRefs && !isKeyframeMode && !isMcMode) return null;
+
+    const remainingNormal = Math.max(0, maxRefs - normalCount);
+    const maxAllowed = ['start', 'end', 'mc_image', 'mc_video'].includes(targetRole) 
+        ? 1 
+        : remainingNormal;
 
     return (
         <>
-            <div className="flex items-center gap-2 px-3 pt-3 pb-0">
+            <div className="flex items-center gap-2">
 
-                {/* Filled reference buttons */}
-                {referenceImages.filter(r =>
-                    !(isMotionOrVideo && ['start', 'end'].includes(r.role)) &&
-                    !(isMcMode && ['mc_image', 'mc_video'].includes(r.role))
-                ).map((img, idx) => {
+                {/* 1. Add Button (Standard Mode) */}
+                {!isKeyframeMode && !isMcMode && supportsRefs && maxRefs > 0 && (
+                    <ReferenceButton
+                        disabled={normalCount >= maxRefs}
+                        onClick={() => openDialog('image', 'normal')}
+                        label="Add Image"
+                        icon={ImagePlus}
+                    />
+                )}
+
+                {/* 2. Regular References Map */}
+                {!isKeyframeMode && !isMcMode && regularRefs.map((img, idx) => {
                     const originalIdx = referenceImages.indexOf(img);
                     return (
-                        <ReferenceButton
+                        <ViewReference
                             key={`${img.asset_id}-${idx}`}
                             media={img}
                             onRemove={() => onRemoveReference(originalIdx)}
-                            label={null}
                         />
                     );
                 })}
 
-                {/* 1. Image Mode */}
-                {!isMotionOrVideo && !isMcMode && supportsRefs && maxRefs > 0 && (
-                    <StandardModeButtons
-                        normalCount={normalCount}
-                        maxRefs={maxRefs}
-                        generationMode={generationMode}
-                        openDialog={openDialog}
-                        onUploadFromPC={onUploadFromPC}   // ← زيد
-                        uploading={uploading}              // ← زيد
-                        hasRefs={hasRefs}
-                    />
+                {/* 3. Keyframe Mode Slots */}
+                {isKeyframeMode && (
+                    <div className="flex items-center gap-2">
+                        {/* Start Slot */}
+                        {startFrame ? (
+                            <ViewReference media={startFrame} onRemove={() => { const idx = referenceImages.indexOf(startFrame); if (idx !== -1) onRemoveReference(idx); }} label="Start" />
+                        ) : (
+                            <ReferenceButton onClick={() => openDialog('image', 'start')} label="Add Start Frame" icon={ImagePlus} />
+                        )}
+
+                        {/* Swap */}
+                        {supportsSwap && (
+                            <button
+                                type="button"
+                                onClick={onSwapFrames}
+                                disabled={!(startFrame && endFrame)}
+                                className="shrink-0 flex items-center justify-center w-8 h-8 rounded-full border border-white/10 bg-white/5 text-white/40 hover:text-white/80 hover:bg-white/10 transition-all disabled:opacity-20 disabled:cursor-not-allowed cursor-pointer"
+                            >
+                                <SwapIcon />
+                            </button>
+                        )}
+
+                        {/* End Slot */}
+                        {supportsEndFrame && (
+                            endFrame ? (
+                                <ViewReference media={endFrame} onRemove={() => { const idx = referenceImages.indexOf(endFrame); if (idx !== -1) onRemoveReference(idx); }} label="End" />
+                            ) : (
+                                <ReferenceButton onClick={() => openDialog('image', 'end')} label="Add End Frame" icon={ImagePlus} />
+                            )
+                        )}
+
+                 
+                    </div>
                 )}
 
-                {/* 2. Motion & Video Mode */}
-                {isMotionOrVideo && (
-                    <MotionModeButtons
-                        startFrame={startFrame}
-                        endFrame={endFrame}
-                        supportsEndFrame={supportsEndFrame}   // ← زيد
-                        supportsSwap={supportsSwap}           // ← زيد
-                        openDialog={openDialog}
-                        onSwap={supportsSwap ? onSwapFrames : undefined}
-                        onRemove={(role) => {
-                            const idx = referenceImages.findIndex(r => r.role === role);
-                            if (idx !== -1) onRemoveReference(idx);
-                        }}
-                    />
-                )}
-
-                {/* 3. Motion Control Mode */}
+                {/* 4. Motion Control Mode Slots */}
                 {isMcMode && (
-                    <MotionControlModeButtons
-                        imageRef={mcImageRef}
-                        videoRef={mcVideoRef}
-                        openDialog={openDialog}
-                        onRemove={(role) => {
-                            const idx = referenceImages.findIndex(r => r.role === role);
-                            if (idx !== -1) onRemoveReference(idx);
-                        }}
-                    />
+                    <div className="flex items-center gap-2">
+                        {mcVideoRef ? (
+                            <ViewReference media={mcVideoRef} onRemove={() => { const idx = referenceImages.indexOf(mcVideoRef); if (idx !== -1) onRemoveReference(idx); }} label="Vid Ref" />
+                        ) : (
+                            <ReferenceButton onClick={() => openDialog('video', 'mc_video')} label="Video Reference" icon={VideoCustomIcon} />
+                        )}
+
+                        {mcImageRef ? (
+                            <ViewReference media={mcImageRef} onRemove={() => { const idx = referenceImages.indexOf(mcImageRef); if (idx !== -1) onRemoveReference(idx); }} label="Img Ref" />
+                        ) : (
+                            <ReferenceButton onClick={() => openDialog('image', 'mc_image')} label="Image Reference" icon={ImageUpIcon} />
+                        )}
+                    </div>
                 )}
 
-                {/* Max badge */}
-                {!isMotionOrVideo && !isMcMode && normalCount === maxRefs && maxRefs > 0 && (
-                    <span className="text-[11px] text-white/25 font-medium pl-1">
-                        max {maxRefs}
-                    </span>
-                )}
+
             </div>
 
-            {hasRefs && (
-                <div className="mx-3 mt-3 border-t border-white/[0.06]" />
-            )}
+  
 
             <ImportMediaDialog
                 open={dialogOpen}
                 onOpenChange={setDialogOpen}
-                onSelect={(asset) => {
-                    onAddReference(asset, targetRole);
-                    if (['start', 'end', 'mc_image', 'mc_video'].includes(targetRole)) {
-                        setDialogOpen(false);
-                    }
+                maxAllowed={maxAllowed} // ← Pass it here
+                onSelect={(assets) => {
+                    const items = Array.isArray(assets) ? assets : [assets];
+                    items.forEach(asset => onAddReference(asset, targetRole));
+                    setDialogOpen(false);
                 }}
-                onUploadFromPC={(file) => {        // ← زيد
-                    onUploadFromPC?.(file, targetRole);
-                    if (['start', 'end', 'mc_image', 'mc_video'].includes(targetRole)) {
-                        setDialogOpen(false);
-                    }
+                onUploadFromPC={(files) => {
+                    const items = Array.isArray(files) ? files : [files];
+                    items.forEach(file => onUploadFromPC?.(file, targetRole));
+                    setDialogOpen(false);
                 }}
                 library={library}
                 loading={libraryLoading}
                 hasMore={libraryHasMore}
                 onLoadMore={onLoadMore}
                 mode={internalMode}
+                assetSource={assetSource}
+                setAssetSource={setAssetSource}
             />
         </>
     );

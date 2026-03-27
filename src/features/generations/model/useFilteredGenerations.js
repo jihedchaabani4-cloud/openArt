@@ -9,7 +9,7 @@ import { useGenerationsStore } from './useGenerationsStore';
  */
 export function useFilteredGenerations(projectId, sessionId) {
   const { data: generations = [], ...queryState } = useGenerations(projectId, sessionId);
-  const { filters } = useGenerationsStore();
+  const { filters, showUploadedMedia } = useGenerationsStore();
 
   // All models present in the current data (for the dropdown)
   const availableModels = useMemo(() =>
@@ -19,6 +19,11 @@ export function useFilteredGenerations(projectId, sessionId) {
 
   const filtered = useMemo(() => {
     let result = [...generations];
+
+    // Global Uploads Visibility Toggle
+    if (!showUploadedMedia) {
+      result = result.filter(g => g.feed_type !== 'upload');
+    }
 
     // Filter by model
     if (filters.models?.length > 0) {
@@ -36,6 +41,13 @@ export function useFilteredGenerations(projectId, sessionId) {
         const ratio = g.params?.aspect_ratio || g.params?.ratio;
         return filters.aspectRatios.includes(ratio);
       });
+    }
+
+    // Filter by Source (Généré vs Importé)
+    if (filters.showGenerated && !filters.showImported) {
+      result = result.filter(g => g.feed_type === 'generation');
+    } else if (filters.showImported && !filters.showGenerated) {
+      result = result.filter(g => g.feed_type === 'upload');
     }
 
     // Filter by liked
@@ -64,7 +76,7 @@ export function useFilteredGenerations(projectId, sessionId) {
     });
 
     return result;
-  }, [generations, filters]);
+  }, [generations, filters, showUploadedMedia]);
 
   return {
     ...queryState,

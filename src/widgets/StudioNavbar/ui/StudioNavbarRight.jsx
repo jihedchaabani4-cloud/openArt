@@ -3,6 +3,7 @@
 import * as React from "react"
 import { cn } from "@/shared/lib/utils"
 import { StudioSettingsDropdown } from "./StudioSettingsDropdown"
+import { NavbarImportButton } from "./NavbarImportButton"
 
 export function StudioNavbarRight({
     searchExpanded,
@@ -17,13 +18,16 @@ export function StudioNavbarRight({
     showDetails,
     setShowDetails,
     clearPromptOnSubmit,
-    setClearPromptOnSubmit
+    setClearPromptOnSubmit,
+    showUploadedMedia,
+    setShowUploadedMedia
 }) {
     return (
         <div className={cn(
             "shrink-0 flex items-center justify-end gap-3 overflow-hidden whitespace-nowrap transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
-            searchExpanded ? "basis-[0%] opacity-0 pointer-events-none" : "basis-[30%] opacity-100"
+            searchExpanded ? "basis-[0%] opacity-0 pointer-events-none" : "basis-[32%] opacity-100"
         )}>
+            <NavbarImportButton />
             <StudioSettingsDropdown 
                 studioLayoutMode={studioLayoutMode}
                 setStudioLayoutMode={setStudioLayoutMode}
@@ -37,6 +41,8 @@ export function StudioNavbarRight({
                 setShowDetails={setShowDetails}
                 clearPromptOnSubmit={clearPromptOnSubmit}
                 setClearPromptOnSubmit={setClearPromptOnSubmit}
+                showUploadedMedia={showUploadedMedia}
+                setShowUploadedMedia={setShowUploadedMedia}
             />
 
             {/* Avatar placeholder */}

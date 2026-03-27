@@ -8,7 +8,7 @@ const Input = React.forwardRef(({ className, type, icon: Icon, onClear, clearIco
   if (hasWrapper) {
     return (
       <label className={cn(
-        "flex h-11 w-full items-center gap-2 rounded-lg bg-[#1a1a1a] px-3 py-2.5 text-sm text-white transition-all cursor-text",
+        "flex h-11 w-full items-center gap-2 rounded-lg bg-black/75 bg-[linear-gradient(0deg,rgba(255,255,255,0.1),rgba(255,255,255,0.1))]   px-3 py-2.5 text-sm text-white transition-all cursor-text",
         className
       )}>
         <Icon className="size-4 text-white shrink-0" />

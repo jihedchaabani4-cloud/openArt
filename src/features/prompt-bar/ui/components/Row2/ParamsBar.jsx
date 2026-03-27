@@ -25,6 +25,7 @@ export function ParamsBar({ values, onChange, generationMode, setGenerationMode 
     <>
       <ModeSelector value={generationMode} onChange={setGenerationMode} />
       <div className="flex-1" />
+
       <ModelSelector 
         type={generationMode} 
         onChange={setModel} 
@@ -37,25 +38,25 @@ export function ParamsBar({ values, onChange, generationMode, setGenerationMode 
         <QualitySelector
           value={resolution}
           onChange={setResolution}
-          options={selectedModel?.support?.quality?.options}
+          options={selectedModel?.support?.quality?.options || selectedModel?.support?.quality}
         />
-      ) : (
+      ) : (selectedModel?.support?.resolution && (
         <VideoResolutionSelector
           value={videoResolution}
           onChange={setVideoResolution}
-          options={selectedModel?.support?.resolution?.options}
+          options={selectedModel?.support?.resolution?.options || selectedModel?.support?.resolution}
         />
-      )}
+      ))}
 
       <RatioSelector
         value={ratio}
         onChange={setRatio}
-        options={selectedModel?.support?.ratio?.options}
+        options={selectedModel?.support?.ratio?.options || selectedModel?.support?.ratio}
       />
 
       <VariationSelector value={count} onChange={setCount} />
 
-      {(generationMode === 'video' || generationMode === 'motion') && (
+      {(generationMode === 'keyframe' || generationMode === 'multiref') && (
         <DurationSelector 
           value={duration} 
           onChange={setDuration} 

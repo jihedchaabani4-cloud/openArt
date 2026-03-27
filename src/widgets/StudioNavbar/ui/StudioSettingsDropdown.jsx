@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Settings, Grid2X2, Layers, Volume2, Eye, Eraser } from "lucide-react"
+import { Settings, Grid2X2, Layers, Volume2, Eye, Eraser, Upload } from "lucide-react"
 import {
   DropdownShell,
   DropdownSection,
@@ -23,12 +23,14 @@ export function StudioSettingsDropdown({
   setShowDetails,
   clearPromptOnSubmit,
   setClearPromptOnSubmit,
+  showUploadedMedia,
+  setShowUploadedMedia,
 }) {
   const [open, setOpen] = React.useState(false)
 
   return (
     <DropdownShell
-      trigger={<Settings className="size-4" />}
+      trigger={<Settings className="size-6" />}
       isActive={open}
       open={open}
       onOpenChange={setOpen}
@@ -75,6 +77,10 @@ export function StudioSettingsDropdown({
 
         <DropdownRow icon={<Eraser />} label="Clear prompt on submit">
           <DropdownToggle value={clearPromptOnSubmit} onChange={setClearPromptOnSubmit} />
+        </DropdownRow>
+
+        <DropdownRow icon={<Upload />} label="Show imported media">
+          <DropdownToggle value={showUploadedMedia} onChange={setShowUploadedMedia} />
         </DropdownRow>
       </div>
     </DropdownShell>

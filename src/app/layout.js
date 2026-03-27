@@ -1,6 +1,7 @@
 import "./globals.css";
 import { Geist_Mono, Poppins } from "next/font/google";
 import { StudioNavbar } from "@/widgets/StudioNavbar";
+import { DragPreview } from "@/shared/ui/DragPreview";
 import { ReactQueryProvider } from "@/shared/lib/ReactQueryProvider";
 
 const poppins = Poppins({
@@ -27,6 +28,7 @@ export default function RootLayout({ children }) {
         suppressHydrationWarning
       >
         <ReactQueryProvider>
+          <DragPreview />
           <StudioNavbar />
           <main className="flex-1 min-h-0 relative pt-[60px]">
             {children}

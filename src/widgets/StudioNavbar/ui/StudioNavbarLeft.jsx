@@ -1,155 +1,86 @@
 "use client"
 
-import * as React from "react"
-import { ChevronLeft, ChevronDown, Pencil, Check, X, Layers, Plus } from "lucide-react"
+import { ArrowLeft, Check, X } from "lucide-react"
 import { cn } from "@/shared/lib/utils"
-import { Input } from "@/shared/ui/input"
-import { Button } from "@/shared/ui/button"
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from "@/shared/ui/dropdown-menu"
 
 export function StudioNavbarLeft({
     searchExpanded,
-    activeProjectId,
     isEditingName,
-    editInputRef,
     editedName,
     setEditedName,
     handleSaveEdit,
     handleCancelEdit,
     handleStartEdit,
     selectedProjectName,
-    projectSessions,
-    activeSessionId,
-    setActiveSessionId,
-    selectedSessionName,
-    setIsCreateSessionOpen
 }) {
     return (
         <div className={cn(
-            "shrink-0 flex items-center gap-2 overflow-hidden whitespace-nowrap transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
-            searchExpanded ? "basis-[0%] opacity-0 pointer-events-none" : "basis-[30%] opacity-100"
+            // Zedt 'overflow-hidden' bech k tesghar tet9ass w mato5rejch l'barra
+            "flex items-center gap-1 transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] overflow-hidden",
+            // 7attina 'w-0' w na7ina 'shrink-0' w hiya msakra bech bel7a9 twalli 0
+            searchExpanded ? "basis-0 w-0 opacity-0 pointer-events-none" : "basis-[30%] shrink-0 opacity-100"
         )}>
-            {/* Back Button */}
+            {/* ── Back Button (arrow_back) ── */}
             <a
                 href="/project"
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/5 border border-white/5 text-white/40 hover:bg-white/10 hover:text-white transition-all"
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white/50 hover:bg-white/5 hover:text-white transition-all"
                 title="Back to Projects"
             >
-                <ChevronLeft className="size-4" />
+                <ArrowLeft className="size-[22px]" />
             </a>
 
-            <div className="w-px h-4 bg-white/10 shrink-0" />
-
-            {/* Project name / edit */}
-            {activeProjectId && (
-                <div className="flex items-center gap-1.5 shrink-0 min-w-0">
-                    {isEditingName ? (
-                        <>
-                            <Input
-                                ref={editInputRef}
-                                value={editedName}
-                                onChange={(e) => setEditedName(e.target.value)}
-                                onKeyDown={(e) => {
-                                    if (e.key === "Enter")  handleSaveEdit()
-                                    if (e.key === "Escape") handleCancelEdit()
-                                }}
-                                className="h-8 bg-white/5 border border-[#D4FF00]/40 rounded-xl px-2.5 text-sm text-white outline-none w-[140px] focus:border-[#D4FF00]/70"
-                            />
-                            <Button
-                                onClick={handleSaveEdit}
-                                className="size-7 rounded-xl bg-[#D4FF00]/10 flex items-center justify-center text-[#D4FF00] hover:bg-[#D4FF00]/20 transition-all"
-                            >
-                                <Check className="size-3.5" />
-                            </Button>
-                            <Button
-                                onClick={handleCancelEdit}
-                                className="size-7 rounded-xl bg-white/5 flex items-center justify-center text-white/40 hover:bg-white/10 transition-all"
-                            >
-                                <X className="size-3.5" />
-                            </Button>
-                        </>
-                    ) : (
-                        <Button
-                            onClick={handleStartEdit}
-                            className="flex items-center gap-1.5 text-white/50 hover:text-white/80 transition-colors group/edit shrink-0"
-                            title="Edit project name"
-                        >
-                            <span className="text-sm truncate max-w-[100px]">{selectedProjectName}</span>
-                            <Pencil className="size-3 opacity-0 group-hover/edit:opacity-100 transition-opacity" />
-                        </Button>
+            {/* ── Collection Title (Dynamic Input) ── */}
+            <div className="flex items-center gap-2 px-1 min-w-0">
+                <input
+                    type="text"
+                    value={editedName || selectedProjectName || "Untitled Collection"}
+                    onChange={(e) => setEditedName(e.target.value)}
+                    onFocus={handleStartEdit}
+                    onBlur={handleSaveEdit}
+                    onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                            e.currentTarget.blur();
+                        }
+                        if (e.key === "Escape") {
+                            handleCancelEdit();
+                            e.currentTarget.blur();
+                        }
+                    }}
+                    className={cn(
+                        "bg-transparent border-none outline-none px-2 py-1 rounded-md transition-all text-[18px] font-medium text-white/90 hover:bg-white/5 focus:bg-white/5 focus:text-white w-full min-w-[120px]",
+                        isEditingName ? "text-white" : "text-white/80"
                     )}
-                </div>
-            )}
+                    aria-label="Collection title"
+                    placeholder="Collection sans titre"
+                />
 
-            {/* Session dropdown */}
-            {activeProjectId && (
-                <>
-                    <div className="h-4 bg-white/10 shrink-0" />
+                {/* ── Action Buttons (Save / Cancel) ── */}
+                {isEditingName && (
+                    <div className="flex items-center gap-1.5 shrink-0 animate-in fade-in zoom-in-95 duration-200">
+                        <button
+                            onMouseDown={(e) => {
+                                e.preventDefault(); 
+                                handleSaveEdit();
+                            }}
+                            className="p-1.5  text-white hover:bg-white/30 rounded-xl transition-all flex items-center justify-center"
+                            title="Save changes"
+                        >
+                            <Check className="size-6" strokeWidth={2.5} />
+                        </button>
 
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button
-                                type="button"
-                            >
-                                <Layers className="size-3.5" />
-                                <span className="text-sm truncate max-w-[90px]">
-                                    {selectedSessionName || "Select Session"}
-                                </span>
-                                <ChevronDown className="size-3.5 opacity-40 group-hover:opacity-100 transition-opacity" />
-                            </Button>
-                        </DropdownMenuTrigger>
-
-                        <DropdownMenuContent className="w-56 bg-black/40 backdrop-blur-xl border-white/10 text-white rounded-xl p-1.5 shadow-2xl z-50">
-                            <DropdownMenuLabel className="text-[10px] uppercase tracking-widest text-white/30 px-3 py-2 font-normal">
-                                Sessions
-                            </DropdownMenuLabel>
-                            <DropdownMenuSeparator className="bg-white/5 mx-1.5" />
-
-                            <div className="py-1 max-h-[260px] overflow-y-auto">
-                                {projectSessions.length === 0 ? (
-                                    <div className="px-3 py-4 text-center">
-                                        <p className="text-xs text-white/30">No sessions found</p>
-                                    </div>
-                                ) : (
-                                    projectSessions.map((s) => (
-                                        <DropdownMenuItem
-                                            key={s.session_id}
-                                            onClick={() => setActiveSessionId(s.session_id)}
-                                            className={cn(
-                                                "flex items-center justify-between gap-2 px-3 py-2 rounded-xl cursor-pointer transition-colors focus:bg-white/5 focus:text-white",
-                                                activeSessionId === s.session_id
-                                                    ? "bg-white/5 text-white"
-                                                    : "text-white/60"
-                                            )}
-                                        >
-                                            <span className="text-sm truncate">{s.session_name}</span>
-                                            {activeSessionId === s.session_id && (
-                                                <div className="size-1.5 rounded-full bg-[#D4FF00]" />
-                                            )}
-                                        </DropdownMenuItem>
-                                    ))
-                                )}
-                            </div>
-
-                            <DropdownMenuSeparator className="bg-white/5 mx-1.5" />
-                            <DropdownMenuItem
-                                onSelect={(e) => { e.preventDefault(); setIsCreateSessionOpen(true) }}
-                                className="flex items-center gap-2 px-3 py-2 rounded-xl cursor-pointer text-[#D4FF00]/60 hover:text-[#D4FF00] focus:bg-[#D4FF00]/5 focus:text-[#D4FF00]"
-                            >
-                                <Plus className="size-4" />
-                                <span className="text-sm">New Session</span>
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                </>
-            )}
+                        <button
+                            onMouseDown={(e) => {
+                                e.preventDefault();
+                                handleCancelEdit();
+                            }}
+                            className="p-1.5 text-white  hover:bg-white/30 rounded-xl transition-all flex items-center justify-center"
+                            title="Cancel changes"
+                        >
+                            <X className="size-6" strokeWidth={2.5} />
+                        </button>
+                    </div>
+                )}
+            </div>
         </div>
     )
 }

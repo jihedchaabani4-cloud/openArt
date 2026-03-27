@@ -23,16 +23,41 @@ export function useUpdateSession() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ sessionId, sessionData }) => {
-      // Assuming PUT or PATCH /sessions/:id
-      const res = await api.put(`/sessions/${sessionId}`, sessionData);
+      // Backend uses PATCH /sessions/:id
+      const res = await api.patch(`/sessions/${sessionId}`, sessionData);
       if (res.ok === false || res.success === false) throw new Error(res.message || 'Failed to update session');
       return res.data;
     },
-    onSuccess: (_, variables) => {
-      if (variables.projectId) {
-        queryClient.invalidateQueries({
-          queryKey: queryKeys.sessions.byProject(variables.projectId),
-        });
+    onMutate: async (variables) => {
+      const { sessionId, sessionData, projectId } = variables;
+      const queryKey = projectId ? queryKeys.sessions.byProject(projectId) : null;
+      
+      let previousSessions = [];
+      if (queryKey) {
+        await queryClient.cancelQueries({ queryKey });
+        previousSessions = queryClient.getQueryData(queryKey);
+        
+        if (previousSessions) {
+          queryClient.setQueryData(queryKey, (old) => {
+            if (!old) return old;
+            return old.map(session => 
+              session.session_id === sessionId 
+                ? { ...session, ...sessionData } 
+                : session
+            );
+          });
+        }
+      }
+      return { previousSessions, queryKey };
+    },
+    onError: (err, variables, context) => {
+      if (context?.queryKey && context?.previousSessions) {
+        queryClient.setQueryData(context.queryKey, context.previousSessions);
+      }
+    },
+    onSettled: (_, error, variables, context) => {
+      if (context?.queryKey) {
+        queryClient.invalidateQueries({ queryKey: context.queryKey });
       }
     },
   });
