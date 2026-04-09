@@ -14,11 +14,17 @@ export const queryKeys = {
         byProject: (projectId)   => ['sessions', projectId],
     },
 
-    // ── Generations ───────────────────────────────────────────────────────────
+    // ── Workflows ─────────────────────────────────────────────────────────────
+    workflows: {
+        all:       ()                          => ['workflows'],
+        byProject: (projectId, sessionId)      => ['workflows', projectId, sessionId],
+        paginated: (page)                      => ['allWorkflows', page],
+    },
+
+    // ── Backward Compat: generations ──────────────────────────────────────────
     generations: {
-        all:       ()                          => ['generations'],
-        byProject: (projectId, sessionId)      => ['generations', projectId, sessionId],
-        paginated: (page)                      => ['allGenerations', page],
+        all:       ()                          => ['workflows'],
+        byProject: (projectId, sessionId)      => ['workflows', projectId, sessionId],
     },
 
     // ── Assets ────────────────────────────────────────────────────────────────
@@ -30,5 +36,11 @@ export const queryKeys = {
     // ── Models ────────────────────────────────────────────────────────────────
     models: {
         studio: () => ['studioModels'],
+    },
+
+    // ── Project Data (Unified: sessions + collections + workflows + media) ────
+    projectData: {
+        byProject:           (projectId)             => ['projectData', projectId],
+        byProjectAndSession: (projectId, sessionId)  => ['projectData', projectId, sessionId],
     },
 };

@@ -5,12 +5,9 @@ import { useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import { Image as ImageIcon, Video, Loader2, Plus, MoreHorizontal, Check } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
-import { useGenerationsStore } from "@/features/generations/model/useGenerationsStore";
-import { useSessions } from "@/features/projects/api/projectsApi";
+import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows";
+import { useProjectData } from "@/features/workflows/api/workflowsApi";
 import { useCreateSession, useUpdateSession, useDeleteSession } from "@/features/projects/api/createSessionApi";
-import { pendingSessionIds } from "@/features/generations/api/generationsApi";
-import { queryKeys } from "@/shared/api/queryKeys";
-import { api } from "@/shared/api/client";
 import {
     DropdownMenu,
     DropdownMenuTrigger,
@@ -53,7 +50,13 @@ const SPRING_FAST = {
 export function SessionSidebar() {
     const queryClient = useQueryClient();
     const { selectedProjectId, activeSessionId, setActiveSessionId } = useGenerationsStore();
-    const { data: sessions = [], isLoading } = useSessions(selectedProjectId);
+
+    // ── Fetch all project data (sessions come from projectContents.sessions) ──
+    const { data: projectData, isLoading } = useProjectData(selectedProjectId);
+    const sessions = projectData?.projectContents?.sessions ?? [];
+    const workflows = projectData?.projectContents?.workflows ?? [];
+    const allMedia = projectData?.projectContents?.media ?? [];
+
     const { mutateAsync: createSession } = useCreateSession();
     const { mutateAsync: updateSession } = useUpdateSession();
     const { mutateAsync: deleteSession } = useDeleteSession();
@@ -66,90 +69,42 @@ export function SessionSidebar() {
     const [editingSessionId, setEditingSessionId] = React.useState(null);
     const [editingName, setEditingName] = React.useState("");
 
-    // ── Cover watcher: poll for completed asset URL and patch sessions cache ──
-    React.useEffect(() => {
-        if (!selectedProjectId) return;
-
-        const interval = setInterval(async () => {
-            if (pendingSessionIds.size === 0) return;
-
-            const sessionsSnapshot = queryClient.getQueryData(queryKeys.sessions.byProject(selectedProjectId));
-            if (!Array.isArray(sessionsSnapshot)) return;
-
-            const toCheck = [...pendingSessionIds].filter(sid =>
-                sessionsSnapshot.some(s => s.session_id === sid)
-            );
-
-            for (const sid of toCheck) {
-                try {
-                    const res = await api.get(`/generations/generations/${selectedProjectId}?session_id=${sid}`);
-                    if (!res.ok || !res.data) continue;
-
-                    const completedItem = res.data
-                        .flatMap(g => g.items || [])
-                        .find(item => item.asset?.file_url);
-
-                    if (completedItem?.asset?.file_url) {
-                        queryClient.setQueryData(queryKeys.sessions.byProject(selectedProjectId), (old) => {
-                            if (!Array.isArray(old)) return old;
-                            return old.map(s =>
-                                s.session_id === sid
-                                    ? { ...s, cover_url: s.cover_url || completedItem.asset.file_url }
-                                    : s
-                            );
-                        });
-
-                        queryClient.invalidateQueries({ queryKey: queryKeys.sessions.byProject(selectedProjectId) });
-                        pendingSessionIds.delete(sid);
-                        console.log(`[SessionSidebar] ✅ Generation complete — cover_url patched + sessions refreshed for: ${sid}`);
-                    }
-                } catch (e) {
-                    // Silently fail — next interval will retry
-                }
+    // Group media by session and sort by most recent for thumbnails
+    const sessionMediaMap = React.useMemo(() => {
+        const map = {};
+        const wfToSession = {};
+        workflows.forEach(w => {
+            wfToSession[w.name || w.id] = w.session_id || w.metadata?.sessionId;
+        });
+        
+        allMedia.forEach(m => {
+            const sid = wfToSession[m.workflowId];
+            if (sid) {
+                if (!map[sid]) map[sid] = [];
+                map[sid].push(m);
             }
-        }, 4000);
-
-        return () => clearInterval(interval);
-    }, [selectedProjectId, queryClient]);
+        });
+        
+        Object.values(map).forEach(arr => {
+            arr.sort((a,b) => new Date(b.mediaMetadata?.createTime || b.create_time || 0) - new Date(a.mediaMetadata?.createTime || a.create_time || 0));
+        });
+        return map;
+    }, [workflows, allMedia]);
 
     if (!selectedProjectId) return null;
 
     const isExpanded = isHovered || openDropdownId !== null || openContextMenuId !== null || editingSessionId !== null;
 
     const handleCreateSession = async () => {
-        console.log("[SessionSidebar] 'New session' clicked. Verifying sessions...");
-
-        if (!sessions || sessions.length === 0) {
-            console.log("[SessionSidebar] No existing sessions. Creating a new 'Untitled' session.");
-            const newSession = await createSession({ project_id: selectedProjectId, session_name: "Untitled" });
-            if (newSession && newSession.session_id) setActiveSessionId(newSession.session_id);
-            return;
-        }
-
-        const sortedSessions = [...sessions].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-        const latestSession = sortedSessions[0];
-        const isEmpty = latestSession.items_count === 0 || (!latestSession.items_count && latestSession.image_cover == null);
-
-        console.log("[SessionSidebar] Latest session found:", latestSession.name || latestSession.session_name || "Untitled");
-        console.log("[SessionSidebar] Is the latest session completely empty?", isEmpty, `(Items count: ${latestSession.items_count || 0})`);
-
-        if (isEmpty) {
-            console.log("[SessionSidebar] ➔ Reusing the empty session instead of creating a new one.");
-            setActiveSessionId(latestSession.session_id);
-        } else {
-            console.log("[SessionSidebar] ➔ Latest session has content. Creating a new 'Untitled' session via API...");
-            const newSession = await createSession({ project_id: selectedProjectId, session_name: "Untitled" });
-            if (newSession && newSession.session_id) {
-                console.log("[SessionSidebar] ➔ Successfully created and switched to new session:", newSession.session_id);
-                setActiveSessionId(newSession.session_id);
-            }
+        const newSession = await createSession({ project_id: selectedProjectId, session_name: "Untitled" });
+        if (newSession?.id || newSession?.session_id) {
+            setActiveSessionId(newSession.id || newSession.session_id);
         }
     };
 
     const handleRename = (sessionId, currentName) => {
         setEditingSessionId(sessionId);
         setEditingName(currentName || "Untitled");
-        // Also close the dropdown so it doesn't stay open over the input
         setOpenDropdownId(null);
     };
 
@@ -158,12 +113,7 @@ export function SessionSidebar() {
         const targetName = editingName.trim();
         if (targetId) {
             setEditingSessionId(null);
-            
-            const session = sessions.find(s => s.session_id === targetId);
-            const currentName = session?.session_name || "Untitled";
-            
-            if (targetName && targetName !== currentName) {
-                // Not waiting on async intentionally, UI returns instantly to unedited view
+            if (targetName) {
                 updateSession({ sessionId: targetId, sessionData: { session_name: targetName }, projectId: selectedProjectId });
             }
         }
@@ -193,19 +143,19 @@ export function SessionSidebar() {
     };
 
     return (
-        <div className="w-[62px] h-full shrink-0 relative z-40 bg-transparent">
+        <div className="w-[60px] h-full shrink-0 relative z-40 bg-transparent">
 
             {/* ── Expanding wrapper — Framer Motion spring ── */}
             <motion.div
-                className="absolute left-0 top-1/2 -translate-y-1/2 max-h-[90vh] h-fit flex flex-col items-start overflow-hidden py-2 border-y border-r border-white/5 rounded-r-md shadow-2xl"
+                className="absolute left-0 top-1/2 -translate-y-1/2 max-h-[90vh] h-fit flex flex-col items-start overflow-hidden py-2 rounded-r-md shadow-2xl"
                 animate={{
                     width: isExpanded ? 280 : 72,
-                    backgroundColor: isExpanded
-                        ? "rgba(10,10,10,0.85)"
-                        : "rgba(10,10,10,0.60)",
+                    backgroundColor: isExpanded ? "rgba(10,10,10,0.85)" : "rgba(0,0,0,0)",
+                    boxShadow: isExpanded ? "0 25px 50px -12px rgba(0,0,0,0.5)" : "none",
+                    borderColor: isExpanded ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0)",
                 }}
                 transition={SPRING}
-                style={{ backdropFilter: "blur(40px)" }}
+                style={{ backdropFilter: isExpanded ? "blur(40px)" : "none" }}
                 onMouseEnter={() => setIsHovered(true)}
                 onMouseLeave={() => setIsHovered(false)}
             >
@@ -251,22 +201,29 @@ export function SessionSidebar() {
                             </div>
                         ) : (
                             sessions.map((session, index) => {
-                                const isActive = activeSessionId === session.session_id;
-                                const isVideoSession = session.type === 'video' || (session.name || '').toLowerCase().includes('video');
-                                const Icon = isVideoSession ? Video : ImageIcon;
-
-                                let thumbUrl = session.cover_url || null;
-                                if (!thumbUrl && session.items && session.items.length > 0) {
-                                    const firstItem = session.items[0];
-                                    thumbUrl = firstItem?.file_url || firstItem?.asset?.file_url || firstItem?.asset?.url || null;
-                                }
-
-                                const itemsCount = session.items_count || session.items?.length || 0;
+                                // New shape: session.name = UUID, session.metadata.displayName = label
+                                const sessionId = session.name;
+                                const isActive = activeSessionId === sessionId;
+                                const displayName = session.metadata?.displayName || "Untitled";
+                                
+                                const sessionMediaList = sessionMediaMap[sessionId] || [];
+                                const itemsCount = sessionMediaList.length;
+                                const latestMedia = sessionMediaList[0];
+                                const thumbUrl = latestMedia?.url || null;
+                                const isVideoSession = thumbUrl && /\.(mp4|webm|mov)$/i.test(thumbUrl);
+                                const Icon = ImageIcon;
 
                                 return (
                                     <ContextMenu 
-                                        key={session.session_id}
-                                        onOpenChange={(open) => setOpenContextMenuId(open ? session.session_id : null)}
+                                        key={sessionId}
+                                        onOpenChange={(open) => {
+                                            if (open) {
+                                                setOpenContextMenuId(sessionId);
+                                                setOpenDropdownId(null);
+                                            } else {
+                                                setOpenContextMenuId(null);
+                                            }
+                                        }}
                                     >
                                         <ContextMenuTrigger asChild>
                                             <motion.div
@@ -274,7 +231,7 @@ export function SessionSidebar() {
                                                     "relative w-full flex items-center justify-start rounded-md group/item p-1 cursor-pointer",
                                             isActive && isExpanded ? "bg-[#1e1e1e]" : ""
                                         )}
-                                        onClick={() => setActiveSessionId(session.session_id)}
+                                        onClick={() => setActiveSessionId(sessionId)}
                                         // Entrance animation
                                         initial={{ opacity: 0, x: -8 }}
                                         animate={{ opacity: 1, x: 0 }}
@@ -299,7 +256,7 @@ export function SessionSidebar() {
                                             style={{ pointerEvents: isExpanded ? "auto" : "none" }}
                                         >
                                             <div className="flex items-center justify-between w-full">
-                                                {editingSessionId === session.session_id ? (
+                                                {editingSessionId === sessionId ? (
                                                     <div className="flex flex-1 items-center gap-1 min-w-0 mr-2">
                                                         <input
                                                             type="text"
@@ -331,11 +288,17 @@ export function SessionSidebar() {
                                                     </div>
                                                 ) : (
                                                     <span className="font-semibold text-xs text-white truncate max-w-[120px]">
-                                                        {session.name || session.session_name || "Untitled"}
+                                                        {displayName}
                                                     </span>
                                                 )}
 
-                                                <DropdownMenu onOpenChange={(open) => setOpenDropdownId(open ? session.session_id : null)}>
+                                                <DropdownMenu 
+                                                    open={openDropdownId === sessionId}
+                                                    onOpenChange={(open) => {
+                                                        setOpenDropdownId(open ? sessionId : null);
+                                                        if (open) setOpenContextMenuId(null);
+                                                    }}
+                                                >
                                                     <DropdownMenuTrigger asChild onClick={e => e.stopPropagation()}>
                                                         <button className="text-white/40 hover:text-white p-1.5 rounded-md hover:bg-white/10 opacity-0 group-hover/item:opacity-100 transition-opacity">
                                                             <MoreHorizontal className="w-4 h-4" />
@@ -343,13 +306,13 @@ export function SessionSidebar() {
                                                     </DropdownMenuTrigger>
                                                     <DropdownMenuContent align="end" className="bg-[#1e1e1e] border-white/10 text-white min-w-[140px] rounded-md z-50 shadow-2xl">
                                                         <DropdownMenuItem
-                                                            onClick={(e) => { e.stopPropagation(); handleRename(session.session_id, session.session_name); }}
+                                                            onClick={(e) => { e.stopPropagation(); handleRename(sessionId, displayName); }}
                                                             className="focus:bg-white/10 cursor-pointer"
                                                         >
                                                             Edit title
                                                         </DropdownMenuItem>
                                                         <DropdownMenuItem
-                                                            onClick={(e) => { e.stopPropagation(); handleDelete(session.session_id); }}
+                                                            onClick={(e) => { e.stopPropagation(); handleDelete(sessionId); }}
                                                             className="text-red-400 focus:text-red-400 focus:bg-red-500/10 cursor-pointer"
                                                         >
                                                             Delete
@@ -359,15 +322,15 @@ export function SessionSidebar() {
                                             </div>
 
                                             <span className="text-xs font-medium text-white/40 mt-1">
-                                                {formatRelativeTime(session.updated_at || session.created_at)}
+                                                {formatRelativeTime(session.metadata?.createTime)}
                                             </span>
                                         </motion.div>
 
                                         {/* ── Thumbnail / Avatar ── */}
                                         <motion.div
                                             className={cn(
-                                                "w-12 h-12 shrink-0 rounded-md overflow-hidden flex items-center justify-center relative z-10",
-                                                isActive ? "bg-black/20" : "bg-black/20"
+                                                "w-12 h-12 shrink-0 rounded-md overflow-hidden flex items-center justify-center bg-white/20 relative z-10",
+                                               
                                             )}
                                             whileHover={{ scale: 1.06 }}
                                             whileTap={{ scale: 0.95 }}
@@ -397,13 +360,13 @@ export function SessionSidebar() {
                                             <AnimatePresence>
                                                 {itemsCount > 0 && (
                                                     <motion.div
-                                                        className="absolute right-1 bottom-1 min-w-[18px] h-[18px] rounded-full bg-[#1e1e1e] border-2 border-[#1e1e1e] flex items-center justify-center px-1 z-20"
+                                                        className="absolute right-0.5 bottom-0.5 min-w-[15px] h-[15px] rounded-full bg-[#1e1e1e] border-2 border-[#1e1e1e] flex items-center justify-center px-1 z-20"
                                                         initial={{ scale: 0, opacity: 0 }}
                                                         animate={{ scale: 1, opacity: 1 }}
                                                         exit={{ scale: 0, opacity: 0 }}
                                                         transition={SPRING_FAST}
                                                     >
-                                                        <span className="text-[9px] font-black text-white/90 leading-none">
+                                                        <span className="text-[9px] font-medium text-white/90 leading-none">
                                                             {itemsCount}
                                                         </span>
                                                     </motion.div>
@@ -414,20 +377,22 @@ export function SessionSidebar() {
                                         </motion.div>
                                     </motion.div>
                                     </ContextMenuTrigger>
-                                    <ContextMenuContent className="bg-[#1e1e1e] border-white/10 text-white min-w-[140px] rounded-md z-50 shadow-2xl">
-                                        <ContextMenuItem
-                                            onClick={(e) => { e.stopPropagation(); handleRename(session.session_id, session.session_name); }}
-                                            className="focus:bg-white/10 cursor-pointer"
-                                        >
-                                            Edit title
-                                        </ContextMenuItem>
-                                        <ContextMenuItem
-                                            onClick={(e) => { e.stopPropagation(); handleDelete(session.session_id); }}
-                                            className="text-red-400 focus:text-red-400 focus:bg-red-500/10 cursor-pointer"
-                                        >
-                                            Delete session
-                                        </ContextMenuItem>
-                                    </ContextMenuContent>
+                                    {openContextMenuId === sessionId && (
+                                        <ContextMenuContent className="bg-[#1e1e1e] border-white/10 text-white min-w-[140px] rounded-md z-50 shadow-2xl">
+                                            <ContextMenuItem
+                                                onClick={(e) => { e.stopPropagation(); handleRename(sessionId, displayName); }}
+                                                className="focus:bg-white/10 cursor-pointer"
+                                            >
+                                                Edit title
+                                            </ContextMenuItem>
+                                            <ContextMenuItem
+                                                onClick={(e) => { e.stopPropagation(); handleDelete(sessionId); }}
+                                                className="text-red-400 focus:text-red-400 focus:bg-red-500/10 cursor-pointer"
+                                            >
+                                                Delete session
+                                            </ContextMenuItem>
+                                        </ContextMenuContent>
+                                    )}
                                 </ContextMenu>
                                 );
                             })

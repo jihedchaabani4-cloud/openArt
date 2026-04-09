@@ -2,15 +2,18 @@
 
 import * as React from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { useGenerationsStore } from "@/features/generations/model/useGenerationsStore"
-import { useFilteredGenerations } from "@/features/generations/model/useFilteredGenerations"
+import { useRouter } from "next/navigation"
+import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows"
+import { useFilteredWorkflows as useFilteredGenerations } from "@/features/workflows/model/useFilteredWorkflows"
+import { ActiveFilterTags } from "@/features/workflows/ui/ActiveFilterTags"
 import ImagePromptBar from "@/features/prompt-bar"
 
 import { cn } from "@/shared/lib/utils"
 import Masonry from 'react-masonry-css'
+import { ArrowUp } from "lucide-react"
 import { MediaGridItem } from "./MediaGridItem"
 import { SessionSidebar } from "../SessionSidebar/SessionSidebar"
-import { Session } from "./GeneratedMediaBlock"
+import { getItemMetadata, getPrimaryMedia } from "@/shared/lib/generationUtils";
 
 // ─── Sub-Components ──────────────────────────────────────────────────────────
 
@@ -28,7 +31,7 @@ const EmptyState = ({ message }) => (
             className="flex flex-col items-center gap-6 z-10"
         >
             <span className="text-[10px] font-bold tracking-[0.4em] text-white/40 uppercase">
-                Generations Studio
+                Workflows Studio
             </span>
             
             <h1 className="text-4xl md:text-5xl font-bold text-center max-w-2xl leading-tight tracking-tight px-6">
@@ -37,7 +40,7 @@ const EmptyState = ({ message }) => (
                 </span>
             </h1>
 
-            {message && message !== "No cinematic shots found" && message !== "No audio generations found" && message !== "No generated images found" && (
+            {message && message !== "No cinematic shots found" && message !== "No audio workflows found" && message !== "No generated images found" && (
                 <p className="text-sm font-medium tracking-wide uppercase text-white/20 mt-4">{message}</p>
             )}
         </motion.div>
@@ -47,69 +50,65 @@ const EmptyState = ({ message }) => (
     </div>
 )
 
-export function GenerationsStudio() {
-    // ── FSD Local UI State (Zustand) ──
-    const { 
-        selectedProjectId: projectId, 
-        activeSessionId,
-        activeFilter,
-        studioLayoutMode,
-        setStudioLayoutMode,
-        gridSize,
-        setGridSize
-    } = useGenerationsStore()
+export function GenerationsStudio({ 
+    workflows: propWorkflows = null, 
+    isLoading: propIsLoading = null, 
+    gridSize: propGridSize = null,
+    isDetailView: propIsDetailView = null,
+    selectedMediaId: propSelectedMediaId = null,
+    onSelectMedia = () => {},
+    emptyMessage = "NO WORKFLOWS FOUND"
+}) {
+    const store = useGenerationsStore();
+    const router = useRouter();
+    const { data: fetchResult, isLoading: fetchIsLoading } = useFilteredGenerations(store.selectedProjectId, store.activeSessionId);
 
-    // ── Server State (React Query + Client Filtering) ──
-    const { 
-        data: displayContent = [], 
-        isLoading: generationsLoading, 
-        refetch: refetchGenerations 
-    } = useFilteredGenerations(projectId, activeSessionId)
+    const workflows = propWorkflows !== null ? propWorkflows : (fetchResult?.filteredWorkflows || []);
+    const isLoading = propIsLoading !== null ? propIsLoading : fetchIsLoading;
+    const gridSize = propGridSize !== null ? propGridSize : store.gridSize;
+    
+    // Navigate to the Edit Page for this workflow
+    const handleWorkflowClick = (workflow) => {
+        const workflowId = workflow.id || workflow.name;
+        if (!workflowId || !store.selectedProjectId) return;
+        router.push(`/projects/${store.selectedProjectId}/edit/${workflowId}`);
+    };
 
-    const loading = generationsLoading;
+    const scrollRef = React.useRef(null);
+    const [showTopBtn, setShowTopBtn] = React.useState(false);
 
-    // Periodic refresh if there are pending generations
-    React.useEffect(() => {
-        if (!projectId || !activeSessionId) return;
+    const handleScroll = React.useCallback(() => {
+        if (!scrollRef.current) return;
+        setShowTopBtn(scrollRef.current.scrollTop > 400);
+    }, []);
 
-        const hasPending = displayContent.some(g => g.status === 'processing' || g.status === 'pending');
-        if (hasPending) {
-            const timer = setInterval(() => {
-                refetchGenerations();
-            }, 3000);
-            return () => clearInterval(timer);
-        }
-    }, [projectId, activeSessionId, displayContent, refetchGenerations])
-
-    // Flatten items for Grid mode
-    const flatItems = React.useMemo(() => {
-        return displayContent.flatMap(group => 
-            (group.items || []).filter(i => i.status !== 'deleted').map(item => ({
-                ...item,
-                group
-            }))
-        );
-    }, [displayContent]);
+    const scrollToTop = React.useCallback(() => {
+        scrollRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+    }, []);
 
     // Masonry column settings based on gridSize
     const breakpointColumnsObj = {
-        default: gridSize === "lg" ? 4 : gridSize === "md" ? 6 : 8,
-        1536: gridSize === "lg" ? 4 : gridSize === "md" ? 5 : 6, // 2xl
-        1280: gridSize === "lg" ? 3 : gridSize === "md" ? 4 : 5, // xl
-        1024: gridSize === "lg" ? 3 : 4,                         // lg
-        768: 2,                                                  // md
-        640: 1                                                   // sm
+        default: gridSize === "lg" ? 3 : gridSize === "md" ? 4 : 5,
+        1536: gridSize === "lg" ? 3 : gridSize === "md" ? 4 : 5,
+        1280: gridSize === "lg" ? 2 : gridSize === "md" ? 3 : 4,
+        1024: gridSize === "lg" ? 2 : gridSize === "md" ? 3 : 4,
+        768: 2,
+        640: 1
     };
 
-    return (
-        <div className="flex h-full w-full overflow-hidden text-white">
-            <SessionSidebar />
-            <main className="flex-1 flex flex-col relative min-w-0 overflow-hidden bg-transparent">
 
-                {/* ── Content ── */}
-                <div className="flex-1 overflow-y-auto overflow-x-hidden p-2 scrollbar-hide">
+    return (
+        <div className="flex h-full w-full overflow-hidden text-white bg-[#050505]">
+            <SessionSidebar />
+            
+            <main className="flex-1 flex flex-col relative min-w-0 overflow-hidden">
+                <div 
+                    ref={scrollRef}
+                    onScroll={handleScroll}
+                    className="flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-6 scrollbar-hide"
+                >
                     <AnimatePresence mode="wait">
-                        {loading ? (
+                        {isLoading ? (
                             <motion.div 
                                 key="loading"
                                 initial={{ opacity: 0 }}
@@ -119,79 +118,81 @@ export function GenerationsStudio() {
                             >
                                 <EmptyState message="Loading..." />
                             </motion.div>
-                        ) : displayContent.length > 0 ? (
-                                <motion.div 
-                                    key={`feed-${projectId}`}
-                                    initial={{ opacity: 0, y: 16 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, y: -16 }}
-                                    transition={{ duration: 0.4, ease: "easeOut" }}
-                                    className="flex flex-col gap-4 w-full  pb-92"
+                        ) : workflows.length > 0 ? (
+                            <motion.div 
+                                key="feed"
+                                initial={{ opacity: 0, y: 16 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -16 }}
+                                transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
+                                className="flex flex-col gap-6 w-full pb-32"
+                            >
+                                <Masonry
+                                    breakpointCols={breakpointColumnsObj}
+                                    className="flex w-auto gap-4"
+                                    columnClassName="bg-clip-padding flex flex-col gap-4"
                                 >
-                                    {studioLayoutMode === 'grouped' ? (
-                                        displayContent.map(group => (
-                                            <Session 
-                                                key={group.id} 
-                                                group={group}
-                                                gridSize={gridSize}
-                                            />
-                                        ))
-                                    ) : (
-                                        <Masonry
-                                            breakpointCols={breakpointColumnsObj}
-                                            className="flex w-auto gap-4"
-                                            columnClassName="bg-clip-padding flex flex-col gap-4"
-                                        >
-                                            {flatItems.map(item => (
-                                                <div 
-                                                    key={item.id}
-                                                    className="relative  shrink-0"
-                                                >
-                                                    <MediaGridItem 
-                                                        item={item}
-                                                        group={item.group}
-                                                        showPrompt={true}
-                                                    />
-                                                </div>
-                                            ))}
-                                        </Masonry>
-                                    )}
-                                </motion.div>
+                                    {workflows.map((workflow, i) => {
+                                        const primaryItem = getPrimaryMedia(workflow);
+                                        if (!primaryItem) return null;
+
+                                        return (
+                                            <motion.div 
+                                                key={workflow.id || workflow.name || i} 
+                                                layout
+                                                className="relative shrink-0"
+                                            >
+                                                <MediaGridItem 
+                                                    workflow={workflow} 
+                                                    onClick={() => handleWorkflowClick(workflow)}
+                                                    className="rounded-2xl border-none shadow-xl"
+                                                />
+                                            </motion.div>
+                                        );
+                                    })}
+                                </Masonry>
+                            </motion.div>
                         ) : (
                             <motion.div 
-                                key={`empty-${projectId}`}
+                                key="empty"
                                 initial={{ opacity: 0, scale: 0.95 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 exit={{ opacity: 0, scale: 1.05 }}
                                 className="w-full h-full flex items-center justify-center"
                             >
-                                <EmptyState message={
-                                    !projectId ? "Select a project to start" :
-                                    "No generated assets found"
-                                } />
+                                <EmptyState message={emptyMessage} />
                             </motion.div>
                         )}
                     </AnimatePresence>
                 </div>
 
-                {/* ── Bottom Floating Prompt Bar ── */}
-                <div className="fixed bottom-8 inset-x-0 z-30 flex justify-center px-6 pointer-events-none">
+                {/* Fixed bottom bar for prompt */}
+                <div className="absolute bottom-10 inset-x-0 z-30 flex justify-center px-6 pointer-events-none">
                     <div className="w-full max-w-[650px] pointer-events-auto">
                         <ImagePromptBar hideBackground={true} />
                     </div>
                 </div>
 
+                <AnimatePresence>
+                    {showTopBtn && (
+                        <motion.button
+                            initial={{ opacity: 0, y: 30, scale: 0.8 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: 30, scale: 0.8 }}
+                            transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                            onClick={scrollToTop}
+                            className="absolute bottom-10 right-10 z-50 p-3 rounded-full bg-white/10 border border-white/10 hover:bg-white/20 text-white backdrop-blur-xl shadow-2xl transition-all cursor-pointer"
+                        >
+                            <ArrowUp className="w-5 h-5" />
+                        </motion.button>
+                    )}
+                </AnimatePresence>
+
                 <style jsx global>{`
-                    .scrollbar-hide::-webkit-scrollbar {
-                        display: none;
-                    }
-                    .scrollbar-hide {
-                        -ms-overflow-style: none;
-                        scrollbar-width: none;
-                    }
+                    .scrollbar-hide::-webkit-scrollbar { display: none; }
+                    .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
                 `}</style>
             </main>
-            
         </div>
     )
 }

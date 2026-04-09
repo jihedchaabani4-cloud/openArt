@@ -3,4 +3,4 @@ export { default } from "./ui/PromptBar"
 export * from "./model/usePromptBar"
 
 // Re-exports for components used elsewhere
-export * from "./ui/PromptBarComponents"
+export * from "./ui/selectors"

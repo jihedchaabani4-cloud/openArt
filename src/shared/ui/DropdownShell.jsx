@@ -85,12 +85,15 @@ export function DropdownSegmented({ value, onChange, options }) {
       {options.map((opt) => (
         <button
           key={opt.value}
-          onClick={() => onChange(opt.value)}
+          onClick={() => !opt.disabled && onChange(opt.value)}
+          disabled={opt.disabled}
           className={cn(
-            "flex-1 py-2 rounded-lg text-sm transition-all font-medium flex items-center justify-center gap-2",
-            value === opt.value
+            "flex-1 py-3 rounded-lg text-sm transition-all font-medium flex flex-col items-center justify-center gap-1 relative",
+            value === opt.value && !opt.disabled
               ? "bg-[#505153] text-white"
-              : "text-white hover:text-white"
+              : opt.disabled
+              ? "opacity-30 cursor-not-allowed"
+              : "text-white/70 hover:text-white hover:bg-white/5"
           )}
         >
           {opt.label}

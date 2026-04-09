@@ -4,4 +4,4 @@
 //     This file exists only so old imports don't break during migration.
 
 export { adaptReferences, validateReference, buildReferencesPayload, getGenerationConfig } from "./referenceUtils";
-export { getGridClass, formatGenerationDate, getItemMetadata } from "./displayUtils";
+export { getGridClass, formatGenerationDate, getItemMetadata, getPrimaryMedia, getPrimaryMediaConfig } from "./displayUtils";

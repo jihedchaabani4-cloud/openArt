@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { useGenerationsStore } from "@/features/generations/model/useGenerationsStore"
+import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows"
 import ImagePromptBar from "@/features/prompt-bar"
 
 

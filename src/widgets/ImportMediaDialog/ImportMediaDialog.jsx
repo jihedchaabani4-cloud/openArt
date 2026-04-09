@@ -2,7 +2,7 @@ import React from "react";
 import { Upload, Search } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@/shared/ui/dialog";
 import { useProjects } from "@/features/projects/api/projectsApi";
-import { useGenerationsStore } from "@/features/generations/model/useGenerationsStore";
+import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows";
 import { useLibraryFilter } from "@/features/prompt-bar/model/useLibraryFilter";
 import { Button } from "@/shared/ui/button";
 import {
@@ -53,10 +53,13 @@ export function ImportMediaDialog({
 
   // ─── Selection Logic ──────────────────────────────────────────────────────
   const toggleSelection = (item) => {
+    const itemUrl = item.url ?? item.image?.url ?? item.video?.url ?? item.file_url;
+    const isVideo = item.type === "video" || item.is_video || !!item.video;
+    
     const asset = {
-      url:      item.file_url ?? item.url,
+      url:      itemUrl,
       asset_id: item.id,
-      is_video: item.is_video,
+      is_video: isVideo,
     };
 
     setSelectedItems((prev) => {
@@ -175,28 +178,31 @@ export function ImportMediaDialog({
               columnClassName="pl-3 bg-clip-padding"
             >
               {visibleItems.map((item) => {
-                const isSelected = selectedItems.some(p => p.asset_id === item.id || p.url === (item.file_url ?? item.url));
+                const itemUrl = item.url ?? item.image?.url ?? item.video?.url ?? item.file_url;
+                const isVideo = item.type === "video" || item.is_video || !!item.video;
+                
+                const isSelected = selectedItems.some(p => p.asset_id === item.id || p.url === itemUrl);
                 const isMaxReached = selectedItems.length >= maxAllowed;
                 const isDisabled = isMaxReached && !isSelected;
 
                 return (
                   <button
-                    key={item.id ?? item.url}
+                    key={item.id ?? itemUrl}
                     onClick={() => toggleSelection(item)}
                     className={`group relative mb-3 w-full rounded-lg overflow-hidden bg-white/5 transition-all
                       ${isSelected ? "ring-2 ring-[#3b82f6]" : "hover:ring-2 hover:ring-white/30"}
                       ${isDisabled ? "opacity-20 cursor-not-allowed" : "cursor-pointer"}
                     `}
                   >
-                    {item.is_video ? (
+                    {isVideo ? (
                       <video
-                        src={item.file_url ?? item.url}
+                        src={itemUrl}
                         className="w-full block"
                         muted
                       />
                     ) : (
                       <img
-                        src={item.file_url ?? item.url}
+                        src={itemUrl}
                         alt=""
                         className="w-full block"
                       />

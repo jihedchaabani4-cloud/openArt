@@ -3,8 +3,9 @@
 
 import React, { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { useGenerationsStore } from "@/features/generations/model/useGenerationsStore";
-import { useStudioModels, useGenerateMutation } from "@/features/generations/api/generationsApi";
+import { useWorkflowsStore } from "@/features/workflows";
+import { usePromptStore } from "./usePromptStore";
+import { useProjectData, useGenerateMutation } from "@/features/workflows/api/workflowsApi";
 import { useAssets } from "@/features/media/api/mediaApi";
 import { queryKeys } from "@/shared/api/queryKeys";
 import { buildReferencesPayload } from "@/shared/lib/referenceUtils";
@@ -13,32 +14,52 @@ import { useMediaUpload } from "./useMediaUpload";
 import { useMediaLibrary } from "@/features/media/model/useMediaLibrary";
 
 export function usePromptBar({ isNewProject = false } = {}) {
-  // ─── Global store ─────────────────────────────────────────────────────────
+  // ─── Global store (Project context) ─────────────────────────────────────────
   const {
     selectedProjectId: projectId,
     activeSessionId,
     setActiveSessionId,
-    setEditTrigger,
-    editTrigger,
+  } = useWorkflowsStore();
+
+  // ─── Prompt Bar Store (Independent) ────────────────────────────────────────
+  const {
+    prompt,
+    setPrompt,
+    generationMode,
+    setGenerationMode,
+    modelId,
+    setModelId,
+    ratio,
+    setRatio,
+    quality: resolution,
+    setQuality: setResolution,
+    count,
+    setCount,
+    duration,
+    setDuration,
+    videoResolution,
+    setVideoResolution,
     referenceImages,
     addReference,
     removeReference,
     clearReferences,
     setReferenceImages,
     swapFrames,
-    generationMode,
-    setGenerationMode,
-  } = useGenerationsStore();
+    popoverOpen,
+    setPopoverOpen,
+    togglePopover,
+  } = usePromptStore();
 
   const queryClient = useQueryClient();
 
   // ─── Remote data ──────────────────────────────────────────────────────────
   const lib = useMediaLibrary(projectId);
 
-  const { data: modelsData, isLoading: studioModelsLoading } = useStudioModels();
+  // Fetch everything from the unified endpoint
+  const { data: projectData, isLoading: studioModelsLoading } = useProjectData(projectId);
 
-  const studioModels   = modelsData?.models   ?? [];
-  const studioFamilies = modelsData?.families ?? [];
+  const studioModels   = projectData?.modelConfig?.models   ?? [];
+  const studioFamilies = projectData?.modelConfig?.families ?? [];
 
   // ─── Model sync (extracted hook) ──────────────────────────────────────────
   const { model, setModel, selectedModel, maxRefs } = useModelSync(
@@ -46,6 +67,11 @@ export function usePromptBar({ isNewProject = false } = {}) {
     studioModelsLoading,
     generationMode
   );
+
+  // Synchronize local model state with store model state
+  useEffect(() => {
+    if (model?.id) setModelId(model.id);
+  }, [model, setModelId]);
 
   // ─── Upload + drag-drop (extracted hook) ──────────────────────────────────
   const upload = useMediaUpload({
@@ -56,13 +82,7 @@ export function usePromptBar({ isNewProject = false } = {}) {
     maxRefs,
   });
 
-  // ─── Local UI state ───────────────────────────────────────────────────────
-  const [prompt,          setPrompt]          = useState("");
-  const [resolution,      setResolution]      = useState("2K");
-  const [ratio,           setRatio]           = useState("1:1");
-  const [count,           setCount]           = useState(1);
-  const [duration,        setDuration]        = useState("5s");
-  const [videoResolution, setVideoResolution] = useState("1080p");
+  // ─── Local UI state (Error only) ───────────────────────────────────────────
   const [generationError, setGenerationError] = useState(null);
   const textareaRef = useRef(null);
 
@@ -76,20 +96,16 @@ export function usePromptBar({ isNewProject = false } = {}) {
     const support = selectedModel.support || {};
     
     // 1. Prune references if they exceed the new model's maximum
-    // Using getState() to avoid adding referenceImages to the dependency array,
-    // which would cause this effect to fire on every reference addition.
-    const currentRefs = useGenerationsStore.getState().referenceImages;
     const currentMaxRefs = support.references?.max ?? 4;
     
-    if (currentRefs.length > currentMaxRefs) {
-      setReferenceImages(currentRefs.slice(0, currentMaxRefs));
+    if (referenceImages.length > currentMaxRefs) {
+      setReferenceImages(referenceImages.slice(0, currentMaxRefs));
     }
 
     // 2. Sync ratio and resolution
-    // support.ratio may be: [{value, label}] array (new format) or { default, options } object
     const extractVal = (raw) => {
       if (Array.isArray(raw)) {
-        const first = raw[0];  // might be string or {value, label}
+        const first = raw[0];
         return (first && typeof first === 'object') ? first.value : first;
       }
       return raw?.default ?? null;
@@ -103,40 +119,6 @@ export function usePromptBar({ isNewProject = false } = {}) {
     setResolution(defQual);
     setVideoResolution(defVid);
   }, [selectedModel?.key]);
-
-  // ─── Restore state from editTrigger ──────────────────────────────────────
-  // ✅ NOTE: adaptReferences is no longer needed here as a useEffect.
-  //    setGenerationMode in the store already adapts refs automatically.
-  useEffect(() => {
-    if (!editTrigger?.params || studioModels.length === 0) return;
-    const { params } = editTrigger;
-
-    if (params.prompt      !== undefined) setPrompt(params.prompt);
-    if (params.model_name)                setModel({ id: params.model_name });
-    if (params.quality)                   setResolution(params.quality);
-    if (params.ratio)                     setRatio(params.ratio);
-    if (params.count)                     setCount(params.count);
-    if (params.duration)                  setDuration(params.duration);
-    if (params.video_resolution)          setVideoResolution(params.video_resolution);
-    if (params.generation_mode)           setGenerationMode(params.generation_mode);
-
-    setReferenceImages(
-      params.references?.length > 0
-        ? params.references.map((r) => ({
-            url:      r.url,
-            asset_id: r.asset_id,
-            role:     r.role,
-            type:     r.type,
-          }))
-        : []
-    );
-
-    if (textareaRef.current) {
-      textareaRef.current.style.height = "auto";
-      textareaRef.current.style.height = textareaRef.current.scrollHeight + "px";
-      textareaRef.current.focus();
-    }
-  }, [editTrigger, studioModels]);
 
   // ─── Library ──────────────────────────────────────────────────────────────
   const library = lib.items;
@@ -181,6 +163,8 @@ export function usePromptBar({ isNewProject = false } = {}) {
         references:       buildReferencesPayload(referenceImages),
       };
 
+      console.log("🚀 [usePromptBar] Sending Generation Payload:", payload);
+
       try {
         const res = await runGenerate({ payload, isVideo });
 
@@ -205,7 +189,6 @@ export function usePromptBar({ isNewProject = false } = {}) {
 
         setPrompt("");
         if (textareaRef.current) textareaRef.current.style.height = "auto";
-        setEditTrigger(null);
       } catch {
         // Error is set via onError callback in useGenerateMutation
       }
@@ -213,7 +196,7 @@ export function usePromptBar({ isNewProject = false } = {}) {
     [
       prompt, generating, generationMode, model, resolution, ratio, count,
       duration, videoResolution, isNewProject, projectId, activeSessionId,
-      referenceImages, runGenerate, setActiveSessionId, setEditTrigger, queryClient,
+      referenceImages, runGenerate, setActiveSessionId, queryClient,
     ]
   );
 
@@ -240,7 +223,10 @@ export function usePromptBar({ isNewProject = false } = {}) {
 
     // References
     referenceImages,
-    handleAddReference:   (asset, role = "normal") => addReference(asset, role, maxRefs),
+    handleAddReference:   (asset, role = "normal") => {
+      if (!asset?.url) return;
+      return addReference(asset, role, maxRefs);
+    },
     handleRemoveReference: removeReference,
     handleClearReferences: clearReferences,
     handleSwapFrames:      swapFrames,
@@ -259,6 +245,11 @@ export function usePromptBar({ isNewProject = false } = {}) {
     setAssetMode: lib.setMediaType,
     handleOpenLibrary: lib.handleOpen,
     handleLoadMoreAssets: lib.handleLoadMore,
+
+    // Popover
+    popoverOpen,
+    togglePopover,
+    closePopover: () => setPopoverOpen(false),
 
     // Generation
     generating,

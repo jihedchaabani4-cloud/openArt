@@ -42,7 +42,7 @@ export function useModelSync(studioModels, studioModelsLoading, generationMode) 
       ? selectedModel?.supportedModes?.includes("i2v_se") || selectedModel?.supportedModes?.includes("i2v")
       : generationMode === "multiref"
       ? selectedModel?.supportedModes?.includes("r2v")
-      : selectedModel?.category === generationMode;
+      : (generationMode === "edit" ? selectedModel?.category === "image" : selectedModel?.category === generationMode);
 
     if (!isMatch) {
       const next =
@@ -53,7 +53,7 @@ export function useModelSync(studioModels, studioModelsLoading, generationMode) 
             ? m.supportedModes?.includes("i2v_se") || m.supportedModes?.includes("i2v")
             : generationMode === "multiref"
             ? m.supportedModes?.includes("r2v")
-            : m.category === generationMode
+            : (generationMode === "edit" ? m.category === "image" : m.category === generationMode)
         ) ?? studioModels[0];
         
       if (next) setModel({ id: next.key });

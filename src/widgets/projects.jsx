@@ -43,15 +43,15 @@ export function ProjectsPage() {
 
     const sortedAndFilteredProjects = React.useMemo(() => {
         let result = projects.filter(p => 
-            p.project_name.toLowerCase().includes(searchQuery.toLowerCase())
+            (p.project_name || "").toLowerCase().includes((searchQuery || "").toLowerCase())
         )
 
         // Apply Sort
         result.sort((a, b) => {
             let valA, valB
             if (sortBy === "alphabetical") {
-                valA = a.project_name.toLowerCase()
-                valB = b.project_name.toLowerCase()
+                valA = (a.project_name || "").toLowerCase()
+                valB = (b.project_name || "").toLowerCase()
             } else if (sortBy === "created") {
                 valA = new Date(a.created_at || 0).getTime()
                 valB = new Date(b.created_at || 0).getTime()

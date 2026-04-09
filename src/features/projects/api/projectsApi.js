@@ -11,22 +11,16 @@ export function useProjects() {
       if (res.ok === false || res.success === false) throw new Error(res.message || 'Failed to fetch projects');
       return res.data;
     },
-    staleTime: 2 * 60 * 1000, // 2 min — changes when user creates/renames/deletes
+    // Normalize new schema (id) → old shape (project_id) for all consumers
+    select: (data) => (data || []).map(p => ({
+      ...p,
+      project_id: p.project_id ?? p.id,
+    })),
+    staleTime: 2 * 60 * 1000,
+    refetchOnWindowFocus: false,
   });
 }
 
-export function useSessions(projectId) {
-  return useQuery({
-    queryKey: queryKeys.sessions.byProject(projectId),
-    queryFn: async () => {
-      const res = await api.get(`/sessions?project_id=${projectId}`);
-      if (res.ok === false || res.success === false) throw new Error(res.message || 'Failed to fetch sessions');
-      return res.data;
-    },
-    enabled: !!projectId,
-    staleTime: 5 * 60 * 1000, // 5 min — sessions rarely change mid-session
-  });
-}
 
 export function useCreateProject() {
   const queryClient = useQueryClient();

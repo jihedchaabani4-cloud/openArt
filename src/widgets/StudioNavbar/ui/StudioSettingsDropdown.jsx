@@ -11,8 +11,6 @@ import {
 } from "@/shared/ui/DropdownShell"
 
 export function StudioSettingsDropdown({
-  studioLayoutMode,
-  setStudioLayoutMode,
   gridSize,
   setGridSize,
   soundOnHover,
@@ -36,17 +34,6 @@ export function StudioSettingsDropdown({
       onOpenChange={setOpen}
       panelWidth="w-72"
     >
-      {/* View Mode */}
-      <DropdownSection label="View Mode">
-        <DropdownSegmented
-          value={studioLayoutMode}
-          onChange={setStudioLayoutMode}
-          options={[
-            { value: "grid",    label: <div className="flex items-center gap-1.5"><Grid2X2 className="size-3.5" /> Grid</div>  },
-            { value: "grouped", label: <div className="flex items-center gap-1.5"><Layers  className="size-3.5" /> Batch</div> },
-          ]}
-        />
-      </DropdownSection>
 
       {/* Grid Size */}
       <DropdownSection label="Grid Size">

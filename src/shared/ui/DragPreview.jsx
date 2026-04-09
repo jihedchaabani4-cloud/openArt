@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence, useMotionValue } from "framer-motion";
-import { useGenerationsStore } from "@/features/generations/model/useGenerationsStore";
+import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows";
 
 /**
  * [FSD Layer: shared/ui]

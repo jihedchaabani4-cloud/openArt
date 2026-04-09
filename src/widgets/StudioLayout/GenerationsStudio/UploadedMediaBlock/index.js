@@ -1,0 +1,1 @@
+export { UploadedMediaBlock } from "./UploadedMediaBlock";

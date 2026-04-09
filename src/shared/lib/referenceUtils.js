@@ -100,6 +100,15 @@ export function buildReferencesPayload(referenceImages) {
  * Extracts generation config from a generation item (for Reuse Settings).
  */
 export function getGenerationConfig(item, group) {
+  // New Schema Support
+  if (item?.mediaMetadata?.requestData) {
+    const meta = item.mediaMetadata.requestData;
+    const settings = meta.settings || {};
+    const prompt = meta.promptInputs?.[0]?.textInput || settings.prompt || "Generated Asset";
+    return { ...settings, prompt, model_name: meta.modelId || meta.modelName };
+  }
+
+  // Old Schema Fallback
   const params = item.params ?? group?.params ?? {};
   const prompt =
     params.prompt ??

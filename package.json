@@ -19,14 +19,17 @@
     "date-fns": "^4.1.0",
     "framer-motion": "^12.34.3",
     "jszip": "^3.10.1",
+    "konva": "^10.2.3",
     "lexical": "^0.41.0",
     "material-symbols": "^0.42.3",
     "next": "^16.2.1",
     "radix-ui": "^1.4.3",
     "react": "19.2.3",
     "react-dom": "19.2.3",
+    "react-konva": "^19.2.3",
     "react-masonry-css": "^1.0.16",
     "socket.io-client": "^4.8.3",
+    "use-image": "^1.1.4",
     "zustand": "^5.0.11"
   },
   "devDependencies": {

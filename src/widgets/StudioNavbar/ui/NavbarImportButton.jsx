@@ -3,7 +3,7 @@
 import React, { useRef } from "react";
 import { Upload, Loader2 } from "lucide-react";
 import { useMediaLibrary } from "@/features/media/model/useMediaLibrary";
-import { useGenerationsStore } from "@/features/generations/model/useGenerationsStore";
+import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows";
 
 export function NavbarImportButton() {
   const { selectedProjectId: projectId, activeSessionId } = useGenerationsStore();

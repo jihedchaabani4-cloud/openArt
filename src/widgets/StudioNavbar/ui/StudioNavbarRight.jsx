@@ -7,8 +7,6 @@ import { NavbarImportButton } from "./NavbarImportButton"
 
 export function StudioNavbarRight({
     searchExpanded,
-    studioLayoutMode,
-    setStudioLayoutMode,
     gridSize,
     setGridSize,
     soundOnHover,
@@ -29,8 +27,6 @@ export function StudioNavbarRight({
         )}>
             <NavbarImportButton />
             <StudioSettingsDropdown 
-                studioLayoutMode={studioLayoutMode}
-                setStudioLayoutMode={setStudioLayoutMode}
                 gridSize={gridSize}
                 setGridSize={setGridSize}
                 soundOnHover={soundOnHover}

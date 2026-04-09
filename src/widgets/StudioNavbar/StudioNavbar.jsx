@@ -2,17 +2,18 @@
 
 import * as React from "react"
 import { motion } from "framer-motion"
-import { useProjects, useSessions } from "@/features/projects/api/projectsApi"
+import { useProjects } from "@/features/projects/api/projectsApi"
+import { useProjectSessions } from "@/features/workflows/api/workflowsApi"
 import { useCreateSession } from "@/features/projects/api/createSessionApi"
-import { useGenerationsStore } from "@/features/generations/model/useGenerationsStore"
-import { useFilteredGenerations } from "@/features/generations/model/useFilteredGenerations"
+import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows"
+import { useFilteredWorkflows as useFilteredGenerations } from "@/features/workflows/model/useFilteredWorkflows"
 
 // UI Components
 import { StudioNavbarLeft } from "./ui/StudioNavbarLeft"
 import { StudioNavbarCenter } from "./ui/StudioNavbarCenter"
 import { StudioNavbarRight } from "./ui/StudioNavbarRight"
 import { CreateSessionDialog } from "./ui/CreateSessionDialog"
-import { ActiveFilterTags } from "@/features/generations/ui/ActiveFilterTags"
+import { ActiveFilterTags } from "@/features/workflows/ui/ActiveFilterTags"
 
 // Hooks
 
@@ -23,7 +24,6 @@ import { useProjectEdit } from "./hooks/useProjectEdit"
 export function StudioNavbar() {
     // ── Store ──
     const {
-        studioLayoutMode, setStudioLayoutMode,
         gridSize, setGridSize,
         soundOnHover, setSoundOnHover,
         showTileDetails, setShowTileDetails,
@@ -37,7 +37,7 @@ export function StudioNavbar() {
 
     // ── Server State ──
     const { data: projects = [] } = useProjects()
-    const { data: projectSessions = [] } = useSessions(activeProjectId)
+    const projectSessions = useProjectSessions(activeProjectId) || []
     const createSessionMutation = useCreateSession()
     const { availableModels, filteredCount, total } = useFilteredGenerations(activeProjectId, activeSessionId)
 
@@ -137,8 +137,6 @@ export function StudioNavbar() {
 
                 <StudioNavbarRight 
                     searchExpanded={searchExpanded}
-                    studioLayoutMode={studioLayoutMode}
-                    setStudioLayoutMode={setStudioLayoutMode}
                     gridSize={gridSize}
                     setGridSize={setGridSize}
                     soundOnHover={soundOnHover}

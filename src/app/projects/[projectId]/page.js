@@ -2,10 +2,9 @@
 
 import * as React from "react"
 import { useEffect } from "react"
-import { useGenerationsStore } from "@/features/generations/model/useGenerationsStore"
+import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows"
 import { GenerationsStudio } from "@/widgets/StudioLayout/GenerationsStudio/GenerationsStudio"
-import { useSessions } from "@/features/projects/api/projectsApi"
-
+import { useProjectSessions } from "@/features/workflows/api/workflowsApi"
 export default function ProjectDetailPage({ params }) {
     const { projectId } = React.use(params)
     const { setSelectedProjectId, activeSessionId, setActiveSessionId } = useGenerationsStore()
@@ -18,7 +17,7 @@ export default function ProjectDetailPage({ params }) {
     }, [projectId, setSelectedProjectId])
 
     // Fetch sessions for this project
-    const { data: sessions = [] } = useSessions(projectId)
+    const sessions = useProjectSessions(projectId) || []
 
     // Auto-select the most recent session if none is active
     useEffect(() => {

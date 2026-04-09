@@ -4,7 +4,9 @@ import * as React from "react"
 import { Search, X } from "lucide-react"
 import { cn } from "@/shared/lib/utils"
 import { Input } from "@/shared/ui/input"
-import { GenerationsFilterDropdown } from "@/features/generations/ui/GenerationsFilterDropdown"
+import { WorkflowsFilterDropdown as GenerationsFilterDropdown } from "@/features/workflows/ui/WorkflowsFilterDropdown"
+import { useFilteredWorkflows as useFilteredGenerations } from "@/features/workflows/model/useFilteredWorkflows"
+import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows"
 
 export function StudioNavbarCenter({
     searchExpanded,

@@ -6,8 +6,12 @@ export function ReactQueryProvider({ children }) {
     const [queryClient] = useState(() => new QueryClient({
         defaultOptions: {
             queries: {
-                staleTime: 60 * 1000, // 1 min
-                refetchOnWindowFocus: false,
+                staleTime: 5 * 60 * 1000,   // 5 min — don't refetch unless explicitly invalidated
+                gcTime:    10 * 60 * 1000,  // 10 min — keep in memory
+                refetchOnWindowFocus:    false,
+                refetchOnReconnect:      false,
+                refetchOnMount:          false,
+                retry: 1,
             },
         },
     }));

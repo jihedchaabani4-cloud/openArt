@@ -1,6 +1,6 @@
 import "./globals.css";
 import { Geist_Mono, Poppins } from "next/font/google";
-import { StudioNavbar } from "@/widgets/StudioNavbar";
+
 import { DragPreview } from "@/shared/ui/DragPreview";
 import { ReactQueryProvider } from "@/shared/lib/ReactQueryProvider";
 
@@ -24,15 +24,12 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
       <body
-        className={`${poppins.variable} ${geistMono.variable} antialiased bg-black text-white overflow-hidden font-sans flex flex-col h-screen`}
+        className={`${poppins.variable} ${geistMono.variable} antialiased bg-black text-white font-sans`}
         suppressHydrationWarning
       >
         <ReactQueryProvider>
           <DragPreview />
-          <StudioNavbar />
-          <main className="flex-1 min-h-0 relative pt-[60px]">
-            {children}
-          </main>
+          {children}
         </ReactQueryProvider>
       </body>
     </html>

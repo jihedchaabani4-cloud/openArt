@@ -1,56 +1,71 @@
-import React, { useState, useMemo, useCallback, useEffect } from "react";
-import { useAssets, useUploadAsset } from "../api/mediaApi";
+import { useState, useMemo, useCallback } from "react";
+import { useUploadAsset } from "../api/mediaApi";
+import { useProjectData } from "@/features/workflows/api/workflowsApi";
 
 /**
  * [FSD Layer: features/media]
  * A shared hook for managing the Media Library state, 
- * pagination, filtering, and uploading for a project.
+ * using cached project data instead of independent fetching.
  */
 export function useMediaLibrary(projectId, initialMode = "all") {
   const [enabled,   setEnabled]   = useState(false);
-  const [offset,    setOffset]    = useState(0);
   const [source,    setSource]    = useState("all"); // 'all' | 'upload' | 'generation'
   const [mediaType, setMediaType] = useState(initialMode); // 'image' | 'video' | 'all'
-  const [items,     setItems]     = useState([]);
-  const [hasMore,   setHasMore]   = useState(false);
 
-  const { data: page, isFetching: loading } = useAssets(projectId, {
-    enabled,
-    offset,
-    type:      source === "all" ? null : source,
-    mediaType: mediaType === "all" ? null : mediaType,
-  });
+  // Instead of querying /api/media directly, we just read from the unified project data cache
+  const { data: projectData, isFetching: loading } = useProjectData(projectId);
 
   const { mutateAsync: uploadAssetToServer } = useUploadAsset();
 
-  // Accumulate pages
-  useEffect(() => {
-    if (!page?.data) return;
-    if (offset === 0) {
-      setItems(page.data);
-    } else {
-      setItems((prev) => [...prev, ...page.data]);
-    }
-    setHasMore(page.hasMore ?? false);
-  }, [page, offset]);
+  const items = useMemo(() => {
+    if (!projectData?.projectContents?.media) return [];
+    
+    let allMedia = [...projectData.projectContents.media];
+    
+    // Sort by descending create_time
+    allMedia.sort((a, b) => {
+      const tA = new Date(a.mediaMetadata?.createTime || a.create_time || 0).getTime();
+      const tB = new Date(b.mediaMetadata?.createTime || b.create_time || 0).getTime();
+      return tB - tA;
+    });
 
-  // Reset when filters change
-  useEffect(() => {
-    setItems([]);
-    setOffset(0);
-  }, [projectId, source, mediaType]);
+    // Determine type: 'video' or 'image' and map structure
+    allMedia = allMedia.map(m => {
+        const isVid = !!m.video || (m.url && /\.(mp4|webm|mov)$/i.test(m.url));
+        return {
+            ...m,
+            id: m.name || m.id,
+            type: isVid ? 'video' : 'image',
+            is_video: isVid,
+            workflow_id: m.workflowId || m.workflow_id,
+            primaryMediaId: m.name || m.id // requested by user to extract the media id
+        };
+    });
+
+    // filter by 'source' ('upload' vs 'generation')
+    if (source !== "all") {
+       allMedia = allMedia.filter(m => {
+           const isUpload = m.workflowStepId === "upload" || !m.generationConfig;
+           return source === "upload" ? isUpload : !isUpload;
+       });
+    }
+
+    // filter by 'mediaType' ('image' vs 'video')
+    if (mediaType !== "all") {
+       allMedia = allMedia.filter(m => m.type === mediaType);
+    }
+
+    return allMedia;
+  }, [projectData, source, mediaType]);
 
   const handleOpen = useCallback((mode = "all") => {
     setMediaType(mode);
     setEnabled(true);
-    setOffset(0);
   }, []);
 
   const handleLoadMore = useCallback(() => {
-    if (!loading && hasMore) {
-      setOffset((prev) => prev + 30);
-    }
-  }, [loading, hasMore]);
+    // Pagination is mostly handled by caching the entire project now
+  }, []);
 
   const handleUpload = useCallback(async (file, sessionId = "") => {
     try {
@@ -68,8 +83,8 @@ export function useMediaLibrary(projectId, initialMode = "all") {
 
   return {
     items,
-    loading,
-    hasMore,
+    loading: enabled && loading,
+    hasMore: false,
     source,
     setSource,
     mediaType,

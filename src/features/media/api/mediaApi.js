@@ -1,5 +1,5 @@
 // [FSD Layer: features/media] — Server State (React Query)
-// Canonical location for useAssets — do NOT import or redeclare in generationsApi.js
+// Canonical location for useAssets — do NOT import or redeclare in workflowsApi.js
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api} from '@/shared/api/client';
 import { queryKeys } from '@/shared/api/queryKeys';
@@ -163,13 +163,13 @@ export function useRemoveAsset() {
 
     onMutate: async ({ assetId }) => {
       // Cancel any in-flight refetches
-      await queryClient.cancelQueries({ queryKey: queryKeys.generations.all });
+      await queryClient.cancelQueries({ queryKey: queryKeys.generations.all() });
 
       // Snapshot current data for fallback
-      const previousGenerations = queryClient.getQueriesData({ queryKey: queryKeys.generations.all });
+      const previousGenerations = queryClient.getQueriesData({ queryKey: queryKeys.generations.all() });
 
       // Optimistically update the caches
-      queryClient.setQueriesData({ queryKey: queryKeys.generations.all }, (old) => {
+      queryClient.setQueriesData({ queryKey: queryKeys.generations.all() }, (old) => {
         const list = Array.isArray(old) ? old : (old?.data ?? []);
         return list.filter(item => item.id !== assetId);
       });
@@ -186,8 +186,8 @@ export function useRemoveAsset() {
     },
 
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.assets.all });
-      queryClient.invalidateQueries({ queryKey: queryKeys.generations.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.assets.all() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.generations.all() });
     },
   });
 }
