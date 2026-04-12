@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState, useMemo, useCallback } from "react";
 import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-motion";
-import { Play, Layers, Heart, Volume2, VolumeX, Camera, Loader2 } from "lucide-react";
+import { Play, Pause, Maximize, Layers, Heart, Volume2, VolumeX, Camera, Loader2 } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import { ImageStatusView } from "@/features/workflows/ui/ImageStatusView";
 import { getPrimaryMedia, getItemMetadata } from "@/shared/lib/generationUtils";
@@ -52,6 +52,15 @@ export function WorkflowMediaPreview({
   const [isMuted, setIsMuted] = useState(true);
   const [isDragging, setIsDragging] = useState(false);
   const [isExtracting, setIsExtracting] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+
+  const formatTime = (time) => {
+    if (isNaN(time) || !isFinite(time)) return "0:00";
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60);
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  };
 
   const { mutateAsync: uploadAsset } = useUploadAsset();
 
@@ -171,10 +180,19 @@ export function WorkflowMediaPreview({
                       }
                     }
                   }}
+                  onLoadedMetadata={() => {
+                      if (videoRef.current) {
+                          setDuration(videoRef.current.duration);
+                      }
+                  }}
                   onTimeUpdate={() => {
-                      if (videoRef.current && !isDragging) {
-                          const p = (videoRef.current.currentTime / videoRef.current.duration) * 100;
-                          progress.set(p);
+                      if (videoRef.current) {
+                          setCurrentTime(videoRef.current.currentTime);
+                          setDuration(videoRef.current.duration || 0);
+                          if (!isDragging) {
+                              const p = (videoRef.current.currentTime / videoRef.current.duration) * 100;
+                              progress.set(p);
+                          }
                       }
                   }}
                 />
@@ -215,47 +233,82 @@ export function WorkflowMediaPreview({
                 >
                   {isExtracting ? <Loader2 className="size-4 animate-spin text-white" /> : <Camera className="size-4 text-white" />}
                 </button>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setIsMuted(m => !m);
-                  }}
-                  className="p-2 rounded-xl bg-black/40 backdrop-blur-md border border-white/10 cursor-pointer hover:bg-black/60 transition-colors"
-                >
-                  {isMuted ? <VolumeX className="size-4 text-white" /> : <Volume2 className="size-4 text-white" />}
-                </button>
               </div>
             )}
 
-            {/* Progress bar for video */}
+            {/* Custom Video Controls */}
             {isDone && isVideo && (
               <div 
-                ref={progressRef}
-                className="absolute bottom-4 inset-x-8 h-6 flex items-center z-30 group/track cursor-pointer"
-                onPointerDown={(e) => {
-                  e.stopPropagation();
-                  setIsDragging(true);
-                  handleSeek(e.clientX);
-                  
-                  const handleMove = (ev) => handleSeek(ev.clientX);
-                  const handleUp = () => {
-                    setIsDragging(false);
-                    document.removeEventListener('pointermove', handleMove);
-                    document.removeEventListener('pointerup', handleUp);
-                  };
-                  document.addEventListener('pointermove', handleMove);
-                  document.addEventListener('pointerup', handleUp);
-                }}
+                className="absolute bottom-4 inset-x-4 z-30 flex items-center gap-3 p-1.5 px-3  backdrop-blur-[1px]  rounded-xl opacity-0 group-hover/video:opacity-100 transition-opacity duration-300"
                 onClick={(e) => e.stopPropagation()}
               >
-                <div className="w-full h-1 bg-white/20 rounded-full overflow-hidden backdrop-blur-md transition-all duration-300 group-hover/track:h-1.5" style={{ opacity: isPlaying && !isDragging ? 1 : 0.8 }}>
+                <button
+                  className="w-7 h-7 flex items-center justify-center shrink-0 rounded-full hover:bg-white/10 text-white transition-colors"
+                  onClick={() => {
+                    if (videoRef.current) {
+                      if (videoRef.current.paused) videoRef.current.play();
+                      else videoRef.current.pause();
+                    }
+                  }}
+                >
+                  {isPlaying ? <Pause className="size-3.5 fill-white" /> : <Play className="size-3.5 fill-white ml-0.5" />}
+                </button>
+
+                <div 
+                  ref={progressRef}
+                  className="flex-1 h-6 flex items-center group/track cursor-pointer relative"
+                  onPointerDown={(e) => {
+                    e.stopPropagation();
+                    setIsDragging(true);
+                    handleSeek(e.clientX);
+                    
+                    const handleMove = (ev) => handleSeek(ev.clientX);
+                    const handleUp = () => {
+                      setIsDragging(false);
+                      document.removeEventListener('pointermove', handleMove);
+                      document.removeEventListener('pointerup', handleUp);
+                    };
+                    document.addEventListener('pointermove', handleMove);
+                    document.addEventListener('pointerup', handleUp);
+                  }}
+                >
+                  <div className="w-full h-1 bg-white/20 rounded-full overflow-hidden transition-all duration-300 group-hover/track:h-1.5 relative pointer-events-none">
+                    <motion.div 
+                      className="h-full bg-white relative overflow-visible shadow-[0_0_10px_rgba(255,255,255,0.5)]" 
+                      style={{ width: progressWidth }} 
+                    />
+                  </div>
                   <motion.div 
-                    className="h-full bg-white shadow-[0_0_12px_rgba(255,255,255,0.8)] relative overflow-visible" 
-                    style={{ width: progressWidth }} 
-                  >
-                    <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full opacity-0 group-hover/track:opacity-100 transition-opacity translate-x-1/2 shadow-md" />
-                  </motion.div>
+                    className="absolute top-1/2 -translate-y-1/2 w-2.5 h-2.5 bg-white rounded-full opacity-0 group-hover/track:opacity-100 transition-opacity shadow-md pointer-events-none"
+                    style={{ left: progressWidth, translateX: '-50%' }}
+                  />
                 </div>
+
+                <div className="text-white text-[12px] font-medium tabular-nums ml-1 select-none shrink-0">
+                  {formatTime(currentTime)} / {formatTime(duration)}
+                </div>
+
+                <button
+                  onClick={() => setIsMuted(m => !m)}
+                  className="w-7 h-7 flex items-center justify-center shrink-0 rounded-full hover:bg-white/10 text-white transition-colors ml-1"
+                >
+                  {isMuted ? <VolumeX className="size-4" /> : <Volume2 className="size-4" />}
+                </button>
+
+                <button
+                  onClick={() => {
+                    if (videoRef.current) {
+                      if (videoRef.current.requestFullscreen) {
+                        videoRef.current.requestFullscreen();
+                      } else if (videoRef.current.webkitRequestFullscreen) {
+                        videoRef.current.webkitRequestFullscreen();
+                      }
+                    }
+                  }}
+                  className="w-7 h-7 flex items-center justify-center shrink-0 rounded-full hover:bg-white/10 text-white transition-colors"
+                >
+                  <Maximize className="size-4" />
+                </button>
               </div>
             )}
           </motion.div>

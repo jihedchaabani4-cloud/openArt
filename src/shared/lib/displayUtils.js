@@ -45,7 +45,7 @@ export function getItemMetadata(item, group) {
   const normalizeStatus = (rawStatus, resolvedUrl, rawError) => {
     const s = (rawStatus || "").toString().toLowerCase();
     if (s === "success" || s === "completed") return "completed";
-    if (s === "processing" || s === "pending" || s === "uploading") return "processing";
+    if (s === "processing" || s === "pending" || s === "uploading" || s === "queued" || s === "in_progress" || s === "starting") return "processing";
     if (s === "rejected") return "rejected";
 
     // Heuristic: some providers return "failed" but the error indicates a safety/policy block.
@@ -88,7 +88,7 @@ export function getItemMetadata(item, group) {
       url,
       aspect,
       ratioStr: null,
-      status: normalizeStatus(item.status, url, item.error),
+      status: normalizeStatus(item.status || item.media_status, url, item.error),
       prompt: item.params?.prompt ?? item.mediaMetadata?.requestData?.promptInputs?.[0]?.textInput ?? '',
     };
   }
@@ -129,7 +129,7 @@ export function getItemMetadata(item, group) {
     url,
     aspect,
     ratioStr,
-    status: normalizeStatus(item.status, url, item.error),
+    status: normalizeStatus(item.status || item.media_status, url, item.error),
   };
 }
 

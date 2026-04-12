@@ -6,14 +6,16 @@ import { useRouter } from "next/navigation"
 import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows"
 import { useFilteredWorkflows as useFilteredGenerations } from "@/features/workflows/model/useFilteredWorkflows"
 import { ActiveFilterTags } from "@/features/workflows/ui/ActiveFilterTags"
-import ImagePromptBar from "@/features/prompt-bar"
+import PromptBar from "@/features/prompt-bar"
 
 import { cn } from "@/shared/lib/utils"
-import Masonry from 'react-masonry-css'
+import { RowsPhotoAlbum } from 'react-photo-album'
+import 'react-photo-album/rows.css'
 import { ArrowUp } from "lucide-react"
 import { MediaGridItem } from "./MediaGridItem"
 import { SessionSidebar } from "../SessionSidebar/SessionSidebar"
 import { getItemMetadata, getPrimaryMedia } from "@/shared/lib/generationUtils";
+import { getItemMetadata as getDisplayMeta } from "@/shared/lib/displayUtils";
 
 // ─── Sub-Components ──────────────────────────────────────────────────────────
 
@@ -86,15 +88,39 @@ export function GenerationsStudio({
         scrollRef.current?.scrollTo({ top: 0, behavior: "smooth" });
     }, []);
 
-    // Masonry column settings based on gridSize
-    const breakpointColumnsObj = {
-        default: gridSize === "lg" ? 3 : gridSize === "md" ? 4 : 5,
-        1536: gridSize === "lg" ? 3 : gridSize === "md" ? 4 : 5,
-        1280: gridSize === "lg" ? 2 : gridSize === "md" ? 3 : 4,
-        1024: gridSize === "lg" ? 2 : gridSize === "md" ? 3 : 4,
-        768: 2,
-        640: 1
-    };
+    // Target row height driven by gridSize
+    const targetRowHeight = gridSize === "lg" ? 380 : gridSize === "md" ? 280 : 200;
+
+    // Build the photo descriptors that react-photo-album needs
+    const photos = React.useMemo(() => {
+        return workflows.reduce((acc, workflow, i) => {
+            const primaryItem = getPrimaryMedia(workflow);
+            if (!primaryItem) return acc;
+
+            // Derive pixel dimensions from the aspect string (e.g. "16/9", "3/4")
+            const meta = getDisplayMeta(primaryItem, workflow);
+            const aspect = meta?.aspect ?? "3/4";
+            const [wStr, hStr] = aspect.split("/");
+            const wNum = parseFloat(wStr) || 3;
+            const hNum = parseFloat(hStr) || 4;
+            // Scale to a fixed base so react-photo-album can do its maths
+            const BASE = 1200;
+            const width  = Math.round(BASE * (wNum / Math.max(wNum, hNum)));
+            const height = Math.round(BASE * (hNum / Math.max(wNum, hNum)));
+
+            const url = meta?.url;
+            if (!url) return acc;   // skip items with no resolved URL
+
+            acc.push({
+                src:      url,
+                width,
+                height,
+                key:      workflow.id || workflow.name || String(i),
+                workflow,
+            });
+            return acc;
+        }, []);
+    }, [workflows]);
 
 
     return (
@@ -127,30 +153,24 @@ export function GenerationsStudio({
                                 transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
                                 className="flex flex-col gap-6 w-full pb-32"
                             >
-                                <Masonry
-                                    breakpointCols={breakpointColumnsObj}
-                                    className="flex w-auto gap-4"
-                                    columnClassName="bg-clip-padding flex flex-col gap-4"
-                                >
-                                    {workflows.map((workflow, i) => {
-                                        const primaryItem = getPrimaryMedia(workflow);
-                                        if (!primaryItem) return null;
-
-                                        return (
-                                            <motion.div 
-                                                key={workflow.id || workflow.name || i} 
-                                                layout
-                                                className="relative shrink-0"
-                                            >
-                                                <MediaGridItem 
-                                                    workflow={workflow} 
-                                                    onClick={() => handleWorkflowClick(workflow)}
-                                                    className="rounded-2xl border-none shadow-xl"
-                                                />
-                                            </motion.div>
-                                        );
-                                    })}
-                                </Masonry>
+                                <RowsPhotoAlbum
+                                    photos={photos}
+                                    targetRowHeight={targetRowHeight}
+                                    spacing={16}
+                                    rowConstraints={{ singleRowMaxHeight: targetRowHeight * 1.6 }}
+                                    render={{
+                                        photo: (_, { photo, width, height }) => (
+                                            <MediaGridItem
+                                                key={photo.key}
+                                                workflow={photo.workflow}
+                                                onClick={() => handleWorkflowClick(photo.workflow)}
+                                                className="rounded-2xl border-none shadow-xl"
+                                                width={width}
+                                                height={height}
+                                            />
+                                        ),
+                                    }}
+                                />
                             </motion.div>
                         ) : (
                             <motion.div 
@@ -169,7 +189,7 @@ export function GenerationsStudio({
                 {/* Fixed bottom bar for prompt */}
                 <div className="absolute bottom-10 inset-x-0 z-30 flex justify-center px-6 pointer-events-none">
                     <div className="w-full max-w-[650px] pointer-events-auto">
-                        <ImagePromptBar hideBackground={true} />
+                        <PromptBar hideBackground={true} />
                     </div>
                 </div>
 

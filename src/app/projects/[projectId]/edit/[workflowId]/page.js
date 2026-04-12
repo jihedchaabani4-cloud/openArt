@@ -129,12 +129,10 @@ export default function WorkflowEditPage() {
                                 primaryMediaId={workflow.metadata?.primaryMediaId}
                                 projectId={projectId}
                                 sessionId={activeSessionId}
-                                blockSelectWhenNotCompleted
                                 onSelect={(item) => {
-                                    // Security/UX guard: don't allow setting primary media
-                                    // to an item that isn't fully generated yet.
+                                    // Allow switching even if processing
                                     const meta = getItemMetadata(item);
-                                    if (meta?.status !== "completed" || !meta?.url) return;
+                                    if (!meta?.url && meta?.status !== "processing") return;
 
                                     setActiveItem(item);
                                     const mediaId = item?.id || item?.name;

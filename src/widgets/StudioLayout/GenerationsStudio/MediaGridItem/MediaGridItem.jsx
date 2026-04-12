@@ -32,6 +32,9 @@ export function MediaGridItem({
   onClick = () => {},
   onDragStart = () => {},
   onDragEnd = () => {},
+  // react-photo-album provides these when used inside render.photo
+  width: albumWidth = null,
+  height: albumHeight = null,
 }) {
   const {
     handleLike,
@@ -96,12 +99,25 @@ export function MediaGridItem({
           <motion.div
             layoutId={`media-card-${itemId}`}
             transition={spring}
-            draggable={isDone}
+            draggable={true}
             onDragStart={(e) => {
               e.dataTransfer.setData("imageUrl", url);
               e.dataTransfer.setData("assetId", item.name || item.id);
               e.dataTransfer.setData("isVideo", String(isVideo));
-              e.dataTransfer.effectAllowed = "copy";
+              e.dataTransfer.setData("workflowId", workflow?.name || workflow?.id || "");
+              e.dataTransfer.effectAllowed = "all";
+
+              // 🐛 Debug: show workflow info on drag start
+              console.group("🚀 [Drag Start] Workflow Info");
+              console.log("workflow.id   :", workflow?.id);
+              console.log("workflow.name :", workflow?.name);
+              console.log("workflowId sent in dataTransfer:", workflow?.name || workflow?.id || "(empty)");
+              console.log("item.id   :", item?.id);
+              console.log("item.name :", item?.name);
+              console.log("status    :", status);
+              console.log("url       :", url);
+              console.log("full workflow obj:", workflow);
+              console.groupEnd();
 
               // Create a custom mini thumbnail for the drag ghost
               const dragDiv = document.createElement("div");
@@ -136,14 +152,18 @@ export function MediaGridItem({
               onDragStart(e, { url, aspect, item });
             }}
             onDragEnd={onDragEnd}
-            onClick={isDone ? onClick : undefined}
+            onClick={(isDone || status === "processing") ? onClick : undefined}
               className={cn(
                 "group relative overflow-hidden bg-[#0a0a0a] rounded-2xl",
                 "outline-2 outline-transparent transition-all duration-300",
-                isDone ? "cursor-pointer active:cursor-grabbing shadow-lg hover:shadow-2xl" : "cursor-default",
+                (isDone || status === "processing") ? "cursor-pointer active:cursor-grabbing shadow-lg hover:shadow-2xl" : "cursor-default",
                 className
               )}
-            style={{ width: "100%" }}
+            style={
+              albumWidth && albumHeight
+                ? { width: albumWidth, height: albumHeight }          // exact album dimensions
+                : { width: "100%", aspectRatio: aspect }              // natural aspect-ratio fallback
+            }
           >
             <ImageStatusView
               status={status}

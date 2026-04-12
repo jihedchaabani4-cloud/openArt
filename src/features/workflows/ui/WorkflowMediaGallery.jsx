@@ -70,17 +70,21 @@ export function WorkflowMediaGallery({
             const itemId = item.id || item.name;
             const isActive = activeItem && (itemId === activeItem.id || itemId === activeItem.name);
             const isPrimary = primaryMediaId && (itemId === primaryMediaId);
-            const isSelectable = !blockSelectWhenNotCompleted || (meta?.status === "completed" && !!meta?.url);
+            const isSelectable = !blockSelectWhenNotCompleted || (meta?.status === "completed" || meta?.status === "processing");
             
             const iUrl = meta.url;
             const iVideo = meta.isVideo;
             const prompt = meta.prompt || item.prompt || "";
             
-            // Get reference images from the correct paths (item.generationConfig.references or item.mediaMetadata.requestData.referenceImages)
+            // Get reference images from the correct paths (item.generationConfig.references or item.mediaMetadata.requestData.references)
             const referenceImages = 
               item.generationConfig?.references || 
+              item.mediaMetadata?.requestData?.references || 
               item.mediaMetadata?.requestData?.referenceImages || 
               [];
+              
+            const firstRefUrl = referenceImages[0]?.url || referenceImages[0]?.file_url;
+            const displayUrl = iUrl || ((meta.status === 'processing' || meta.status === 'uploading') ? firstRefUrl : null);
             
             return (
               <div 
@@ -105,18 +109,18 @@ export function WorkflowMediaGallery({
                   style={{ 
                     maxWidth: "300px",
                     maxHeight: "200px",
-                    width: "auto",
+                    width: (meta.status === "processing" || meta.status === "uploading" || !meta.url) ? "100%" : "auto",
                     height: "auto",
-                    aspectRatio: meta.aspect || "auto"
+                    aspectRatio: meta.aspect && meta.aspect !== "auto" ? meta.aspect : "16/9"
                   }}
                 >
                   <ImageStatusView
                     status={meta.status || 'completed'}
-                    src={iUrl}
+                    src={displayUrl}
                     alt={prompt}
                     aspect={meta.aspect || "auto"}
                     className="w-full h-full object-cover transition-transform duration-700"
-                    showOverlay={false}
+                    showOverlay={true}
                   >
                     {iVideo && iUrl && (
                       <video 
@@ -168,18 +172,25 @@ export function WorkflowMediaGallery({
                 {/* Reference Images Row (if any) */}
                 {referenceImages.length > 0 && (
                   <div className="flex flex-wrap gap-2 px-1">
-                    {referenceImages.map((ref, idx) => (
+                    {referenceImages.map((ref, idx) => {
+                      const refUrl = ref.url || ref.file_url;
+                      if (!refUrl) return null;
+                      return (
                       <div 
                         key={idx}
-                        className="w-10 h-10 rounded-lg overflow-hidden border border-white/10 bg-white/5 shrink-0"
+                        className="relative w-10 h-10 flex items-center justify-center rounded-lg overflow-hidden border border-white/10 bg-white/5 shrink-0"
                       >
+                        <ImageIcon className="absolute size-4 text-white/20" />
                         <img 
-                          src={ref.url} 
-                          className="w-full h-full object-cover" 
+                          src={refUrl} 
+                          className="absolute inset-0 w-full h-full object-cover z-10" 
                           alt="Reference" 
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                          }}
                         />
                       </div>
-                    ))}
+                    )})}
                   </div>
                 )}
 

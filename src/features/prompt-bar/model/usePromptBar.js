@@ -3,7 +3,7 @@
 
 import React, { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { useWorkflowsStore } from "@/features/workflows";
+import { useWorkflowsStore, useGenerationsStore } from "@/features/workflows";
 import { usePromptStore } from "./usePromptStore";
 import { useProjectData, useGenerateMutation } from "@/features/workflows/api/workflowsApi";
 import { useAssets } from "@/features/media/api/mediaApi";
@@ -48,6 +48,8 @@ export function usePromptBar({ isNewProject = false } = {}) {
     popoverOpen,
     setPopoverOpen,
     togglePopover,
+    motion,
+    setMotion,
   } = usePromptStore();
 
   const queryClient = useQueryClient();
@@ -220,6 +222,7 @@ export function usePromptBar({ isNewProject = false } = {}) {
     duration,       setDuration,
     videoResolution, setVideoResolution,
     generationMode, setGenerationMode,
+    motion,         setMotion,
 
     // References
     referenceImages,

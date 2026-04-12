@@ -3,8 +3,8 @@
 import React from "react";
 import { Paperclip, Loader2, ArrowRight } from "lucide-react";
 import { Button } from "@/shared/ui/button";
-import { PromptTextarea } from "../shared/PromptTextarea";
-import { ModelSelector } from "../selectors/ModelSelector";
+import { PromptTextarea } from "../common/PromptTextarea";
+import { ModelSelector } from "../common/selectors/ModelSelector";
 import { EditReferenceList } from "./EditReferenceList";
 import { ImportMediaPopover } from "@/widgets/ImportMediaDialog/ImportMediaPopover";
 
@@ -63,16 +63,14 @@ export function EditDescribeTab({ s }) {
 
           {/* Right Actions: Model Selector & Submit */}
           <div className="flex items-center gap-3 shrink-0">
-            {!isVideo && (
-              <ModelSelector
-                type="image"
-                onChange={s.setModel}
-                defaultId={s.model?.id}
-                dynamicModels={s.studioModels}
-                loading={s.studioModelsLoading}
-                className="border-none bg-transparent hover:bg-transparent h-8 text-[12px] font-bold text-white/60 hover:text-white transition-colors"
-              />
-            )}
+            <ModelSelector
+              type={isVideo ? "video" : "image"}
+              onChange={s.setModel}
+              defaultId={s.model?.id}
+              dynamicModels={s.studioModels}
+              loading={s.studioModelsLoading}
+              className="border-none bg-transparent hover:bg-transparent h-8 text-[12px] font-bold text-white/60 hover:text-white transition-colors"
+            />
 
             <Button
               type="submit"

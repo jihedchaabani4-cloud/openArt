@@ -49,6 +49,9 @@ export const usePromptStore = create((set, get) => ({
   videoResolution: "1080p",
   setVideoResolution: (videoResolution) => set({ videoResolution }),
 
+  motion: 50,
+  setMotion: (motion) => set({ motion }),
+
   // ─── Mode-specific references storage ─────────────────────────────────────
   referencesByMode: {
     image: [],

@@ -1,9 +1,10 @@
 // src/features/prompt-bar/model/useEditPromptBar.js
 import React, { useRef, useEffect, useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useParams } from "next/navigation";
 import { useWorkflowsStore } from "@/features/workflows";
 import { useEditStore } from "./useEditStore";
-import { useProjectData, useGenerateMutation } from "@/features/workflows/api/workflowsApi";
+import { useProjectData, useGenerateMutation, useExtendVideoMutation } from "@/features/workflows/api/workflowsApi";
 import { queryKeys } from "@/shared/api/queryKeys";
 import { buildReferencesPayload } from "@/shared/lib/referenceUtils";
 import { useModelSync } from "./useModelSync";
@@ -16,10 +17,13 @@ import { useMediaLibrary } from "@/features/media/model/useMediaLibrary";
  * Now fully isolated using useEditStore.
  */
 export function useEditPromptBar() {
+  const params = useParams();
   const {
-    selectedProjectId: projectId,
+    selectedProjectId: storeProjectId,
     activeSessionId,
   } = useWorkflowsStore();
+
+  const projectId = params?.projectId || storeProjectId;
 
   const {
     editTarget,
@@ -58,10 +62,13 @@ export function useEditPromptBar() {
   const lib = useMediaLibrary(projectId);
   const { data: projectData, isLoading: studioModelsLoading } = useProjectData(projectId);
 
-  const studioModels = projectData?.modelConfig?.models ?? [];
+  const rawModels = projectData?.modelConfig?.models;
+  const studioModels = React.useMemo(() => {
+    return (rawModels || []).filter(m => m.supportsEdit === true);
+  }, [rawModels]);
   const studioFamilies = projectData?.modelConfig?.families ?? [];
 
-  const generationMode = editTarget?.isVideo ? "motion" : "image";
+  const generationMode = editTarget?.isVideo ? "video" : "image";
   const { model, setModel, selectedModel, maxRefs } = useModelSync(
     studioModels,
     studioModelsLoading,
@@ -84,6 +91,10 @@ export function useEditPromptBar() {
   const textareaRef = useRef(null);
 
   const { mutateAsync: runGenerate, isPending: generating } = useGenerateMutation({
+    onError: (err) => console.error(err.message),
+  });
+
+  const { mutateAsync: runExtendVideo, isPending: extendingVideo } = useExtendVideoMutation({
     onError: (err) => console.error(err.message),
   });
 
@@ -115,6 +126,35 @@ export function useEditPromptBar() {
             }
           } catch (err) {
             console.error("❌ Upscale failed:", err);
+          }
+          return;
+      }
+
+      if (activeTab === "camera" && editTarget?.isVideo) {
+          if (generating) return;
+          const payload = {
+              prompt:           "", // Always empty as requested
+              camera_text:      camera, // Use the selected preset
+              model:            model?.id ?? "kling_o3",
+              ratio,
+              edit_type:        "camera",
+              project_id:       projectId,
+              session_id:       activeSessionId,
+              workflow_id:      editTarget?.workflow_id,
+              media_id:         editTarget?.media_id,
+              references:       buildReferencesPayload(referenceImages),
+          };
+
+          try {
+              const res = await runGenerate({ payload, isVideo: true, isCamera: true });
+              const finalProj = res.project_id ?? projectId;
+              const finalSess = res.session_id ?? activeSessionId;
+              if (finalProj) {
+                  queryClient.invalidateQueries({ queryKey: queryKeys.assets.byProject(finalProj, finalSess) });
+                  queryClient.invalidateQueries({ queryKey: queryKeys.generations.byProject(finalProj, finalSess) });
+              }
+          } catch (err) {
+              console.error("❌ Camera edit failed:", err);
           }
           return;
       }
@@ -157,9 +197,56 @@ export function useEditPromptBar() {
       }
     },
     [
-      prompt, generating, model, resolution, ratio, projectId, activeSessionId,
+      prompt, camera, generating, model, resolution, ratio, projectId, activeSessionId,
       referenceImages, editTarget, runGenerate, queryClient, setPrompt,
       activeTab, upscaleScale, selection
+    ]
+  );
+
+  const handleExtendVideo = useCallback(
+    async (e) => {
+      if (e) e.preventDefault();
+
+      if (editTarget?.session_id && activeSessionId && editTarget.session_id !== activeSessionId) return;
+      if (editTarget?.media_status && editTarget.media_status !== "completed") return;
+      if (!editTarget?.media_id || !editTarget?.workflow_id) return;
+      
+      if (extendingVideo) return;
+
+      const payload = {
+        prompt:           prompt || "extend", // fallback
+        model:            model?.id ?? "nanobana_pro",
+        model_name:       model?.id ?? "nanobana_pro",
+        quality:          resolution,
+        ratio,
+        num_images:       1,
+        edit_type:        "extend",
+        section:          "video_generator",
+        project_id:       projectId,
+        session_id:       activeSessionId,
+        workflow_id:      editTarget?.workflow_id,
+        media_id:         editTarget?.media_id,
+      };
+
+      try {
+        const res = await runExtendVideo({ payload });
+        const finalProj = res.project_id ?? projectId;
+        const finalSess = res.session_id ?? activeSessionId;
+        
+        if (finalProj) {
+          queryClient.invalidateQueries({ queryKey: queryKeys.assets.byProject(finalProj, finalSess) });
+          queryClient.invalidateQueries({ queryKey: queryKeys.generations.byProject(finalProj, finalSess) });
+        }
+
+        setPrompt("");
+        if (textareaRef.current) textareaRef.current.style.height = "auto";
+      } catch (err) {
+        console.error("❌ Video extend failed:", err);
+      }
+    },
+    [
+      prompt, extendingVideo, model, resolution, ratio, projectId, activeSessionId,
+      editTarget, runExtendVideo, queryClient, setPrompt
     ]
   );
 
@@ -206,5 +293,7 @@ export function useEditPromptBar() {
     editTarget,
     setEditTarget,
     resetEditStore,
+    extendingVideo,
+    handleExtendVideo,
   };
 }

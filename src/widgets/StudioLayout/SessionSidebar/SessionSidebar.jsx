@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Image as ImageIcon, Video, Loader2, Plus, MoreHorizontal, Check } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows";
-import { useProjectData } from "@/features/workflows/api/workflowsApi";
+import { useProjectData, useMoveWorkflow } from "@/features/workflows/api/workflowsApi";
 import { useCreateSession, useUpdateSession, useDeleteSession } from "@/features/projects/api/createSessionApi";
 import {
     DropdownMenu,
@@ -61,6 +61,8 @@ export function SessionSidebar() {
     const { mutateAsync: updateSession } = useUpdateSession();
     const { mutateAsync: deleteSession } = useDeleteSession();
 
+    const { mutate: moveWorkflow } = useMoveWorkflow();
+
     const [isHovered, setIsHovered] = React.useState(false);
     const [openDropdownId, setOpenDropdownId] = React.useState(null);
     const [openContextMenuId, setOpenContextMenuId] = React.useState(null);
@@ -68,6 +70,9 @@ export function SessionSidebar() {
     const [sessionToDelete, setSessionToDelete] = React.useState(null);
     const [editingSessionId, setEditingSessionId] = React.useState(null);
     const [editingName, setEditingName] = React.useState("");
+    const [dragOverSessionId, setDragOverSessionId] = React.useState(null);
+    const [isDraggingOver, setIsDraggingOver] = React.useState(false);
+    const [isDragOverNew, setIsDragOverNew] = React.useState(false);
 
     // Group media by session and sort by most recent for thumbnails
     const sessionMediaMap = React.useMemo(() => {
@@ -91,9 +96,16 @@ export function SessionSidebar() {
         return map;
     }, [workflows, allMedia]);
 
+    // ── Frontend sorting: Newest sessions first ──
+    const sortedSessions = React.useMemo(() => {
+        return [...sessions].sort((a, b) => 
+            new Date(b.metadata?.createTime || 0) - new Date(a.metadata?.createTime || 0)
+        );
+    }, [sessions]);
+
     if (!selectedProjectId) return null;
 
-    const isExpanded = isHovered || openDropdownId !== null || openContextMenuId !== null || editingSessionId !== null;
+    const isExpanded = isHovered || isDraggingOver || openDropdownId !== null || openContextMenuId !== null || editingSessionId !== null;
 
     const handleCreateSession = async () => {
         const newSession = await createSession({ project_id: selectedProjectId, session_name: "Untitled" });
@@ -142,6 +154,62 @@ export function SessionSidebar() {
         }
     };
 
+    const handleDragOver = (e, sessionId) => {
+        e.preventDefault();
+        // Matching 'all' or 'copy' with copy is safer across browsers
+        e.dataTransfer.dropEffect = "copy";
+        
+        if (dragOverSessionId !== sessionId) {
+            console.log(`🔎 [DragOver] Session: ${sessionId}`);
+            setDragOverSessionId(sessionId);
+        }
+        setIsDraggingOver(true);
+    };
+
+    const handleDragLeave = (e) => {
+        if (!e.currentTarget.contains(e.relatedTarget)) {
+            setDragOverSessionId(null);
+        }
+    };
+
+    const handleDrop = (e, targetSessionId) => {
+        e.preventDefault();
+        setDragOverSessionId(null);
+        setIsDraggingOver(false);
+        const workflowId = e.dataTransfer.getData("workflowId");
+
+        // 🐛 Debug: show drop info
+        console.group("🎯 [Drop] Session Drop Info");
+        console.log("workflowId received:", workflowId || "(empty — nothing in dataTransfer)");
+        console.log("targetSessionId    :", targetSessionId);
+        console.log("projectId          :", selectedProjectId);
+        console.groupEnd();
+
+        if (!workflowId || !targetSessionId) return;
+        moveWorkflow({
+            workflowId,
+            sessionId:  targetSessionId,
+            projectId:  selectedProjectId,
+        });
+    };
+
+    const handleDropNewSession = (e) => {
+        e.preventDefault();
+        setIsDragOverNew(false);
+        setIsDraggingOver(false);
+        const workflowId = e.dataTransfer.getData("workflowId");
+
+        console.log("✨ [Drop] Creating new session for workflow:", workflowId);
+
+        if (!workflowId) return;
+        moveWorkflow({
+            workflowId,
+            newsession: true,
+            projectId: selectedProjectId,
+            sessionName: "New Session"
+        });
+    };
+
     return (
         <div className="w-[60px] h-full shrink-0 relative z-40 bg-transparent">
 
@@ -158,6 +226,15 @@ export function SessionSidebar() {
                 style={{ backdropFilter: isExpanded ? "blur(40px)" : "none" }}
                 onMouseEnter={() => setIsHovered(true)}
                 onMouseLeave={() => setIsHovered(false)}
+                onDragEnter={() => setIsDraggingOver(true)}
+                onDragLeave={(e) => {
+                    // only collapse sidebar when drag fully leaves the sidebar container
+                    if (!e.currentTarget.contains(e.relatedTarget)) {
+                        setIsDraggingOver(false);
+                        setDragOverSessionId(null);
+                    }
+                }}
+                onDrop={() => setIsDraggingOver(false)}
             >
                 {/* Fixed-width inner container to prevent reflow */}
                 <div className="w-[280px] flex flex-col h-fit shrink-0 items-start">
@@ -165,11 +242,25 @@ export function SessionSidebar() {
                     {/* ── Header: New Session Button ── */}
                     <div className="px-1 w-[280px] flex justify-start mb-2 shrink-0">
                         <button
-                            className="flex items-center justify-start w-full h-12 px-1 rounded-md hover:bg-white/5 transition-colors group/btn text-white/40 hover:text-white"
+                            className={cn(
+                                "flex items-center justify-start w-full h-12 px-1 rounded-md transition-all group/btn text-white/40 hover:text-white",
+                                isDragOverNew ? "bg-white/10 ring-2 ring-white/30" : "hover:bg-white/5"
+                            )}
                             onClick={handleCreateSession}
+                            onDragOver={(e) => {
+                                e.preventDefault();
+                                e.dataTransfer.dropEffect = "copy";
+                                setIsDragOverNew(true);
+                                setIsDraggingOver(true);
+                            }}
+                            onDragLeave={() => setIsDragOverNew(false)}
+                            onDrop={handleDropNewSession}
                         >
                             <motion.div
-                                className="w-12 h-12 flex items-center justify-center rounded-lg bg-white/15 shrink-0"
+                                className={cn(
+                                    "w-12 h-12 flex items-center justify-center rounded-lg shrink-0 transition-colors",
+                                    isDragOverNew ? "bg-white/30" : "bg-white/15"
+                                )}
                                 whileHover={{ scale: 1.08 }}
                                 whileTap={{ scale: 0.93 }}
                                 transition={SPRING_FAST}
@@ -200,7 +291,7 @@ export function SessionSidebar() {
                                 <Loader2 className="w-4 h-4 animate-spin text-white/30" />
                             </div>
                         ) : (
-                            sessions.map((session, index) => {
+                            sortedSessions.map((session, index) => {
                                 // New shape: session.name = UUID, session.metadata.displayName = label
                                 const sessionId = session.name;
                                 const isActive = activeSessionId === sessionId;
@@ -214,8 +305,17 @@ export function SessionSidebar() {
                                 const Icon = ImageIcon;
 
                                 return (
-                                    <ContextMenu 
+                                    <div
                                         key={sessionId}
+                                        className={cn(
+                                            "w-full rounded-md transition-all duration-150",
+                                            dragOverSessionId === sessionId ? "ring-2 ring-white/40 bg-white/5" : ""
+                                        )}
+                                        onDragOver={(e) => handleDragOver(e, sessionId)}
+                                        onDragLeave={handleDragLeave}
+                                        onDrop={(e) => handleDrop(e, sessionId)}
+                                    >
+                                    <ContextMenu 
                                         onOpenChange={(open) => {
                                             if (open) {
                                                 setOpenContextMenuId(sessionId);
@@ -228,20 +328,20 @@ export function SessionSidebar() {
                                         <ContextMenuTrigger asChild>
                                             <motion.div
                                                 className={cn(
-                                                    "relative w-full flex items-center justify-start rounded-md group/item p-1 cursor-pointer",
-                                            isActive && isExpanded ? "bg-[#1e1e1e]" : ""
-                                        )}
-                                        onClick={() => setActiveSessionId(sessionId)}
-                                        // Entrance animation
-                                        initial={{ opacity: 0, x: -8 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        transition={{ ...SPRING_FAST, delay: index * 0.03 }}
-                                        whileHover={{
-                                            backgroundColor: isActive && isExpanded
-                                                ? "rgba(30,30,30,1)"
-                                                : "rgba(255,255,255,0.05)",
-                                        }}
-                                    >
+                                                    "relative w-full flex items-center justify-start rounded-md group/item p-1 cursor-pointer transition-all duration-150",
+                                                    isActive && isExpanded ? "bg-[#1e1e1e]" : "",
+                                                )}
+                                                onClick={() => setActiveSessionId(sessionId)}
+                                                // Entrance animation
+                                                initial={{ opacity: 0, x: -8 }}
+                                                animate={{ opacity: 1, x: 0 }}
+                                                transition={{ ...SPRING_FAST, delay: index * 0.03 }}
+                                                whileHover={{
+                                                    backgroundColor: isActive && isExpanded
+                                                            ? "rgba(30,30,30,1)"
+                                                            : "rgba(255,255,255,0.05)",
+                                                }}
+                                            >
                                         {/* ── Text side (revealed on expand) ── */}
                                         <motion.div
                                             className="absolute right-4 left-[72px] flex flex-col justify-center pointer-events-none"
@@ -394,6 +494,7 @@ export function SessionSidebar() {
                                         </ContextMenuContent>
                                     )}
                                 </ContextMenu>
+                                </div>
                                 );
                             })
                         )}

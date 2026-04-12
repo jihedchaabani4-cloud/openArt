@@ -3,7 +3,7 @@
 import * as React from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows"
-import ImagePromptBar from "@/features/prompt-bar"
+import PromptBar from "@/features/prompt-bar"
 
 
 // ─── Sub-Components ──────────────────────────────────────────────────────────
@@ -73,7 +73,7 @@ export function NewProjectView() {
                 <div className="fixed bottom-8 inset-x-0 z-30 flex justify-center px-6 pointer-events-none">
                     <div className="w-full max-w-[850px] pointer-events-auto">
                         <div className="">
-                            <ImagePromptBar hideBackground={true} isNewProject={true} />
+                            <PromptBar hideBackground={true} isNewProject={true} />
                         </div>
                     </div>
                 </div>

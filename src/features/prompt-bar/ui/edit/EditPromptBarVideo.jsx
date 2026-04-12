@@ -1,14 +1,18 @@
 "use client";
 
 import React from "react";
-import { Sparkles, Maximize } from "lucide-react";
+import { Maximize, Camera, ChevronsRight, Eraser } from "lucide-react";
 import { EditPromptBarBase } from "./EditPromptBarBase";
 import { useEditPromptBar } from "../../model/useEditPromptBar";
 import { EditDescribeTab } from "./EditDescribeTab";
-import UpscalePanel from "../tabs/UpscalePanel";
+import UpscalePanel from "./tabs/UpscalePanel";
+import { CameraView } from "./tabs/CameraView";
+import { ExtendView } from "./tabs/ExtendView";
 
 const TABS = [
-    { id: "generate", label: "Generate", icon: Sparkles },
+    { id: "edit", label: "Edit", icon: Eraser },
+    { id: "camera",   label: "Camera",   icon: Camera    },
+    { id: "extend",   label: "Extend",   icon: ChevronsRight },
     { id: "upscale",  label: "Upscale",  icon: Maximize  },
 ];
 
@@ -20,11 +24,15 @@ export function EditPromptBarVideo({ className }) {
     const s = useEditPromptBar();
 
     return (
-        <EditPromptBarBase tabs={TABS} defaultTab="generate" className={className}>
+        <EditPromptBarBase tabs={TABS} defaultTab="edit" className={className}>
             {(activeTab) => (
                 <>
-                    {activeTab === "generate" ? (
+                    {activeTab === "edit" ? (
                         <EditDescribeTab s={s} />
+                    ) : activeTab === "camera" ? (
+                        <CameraView s={s} />
+                    ) : activeTab === "extend" ? (
+                        <ExtendView s={s} />
                     ) : activeTab === "upscale" ? (
                         <UpscalePanel
                             editTarget={s.editTarget}

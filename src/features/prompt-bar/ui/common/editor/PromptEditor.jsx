@@ -1,0 +1,198 @@
+"use client";
+
+import React, { useEffect } from "react";
+import { LexicalComposer } from "@lexical/react/LexicalComposer";
+import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
+import { ContentEditable } from "@lexical/react/LexicalContentEditable";
+import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
+import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary";
+import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
+import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
+
+import { MentionNode, $createMentionNode, $isMentionNode } from "./MentionNode";
+import {
+  $getSelection,
+  $isRangeSelection,
+  $getRoot,
+  $createParagraphNode,
+  $createTextNode,
+  KEY_DOWN_COMMAND,
+  COMMAND_PRIORITY_HIGH,
+} from "lexical";
+
+const theme = {
+  paragraph: "text-white/90 text-[14.5px] leading-relaxed",
+};
+
+// ── Sync external value + Enter to submit ────────────────────────────────────
+function SubmissionPlugin({ onSubmit, externalValue }) {
+  const [editor] = useLexicalComposerContext();
+
+  useEffect(() => {
+    editor.update(() => {
+      const root = $getRoot();
+      const text = root.getTextContent();
+      if (externalValue !== undefined && externalValue !== text) {
+        root.clear();
+        if (externalValue) {
+          const p = $createParagraphNode();
+          p.append($createTextNode(externalValue));
+          root.append(p);
+        }
+      }
+    });
+  }, [externalValue, editor]);
+
+  useEffect(() => {
+    return editor.registerCommand(
+      KEY_DOWN_COMMAND,
+      (e) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault();
+          onSubmit?.();
+          return true;
+        }
+        return false;
+      },
+      COMMAND_PRIORITY_HIGH
+    );
+  }, [editor, onSubmit]);
+
+  return null;
+}
+
+// ── @ Shortcut Plugin ────────────────────────────────────────────────────────
+/**
+ * Intercepts the '@' key BEFORE it is inserted into the editor.
+ * - Prevents the default insertion entirely (e.key === "@").
+ * - Opens the Media Library dialog immediately.
+ * - On asset selection, inserts MentionNode chips at the cursor position.
+ * No text scanning, no deletion loops, no race conditions.
+ */
+function AtShortcutPlugin({ onTriggerMentionDialog }) {
+  const [editor] = useLexicalComposerContext();
+
+  useEffect(() => {
+    if (!onTriggerMentionDialog) return;
+
+    return editor.registerCommand(
+      KEY_DOWN_COMMAND,
+      (event) => {
+        // Detect '@' regardless of keyboard layout (key value or Shift+2)
+        if (event.key !== "@") return false;
+
+        // ① Prevent '@' from ever appearing in the editor
+        event.preventDefault();
+
+        // ② Open the Media Library; provide a callback for when assets are chosen
+        onTriggerMentionDialog((assets) => {
+          editor.update(() => {
+            const selection = $getSelection();
+            if (!$isRangeSelection(selection)) return;
+
+            assets.forEach((asset, idx) => {
+              const mentionNode = $createMentionNode(
+                asset.url,
+                idx,
+                asset.displayName || asset.name || "Ref",
+                asset.asset_id
+              );
+              // Insert chip + trailing space at the cursor
+              selection.insertNodes([mentionNode, $createTextNode(" ")]);
+            });
+          });
+        });
+
+        // ③ Mark command as handled so nothing else processes it
+        return true;
+      },
+      // HIGH priority so we run before SubmissionPlugin's Enter handler
+      COMMAND_PRIORITY_HIGH
+    );
+  }, [editor, onTriggerMentionDialog]);
+
+  return null;
+}
+
+// ── Sync References Plugin ───────────────────────────────────────────────────
+/**
+ * Removes MentionNode chips whose asset_id is no longer in referenceImages.
+ */
+function SyncReferencesPlugin({ referenceImages = [] }) {
+  const [editor] = useLexicalComposerContext();
+
+  useEffect(() => {
+    const validIds = new Set(
+      referenceImages.map((img) => img.asset_id).filter(Boolean)
+    );
+
+    editor.update(() => {
+      const root = $getRoot();
+      root.getChildren().forEach((child) => {
+        if (child.getType() === "paragraph") {
+          child.getChildren().forEach((node) => {
+            if ($isMentionNode(node)) {
+              const assetId = node.getAssetId();
+              if (assetId && !validIds.has(assetId)) {
+                node.remove();
+              }
+            }
+          });
+        }
+      });
+    });
+  }, [referenceImages, editor]);
+
+  return null;
+}
+
+// ── Main Component ───────────────────────────────────────────────────────────
+export function PromptEditor({
+  value,
+  onChange,
+  onSubmit,
+  referenceImages,
+  textareaRef,
+  onTriggerMentionDialog,
+}) {
+  const initialConfig = {
+    namespace: "PromptEditor",
+    theme,
+    nodes: [MentionNode],
+    onError: (error) => {
+      console.error(error);
+    },
+  };
+
+  const handleLexicalChange = (editorState) => {
+    editorState.read(() => {
+      onChange($getRoot().getTextContent());
+    });
+  };
+
+  return (
+    <LexicalComposer initialConfig={initialConfig}>
+      <div className="relative min-h-[38px] w-full items-start">
+        <RichTextPlugin
+          contentEditable={
+            <ContentEditable className="outline-none text-white text-[14.5px] leading-relaxed min-h-[36px] py-1.5" />
+          }
+          placeholder={
+            !value && (
+              <span className="absolute top-1.5 left-0 text-white/25 text-[14.5px] pointer-events-none">
+                Describe the scene you imagine...
+              </span>
+            )
+          }
+          ErrorBoundary={LexicalErrorBoundary}
+        />
+
+        <HistoryPlugin />
+        <AtShortcutPlugin onTriggerMentionDialog={onTriggerMentionDialog} />
+        <SyncReferencesPlugin referenceImages={referenceImages} />
+        <OnChangePlugin onChange={handleLexicalChange} />
+        <SubmissionPlugin onSubmit={onSubmit} externalValue={value} />
+      </div>
+    </LexicalComposer>
+  );
+}

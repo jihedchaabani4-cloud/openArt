@@ -6,9 +6,9 @@ import {
 } from "lucide-react";
 import { useEditPromptBar } from "../../model/useEditPromptBar";
 import { EditDescribeTab } from "./EditDescribeTab";
-import AnglesPanel from "../tabs/Angles";
-import LightingPanel from "../tabs/Lighting";
-import UpscalePanel from "../tabs/UpscalePanel";
+import AnglesPanel from "./tabs/Angles";
+import LightingPanel from "./tabs/Lighting";
+import UpscalePanel from "./tabs/UpscalePanel";
 import { EditPromptBarBase } from "./EditPromptBarBase";
 
 const TABS = [

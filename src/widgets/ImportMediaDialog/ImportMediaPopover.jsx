@@ -6,7 +6,8 @@ import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows";
 import { useLibraryFilter } from "@/features/prompt-bar/model/useLibraryFilter";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
-import Masonry from 'react-masonry-css';
+import { RowsPhotoAlbum } from 'react-photo-album';
+import 'react-photo-album/rows.css';
 import { cn } from "@/shared/lib/utils";
 
 /**
@@ -26,6 +27,7 @@ export function ImportMediaPopover({
   onUploadFromPC,
   assetSource = "all",
   setAssetSource,
+  anchorRef,
   className
 }) {
   const { data: projects = [] }                = useProjects();
@@ -46,6 +48,8 @@ export function ImportMediaPopover({
     if (!open) return;
 
     const handleClickOutside = (event) => {
+      // Ignore clicks on the anchor/trigger button — it handles its own toggle
+      if (anchorRef?.current && anchorRef.current.contains(event.target)) return;
       if (popoverRef.current && !popoverRef.current.contains(event.target)) {
         onOpenChange(false);
       }
@@ -122,6 +126,34 @@ export function ImportMediaPopover({
     ? "video/mp4,video/webm"
     : "image/*,video/mp4,video/webm";
 
+  // ─── Photo descriptors for RowsPhotoAlbum ────────────────────────────────
+  const photos = React.useMemo(() => {
+    const BASE = 1200;
+    return visibleItems.map((item, i) => {
+      const itemUrl = item.url ?? item.image?.url ?? item.video?.url ?? item.file_url ?? null;
+      if (!itemUrl) return null;   // skip items with no resolved URL
+
+      const isVideo  = item.type === "video" || item.is_video || !!item.video;
+
+      // Derive aspect from metadata or fallback by media type
+      const w = item.width  ?? item.image?.dimensions?.width  ?? item.video?.dimensions?.width  ?? null;
+      const h = item.height ?? item.image?.dimensions?.height ?? item.video?.dimensions?.height ?? null;
+      const wNum = w ? parseFloat(w) : (isVideo ? 16 : 3);
+      const hNum = h ? parseFloat(h) : (isVideo ?  9 : 4);
+      const maxDim = Math.max(wNum, hNum);
+
+      return {
+        src:     itemUrl,
+        width:   Math.round(BASE * (wNum / maxDim)),
+        height:  Math.round(BASE * (hNum / maxDim)),
+        key:     item.id ?? itemUrl ?? String(i),
+        item,
+        itemUrl,
+        isVideo,
+      };
+    }).filter(Boolean);
+  }, [visibleItems]);
+
   return (
     <AnimatePresence>
       {open && (
@@ -183,48 +215,49 @@ export function ImportMediaPopover({
                 No assets found
               </div>
             ) : (
-              <Masonry
-                breakpointCols={3}
-                className="flex -ml-4 w-auto"
-                columnClassName="pl-4 bg-clip-padding"
-              >
-                {visibleItems.map((item) => {
-                  const itemUrl = item.url ?? item.image?.url ?? item.video?.url ?? item.file_url;
-                  const isVideo = item.type === "video" || item.is_video || !!item.video;
-                  
-                  const isSelected = selectedItems.some(p => p.asset_id === item.id || p.url === itemUrl);
-                  const isMaxReached = selectedItems.length >= maxAllowed;
-                  const isDisabled = isMaxReached && !isSelected;
+              <RowsPhotoAlbum
+                photos={photos}
+                targetRowHeight={160}
+                spacing={10}
+                rowConstraints={{ singleRowMaxHeight: 260 }}
+                render={{
+                  photo: (_, { photo, width, height }) => {
+                    const { item, itemUrl, isVideo } = photo;
+                    const isSelected  = selectedItems.some(p => p.asset_id === item.id || p.url === itemUrl);
+                    const isMaxReached = selectedItems.length >= maxAllowed;
+                    const isDisabled  = isMaxReached && !isSelected;
 
-                  return (
-                    <button
-                      key={item.id ?? itemUrl}
-                      onClick={() => toggleSelection(item)}
-                      className={cn(
-                        "group relative mb-3 w-full rounded-xl overflow-hidden bg-white/5 transition-all duration-300",
-                        isSelected ? "ring-2 ring-white" : "hover:ring-2 hover:ring-white/20",
-                        isDisabled ? "opacity-20 cursor-not-allowed" : "cursor-pointer"
-                      )}
-                    >
-                      {isVideo ? (
-                        <video src={itemUrl} className="w-full block" muted />
-                      ) : (
-                        <img src={itemUrl} alt="" className="w-full block" />
-                      )}
-                      
-                      {isSelected && (
-                        <div className="absolute inset-0 bg-white/10 flex items-center justify-center">
-                          <div className="w-6 h-6 bg-white text-black rounded-full flex items-center justify-center shadow-xl">
-                            <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
-                               <path d="M13.485 3.485a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0l-3.25-3.25a.75.75 0 1 1 1.06-1.06L5.75 10.19l6.72-6.705a.75.75 0 0 1 1.015 0z" />
-                            </svg>
+                    return (
+                      <button
+                        key={photo.key}
+                        onClick={() => toggleSelection(item)}
+                        style={{ width, height }}
+                        className={cn(
+                          "group relative rounded-xl overflow-hidden bg-white/5 transition-all duration-300",
+                          isSelected   ? "ring-2 ring-white"          : "hover:ring-2 hover:ring-white/20",
+                          isDisabled   ? "opacity-20 cursor-not-allowed" : "cursor-pointer"
+                        )}
+                      >
+                        {isVideo ? (
+                          <video src={itemUrl} style={{ width, height, objectFit: "cover" }} muted />
+                        ) : (
+                          <img   src={itemUrl} alt="" style={{ width, height, objectFit: "cover" }} />
+                        )}
+
+                        {isSelected && (
+                          <div className="absolute inset-0 bg-white/10 flex items-center justify-center">
+                            <div className="w-6 h-6 bg-white text-black rounded-full flex items-center justify-center shadow-xl">
+                              <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
+                                <path d="M13.485 3.485a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0l-3.25-3.25a.75.75 0 1 1 1.06-1.06L5.75 10.19l6.72-6.705a.75.75 0 0 1 1.015 0z" />
+                              </svg>
+                            </div>
                           </div>
-                        </div>
-                      )}
-                    </button>
-                  );
-                })}
-              </Masonry>
+                        )}
+                      </button>
+                    );
+                  },
+                }}
+              />
             )}
 
             {(hasMore || loading) && visibleItems.length > 0 && (

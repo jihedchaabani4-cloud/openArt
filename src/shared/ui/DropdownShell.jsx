@@ -79,29 +79,34 @@ export function DropdownSection({ label, action, className, children }) {
 // DropdownSegmented — pill-style segmented control
 // ─────────────────────────────────────────────────────────────────────────────
 
-export function DropdownSegmented({ value, onChange, options }) {
+export const DropdownSegmented = React.memo(({ value, onChange, options, className, variant = "default" }) => {
   return (
-    <div className="flex gap-1 bg-white/5  rounded-xl">
-      {options.map((opt) => (
-        <button
-          key={opt.value}
-          onClick={() => !opt.disabled && onChange(opt.value)}
-          disabled={opt.disabled}
-          className={cn(
-            "flex-1 py-3 rounded-lg text-sm transition-all font-medium flex flex-col items-center justify-center gap-1 relative",
-            value === opt.value && !opt.disabled
-              ? "bg-[#505153] text-white"
-              : opt.disabled
-              ? "opacity-30 cursor-not-allowed"
-              : "text-white/70 hover:text-white hover:bg-white/5"
-          )}
-        >
-          {opt.label}
-        </button>
-      ))}
+    <div className={cn("flex gap-1 bg-white/5 rounded-xl overflow-x-auto scrollbar-hide", className)}>
+      {options.map((opt) => {
+        const isSelected = value === opt.value && !opt.disabled;
+        
+        return (
+          <button
+            key={opt.value}
+            onClick={() => !opt.disabled && onChange(opt.value)}
+            disabled={opt.disabled}
+            className={cn(
+              "flex-1 min-w-fit px-3 py-3 rounded-lg text-[13px] transition-all font-medium flex flex-row items-center justify-center gap-2 relative whitespace-nowrap",
+              isSelected
+                ? (variant === "white" ? "bg-white text-black" : "bg-[#505153] text-white")
+                : opt.disabled
+                ? "opacity-30 cursor-not-allowed"
+                : "text-white hover:text-white hover:bg-white/5"
+            )}
+          >
+            {opt.icon && <span className="">{opt.icon}</span>}
+            {opt.label}
+          </button>
+        );
+      })}
     </div>
   )
-}
+})
 
 // ─────────────────────────────────────────────────────────────────────────────
 // DropdownChips — multi-select chip group
@@ -196,7 +201,7 @@ export function DropdownClearAction({ onClick, label = "Clear" }) {
 // DropdownToggle — Off/On pill toggle
 // ─────────────────────────────────────────────────────────────────────────────
 
-export function DropdownToggle({ value, onChange }) {
+export const DropdownToggle = React.memo(({ value, onChange }) => {
   return (
     <div className="flex gap-0.5 bg-white/5 p-0.5 rounded-lg">
       <button
@@ -219,7 +224,7 @@ export function DropdownToggle({ value, onChange }) {
       </button>
     </div>
   )
-}
+})
 
 // ─────────────────────────────────────────────────────────────────────────────
 // DropdownRow — icon + label + right-slot row

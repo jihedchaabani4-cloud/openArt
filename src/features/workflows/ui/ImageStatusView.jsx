@@ -8,12 +8,9 @@ export function ImageStatusView({
   status,
   src,
   alt = "",
-  label,
   aspect = "9/16",
   className,
   rounded = "rounded-sm",
-  showOverlay = true,
-  onCancel,
   error,
   children,
 }) {
@@ -123,6 +120,7 @@ export function ImageStatusView({
         </div>
       ) : isProcessing ? (
         <div className="w-full h-full relative overflow-hidden bg-[#0f1012]">
+          {/* Gradient Background */}
           <div
             className="absolute inset-0"
             style={{

@@ -41,8 +41,9 @@ export function useWorkflowActions(workflow, item = null) {
 
   const workflowSessionId = workflow?.metadata?.sessionId ?? workflow?.session_id ?? null;
   const isSameSession = !activeSessionId || !workflowSessionId || workflowSessionId === activeSessionId;
-  const canUseAsInput = isSameSession && metadata?.status === "completed" && !!url;
   const isInProgress = ["processing", "pending", "uploading"].includes(metadata?.status);
+  const canUseAsInput = isSameSession && metadata?.status === "completed" && !!url;
+  const canEnterEdit = isSameSession && (metadata?.status === "completed" || isInProgress);
   // Delete is allowed cross-session in UI (server enforces auth separately);
   // only block while a job is in progress to avoid race/confusion.
   const canDelete = !isInProgress;
@@ -98,7 +99,7 @@ export function useWorkflowActions(workflow, item = null) {
   };
 
   const handleEdit = () => {
-    if (!canUseAsInput) return;
+    if (!canEnterEdit) return;
     const config = (targetItem?.generationConfig) || getPrimaryMediaConfig(workflow) || {};
     const modelName = config.model_name || config.model || "";
     const assetId = targetItem?.asset_id || targetItem?.name || targetItem?.id || "";

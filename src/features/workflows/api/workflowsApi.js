@@ -97,7 +97,10 @@ export function useGenerateMutation({ onError } = {}) {
   return useMutation({
     mutationFn: async ({ payload, isVideo, isCamera, isLighting, isUpscale }) => {
       let endpoint = isVideo ? '/video/generated' : '/images/generated';
-      if (isCamera) endpoint = '/camera/change-angles';
+      if (isCamera) {
+          endpoint = '/camera/change-angles';
+          if (isVideo) payload.media_type = "video";
+      }
       if (isLighting) endpoint = '/lighting/change-lighting';
       if (isUpscale) endpoint = '/media/upscale';
       
@@ -108,6 +111,9 @@ export function useGenerateMutation({ onError } = {}) {
         } else if (payload.edit_type === 'img2img') {
           endpoint = '/images/generated/edit/new';
         }
+      } else if (isVideo && payload.edit_type === 'edit') {
+        // Dedicated endpoint for video editing
+        endpoint = '/video/edit';
       }
       
       const res = await api.post(endpoint, payload);
@@ -125,6 +131,37 @@ export function useGenerateMutation({ onError } = {}) {
     onSuccess: (res, { payload }) => {
       const { project_id: projectId, session_id: sessionId } = payload || {};
       // Invalidate the unified project data cache to trigger a refetch
+      if (projectId) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.projectData.byProject(projectId) });
+        if (sessionId) {
+          queryClient.invalidateQueries({
+            queryKey: queryKeys.projectData.byProjectAndSession(projectId, sessionId),
+          });
+        }
+      }
+    },
+  });
+}
+
+export function useExtendVideoMutation({ onError } = {}) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ payload }) => {
+      const endpoint = '/video/extend';
+      const res = await api.post(endpoint, payload);
+      if (!res.ok) throw new Error(res.message || 'Video extension failed');
+      return res;
+    },
+    onMutate: async () => {
+      useWorkflowsStore.getState().fireScrollToTop();
+      return {};
+    },
+    onError: (err) => {
+      console.error('❌ Video extension failed:', err);
+      if (typeof onError === 'function') onError(err);
+    },
+    onSuccess: (res, { payload }) => {
+      const { project_id: projectId, session_id: sessionId } = payload || {};
       if (projectId) {
         queryClient.invalidateQueries({ queryKey: queryKeys.projectData.byProject(projectId) });
         if (sessionId) {
@@ -211,6 +248,59 @@ export function useSetPrimaryMedia() {
         if (sessionId) {
           queryClient.invalidateQueries({
             queryKey: queryKeys.projectData.byProjectAndSession(projectId, sessionId),
+          });
+        }
+      }
+    },
+  });
+}
+
+/**
+ * useMoveWorkflow
+ * Moves a workflow to a different session (or creates a new session automatically).
+ *
+ * Usage — move to existing session:
+ *   moveWorkflow({ workflowId, sessionId, projectId })
+ *
+ * Usage — create new session and move:
+ *   moveWorkflow({ workflowId, newsession: true, sessionName: "My Session", projectId })
+ */
+export function useMoveWorkflow() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ workflowId, sessionId, projectId, newsession = false, sessionName }) => {
+      const body = {};
+      if (newsession) {
+        body.newsession = true;
+        if (sessionName) body.session_name = sessionName;
+      } else {
+        if (!sessionId) throw new Error('sessionId is required when newsession is false');
+        body.session_id = sessionId;
+      }
+      if (projectId) body.project_id = projectId;
+
+      const res = await api.patch(`/workflows/workflows/${workflowId}/move`, body);
+      if (!res.ok) throw new Error(res.message || 'Failed to move workflow');
+      return res;
+    },
+    onSuccess: (res, { projectId, sessionId }) => {
+      // Invalidate the source project/session
+      if (projectId) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.projectData.byProject(projectId) });
+        if (sessionId) {
+          queryClient.invalidateQueries({
+            queryKey: queryKeys.projectData.byProjectAndSession(projectId, sessionId),
+          });
+        }
+      }
+      // Also invalidate the destination session if different
+      const newSessionId = res?.workflow?.session_id;
+      const newProjectId = res?.workflow?.project_id;
+      if (newProjectId) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.projectData.byProject(newProjectId) });
+        if (newSessionId) {
+          queryClient.invalidateQueries({
+            queryKey: queryKeys.projectData.byProjectAndSession(newProjectId, newSessionId),
           });
         }
       }
