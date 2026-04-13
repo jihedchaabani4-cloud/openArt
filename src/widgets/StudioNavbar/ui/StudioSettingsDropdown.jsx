@@ -28,7 +28,7 @@ export function StudioSettingsDropdown({
 
   return (
     <DropdownShell
-      trigger={<Settings className="size-6" />}
+      trigger={<Settings className="size-7" />}
       isActive={open}
       open={open}
       onOpenChange={setOpen}

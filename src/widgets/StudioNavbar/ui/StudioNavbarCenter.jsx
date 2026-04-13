@@ -36,7 +36,6 @@ export function StudioNavbarCenter({
                     onClear={searchExpanded ? handleCloseSearch : undefined}
                     clearIcon={X}
                     type="search"
-                    placeholder="Search in project..."
                     value={filters.prompt}
                     onChange={(e) => setFilter('prompt', e.target.value)}
                     onBlur={() => !filters.prompt && handleCloseSearch()}

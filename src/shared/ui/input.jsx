@@ -8,10 +8,11 @@ const Input = React.forwardRef(({ className, type, icon: Icon, onClear, clearIco
   if (hasWrapper) {
     return (
       <label className={cn(
-        "flex h-11 w-full items-center gap-2 rounded-lg bg-black/75 bg-[linear-gradient(0deg,rgba(255,255,255,0.1),rgba(255,255,255,0.1))]   px-3 py-2.5 text-sm text-white transition-all cursor-text",
+        "flex h-11 w-full items-center gap-2 rounded-2xl px-3 py-2.5 text-sm text-white transition-all cursor-text",
+        "bg-black/75 bg-[linear-gradient(0deg,rgba(255,255,255,0.1),rgba(255,255,255,0.1))]",
         className
       )}>
-        <Icon className="size-4 text-white shrink-0" />
+        <Icon className="size-4 text-white/70 shrink-2" strokeWidth={3} />
         <input
           type={type}
           ref={ref}
@@ -36,7 +37,7 @@ const Input = React.forwardRef(({ className, type, icon: Icon, onClear, clearIco
       type={type}
       ref={ref}
       className={cn(
-        "flex h-11 w-full rounded-lg border border-white/8 bg-white/3 px-3 py-2.5 text-sm text-white placeholder:text-white/40 focus:border-white/20 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 transition-all",
+        "flex h-11 w-full rounded-2xl border border-white/8 bg-white/3 px-3 py-2.5 text-sm text-white placeholder:text-white/40 focus:border-white/20 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 transition-all",
         className
       )}
       {...props}

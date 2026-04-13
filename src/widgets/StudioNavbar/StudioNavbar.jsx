@@ -23,17 +23,23 @@ import { useProjectEdit } from "./hooks/useProjectEdit"
 
 export function StudioNavbar() {
     // ── Store ──
-    const {
-        gridSize, setGridSize,
-        soundOnHover, setSoundOnHover,
-        showTileDetails, setShowTileDetails,
-        showDetails, setShowDetails,
-        clearPromptOnSubmit, setClearPromptOnSubmit,
-        activeSessionId, setActiveSessionId,
-        selectedProjectId: activeProjectId,
-        showUploadedMedia, setShowUploadedMedia,
-        filters, setFilter,
-    } = useGenerationsStore()
+    const gridSize = useGenerationsStore(s => s.gridSize);
+    const setGridSize = useGenerationsStore(s => s.setGridSize);
+    const soundOnHover = useGenerationsStore(s => s.soundOnHover);
+    const setSoundOnHover = useGenerationsStore(s => s.setSoundOnHover);
+    const showTileDetails = useGenerationsStore(s => s.showTileDetails);
+    const setShowTileDetails = useGenerationsStore(s => s.setShowTileDetails);
+    const showDetails = useGenerationsStore(s => s.showDetails);
+    const setShowDetails = useGenerationsStore(s => s.setShowDetails);
+    const clearPromptOnSubmit = useGenerationsStore(s => s.clearPromptOnSubmit);
+    const setClearPromptOnSubmit = useGenerationsStore(s => s.setClearPromptOnSubmit);
+    const activeSessionId = useGenerationsStore(s => s.activeSessionId);
+    const setActiveSessionId = useGenerationsStore(s => s.setActiveSessionId);
+    const activeProjectId = useGenerationsStore(s => s.selectedProjectId);
+    const showUploadedMedia = useGenerationsStore(s => s.showUploadedMedia);
+    const setShowUploadedMedia = useGenerationsStore(s => s.setShowUploadedMedia);
+    const filters = useGenerationsStore(s => s.filters);
+    const setFilter = useGenerationsStore(s => s.setFilter);
 
     // ── Server State ──
     const { data: projects = [] } = useProjects()
@@ -48,7 +54,9 @@ export function StudioNavbar() {
     const selectedSessionName = activeSession?.session_name || null
 
     // ── Logic Hooks ──
-    const { hidden } = useNavbarScroll()
+    const activeFilter = useGenerationsStore(s => s.activeFilter);
+    const setActiveFilter = useGenerationsStore(s => s.setActiveFilter);
+    const isNavbarHidden = useGenerationsStore(s => s.isNavbarHidden);
     const {
         searchExpanded,
         searchInputRef,
@@ -100,11 +108,11 @@ export function StudioNavbar() {
                 visible: { y: 0 },
                 hidden: { y: "-100%" },
             }}
-            animate={hidden ? "hidden" : "visible"}
+            animate={isNavbarHidden ? "hidden" : "visible"}
             transition={{ duration: 0.35, ease: "easeInOut" }}
-            className="fixed top-0 left-0 w-full z-50 flex flex-col bg-transparent min-h-[60px]"
+            className="fixed py-2 px-8 top-0 left-0 w-full z-50 flex flex-col bg-transparent min-h-[60px]"
         >
-            <div className="flex items-stretch min-h-[60px] w-full">
+            <div className="flex  items-stretch min-h-[60px] w-full">
                 <StudioNavbarLeft 
                     searchExpanded={searchExpanded}
                     activeProjectId={activeProjectId}

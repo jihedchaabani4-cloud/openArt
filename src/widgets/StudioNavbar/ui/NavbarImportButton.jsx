@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useRef } from "react";
-import { Upload, Loader2 } from "lucide-react";
+import { Plus, Loader2 } from "lucide-react";
 import { useMediaLibrary } from "@/features/media/model/useMediaLibrary";
 import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows";
 
@@ -23,6 +23,7 @@ export function NavbarImportButton() {
             await lib.handleUpload(file, activeSessionId);
         } catch (err) {
             console.error("Upload failed for file:", file.name, err);
+            window.alert(err.message || "Upload failed");
         }
     }
     
@@ -45,13 +46,13 @@ export function NavbarImportButton() {
         type="button"
         onClick={handleClick}
         disabled={lib.loading}
-        className="size-9 rounded-xl flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 transition-all border border-white/5 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="size-11 rounded-full flex items-center justify-center text-white/90 hover:text-white hover:bg-white/10 transition-all border border-white/5 disabled:opacity-50 disabled:cursor-not-allowed"
         title="Upload Media"
       >
         {lib.loading ? (
-            <Loader2 className="size-5 animate-spin text-white/40" />
+            <Loader2 className="size-6 animate-spin text-white/40" />
         ) : (
-            <Upload className="size-5" />
+            <Plus className="size-6 " strokeWidth={3}  />
         )}
       </button>
     </>

@@ -18,6 +18,9 @@ export const useWorkflowsStore = create((set, get) => ({
 
     triggerScrollToTop: 0,
     fireScrollToTop: () => set((s) => ({ triggerScrollToTop: (s.triggerScrollToTop || 0) + 1 })),
+    
+    isNavbarHidden: false,
+    setIsNavbarHidden: (val) => set({ isNavbarHidden: val }),
 
     loading: false,
     setLoading: (loading) => set({ loading }),

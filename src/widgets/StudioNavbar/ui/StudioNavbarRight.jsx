@@ -22,7 +22,7 @@ export function StudioNavbarRight({
 }) {
     return (
         <div className={cn(
-            "shrink-0 flex items-center justify-end gap-3 overflow-hidden whitespace-nowrap transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
+            "shrink-0 flex items-center justify-end gap-1 overflow-hidden whitespace-nowrap transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
             searchExpanded ? "basis-[0%] opacity-0 pointer-events-none" : "basis-[32%] opacity-100"
         )}>
             <NavbarImportButton />

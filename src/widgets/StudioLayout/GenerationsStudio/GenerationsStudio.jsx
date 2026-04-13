@@ -13,7 +13,6 @@ import { RowsPhotoAlbum } from 'react-photo-album'
 import 'react-photo-album/rows.css'
 import { ArrowUp } from "lucide-react"
 import { MediaGridItem } from "./MediaGridItem"
-import { SessionSidebar } from "../SessionSidebar/SessionSidebar"
 import { usePromptStore } from "@/features/prompt-bar/model/usePromptStore";
 import { getItemMetadata, getPrimaryMedia } from "@/shared/lib/generationUtils";
 import { getItemMetadata as getDisplayMeta } from "@/shared/lib/displayUtils";
@@ -62,36 +61,87 @@ export function GenerationsStudio({
     onSelectMedia = () => {},
     emptyMessage = "NO WORKFLOWS FOUND"
 }) {
-    const store = useGenerationsStore();
+    const selectedProjectId = useGenerationsStore(s => s.selectedProjectId);
+    const activeSessionId   = useGenerationsStore(s => s.activeSessionId);
+    const gridSize          = useGenerationsStore(s => s.gridSize);
+    const setIsNavbarHidden = useGenerationsStore(s => s.setIsNavbarHidden);
+    
     const isDragging = usePromptStore(s => s.isDraggingGalleryItem);
     const router = useRouter();
-    const { data: fetchResult, isLoading: fetchIsLoading } = useFilteredGenerations(store.selectedProjectId, store.activeSessionId);
+    const { data: fetchResult, isLoading: fetchIsLoading } = useFilteredGenerations(selectedProjectId, activeSessionId);
 
     const workflows = propWorkflows !== null ? propWorkflows : (fetchResult?.filteredWorkflows || []);
     const isLoading = propIsLoading !== null ? propIsLoading : fetchIsLoading;
-    const gridSize = propGridSize !== null ? propGridSize : store.gridSize;
+    const finalGridSize = propGridSize !== null ? propGridSize : gridSize;
     
     // Navigate to the Edit Page for this workflow
     const handleWorkflowClick = (workflow) => {
         const workflowId = workflow.id || workflow.name;
-        if (!workflowId || !store.selectedProjectId) return;
-        router.push(`/projects/${store.selectedProjectId}/edit/${workflowId}`);
+        if (!workflowId || !selectedProjectId) return;
+        router.push(`/projects/${selectedProjectId}/edit/${workflowId}`);
     };
 
     const scrollRef = React.useRef(null);
+    const prevScrollTop = React.useRef(0);
+    const rafRef = React.useRef(null);          // ← rAF handle for throttling
     const [showTopBtn, setShowTopBtn] = React.useState(false);
 
+    // ─── 144fps scroll handler via requestAnimationFrame ─────────────────────
     const handleScroll = React.useCallback(() => {
-        if (!scrollRef.current) return;
-        setShowTopBtn(scrollRef.current.scrollTop > 400);
+        if (rafRef.current) return; // already scheduled — skip until next frame
+
+        rafRef.current = requestAnimationFrame(() => {
+            rafRef.current = null;
+            if (!scrollRef.current) return;
+
+            const currentScrollTop = scrollRef.current.scrollTop;
+
+            // Show / hide "back to top" button
+            setShowTopBtn(currentScrollTop > 400);
+
+            // Hide / show navbar on scroll direction change
+            const isCurrentlyHidden = useGenerationsStore.getState().isNavbarHidden;
+            if (currentScrollTop > prevScrollTop.current && currentScrollTop > 80) {
+                if (!isCurrentlyHidden) setIsNavbarHidden(true);
+            } else if (currentScrollTop < prevScrollTop.current) {
+                if (isCurrentlyHidden) setIsNavbarHidden(false);
+            }
+
+            prevScrollTop.current = currentScrollTop;
+        });
+    }, [setIsNavbarHidden]);
+
+    // Cancel any pending rAF on unmount
+    React.useEffect(() => {
+        return () => {
+            if (rafRef.current) cancelAnimationFrame(rafRef.current);
+        };
     }, []);
 
+    // ─── easeOutExpo spring-like scroll-to-top ────────────────────────────────
     const scrollToTop = React.useCallback(() => {
-        scrollRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+        const el = scrollRef.current;
+        if (!el) return;
+
+        const start     = el.scrollTop;
+        const startTime = performance.now();
+        const duration  = 600; // ms — feels snappy at 144 fps
+
+        // easeOutExpo: fast start, butter-smooth landing
+        const ease = (t) => (t === 1 ? 1 : 1 - Math.pow(2, -10 * t));
+
+        const animate = (now) => {
+            const elapsed  = now - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            el.scrollTop   = start * (1 - ease(progress));
+            if (progress < 1) requestAnimationFrame(animate);
+        };
+
+        requestAnimationFrame(animate);
     }, []);
 
     // Target row height driven by gridSize
-    const targetRowHeight = gridSize === "lg" ? 380 : gridSize === "md" ? 280 : 200;
+    const targetRowHeight = finalGridSize === "lg" ? 380 : finalGridSize === "md" ? 280 : 200;
 
     // Build the photo descriptors that react-photo-album needs
     const photos = React.useMemo(() => {
@@ -127,8 +177,6 @@ export function GenerationsStudio({
 
     return (
         <div className="flex h-full w-full overflow-hidden text-white bg-[#050505]">
-            <SessionSidebar />
-            
             <main className="flex-1 flex flex-col relative min-w-0 overflow-hidden">
                 {/* ── Global Drag Overlay ── */}
                 <AnimatePresence>
@@ -141,10 +189,11 @@ export function GenerationsStudio({
                         />
                     )}
                 </AnimatePresence>
+
                 <div 
                     ref={scrollRef}
                     onScroll={handleScroll}
-                    className="flex-1 overflow-y-auto overflow-x-hidden p-2 scrollbar-hide"
+                    className="flex-1 overflow-y-auto pt-[80px] overflow-x-hidden p-5 custom-scrollbar"
                 >
                     <AnimatePresence mode="wait">
                         {isLoading ? (
@@ -222,8 +271,33 @@ export function GenerationsStudio({
                 </AnimatePresence>
 
                 <style jsx global>{`
-                    .scrollbar-hide::-webkit-scrollbar { display: none; }
-                    .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+                    .custom-scrollbar::-webkit-scrollbar {
+                        width: 14px;
+                    }
+                    .custom-scrollbar::-webkit-scrollbar-track {
+                        background: transparent;
+                    }
+                    .custom-scrollbar::-webkit-scrollbar-thumb {
+                        background-color: rgba(255, 255, 255, 0.2);
+                        border-radius: 20px;
+                        border: 4px solid transparent;
+                        background-clip: padding-box;
+                        transition: background 0.2s ease;
+                    }
+                    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+                        background-color: rgba(255, 255, 255, 0.35);
+                    }
+                    .custom-scrollbar {
+                        -ms-overflow-style: auto;
+                        scrollbar-width: thin;
+                        scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+
+                        /* ✦ 144fps smooth scroll */
+                        scroll-behavior: smooth;
+                        -webkit-overflow-scrolling: touch;
+                        overscroll-behavior-y: contain;
+                        will-change: scroll-position;
+                    }
                 `}</style>
             </main>
         </div>

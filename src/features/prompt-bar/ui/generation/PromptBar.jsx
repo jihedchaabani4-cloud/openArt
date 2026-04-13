@@ -20,7 +20,7 @@ export default function PromptBar({ hideBackground = false, isNewProject = false
     const [dialogOpen, setDialogOpen] = React.useState(false);
     const [internalMode, setInternalMode] = React.useState('image');
     const [targetRole, setTargetRole] = React.useState('normal');
-    const [variationsOpen, setVariationsOpen] = React.useState(true);
+    const [variationsOpen, setVariationsOpen] = React.useState(false);
     const [mentionCallback, setMentionCallback] = React.useState(null);
     const isDraggingGalleryItem = usePromptStore(s => s.isDraggingGalleryItem);
     const draggedItem = usePromptStore(s => s.draggedItem);
@@ -110,18 +110,16 @@ export default function PromptBar({ hideBackground = false, isNewProject = false
         >
             {/* ── Width constraint ─────────────────────────────────────────── */}
             <div
-                className="w-full flex flex-col items-center justify-center "
+                className="w-full flex flex-col items-end justify-end "
                 style={{ maxWidth: hideBackground ? undefined : "550px" }}
             >
                 {isDraggingGalleryItem ? (
                     /* ── Raw overlay — no card wrapper ────────────── */
-                    <div className="w-full min-h-[140px] flex">
-                        <DragDropOverlay 
-                            mode={s.generationMode} 
-                            onDrop={handleGalleryDrop}
-                            error={dragError}
-                        />
-                    </div>
+                    <DragDropOverlay 
+                        mode={s.generationMode} 
+                        onDrop={handleGalleryDrop}
+                        error={dragError}
+                    />
                 ) : (
                     /* ── Visual card normal ────────────────────────── */
                     <div className="relative w-full flex flex-col border border-white/5 shadow-[0px_16px_32px_-8px_rgba(0,0,0,0.4)] backdrop-blur-[80px] bg-[#161718e6] rounded-2xl overflow-hidden min-h-[60px]">

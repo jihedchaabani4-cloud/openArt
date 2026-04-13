@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation"
 import { StudioNavbar } from "@/widgets/StudioNavbar"
+import { SessionSidebar } from "@/widgets/StudioLayout/SessionSidebar/SessionSidebar"
 
 /**
  * Layout for /projects/[projectId] studio pages.
@@ -19,8 +20,11 @@ export default function StudioLayout({ children }) {
     return (
         <div className="flex flex-col h-screen overflow-hidden">
             <StudioNavbar />
-            <div className="flex-1 min-h-0 pt-[60px] flex flex-col overflow-hidden">
-                {children}
+            <div className="flex-1 min-h-0 flex flex-row overflow-hidden bg-[#050505]">
+                <SessionSidebar />
+                <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
+                    {children}
+                </div>
             </div>
         </div>
     )

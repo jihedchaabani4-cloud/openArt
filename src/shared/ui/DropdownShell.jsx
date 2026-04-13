@@ -30,9 +30,9 @@ export function DropdownShell({
         <button
           type="button"
           className={cn(
-            "size-9 rounded-xl flex items-center justify-center transition-all ",
+            "size-9 rounded-2xl flex items-center justify-center transition-all ",
             isActive
-              ? "bg-transparent text-white "
+              ? "bg-transparent text-white/80 "
               : " text-white hover:bg-white/10 hover:text-white "
           )}
         >

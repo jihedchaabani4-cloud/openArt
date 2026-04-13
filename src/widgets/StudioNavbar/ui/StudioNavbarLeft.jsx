@@ -36,20 +36,20 @@ export function StudioNavbarLeft({
 
     return (
         <div className={cn(
-            "flex items-center gap-1 transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] overflow-hidden",
+            "flex items-center transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] overflow-hidden",
             searchExpanded ? "basis-0 w-0 opacity-0 pointer-events-none" : "basis-[30%] shrink-0 opacity-100"
         )}>
             {/* ── Back Button ── */}
             <a
                 href="/projects"
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white/50 hover:bg-white/5 hover:text-white transition-all"
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white/90 hover:bg-white/5 hover:text-white transition-all"
                 title="Back to Projects"
             >
-                <ArrowLeft className="size-[22px]" />
+                <ArrowLeft className="size-[24px]" strokeWidth={3} />
             </a>
 
             {/* ── Project Title ── */}
-            <div className="flex items-center gap-2 px-1 min-w-0">
+            <div className="flex items-center gap-2 min-w-0">
                 <input
                     type="text"
                     value={editedName || selectedProjectName || "Untitled"}
@@ -61,8 +61,8 @@ export function StudioNavbarLeft({
                         if (e.key === "Escape") { handleCancelEdit(); e.currentTarget.blur() }
                     }}
                     className={cn(
-                        "bg-transparent border-none outline-none px-2 py-1 rounded-md transition-all text-[18px] font-medium hover:bg-white/5 focus:bg-white/5 focus:text-white w-full min-w-[80px] max-w-[160px]",
-                        isEditingName ? "text-white" : "text-white/80"
+                        "bg-transparent border-none outline-none px-2 py-1 rounded-md transition-all text-md font-medium hover:bg-white/5 focus:bg-white/5 focus:text-white w-full min-w-[80px] max-w-[160px]",
+                        isEditingName ? "text-white" : "text-white"
                     )}
                     aria-label="Project title"
                 />
