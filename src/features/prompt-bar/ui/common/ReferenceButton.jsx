@@ -18,6 +18,11 @@ export function ReferenceButton({
   disabled = false,
   pulse = false,
   className,
+  onDragOver,
+  onDragEnter,
+  onDragLeave,
+  onDrop,
+  ...props
 }) {
   const preset = variant ? VARIANTS[variant] : null;
   const displayWord = word ?? preset?.word ?? null;
@@ -26,6 +31,10 @@ export function ReferenceButton({
   return (
     <div
       onClick={!disabled ? onClick : undefined}
+      onDragOver={onDragOver}
+      onDragEnter={onDragEnter}
+      onDragLeave={onDragLeave}
+      onDrop={onDrop}
       className={cn(
         "group relative shrink-0",
         "w-[50px] h-[50px] rounded-[12px]",
@@ -39,6 +48,7 @@ export function ReferenceButton({
         disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer",
         className
       )}
+      {...props}
     >
       {displayWord && (
         <span

@@ -102,7 +102,7 @@ export function StudioNavbar() {
             }}
             animate={hidden ? "hidden" : "visible"}
             transition={{ duration: 0.35, ease: "easeInOut" }}
-            className="fixed top-0 left-0 w-full z-50 flex flex-col bg-black/80 backdrop-blur-xl border-b border-white/5 min-h-[60px]"
+            className="fixed top-0 left-0 w-full z-50 flex flex-col bg-transparent min-h-[60px]"
         >
             <div className="flex items-stretch min-h-[60px] w-full">
                 <StudioNavbarLeft 

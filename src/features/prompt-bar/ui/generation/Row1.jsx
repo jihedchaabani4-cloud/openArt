@@ -78,7 +78,18 @@ export function Row1({
                             label="Start"
                         />
                     ) : (
-                        <ReferenceButton variant="start" onClick={() => openDialog('image', 'start')} />
+                        <ReferenceButton 
+                            variant="start" 
+                            onClick={() => openDialog('image', 'start')} 
+                            onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                            onDrop={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                if (e.dataTransfer?.files?.length > 0 && handleUploadFromPC) {
+                                    handleUploadFromPC(e.dataTransfer.files[0], 'start');
+                                }
+                            }}
+                        />
                     )}
 
                     {/* Swap */}
@@ -102,7 +113,18 @@ export function Row1({
                                 label="End"
                             />
                         ) : (
-                            <ReferenceButton variant="end" onClick={() => openDialog('image', 'end')} />
+                            <ReferenceButton 
+                                variant="end" 
+                                onClick={() => openDialog('image', 'end')} 
+                                onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                                onDrop={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    if (e.dataTransfer?.files?.length > 0 && handleUploadFromPC) {
+                                        handleUploadFromPC(e.dataTransfer.files[0], 'end');
+                                    }
+                                }}
+                            />
                         )
                     )}
                 </div>
@@ -118,7 +140,18 @@ export function Row1({
                             label="Vid"
                         />
                     ) : (
-                        <ReferenceButton variant="motion" onClick={() => openDialog('video', 'mc_video')} />
+                        <ReferenceButton 
+                            variant="motion" 
+                            onClick={() => openDialog('video', 'mc_video')} 
+                            onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                            onDrop={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                if (e.dataTransfer?.files?.length > 0 && handleUploadFromPC) {
+                                    handleUploadFromPC(e.dataTransfer.files[0], 'mc_video');
+                                }
+                            }}
+                        />
                     )}
 
                     {mcImageRef ? (
@@ -128,7 +161,18 @@ export function Row1({
                             label="Ref"
                         />
                     ) : (
-                        <ReferenceButton variant="ref" onClick={() => openDialog('image', 'mc_image')} />
+                        <ReferenceButton 
+                            variant="ref" 
+                            onClick={() => openDialog('image', 'mc_image')} 
+                            onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                            onDrop={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                if (e.dataTransfer?.files?.length > 0 && handleUploadFromPC) {
+                                    handleUploadFromPC(e.dataTransfer.files[0], 'mc_image');
+                                }
+                            }}
+                        />
                     )}
                 </div>
             )}

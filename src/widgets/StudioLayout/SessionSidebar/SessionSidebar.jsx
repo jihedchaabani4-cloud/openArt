@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Image as ImageIcon, Video, Loader2, Plus, MoreHorizontal, Check } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows";
+import { usePromptStore } from "@/features/prompt-bar/model/usePromptStore";
 import { useProjectData, useMoveWorkflow } from "@/features/workflows/api/workflowsApi";
 import { useCreateSession, useUpdateSession, useDeleteSession } from "@/features/projects/api/createSessionApi";
 import {
@@ -103,9 +104,11 @@ export function SessionSidebar() {
         );
     }, [sessions]);
 
-    if (!selectedProjectId) return null;
+    const isDraggingGalleryItem = usePromptStore(s => s.isDraggingGalleryItem);
 
-    const isExpanded = isHovered || isDraggingOver || openDropdownId !== null || openContextMenuId !== null || editingSessionId !== null;
+    const isExpanded = isHovered || isDraggingOver || isDraggingGalleryItem || openDropdownId !== null || openContextMenuId !== null || editingSessionId !== null;
+
+    if (!selectedProjectId) return null;
 
     const handleCreateSession = async () => {
         const newSession = await createSession({ project_id: selectedProjectId, session_name: "Untitled" });
@@ -215,12 +218,12 @@ export function SessionSidebar() {
 
             {/* ── Expanding wrapper — Framer Motion spring ── */}
             <motion.div
-                className="absolute left-0 top-1/2 -translate-y-1/2 max-h-[90vh] h-fit flex flex-col items-start overflow-hidden py-2 rounded-r-md shadow-2xl"
+                className="absolute left-0 top-1/2 -translate-y-1/2 max-h-[90vh] h-fit flex flex-col items-start overflow-hidden py-2 rounded-r-md shadow-2xl border transition-colors"
                 animate={{
                     width: isExpanded ? 280 : 72,
-                    backgroundColor: isExpanded ? "rgba(10,10,10,0.85)" : "rgba(0,0,0,0)",
+                    backgroundColor:"backdrop-blur-[80px] bg-[#161718e6]",
                     boxShadow: isExpanded ? "0 25px 50px -12px rgba(0,0,0,0.5)" : "none",
-                    borderColor: isExpanded ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0)",
+                    borderColor: isDraggingGalleryItem ? "rgba(255,255,255,0.4)" : (isExpanded ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0)"),
                 }}
                 transition={SPRING}
                 style={{ backdropFilter: isExpanded ? "blur(40px)" : "none" }}

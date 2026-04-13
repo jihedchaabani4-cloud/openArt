@@ -65,7 +65,6 @@ export function StudioNavbarLeft({
                         isEditingName ? "text-white" : "text-white/80"
                     )}
                     aria-label="Project title"
-                    placeholder="Untitled"
                 />
 
                 {isEditingName && (
@@ -88,69 +87,6 @@ export function StudioNavbarLeft({
                 )}
             </div>
 
-            {/* ── Separator ── */}
-            <div className="h-5 w-px bg-white/10 shrink-0 mx-1" />
-
-            {/* ── Session Switcher ── */}
-            <div className="relative shrink-0" ref={dropdownRef}>
-                <button
-                    onClick={() => setSessionsOpen(v => !v)}
-                    className="flex items-center gap-1.5 h-8 px-2.5 rounded-md bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/10 text-white/70 hover:text-white transition-all group text-xs font-medium"
-                >
-                    <Layers className="size-3.5 text-white/40 group-hover:text-white/70 transition-colors" />
-                    <span className="max-w-[100px] truncate">
-                        {selectedSessionName || "All sessions"}
-                    </span>
-                    <ChevronDown className={cn(
-                        "size-3 text-white/30 transition-transform duration-200",
-                        sessionsOpen && "rotate-180"
-                    )} />
-                </button>
-
-                {sessionsOpen && (
-                    <div className="absolute top-full left-0 mt-1.5 w-52 bg-[#131517] border border-white/10 rounded-xl shadow-2xl z-[999] overflow-hidden py-1">
-                        {/* All sessions option */}
-                        <button
-                            onClick={() => { setActiveSessionId(null); setSessionsOpen(false) }}
-                            className={cn(
-                                "w-full flex items-center justify-between px-3 py-2 text-xs hover:bg-white/5 transition-colors",
-                                !activeSessionId ? "text-white" : "text-white/50"
-                            )}
-                        >
-                            <span>All sessions</span>
-                            {!activeSessionId && <Check className="size-3.5 text-[#D4FF00]" />}
-                        </button>
-
-                        {projectSessions.length > 0 && (
-                            <div className="h-px bg-white/5 my-1 mx-2" />
-                        )}
-
-                        {/* Individual sessions */}
-                        {projectSessions.map((s) => (
-                            <button
-                                key={s.session_id}
-                                onClick={() => { setActiveSessionId(s.session_id); setSessionsOpen(false) }}
-                                className={cn(
-                                    "w-full flex items-center justify-between px-3 py-2 text-xs hover:bg-white/5 transition-colors",
-                                    activeSessionId === s.session_id ? "text-white" : "text-white/50"
-                                )}
-                            >
-                                <span className="truncate">{s.session_name}</span>
-                                {activeSessionId === s.session_id && <Check className="size-3.5 text-[#D4FF00] shrink-0" />}
-                            </button>
-                        ))}
-
-                        {/* New session button */}
-                        <div className="h-px bg-white/5 my-1 mx-2" />
-                        <button
-                            onClick={() => { setSessionsOpen(false); setIsCreateSessionOpen?.(true) }}
-                            className="w-full flex items-center gap-2 px-3 py-2 text-xs text-white/40 hover:text-white hover:bg-white/5 transition-colors"
-                        >
-                            <span>+ New session</span>
-                        </button>
-                    </div>
-                )}
-            </div>
         </div>
     )
 }

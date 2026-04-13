@@ -14,6 +14,7 @@ import 'react-photo-album/rows.css'
 import { ArrowUp } from "lucide-react"
 import { MediaGridItem } from "./MediaGridItem"
 import { SessionSidebar } from "../SessionSidebar/SessionSidebar"
+import { usePromptStore } from "@/features/prompt-bar/model/usePromptStore";
 import { getItemMetadata, getPrimaryMedia } from "@/shared/lib/generationUtils";
 import { getItemMetadata as getDisplayMeta } from "@/shared/lib/displayUtils";
 
@@ -62,6 +63,7 @@ export function GenerationsStudio({
     emptyMessage = "NO WORKFLOWS FOUND"
 }) {
     const store = useGenerationsStore();
+    const isDragging = usePromptStore(s => s.isDraggingGalleryItem);
     const router = useRouter();
     const { data: fetchResult, isLoading: fetchIsLoading } = useFilteredGenerations(store.selectedProjectId, store.activeSessionId);
 
@@ -128,10 +130,21 @@ export function GenerationsStudio({
             <SessionSidebar />
             
             <main className="flex-1 flex flex-col relative min-w-0 overflow-hidden">
+                {/* ── Global Drag Overlay ── */}
+                <AnimatePresence>
+                    {isDragging && (
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="absolute inset-0 z-[25] bg-black/60 backdrop-blur-[4px] pointer-events-none"
+                        />
+                    )}
+                </AnimatePresence>
                 <div 
                     ref={scrollRef}
                     onScroll={handleScroll}
-                    className="flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-6 scrollbar-hide"
+                    className="flex-1 overflow-y-auto overflow-x-hidden p-2 scrollbar-hide"
                 >
                     <AnimatePresence mode="wait">
                         {isLoading ? (

@@ -1,84 +1,77 @@
-import React, { useState } from 'react';
-import { Plus } from 'lucide-react';
-import { cn } from '@/shared/lib/utils';
-import { motion, AnimatePresence } from 'framer-motion';
+import React from "react";
+import { motion } from "framer-motion";
+import { ImagePlus, Ban } from "lucide-react";
+import { cn } from "@/shared/lib/utils";
 
-export function DragDropOverlay({
-    isDragging,
-    generationMode,
-    onDropStart,
-    onDropEnd,
-    onDropIngredient,
-    onDragLeaveBase
-}) {
-    // Show two slots if it's keyframe, otherwise one generic slot
-    const isKeyframeMode = generationMode === 'keyframe';
+/**
+ * DragDropOverlay
+ * A premium, dynamic overlay that appears when dragging media.
+ * Adapts its layout and text based on the generation mode and errors.
+ */
+export function DragDropOverlay({ mode, onDrop, error }) {
+  const isKeyframe = mode === "keyframe";
+  
+  // Dynamic labels based on mode
+  const getLabel = (role) => {
+    if (isKeyframe) {
+      return role === "start" ? "Add start frame" : "Add end frame";
+    }
+    if (mode === "motion-control") {
+      return "Add motion reference";
+    }
+    return "Add ingredient";
+  };
 
-    return (
-        <AnimatePresence>
-            {isDragging && (
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.98 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.98 }}
-                    transition={{ duration: 0.2, ease: "easeOut" }}
-                    className="relative w-full h-[60px] flex items-center justify-center bg-[#1c1c1c] rounded-2xl overflow-hidden border border-white/5 shadow-[0px_16px_32px_-8px_rgba(0,0,0,0.4)]"
-                    onDragLeave={onDragLeaveBase}
-                >
-                    {isKeyframeMode ? (
-                        <div className="flex items-center w-full h-full">
-                            <DropZone 
-                                label="Add start frame" 
-                                onDrop={onDropStart} 
-                                className="border-r border-white/5"
-                            />
-                            <DropZone 
-                                label="Add end frame" 
-                                onDrop={onDropEnd} 
-                            />
-                        </div>
-                    ) : (
-                        <DropZone 
-                            label="Add Ingredient" 
-                            onDrop={onDropIngredient} 
-                        />
-                    )}
-                </motion.div>
-            )}
-        </AnimatePresence>
-    );
+  return (
+    <div className="relative w-full h-full flex items-center justify-center p-3 pointer-events-none">
+      {/* Content: 1 or 2 Drop Targets OR Error State */}
+      <div className="relative w-full h-full flex gap-3">
+        {error ? (
+          /* ── Error State (Prohibited) ── */
+          <div className="flex-1 h-[80px] flex flex-row items-center justify-center gap-3 bg-[#1b1c1e] border border-[#ff4d8d]/50 rounded-[24px] px-8 shadow-2xl backdrop-blur-3xl">
+             <div className="flex items-center justify-center text-[#ff4d8d]">
+              <Ban className="size-6" strokeWidth={1.8} />
+            </div>
+            <span className="text-[#ff4d8d] font-semibold text-[15px] tracking-tight">
+              {error}
+            </span>
+          </div>
+        ) : isKeyframe ? (
+          <>
+            {/* Start Frame Zone */}
+            <DropZone label={getLabel("start")} onDrop={() => onDrop?.("start")} />
+            {/* End Frame Zone */}
+            <DropZone label={getLabel("end")} onDrop={() => onDrop?.("end")} />
+          </>
+        ) : (
+          /* Unified Ingredient Zone */
+          <DropZone label={getLabel("normal")} onDrop={() => onDrop?.("normal")} />
+        )}
+      </div>
+    </div>
+  );
 }
 
-function DropZone({ label, onDrop, className }) {
-    const [isOver, setIsOver] = useState(false);
-
-    return (
-        <div
-            onDragOver={(e) => { 
-                e.preventDefault(); 
-                e.stopPropagation();
-                setIsOver(true); 
-            }}
-            onDragLeave={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                setIsOver(false);
-            }}
-            onDrop={(e) => { 
-                e.preventDefault(); 
-                e.stopPropagation();
-                setIsOver(false); 
-                onDrop?.(e); 
-            }}
-            className={cn(
-                "flex-1 flex items-center justify-center gap-2 transition-all h-full w-full",
-                "bg-transparent text-white",
-                isOver && "bg-white/5 shadow-inner",
-                className
-            )}
-        >
-            <Plus size={16} strokeWidth={2} className="text-white/80" />
-            <span className="text-[13px] font-medium tracking-wide text-white/90">{label}</span>
-        </div>
-    );
+function DropZone({ label, onDrop }) {
+  return (
+    <div 
+      onDragOver={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      }}
+      onDrop={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onDrop?.();
+      }}
+      className="flex-1 h-[90px] flex flex-row items-center justify-center gap-4 bg-white/[0.03] border-2 border-dashed border-white/10 rounded-[28px] px-8 shadow-2xl backdrop-blur-3xl transition-all duration-300 pointer-events-auto cursor-copy hover:border-white/40 hover:bg-white/[0.08] hover:scale-[1.01] hover:shadow-white/5 group"
+    >
+      <div className="flex items-center justify-center text-white/50 transition-all duration-300 group-hover:text-white group-hover:scale-110">
+        <ImagePlus className="size-7" strokeWidth={1.5} />
+      </div>
+      <span className="text-white/80 font-medium text-[16px] tracking-tight whitespace-nowrap transition-colors group-hover:text-white">
+        {label}
+      </span>
+    </div>
+  );
 }

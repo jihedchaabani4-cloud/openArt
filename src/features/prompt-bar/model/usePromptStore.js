@@ -140,4 +140,10 @@ export const usePromptStore = create((set, get) => ({
   popoverOpen: false,
   setPopoverOpen: (popoverOpen) => set({ popoverOpen }),
   togglePopover: () => set((state) => ({ popoverOpen: !state.popoverOpen })),
+
+  // ─── Global Drag State ─────────────────────────────────────────────────────
+  isDraggingGalleryItem: false,
+  draggedItem: null,
+  setIsDraggingGalleryItem: (val) => set({ isDraggingGalleryItem: val }),
+  setDraggedItem: (item) => set({ draggedItem: item }),
 }));
