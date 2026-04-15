@@ -34,20 +34,11 @@ function SubmissionPlugin({ onSubmit, externalValue }) {
   useEffect(() => {
     editor.update(() => {
       const root = $getRoot();
-      // Compare ONLY plain text nodes (not chips) to avoid false positives
-      let currentPlainText = "";
-      root.getChildren().forEach((child) => {
-        if (child.getType() === "paragraph") {
-          child.getChildren().forEach((node) => {
-            if (node.getType() === "text") {
-              currentPlainText += node.getTextContent();
-            }
-          });
-        }
-      });
+      const currentText = root.getTextContent();
 
-      // Only sync if the stored value genuinely differs from what the user typed
-      if (externalValue !== undefined && externalValue !== currentPlainText.trimStart()) {
+      // We compare the full text (including serialized chips like <Trait: ...>) 
+      // against the externalValue. This prevents wiping the editor unnecessarily.
+      if (externalValue !== undefined && externalValue !== currentText) {
         root.clear();
         if (externalValue) {
           const p = $createParagraphNode();
@@ -129,38 +120,6 @@ function AtShortcutPlugin({ onTriggerMentionDialog }) {
   return null;
 }
 
-// ── Sync References Plugin ───────────────────────────────────────────────────
-/**
- * Removes MentionNode chips whose asset_id is no longer in referenceImages.
- */
-function SyncReferencesPlugin({ referenceImages = [] }) {
-  const [editor] = useLexicalComposerContext();
-
-  useEffect(() => {
-    const validIds = new Set(
-      referenceImages.map((img) => img.asset_id).filter(Boolean)
-    );
-
-    editor.update(() => {
-      const root = $getRoot();
-      root.getChildren().forEach((child) => {
-        if (child.getType() === "paragraph") {
-          child.getChildren().forEach((node) => {
-            if ($isMentionNode(node)) {
-              const assetId = node.getAssetId();
-              if (assetId && !validIds.has(assetId)) {
-                node.remove();
-              }
-            }
-          });
-        }
-      });
-    });
-  }, [referenceImages, editor]);
-
-  return null;
-}
-
 const EDITOR_NODES = [MentionNode, FeatureNode];
 
 // ── Main Component ───────────────────────────────────────────────────────────
@@ -184,21 +143,9 @@ export function PromptEditor({
 
   const handleLexicalChange = (editorState) => {
     editorState.read(() => {
-      const root = $getRoot();
-      // Extract ONLY the user-typed text (TextNodes), excluding FeatureNode and MentionNode chips.
-      // This prevents the serialized <Trait: x> / <MediaAsset: y> strings from being
-      // written back into the store, which would cause a re-render loop.
-      let plainText = "";
-      root.getChildren().forEach((paragraph) => {
-        if (paragraph.getType() === "paragraph") {
-          paragraph.getChildren().forEach((node) => {
-            if (node.getType() === "text") {
-              plainText += node.getTextContent();
-            }
-          });
-        }
-      });
-      onChange(plainText.trimStart());
+      // Save the FULL content including serialized tags (<Trait: ...>) to the store.
+      // This ensures the prompt string is actually contextual for AI processing.
+      onChange($getRoot().getTextContent());
     });
   };
 
@@ -221,9 +168,7 @@ export function PromptEditor({
 
         <HistoryPlugin />
         <AtShortcutPlugin onTriggerMentionDialog={onTriggerMentionDialog} />
-        <SyncReferencesPlugin referenceImages={referenceImages} />
-        <SyncFeaturesPlugin />
-        <TextTagConverterPlugin />
+        <TextTagConverterPlugin referenceImages={referenceImages} />
         <OnChangePlugin onChange={handleLexicalChange} />
         <SubmissionPlugin onSubmit={onSubmit} externalValue={value} />
       </div>

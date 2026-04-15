@@ -35,32 +35,34 @@ export function MediaGridItem({
   width:  albumWidth  = null,
   height: albumHeight = null,
 }) {
+  // ─────────────────────────────────────────────────────────────────────────
+  // ALL HOOKS UNCONDITIONALLY AT THE TOP — React Rules of Hooks §1
+  // No early returns, conditionals, or loops above this section.
+  // ─────────────────────────────────────────────────────────────────────────
+
   const {
     handleLike, handleDelete, handleDownload,
     handleReuseSettings, handleEdit, handleAnimate, handleAddToPrompt,
     isVideo, url, isLiked, status, aspect, prompt, item, canDelete,
   } = useWorkflowActions(workflow, propItem);
 
-  if (!item) return null;
-
-  const itemId = item.name ?? item.id;
-
+  // ── State ──────────────────────────────────────────────────────────────
   const [isDropdownOpen,      setIsDropdownOpen]      = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [isDragging,          setIsDragging]          = useState(false);
 
+  // ── Motion values ──────────────────────────────────────────────────────
   const mouseX        = useMotionValue(-500);
   const mouseY        = useMotionValue(-500);
   const progress      = useMotionValue(0);
   const progressWidth = useTransform(progress, (v) => `${v}%`);
-  const videoRef      = useRef(null);
 
-  // rAF ref — avoid scheduling multiple frames
-  const rafRef     = useRef(null);
-  // last known good position — never overwrite with (0,0)
-  const lastPos    = useRef({ x: -500, y: -500 });
+  // ── Refs ───────────────────────────────────────────────────────────────
+  const videoRef = useRef(null);
+  const rafRef   = useRef(null);
+  const lastPos  = useRef({ x: -500, y: -500 });
 
-  // ── video scrub ────────────────────────────────────────────────────────
+  // ── Video scrub rAF loop ───────────────────────────────────────────────
   useEffect(() => {
     let frame;
     const tick = () => {
@@ -73,78 +75,14 @@ export function MediaGridItem({
     return () => cancelAnimationFrame(frame);
   }, [progress]);
 
-  const isDone  = status === "completed" && !!url;
-  const isError = ["rejected", "failed", "error"].includes(status);
-  const canReuse = item?.workflowStepId === "CAE";
-
-  const menuItems = [
-    { key: "add",      icon: Plus,     label: "Add to prompt",   onClick: handleAddToPrompt },
-    { key: "like",     icon: Heart,    label: isLiked ? "Unlike" : "Like", iconClassName: cn(isLiked && "fill-white"), onClick: handleLike },
-    ...(canReuse ? [
-      { key: "edit",   icon: Wand2,    label: "Edit Image",      onClick: handleEdit },
-      { key: "reuse",  icon: Undo2,    label: "Reuse Settings",  onClick: handleReuseSettings },
-    ] : []),
-    { key: "download", icon: Download, label: "Download",        onClick: handleDownload },
-    ...(!isVideo ? [{ key: "animate", icon: Wand2, label: "Animate Image", onClick: handleAnimate }] : []),
-    { key: "delete",   icon: Trash2,   label: "Delete", disabled: !canDelete, onClick: () => setIsDeleteConfirmOpen(true) },
-  ];
-
-  // ── drag handlers ──────────────────────────────────────────────────────
-  const handleDragStart = (e) => {
-    e.dataTransfer.setData("imageUrl",   url);
-    e.dataTransfer.setData("assetId",    item.name || item.id);
-    e.dataTransfer.setData("isVideo",    String(isVideo));
-    e.dataTransfer.setData("workflowId", workflow?.name || workflow?.id || "");
-    e.dataTransfer.effectAllowed = "all";
-    e.dataTransfer.setDragImage(EMPTY_IMG, 0, 0);
-
-    lastPos.current = { x: e.clientX, y: e.clientY };
-    mouseX.set(e.clientX);
-    mouseY.set(e.clientY);
-
-    setIsDragging(true);
-    usePromptStore.getState().setIsDraggingGalleryItem(true);
-    usePromptStore.getState().setDraggedItem(item);
-    onDragStart(e, { url, aspect, item });
-  };
-
-  const handleDrag = useCallback((e) => {
-    // Chrome fires (0,0) right before dragend — ignore it
-    if (e.clientX === 0 && e.clientY === 0) return;
-
-    lastPos.current = { x: e.clientX, y: e.clientY };
-
-    // throttle to one DOM write per animation frame
-    if (rafRef.current) return;
-    rafRef.current = requestAnimationFrame(() => {
-      mouseX.set(lastPos.current.x);
-      mouseY.set(lastPos.current.y);
-      rafRef.current = null;
-    });
-  }, [mouseX, mouseY]);
-
-  const handleDragEnd = (e) => {
-    if (rafRef.current) {
-      cancelAnimationFrame(rafRef.current);
-      rafRef.current = null;
-    }
-    setIsDragging(false);
-    usePromptStore.getState().setIsDraggingGalleryItem(false);
-    usePromptStore.getState().setDraggedItem(null);
-    onDragEnd(e);
-  };
-
-  // cleanup on unmount
+  // ── Cleanup on unmount ─────────────────────────────────────────────────
   useEffect(() => () => {
     if (rafRef.current) cancelAnimationFrame(rafRef.current);
-    // Safety check: ensure we don't leave the UI in a dragging state
     usePromptStore.getState().setIsDraggingGalleryItem(false);
     usePromptStore.getState().setDraggedItem(null);
   }, []);
 
-  // ── Global block-cursor fix ────────────────────────────────────────────
-  // HTML5 drag forces a 🚫 cursor if hovering over non-drop zones.
-  // This cleanly neutralizes it globally only while dragging.
+  // ── Block-cursor fix while dragging ───────────────────────────────────
   useEffect(() => {
     if (!isDragging) return;
     const hideBlockCursor = (e) => {
@@ -155,7 +93,66 @@ export function MediaGridItem({
     return () => window.removeEventListener("dragover", hideBlockCursor);
   }, [isDragging]);
 
-  // ── render ─────────────────────────────────────────────────────────────
+  // ── Throttled drag handler ─────────────────────────────────────────────
+  const handleDrag = useCallback((e) => {
+    if (e.clientX === 0 && e.clientY === 0) return;
+    lastPos.current = { x: e.clientX, y: e.clientY };
+    if (rafRef.current) return;
+    rafRef.current = requestAnimationFrame(() => {
+      mouseX.set(lastPos.current.x);
+      mouseY.set(lastPos.current.y);
+      rafRef.current = null;
+    });
+  }, [mouseX, mouseY]);
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // SAFE EARLY RETURN — all hooks have already been called above
+  // ─────────────────────────────────────────────────────────────────────────
+  if (!item) return null;
+
+  // ── Derived values (pure computation — no hooks) ───────────────────────
+  const itemId   = item.name ?? item.id;
+  const isDone   = status === "completed" && !!url;
+  const isError  = ["rejected", "failed", "error"].includes(status);
+  const canReuse = item?.workflowStepId === "CAE";
+
+  const menuItems = [
+    { key: "add",      icon: Plus,     label: "Add to prompt",            onClick: handleAddToPrompt },
+    { key: "like",     icon: Heart,    label: isLiked ? "Unlike" : "Like", iconClassName: cn(isLiked && "fill-white"), onClick: handleLike },
+    ...(canReuse ? [
+      { key: "edit",   icon: Wand2,    label: "Edit Image",               onClick: handleEdit },
+      { key: "reuse",  icon: Undo2,    label: "Reuse Settings",           onClick: handleReuseSettings },
+    ] : []),
+    { key: "download", icon: Download, label: "Download",                  onClick: handleDownload },
+    ...(!isVideo ? [{ key: "animate", icon: Wand2, label: "Animate Image", onClick: handleAnimate }] : []),
+    { key: "delete",   icon: Trash2,   label: "Delete", disabled: !canDelete, onClick: () => setIsDeleteConfirmOpen(true) },
+  ];
+
+  const handleDragStart = (e) => {
+    e.dataTransfer.setData("imageUrl",   url);
+    e.dataTransfer.setData("assetId",    item.name || item.id);
+    e.dataTransfer.setData("isVideo",    String(isVideo));
+    e.dataTransfer.setData("workflowId", workflow?.name || workflow?.id || "");
+    e.dataTransfer.effectAllowed = "all";
+    e.dataTransfer.setDragImage(EMPTY_IMG, 0, 0);
+    lastPos.current = { x: e.clientX, y: e.clientY };
+    mouseX.set(e.clientX);
+    mouseY.set(e.clientY);
+    setIsDragging(true);
+    usePromptStore.getState().setIsDraggingGalleryItem(true);
+    usePromptStore.getState().setDraggedItem(item);
+    onDragStart(e, { url, aspect, item });
+  };
+
+  const handleDragEnd = (e) => {
+    if (rafRef.current) { cancelAnimationFrame(rafRef.current); rafRef.current = null; }
+    setIsDragging(false);
+    usePromptStore.getState().setIsDraggingGalleryItem(false);
+    usePromptStore.getState().setDraggedItem(null);
+    onDragEnd(e);
+  };
+
+  // ── Render ─────────────────────────────────────────────────────────────
   return (
     <>
       <ContextMenu>
@@ -320,7 +317,7 @@ export function MediaGridItem({
         onConfirm={handleDelete}
       />
 
-      {/* ── Drag ghost ── */}
+      {/* ── Drag ghost portal ── */}
       {isDragging && createPortal(
         <motion.div
           className="fixed top-0 left-0 z-[99999] pointer-events-none rounded-[12px] overflow-hidden border-2 border-white/80 shadow-[0_16px_40px_rgba(0,0,0,0.55)]"

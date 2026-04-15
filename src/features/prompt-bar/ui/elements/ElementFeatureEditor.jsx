@@ -109,7 +109,21 @@ export function ElementFeatureEditor({ open, onOpenChange, anchorRef }) {
 function IdentitySection() {
   const s = useElementPrompt();
   const [activeSubTab, setActiveSubTab] = React.useState('gender');
-  const selections = s.features.identity;
+  const { prompt, toggleTagInPrompt } = s;
+
+  // Derive selection state from the prompt string
+  const currentSelections = React.useMemo(() => {
+    const results = {};
+    if (activeSubTab === 'age') {
+      const match = AGE_STEPS.find(step => prompt.includes(`<Trait: ${step.label}>`));
+      results.age = match ? match.value : null;
+    } else {
+      const options = IDENTITY_OPTIONS[activeSubTab] || [];
+      const match = options.find(opt => prompt.includes(`<Trait: ${opt.label}>`));
+      results[activeSubTab] = match ? match.value : null;
+    }
+    return results;
+  }, [prompt, activeSubTab]);
 
   return (
     <div className="flex rounded-xl overflow-hidden h-full">
@@ -141,16 +155,22 @@ function IdentitySection() {
              <SelectorSlide
               title="Select age of your character"
               steps={AGE_STEPS}
-              value={selections.age}
-              onChange={(val) => s.updateFeature('identity', 'age', val)}
+              value={currentSelections.age}
+              onChange={(val) => {
+                const label = AGE_STEPS.find(a => a.value === val)?.label;
+                if (label) toggleTagInPrompt(label, { section: 'identity', key: 'age' });
+              }}
               accentColor="#a3e635"
             />
           </div>
         ) : (
           <SelectorCard
             items={IDENTITY_OPTIONS[activeSubTab]}
-            value={selections[activeSubTab]}
-            onChange={(val) => s.updateFeature('identity', activeSubTab, val)}
+            value={currentSelections[activeSubTab]}
+            onChange={(val) => {
+                const opt = IDENTITY_OPTIONS[activeSubTab].find(o => o.value === val);
+                if (opt) toggleTagInPrompt(opt.label, { section: 'identity', key: activeSubTab });
+            }}
           />
         )}
       </div>
@@ -161,7 +181,20 @@ function IdentitySection() {
 function AppearanceSection() {
   const s = useElementPrompt();
   const [activeSubTab, setActiveSubTab] = React.useState('build');
-  const selections = s.features.appearance;
+  const { prompt, toggleTagInPrompt } = s;
+
+  const currentSelections = React.useMemo(() => {
+    const results = {};
+    if (activeSubTab === 'height') {
+      const match = HEIGHT_STEPS.find(step => prompt.includes(`<Trait: ${step.label}>`));
+      results.height = match ? match.value : null;
+    } else {
+      const options = APPEARANCE_OPTIONS[activeSubTab] || [];
+      const match = options.find(opt => prompt.includes(`<Trait: ${opt.label}>`));
+      results[activeSubTab] = match ? match.value : null;
+    }
+    return results;
+  }, [prompt, activeSubTab]);
 
   return (
     <div className="flex rounded-xl overflow-hidden h-full">
@@ -193,16 +226,22 @@ function AppearanceSection() {
              <SelectorSlide
               title="Select height of your character"
               steps={HEIGHT_STEPS}
-              value={selections.height}
-              onChange={(val) => s.updateFeature('appearance', 'height', val)}
+              value={currentSelections.height}
+              onChange={(val) => {
+                const label = HEIGHT_STEPS.find(h => h.value === val)?.label;
+                if (label) toggleTagInPrompt(label, { section: 'appearance', key: 'height' });
+              }}
               accentColor="#a3e635"
             />
           </div>
         ) : (
           <SelectorCard
             items={APPEARANCE_OPTIONS[activeSubTab]}
-            value={selections[activeSubTab]}
-            onChange={(val) => s.updateFeature('appearance', activeSubTab, val)}
+            value={currentSelections[activeSubTab]}
+            onChange={(val) => {
+                const opt = APPEARANCE_OPTIONS[activeSubTab].find(o => o.value === val);
+                if (opt) toggleTagInPrompt(opt.label, { section: 'appearance', key: activeSubTab });
+            }}
           />
         )}
       </div>
@@ -222,14 +261,21 @@ function DetailsSection() {
 
 function OutfitSection() {
   const s = useElementPrompt();
-  const selected = s.features.outfit;
+  const { prompt, toggleTagInPrompt } = s;
+  const currentSelectedValue = React.useMemo(() => {
+    const match = OUTFIT_OPTIONS.find(opt => prompt.includes(`<Trait: ${opt.label}>`));
+    return match ? match.value : null;
+  }, [prompt]);
 
   return (
     <div className="p-4 flex flex-col h-full overflow-y-auto scrollbar-hide">
       <SelectorCard
         items={OUTFIT_OPTIONS}
-        value={selected}
-        onChange={(val) => s.updateFeature('outfit', null, val)}
+        value={currentSelectedValue}
+        onChange={(val) => {
+            const opt = OUTFIT_OPTIONS.find(o => o.value === val);
+            if (opt) toggleTagInPrompt(opt.label, { section: 'outfit', key: null });
+        }}
       />
     </div>
   );

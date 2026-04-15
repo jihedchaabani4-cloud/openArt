@@ -41,22 +41,23 @@ export const useElementStore = create((set, get) => ({
     outfit: null,
   },
 
-  updateFeature: (section, key, value) => set((state) => {
+  updateFeature: (section, key, value, forceSet = false) => set((state) => {
     const currentFeatures = state.features;
     
     // Handle top-level features (like outfit)
     if (section === 'outfit') {
+      const newValue = (!forceSet && currentFeatures.outfit === value) ? null : value;
       return {
         features: {
           ...currentFeatures,
-          outfit: currentFeatures.outfit === value ? null : value
+          outfit: newValue
         }
       };
     }
 
     // Handle nested features (identity, appearance)
     const sectionData = currentFeatures[section] || {};
-    const newValue = sectionData[key] === value ? null : value;
+    const newValue = (!forceSet && sectionData[key] === value) ? null : value;
 
     return {
       features: {
@@ -120,6 +121,76 @@ export const useElementStore = create((set, get) => ({
       [state.elementMode]: images
     }
   })),
+
+  /**
+   * Unifies selection cards with the text bar.
+   * Directly toggles a <Trait: Label> in the prompt string.
+   */
+  toggleTagInPrompt: (label, info = {}) => set((state) => {
+    const mode = state.elementMode;
+    const currentPrompt = state.prompts[mode] || "";
+    const tag = `<Trait: ${label}>`;
+    
+    // 1. If it exists, remove it
+    if (currentPrompt.includes(tag)) {
+      return {
+        prompts: {
+          ...state.prompts,
+          [mode]: currentPrompt.replace(tag, "").replace(/\s\s+/g, ' ').trim()
+        }
+      };
+    }
+
+    // 2. EXCLUSIVITY: If another tag in the SAME category exists, replace it
+    // We use require to avoid circular imports if needed, but the constant is stable.
+    const { getFeatureInfoFromLabel } = require("./feature-constants");
+
+    let newPrompt = currentPrompt;
+    if (info.section && info.key) {
+      const categoryTagsRegex = /<Trait:\s*([^>]+)>/gi;
+      let matched;
+      while ((matched = categoryTagsRegex.exec(currentPrompt)) !== null) {
+        const foundLabel = matched[1].trim();
+        const foundInfo = getFeatureInfoFromLabel(foundLabel); 
+        if (foundInfo && foundInfo.section === info.section && foundInfo.key === info.key) {
+           newPrompt = newPrompt.replace(matched[0], "").trim();
+        }
+      }
+    }
+
+    // 3. Append the new tag
+    return {
+      prompts: {
+        ...state.prompts,
+        [mode]: (newPrompt + " " + tag).replace(/\s\s+/g, ' ').trim()
+      }
+    };
+  }),
+
+  /**
+   * Directly toggles a <MediaAsset: uuid> in the prompt string.
+   */
+  toggleMediaTag: (assetId) => set((state) => {
+    const mode = state.elementMode;
+    const currentPrompt = state.prompts[mode] || "";
+    const tag = `<MediaAsset: ${assetId}>`;
+
+    if (currentPrompt.includes(tag)) {
+      return {
+        prompts: {
+          ...state.prompts,
+          [mode]: currentPrompt.replace(tag, "").replace(/\s\s+/g, ' ').trim()
+        }
+      };
+    }
+
+    return {
+      prompts: {
+        ...state.prompts,
+        [mode]: (currentPrompt + " " + tag).replace(/\s\s+/g, ' ').trim()
+      }
+    };
+  }),
 
   // ─── Reset Store ──────────────────────────────────────────────────────────
   resetElementStore: () => set({

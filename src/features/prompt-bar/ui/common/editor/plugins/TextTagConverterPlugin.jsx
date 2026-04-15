@@ -1,73 +1,112 @@
 import { useEffect } from "react";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
-import { TextNode, $createTextNode } from "lexical";
+import { TextNode, $createTextNode, $getRoot } from "lexical";
 import { $createFeatureNode } from "../FeatureNode";
+import { $createMentionNode } from "../MentionNode";
 import { getFeatureInfoFromLabel } from "../../../../model/feature-constants";
 import { useElementStore } from "../../../../model/useElementStore";
 
 /**
  * TextTagConverterPlugin
  *
- * Scans TextNodes for patterns like <Trait: Male> or <Trait:Male>
- * and converts them in-place into proper visual FeatureNode chips.
+ * Scans TextNodes for:
+ * 1. <Trait: Label> -> FeatureNode (Chip)
+ * 2. <MediaAsset: uuid> -> MentionNode (Image Chip)
  *
- * Also auto-selects the feature in the store if it isn't already selected.
+ * Performs in-place conversion and ensures store state is updated.
  */
-export function TextTagConverterPlugin() {
+export function TextTagConverterPlugin({ referenceImages = [] }) {
   const [editor] = useLexicalComposerContext();
   const updateFeature = useElementStore((s) => s.updateFeature);
 
   useEffect(() => {
-    // registerNodeTransform is the cleanest Lexical API for this —
-    // it fires after every mutation and lets you transform a node in place.
     return editor.registerNodeTransform(TextNode, (textNode) => {
       const text = textNode.getTextContent();
-      // Match <Trait: Label> or <Trait:Label> (case insensitive)
+      
+      // 1. Match Trait Tags: <Trait: Male>
       const TRAIT_REGEX = /<Trait:\s*([^>]+)>/i;
-      const match = TRAIT_REGEX.exec(text);
+      const traitMatch = TRAIT_REGEX.exec(text);
 
-      if (!match) return; // Nothing to convert in this node
+      if (traitMatch) {
+        const fullMatch = traitMatch[0];
+        const labelRaw = traitMatch[1].trim();
+        const startIdx = traitMatch.index;
+        const endIdx = startIdx + fullMatch.length;
 
-      const fullMatch = match[0];           // e.g. "<Trait: Male>"
-      const labelRaw = match[1].trim();     // e.g. "Male"
-      const startIdx = match.index;
-      const endIdx = startIdx + fullMatch.length;
+        const featureInfo = getFeatureInfoFromLabel(labelRaw);
+        if (featureInfo) {
+          // Exclusivity Check: Remove other chips in the same category
+          if (featureInfo.key || featureInfo.section === 'outfit') {
+            const root = $getRoot();
+            root.getChildren().forEach(child => {
+              if (child.getType() === 'paragraph') {
+                child.getChildren().forEach(node => {
+                  if (node.getType() === 'feature-tag') {
+                    if (node.__section === featureInfo.section && node.__traitKey === featureInfo.key) {
+                      node.remove();
+                    }
+                  }
+                });
+              }
+            });
+          }
 
-      // Look up the full feature context from the label
-      const featureInfo = getFeatureInfoFromLabel(labelRaw);
-
-      if (!featureInfo) {
-        // Unknown label — leave as plain text so user can see it
-        return;
+          const chip = $createFeatureNode(
+            featureInfo.section, featureInfo.key, featureInfo.value, 
+            featureInfo.label, featureInfo.mediaLink || null
+          );
+          
+          replaceWithNode(textNode, text, startIdx, endIdx, chip);
+          updateFeature(featureInfo.section, featureInfo.key, featureInfo.value, true);
+          return;
+        }
       }
 
-      // Split the TextNode into: [before] [FeatureChip] [after]
-      const before = text.slice(0, startIdx);
-      const after  = text.slice(endIdx);
+      // 2. Match Media Tags: <MediaAsset: 752de845-...>
+      const MEDIA_REGEX = /<MediaAsset:\s*([a-f0-9-]+)>/i;
+      const mediaMatch = MEDIA_REGEX.exec(text);
 
-      // Replace current node with the before-text + chip + after-text
-      const featureNode = $createFeatureNode(
-        featureInfo.section,
-        featureInfo.key,
-        featureInfo.value,
-        featureInfo.label,
-        featureInfo.mediaLink || null
-      );
+      if (mediaMatch) {
+        const fullMatch = mediaMatch[0];
+        const assetId = mediaMatch[1].trim();
+        const startIdx = mediaMatch.index;
+        const endIdx = startIdx + fullMatch.length;
 
-      if (before) {
-        textNode.insertBefore($createTextNode(before));
+        // Resolve metadata from current references
+        const asset = referenceImages.find(img => img.asset_id === assetId);
+        
+        if (asset) {
+          const chip = $createMentionNode(
+            asset.url, 
+            0, 
+            asset.displayName || asset.name || "Ref", 
+            asset.asset_id
+          );
+          
+          replaceWithNode(textNode, text, startIdx, endIdx, chip);
+          return; 
+        }
       }
-      textNode.insertBefore(featureNode);
-      if (after) {
-        textNode.replace($createTextNode(after));
-      } else {
-        textNode.remove();
-      }
-
-      // Auto-select this feature in the Zustand store if it isn't already
-      updateFeature(featureInfo.section, featureInfo.key, featureInfo.value);
     });
-  }, [editor, updateFeature]);
+  }, [editor, updateFeature, referenceImages]);
 
   return null;
+}
+
+/**
+ * Helper to split a TextNode and insert a chip in the middle
+ */
+function replaceWithNode(textNode, fullText, start, end, newNode) {
+  const before = fullText.slice(0, start);
+  const after  = fullText.slice(end);
+
+  if (before) {
+    textNode.insertBefore($createTextNode(before));
+  }
+  textNode.insertBefore(newNode);
+  if (after) {
+    textNode.replace($createTextNode(after));
+  } else {
+    textNode.remove();
+  }
 }

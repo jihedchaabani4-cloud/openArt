@@ -48,6 +48,8 @@ export function useElementPrompt() {
         setDraggedItem,
         features,
         updateFeature,
+        toggleTagInPrompt,
+        toggleMediaTag,
     } = useElementStore();
 
     // ─── Computed State by Mode ───────────────────────────────────────────────
@@ -119,7 +121,7 @@ export function useElementPrompt() {
                 session_id: activeSessionId,
             };
 
-            console.log(`🎭 [useElementPrompt] Creating ${elementMode} Sheet:`, payload);
+            console.log(`📡 [useElementPrompt] Dispatching ${elementMode} request with ${payload.references.length} references:`, payload);
 
             try {
                 await runCreateElementSheet({ payload });
@@ -177,7 +179,10 @@ export function useElementPrompt() {
             if (!asset?.url) return;
             return addReference(asset, role, maxRefs);
         },
-        handleRemoveReference: removeReference,
+        handleRemoveReference: (assetId) => {
+            removeReference(assetId);
+            toggleMediaTag(assetId); // Also remove the tag from the prompt if it exists
+        },
         handleClearReferences: clearReferences,
         handleGenerate,
         maxRefs,
@@ -185,5 +190,7 @@ export function useElementPrompt() {
         // Features
         features,
         updateFeature,
+        toggleTagInPrompt,
+        toggleMediaTag,
     };
 }

@@ -91,6 +91,8 @@ export function buildReferencesPayload(referenceImages) {
   return referenceImages.map((r) => ({
     url:      r.url,
     asset_id: r.asset_id ?? null,
+    media_id: r.asset_id ?? null, // Backend controller expects media_id
+    id:       r.asset_id ?? null, // Fallback alias
     role:     r.role ?? "normal",
     type:     r.type ?? "image",
   }));
