@@ -16,6 +16,9 @@ export const useWorkflowsStore = create((set, get) => ({
     activeSessionId: null,
     setActiveSessionId: (id) => set({ activeSessionId: id }),
 
+    activeStudioTab: "generations", // "generations" | "elements"
+    setActiveStudioTab: (tab) => set({ activeStudioTab: tab }),
+
     triggerScrollToTop: 0,
     fireScrollToTop: () => set((s) => ({ triggerScrollToTop: (s.triggerScrollToTop || 0) + 1 })),
     

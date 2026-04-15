@@ -2,7 +2,7 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { Loader2 } from "lucide-react";
+import { Loader2, ArrowLeft, Shapes, LayoutGrid } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows";
 import { usePromptStore } from "@/features/prompt-bar/model/usePromptStore";
@@ -22,12 +22,20 @@ const SIDEBAR_SPRING = {
 import { NewSessionButton } from "./NewSessionButton";
 import { SessionItem } from "./SessionItem";
 
+import Link from "next/link";
+
 // ─────────────────────────────────────────────────────────────────────────────
 // SessionSidebar — collapsible sidebar that lists sessions for the active project.
 // Expands on hover / drag-enter, collapses on mouse-leave / drag-end.
 // ─────────────────────────────────────────────────────────────────────────────
 export function SessionSidebar() {
-    const { selectedProjectId, activeSessionId, setActiveSessionId } = useGenerationsStore();
+    const { 
+        selectedProjectId, 
+        activeSessionId, 
+        setActiveSessionId,
+        activeStudioTab,
+        setActiveStudioTab
+    } = useGenerationsStore();
 
     // ── Data ─────────────────────────────────────────────────────────────────
     const { data: projectData, isLoading } = useProjectData(selectedProjectId);
@@ -40,6 +48,7 @@ export function SessionSidebar() {
     const { mutateAsync: updateSession } = useUpdateSession();
     const { mutateAsync: deleteSession } = useDeleteSession();
     const { mutate: moveWorkflow }       = useMoveWorkflow();
+    const isNavbarHidden = useGenerationsStore((s) => s.isNavbarHidden);
 
     // ── Local state ───────────────────────────────────────────────────────────
     const [isHovered,          setIsHovered]          = React.useState(false);
@@ -191,13 +200,61 @@ export function SessionSidebar() {
 
     // ── Render ────────────────────────────────────────────────────────────────
     return (
-        <div className="w-[60px] h-full shrink-0 relative z-40 bg-transparent">
+        <div className="w-[60px] h-full shrink-0 relative z-40 bg-transparent flex flex-col">
+            {/* Top Buttons */}
+            <motion.div 
+                className="flex flex-col items-center justify-start  relative z-50 overflow-hidden w-full"
+                initial={false}
+                animate={{
+                    height: isNavbarHidden ? 0 : 76, // 76px exactly matches the Navbar total bounds
+                    opacity: isNavbarHidden ? 0 : 1,
+                    y: isNavbarHidden ? "-100%" : 0,
+                    paddingTop: isNavbarHidden ? 0 : 18, // explicitly push it down to align precisely
+                }}
+                transition={{ duration: 0.85, ease: [0.16, 1, 0.3, 1] }}
+            >
+                <Link 
+                    href="/projects"
+                    className="flex items-center justify-center w-10 h-10 rounded-xl bg-white/5 hover:bg-white/10 text-white/90 hover:text-white transition-colors"
+                >
+                    <ArrowLeft className="w-6 h-6" />
+                </Link>
+            </motion.div>
 
-            {/* Expanding wrapper */}
-            <motion.div
-                className={cn(
-                    "absolute left-0 top-1/2 -translate-y-1/2 max-h-[90vh] h-fit flex flex-col items-start overflow-hidden py-2 rounded-2xl border transition-colors",
-                )}
+            {/* Tabs for Studio Views */}
+            <div className="flex flex-col items-center gap-2 pt-2 relative z-50 w-full">
+                <button 
+                    onClick={() => setActiveStudioTab("generations")}
+                    className={cn(
+                        "flex items-center justify-center w-10 h-10 rounded-xl transition-all",
+                        activeStudioTab === "generations" 
+                            ? "bg-white/10 text-white shadow-sm" 
+                            : "bg-transparent text-white/40 hover:bg-white/5 hover:text-white"
+                    )}
+                    title="Generations"
+                >
+                    <LayoutGrid className="w-6 h-6" strokeWidth={2.5} />
+                </button>
+                <button 
+                    onClick={() => setActiveStudioTab("elements")}
+                    className={cn(
+                        "flex items-center justify-center w-10 h-10 rounded-xl transition-all",
+                        activeStudioTab === "elements" 
+                            ? "bg-white/10 text-white shadow-sm" 
+                            : "bg-transparent text-white/40 hover:bg-white/5 hover:text-white"
+                    )}
+                    title="Elements Library"
+                >
+                    <Shapes className="w-6 h-6" strokeWidth={2.5} />
+                </button>
+            </div>
+
+            {/* Expanding wrapper (anchored right below the buttons) */}
+            <div className="relative w-full  flex-1 z-40">
+                <motion.div
+                    className={cn(
+                        "absolute left-0 top-0 max-h-[calc(100vh-120px)] h-fit flex flex-col items-start overflow-hidden py-2 rounded-2xl border transition-colors",
+                    )}
                 animate={{
                     width: isExpanded ? 260 : 60,
                     backgroundColor: isExpanded ? "#161718e6" : "rgba(0, 0, 0, 0)",
@@ -295,6 +352,7 @@ export function SessionSidebar() {
                     </div>
                 </div>
             </motion.div>
+            </div>
 
             {/* ── Delete confirmation dialog ── */}
             <ConfirmDeleteDialog

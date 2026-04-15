@@ -3,16 +3,17 @@
 import * as React from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useRouter } from "next/navigation"
+
 import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows"
 import { useFilteredWorkflows as useFilteredGenerations } from "@/features/workflows/model/useFilteredWorkflows"
 import { ActiveFilterTags } from "@/features/workflows/ui/ActiveFilterTags"
 import PromptBar from "@/features/prompt-bar"
-
 import { cn } from "@/shared/lib/utils"
 import { RowsPhotoAlbum } from 'react-photo-album'
 import 'react-photo-album/rows.css'
 import { ArrowUp } from "lucide-react"
 import { MediaGridItem } from "./MediaGridItem"
+
 import { usePromptStore } from "@/features/prompt-bar/model/usePromptStore";
 import { getItemMetadata, getPrimaryMedia } from "@/shared/lib/generationUtils";
 import { getItemMetadata as getDisplayMeta } from "@/shared/lib/displayUtils";

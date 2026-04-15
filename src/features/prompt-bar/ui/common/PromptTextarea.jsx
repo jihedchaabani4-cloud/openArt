@@ -1,7 +1,7 @@
 
 import { PromptEditor } from './editor/PromptEditor';
 
-export function PromptTextarea({ value, onChange, onSubmit, textareaRef, referenceImages, className, onTriggerMentionDialog }) {
+export function PromptTextarea({ value, onChange, onSubmit, textareaRef, referenceImages, className, onTriggerMentionDialog, placeholder }) {
   return (
     <div className={`flex-1 flex gap-2 items-start w-full ${className}`}>
       <div className="flex-1 relative">
@@ -12,6 +12,7 @@ export function PromptTextarea({ value, onChange, onSubmit, textareaRef, referen
           textareaRef={textareaRef}
           referenceImages={referenceImages}
           onTriggerMentionDialog={onTriggerMentionDialog}
+          placeholder={placeholder}
         />
       </div>
     </div>

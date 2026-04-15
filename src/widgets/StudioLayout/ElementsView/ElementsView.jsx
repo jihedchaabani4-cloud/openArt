@@ -5,6 +5,7 @@ import { motion } from "framer-motion"
 import { Plus, Info } from "lucide-react"
 
 import { CreateElementDialog } from "./ui/CreateElementDialog"
+import { ElementsPromptBar } from "@/features/prompt-bar/ui/elements/ElementsPromptBar"
 
 /**
  * ElementsView
@@ -205,6 +206,11 @@ export function ElementsView({
         onOpenChange={setIsCreateDialogOpen}
         onCreate={handleCreateElement}
       />
+
+      {/* Floating Prompt Bar at the bottom */}
+      <div className="fixed bottom-8 left-1/2 -translate-x-1/2 w-full max-w-[550px] z-[60] px-6">
+          <ElementsPromptBar />
+      </div>
     </div>
   )
 }

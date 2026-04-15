@@ -28,8 +28,6 @@ export function Row2({ paramsProps, actionProps, onToggleVariations, variationsO
           <Paperclip className="w-4 h-4" />
         </button>
       )}
-      {/* Model Selector — directly here, no ParamsBar middleman */}
-
 
       <div className="ml-auto flex items-center gap-2">
         <ModelSelector

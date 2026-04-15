@@ -55,6 +55,11 @@ export class MentionNode extends DecoratorNode {
 
   isInline() { return true; }
 
+  // Overload to inject the reference tag text into the raw prompt string for the AI LLM
+  getTextContent() {
+    return `<MediaAsset:${this.__assetId}>`;
+  }
+
   getAssetId() {
     return this.__assetId;
   }

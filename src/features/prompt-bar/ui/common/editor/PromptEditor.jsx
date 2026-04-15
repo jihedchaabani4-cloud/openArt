@@ -10,6 +10,9 @@ import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 
 import { MentionNode, $createMentionNode, $isMentionNode } from "./MentionNode";
+import { FeatureNode, $createFeatureNode, $isFeatureNode } from "./FeatureNode";
+import { SyncFeaturesPlugin } from "./plugins/SyncFeaturesPlugin";
+import { TextTagConverterPlugin } from "./plugins/TextTagConverterPlugin";
 import {
   $getSelection,
   $isRangeSelection,
@@ -31,8 +34,20 @@ function SubmissionPlugin({ onSubmit, externalValue }) {
   useEffect(() => {
     editor.update(() => {
       const root = $getRoot();
-      const text = root.getTextContent();
-      if (externalValue !== undefined && externalValue !== text) {
+      // Compare ONLY plain text nodes (not chips) to avoid false positives
+      let currentPlainText = "";
+      root.getChildren().forEach((child) => {
+        if (child.getType() === "paragraph") {
+          child.getChildren().forEach((node) => {
+            if (node.getType() === "text") {
+              currentPlainText += node.getTextContent();
+            }
+          });
+        }
+      });
+
+      // Only sync if the stored value genuinely differs from what the user typed
+      if (externalValue !== undefined && externalValue !== currentPlainText.trimStart()) {
         root.clear();
         if (externalValue) {
           const p = $createParagraphNode();
@@ -146,6 +161,8 @@ function SyncReferencesPlugin({ referenceImages = [] }) {
   return null;
 }
 
+const EDITOR_NODES = [MentionNode, FeatureNode];
+
 // ── Main Component ───────────────────────────────────────────────────────────
 export function PromptEditor({
   value,
@@ -154,19 +171,34 @@ export function PromptEditor({
   referenceImages,
   textareaRef,
   onTriggerMentionDialog,
+  placeholder = "Describe the scene you imagine...",
 }) {
-  const initialConfig = {
+  const initialConfig = React.useMemo(() => ({
     namespace: "PromptEditor",
     theme,
-    nodes: [MentionNode],
+    nodes: EDITOR_NODES,
     onError: (error) => {
       console.error(error);
     },
-  };
+  }), []);
 
   const handleLexicalChange = (editorState) => {
     editorState.read(() => {
-      onChange($getRoot().getTextContent());
+      const root = $getRoot();
+      // Extract ONLY the user-typed text (TextNodes), excluding FeatureNode and MentionNode chips.
+      // This prevents the serialized <Trait: x> / <MediaAsset: y> strings from being
+      // written back into the store, which would cause a re-render loop.
+      let plainText = "";
+      root.getChildren().forEach((paragraph) => {
+        if (paragraph.getType() === "paragraph") {
+          paragraph.getChildren().forEach((node) => {
+            if (node.getType() === "text") {
+              plainText += node.getTextContent();
+            }
+          });
+        }
+      });
+      onChange(plainText.trimStart());
     });
   };
 
@@ -180,7 +212,7 @@ export function PromptEditor({
           placeholder={
             !value && (
               <span className="absolute top-1.5 left-0 text-white/25 text-[14.5px] pointer-events-none">
-                Describe the scene you imagine...
+                {placeholder}
               </span>
             )
           }
@@ -190,6 +222,8 @@ export function PromptEditor({
         <HistoryPlugin />
         <AtShortcutPlugin onTriggerMentionDialog={onTriggerMentionDialog} />
         <SyncReferencesPlugin referenceImages={referenceImages} />
+        <SyncFeaturesPlugin />
+        <TextTagConverterPlugin />
         <OnChangePlugin onChange={handleLexicalChange} />
         <SubmissionPlugin onSubmit={onSubmit} externalValue={value} />
       </div>

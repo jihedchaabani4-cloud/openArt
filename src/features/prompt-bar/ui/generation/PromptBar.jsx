@@ -15,6 +15,7 @@ import { RatioSelector } from "../common/selectors/RatioSelector";
 import { VariationSelector } from "../common/selectors/VariationSelector";
 import { DurationSelector } from "../common/selectors/DurationSelector";
 import { VideoResolutionSelector } from "../common/selectors/VideoResolutionSelector";
+
 export default function PromptBar({ hideBackground = false, isNewProject = false, initialMode = null }) {
     const s = usePromptBar({ isNewProject });
     const [dialogOpen, setDialogOpen] = React.useState(false);

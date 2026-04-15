@@ -2,7 +2,7 @@ import React from 'react';
 
 export function MentionTag({ imageUrl, imageIndex, imageName }) {
   return (
-    <span contentEditable={false} draggable className="cursor-grab active:cursor-grabbing group select-none inline-block">
+    <span contentEditable={false} draggable className="cursor-grab active:cursor-grabbing group select-none inline-block mx-[2px]">
       <span className="inline-flex align-middle items-center gap-1 rounded-md bg-white/10 overflow-hidden border border-white/10 px-0.5">
         
         {/* Thumbnail */}

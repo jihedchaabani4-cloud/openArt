@@ -1,6 +1,6 @@
 "use client"
 
-import { ArrowLeft, Check, X, ChevronDown, Layers } from "lucide-react"
+import { Check, X, ChevronDown, Layers } from "lucide-react"
 import { cn } from "@/shared/lib/utils"
 import * as React from "react"
 
@@ -39,15 +39,6 @@ export function StudioNavbarLeft({
             "flex items-center transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] overflow-hidden",
             searchExpanded ? "basis-0 w-0 opacity-0 pointer-events-none" : "basis-[30%] shrink-0 opacity-100"
         )}>
-            {/* ── Back Button ── */}
-            <a
-                href="/projects"
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white/90 hover:bg-white/5 hover:text-white transition-all"
-                title="Back to Projects"
-            >
-                <ArrowLeft className="size-[24px]" strokeWidth={3} />
-            </a>
-
             {/* ── Project Title ── */}
             <div className="flex items-center gap-2 min-w-0">
                 <input

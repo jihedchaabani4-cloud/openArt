@@ -67,31 +67,8 @@ export function useMediaLibrary(projectId, initialMode = "all") {
     // Pagination is mostly handled by caching the entire project now
   }, []);
 
-  const getVideoDuration = (file) => {
-    return new Promise((resolve) => {
-      const video = document.createElement("video");
-      video.preload = "metadata";
-      video.onloadedmetadata = () => {
-        URL.revokeObjectURL(video.src);
-        resolve(video.duration);
-      };
-      video.onerror = () => {
-        URL.revokeObjectURL(video.src);
-        resolve(0);
-      };
-      video.src = URL.createObjectURL(file);
-    });
-  };
-
   const handleUpload = useCallback(async (file, sessionId = "") => {
     try {
-      if (file.type.startsWith("video/")) {
-        const duration = await getVideoDuration(file);
-        if (duration > 30) {
-          throw new Error(`Video duration cannot exceed 30 seconds (yours is ${Math.round(duration)}s).`);
-        }
-      }
-
       const data = await uploadAssetToServer({ 
         file, 
         projectId: projectId ?? "", 

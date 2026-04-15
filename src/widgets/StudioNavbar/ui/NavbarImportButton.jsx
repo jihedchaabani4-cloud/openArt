@@ -23,7 +23,6 @@ export function NavbarImportButton() {
             await lib.handleUpload(file, activeSessionId);
         } catch (err) {
             console.error("Upload failed for file:", file.name, err);
-            window.alert(err.message || "Upload failed");
         }
     }
     

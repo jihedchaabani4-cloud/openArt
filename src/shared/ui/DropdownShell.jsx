@@ -91,7 +91,7 @@ export const DropdownSegmented = React.memo(({ value, onChange, options, classNa
             onClick={() => !opt.disabled && onChange(opt.value)}
             disabled={opt.disabled}
             className={cn(
-              "flex-1 min-w-fit px-3 py-3 rounded-lg text-[13px] transition-all font-medium flex flex-row items-center justify-center gap-2 relative whitespace-nowrap",
+              "flex-1 min-w-fit px-3 py-3 rounded-lg text-[13px] transition-all  flex flex-row items-center justify-center gap-2 relative whitespace-nowrap",
               isSelected
                 ? (variant === "white" ? "bg-white text-black" : "bg-[#505153] text-white")
                 : opt.disabled

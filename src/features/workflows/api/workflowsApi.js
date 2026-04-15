@@ -143,6 +143,41 @@ export function useGenerateMutation({ onError } = {}) {
   });
 }
 
+/**
+ * mutation for creating structured element sheets
+ */
+export function useCreateElementSheetMutation({ onError } = {}) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ payload }) => {
+      const { type } = payload;
+      const endpoint = `/element-sheet/${type}`;
+      const res = await api.post(endpoint, payload);
+      if (!res.ok) throw new Error(res.message || 'Element sheet creation failed');
+      return res;
+    },
+    onMutate: () => {
+      useWorkflowsStore.getState().fireScrollToTop();
+      return {};
+    },
+    onError: (err) => {
+      console.error('❌ Character sheet creation failed:', err);
+      if (typeof onError === 'function') onError(err);
+    },
+    onSuccess: (res, { payload }) => {
+      const { project_id: projectId, session_id: sessionId } = payload || {};
+      if (projectId) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.projectData.byProject(projectId) });
+        if (sessionId) {
+          queryClient.invalidateQueries({
+            queryKey: queryKeys.projectData.byProjectAndSession(projectId, sessionId),
+          });
+        }
+      }
+    },
+  });
+}
+
 export function useExtendVideoMutation({ onError } = {}) {
   const queryClient = useQueryClient();
   return useMutation({
