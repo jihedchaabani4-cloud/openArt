@@ -32,6 +32,19 @@ export function formatGenerationDate(dateString) {
   }
 }
 
+export function formatPromptForDisplay(prompt) {
+  if (!prompt) return "";
+
+  return String(prompt)
+    .replace(/<Trait:\s*([^>]+)>/gi, (_, label) => `${String(label || "").trim()}, `)
+    .replace(/<MediaAsset:\s*[^>]+>/gi, "")
+    .replace(/\s+,/g, ",")
+    .replace(/,\s*,+/g, ", ")
+    .replace(/\s+/g, " ")
+    .replace(/^[,\s]+|[,\s]+$/g, "")
+    .trim();
+}
+
 /**
  * Resolves display metadata for a generation item.
  * Supports BOTH the old schema (item.file_url, item.asset_type)
@@ -80,7 +93,7 @@ export function getItemMetadata(item, group) {
     const dims = mediaObj?.dimensions ?? (item.image?.generatedImage) ?? item.dimensions ?? null;
     const w = dims?.width;
     const h = dims?.height;
-    const aspect = (w && h) ? `${w}/${h}` : (isVideo ? '16/9' : '3/4');
+    const aspect = (w && h && !isNaN(w) && !isNaN(h)) ? `${w}/${h}` : (isVideo ? '16/9' : '3/4');
 
     return {
       isVideo,
@@ -146,9 +159,11 @@ export function getPrimaryMedia(workflow) {
   const primaryId = workflow.metadata?.primaryMediaId;
   if (primaryId) {
     const target = workflow.items.find(i => (i.id === primaryId || i.name === primaryId) && i.status !== 'deleted');
-    return target || null;
+    if (target) return target;
   }
-  return null;
+  
+  // Fallback: Just return the first non-deleted media piece
+  return workflow.items.find(i => i.status !== 'deleted') || workflow.items[0] || null;
 }
 
 /**
@@ -161,4 +176,3 @@ export function getPrimaryMediaConfig(workflow) {
   const primary = getPrimaryMedia(workflow);
   return primary?.generationConfig || null;
 }
-

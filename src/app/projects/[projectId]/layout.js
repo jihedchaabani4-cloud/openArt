@@ -1,10 +1,10 @@
 "use client"
 
 import { usePathname } from "next/navigation"
+import { useEffect } from "react"
 import { SessionSidebar } from "@/widgets/StudioLayout/SessionSidebar/SessionSidebar"
-import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows"
-import { ElementsView } from "@/widgets/StudioLayout/ElementsView/ElementsView"
 import { StudioNavbar } from "@/widgets/StudioNavbar"
+import { useWorkflowsStore } from "@/features/workflows"
 
 /**
  * Layout for /projects/[projectId] studio pages.
@@ -12,8 +12,15 @@ import { StudioNavbar } from "@/widgets/StudioNavbar"
  */
 export default function StudioLayout({ children }) {
     const pathname = usePathname()
-    const isEditPage = pathname?.includes("/edit/")
-    const activeStudioTab = useGenerationsStore(s => s.activeStudioTab)
+    const setIsNavbarHidden = useWorkflowsStore((s) => s.setIsNavbarHidden)
+    const isEditPage =
+        pathname?.includes("/generations/edit/") ||
+        pathname?.includes("/elements/edit/") ||
+        pathname?.includes("/edit/")
+
+    useEffect(() => {
+        setIsNavbarHidden(false)
+    }, [pathname, setIsNavbarHidden])
 
     if (isEditPage) {
         // Edit pages manage their own height and navbar via edit/layout.js
@@ -26,7 +33,7 @@ export default function StudioLayout({ children }) {
                 <SessionSidebar />
                 <div className="flex-1 min-w-0 flex flex-col relative overflow-hidden">
                     <StudioNavbar />
-                    {activeStudioTab === "elements" ? <ElementsView /> : children}
+                    {children}
                 </div>
             </div>
         </div>

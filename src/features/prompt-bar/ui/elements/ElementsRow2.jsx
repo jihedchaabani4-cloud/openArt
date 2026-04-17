@@ -4,6 +4,7 @@ import { ActionButton } from '../common/ActionButton';
 import { useElementStore } from '../../model/useElementStore';
 import { BaseSelect, useSelectLogic } from '../common/selectors/DropdownEngine';
 import { cn } from '@/shared/lib/utils';
+import { Button } from '@/shared/ui/button';
 export function ElementsRow2({ paramsProps, actionProps, onToggleVariations, variationsOpen, onAddClick, mediaOpen, paperclipRef }) {
   const { elementMode, setElementMode, featureEditorOpen, setFeatureEditorOpen, sparklesRef } = paramsProps;
 
@@ -16,9 +17,9 @@ export function ElementsRow2({ paramsProps, actionProps, onToggleVariations, var
     {
       label: "Element Type",
       items: [
-        { label: "Character", value: "character", icon: <UserCircle className="w-4 h-4" /> },
-        { label: "Location", value: "location", icon: <Mountain className="w-4 h-4" /> },
-        { label: "Product", value: "product", icon: <Package className="w-4 h-4" /> },
+        { label: "Character", value: "character" },
+        { label: "Location", value: "location" },
+        { label: "Product", value: "product" },
       ]
     }
   ];
@@ -26,29 +27,52 @@ export function ElementsRow2({ paramsProps, actionProps, onToggleVariations, var
   const currentItem = groups[0].items.find(i => i.value === elementMode);
 
   return (
-    <div className="flex items-center gap-1.5 w-full relative">
-       <button
-          ref={paperclipRef}
-          onClick={onAddClick}
-          className={cn(
-            "p-2 rounded-lg transition-colors shrink-0",
-             mediaOpen ? 'bg-white/10 text-white' : 'text-neutral-400 hover:bg-white/5 hover:text-neutral-100'
-          )}
-          title="Add Reference Images"
-          type="button"
-        >
-          <Paperclip className="w-4 h-4" />
-        </button>
+    <div className="flex items-center justify-between gap-1.5 w-full relative">
+      
+      {/* ── LEFT SIDE ── */}
+      <div className="flex items-center gap-1.5">
+        <Button
+            ref={paperclipRef}
+            onClick={onAddClick}
+            variant="ghost"
+            size="icon"
+            className={cn(
+              "rounded-lg transition-colors shrink-0 w-9 h-9",
+               mediaOpen ? 'bg-white/10 text-white' : 'text-neutral-400 hover:bg-white/5 hover:text-neutral-100'
+            )}
+            title="Add Reference Images"
+            type="button"
+          >
+            <Paperclip className="w-4 h-4" />
+        </Button>
 
+        <div className="flex justify-center group/select px-2">
+            <BaseSelect 
+              value={elementMode}
+              displayLabel={currentItem?.label || "Select Type"}
+              groups={groups}
+              open={open}
+              panelStyle={panelStyle}
+              triggerRef={triggerRef}
+              panelRef={panelRef}
+              handleToggle={handleToggle}
+              handleSelect={handleSelect}
+            />
+        </div>
+      </div>
+
+      {/* ── RIGHT SIDE ── */}
+      <div className="flex items-center gap-2 shrink-0">
         {elementMode === 'character' && (
-          <div className="relative">
-            <button
+            <Button
               ref={sparklesRef}
               onClick={() => setFeatureEditorOpen(!featureEditorOpen)}
+              variant="ghost"
+              size="icon"
               className={cn(
-                "p-2 rounded-lg transition-all shrink-0 group relative overflow-hidden",
+                "rounded-lg transition-all shrink-0 group w-9 h-9 relative overflow-hidden",
                 featureEditorOpen 
-                  ? "bg-[#3ce5ff33] text-[#3ce5ff] shadow-[0_0_20px_rgba(60,229,255,0.1)] border border-[#3ce5ff22]" 
+                  ? "bg-white/10 text-white" 
                   : "text-neutral-400 hover:bg-white/5 hover:text-neutral-100"
               )}
               title="Feature Editor"
@@ -58,28 +82,12 @@ export function ElementsRow2({ paramsProps, actionProps, onToggleVariations, var
               {!featureEditorOpen && (
                 <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
               )}
-            </button>
-          </div>
+            </Button>
         )}
 
-       <div className="flex-1 flex justify-center group/select px-2">
-          <BaseSelect 
-            value={elementMode}
-            displayLabel={currentItem?.label || "Select Type"}
-            triggerIcon={currentItem?.icon}
-            groups={groups}
-            open={open}
-            panelStyle={panelStyle}
-            triggerRef={triggerRef}
-            panelRef={panelRef}
-            handleToggle={handleToggle}
-            handleSelect={handleSelect}
-          />
-       </div>
-
-      <div className="flex items-center gap-2 shrink-0">
         <ActionButton {...actionProps} />
       </div>
+
     </div>
   );
 }

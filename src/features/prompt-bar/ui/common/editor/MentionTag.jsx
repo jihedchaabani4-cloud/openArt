@@ -1,9 +1,25 @@
 import React from 'react';
 
-export function MentionTag({ imageUrl, imageIndex, imageName }) {
+export function MentionTag({ imageUrl, imageIndex, imageName, onClick, onRemove }) {
+  const handleClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (onClick) {
+      onClick(e);
+      return;
+    }
+    onRemove?.();
+  };
+
   return (
-    <span contentEditable={false} draggable className="cursor-grab active:cursor-grabbing group select-none inline-block mx-[2px]">
-      <span className="inline-flex align-middle items-center gap-1 rounded-md bg-white/10 overflow-hidden border border-white/10 px-0.5">
+    <span 
+      contentEditable={false} 
+      draggable 
+      onClick={handleClick}
+      data-feature-chip={onClick ? "true" : undefined}
+      className="cursor-pointer group select-none inline-block mx-[2px] transition-all"
+    >
+      <span className="inline-flex align-middle items-center gap-1 rounded-md bg-white/10 overflow-hidden border border-white/10 px-0.5 group-hover:border-white/60 group-hover:bg-white/20 transition-all">
         
         {/* Thumbnail */}
         <figure className="relative overflow-hidden bg-white/5 size-[18px] flex-shrink-0 rounded-sm">

@@ -17,7 +17,13 @@ export const useWorkflowsStore = create((set, get) => ({
     setActiveSessionId: (id) => set({ activeSessionId: id }),
 
     activeStudioTab: "generations", // "generations" | "elements"
-    setActiveStudioTab: (tab) => set({ activeStudioTab: tab }),
+    setActiveStudioTab: (tab) => set((s) => {
+        const target = tab === 'elements' ? '_elementFilters' : '_generationFilters';
+        return { 
+           activeStudioTab: tab,
+           filters: s[target] || s.filters 
+        };
+    }),
 
     triggerScrollToTop: 0,
     fireScrollToTop: () => set((s) => ({ triggerScrollToTop: (s.triggerScrollToTop || 0) + 1 })),
@@ -55,53 +61,68 @@ export const useWorkflowsStore = create((set, get) => ({
     showUploadedMedia: true,
     setShowUploadedMedia: (val) => set({ showUploadedMedia: val }),
 
-    // Filtering & Search
+    // ── Filtering & Search ──
+    _generationFilters: {
+        models:       [], types:        [], aspectRatios: [],
+        sort:         'newest', prompt:       '', liked:        false,
+        gender:       [], renderingStyles:[],
+    },
+    _elementFilters: {
+        models:       [], types:        [], aspectRatios: [],
+        sort:         'newest', prompt:       '', liked:        false,
+        gender:       [], renderingStyles:[],
+    },
+    // The exposed state for the currently active tab
     filters: {
-        models:       [],
-        types:        [],
-        aspectRatios: [],
-        sort:         'newest',
-        prompt:       '',
-        liked:        false,
+        models:       [], types:        [], aspectRatios: [],
+        sort:         'newest', prompt:       '', liked:        false,
+        gender:       [], renderingStyles:[],
     },
 
-    setFilter: (key, value) => set((s) => ({ 
-        filters: { ...s.filters, [key]: value } 
-    })),
-
-    toggleArrayFilter: (key, value) => set((s) => {
-        const arr = s.filters[key] || [];
-        return {
-            filters: {
-                ...s.filters,
-                [key]: arr.includes(value) 
-                    ? arr.filter(v => v !== value) 
-                    : [...arr, value],
-            }
+    setFilter: (key, value) => set((s) => {
+        const nextFilters = { ...s.filters, [key]: value };
+        const target = s.activeStudioTab === 'elements' ? '_elementFilters' : '_generationFilters';
+        return { 
+            filters: nextFilters, 
+            [target]: nextFilters 
         };
     }),
 
-    clearFilters: () => set({ 
-        filters: {
-            models:       [],
-            types:        [],
-            aspectRatios: [],
-            sort:         'newest',
-            prompt:       '',
-            liked:        false,
-            showGenerated: false,
-            showImported:  false,
-        } 
+    toggleArrayFilter: (key, value) => set((s) => {
+        const arr = s.filters[key] || [];
+        const nextArr = arr.includes(value) ? arr.filter(v => v !== value) : [...arr, value];
+        const nextFilters = { ...s.filters, [key]: nextArr };
+        const target = s.activeStudioTab === 'elements' ? '_elementFilters' : '_generationFilters';
+        return {
+            filters: nextFilters,
+            [target]: nextFilters
+        };
+    }),
+
+    clearFilters: () => set((s) => {
+        const empty = {
+            models: [], types: [], aspectRatios: [],
+            sort: 'newest', prompt: '', liked: false,
+            showGenerated: false, showImported: false,
+            gender: [], renderingStyles: [],
+        };
+        const target = s.activeStudioTab === 'elements' ? '_elementFilters' : '_generationFilters';
+        return { 
+            filters: empty,
+            [target]: empty
+        };
     }),
 
     // @deprecated - use filters.liked instead
     activeFilter: "all", 
-    setActiveFilter: (filter) => set({ 
-        activeFilter: filter,
-        filters: { 
-            ...get().filters, 
-            liked: filter === 'liked' 
-        }
+    setActiveFilter: (filter) => set((s) => {
+        const nextFilters = { ...s.filters, liked: filter === 'liked' };
+        const target = s.activeStudioTab === 'elements' ? '_elementFilters' : '_generationFilters';
+        return { 
+            activeFilter: filter,
+            filters: nextFilters,
+            [target]: nextFilters
+        };
     }),
 
     // Global Drag State

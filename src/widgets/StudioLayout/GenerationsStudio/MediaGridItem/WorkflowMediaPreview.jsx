@@ -41,7 +41,8 @@ export function WorkflowMediaPreview({
   const activeMetadata = useMemo(() => activeItem ? getItemMetadata(activeItem) : null, [activeItem]);
   const { isVideo, url, status, aspect, prompt } = activeMetadata || {};
 
-  const { activeTab, selection, setSelection, clearSelection } = useEditStore();
+  const { activeTab, selection, setSelection, clearSelection, editTarget } = useEditStore();
+  const disableSelection = !!editTarget?.isElementSheet;
 
   const progress = useMotionValue(0);
   const progressWidth = useTransform(progress, (v) => `${v}%`);
@@ -102,7 +103,7 @@ export function WorkflowMediaPreview({
   useEffect(() => {
     clearSelection();
     return () => clearSelection();
-  }, [activeItem?.id, activeItem?.name, activeTab, clearSelection]);
+  }, [activeItem?.id, activeItem?.name, activeTab, disableSelection, clearSelection]);
 
   useEffect(() => {
     let frame;
@@ -199,9 +200,9 @@ export function WorkflowMediaPreview({
               ) : isDone && !isVideo ? (
                 <WorkflowMediaCanvas 
                   imageUrl={url}
-                  selection={selection}
-                  onSelectionChange={setSelection}
-                  readOnly={activeTab !== "describe"}
+                  selection={disableSelection ? null : selection}
+                  onSelectionChange={disableSelection ? undefined : setSelection}
+                  readOnly={disableSelection || activeTab !== "describe"}
                 />
               ) : null}
             </ImageStatusView>

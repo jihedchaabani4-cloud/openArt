@@ -48,16 +48,17 @@ function RadioRow({ label, checked, onChange }) {
  * A sleek, modern filter dropdown for the studio Navbar.
  */
 export function WorkflowsFilterDropdown({ filteredCount = 0, total = 0 }) {
-  const { filters, setFilter, toggleArrayFilter, clearFilters } = useWorkflowsStore()
+  const { filters, setFilter, toggleArrayFilter, clearFilters, activeStudioTab } = useWorkflowsStore()
+  const isElements = activeStudioTab === "elements"
 
-  // Calculate active filters to show a notification badge
-  const activeCount =
-    (filters.showGenerated ? 1 : 0) +
-    (filters.showImported ? 1 : 0) +
-    (filters.liked ? 1 : 0) +
-    (filters.types.length) +
-    (filters.sort !== 'newest' ? 1 : 0) +
-    (filters.prompt ? 1 : 0)
+  // Calculate active filters to show a notification badge based on mode
+  const activeCount = isElements
+    ? (filters.sort !== 'newest' ? 1 : 0) + (filters.gender?.length || 0) + (filters.renderingStyles?.length || 0) + (filters.liked ? 1 : 0)
+    : (filters.showGenerated ? 1 : 0) +
+      (filters.showImported ? 1 : 0) +
+      (filters.liked ? 1 : 0) +
+      (filters.types?.length || 0) +
+      (filters.sort !== 'newest' ? 1 : 0)
 
   return (
     <DropdownShell
@@ -65,7 +66,7 @@ export function WorkflowsFilterDropdown({ filteredCount = 0, total = 0 }) {
       isActive={activeCount > 0}
       panelWidth="w-64"
     >
-      {/* 1. Sorting */}
+      {/* 1. Sorting (Shared) */}
       <DropdownSection label="Trier par" className="mb-4 mt-1 border-b border-white/5 pb-4">
         <RadioRow
           label="Le plus récent"
@@ -79,40 +80,87 @@ export function WorkflowsFilterDropdown({ filteredCount = 0, total = 0 }) {
         />
       </DropdownSection>
 
-      {/* 2. Type Selection */}
-      <DropdownSection label="Type" className="mb-4 border-b border-white/5 pb-4">
-        <CheckboxRow
-          label="Images"
-          checked={filters.types.includes("image")}
-          onChange={() => toggleArrayFilter("types", "image")}
-        />
-        <CheckboxRow
-          label="Vidéos"
-          checked={filters.types.includes("video")}
-          onChange={() => toggleArrayFilter("types", "video")}
-        />
-      </DropdownSection>
+      {isElements ? (
+        <>
+          {/* Elements Specific Filters */}
+          <DropdownSection label="Genre" className="mb-4 border-b border-white/5 pb-4">
+            <CheckboxRow
+              label="Homme"
+              checked={filters.gender?.includes("male")}
+              onChange={() => toggleArrayFilter("gender", "male")}
+            />
+            <CheckboxRow
+              label="Femme"
+              checked={filters.gender?.includes("female")}
+              onChange={() => toggleArrayFilter("gender", "female")}
+            />
+          </DropdownSection>
 
-      {/* 3. Source & Favorites */}
-      <DropdownSection label="Création" className="mb-2">
-        <CheckboxRow
-          label="Généré"
-          checked={filters.showGenerated}
-          onChange={() => setFilter("showGenerated", !filters.showGenerated)}
-        />
-        <CheckboxRow
-          label="Importé"
-          checked={filters.showImported}
-          onChange={() => setFilter("showImported", !filters.showImported)}
-        />
-        <CheckboxRow
-          label="Favoris"
-          checked={filters.liked}
-          onChange={() => setFilter("liked", !filters.liked)}
-        />
-      </DropdownSection>
+          <DropdownSection label="Style de rendu" className="mb-2">
+            <CheckboxRow
+              label="Hyper-réalisme"
+              checked={filters.renderingStyles?.includes("hyper-realistic")}
+              onChange={() => toggleArrayFilter("renderingStyles", "hyper-realistic")}
+            />
+            <CheckboxRow
+              label="Anime"
+              checked={filters.renderingStyles?.includes("anime")}
+              onChange={() => toggleArrayFilter("renderingStyles", "anime")}
+            />
+            <CheckboxRow
+              label="Cartoon"
+              checked={filters.renderingStyles?.includes("cartoon")}
+              onChange={() => toggleArrayFilter("renderingStyles", "cartoon")}
+            />
+            <CheckboxRow
+              label="2D Illustration"
+              checked={filters.renderingStyles?.includes("2d-illustration")}
+              onChange={() => toggleArrayFilter("renderingStyles", "2d-illustration")}
+            />
+            <CheckboxRow
+              label="Favoris"
+              checked={filters.liked}
+              onChange={() => setFilter("liked", !filters.liked)}
+            />
+          </DropdownSection>
+        </>
+      ) : (
+        <>
+          {/* Generations Specific Filters */}
+          <DropdownSection label="Type" className="mb-4 border-b border-white/5 pb-4">
+            <CheckboxRow
+              label="Images"
+              checked={filters.types?.includes("image")}
+              onChange={() => toggleArrayFilter("types", "image")}
+            />
+            <CheckboxRow
+              label="Vidéos"
+              checked={filters.types?.includes("video")}
+              onChange={() => toggleArrayFilter("types", "video")}
+            />
+          </DropdownSection>
 
-      {/* 4. Footer & Stats */}
+          <DropdownSection label="Création" className="mb-2">
+            <CheckboxRow
+              label="Généré"
+              checked={filters.showGenerated}
+              onChange={() => setFilter("showGenerated", !filters.showGenerated)}
+            />
+            <CheckboxRow
+              label="Importé"
+              checked={filters.showImported}
+              onChange={() => setFilter("showImported", !filters.showImported)}
+            />
+            <CheckboxRow
+              label="Favoris"
+              checked={filters.liked}
+              onChange={() => setFilter("liked", !filters.liked)}
+            />
+          </DropdownSection>
+        </>
+      )}
+
+      {/* Footer & Stats */}
       <DropdownFooter className="flex items-center justify-between pt-2">
         <DropdownStat label="Filtré" count={filteredCount} />
         <DropdownReset onClick={clearFilters} disabled={activeCount === 0} />

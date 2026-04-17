@@ -1,64 +1,75 @@
 // src/features/prompt-bar/model/useModelSync.js
-// ✅ Single responsibility: keeps the selected model in sync with the generation mode.
+// Keeps the selected model aligned with the active generation mode
+// without effect-driven setState loops.
 
-import { useState, useEffect, useMemo } from "react";
+import { useMemo, useState } from "react";
+
+function supportsGenerationMode(model, generationMode) {
+  if (!model) return false;
+
+  if (generationMode === "motion") {
+    return model.supportedModes?.includes("motion") || model.category === "motion";
+  }
+
+  if (generationMode === "keyframe") {
+    return model.supportedModes?.includes("i2v_se") || model.supportedModes?.includes("i2v");
+  }
+
+  if (generationMode === "multiref") {
+    return model.supportedModes?.includes("r2v");
+  }
+
+  if (["edit", "image", "character", "location", "product"].includes(generationMode)) {
+    return model.category === "image" || model.category === generationMode;
+  }
+
+  return model.category === generationMode;
+}
 
 /**
- * Manages model selection and auto-syncs it when generationMode changes.
- *
- * ✅ FIX: uses the SAME field ("category") for both the isMatch check
- *    and the studioModels.find() call — eliminating the type vs category bug.
- *
- * @param {Array}   studioModels
- * @param {boolean} studioModelsLoading
- * @param {string}  generationMode
- * @returns {{ model, setModel, selectedModel, maxRefs }}
+ * @param {Array} studioModels
+ * @param {boolean} _studioModelsLoading
+ * @param {string} generationMode
+ * @param {string|null} preferredModelId
+ * @returns {{ model: { id: string } | null, setModel: Function, selectedModel: object | null, maxRefs: number }}
  */
-export function useModelSync(studioModels, studioModelsLoading, generationMode) {
-  const [model, setModel] = useState(null);
+export function useModelSync(studioModels, _studioModelsLoading, generationMode, preferredModelId = null) {
+  const [manualModelId, setManualModelId] = useState(null);
 
-  // Derive the full model object from the stored key
+  const supportedModels = useMemo(
+    () => studioModels.filter((item) => supportsGenerationMode(item, generationMode)),
+    [studioModels, generationMode]
+  );
+
+  const selectedModelId = useMemo(() => {
+    if (preferredModelId) {
+      const preferredModel = studioModels.find((item) => item.key === preferredModelId);
+      if (supportsGenerationMode(preferredModel, generationMode)) {
+        return preferredModel.key;
+      }
+    }
+
+    if (manualModelId) {
+      const manualModel = studioModels.find((item) => item.key === manualModelId);
+      if (supportsGenerationMode(manualModel, generationMode)) {
+        return manualModel.key;
+      }
+    }
+
+    return supportedModels[0]?.key ?? studioModels[0]?.key ?? null;
+  }, [preferredModelId, manualModelId, studioModels, supportedModels, generationMode]);
+
   const selectedModel = useMemo(
-    () => studioModels.find((m) => m.key === model?.id) ?? null,
-    [studioModels, model?.id]
+    () => studioModels.find((item) => item.key === selectedModelId) ?? null,
+    [studioModels, selectedModelId]
   );
 
   const maxRefs = selectedModel?.support?.references?.max ?? 4;
 
-  // Init: pick the first available model on load
-  useEffect(() => {
-    if (!model && studioModels.length > 0) {
-      setModel({ id: studioModels[0].key });
-    }
-  }, [studioModels, model]);
-
-  // ✅ FIX: both isMatch and find use "category" — consistent field
-  useEffect(() => {
-    if (studioModelsLoading || studioModels.length === 0) return;
-
-    const isMatch = generationMode === "motion"
-      ? selectedModel?.supportedModes?.includes("motion") || selectedModel?.category === "motion"
-      : generationMode === "keyframe"
-      ? selectedModel?.supportedModes?.includes("i2v_se") || selectedModel?.supportedModes?.includes("i2v")
-      : generationMode === "multiref"
-      ? selectedModel?.supportedModes?.includes("r2v")
-      : (generationMode === "edit" ? selectedModel?.category === "image" : selectedModel?.category === generationMode);
-
-    if (!isMatch) {
-      const next =
-        studioModels.find((m) => 
-          generationMode === "motion"
-            ? m.supportedModes?.includes("motion") || m.category === "motion"
-            : generationMode === "keyframe"
-            ? m.supportedModes?.includes("i2v_se") || m.supportedModes?.includes("i2v")
-            : generationMode === "multiref"
-            ? m.supportedModes?.includes("r2v")
-            : (generationMode === "edit" ? m.category === "image" : m.category === generationMode)
-        ) ?? studioModels[0];
-        
-      if (next) setModel({ id: next.key });
-    }
-  }, [generationMode, studioModels, studioModelsLoading, selectedModel]);
-
-  return { model, setModel, selectedModel, maxRefs };
+  return {
+    model: selectedModelId ? { id: selectedModelId } : null,
+    setModel: (nextModel) => setManualModelId(nextModel?.id ?? null),
+    selectedModel,
+    maxRefs,
+  };
 }

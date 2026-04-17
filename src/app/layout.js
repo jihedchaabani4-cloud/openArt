@@ -1,18 +1,28 @@
 import "./globals.css";
-import { Geist_Mono, Poppins } from "next/font/google";
+import { Geist_Mono } from "next/font/google";
+import localFont from "next/font/local";
 
 import { DragPreview } from "@/shared/ui/DragPreview";
 import { ReactQueryProvider } from "@/shared/lib/ReactQueryProvider";
 
-const poppins = Poppins({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800", "900"],
-  variable: "--font-poppins",
-});
-
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+const googleSans = localFont({
+  src: [
+    {
+      path: "../../public/fonts/GoogleSans-VariableFont_GRAD,opsz,wght.ttf",
+      style: "normal",
+    },
+    {
+      path: "../../public/fonts/GoogleSans-Italic-VariableFont_GRAD,opsz,wght.ttf",
+      style: "italic",
+    },
+  ],
+  display: "swap",
+  variable: "--font-google-sans",
 });
 
 export const metadata = {
@@ -24,7 +34,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
       <body
-        className={`${poppins.variable} ${geistMono.variable} antialiased bg-black text-white font-sans`}
+        className={`${googleSans.variable} ${geistMono.variable} antialiased bg-black text-white font-sans`}
         suppressHydrationWarning
       >
         <ReactQueryProvider>

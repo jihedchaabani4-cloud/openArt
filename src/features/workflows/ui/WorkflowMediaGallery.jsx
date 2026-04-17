@@ -9,6 +9,33 @@ import { cn } from "@/shared/lib/utils";
 import { getItemMetadata } from "@/shared/lib/generationUtils";
 import { ImageStatusView } from "./ImageStatusView";
 
+function tokenizePrompt(prompt = "") {
+  const tokens = [];
+  const regex = /<Trait:\s*([^>]+)>|<MediaAsset:\s*[^>]+>/gi;
+  let lastIndex = 0;
+  let match;
+
+  while ((match = regex.exec(prompt)) !== null) {
+    if (match.index > lastIndex) {
+      const text = prompt.slice(lastIndex, match.index).trim();
+      if (text) tokens.push({ type: "text", value: text });
+    }
+
+    if (match[1]) {
+      tokens.push({ type: "trait", value: match[1].trim() });
+    }
+
+    lastIndex = regex.lastIndex;
+  }
+
+  if (lastIndex < prompt.length) {
+    const text = prompt.slice(lastIndex).trim();
+    if (text) tokens.push({ type: "text", value: text });
+  }
+
+  return tokens;
+}
+
 /**
  * WorkflowMediaGallery
  * A dedicated gallery component for the Workflow Edit Page.
@@ -75,6 +102,7 @@ export function WorkflowMediaGallery({
             const iUrl = meta.url;
             const iVideo = meta.isVideo;
             const prompt = meta.prompt || item.prompt || "";
+            const promptTokens = tokenizePrompt(prompt);
             
             // Get reference images from the correct paths (item.generationConfig.references or item.mediaMetadata.requestData.references)
             const referenceImages = 
@@ -195,17 +223,35 @@ export function WorkflowMediaGallery({
                 )}
 
                 {/* Prompt Text */}
-                {prompt && (
-                  <p
+                {promptTokens.length > 0 && (
+                  <div
                     onClick={() => toggleExpand(itemId)}
                     className={cn(
-                      "px-1 text-[11px] text-white font-medium transition-all duration-200 cursor-pointer select-none",
-                      expandedIds.has(itemId) ? "" : "line-clamp-2"
+                      "px-1 text-[11px] text-white font-medium transition-all duration-200 cursor-pointer select-none overflow-hidden",
+                      expandedIds.has(itemId) ? "" : "max-h-[36px]"
                     )}
                     title={expandedIds.has(itemId) ? "" : prompt}
                   >
-                    {prompt}
-                  </p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {promptTokens.map((token, index) =>
+                        token.type === "trait" ? (
+                          <span
+                            key={`${itemId}-trait-${index}`}
+                            className="inline-flex items-center rounded-md border border-white/10 bg-white/10 px-2 py-0.5 text-[10px] leading-none text-white/85"
+                          >
+                            {token.value}
+                          </span>
+                        ) : (
+                          <span
+                            key={`${itemId}-text-${index}`}
+                            className="text-[11px] leading-5 text-white/75"
+                          >
+                            {token.value}
+                          </span>
+                        )
+                      )}
+                    </div>
+                  </div>
                 )}
               </div>
             );

@@ -1,7 +1,30 @@
-import React from 'react';
-import { DecoratorNode } from "lexical";
+import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
+import { $getNodeByKey, DecoratorNode } from "lexical";
 import { MentionTag } from "./MentionTag";
-import { getFeatureInfo } from "../../../model/feature-constants";
+import { useElementStore } from "../../../model/useElementStore";
+
+function FeatureComponent({ nodeKey, section, traitKey, value, label, mediaLink }) {
+  const [editor] = useLexicalComposerContext();
+  const openFeatureEditorForLabel = useElementStore((state) => state.openFeatureEditorForLabel);
+
+  const handleRemove = () => {
+    editor.update(() => {
+      const node = $getNodeByKey(nodeKey);
+      if (node) {
+        node.remove();
+      }
+    });
+  };
+
+  return (
+    <MentionTag
+      imageUrl={mediaLink}
+      imageName={label}
+      onClick={() => openFeatureEditorForLabel(label)}
+      onRemove={handleRemove}
+    />
+  );
+}
 
 /**
  * Custom Lexical Node for Feature Tags (Character attributes).
@@ -85,9 +108,13 @@ export class FeatureNode extends DecoratorNode {
 
   decorate() {
     return (
-      <MentionTag
-        imageUrl={this.__mediaLink}
-        imageName={this.__label}
+      <FeatureComponent
+        nodeKey={this.getKey()}
+        section={this.__section}
+        traitKey={this.__traitKey}
+        value={this.__value}
+        label={this.__label}
+        mediaLink={this.__mediaLink}
       />
     );
   }

@@ -40,7 +40,6 @@ export function useEditPromptBar() {
     addReference,
     removeReference,
     clearReferences,
-    setReferenceImages,
     selection,
     setSelection,
     clearSelection,
@@ -77,8 +76,10 @@ export function useEditPromptBar() {
 
   // Synchronize local model state with store model state
   useEffect(() => {
-    if (model?.id) setModelId(model.id);
-  }, [model, setModelId]);
+    if (model?.id && modelId !== model.id) {
+      setModelId(model.id);
+    }
+  }, [model?.id, modelId, setModelId]);
 
   const upload = useMediaUpload({
     projectId,

@@ -1,8 +1,28 @@
-import React from 'react';
-import {
-  DecoratorNode,
-} from "lexical";
+import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
+import { $getNodeByKey, DecoratorNode } from "lexical";
 import { MentionTag } from "./MentionTag";
+
+function MentionComponent({ nodeKey, imageUrl, imageIndex, imageName, assetId }) {
+  const [editor] = useLexicalComposerContext();
+
+  const handleRemove = () => {
+    editor.update(() => {
+      const node = $getNodeByKey(nodeKey);
+      if (node) {
+        node.remove();
+      }
+    });
+  };
+
+  return (
+    <MentionTag
+      imageUrl={imageUrl}
+      imageIndex={imageIndex}
+      imageName={imageName}
+      onRemove={handleRemove}
+    />
+  );
+}
 
 /**
  * Custom Lexical Node for Mentions (Image Tags).
@@ -66,10 +86,12 @@ export class MentionNode extends DecoratorNode {
 
   decorate() {
     return (
-      <MentionTag
+      <MentionComponent
+        nodeKey={this.getKey()}
         imageUrl={this.__imageUrl}
         imageIndex={this.__imageIndex}
         imageName={this.__imageName}
+        assetId={this.__assetId}
       />
     );
   }

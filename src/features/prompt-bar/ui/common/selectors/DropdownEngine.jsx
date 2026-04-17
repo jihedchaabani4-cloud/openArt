@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect, useCallback } from "react"
 import { createPortal } from "react-dom"
 import { cn } from "@/shared/lib/utils"
 import { CheckIcon } from "lucide-react"
+import { Button } from "@/shared/ui/button"
 
 // ─── RatioIcon ───────────────────────────────────────────────────────────────
 export const RatioIcon = ({ ratio, isSelected }) => {
@@ -124,9 +125,10 @@ export function BaseSelect({
   return (
     <div className="relative inline-flex flex-col">
       {/* ── Trigger ── */}
-      <button
+      <Button
         ref={triggerRef}
         type="button"
+        variant="ghost"
         onPointerDown={handleToggle}
         className={cn(
           "flex w-auto max-w-fit items-center gap-1.5",
@@ -138,7 +140,7 @@ export function BaseSelect({
       >
         {Icon && <span className="text-white shrink-0">{Icon}</span>}
         <span className="truncate">{displayLabel}</span>
-      </button>
+      </Button>
 
       {/* ── Dropdown Panel (Portal) ── */}
       {open && typeof document !== "undefined" && createPortal(

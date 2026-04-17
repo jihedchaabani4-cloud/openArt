@@ -36,20 +36,18 @@ export function TextTagConverterPlugin({ referenceImages = [] }) {
         const featureInfo = getFeatureInfoFromLabel(labelRaw);
         if (featureInfo) {
           // Exclusivity Check: Remove other chips in the same category
-          if (featureInfo.key || featureInfo.section === 'outfit') {
-            const root = $getRoot();
-            root.getChildren().forEach(child => {
-              if (child.getType() === 'paragraph') {
-                child.getChildren().forEach(node => {
-                  if (node.getType() === 'feature-tag') {
-                    if (node.__section === featureInfo.section && node.__traitKey === featureInfo.key) {
-                      node.remove();
-                    }
+          const root = $getRoot();
+          root.getChildren().forEach(child => {
+            if (child.getType() === 'paragraph') {
+              child.getChildren().forEach(node => {
+                if (node.getType() === 'feature-tag') {
+                  if (node.__section === featureInfo.section && node.__traitKey === featureInfo.key) {
+                    node.remove();
                   }
-                });
-              }
-            });
-          }
+                }
+              });
+            }
+          });
 
           const chip = $createFeatureNode(
             featureInfo.section, featureInfo.key, featureInfo.value, 

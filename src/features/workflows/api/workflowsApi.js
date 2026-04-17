@@ -265,6 +265,96 @@ export function useToggleWorkflowLike() {
   });
 }
 
+export function useUpdateWorkflow() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ workflowId, workflowData }) => {
+      const res = await api.patch(`/workflows/workflows/${workflowId}`, workflowData);
+      if (!res.ok) throw new Error(res.message || "Failed to update workflow");
+      return res;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['projectData'] });
+    },
+  });
+}
+
+/**
+ * useElementSheetWorkflows
+ * Returns all project-level workflows whose type starts with "ELEMENT_SHEET_"
+ * (CHARACTER, LOCATION, PRODUCT). These are session-less — session_id = null.
+ *
+ * Each item has the shape returned by the unified project-data endpoint.
+ */
+export function useElementSheetWorkflows(projectId) {
+  const { data, isLoading, isError } = useProjectData(projectId);
+  const workflows = data?.projectContents?.workflows ?? [];
+  const media = data?.projectContents?.media ?? [];
+  const filters = useWorkflowsStore((s) => s._elementFilters);
+
+  const allElements = workflows
+    .filter((w) => w.workflow_type === "ELEMENT_SHEET")
+    .map((w) => {
+      const items = media.filter((m) => m.workflowId === w.name);
+      return {
+        ...w,
+        items,
+        isMultiMedia: items.length > 1,
+      };
+    });
+
+  const filteredElements = allElements
+    .filter((w) => {
+      if (filters?.liked && !w.metadata?.favorited) return false;
+
+      // Find if any item has the prompt
+      const wPrompt = (w.items?.[0]?.generationConfig?.prompt || '').toLowerCase();
+        
+      // 1. Text Search Filter
+      if (filters?.prompt?.trim()) {
+        const q = filters.prompt.toLowerCase();
+        const wName = (w.name || '').toLowerCase();
+        const wDisplayName = (w.metadata?.displayName || '').toLowerCase();
+        
+        if (!wName.includes(q) && !wDisplayName.includes(q) && !wPrompt.includes(q)) {
+          return false;
+        }
+      }
+
+      // 2. Gender Filter
+      if (filters?.gender?.length > 0) {
+        // e.g. "male" could match "female", so it's safer to use regex boundary for precision
+        // or just simple string checks if tags are structured like <Trait: Male>
+        const hasGenderMatch = filters.gender.some(g => wPrompt.match(new RegExp(`\\b${g}\\b`, 'i')));
+        if (!hasGenderMatch) return false;
+      }
+
+      // 3. Rendering Style Filter
+      if (filters?.renderingStyles?.length > 0) {
+        const hasStyleMatch = filters.renderingStyles.some(rs => {
+            // "hyper-realistic" -> "hyper-realistic" etc
+            return wPrompt.includes(rs.toLowerCase().replace('-', ' ')); 
+        });
+        if (!hasStyleMatch) return false;
+      }
+
+      return true;
+    })
+    .sort((a, b) => {
+      const tA = new Date(a.metadata?.createTime || 0).getTime();
+      const tB = new Date(b.metadata?.createTime || 0).getTime();
+      return filters?.sort === 'oldest' ? tA - tB : tB - tA;
+    });
+
+  return { 
+      workflows: filteredElements, 
+      filteredCount: filteredElements.length,
+      total: allElements.length,
+      isLoading, 
+      isError 
+  };
+}
+
 // ── Alias for compatibility ──────────────────────────────────────────────────
 export const useRemoveGeneration = useRemoveWorkflow;
 export const useRemoveGenerationItem = useRemoveWorkflowItem;

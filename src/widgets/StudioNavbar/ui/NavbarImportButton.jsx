@@ -6,9 +6,11 @@ import { useMediaLibrary } from "@/features/media/model/useMediaLibrary";
 import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows";
 
 export function NavbarImportButton() {
-  const { selectedProjectId: projectId, activeSessionId } = useGenerationsStore();
+  const { selectedProjectId: projectId, activeSessionId, activeStudioTab } = useGenerationsStore();
   const fileInputRef = useRef(null);
   const lib = useMediaLibrary(projectId);
+
+  if (activeStudioTab !== 'generations') return null;
 
   const handleClick = () => {
     fileInputRef.current?.click();

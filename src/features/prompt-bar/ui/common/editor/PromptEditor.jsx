@@ -120,8 +120,6 @@ function AtShortcutPlugin({ onTriggerMentionDialog }) {
   return null;
 }
 
-const EDITOR_NODES = [MentionNode, FeatureNode];
-
 // ── Main Component ───────────────────────────────────────────────────────────
 export function PromptEditor({
   value,
@@ -132,6 +130,9 @@ export function PromptEditor({
   onTriggerMentionDialog,
   placeholder = "Describe the scene you imagine...",
 }) {
+  // Move nodes inside to participate in HMR correctly
+  const EDITOR_NODES = React.useMemo(() => [MentionNode, FeatureNode], [MentionNode, FeatureNode]);
+
   const initialConfig = React.useMemo(() => ({
     namespace: "PromptEditor",
     theme,
@@ -139,7 +140,13 @@ export function PromptEditor({
     onError: (error) => {
       console.error(error);
     },
-  }), []);
+  }), [EDITOR_NODES]);
+
+  // Generate a key that changes ONLY when the node classes change (HMR)
+  // This forces LexicalComposer to remount, preventing "Type mismatch" errors.
+  const editorKey = React.useMemo(() => {
+    return `editor-${Date.now()}`;
+  }, [MentionNode, FeatureNode]);
 
   const handleLexicalChange = (editorState) => {
     editorState.read(() => {
@@ -150,7 +157,7 @@ export function PromptEditor({
   };
 
   return (
-    <LexicalComposer initialConfig={initialConfig}>
+    <LexicalComposer initialConfig={initialConfig} key={editorKey}>
       <div className="relative min-h-[38px] w-full items-start">
         <RichTextPlugin
           contentEditable={

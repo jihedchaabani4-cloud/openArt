@@ -1,33 +1,10 @@
 "use client";
 
-import React from "react";
 import { cn } from "@/shared/lib/utils";
 import { useEditStore } from "../../model/useEditStore";
 import { useWorkflowsStore } from "@/features/workflows";
+import { getPromptBarVariant } from "../common/promptBarVariants";
 
-/**
- * EditPromptBarBase
- * Shared shell for all edit prompt bars (image, video, etc.).
- *
- * Usage:
- * ```jsx
- * <EditPromptBarBase tabs={tabs} defaultTab="describe">
- *   {(activeTab) => (
- *     <>
- *       {activeTab === "describe" && <MyDescribePanel />}
- *       {activeTab === "upscale"  && <MyUpscalePanel  />}
- *     </>
- *   )}
- * </EditPromptBarBase>
- * ```
- *
- * Props:
- * @param {Array<{ id: string, label: string, icon: React.ComponentType }>} tabs
- * @param {string}   [defaultTab]  - Which tab to fall back to if the stored tab isn't in the list
- * @param {boolean}  [showGuard]   - When false, skip the media-completed visibility guard (default true)
- * @param {Function} children      - Render-prop: (activeTab) => ReactNode  (the tab content)
- * @param {string}   [className]
- */
 export function EditPromptBarBase({
     tabs = [],
     defaultTab,
@@ -35,10 +12,10 @@ export function EditPromptBarBase({
     children,
     className,
 }) {
+    const variantConfig = getPromptBarVariant("edit");
     const { activeSessionId } = useWorkflowsStore();
     const { editTarget, activeTab: storedTab, setActiveTab } = useEditStore();
 
-    // ── Visibility guard (same logic used in EditPromptBar) ──────────────────
     if (showGuard) {
         const canShow =
             editTarget?.media_status === "completed" &&
@@ -47,25 +24,18 @@ export function EditPromptBarBase({
                 !activeSessionId ||
                 editTarget.session_id === activeSessionId);
 
-        // console.log("EditPromptBarBase: canShow=", canShow, "editTarget=", editTarget);
-
         if (!canShow) return null;
     }
 
-    // ── Resolve active tab — fall back to defaultTab or first tab ────────────
     const resolvedDefault = defaultTab ?? tabs[0]?.id;
-    const activeTab = tabs.find((t) => t.id === storedTab)
-        ? storedTab
-        : resolvedDefault;
+    const activeTab = tabs.find((tab) => tab.id === storedTab) ? storedTab : resolvedDefault;
 
     return (
         <div className={cn("relative w-full flex flex-col items-center gap-3", className)}>
-            {/* ── Content Box ── */}
-            <div className="flex flex-col w-full bg-[#131517] backdrop-blur-xl rounded-xl">
+            <div className={variantConfig.cardClassName}>
                 {typeof children === "function" ? children(activeTab) : children}
             </div>
 
-            {/* ── Tab Bar ── */}
             {tabs.length > 1 && (
                 <div className="flex rounded-xl overflow-hidden backdrop-blur-xl items-center gap-1.5 overflow-x-auto no-scrollbar">
                     {tabs.map((tab) => (

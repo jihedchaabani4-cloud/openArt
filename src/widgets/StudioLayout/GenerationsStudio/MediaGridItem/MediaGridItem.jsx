@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { motion, useMotionValue, useTransform } from "framer-motion";
 import { Play, Heart, Trash2, Download, Wand2, Undo2, Plus, MoreVertical, Layers } from "lucide-react";
@@ -17,7 +17,7 @@ import { ConfirmDeleteDialog } from "@/widgets/dialogs/ConfirmDeleteDialog";
 import { useWorkflowActions } from "@/features/workflows/model/useMediaActions";
 import { usePromptStore } from "@/features/prompt-bar/model/usePromptStore";
 import { ActionBtn } from "./ActionBtn";
-import { spring, iconCls } from "./constants";
+import { springGentle, iconCls } from "./constants";
 
 const EMPTY_IMG = typeof window !== 'undefined' ? (() => {
   const img = new Image();
@@ -34,6 +34,7 @@ export function MediaGridItem({
   onDragEnd   = () => {},
   width:  albumWidth  = null,
   height: albumHeight = null,
+  disableLayoutAnimation = false,
 }) {
   // ─────────────────────────────────────────────────────────────────────────
   // ALL HOOKS UNCONDITIONALLY AT THE TOP — React Rules of Hooks §1
@@ -43,6 +44,7 @@ export function MediaGridItem({
   const {
     handleLike, handleDelete, handleDownload,
     handleReuseSettings, handleEdit, handleAnimate, handleAddToPrompt,
+    handleSetParameters,
     isVideo, url, isLiked, status, aspect, prompt, item, canDelete,
   } = useWorkflowActions(workflow, propItem);
 
@@ -111,12 +113,13 @@ export function MediaGridItem({
   if (!item) return null;
 
   // ── Derived values (pure computation — no hooks) ───────────────────────
-  const itemId   = item.name ?? item.id;
   const isDone   = status === "completed" && !!url;
   const isError  = ["rejected", "failed", "error"].includes(status);
   const canReuse = item?.workflowStepId === "CAE";
+  const isElementSheet = workflow?.workflow_type === "ELEMENT_SHEET";
+  const isDraggable = isDone && !isElementSheet;
 
-  const menuItems = [
+  let menuItems = [
     { key: "add",      icon: Plus,     label: "Add to prompt",            onClick: handleAddToPrompt },
     { key: "like",     icon: Heart,    label: isLiked ? "Unlike" : "Like", iconClassName: cn(isLiked && "fill-white"), onClick: handleLike },
     ...(canReuse ? [
@@ -127,6 +130,15 @@ export function MediaGridItem({
     ...(!isVideo ? [{ key: "animate", icon: Wand2, label: "Animate Image", onClick: handleAnimate }] : []),
     { key: "delete",   icon: Trash2,   label: "Delete", disabled: !canDelete, onClick: () => setIsDeleteConfirmOpen(true) },
   ];
+
+  if (isElementSheet) {
+    menuItems = [
+      { key: "reuse", icon: Undo2, label: "Reuse Settings", onClick: handleSetParameters },
+      { key: "like",     icon: Heart,    label: isLiked ? "Unlike" : "Like", iconClassName: cn(isLiked && "fill-white"), onClick: handleLike },
+      { key: "download", icon: Download, label: "Download",                  onClick: handleDownload },
+      { key: "delete",   icon: Trash2,   label: "Delete", disabled: !canDelete, onClick: () => setIsDeleteConfirmOpen(true) },
+    ];
+  }
 
   const handleDragStart = (e) => {
     e.dataTransfer.setData("imageUrl",   url);
@@ -158,25 +170,33 @@ export function MediaGridItem({
       <ContextMenu>
         <ContextMenuTrigger asChild>
           <motion.div
-            layoutId={`media-card-${itemId}`}
-            transition={spring}
-            draggable={isDone}
-            onDragStart={handleDragStart}
-            onDrag={handleDrag}
-            onDragEnd={handleDragEnd}
+            layout={disableLayoutAnimation ? false : "position"}
+            transition={disableLayoutAnimation ? { duration: 0.18, ease: [0.22, 1, 0.36, 1] } : springGentle}
+            draggable={isDraggable}
+            onDragStart={isDraggable ? handleDragStart : undefined}
+            onDrag={isDraggable ? handleDrag : undefined}
+            onDragEnd={isDraggable ? handleDragEnd : undefined}
             onClick={(isDone || status === "processing") ? onClick : undefined}
             className={cn(
               "group relative overflow-hidden bg-[#0a0a0a] rounded-2xl",
               "outline-2 outline-transparent transition-all duration-300",
               (isDone || status === "processing")
-                ? "cursor-grab active:cursor-grabbing shadow-lg hover:shadow-2xl"
+                ? (isElementSheet ? "cursor-pointer shadow-lg hover:shadow-2xl" : "cursor-grab active:cursor-grabbing shadow-lg hover:shadow-2xl")
                 : "cursor-default",
               className
             )}
             style={
               albumWidth && albumHeight
-                ? { width: albumWidth, height: albumHeight }
-                : { width: "100%", aspectRatio: aspect }
+                ? {
+                    width: albumWidth,
+                    height: albumHeight,
+                    willChange: disableLayoutAnimation ? "auto" : "transform",
+                  }
+                : {
+                    width: "100%",
+                    aspectRatio: aspect,
+                    willChange: disableLayoutAnimation ? "auto" : "transform",
+                  }
             }
           >
             {/* ── Media ── */}
@@ -226,7 +246,7 @@ export function MediaGridItem({
                     <ActionBtn onClick={(e) => { e.stopPropagation(); handleLike(); }}>
                       <Heart className={cn(iconCls, isLiked && "fill-[#303031] text-[#303031]")} />
                     </ActionBtn>
-                    {canReuse && (
+                    {canReuse && !isElementSheet && (
                       <ActionBtn onClick={(e) => { e.stopPropagation(); handleReuseSettings(); }}>
                         <Undo2 className={iconCls} />
                       </ActionBtn>
@@ -280,14 +300,16 @@ export function MediaGridItem({
             )}
 
             {/* ── Corner badges ── */}
-            {isDone && (isVideo || item.is_liked || workflow.isMultiMedia) && (
-              <div className="absolute top-3 left-3 z-20 flex flex-col gap-2 pointer-events-none drop-shadow-md">
-                {workflow.isMultiMedia && <Layers className="size-5 text-white drop-shadow-md" />}
-                {workflow.is_liked     && <Heart  className="size-5 fill-white text-white drop-shadow-md" />}
+            {isDone && (isLiked || isVideo || workflow.isMultiMedia) && (
+              <div className="absolute top-3 left-3 z-20 flex items-center gap-2 pointer-events-none drop-shadow-md">
+                {workflow.isMultiMedia && (
+                  <Layers className="size-4 text-white" />
+                )}
+                {isLiked && (
+                  <Heart className="size-4 fill-white text-white" />
+                )}
                 {isVideo && (
-                  <div className="p-1 rounded-full bg-white shadow-md w-fit">
-                    <Play className="size-1.5 fill-black text-black" />
-                  </div>
+                  <Play className="size-4 fill-white text-white" />
                 )}
               </div>
             )}
@@ -321,12 +343,24 @@ export function MediaGridItem({
       {isDragging && createPortal(
         <motion.div
           className="fixed top-0 left-0 z-[99999] pointer-events-none rounded-[12px] overflow-hidden border-2 border-white/80 shadow-[0_16px_40px_rgba(0,0,0,0.55)]"
-          style={{
-            width: aspect > 1 ? 120 : 120 * (aspect || 1),
-            height: aspect > 1 ? 120 / (aspect || 1) : 120,
-            x: mouseX, y: mouseY,
-            translateX: "-50%", translateY: "-50%",
-          }}
+          style={(() => {
+            let numericAspect = 1;
+            if (typeof aspect === "number") {
+              numericAspect = aspect;
+            } else if (typeof aspect === "string" && aspect.includes("/")) {
+              const [w, h] = aspect.split("/").map(Number);
+              if (w && h) numericAspect = w / h;
+            }
+            
+            return {
+              width: numericAspect > 1 ? 120 : 120 * numericAspect,
+              height: numericAspect > 1 ? 120 / numericAspect : 120,
+              x: mouseX, 
+              y: mouseY,
+              translateX: "-50%", 
+              translateY: "-50%",
+            };
+          })()}
           initial={{ scale: 0.7, opacity: 0 }}
           animate={{ scale: 1,   opacity: 1 }}
           transition={{ duration: 0.15, ease: "easeOut" }}

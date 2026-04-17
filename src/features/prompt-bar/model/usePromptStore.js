@@ -85,17 +85,25 @@ export const usePromptStore = create((set, get) => ({
   removeReference: (assetId) => {
     set((state) => {
       const newRefs = state.referenceImages.filter((r) => r.asset_id !== assetId);
+      const tagRegex = new RegExp(`<MediaAsset:\\s*${assetId}>`, "gi");
+      const newPrompt = state.prompt.replace(tagRegex, "").replace(/\s\s+/g, ' ').trim();
+
       return {
+        prompt: newPrompt,
         referenceImages: newRefs,
         referencesByMode: { ...state.referencesByMode, [state.generationMode]: newRefs }
       };
     });
   },
 
-  clearReferences: () => set((state) => ({ 
-    referenceImages: [],
-    referencesByMode: { ...state.referencesByMode, [state.generationMode]: [] }
-  })),
+  clearReferences: () => set((state) => {
+    const newPrompt = state.prompt.replace(/<MediaAsset:\s*[a-f0-9-]+>/gi, "").replace(/\s\s+/g, ' ').trim();
+    return { 
+      prompt: newPrompt,
+      referenceImages: [],
+      referencesByMode: { ...state.referencesByMode, [state.generationMode]: [] }
+    };
+  }),
 
   setReferenceImages: (images) => set((state) => ({ 
     referenceImages: images,

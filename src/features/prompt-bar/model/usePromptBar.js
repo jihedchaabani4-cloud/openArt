@@ -1,12 +1,11 @@
 // src/features/prompt-bar/model/usePromptBar.js
 // ✅ Slim orchestrator: composes small hooks, owns generate logic only.
 
-import React, { useState, useMemo, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useWorkflowsStore, useGenerationsStore } from "@/features/workflows";
 import { usePromptStore } from "./usePromptStore";
 import { useProjectData, useGenerateMutation } from "@/features/workflows/api/workflowsApi";
-import { useAssets } from "@/features/media/api/mediaApi";
 import { queryKeys } from "@/shared/api/queryKeys";
 import { buildReferencesPayload } from "@/shared/lib/referenceUtils";
 import { useModelSync } from "./useModelSync";
@@ -60,20 +59,29 @@ export function usePromptBar({ isNewProject = false } = {}) {
   // Fetch everything from the unified endpoint
   const { data: projectData, isLoading: studioModelsLoading } = useProjectData(projectId);
 
-  const studioModels   = projectData?.modelConfig?.models   ?? [];
-  const studioFamilies = projectData?.modelConfig?.families ?? [];
+  const studioModels = useMemo(
+    () => projectData?.modelConfig?.models ?? [],
+    [projectData?.modelConfig?.models]
+  );
+  const studioFamilies = useMemo(
+    () => projectData?.modelConfig?.families ?? [],
+    [projectData?.modelConfig?.families]
+  );
 
   // ─── Model sync (extracted hook) ──────────────────────────────────────────
   const { model, setModel, selectedModel, maxRefs } = useModelSync(
     studioModels,
     studioModelsLoading,
-    generationMode
+    generationMode,
+    modelId
   );
 
   // Synchronize local model state with store model state
   useEffect(() => {
-    if (model?.id) setModelId(model.id);
-  }, [model, setModelId]);
+    if (model?.id && modelId !== model.id) {
+      setModelId(model.id);
+    }
+  }, [model?.id, modelId, setModelId]);
 
   // ─── Upload + drag-drop (extracted hook) ──────────────────────────────────
   const upload = useMediaUpload({
@@ -113,14 +121,53 @@ export function usePromptBar({ isNewProject = false } = {}) {
       return raw?.default ?? null;
     };
 
+    const extractOptions = (raw) => {
+      if (!raw) return [];
+      if (Array.isArray(raw)) {
+        return raw.map((item) => (typeof item === "object" ? item.value : item)).filter(Boolean);
+      }
+      if (Array.isArray(raw.items)) {
+        return raw.items.map((item) => (typeof item === "object" ? item.value : item)).filter(Boolean);
+      }
+      if (Array.isArray(raw.options)) {
+        return raw.options.map((item) => (typeof item === "object" ? item.value : item)).filter(Boolean);
+      }
+      return [];
+    };
+
     const defRatio = extractVal(support.ratio) ?? "1:1";
     const defQual  = extractVal(support.quality) ?? "2K";
     const defVid   = extractVal(support.resolution) ?? "1080p";
 
-    setRatio(defRatio);
-    setResolution(defQual);
-    setVideoResolution(defVid);
-  }, [selectedModel?.key]);
+    const ratioOptions = extractOptions(support.ratio);
+    const qualityOptions = extractOptions(support.quality);
+    const videoResolutionOptions = extractOptions(support.resolution);
+
+    const nextRatio = ratioOptions.includes(ratio) ? ratio : defRatio;
+    const nextResolution = qualityOptions.includes(resolution) ? resolution : defQual;
+    const nextVideoResolution = videoResolutionOptions.includes(videoResolution) ? videoResolution : defVid;
+
+    if (nextRatio !== ratio) {
+      setRatio(nextRatio);
+    }
+    if (nextResolution !== resolution) {
+      setResolution(nextResolution);
+    }
+    if (nextVideoResolution !== videoResolution) {
+      setVideoResolution(nextVideoResolution);
+    }
+  }, [
+    referenceImages,
+    ratio,
+    resolution,
+    selectedModel,
+    selectedModel?.key,
+    setRatio,
+    setReferenceImages,
+    setResolution,
+    setVideoResolution,
+    videoResolution,
+  ]);
 
   // ─── Library ──────────────────────────────────────────────────────────────
   const library = lib.items;
@@ -139,7 +186,17 @@ export function usePromptBar({ isNewProject = false } = {}) {
     setVideoResolution("1080p");
     setReferenceImages([]);
     if (textareaRef.current) textareaRef.current.style.height = "auto";
-  }, [studioModels, setReferenceImages]);
+  }, [
+    setCount,
+    setDuration,
+    setModel,
+    setPrompt,
+    setRatio,
+    setReferenceImages,
+    setResolution,
+    setVideoResolution,
+    studioModels,
+  ]);
 
   // ─── Generate ─────────────────────────────────────────────────────────────
   const handleGenerate = useCallback(
@@ -198,7 +255,7 @@ export function usePromptBar({ isNewProject = false } = {}) {
     [
       prompt, generating, generationMode, model, resolution, ratio, count,
       duration, videoResolution, isNewProject, projectId, activeSessionId,
-      referenceImages, runGenerate, setActiveSessionId, queryClient,
+      referenceImages, runGenerate, setActiveSessionId, queryClient, setPrompt,
     ]
   );
 

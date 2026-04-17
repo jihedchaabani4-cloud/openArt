@@ -1,12 +1,14 @@
 import { useWorkflowsStore } from "./useWorkflowsStore";
-import { useToggleWorkflowLike, useRemoveWorkflow, useToggleLike, useRemoveWorkflowItem } from "../api/workflowsApi";
+import { useToggleWorkflowLike, useRemoveWorkflow } from "../api/workflowsApi";
 import { getItemMetadata, getPrimaryMedia, getPrimaryMediaConfig } from "@/shared/lib/generationUtils";
 import { downloadFile } from "@/shared/lib/utils";
 import { useRemoveAsset } from "@/features/media/api/mediaApi";
 import { usePathname } from "next/navigation";
 
 import { useEditStore } from "@/features/prompt-bar/model/useEditStore";
+import { useElementStore } from "@/features/prompt-bar/model/useElementStore";
 import { usePromptStore } from "@/features/prompt-bar/model/usePromptStore";
+import { buildElementSheetDraft } from "./elementSheetConfig";
 
 /**
  * useWorkflowActions
@@ -17,14 +19,16 @@ import { usePromptStore } from "@/features/prompt-bar/model/usePromptStore";
  */
 export function useWorkflowActions(workflow, item = null) {
   const pathname = usePathname();
-  const isEditPage = pathname?.includes("/edit/");
+  const isEditPage =
+    pathname?.includes("/generations/edit/") ||
+    pathname?.includes("/elements/edit/");
 
   const { 
-    setEditTrigger,
     activeSessionId,
   } = useWorkflowsStore();
 
   const editStore = useEditStore();
+  const elementStore = useElementStore();
   const promptStore = usePromptStore();
 
   const { mutate: toggleLike } = useToggleWorkflowLike();
@@ -47,6 +51,7 @@ export function useWorkflowActions(workflow, item = null) {
   // Delete is allowed cross-session in UI (server enforces auth separately);
   // only block while a job is in progress to avoid race/confusion.
   const canDelete = !isInProgress;
+  const isElementSheet = workflow?.workflow_type === "ELEMENT_SHEET";
 
   const prompt = targetItem?.params?.prompt 
                 || targetItem?.mediaMetadata?.requestData?.promptInputs?.[0]?.textInput 
@@ -74,6 +79,47 @@ export function useWorkflowActions(workflow, item = null) {
 
   const handleReuseSettings = () => {
     if (!canUseAsInput) return;
+
+    if (isElementSheet) {
+      const draft = buildElementSheetDraft(workflow, targetItem);
+      if (!draft) return;
+
+      elementStore.hydrateElementDraft({
+        mode: draft.mode,
+        prompt: draft.prompt,
+        references: draft.references,
+        features: draft.features,
+      });
+
+      promptStore.setGenerationMode(draft.isVideo ? "video" : "image");
+      if (draft.promptConfig.model) promptStore.setModelId(draft.promptConfig.model);
+      if (draft.promptConfig.ratio) promptStore.setRatio(draft.promptConfig.ratio);
+      if (draft.promptConfig.quality) promptStore.setQuality(draft.promptConfig.quality);
+      if (draft.promptConfig.videoResolution) {
+        promptStore.setVideoResolution(draft.promptConfig.videoResolution);
+      }
+
+      if (isEditPage) {
+        editStore.setEditTarget({
+          workflow_id: draft.workflowId,
+          workflow_type: draft.workflowType,
+          media_id: draft.mediaId,
+          primaryMediaId: draft.primaryMediaId,
+          primaryMediaUrl: draft.primaryMediaUrl,
+          url: draft.url,
+          dna: draft.dna,
+          elementMode: draft.mode,
+          isElementSheet: true,
+          isVideo: draft.isVideo,
+          prompt: draft.prompt,
+          ratio: draft.promptConfig.ratio,
+          quality: draft.promptConfig.quality,
+          videoResolution: draft.promptConfig.videoResolution,
+        });
+      }
+      return;
+    }
+
     const config = (targetItem?.generationConfig) || getPrimaryMediaConfig(workflow) || {};
     const modelName = config.model_name || config.model || "";
     
@@ -147,6 +193,10 @@ export function useWorkflowActions(workflow, item = null) {
     activeStore.addReference(asset, "normal");
   };
 
+  const handleSetParameters = () => {
+    handleReuseSettings();
+  };
+
   return {
     handleLike,
     handleDelete,
@@ -155,6 +205,7 @@ export function useWorkflowActions(workflow, item = null) {
     handleEdit,
     handleAnimate,
     handleAddToPrompt,
+    handleSetParameters,
     canDelete,
     isVideo,
     url,
@@ -162,6 +213,7 @@ export function useWorkflowActions(workflow, item = null) {
     status: metadata.status,
     prompt,
     isLiked: workflow.metadata?.favorited || false,
+    isElementSheet,
     item: targetItem, // return the resolved item
   };
 }

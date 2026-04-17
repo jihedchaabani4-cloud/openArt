@@ -17,28 +17,45 @@ import { SelectorCard } from "@/shared/ui/selector-card";
 import { SelectorSlide } from "@/shared/ui/selector-slide";
 import { useElementPrompt } from "../../model/useElementPrompt";
 import { cn } from "@/shared/lib/utils";
+import { useElementStore } from "../../model/useElementStore";
 
 import { 
   TABS, 
+  ERA_STEPS,
   IDENTITY_SUB_TABS, 
-  IDENTITY_OPTIONS, 
+  IDENTITY_OPTIONS,
+  CHARACTER_TYPE_OPTIONS,
   AGE_STEPS, 
-  APPEARANCE_SUB_TABS, 
   HEIGHT_STEPS, 
-  APPEARANCE_OPTIONS, 
-  OUTFIT_OPTIONS 
+  HEAD_SUB_TABS,
+  HEAD_OPTIONS,
+  DETAILS_SUB_TABS,
+  DETAILS_OPTIONS,
+  OUTFIT_OPTIONS,
+  RENDERING_STYLE_OPTIONS
 } from "../../model/feature-constants";
 
 const SELECT_GROUPS = []; // No longer needed for BaseSelector
 
 export function ElementFeatureEditor({ open, onOpenChange, anchorRef }) {
-  const [activeTab, setActiveTab] = React.useState('identity');
+  const featureEditor = useElementStore((state) => state.featureEditor);
+  const setFeatureEditorView = useElementStore((state) => state.setFeatureEditorView);
+  const [activeTab, setActiveTab] = React.useState(featureEditor.activeTab || 'identity');
   const editorRef = React.useRef(null);
+
+  React.useEffect(() => {
+    if (open) {
+      setActiveTab(featureEditor.activeTab || 'identity');
+    }
+  }, [open, featureEditor.activeTab]);
 
   // Click outside logic
   React.useEffect(() => {
     if (!open) return;
     const handleClickOutside = (event) => {
+      if (event.target instanceof Element && event.target.closest('[data-feature-chip="true"]')) {
+        return;
+      }
       if (anchorRef?.current && anchorRef.current.contains(event.target)) return;
       if (editorRef.current && !editorRef.current.contains(event.target)) {
         onOpenChange(false);
@@ -71,7 +88,10 @@ export function ElementFeatureEditor({ open, onOpenChange, anchorRef }) {
           <div className="p-1 flex items-center justify-between">
             <BaseSelector
               value={activeTab}
-              onChange={setActiveTab}
+              onChange={(nextTab) => {
+                setActiveTab(nextTab);
+                setFeatureEditorView({ activeTab: nextTab, activeSubTab: null });
+              }}
               options={TABS}
             />
           </div>
@@ -87,8 +107,10 @@ export function ElementFeatureEditor({ open, onOpenChange, anchorRef }) {
                   transition={{ duration: 0.2 }}
                   className="flex-1 flex flex-col"
                 >
+                   {activeTab === 'era' && <EraSection />}
+                  {activeTab === 'renderingStyle' && <RenderingStyleSection />}
                    {activeTab === 'identity' && <IdentitySection />}
-                  {activeTab === 'appearance' && <AppearanceSection />}
+                  {activeTab === 'head' && <HeadSection />}
                   {activeTab === 'details' && <DetailsSection />}
                   {activeTab === 'outfit' && <OutfitSection />}
                 </motion.div>
@@ -106,24 +128,67 @@ export function ElementFeatureEditor({ open, onOpenChange, anchorRef }) {
   );
 }
 
+function EraSection() {
+  const s = useElementPrompt();
+  const { prompt, toggleTagInPrompt } = s;
+
+  const currentSelection = React.useMemo(() => {
+    const match = ERA_STEPS.find(step => prompt.includes(`<Trait: ${step.label}>`));
+    return match ? match.value : null;
+  }, [prompt]);
+
+  return (
+    <div className="flex-1 p-8 flex flex-col justify-center h-full">
+      <SelectorSlide
+        title="What period is your film set in?"
+        steps={ERA_STEPS}
+        value={currentSelection}
+        onChange={(val) => {
+          const label = ERA_STEPS.find(a => a.value === val)?.label;
+          if (label) toggleTagInPrompt(label, { section: 'era', key: null });
+        }}
+        accentColor="#a3e635"
+      />
+    </div>
+  );
+}
+
 function IdentitySection() {
   const s = useElementPrompt();
-  const [activeSubTab, setActiveSubTab] = React.useState('gender');
+  const featureEditor = useElementStore((state) => state.featureEditor);
+  const setFeatureEditorView = useElementStore((state) => state.setFeatureEditorView);
+  const [activeSubTab, setActiveSubTab] = React.useState(featureEditor.activeSubTab || 'characterType');
   const { prompt, toggleTagInPrompt } = s;
+
+  React.useEffect(() => {
+    if (featureEditor.activeTab === 'identity' && featureEditor.activeSubTab) {
+      setActiveSubTab(featureEditor.activeSubTab);
+    }
+  }, [featureEditor.activeTab, featureEditor.activeSubTab]);
 
   // Derive selection state from the prompt string
   const currentSelections = React.useMemo(() => {
     const results = {};
-    if (activeSubTab === 'age') {
-      const match = AGE_STEPS.find(step => prompt.includes(`<Trait: ${step.label}>`));
-      results.age = match ? match.value : null;
-    } else {
-      const options = IDENTITY_OPTIONS[activeSubTab] || [];
-      const match = options.find(opt => prompt.includes(`<Trait: ${opt.label}>`));
-      results[activeSubTab] = match ? match.value : null;
-    }
+    // Age
+    const ageMatch = AGE_STEPS.find(step => prompt.includes(`<Trait: ${step.label}>`));
+    results.age = ageMatch ? ageMatch.value : null;
+
+    // Height
+    const heightMatch = HEIGHT_STEPS.find(step => prompt.includes(`<Trait: ${step.label}>`));
+    results.height = heightMatch ? heightMatch.value : null;
+
+    // Character Type
+    const charTypeMatch = CHARACTER_TYPE_OPTIONS.find(opt => prompt.includes(`<Trait: ${opt.label}>`));
+    results.characterType = charTypeMatch ? charTypeMatch.value : null;
+
+    // Other Identity Options (Gender, Race, Build)
+    Object.keys(IDENTITY_OPTIONS).forEach((key) => {
+      const match = IDENTITY_OPTIONS[key].find(opt => prompt.includes(`<Trait: ${opt.label}>`));
+      results[key] = match ? match.value : null;
+    });
+
     return results;
-  }, [prompt, activeSubTab]);
+  }, [prompt]);
 
   return (
     <div className="flex rounded-xl overflow-hidden h-full">
@@ -134,7 +199,10 @@ function IdentitySection() {
           return (
             <button
               key={tab.id}
-              onClick={() => setActiveSubTab(tab.id)}
+              onClick={() => {
+                setActiveSubTab(tab.id);
+                setFeatureEditorView({ activeTab: 'identity', activeSubTab: tab.id });
+              }}
               className={cn(
                 "w-full flex items-center px-2 py-2 rounded-lg transition-all text-[14px]",
                 isActive 
@@ -163,36 +231,68 @@ function IdentitySection() {
               accentColor="#a3e635"
             />
           </div>
-        ) : (
+        ) : activeSubTab === 'height' ? (
+          <div className="w-full flex flex-col">
+             <SelectorSlide
+              title="Select height of your character"
+              steps={HEIGHT_STEPS}
+              value={currentSelections.height}
+              onChange={(val) => {
+                const label = HEIGHT_STEPS.find(h => h.value === val)?.label;
+                if (label) toggleTagInPrompt(label, { section: 'identity', key: 'height' });
+              }}
+              accentColor="#a3e635"
+            />
+          </div>
+        ) : activeSubTab === 'characterType' ? (
           <SelectorCard
-            items={IDENTITY_OPTIONS[activeSubTab]}
-            value={currentSelections[activeSubTab]}
+            items={CHARACTER_TYPE_OPTIONS}
+            value={currentSelections.characterType}
             onChange={(val) => {
-                const opt = IDENTITY_OPTIONS[activeSubTab].find(o => o.value === val);
-                if (opt) toggleTagInPrompt(opt.label, { section: 'identity', key: activeSubTab });
+              const opt = CHARACTER_TYPE_OPTIONS.find(o => o.value === val);
+              if (opt) toggleTagInPrompt(opt.label, { section: 'identity', key: 'characterType' });
             }}
           />
+        ) : (
+        <SelectorCard
+          items={
+            activeSubTab === 'race'
+              ? IDENTITY_OPTIONS.race.map(opt => ({
+                  ...opt,
+                  mediaLink: currentSelections.gender === 'female' ? opt.mediaLinkFemale : opt.mediaLinkMale,
+                }))
+              : IDENTITY_OPTIONS[activeSubTab]
+          }
+          value={currentSelections[activeSubTab]}
+          onChange={(val) => {
+              const opt = IDENTITY_OPTIONS[activeSubTab].find(o => o.value === val);
+              if (opt) toggleTagInPrompt(opt.label, { section: 'identity', key: activeSubTab });
+          }}
+        />
         )}
       </div>
     </div>
   );
 }
 
-function AppearanceSection() {
+function HeadSection() {
   const s = useElementPrompt();
-  const [activeSubTab, setActiveSubTab] = React.useState('build');
+  const featureEditor = useElementStore((state) => state.featureEditor);
+  const setFeatureEditorView = useElementStore((state) => state.setFeatureEditorView);
+  const [activeSubTab, setActiveSubTab] = React.useState(featureEditor.activeSubTab || 'hairStyle');
   const { prompt, toggleTagInPrompt } = s;
+
+  React.useEffect(() => {
+    if (featureEditor.activeTab === 'head' && featureEditor.activeSubTab) {
+      setActiveSubTab(featureEditor.activeSubTab);
+    }
+  }, [featureEditor.activeTab, featureEditor.activeSubTab]);
 
   const currentSelections = React.useMemo(() => {
     const results = {};
-    if (activeSubTab === 'height') {
-      const match = HEIGHT_STEPS.find(step => prompt.includes(`<Trait: ${step.label}>`));
-      results.height = match ? match.value : null;
-    } else {
-      const options = APPEARANCE_OPTIONS[activeSubTab] || [];
-      const match = options.find(opt => prompt.includes(`<Trait: ${opt.label}>`));
-      results[activeSubTab] = match ? match.value : null;
-    }
+    const options = HEAD_OPTIONS[activeSubTab] || [];
+    const match = options.find(opt => prompt.includes(`<Trait: ${opt.label}>`));
+    results[activeSubTab] = match ? match.value : null;
     return results;
   }, [prompt, activeSubTab]);
 
@@ -200,12 +300,15 @@ function AppearanceSection() {
     <div className="flex rounded-xl overflow-hidden h-full">
       {/* Left Sidebar - Vertical Sub-tabs */}
       <div className="w-1/6 p-2 space-y-1">
-        {APPEARANCE_SUB_TABS.map((tab) => {
+        {HEAD_SUB_TABS.map((tab) => {
           const isActive = activeSubTab === tab.id;
           return (
             <button
               key={tab.id}
-              onClick={() => setActiveSubTab(tab.id)}
+              onClick={() => {
+                setActiveSubTab(tab.id);
+                setFeatureEditorView({ activeTab: 'head', activeSubTab: tab.id });
+              }}
               className={cn(
                 "w-full flex items-center px-2 py-2 rounded-lg transition-all text-[14px]",
                 isActive 
@@ -220,41 +323,78 @@ function AppearanceSection() {
       </div>
 
       {/* Right Content */}
-      <div className="flex-1 p-4 flex flex-col">
-        {activeSubTab === 'height' ? (
-          <div className="w-full flex flex-col">
-             <SelectorSlide
-              title="Select height of your character"
-              steps={HEIGHT_STEPS}
-              value={currentSelections.height}
-              onChange={(val) => {
-                const label = HEIGHT_STEPS.find(h => h.value === val)?.label;
-                if (label) toggleTagInPrompt(label, { section: 'appearance', key: 'height' });
-              }}
-              accentColor="#a3e635"
-            />
-          </div>
-        ) : (
-          <SelectorCard
-            items={APPEARANCE_OPTIONS[activeSubTab]}
-            value={currentSelections[activeSubTab]}
-            onChange={(val) => {
-                const opt = APPEARANCE_OPTIONS[activeSubTab].find(o => o.value === val);
-                if (opt) toggleTagInPrompt(opt.label, { section: 'appearance', key: activeSubTab });
-            }}
-          />
-        )}
+      <div className="flex-1 p-4 flex flex-col h-full overflow-y-auto scrollbar-hide">
+        <SelectorCard
+          items={HEAD_OPTIONS[activeSubTab]}
+          value={currentSelections[activeSubTab]}
+          onChange={(val) => {
+              const opt = HEAD_OPTIONS[activeSubTab].find(o => o.value === val);
+              if (opt) toggleTagInPrompt(opt.label, { section: 'head', key: activeSubTab });
+          }}
+        />
       </div>
     </div>
   );
 }
 
 function DetailsSection() {
+  const s = useElementPrompt();
+  const featureEditor = useElementStore((state) => state.featureEditor);
+  const setFeatureEditorView = useElementStore((state) => state.setFeatureEditorView);
+  const [activeSubTab, setActiveSubTab] = React.useState(featureEditor.activeSubTab || 'eyeColor');
+  const { prompt, toggleTagInPrompt } = s;
+
+  React.useEffect(() => {
+    if (featureEditor.activeTab === 'details' && featureEditor.activeSubTab) {
+      setActiveSubTab(featureEditor.activeSubTab);
+    }
+  }, [featureEditor.activeTab, featureEditor.activeSubTab]);
+
+  const currentSelections = React.useMemo(() => {
+    const results = {};
+    const options = DETAILS_OPTIONS[activeSubTab] || [];
+    const match = options.find(opt => prompt.includes(`<Trait: ${opt.label}>`));
+    results[activeSubTab] = match ? match.value : null;
+    return results;
+  }, [prompt, activeSubTab]);
+
   return (
-    <div className="space-y-4">
-      <SectionTitle icon={FileText} title="Distinctive Details" />
-      <FeatureTextarea label="Features" placeholder="Scars, tattoos, unique traits..." />
-      <FeatureTextarea label="Personality" placeholder="Stoic, cheerful, mysterious..." />
+    <div className="flex rounded-xl overflow-hidden h-full">
+      {/* Left Sidebar - Vertical Sub-tabs */}
+      <div className="w-1/6 p-2 space-y-1">
+        {DETAILS_SUB_TABS.map((tab) => {
+          const isActive = activeSubTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => {
+                setActiveSubTab(tab.id);
+                setFeatureEditorView({ activeTab: 'details', activeSubTab: tab.id });
+              }}
+              className={cn(
+                "w-full flex items-center px-2 py-2 rounded-lg transition-all text-[14px]",
+                isActive 
+                  ? "text-white bg-white/10" 
+                  : "text-white/70 hover:text-white/90"
+              )}
+            >
+              {tab.label}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Right Content */}
+      <div className="flex-1 p-4 flex flex-col h-full overflow-y-auto scrollbar-hide">
+        <SelectorCard
+          items={DETAILS_OPTIONS[activeSubTab]}
+          value={currentSelections[activeSubTab]}
+          onChange={(val) => {
+              const opt = DETAILS_OPTIONS[activeSubTab].find(o => o.value === val);
+              if (opt) toggleTagInPrompt(opt.label, { section: 'details', key: activeSubTab });
+          }}
+        />
+      </div>
     </div>
   );
 }
@@ -262,6 +402,13 @@ function DetailsSection() {
 function OutfitSection() {
   const s = useElementPrompt();
   const { prompt, toggleTagInPrompt } = s;
+  
+  // Need to know gender to show correct preview
+  const currentGender = React.useMemo(() => {
+    const match = IDENTITY_OPTIONS.gender.find(opt => prompt.includes(`<Trait: ${opt.label}>`));
+    return match ? match.value : 'male'; // Default to male preview if nothing selected
+  }, [prompt]);
+
   const currentSelectedValue = React.useMemo(() => {
     const match = OUTFIT_OPTIONS.find(opt => prompt.includes(`<Trait: ${opt.label}>`));
     return match ? match.value : null;
@@ -270,11 +417,36 @@ function OutfitSection() {
   return (
     <div className="p-4 flex flex-col h-full overflow-y-auto scrollbar-hide">
       <SelectorCard
-        items={OUTFIT_OPTIONS}
+        items={OUTFIT_OPTIONS.map(opt => ({
+          ...opt,
+          mediaLink: opt.mediaLink || (currentGender === 'female' ? opt.mediaLinkFemale : opt.mediaLinkMale)
+        }))}
         value={currentSelectedValue}
         onChange={(val) => {
             const opt = OUTFIT_OPTIONS.find(o => o.value === val);
             if (opt) toggleTagInPrompt(opt.label, { section: 'outfit', key: null });
+        }}
+      />
+    </div>
+  );
+}
+
+function RenderingStyleSection() {
+  const s = useElementPrompt();
+  const { prompt, toggleTagInPrompt } = s;
+  const currentSelectedValue = React.useMemo(() => {
+    const match = RENDERING_STYLE_OPTIONS.find(opt => prompt.includes(`<Trait: ${opt.label}>`));
+    return match ? match.value : null;
+  }, [prompt]);
+
+  return (
+    <div className="p-4 flex flex-col h-full overflow-y-auto scrollbar-hide">
+      <SelectorCard
+        items={RENDERING_STYLE_OPTIONS}
+        value={currentSelectedValue}
+        onChange={(val) => {
+            const opt = RENDERING_STYLE_OPTIONS.find(o => o.value === val);
+            if (opt) toggleTagInPrompt(opt.label, { section: 'renderingStyle', key: null });
         }}
       />
     </div>

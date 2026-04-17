@@ -87,7 +87,7 @@ function buildInputAssets(references = []) {
 export function useFilteredWorkflows(projectId, sessionId) {
   // Always fetch the FULL project data (cached heavily) so switching sessions doesn't trigger a refetch
   const queryResult           = useProjectData(projectId);
-  const { filters, showUploadedMedia } = useWorkflowsStore();
+  const { _generationFilters: filters, showUploadedMedia } = useWorkflowsStore();
 
   const rawWorkflows = queryResult.data?.projectContents?.workflows ?? [];
   const rawMedia     = queryResult.data?.projectContents?.media     ?? [];
@@ -114,9 +114,14 @@ export function useFilteredWorkflows(projectId, sessionId) {
 
     // 1. فلترة
     const filtered = rawWorkflows.filter(wf => {
+      // Hide Element Sheets from normal workspace/timeline:
+      if (wf.workflow_type === "ELEMENT_SHEET") return false;
+
       const wfMedia = mediaByWorkflow[wf.name] ?? [];
       const { config, model, isUpload } = resolveConfig(wfMedia);
       const type = isUpload ? 'upload' : 'generation';
+
+      if (filters.liked && !wf.metadata?.favorited) return false;
 
       // Filter uploads if needed
       if (!showUploadedMedia && type === 'upload') return false;
@@ -196,6 +201,9 @@ export function useFilteredWorkflows(projectId, sessionId) {
 
   return {
     ...queryResult,
+    availableModels,
+    filteredCount: filteredWorkflows.length,
+    total: rawWorkflows.filter(wf => wf.workflow_type !== "ELEMENT_SHEET").length,
     data: {
       ...queryResult.data,
       filteredWorkflows,

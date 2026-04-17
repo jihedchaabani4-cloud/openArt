@@ -27,7 +27,7 @@ export function NewSessionButton({
     onDrop,
 }) {
     return (
-        <div className="px-1 w-[230px] flex justify-start mb-2 shrink-0">
+        <div className="w-[230px] flex  justify-start mb-2 shrink-0">
             <button
                 className={cn(
                     "flex items-center justify-start w-full p-0 rounded-md transition-all group/btn text-white/40 hover:text-white",
@@ -42,7 +42,7 @@ export function NewSessionButton({
                 {/* Icon box */}
                 <motion.div
                     className={cn(
-                        "w-13 h-13 flex items-center justify-center rounded-md shrink-0 transition-all duration-0",
+                        "w-10 h-10 flex items-center justify-center rounded-md shrink-0 transition-all duration-0",
                         isDragOverNew
                             ? "bg-black/95 bg-[linear-gradient(0deg,rgba(255,255,255,0.1),rgba(255,255,255,0.1))]"
                             : "bg-black/65 bg-[linear-gradient(0deg,rgba(255,255,255,0.1),rgba(255,255,255,0.1))]",

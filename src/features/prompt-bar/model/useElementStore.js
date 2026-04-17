@@ -1,216 +1,370 @@
 import { create } from "zustand";
+import { getFeatureInfoFromLabel } from "./feature-constants";
+
+const createEmptyFeatures = () => ({
+  era: null,
+  renderingStyle: null,
+  identity: {
+    characterType: null,
+    gender: null,
+    race: null,
+    age: null,
+    build: null,
+    height: null,
+  },
+  head: {
+    hairStyle: null,
+    hairTexture: null,
+    hairColor: null,
+  },
+  details: {
+    eyeColor: null,
+    skinCondition: null,
+    rightArm: null,
+    leftArm: null,
+    rightLeg: null,
+    leftLeg: null,
+  },
+  outfit: null,
+});
+
+function clearFeatureSelection(features, featureInfo) {
+  if (!featureInfo?.section) return features;
+
+  if (["outfit", "era", "renderingStyle"].includes(featureInfo.section)) {
+    return {
+      ...features,
+      [featureInfo.section]: null,
+    };
+  }
+
+  if (!featureInfo.key) return features;
+
+  return {
+    ...features,
+    [featureInfo.section]: {
+      ...features[featureInfo.section],
+      [featureInfo.key]: null,
+    },
+  };
+}
+
+function applyFeatureSelection(features, featureInfo) {
+  if (!featureInfo?.section) return features;
+
+  if (["outfit", "era", "renderingStyle"].includes(featureInfo.section)) {
+    return {
+      ...features,
+      [featureInfo.section]: featureInfo.value,
+    };
+  }
+
+  if (!featureInfo.key) return features;
+
+  return {
+    ...features,
+    [featureInfo.section]: {
+      ...features[featureInfo.section],
+      [featureInfo.key]: featureInfo.value,
+    },
+  };
+}
+
+function mergeElementFeatures(features) {
+  const base = createEmptyFeatures();
+  if (!features) return base;
+
+  return {
+    ...base,
+    ...features,
+    identity: {
+      ...base.identity,
+      ...features.identity,
+    },
+    head: {
+      ...base.head,
+      ...features.head,
+    },
+    details: {
+      ...base.details,
+      ...features.details,
+    },
+  };
+}
+
+function resolveFeatureEditorSelection(featureInfo) {
+  if (!featureInfo?.section) {
+    return { activeTab: "identity", activeSubTab: "characterType" };
+  }
+
+  if (["era", "renderingStyle", "outfit"].includes(featureInfo.section)) {
+    return { activeTab: featureInfo.section, activeSubTab: null };
+  }
+
+  return {
+    activeTab: featureInfo.section,
+    activeSubTab: featureInfo.key || null,
+  };
+}
 
 /**
  * useElementStore
  * Independent store for the Elements Prompt Bar.
- * Keeps track of element-specific prompts, modes (Character, Location, General), and references.
- * Completely isolated from the main Generation usePromptStore.
+ * Keeps track of element-specific prompts, references, and structured features.
  */
-export const useElementStore = create((set, get) => ({
-  // ─── Local UI State ───────────────────────────────────────────────────────
+export const useElementStore = create((set) => ({
   prompts: {
     character: "",
     location: "",
-    product: ""
+    product: "",
   },
-  setPrompt: (text) => set((state) => ({
-    prompts: {
-      ...state.prompts,
-      [state.elementMode]: text
-    }
-  })),
+  setPrompt: (text) =>
+    set((state) => ({
+      prompts: {
+        ...state.prompts,
+        [state.elementMode]: text,
+      },
+    })),
 
-  elementMode: "character", // "character" | "location" | "product"
+  elementMode: "character",
   setElementMode: (mode) => set({ elementMode: mode }),
 
-  features: {
-    identity: {
-      gender: null,
-      race: null,
-      age: null,
-    },
-    appearance: {
-      build: null,
-      height: null,
-      eyeColor: null,
-      hairStyle: null,
-      hairTexture: null,
-      hairColor: null,
-      facialHair: null,
-    },
-    outfit: null,
+  features: createEmptyFeatures(),
+  featureEditor: {
+    open: false,
+    activeTab: "identity",
+    activeSubTab: "characterType",
   },
 
-  updateFeature: (section, key, value, forceSet = false) => set((state) => {
-    const currentFeatures = state.features;
-    
-    // Handle top-level features (like outfit)
-    if (section === 'outfit') {
-      const newValue = (!forceSet && currentFeatures.outfit === value) ? null : value;
+  setFeatureEditorOpen: (open) =>
+    set((state) => ({
+      featureEditor: {
+        ...state.featureEditor,
+        open,
+      },
+    })),
+
+  setFeatureEditorView: ({ activeTab, activeSubTab = null }) =>
+    set((state) => ({
+      featureEditor: {
+        ...state.featureEditor,
+        activeTab: activeTab || state.featureEditor.activeTab,
+        activeSubTab,
+      },
+    })),
+
+  openFeatureEditorForLabel: (label) =>
+    set((state) => {
+      const featureInfo = getFeatureInfoFromLabel(label);
+      const nextView = resolveFeatureEditorSelection(featureInfo);
+      return {
+        featureEditor: {
+          ...state.featureEditor,
+          ...nextView,
+          open: true,
+        },
+      };
+    }),
+
+  updateFeature: (section, key, value, forceSet = false) =>
+    set((state) => {
+      const currentFeatures = state.features;
+
+      if (["outfit", "era", "renderingStyle"].includes(section)) {
+        const currentValue = currentFeatures[section];
+        const newValue = !forceSet && currentValue === value ? null : value;
+        return {
+          features: {
+            ...currentFeatures,
+            [section]: newValue,
+          },
+        };
+      }
+
+      const sectionData = currentFeatures[section] || {};
+      const newValue = !forceSet && sectionData[key] === value ? null : value;
+
       return {
         features: {
           ...currentFeatures,
-          outfit: newValue
-        }
+          [section]: {
+            ...sectionData,
+            [key]: newValue,
+          },
+        },
       };
-    }
+    }),
 
-    // Handle nested features (identity, appearance)
-    const sectionData = currentFeatures[section] || {};
-    const newValue = (!forceSet && sectionData[key] === value) ? null : value;
-
-    return {
-      features: {
-        ...currentFeatures,
-        [section]: {
-          ...sectionData,
-          [key]: newValue
-        }
-      }
-    };
-  }),
+  clearFeatures: () => set({ features: createEmptyFeatures() }),
 
   references: {
     character: [],
     location: [],
-    product: []
+    product: [],
   },
-  
+
   addReference: (asset, role = "normal", maxRefs = 5) => {
     set((state) => {
       const modeRefs = state.references[state.elementMode] || [];
-      
-      const exists = modeRefs.find((r) => r.asset_id === asset.asset_id);
-      if (exists) return state;
-      
-      if (modeRefs.length >= maxRefs) return state;
 
-      const isVideo = asset.is_video || (asset.url?.toLowerCase().endsWith('.mp4') || asset.url?.toLowerCase().endsWith('.webm'));
-      const type = isVideo ? "video" : "image";
-      
-      const newRefs = [...modeRefs, { ...asset, role, type, is_video: isVideo }];
-      
-      return { 
+      const exists = modeRefs.find((ref) => ref.asset_id === asset.asset_id);
+      if (exists || modeRefs.length >= maxRefs) return state;
+
+      const isVideo =
+        asset.is_video ||
+        asset.url?.toLowerCase().endsWith(".mp4") ||
+        asset.url?.toLowerCase().endsWith(".webm");
+
+      const newRefs = [...modeRefs, { ...asset, role, type: isVideo ? "video" : "image", is_video: isVideo }];
+
+      return {
         references: {
           ...state.references,
-          [state.elementMode]: newRefs
-        }
+          [state.elementMode]: newRefs,
+        },
       };
     });
   },
 
   removeReference: (assetId) => {
+    set((state) => {
+      const mode = state.elementMode;
+      const currentPrompt = state.prompts[mode] || "";
+      const tagRegex = new RegExp(`<MediaAsset:\\s*${assetId}>`, "gi");
+      const newPrompt = currentPrompt.replace(tagRegex, "").replace(/\s\s+/g, " ").trim();
+
+      return {
+        prompts: {
+          ...state.prompts,
+          [mode]: newPrompt,
+        },
+        references: {
+          ...state.references,
+          [mode]: (state.references[mode] || []).filter((ref) => ref.asset_id !== assetId),
+        },
+      };
+    });
+  },
+
+  clearReferences: () =>
+    set((state) => {
+      const mode = state.elementMode;
+      const currentPrompt = state.prompts[mode] || "";
+      const newPrompt = currentPrompt.replace(/<MediaAsset:\s*[a-f0-9-]+>/gi, "").replace(/\s\s+/g, " ").trim();
+
+      return {
+        prompts: {
+          ...state.prompts,
+          [mode]: newPrompt,
+        },
+        references: {
+          ...state.references,
+          [mode]: [],
+        },
+      };
+    }),
+
+  setReferenceImages: (images) =>
     set((state) => ({
       references: {
         ...state.references,
-        [state.elementMode]: (state.references[state.elementMode] || []).filter((r) => r.asset_id !== assetId)
-      }
-    }));
-  },
-
-  clearReferences: () => set((state) => ({
-    references: {
-      ...state.references,
-      [state.elementMode]: []
-    }
-  })),
-
-  setReferenceImages: (images) => set((state) => ({
-    references: {
-      ...state.references,
-      [state.elementMode]: images
-    }
-  })),
-
-  /**
-   * Unifies selection cards with the text bar.
-   * Directly toggles a <Trait: Label> in the prompt string.
-   */
-  toggleTagInPrompt: (label, info = {}) => set((state) => {
-    const mode = state.elementMode;
-    const currentPrompt = state.prompts[mode] || "";
-    const tag = `<Trait: ${label}>`;
-    
-    // 1. If it exists, remove it
-    if (currentPrompt.includes(tag)) {
-      return {
-        prompts: {
-          ...state.prompts,
-          [mode]: currentPrompt.replace(tag, "").replace(/\s\s+/g, ' ').trim()
-        }
-      };
-    }
-
-    // 2. EXCLUSIVITY: If another tag in the SAME category exists, replace it
-    // We use require to avoid circular imports if needed, but the constant is stable.
-    const { getFeatureInfoFromLabel } = require("./feature-constants");
-
-    let newPrompt = currentPrompt;
-    if (info.section && info.key) {
-      const categoryTagsRegex = /<Trait:\s*([^>]+)>/gi;
-      let matched;
-      while ((matched = categoryTagsRegex.exec(currentPrompt)) !== null) {
-        const foundLabel = matched[1].trim();
-        const foundInfo = getFeatureInfoFromLabel(foundLabel); 
-        if (foundInfo && foundInfo.section === info.section && foundInfo.key === info.key) {
-           newPrompt = newPrompt.replace(matched[0], "").trim();
-        }
-      }
-    }
-
-    // 3. Append the new tag
-    return {
-      prompts: {
-        ...state.prompts,
-        [mode]: (newPrompt + " " + tag).replace(/\s\s+/g, ' ').trim()
-      }
-    };
-  }),
-
-  /**
-   * Directly toggles a <MediaAsset: uuid> in the prompt string.
-   */
-  toggleMediaTag: (assetId) => set((state) => {
-    const mode = state.elementMode;
-    const currentPrompt = state.prompts[mode] || "";
-    const tag = `<MediaAsset: ${assetId}>`;
-
-    if (currentPrompt.includes(tag)) {
-      return {
-        prompts: {
-          ...state.prompts,
-          [mode]: currentPrompt.replace(tag, "").replace(/\s\s+/g, ' ').trim()
-        }
-      };
-    }
-
-    return {
-      prompts: {
-        ...state.prompts,
-        [mode]: (currentPrompt + " " + tag).replace(/\s\s+/g, ' ').trim()
-      }
-    };
-  }),
-
-  // ─── Reset Store ──────────────────────────────────────────────────────────
-  resetElementStore: () => set({
-    prompts: { character: "", location: "", product: "" },
-    elementMode: "character",
-    references: { character: [], location: [], product: [] },
-    features: {
-      identity: { gender: null, race: null, age: null },
-      appearance: { 
-        build: null, height: null, eyeColor: null, hairStyle: null, 
-        hairTexture: null, hairColor: null, facialHair: null 
+        [state.elementMode]: images,
       },
-      outfit: null,
-    },
-  }),
+    })),
 
-  // ─── Popover / Drag State (Local to Elements) ─────────────────────────────
-  // We keep these separate so dragging in Elements doesn't flicker Generations
-  isDraggingGalleryItem: false,
-  draggedItem: null,
-  setIsDraggingGalleryItem: (val) => set({ isDraggingGalleryItem: val }),
-  setDraggedItem: (item) => set({ draggedItem: item }),
+  hydrateElementDraft: ({
+    mode = "character",
+    prompt = "",
+    references = [],
+    features = null,
+  } = {}) =>
+    set((state) => ({
+      elementMode: mode,
+      prompts: {
+        ...state.prompts,
+        [mode]: prompt,
+      },
+      references: {
+        ...state.references,
+        [mode]: references,
+      },
+      features: mergeElementFeatures(features),
+    })),
+
+  toggleTagInPrompt: (label, info = {}) =>
+    set((state) => {
+      const mode = state.elementMode;
+      const currentPrompt = state.prompts[mode] || "";
+      const tag = `<Trait: ${label}>`;
+      const resolvedInfo = getFeatureInfoFromLabel(label);
+
+      if (currentPrompt.includes(tag)) {
+        return {
+          prompts: {
+            ...state.prompts,
+            [mode]: currentPrompt.replace(tag, "").replace(/\s\s+/g, " ").trim(),
+          },
+          features: clearFeatureSelection(state.features, resolvedInfo),
+        };
+      }
+
+      let newPrompt = currentPrompt;
+      if (info.section) {
+        const categoryTagsRegex = /<Trait:\s*([^>]+)>/gi;
+        let matched;
+        while ((matched = categoryTagsRegex.exec(currentPrompt)) !== null) {
+          const foundInfo = getFeatureInfoFromLabel(matched[1].trim());
+          const sameTopLevel = !info.key && foundInfo && foundInfo.section === info.section && foundInfo.key == null;
+          const sameNested = info.key && foundInfo && foundInfo.section === info.section && foundInfo.key === info.key;
+          if (sameTopLevel || sameNested) {
+            newPrompt = newPrompt.replace(matched[0], "").trim();
+          }
+        }
+      }
+
+      return {
+        prompts: {
+          ...state.prompts,
+          [mode]: (newPrompt + " " + tag).replace(/\s\s+/g, " ").trim(),
+        },
+        features: applyFeatureSelection(state.features, resolvedInfo),
+      };
+    }),
+
+  toggleMediaTag: (assetId) =>
+    set((state) => {
+      const mode = state.elementMode;
+      const currentPrompt = state.prompts[mode] || "";
+      const tagRegex = new RegExp(`<MediaAsset:\\s*${assetId}>`, "gi");
+      const tag = `<MediaAsset:${assetId}>`;
+
+      if (tagRegex.test(currentPrompt)) {
+        return {
+          prompts: {
+            ...state.prompts,
+            [mode]: currentPrompt.replace(tagRegex, "").replace(/\s\s+/g, " ").trim(),
+          },
+        };
+      }
+
+      return {
+        prompts: {
+          ...state.prompts,
+          [mode]: (currentPrompt + " " + tag).replace(/\s\s+/g, " ").trim(),
+        },
+      };
+    }),
+
+  resetElementStore: () =>
+    set({
+      prompts: { character: "", location: "", product: "" },
+      elementMode: "character",
+      references: { character: [], location: [], product: [] },
+      features: createEmptyFeatures(),
+      featureEditor: {
+        open: false,
+        activeTab: "identity",
+        activeSubTab: "characterType",
+      },
+    }),
 }));

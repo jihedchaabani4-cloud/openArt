@@ -23,6 +23,7 @@ import { NewSessionButton } from "./NewSessionButton";
 import { SessionItem } from "./SessionItem";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SessionSidebar — collapsible sidebar that lists sessions for the active project.
@@ -33,9 +34,10 @@ export function SessionSidebar() {
         selectedProjectId, 
         activeSessionId, 
         setActiveSessionId,
-        activeStudioTab,
-        setActiveStudioTab
     } = useGenerationsStore();
+
+    const pathname = usePathname();
+    const isElementsActive = pathname?.includes("/elements");
 
     // ── Data ─────────────────────────────────────────────────────────────────
     const { data: projectData, isLoading } = useProjectData(selectedProjectId);
@@ -223,42 +225,43 @@ export function SessionSidebar() {
 
             {/* Tabs for Studio Views */}
             <div className="flex flex-col items-center gap-2 pt-2 relative z-50 w-full">
-                <button 
-                    onClick={() => setActiveStudioTab("generations")}
+                <Link 
+                    href={`/projects/${selectedProjectId}/generations`}
                     className={cn(
                         "flex items-center justify-center w-10 h-10 rounded-xl transition-all",
-                        activeStudioTab === "generations" 
+                        !isElementsActive
                             ? "bg-white/10 text-white shadow-sm" 
                             : "bg-transparent text-white/40 hover:bg-white/5 hover:text-white"
                     )}
                     title="Generations"
                 >
                     <LayoutGrid className="w-6 h-6" strokeWidth={2.5} />
-                </button>
-                <button 
-                    onClick={() => setActiveStudioTab("elements")}
+                </Link>
+                <Link 
+                    href={`/projects/${selectedProjectId}/elements`}
                     className={cn(
                         "flex items-center justify-center w-10 h-10 rounded-xl transition-all",
-                        activeStudioTab === "elements" 
+                        isElementsActive
                             ? "bg-white/10 text-white shadow-sm" 
                             : "bg-transparent text-white/40 hover:bg-white/5 hover:text-white"
                     )}
                     title="Elements Library"
                 >
                     <Shapes className="w-6 h-6" strokeWidth={2.5} />
-                </button>
+                </Link>
             </div>
 
             {/* Expanding wrapper (anchored right below the buttons) */}
-            <div className="relative w-full  flex-1 z-40">
-                <motion.div
+            {!isElementsActive && (
+                <div className="relative p-1 w-full flex-1 z-40">
+                    <motion.div
                     className={cn(
-                        "absolute left-0 top-0 max-h-[calc(100vh-120px)] h-fit flex flex-col items-start overflow-hidden py-2 rounded-2xl border transition-colors",
+                        "absolute left-0 top-0 max-h-[calc(100vh-120px)] pl-2.5 h-fit flex flex-col items-start overflow-hidden py-2 rounded-2xl border transition-colors",
                     )}
                 animate={{
-                    width: isExpanded ? 260 : 60,
-                    backgroundColor: isExpanded ? "#161718e6" : "rgba(0, 0, 0, 0)",
+                    backgroundColor: isExpanded ? "#161718e6" : "rgba(0,0,0,0)",
                     backdropFilter: isExpanded ? "blur(80px)" : "blur(0px)",
+                    width: isExpanded ? 260 : 60,
                     boxShadow: isExpanded
                         ? "0 25px 50px -12px rgba(0,0,0,0.5)"
                         : "0 0px 0px 0px rgba(0,0,0,0)",
@@ -287,7 +290,7 @@ export function SessionSidebar() {
                 onDrop={() => setIsDraggingOver(false)}
             >
                 {/* Fixed-width inner wrapper to prevent reflow during animation */}
-                <div className="w-[260px] gap-1 flex flex-col h-fit shrink-0 items-start">
+                <div className="w-[260px] gap-1 flex flex-col h-fit shrink-0">
 
                     {/* ── New Session button ── */}
                     <NewSessionButton
@@ -306,7 +309,7 @@ export function SessionSidebar() {
                     />
 
                     {/* ── Sessions list ── */}
-                    <div className="w-[260px] max-h-[60vh] gap-3 overflow-y-auto overflow-x-hidden hide-scrollbar flex flex-col items-start px-1 pb-1 shrink">
+                    <div className="w-[260px] max-h-[60vh] gap-3 overflow-y-auto overflow-x-hidden hide-scrollbar flex flex-col  pb-1 shrink">
                         {isLoading ? (
                             <div className="w-full flex justify-end pr-5">
                                 <Loader2 className="w-4 h-4 animate-spin text-white/30" />
@@ -352,7 +355,8 @@ export function SessionSidebar() {
                     </div>
                 </div>
             </motion.div>
-            </div>
+                </div>
+            )}
 
             {/* ── Delete confirmation dialog ── */}
             <ConfirmDeleteDialog
