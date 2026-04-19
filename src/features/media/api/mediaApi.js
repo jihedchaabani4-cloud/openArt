@@ -68,11 +68,16 @@ export function useUploadAsset() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ file, projectId, sessionId, metadata }) => {
+      let payloadMeta = metadata;
+      if (!payloadMeta && file) {
+          payloadMeta = await getMediaMetadata(file);
+      }
+
       const formData = new FormData();
       formData.append("file", file);
       formData.append("project_id", projectId || "");
       formData.append("session_id", sessionId || "");
-      if (metadata) formData.append("metadata", JSON.stringify(metadata));
+      if (payloadMeta) formData.append("metadata", JSON.stringify(payloadMeta));
       return await api.postForm("/assets/upload", formData);
     },
 

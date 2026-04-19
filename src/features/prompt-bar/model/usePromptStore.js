@@ -65,15 +65,27 @@ export const usePromptStore = create((set, get) => ({
     set((state) => {
       const { referenceImages, generationMode, referencesByMode } = state;
       
-      const exists = referenceImages.find((r) => r.asset_id === asset.asset_id);
+      // Better exists check
+      const exists = referenceImages.find((r) => 
+        (asset.asset_id && r.asset_id === asset.asset_id) || 
+        (asset.url && r.url === asset.url)
+      );
       if (exists) return state;
       
-      if (referenceImages.length >= maxRefs) return state;
+      const isSingularRole = ["start", "end", "mc_image", "mc_video"].includes(role);
+      
+      // If adding a normal ref and max reached, abort
+      if (!isSingularRole && referenceImages.length >= maxRefs) return state;
 
       const isVideo = asset.is_video || (asset.url?.toLowerCase().endsWith('.mp4') || asset.url?.toLowerCase().endsWith('.webm'));
       const type = isVideo ? "video" : "image";
       
-      const newRefs = [...referenceImages, { ...asset, role, type, is_video: isVideo }];
+      // Remove previous asset of the same singular role if replacing
+      const filteredRefs = isSingularRole 
+        ? referenceImages.filter(r => r.role !== role) 
+        : referenceImages;
+        
+      const newRefs = [...filteredRefs, { ...asset, role, type, is_video: isVideo }];
       
       return { 
         referenceImages: newRefs,

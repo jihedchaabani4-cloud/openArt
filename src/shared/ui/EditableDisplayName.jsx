@@ -4,17 +4,28 @@ import * as React from "react"
 import { Check, X } from "lucide-react"
 import { cn } from "@/shared/lib/utils"
 
-export function EditableDisplayName({
+export const EditableDisplayName = React.forwardRef(({
   displayName,
   placeholder = "Untitled",
   onSave,
+  onEditChange,
   className,
   inputClassName,
   maxLength = 120,
-}) {
+}, ref) => {
   const [isEditing, setIsEditing] = React.useState(false)
   const [value, setValue] = React.useState(displayName || "")
   const inputRef = React.useRef(null)
+
+  React.useEffect(() => {
+    onEditChange?.(isEditing)
+  }, [isEditing, onEditChange])
+
+  React.useImperativeHandle(ref, () => ({
+    startEditing: () => {
+      setIsEditing(true)
+    }
+  }))
 
   React.useEffect(() => {
     if (!isEditing) {
@@ -70,6 +81,7 @@ export function EditableDisplayName({
           "bg-transparent border-none outline-none px-2 py-1 rounded-md transition-all hover:bg-white/5 focus:bg-white/5 w-full min-w-[80px] text-white",
           inputClassName
         )}
+        style={{ cursor: isEditing ? "text" : "default" }}
         aria-label="Display name"
       />
 
@@ -99,4 +111,6 @@ export function EditableDisplayName({
       )}
     </div>
   )
-}
+})
+
+EditableDisplayName.displayName = "EditableDisplayName"

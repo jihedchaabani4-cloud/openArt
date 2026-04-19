@@ -105,11 +105,10 @@ export function usePromptBar({ isNewProject = false } = {}) {
     if (!selectedModel) return;
     const support = selectedModel.support || {};
     
-    // 1. Prune references if they exceed the new model's maximum
-    const currentMaxRefs = support.references?.max ?? 4;
-    
-    if (referenceImages.length > currentMaxRefs) {
-      setReferenceImages(referenceImages.slice(0, currentMaxRefs));
+    // 1. Prune references if they exceed the new model's max allowed
+    // Note: maxRefs is properly overridden for motion models in useModelSync
+    if (referenceImages.length > maxRefs) {
+      setReferenceImages(referenceImages.slice(0, maxRefs));
     }
 
     // 2. Sync ratio and resolution
@@ -167,6 +166,7 @@ export function usePromptBar({ isNewProject = false } = {}) {
     setResolution,
     setVideoResolution,
     videoResolution,
+    maxRefs,
   ]);
 
   // ─── Library ──────────────────────────────────────────────────────────────

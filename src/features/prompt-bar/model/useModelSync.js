@@ -7,7 +7,7 @@ import { useMemo, useState } from "react";
 function supportsGenerationMode(model, generationMode) {
   if (!model) return false;
 
-  if (generationMode === "motion") {
+  if (generationMode === "motion" || generationMode === "motion-control") {
     return model.supportedModes?.includes("motion") || model.category === "motion";
   }
 
@@ -64,7 +64,11 @@ export function useModelSync(studioModels, _studioModelsLoading, generationMode,
     [studioModels, selectedModelId]
   );
 
-  const maxRefs = selectedModel?.support?.references?.max ?? 4;
+  let maxRefs = selectedModel?.support?.references?.max ?? 4;
+  if (generationMode === "motion" || generationMode === "motion-control") {
+    // Motion control always requires exactly 1 image and 1 video
+    maxRefs = 2;
+  }
 
   return {
     model: selectedModelId ? { id: selectedModelId } : null,

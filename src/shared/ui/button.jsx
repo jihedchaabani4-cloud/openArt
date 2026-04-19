@@ -24,7 +24,7 @@ const buttonVariants = cva(
         "studio-neon": "inline-flex items-center justify-center gap-2 h-12 px-6 rounded-xl bg-[#EFFE17] text-black text-sm font-semibold pb-0.5 transition-all hover:opacity-80 active:opacity-60 shadow-[inset_0px_-3px_rgba(0,0,0,0.25)] disabled:opacity-50",
         "studio-error": "flex items-center justify-center gap-3 h-11 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500 hover:bg-red-500/20 transition-all",
         "studio-white": " px-[12px] py-[8px] bg-white text-black hover:bg-white/90 transition-all  ",
-        "studio-ghost": "  px-[12px] py-[8px]  bg-white/10  text-white hover:bg-white/40 transition-all font-semibold",
+        "studio-ghost": "  px-[12px] py-[8px]  bg-white/5  text-white hover:bg-white/40 transition-all font-semibold",
         "studio-overlay-icon":
           "w-9 h-9 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center text-white/70 hover:text-white hover:bg-black/60 transition-all",
         "studio-node-thumb":

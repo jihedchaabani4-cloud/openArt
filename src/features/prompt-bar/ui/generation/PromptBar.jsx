@@ -15,6 +15,8 @@ import { RatioSelector } from "../common/selectors/RatioSelector";
 import { VariationSelector } from "../common/selectors/VariationSelector";
 import { DurationSelector } from "../common/selectors/DurationSelector";
 import { VideoResolutionSelector } from "../common/selectors/VideoResolutionSelector";
+import { VscSettings } from "react-icons/vsc";
+
 
 export default function PromptBar({ hideBackground = false, isNewProject = false, initialMode = null }) {
     const s = usePromptBar({ isNewProject });
@@ -238,7 +240,7 @@ export default function PromptBar({ hideBackground = false, isNewProject = false
                 }}
             >
                 <div className="flex flex-col w-full gap-1.5">
-                    <div onPointerDown={() => setVariationsOpen(false)}>
+                    <div className="flex items-start gap-2" onPointerDown={() => setVariationsOpen(false)}>
                         <PromptTextarea
                             value={s.prompt}
                             onChange={s.setPrompt}
@@ -251,6 +253,18 @@ export default function PromptBar({ hideBackground = false, isNewProject = false
                                     : undefined
                             }
                         />
+                        <button
+                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); setVariationsOpen((prev) => !prev); }}
+                            className={`p-2 h-[44px] w-[44px] flex items-center justify-center rounded-2xl transition-all duration-300 ${
+                                variationsOpen 
+                                    ? 'bg-white/10 text-white shadow-[0_0_15px_rgba(255,255,255,0.05)]' 
+                                    : 'text-neutral-400 hover:bg-white/5 hover:text-neutral-100'
+                            }`}
+                            title="Generation Settings"
+                            type="button"
+                        >
+                            <VscSettings className="w-5 h-5" />
+                        </button>
                     </div>
 
                     <Row2

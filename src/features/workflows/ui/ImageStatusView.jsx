@@ -80,7 +80,7 @@ export function ImageStatusView({
       `}</style>
 
       {isCompleted && src ? (
-        <div className="w-full h-full relative">
+        <div className="w-full h-full relative flex items-center justify-center">
           {(!isInView || !isMediaLoaded) && (
             <div className="absolute inset-0 z-0 bg-white/5 animate-pulse flex items-center justify-center">
               {isInView && (
@@ -91,7 +91,7 @@ export function ImageStatusView({
 
           {isInView && (
             <div className={cn(
-              "w-full h-full transition-opacity duration-500",
+              "w-full h-full transition-opacity duration-500 relative flex items-center justify-center",
               isMediaLoaded ? "opacity-100" : "opacity-0"
             )}>
               {children ? (

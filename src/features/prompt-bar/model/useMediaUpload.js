@@ -6,7 +6,7 @@ import { useUploadAsset } from "@/features/media/api/mediaApi";
 
 const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 const ALLOWED_VIDEO_TYPES = ["video/mp4", "video/webm", "video/quicktime"];
-const MAX_FILE_SIZE_MB    = 50;
+const MAX_FILE_SIZE_MB    = 10;
 
 /**
  * ✅ FIX: Added file type and size validation before hitting the API.
@@ -44,16 +44,28 @@ export function useMediaUpload({ projectId, activeSessionId, addReference, refer
   };
 
   const validateFile = useCallback(async (file) => {
+    const isVideo = file.type.startsWith("video/");
+    const isImage = file.type.startsWith("image/");
+
     const allowed = [...ALLOWED_IMAGE_TYPES, ...ALLOWED_VIDEO_TYPES];
     if (!allowed.includes(file.type)) {
       return { ok: false, reason: `File type "${file.type}" is not supported.` };
     }
+
     const sizeMB = file.size / (1024 * 1024);
-    if (sizeMB > MAX_FILE_SIZE_MB) {
-      return { ok: false, reason: `File exceeds ${MAX_FILE_SIZE_MB} MB limit.` };
+
+    // Validation for Images: Max 10MB
+    if (isImage && sizeMB > 10) {
+        return { ok: false, reason: `Image exceeds 10MB limit (yours: ${sizeMB.toFixed(2)}MB).` };
     }
 
-    if (file.type.startsWith("video/")) {
+    // Validation for Videos: Max 50MB (buffer limit usually higher, but let's keep it safe)
+    if (isVideo && sizeMB > 50) {
+        return { ok: false, reason: `Video exceeds 50MB limit (yours: ${sizeMB.toFixed(2)}MB).` };
+    }
+
+    // Video Duration: Max 30 seconds
+    if (isVideo) {
       const duration = await getVideoDuration(file);
       if (duration > 30) {
         return { ok: false, reason: `Video duration cannot exceed 30 seconds (yours is ${Math.round(duration)}s).` };
@@ -102,6 +114,11 @@ export function useMediaUpload({ projectId, activeSessionId, addReference, refer
             asset_id: data.asset_id,
             type:     data.type,
             is_video: data.type === "video",
+            width:       data.width,
+            height:      data.height,
+            ratio:       data.ratio,
+            resolution:  data.resolution,
+            size:        data.size,
           },
           role,
           maxRefs

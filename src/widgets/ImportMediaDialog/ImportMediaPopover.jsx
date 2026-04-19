@@ -1,8 +1,6 @@
 import React from "react";
 import { Upload, Search, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useProjects } from "@/features/projects/api/projectsApi";
-import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows";
 import { useLibraryFilter } from "@/features/prompt-bar/model/useLibraryFilter";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
@@ -25,18 +23,10 @@ export function ImportMediaPopover({
   mode       = "all",
   maxAllowed = 1,
   onUploadFromPC,
-  assetSource = "all",
-  setAssetSource,
   anchorRef,
-  className
 }) {
-  const { data: projects = [] }                = useProjects();
-  const { selectedProjectId: activeProjectId } = useGenerationsStore();
-
   const {
-    sort,            setSort,
     search,          setSearch,
-    selectedProject, setSelectedProject,
     visibleItems,
   } = useLibraryFilter(library, mode);
   const [selectedItems, setSelectedItems] = React.useState([]);

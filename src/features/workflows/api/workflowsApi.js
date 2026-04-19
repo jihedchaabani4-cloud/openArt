@@ -116,6 +116,11 @@ export function useGenerateMutation({ onError } = {}) {
         endpoint = '/video/edit';
       }
       
+      // Explicit Motion Routing
+      if (payload.section === 'motion' || payload.edit_type === 'motion') {
+         endpoint = '/video/motion';
+      }
+      
       const res = await api.post(endpoint, payload);
       if (!res.ok) throw new Error(res.message || 'Workflow execution failed');
       return res;

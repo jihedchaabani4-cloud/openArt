@@ -1,5 +1,6 @@
 import React from 'react';
-import { Settings, Paperclip } from 'lucide-react';
+import { Paperclip } from 'lucide-react';
+import { VscSettings } from "react-icons/vsc";
 import { ModelSelector } from '../common/selectors/ModelSelector';
 import { ActionButton } from '../common/ActionButton';
 
@@ -37,16 +38,6 @@ export function Row2({ paramsProps, actionProps, onToggleVariations, variationsO
           dynamicModels={studioModels}
           loading={studioModelsLoading}
         />
-        <button
-          onClick={onToggleVariations}
-          className={`p-2 rounded-lg transition-colors ${
-            variationsOpen ? 'bg-white/10 text-white' : 'text-neutral-400 hover:bg-white/5 hover:text-neutral-100'
-          }`}
-          title="Generation Settings"
-          type="button"
-        >
-          <Settings className="w-4 h-4" />
-        </button>
         <ActionButton {...actionProps} />
       </div>
     </div>
