@@ -340,14 +340,10 @@ export default function AnglesPanel({ onClose, onGenerate, previewImageUrl }) {
       session_id: editTarget.session_id,
       ratio: editTarget.ratio,
       quality: editTarget.quality,
-      references: [
-        {
-          id: editTarget.media_id,
-          url: activeImageUrl,
-          type: "image"
-        }
-      ],
-      model_name: "runway_gen4"
+      workflow_id: editTarget.workflow_id,
+      video_workflow_id: editTarget.workflow_id,
+      reference_workflow_ids: [editTarget.workflow_id].filter(Boolean),
+      model_name: "seedream-pro",
     };
 
     generateMutation.mutate({

@@ -142,8 +142,8 @@ export function useEditPromptBar() {
               project_id:       projectId,
               session_id:       activeSessionId,
               workflow_id:      editTarget?.workflow_id,
-              media_id:         editTarget?.media_id,
-              references:       buildReferencesPayload(referenceImages),
+              video_workflow_id: editTarget?.workflow_id,
+              reference_workflow_ids: referenceImages.map(r => r.workflow_id).filter(Boolean),
           };
 
           try {
@@ -156,6 +156,36 @@ export function useEditPromptBar() {
               }
           } catch (err) {
               console.error("❌ Camera edit failed:", err);
+          }
+          return;
+      }
+
+      if (activeTab === "camera" && !editTarget?.isVideo) {
+          if (generating) return;
+          const cameraState = camera || {};
+          const payload = {
+              rotation:                cameraState.rotation ?? 0,
+              tilt:                    cameraState.tilt    ?? 0,
+              zoom:                    cameraState.zoom    ?? 6,
+              project_id:              projectId,
+              session_id:              activeSessionId,
+              workflow_id:             editTarget?.workflow_id,
+              ratio,
+              quality:                 resolution,
+              model_name:              "seedream-pro",
+              reference_workflow_ids:  referenceImages.map(r => r.workflow_id).filter(Boolean),
+          };
+
+          try {
+              const res = await runGenerate({ payload, isCamera: true });
+              const finalProj = res.project_id ?? projectId;
+              const finalSess = res.session_id ?? activeSessionId;
+              if (finalProj) {
+                  queryClient.invalidateQueries({ queryKey: queryKeys.assets.byProject(finalProj, finalSess) });
+                  queryClient.invalidateQueries({ queryKey: queryKeys.generations.byProject(finalProj, finalSess) });
+              }
+          } catch (err) {
+              console.error("❌ Image camera edit failed:", err);
           }
           return;
       }
@@ -174,8 +204,8 @@ export function useEditPromptBar() {
         project_id:       projectId,
         session_id:       activeSessionId,
         workflow_id:      editTarget?.workflow_id,
-        media_id:         editTarget?.media_id,
-        references:       buildReferencesPayload(referenceImages),
+        video_workflow_id: editTarget?.workflow_id,
+        reference_workflow_ids: referenceImages.map(r => r.workflow_id).filter(Boolean),
         mask_selection:   selection,
         activeTab:        activeTab,
         upscaleScale:     upscaleScale,
@@ -225,8 +255,8 @@ export function useEditPromptBar() {
         section:          "video_generator",
         project_id:       projectId,
         session_id:       activeSessionId,
-        workflow_id:      editTarget?.workflow_id,
-        media_id:         editTarget?.media_id,
+        workflow_id:       editTarget?.workflow_id,
+        video_workflow_id: editTarget?.workflow_id,
       };
 
       try {

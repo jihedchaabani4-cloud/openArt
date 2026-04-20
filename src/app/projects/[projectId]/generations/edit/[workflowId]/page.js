@@ -73,7 +73,7 @@ export default function WorkflowEditPage() {
         return () => {
             resetEditStore();
         };
-    }, [workflow, activeItem, setEditTarget, resetEditStore]);
+    }, [workflow, activeItem, projectId, activeSessionId, setEditTarget, resetEditStore, isVideoItem]);
 
     if (!workflow) {
         return (

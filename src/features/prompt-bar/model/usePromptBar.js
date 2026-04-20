@@ -219,6 +219,7 @@ export function usePromptBar({ isNewProject = false } = {}) {
         section:          (generationMode === "motion" || generationMode === "motion-control") ? "motion" : (isVideo ? "video_studio" : "image_generator"),
         project_id:       isNewProject ? null : projectId,
         session_id:       isNewProject ? null : activeSessionId,
+        reference_workflow_ids: referenceImages.map(r => r.workflow_id).filter(Boolean),
         references:       buildReferencesPayload(referenceImages),
       };
 

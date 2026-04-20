@@ -316,11 +316,7 @@ export default function LightingPanel({ onClose, onGenerate, previewImageUrl }) 
       session_id: editTarget.session_id,
       ratio: editTarget.ratio,
       quality: editTarget.quality,
-      references: [{
-        id: editTarget.media_id,
-        url: activeImageUrl,
-        type: "image"
-      }],
+      workflow_id: editTarget.workflow_id,
       model_name: "seedream-pro",
     };
     generateMutation.mutate({ payload, isLighting: true });
