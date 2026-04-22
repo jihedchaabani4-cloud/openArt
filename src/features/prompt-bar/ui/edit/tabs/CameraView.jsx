@@ -5,24 +5,33 @@ import { ModelSelector } from "../../common/selectors/ModelSelector";
 import { PromptTextarea } from "../../common/PromptTextarea";
 
 const CAMERA_MOTIONS = [
-    { id: "dolly-in", label: "Dolly in" },
-    { id: "dolly-out", label: "Dolly out" },
-    { id: "orbit-left", label: "Orbit left" },
-    { id: "orbit-right", label: "Orbit right" },
-    { id: "orbit-up", label: "Orbit up" },
-    { id: "orbit-low", label: "Orbit low" },
-    { id: "dolly-in-zoom-out", label: "Dolly in zoom out" },
-    { id: "dolly-out-zoom-in", label: "Dolly out zoom in" },
+    { id: "static", label: "Static", video: "https://res.cloudinary.com/dsak0vfdj/video/upload/v1776729328/Static_j4m7uu.mp4" },
+    { id: "handheld", label: "Handheld", video: "https://res.cloudinary.com/dsak0vfdj/video/upload/v1776729327/Handheld_mxhev9.mp4" },
+    { id: "zoom-out", label: "Zoom Out", video: "https://res.cloudinary.com/dsak0vfdj/video/upload/v1776729329/Zoom_Out_nly7ir.mp4" },
+    { id: "zoom-in", label: "Zoom in", video: "https://res.cloudinary.com/dsak0vfdj/video/upload/v1776729329/Zoom_in_jqpbkz.mp4" },
+    { id: "camera-follows", label: "Camera follows", video: "https://res.cloudinary.com/dsak0vfdj/video/upload/v1776729326/Camera_follows_divs8n.mp4" },
+    { id: "pan-left", label: "Pan left", video: "https://res.cloudinary.com/dsak0vfdj/video/upload/v1776729328/Pan_left_jndklz.mp4" },
+    { id: "pan-right", label: "Pan right", video: "https://res.cloudinary.com/dsak0vfdj/video/upload/v1776729328/Pan_right_yxxmrm.mp4" },
+    { id: "tilt-up", label: "Tilt up", video: "https://res.cloudinary.com/dsak0vfdj/video/upload/v1776729329/Tilt_up_bbcudx.mp4" },
+    { id: "tilt-down", label: "Tilt down", video: "https://res.cloudinary.com/dsak0vfdj/video/upload/v1776729329/Tilt_down_qp4e64.mp4" },
+    { id: "orbit-around", label: "Orbit around", video: "https://res.cloudinary.com/dsak0vfdj/video/upload/v1776729328/Orbit_around_opvkav.mp4" },
+    { id: "drone-shot", label: "Drone shot", video: "https://res.cloudinary.com/dsak0vfdj/video/upload/v1776729327/Drone_shot_igjxtc.mp4" },
+    { id: "360-roll", label: "360 roll", video: "https://res.cloudinary.com/dsak0vfdj/video/upload/v1776729326/360_roll_c6ainz.mp4" },
+    { id: "dolly-in", label: "Dolly in", video: "https://res.cloudinary.com/dsak0vfdj/video/upload/v1776729326/Dolly_in_ysm8vh.mp4" },
+    { id: "dolly-out", label: "Dolly out", video: "https://res.cloudinary.com/dsak0vfdj/video/upload/v1776729326/Dolly_out_ypisdm.mp4" },
+    { id: "dolly-left", label: "Dolly left", video: "https://res.cloudinary.com/dsak0vfdj/video/upload/v1776729326/Dolly_left_qh6et8.mp4" },
+    { id: "dolly-right", label: "Dolly right", video: "https://res.cloudinary.com/dsak0vfdj/video/upload/v1776729326/Dolly_right_zpmq6k.mp4" },
+    { id: "jib-down", label: "Jib down", video: "https://res.cloudinary.com/dsak0vfdj/video/upload/v1776729327/Jib_down_v9e5qz.mp4" },
 ];
 
 const CAMERA_POSITIONS = [
-    { id: "center", label: "Center" },
-    { id: "left", label: "Left" },
-    { id: "right", label: "Right" },
-    { id: "high", label: "High" },
-    { id: "low", label: "Low" },
-    { id: "closer", label: "Closer" },
-    { id: "further", label: "Further" },
+    { id: "center", label: "Center", image: "https://res.cloudinary.com/dsak0vfdj/image/upload/v1776737449/Camera_position_centre_un820i.jpg" },
+    { id: "left", label: "Left", image: "https://res.cloudinary.com/dsak0vfdj/image/upload/v1776737449/Camera_position_left_ec8hlf.jpg" },
+    { id: "right", label: "Right", image: "https://res.cloudinary.com/dsak0vfdj/image/upload/v1776737448/Camera_position_right_jyi3uo.jpg" },
+    { id: "high", label: "High", image: "https://res.cloudinary.com/dsak0vfdj/image/upload/v1776737450/Camera_position_hight_axv5zs.jpg" },
+    { id: "low", label: "Low", image: "https://res.cloudinary.com/dsak0vfdj/image/upload/v1776737449/Camera_position_low_sf7xst.jpg" },
+    { id: "closer", label: "Closer", image: "https://res.cloudinary.com/dsak0vfdj/image/upload/v1776737449/Camera_position_closer_w4ddca.jpg" },
+    { id: "further", label: "Further", image: "https://res.cloudinary.com/dsak0vfdj/image/upload/v1776737448/Camera_position_further_gyefpl.jpg" },
 ];
 
 import { Loader2 } from "lucide-react";
@@ -32,39 +41,43 @@ export function CameraView({ s }) {
     // Local selection state for UI, but also sync with store
     const [selectedMotion, setSelectedMotion] = useState(null);
     const [selectedPosition, setSelectedPosition] = useState(null);
+    const [isExpanded, setIsExpanded] = useState(false);
 
-    // Dragger logic
+    // Dragger logic — uses Pointer Events API (compatible with framer-motion)
     const sliderRef = useRef(null);
     const isDown = useRef(false);
     const startX = useRef(0);
     const scrollLeft = useRef(0);
     const isDragging = useRef(false);
 
-    const onMouseDown = (e) => {
+    const onPointerDown = (e) => {
+        if (!sliderRef.current) return;
+        // Only handle primary button (left click)
+        if (e.button !== undefined && e.button !== 0) return;
         isDown.current = true;
         isDragging.current = false;
-        startX.current = e.pageX - sliderRef.current.offsetLeft;
+        // Capture pointer so we keep receiving events even if cursor leaves element
+        sliderRef.current.setPointerCapture(e.pointerId);
+        startX.current = e.clientX - sliderRef.current.getBoundingClientRect().left;
         scrollLeft.current = sliderRef.current.scrollLeft;
     };
 
-    const onMouseLeave = () => {
+    const onPointerUp = (e) => {
+        if (!sliderRef.current) return;
         isDown.current = false;
+        try { sliderRef.current.releasePointerCapture(e.pointerId); } catch (_) {}
     };
 
-    const onMouseUp = () => {
-        isDown.current = false;
-    };
-
-    const onMouseMove = (e) => {
-        if (!isDown.current) return;
-        e.preventDefault();
-        const x = e.pageX - sliderRef.current.offsetLeft;
+    const onPointerMove = (e) => {
+        if (!isDown.current || !sliderRef.current) return;
+        // Do NOT call e.preventDefault() here — it breaks framer-motion
+        const x = e.clientX - sliderRef.current.getBoundingClientRect().left;
         const walk = (x - startX.current) * 1.5; // Scroll speed multiplier
-        
+
         if (Math.abs(walk) > 5) {
             isDragging.current = true; // Mark as dragging to prevent click
         }
-        
+
         sliderRef.current.scrollLeft = scrollLeft.current - walk;
     };
 
@@ -111,22 +124,39 @@ export function CameraView({ s }) {
                         <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-white rounded-t-full shadow-[0_0_8px_rgba(255,255,255,0.5)]" />
                     )}
                 </button>
+                
+                <div className="flex-1" />
+                
+                <button 
+                    onClick={() => setIsExpanded(!isExpanded)}
+                    title={isExpanded ? "Collapse to row" : "Expand to grid"}
+                    className={cn(
+                        "p-1.5 rounded-md transition-all",
+                        isExpanded ? "bg-white/10 text-white shadow-inner" : "text-white/40 hover:text-white/80 hover:bg-white/5"
+                    )}
+                >
+                    <LayoutGrid size={18} strokeWidth={2} />
+                </button>
             </div>
 
             <div className="w-full flex items-center gap-2 pt-1">
                 {/* Scrollable Container */}
                 <div 
                     ref={sliderRef}
-                    onMouseDown={onMouseDown}
-                    onMouseLeave={onMouseLeave}
-                    onMouseUp={onMouseUp}
-                    onMouseMove={onMouseMove}
-                    className="flex-1 flex overflow-x-auto gap-3 pb-2 pt-1 px-4 cursor-grab active:cursor-grabbing"
+                    onPointerDown={!isExpanded ? onPointerDown : undefined}
+                    onPointerUp={!isExpanded ? onPointerUp : undefined}
+                    onPointerMove={!isExpanded ? onPointerMove : undefined}
+                    className={cn(
+                        "flex gap-3 pb-2 pt-1 px-4 transition-all duration-300",
+                        isExpanded 
+                            ? "flex-wrap grid grid-cols-2 sm:grid-cols-3 max-h-[350px] overflow-y-auto mt-1 mb-2 scrollbar-thin scrollbar-thumb-white/10" 
+                            : "overflow-x-auto cursor-grab active:cursor-grabbing"
+                    )}
                     style={{ 
-                        scrollbarWidth: 'none', // Hide standard scrollbar to encourage dragging
+                        scrollbarWidth: isExpanded ? 'thin' : 'none',
                         msOverflowStyle: 'none',
-                        maskImage: 'linear-gradient(to right, transparent, black 3%, black 97%, transparent)',
-                        WebkitMaskImage: 'linear-gradient(to right, transparent, black 3%, black 97%, transparent)'
+                        maskImage: !isExpanded ? 'linear-gradient(to right, transparent, black 3%, black 97%, transparent)' : undefined,
+                        WebkitMaskImage: !isExpanded ? 'linear-gradient(to right, transparent, black 3%, black 97%, transparent)' : undefined
                     }}
                 >
                     {currentItems.map((item) => {
@@ -137,7 +167,8 @@ export function CameraView({ s }) {
                                 key={item.id}
                                 onClick={() => handleItemClick(item)}
                                 className={cn(
-                                    "flex flex-col gap-2 min-w-[140px] md:min-w-[160px] transition-all group select-none border-none outline-none",
+                                    "flex flex-col gap-2 transition-all group select-none border-none outline-none",
+                                    !isExpanded ? "min-w-[140px] md:min-w-[160px]" : "w-full",
                                     isSelected ? "opacity-100" : "opacity-60 hover:opacity-100"
                                 )}
                             >
@@ -145,21 +176,37 @@ export function CameraView({ s }) {
                                     className={cn(
                                         "w-full aspect-[16/9] rounded-[10px] overflow-hidden bg-[rgb(28,28,28)] transition-all relative shadow-sm pointer-events-none",
                                         isSelected 
-                                            ? "border border-white/30 shadow-[0_0_15px_rgba(255,255,255,0.05)] ring-1 ring-white/10" 
+                                            ? "border-2 border-white shadow-[0_0_20px_rgba(255,255,255,0.15)] ring-2 ring-white/40" 
                                             : ""
                                     )}
-                                    style={{
-                                        border: !isSelected ? "1px solid rgba(218, 220, 224, 0.05)" : undefined
-                                    }}
                                 >
-                                    {/* Placeholder gradient background */}
-                                    <div className="absolute inset-0 bg-gradient-to-b from-white/[0.03] to-transparent pointer-events-none" />
-                                    
-                                    <div className="w-full h-full flex flex-col items-center justify-center p-2">
-                                        <div className="w-6 h-6 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mb-1 shadow-inner">
-                                            <div className="w-1.5 h-1.5 rounded-full bg-white/40" />
-                                        </div>
-                                    </div>
+                                    {item.video ? (
+                                        <video 
+                                            src={item.video}
+                                            autoPlay
+                                            loop
+                                            muted
+                                            playsInline
+                                            className="w-full h-full object-cover"
+                                        />
+                                    ) : item.image ? (
+                                        <img 
+                                            src={item.image} 
+                                            alt={item.label}
+                                            className="w-full h-full object-cover"
+                                        />
+                                    ) : (
+                                        <>
+                                            {/* Placeholder gradient background */}
+                                            <div className="absolute inset-0 bg-gradient-to-b from-white/[0.03] to-transparent pointer-events-none" />
+                                            
+                                            <div className="w-full h-full flex flex-col items-center justify-center p-2">
+                                                <div className="w-6 h-6 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mb-1 shadow-inner">
+                                                    <div className="w-1.5 h-1.5 rounded-full bg-white/40" />
+                                                </div>
+                                            </div>
+                                        </>
+                                    )}
                                 </div>
                                 
                                 <span className={cn(

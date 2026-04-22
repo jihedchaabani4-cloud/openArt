@@ -36,11 +36,16 @@ export default function PromptBar({ hideBackground = false, isNewProject = false
             draggedItem.url?.toLowerCase().endsWith(".mp4") ||
             draggedItem.url?.toLowerCase().endsWith(".webm");
 
-        if (isVideo && s.generationMode === "image") {
-            return "We cannot handle dropping videos at this time";
+        const isMotionMode = s.generationMode === "motion" || s.generationMode === "motion-control";
+        const isKeyframeMode = s.generationMode === "keyframe";
+        const isSlottedMode = isMotionMode || isKeyframeMode;
+
+        if (isVideo && !isMotionMode) {
+            return "Videos are only allowed in Motion Control mode";
         }
 
-        if (s.generationMode !== "keyframe" && s.referenceImages.length >= s.maxRefs) {
+        // Only block if NOT a slotted mode and limit reached
+        if (!isSlottedMode && s.referenceImages.length >= s.maxRefs) {
             return `Reference limit reached (max ${s.maxRefs})`;
         }
 
@@ -106,7 +111,13 @@ export default function PromptBar({ hideBackground = false, isNewProject = false
             containerRef={containerRef}
             isDragging={isDraggingGalleryItem}
             dragOverlay={
-                <DragDropOverlay mode={s.generationMode} onDrop={handleGalleryDrop} error={dragError} />
+                <DragDropOverlay 
+                    mode={s.generationMode} 
+                    onDrop={handleGalleryDrop} 
+                    error={dragError} 
+                    referenceImages={s.referenceImages}
+                    draggedItem={draggedItem}
+                />
             }
             popover={
                 <ImportMediaPopover
@@ -196,7 +207,8 @@ export default function PromptBar({ hideBackground = false, isNewProject = false
             <AnimatePresence>
                 {(s.referenceImages.length > 0 ||
                     s.generationMode === "keyframe" ||
-                    s.generationMode === "motion-control") && (
+                    s.generationMode === "motion-control" ||
+                    s.generationMode === "motion") && (
                     <motion.div
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: "auto", opacity: 1 }}
@@ -206,8 +218,9 @@ export default function PromptBar({ hideBackground = false, isNewProject = false
                     >
                         <div className="p-2" onPointerDown={() => setVariationsOpen(false)}>
                             <Row1
+                                key={`${s.selectedModel?.key}-${generationMode}`}
                                 referenceImages={s.referenceImages}
-                                generationMode={s.generationMode}
+                                generationMode={generationMode}
                                 selectedModel={s.selectedModel}
                                 onRemoveReference={s.handleRemoveReference}
                                 onSwapFrames={s.handleSwapFrames}
@@ -232,8 +245,17 @@ export default function PromptBar({ hideBackground = false, isNewProject = false
                     e.preventDefault();
                     e.stopPropagation();
                     if (e.dataTransfer?.files?.length > 0) {
-                        const role = ["keyframe", "motion-control"].includes(s.generationMode) ? "mc_image" : "normal";
                         Array.from(e.dataTransfer.files).forEach((file) => {
+                            let role = "normal";
+                            const isVideo = file.type.startsWith("video/");
+                            
+                            if (["motion-control", "motion"].includes(s.generationMode)) {
+                                role = isVideo ? "mc_video" : "mc_image";
+                            } else if (s.generationMode === "keyframe") {
+                                const hasStart = s.referenceImages.some(r => r.role === 'start');
+                                role = hasStart ? "end" : "start";
+                            }
+                            
                             s.handleUploadFromPC?.(file, role);
                         });
                     }
@@ -253,18 +275,6 @@ export default function PromptBar({ hideBackground = false, isNewProject = false
                                     : undefined
                             }
                         />
-                        <button
-                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); setVariationsOpen((prev) => !prev); }}
-                            className={`p-2 h-[44px] w-[44px] flex items-center justify-center rounded-2xl transition-all duration-300 ${
-                                variationsOpen 
-                                    ? 'bg-white/10 text-white shadow-[0_0_15px_rgba(255,255,255,0.05)]' 
-                                    : 'text-neutral-400 hover:bg-white/5 hover:text-neutral-100'
-                            }`}
-                            title="Generation Settings"
-                            type="button"
-                        >
-                            <VscSettings className="w-5 h-5" />
-                        </button>
                     </div>
 
                     <Row2
@@ -287,6 +297,8 @@ export default function PromptBar({ hideBackground = false, isNewProject = false
                         mediaOpen={dialogOpen}
                         paperclipRef={paperclipRef}
                         onAddClick={() => (dialogOpen ? setDialogOpen(false) : openDialog("image", "normal"))}
+                        onReset={s.handleReset}
+                        hasChanges={s.hasChanges}
                     />
                 </div>
             </PromptBarBase>

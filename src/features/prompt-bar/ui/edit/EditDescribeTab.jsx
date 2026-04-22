@@ -5,7 +5,7 @@ import { Paperclip, Loader2, ArrowRight } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 import { PromptTextarea } from "../common/PromptTextarea";
 import { ModelSelector } from "../common/selectors/ModelSelector";
-import { EditReferenceList } from "./EditReferenceList";
+import { Row1 } from "../generation/Row1";
 import { ImportMediaPopover } from "@/widgets/ImportMediaDialog/ImportMediaPopover";
 
 /**
@@ -19,7 +19,7 @@ export function EditDescribeTab({ s }) {
   const handleOpenMedia = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    s.handleOpenLibrary?.(isVideo ? "video" : "image");
+    s.handleOpenLibrary?.("image");
     setDialogOpen(true);
   };
 
@@ -27,10 +27,19 @@ export function EditDescribeTab({ s }) {
     <div className="p-2">
       {/* Reference list - renders above the input bar if images exist */}
       {s.referenceImages.length > 0 && (
-        <div className="">
-          <EditReferenceList
-            images={s.referenceImages}
-            onRemove={s.handleRemoveReference}
+        <div className="p-2 border-b border-white/5 bg-black/40">
+          <Row1
+            key={`${s.selectedModel?.key}-${isVideo ? "video" : "image"}`}
+            referenceImages={s.referenceImages}
+            onRemoveReference={s.handleRemoveReference}
+            maxRefs={s.maxRefs}
+            selectedModel={s.selectedModel}
+            generationMode={isVideo ? "video" : "image"}
+            openDialog={(mode) => {
+              s.handleOpenLibrary?.(mode);
+              setDialogOpen(true);
+            }}
+            showAddButton={false}
           />
         </div>
       )}
@@ -109,7 +118,7 @@ export function EditDescribeTab({ s }) {
         onLoadMore={s.handleLoadMoreAssets}
         assetSource={s.assetSource}
         setAssetSource={s.setAssetSource}
-        mode={isVideo ? "video" : "image"}
+        mode="image"
       />
     </div>
   );

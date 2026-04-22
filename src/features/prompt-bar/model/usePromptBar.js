@@ -11,6 +11,7 @@ import { buildReferencesPayload } from "@/shared/lib/referenceUtils";
 import { useModelSync } from "./useModelSync";
 import { useMediaUpload } from "./useMediaUpload";
 import { useMediaLibrary } from "@/features/media/model/useMediaLibrary";
+import { getItemMetadata } from "@/shared/lib/displayUtils";
 
 export function usePromptBar({ isNewProject = false } = {}) {
   // ─── Global store (Project context) ─────────────────────────────────────────
@@ -76,6 +77,14 @@ export function usePromptBar({ isNewProject = false } = {}) {
     modelId
   );
 
+  useEffect(() => {
+    console.log("🎯 [usePromptBar] Sync Check:", {
+      selectedModelKey: selectedModel?.key,
+      maxRefs,
+      generationMode
+    });
+  }, [selectedModel, maxRefs, generationMode]);
+
   // Synchronize local model state with store model state
   useEffect(() => {
     if (model?.id && modelId !== model.id) {
@@ -84,12 +93,14 @@ export function usePromptBar({ isNewProject = false } = {}) {
   }, [model?.id, modelId, setModelId]);
 
   // ─── Upload + drag-drop (extracted hook) ──────────────────────────────────
+  const isMotionMode = generationMode === "motion" || generationMode === "motion-control";
   const upload = useMediaUpload({
     projectId,
     activeSessionId,
     addReference,
     referenceImages,
     maxRefs,
+    allowedType: isMotionMode ? undefined : "image",
   });
 
   // ─── Local UI state (Error only) ───────────────────────────────────────────
@@ -285,8 +296,32 @@ export function usePromptBar({ isNewProject = false } = {}) {
     // References
     referenceImages,
     handleAddReference:   (asset, role = "normal") => {
-      if (!asset?.url) return;
-      return addReference(asset, role, maxRefs);
+      const metadata = getItemMetadata(asset);
+      const isVideo = metadata.isVideo;
+      
+      let finalRole = role;
+      if (finalRole === "normal") {
+        if (generationMode === "motion-control") {
+          finalRole = isVideo ? "mc_video" : "mc_image";
+        } else if (generationMode === "keyframe") {
+          const hasStart = referenceImages.some(r => r.role === 'start');
+          finalRole = hasStart ? "end" : "start";
+        }
+      }
+
+      const normalizedAsset = {
+        ...asset,
+        url: metadata.url,
+        is_video: isVideo,
+        asset_id: asset.asset_id || asset.name || asset.id
+      };
+
+      if (!normalizedAsset.url) {
+        console.warn("[usePromptBar] Failed to resolve URL for asset:", asset);
+        return;
+      }
+
+      return addReference(normalizedAsset, finalRole, maxRefs);
     },
     handleRemoveReference: removeReference,
     handleClearReferences: clearReferences,

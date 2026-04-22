@@ -19,7 +19,7 @@ const MAX_FILE_SIZE_MB    = 10;
  * @param {number}   params.maxRefs
  * @returns upload handlers + isDragging state
  */
-export function useMediaUpload({ projectId, activeSessionId, addReference, referenceImages, maxRefs }) {
+export function useMediaUpload({ projectId, activeSessionId, addReference, referenceImages, maxRefs, allowedType = "all" }) {
   const [uploading,  setUploading]  = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [uploadError, setUploadError] = useState(null);
@@ -50,6 +50,13 @@ export function useMediaUpload({ projectId, activeSessionId, addReference, refer
     const allowed = [...ALLOWED_IMAGE_TYPES, ...ALLOWED_VIDEO_TYPES];
     if (!allowed.includes(file.type)) {
       return { ok: false, reason: `File type "${file.type}" is not supported.` };
+    }
+
+    if (allowedType === "image" && isVideo) {
+      return { ok: false, reason: "Only images are allowed in this mode." };
+    }
+    if (allowedType === "video" && isImage) {
+      return { ok: false, reason: "Only videos are allowed in this mode." };
     }
 
     const sizeMB = file.size / (1024 * 1024);
@@ -171,6 +178,15 @@ export function useMediaUpload({ projectId, activeSessionId, addReference, refer
         e.dataTransfer.getData("isVideo") === "true";
 
       if (!url) return;
+
+      if (allowedType === "image" && isVideo) {
+        setUploadError("Only images are allowed as references in this mode.");
+        return;
+      }
+      if (allowedType === "video" && !isVideo) {
+        setUploadError("Only videos are allowed as references in this mode.");
+        return;
+      }
 
       addReference(
         { url, asset_id: assetId ?? null, is_video: isVideo },

@@ -7,23 +7,22 @@ import { useMemo, useState } from "react";
 function supportsGenerationMode(model, generationMode) {
   if (!model) return false;
 
-  if (generationMode === "motion" || generationMode === "motion-control") {
-    return model.supportedModes?.includes("motion") || model.category === "motion";
-  }
+  const isVideoMode = ["video", "keyframe", "motion", "motion-control"].includes(generationMode);
+  const isVideoModel = model.category === "video" || model.supportedModes?.some(m => ["i2v", "t2v", "i2v_se", "motion"].includes(m));
 
-  if (generationMode === "keyframe") {
-    return model.supportedModes?.includes("i2v_se") || model.supportedModes?.includes("i2v");
+  if (isVideoMode) {
+    return isVideoModel;
   }
 
   if (generationMode === "multiref") {
-    return model.supportedModes?.includes("r2v");
+    return model.supportedModes?.includes("r2v") || (model.support?.references?.max > 1);
   }
 
   if (["edit", "image", "character", "location", "product"].includes(generationMode)) {
     return model.category === "image" || model.category === generationMode;
   }
 
-  return model.category === generationMode;
+  return model.category === generationMode || model.supportedModes?.includes(generationMode);
 }
 
 /**
@@ -42,17 +41,19 @@ export function useModelSync(studioModels, _studioModelsLoading, generationMode,
   );
 
   const selectedModelId = useMemo(() => {
+    // 1. Prioritize manual selection (user intent)
+    if (manualModelId) {
+      const manualModel = studioModels.find((item) => item.key === manualModelId);
+      if (manualModel) {
+        return manualModel.key;
+      }
+    }
+
+    // 2. Fallback to preferred model from store
     if (preferredModelId) {
       const preferredModel = studioModels.find((item) => item.key === preferredModelId);
       if (supportsGenerationMode(preferredModel, generationMode)) {
         return preferredModel.key;
-      }
-    }
-
-    if (manualModelId) {
-      const manualModel = studioModels.find((item) => item.key === manualModelId);
-      if (supportsGenerationMode(manualModel, generationMode)) {
-        return manualModel.key;
       }
     }
 
@@ -64,11 +65,13 @@ export function useModelSync(studioModels, _studioModelsLoading, generationMode,
     [studioModels, selectedModelId]
   );
 
-  let maxRefs = selectedModel?.support?.references?.max ?? 4;
-  if (generationMode === "motion" || generationMode === "motion-control") {
-    // Motion control always requires exactly 1 image and 1 video
-    maxRefs = 2;
-  }
+  const maxRefs = useMemo(() => {
+    let count = selectedModel?.support?.references?.max ?? 4;
+    if (generationMode === "motion" || generationMode === "motion-control") {
+      count = 2;
+    }
+    return count;
+  }, [selectedModel, generationMode]);
 
   return {
     model: selectedModelId ? { id: selectedModelId } : null,

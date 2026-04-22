@@ -87,6 +87,7 @@ export function useEditPromptBar() {
     addReference: (asset, role) => addReference(asset, role, maxRefs),
     referenceImages,
     maxRefs,
+    allowedType: "image",
   });
 
   const textareaRef = useRef(null);
@@ -112,7 +113,7 @@ export function useEditPromptBar() {
       if (activeTab === "upscale") {
           if (generating) return;
           const payload = {
-              media_id:         editTarget?.media_id,
+              workflow_id:      editTarget?.workflow_id,
               upscaleScale:     upscaleScale,
           };
           

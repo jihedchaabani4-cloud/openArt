@@ -12,7 +12,8 @@ export function normalizeElementMode(dnaType) {
 }
 
 export function normalizeElementReferences(references = []) {
-  return references
+  const safeRefs = Array.isArray(references) ? references : [];
+  return safeRefs
     .filter((item) => item?.url)
     .map((item, index) => {
       const assetId = item.asset_id ?? item.assetId ?? item.id ?? item.name ?? `${item.url}-${index}`;
@@ -34,7 +35,8 @@ export function normalizeElementReferences(references = []) {
 
 export function buildElementPrompt(basePrompt = "", traits = []) {
   const cleanedPrompt = (basePrompt || "").trim();
-  const traitTags = traits
+  const safeTraits = Array.isArray(traits) ? traits : [];
+  const traitTags = safeTraits
     .map((trait) => {
       if (typeof trait === "string") return trait.trim();
       return trait?.label?.trim() || trait?.name?.trim() || trait?.value?.trim() || "";

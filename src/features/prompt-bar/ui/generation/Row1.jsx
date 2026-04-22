@@ -20,34 +20,38 @@ export function Row1({
     openDialog,
     showAddButton = true,
 }) {
-    const supportsRefs       = !!selectedModel?.support?.references;
-    const supportsStartFrame = selectedModel?.support?.keyframe
-        ? !!selectedModel.support.keyframe.start
-        : !!selectedModel?.support?.frames?.startFrame;
-    const supportsEndFrame = selectedModel?.support?.keyframe
-        ? !!selectedModel.support.keyframe.end
-        : !!selectedModel?.support?.frames?.endFrame;
-    const supportsSwap = supportsStartFrame && supportsEndFrame;
-
+    console.log("🟧 [Row1] Render:", { model: selectedModel?.key, maxRefs, generationMode });
+    const supportsRefs = !!selectedModel?.support?.references || generationMode === 'motion' || generationMode === 'motion-control';
+    
     const isKeyframeMode = generationMode === 'keyframe';
     const isMcMode       = generationMode === 'motion-control';
+    const isMotionMode   = generationMode === 'motion';
+    const isAnyMotion    = isMotionMode || isMcMode;
+
+    const supportsStartFrame = maxRefs >= 1;
+    const supportsEndFrame   = maxRefs >= 2;
+    const supportsSwap = supportsStartFrame && supportsEndFrame;
 
     const startFrame  = referenceImages.find(r => r.role === 'start');
     const endFrame    = referenceImages.find(r => r.role === 'end');
     const mcImageRef  = referenceImages.find(r => r.role === 'mc_image');
     const mcVideoRef  = referenceImages.find(r => r.role === 'mc_video');
+    
+    // Regular refs are those that aren't specific slots
     const regularRefs = referenceImages.filter(
         r => !['start', 'end', 'mc_image', 'mc_video'].includes(r.role)
     );
 
     const normalCount = regularRefs.length;
 
-    if (!supportsRefs && !isKeyframeMode && !isMcMode) return null;
+    // Guard: only render if we have something to show or the mode requires slots
+    const shouldRender = supportsRefs || isKeyframeMode || isAnyMotion || referenceImages.length > 0;
+    if (!shouldRender) return null;
 
     return (
         <div className="flex items-center gap-2">
-            {/* 1. Add Button (Standard Mode) */}
-            {!isKeyframeMode && !isMcMode && supportsRefs && maxRefs > 0 && showAddButton && (
+            {/* 1. Add Button (Standard Mode only - hidden in keyframe/mc) */}
+            {!isKeyframeMode && !isMcMode && !isMotionMode && supportsRefs && maxRefs > 0 && showAddButton && (
                 <ReferenceButton
                     disabled={normalCount >= maxRefs}
                     onClick={() => openDialog('image', 'normal')}
@@ -55,17 +59,14 @@ export function Row1({
                 />
             )}
 
-            {/* 2. Regular References */}
-            {!isKeyframeMode && !isMcMode && regularRefs.map((img, idx) => {
-                const originalIdx = referenceImages.indexOf(img);
-                return (
-                    <ViewReference
-                        key={`${img.asset_id}-${idx}`}
-                        media={img}
-                        onRemove={() => onRemoveReference(img.asset_id)}
-                    />
-                );
-            })}
+            {/* 2. Regular References (Standard Modes) */}
+            {!isKeyframeMode && !isMcMode && !isMotionMode && regularRefs.map((img, idx) => (
+                <ViewReference
+                    key={img.asset_id || img.url || idx}
+                    media={img}
+                    onRemove={() => onRemoveReference(img.asset_id)}
+                />
+            ))}
 
             {/* 3. Keyframe Mode Slots */}
             {isKeyframeMode && (
@@ -130,9 +131,10 @@ export function Row1({
                 </div>
             )}
 
-            {/* 4. Motion Control Mode Slots */}
-            {isMcMode && (
+            {/* 4. Motion/Motion-Control Mode Slots */}
+            {isAnyMotion && (
                 <div className="flex items-center gap-2">
+                    {/* Motion Video Slot */}
                     {mcVideoRef ? (
                         <ViewReference
                             media={mcVideoRef}
@@ -154,6 +156,7 @@ export function Row1({
                         />
                     )}
 
+                    {/* Source Image Slot */}
                     {mcImageRef ? (
                         <ViewReference
                             media={mcImageRef}

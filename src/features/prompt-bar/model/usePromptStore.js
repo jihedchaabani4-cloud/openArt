@@ -78,6 +78,34 @@ export const usePromptStore = create((set, get) => ({
       if (!isSingularRole && referenceImages.length >= maxRefs) return state;
 
       const isVideo = asset.is_video || (asset.url?.toLowerCase().endsWith('.mp4') || asset.url?.toLowerCase().endsWith('.webm'));
+      const isMotionMode = ["motion", "motion-control"].includes(generationMode);
+      const isKeyframeMode = generationMode === "keyframe";
+      const isSlottedMode = isMotionMode || isKeyframeMode;
+
+      // 1. Block 'normal' refs in slotted modes (must use specific roles)
+      if (isSlottedMode && role === "normal") {
+        console.warn(`[usePromptStore] Blocked 'normal' ref in slotted mode: ${generationMode}. Use specific roles.`);
+        return state;
+      }
+
+      // 2. Strict type-role enforcement for Motion
+      if (isMotionMode) {
+        if (role === "mc_video" && !isVideo) {
+          console.warn("[usePromptStore] mc_video role requires a video.");
+          return state;
+        }
+        if (role === "mc_image" && isVideo) {
+          console.warn("[usePromptStore] mc_image role requires an image.");
+          return state;
+        }
+      }
+
+      // 3. Block videos in non-motion modes
+      if (isVideo && !isMotionMode) {
+        console.warn(`[usePromptStore] Videos only allowed in motion modes. Blocked for: ${generationMode}`);
+        return state;
+      }
+      
       const type = isVideo ? "video" : "image";
       
       // Remove previous asset of the same singular role if replacing
