@@ -17,6 +17,7 @@ import { MediaGridItem } from "@/widgets/StudioLayout/GenerationsStudio/MediaGri
 import { usePromptStore } from "@/features/prompt-bar/model/usePromptStore";
 import { getPrimaryMedia } from "@/shared/lib/generationUtils";
 import { getItemMetadata as getDisplayMeta } from "@/shared/lib/displayUtils";
+import { LoadingScreen } from "@/shared/ui/LoadingScreen";
 
 // ─── Sub-Components ──────────────────────────────────────────────────────────
 
@@ -218,17 +219,7 @@ export default function GenerationsPage({ params }) {
                     className="flex-1 overflow-y-auto pt-[80px] overflow-x-hidden p-5 custom-scrollbar"
                 >
                     <AnimatePresence mode="wait">
-                        {isLoading ? (
-                            <motion.div 
-                                key="loading"
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                exit={{ opacity: 0 }}
-                                className="w-full h-full flex items-center justify-center"
-                            >
-                                <EmptyState message="Loading..." />
-                            </motion.div>
-                        ) : workflows.length > 0 ? (
+                        {workflows.length > 0 ? (
                             <motion.div 
                                 key="feed"
                                 initial={{ opacity: 0, y: 16 }}

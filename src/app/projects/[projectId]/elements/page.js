@@ -213,17 +213,7 @@ export default function ElementsPage({ params }) {
                     className="flex-1 overflow-y-auto pt-[80px] overflow-x-hidden p-5 custom-scrollbar"
                 >
                     <AnimatePresence mode="wait">
-                        {isLoading ? (
-                            <motion.div 
-                                key="loading"
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                exit={{ opacity: 0 }}
-                                className="w-full h-full flex items-center justify-center"
-                            >
-                                <EmptyState message="Loading..." />
-                            </motion.div>
-                        ) : existingSheets.length > 0 ? (
+                        {existingSheets.length > 0 ? (
                             <motion.div 
                                 key="feed"
                                 initial={{ opacity: 0, y: 16 }}

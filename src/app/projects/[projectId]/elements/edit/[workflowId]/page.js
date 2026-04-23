@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useWorkflowsStore } from "@/features/workflows";
 import { useProjectData, useSetPrimaryMedia } from "@/features/workflows/api/workflowsApi";
 import { WorkflowMediaPreview } from "@/widgets/StudioLayout/GenerationsStudio/MediaGridItem/WorkflowMediaPreview";
@@ -13,9 +13,11 @@ import { useElementStore } from "@/features/prompt-bar/model/useElementStore";
 import { usePromptStore } from "@/features/prompt-bar/model/usePromptStore";
 import { buildElementSheetDraft } from "@/features/workflows/model/elementSheetConfig";
 import { getPrimaryMedia, getItemMetadata } from "@/shared/lib/generationUtils";
+import { LoadingScreen } from "@/shared/ui/LoadingScreen";
 
 export default function ElementWorkflowEditPage() {
     const { projectId, workflowId } = useParams();
+    const router = useRouter();
 
     const { activeSessionId } = useWorkflowsStore();
     const setEditTarget = useEditStore((state) => state.setEditTarget);
@@ -30,7 +32,7 @@ export default function ElementWorkflowEditPage() {
     const setVideoResolution = usePromptStore((state) => state.setVideoResolution);
     const setPrimaryMediaMutation = useSetPrimaryMedia();
 
-    const { data: projectData } = useProjectData(projectId);
+    const { data: projectData, isLoading } = useProjectData(projectId);
     const workflow = React.useMemo(() => {
         const rawWorkflows = projectData?.projectContents?.workflows ?? [];
         const rawMedia = projectData?.projectContents?.media ?? [];
@@ -51,6 +53,13 @@ export default function ElementWorkflowEditPage() {
             items,
         };
     }, [projectData, workflowId]);
+
+    // Redirect back if workflow not found after loading
+    React.useEffect(() => {
+        if (!isLoading && !workflow && projectData) {
+            router.replace(`/projects/${projectId}/elements`);
+        }
+    }, [isLoading, workflow, projectData, router, projectId]);
 
     const [activeItem, setActiveItem] = React.useState(null);
     const [showHistory, setShowHistory] = React.useState(true);
@@ -126,13 +135,11 @@ export default function ElementWorkflowEditPage() {
         setVideoResolution,
     ]);
 
-    if (!workflow) {
-        return (
-            <div className="flex h-screen w-full items-center justify-center bg-[#050505]">
-                <div className="animate-pulse text-white/20">Loading workflow...</div>
-            </div>
-        );
+    if (isLoading) {
+        return <LoadingScreen />;
     }
+
+    if (!workflow) return null; // Let redirect handle it
 
     return (
         <div className="flex flex-col h-full w-full bg-[#050505] text-white overflow-hidden">

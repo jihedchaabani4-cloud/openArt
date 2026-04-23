@@ -15,6 +15,7 @@ import { cn } from "@/shared/lib/utils"
 import { getPrimaryMedia, getItemMetadata } from "@/shared/lib/generationUtils"
 import { Button } from "@/shared/ui/button"
 import { useSetPrimaryMedia } from "@/features/workflows/api/workflowsApi"
+import { LoadingScreen } from "@/shared/ui/LoadingScreen"
 
 /**
  * Workflow Edit Page
@@ -30,10 +31,17 @@ export default function WorkflowEditPage() {
     const setPrimaryMediaMutation = useSetPrimaryMedia()
     
     // Use the existing hook to find the workflow in the cache
-    const { data: fetchResult } = useFilteredWorkflows(projectId, activeSessionId)
+    const { data: fetchResult, isLoading } = useFilteredWorkflows(projectId, activeSessionId)
     
     const workflows = fetchResult?.filteredWorkflows || []
     const workflow = workflows.find(w => (w.id || w.name) === workflowId)
+
+    // Redirect back to project if workflow is not found after loading
+    React.useEffect(() => {
+        if (!isLoading && !workflow && workflows.length > 0) {
+            router.replace(`/projects/${projectId}/generations`);
+        }
+    }, [isLoading, workflow, workflows.length, router, projectId]);
 
     const [activeItem, setActiveItem] = React.useState(null)
     const [showHistory, setShowHistory] = React.useState(true)
@@ -75,13 +83,11 @@ export default function WorkflowEditPage() {
         };
     }, [workflow, activeItem, projectId, activeSessionId, setEditTarget, resetEditStore, isVideoItem]);
 
-    if (!workflow) {
-        return (
-            <div className="flex h-screen w-full items-center justify-center bg-[#050505]">
-                <div className="animate-pulse text-white/20">Loading workflow...</div>
-            </div>
-        )
+    if (isLoading) {
+        return <LoadingScreen />;
     }
+
+    if (!workflow) return null; // Let the redirect handle it
 
     return (
         <div className="flex flex-col h-full w-full bg-[#050505] text-white overflow-hidden">
@@ -97,7 +103,7 @@ export default function WorkflowEditPage() {
                     
                     {/* Left Side - Preview (Flexible Width) */}
                     <div className="flex-1 flex flex-col gap-6 relative h-full">
-                       
+                        
                                 <WorkflowMediaPreview 
                                     workflow={workflow} 
                                     className="max-w-fit-content"

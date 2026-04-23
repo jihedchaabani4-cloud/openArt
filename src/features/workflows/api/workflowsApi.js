@@ -9,10 +9,9 @@ import { useWorkflowsStore } from '../model/useWorkflowsStore';
 /**
  * useProjectData:
  * The SINGLE source of truth for a project.
- * Fetches: sessions (as parent collections), collections, workflows, and media.
  * 
- * If sessionId is provided, media and collections are filtered by that session.
- * Otherwise returns the full project structure with all sessions.
+ * 🧠 Blueprint Layer: Pure Hook.
+ * Logic is handled by the Layout (Control Layer).
  */
 export function useProjectData(projectId, sessionId = null) {
   const queryKey = sessionId
@@ -24,12 +23,22 @@ export function useProjectData(projectId, sessionId = null) {
     queryFn: async () => {
       let url = `/workflows/project-data/${projectId}`;
       if (sessionId) url += `?session_id=${sessionId}`;
-      const res = await api.get(url);
-      if (res?.result?.data?.json) return res.result.data.json;
-      throw new Error('Failed to fetch project data');
+      
+      try {
+        const res = await api.get(url);
+        if (res?.result?.data?.json) return res.result.data.json;
+        throw new Error('Project not found');
+      } catch (err) {
+        throw err;
+      }
     },
     enabled: !!projectId,
-    staleTime: 30_000, // 30s
+    // 🎯 SaaS Settings
+    staleTime: 60_000, 
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    retry: 1, // Don't hang forever on bad IDs
+    throwOnError: false, // Controlled handling
   });
 }
 
@@ -40,7 +49,6 @@ export function useProjectData(projectId, sessionId = null) {
 export function useProjectSessions(projectId) {
   const { data } = useProjectData(projectId);
   const sessions = data?.projectContents?.sessions ?? [];
-  // Map to legacy layout structure so UI components don't break
   return sessions.map(s => ({
     ...s,
     session_id: s.name,
@@ -48,47 +56,22 @@ export function useProjectSessions(projectId) {
   }));
 }
 
-/**
- * useSessionCollections:
- * Returns only collections belonging to a specific session.
- */
 export function useSessionCollections(projectId, sessionId) {
   const { data } = useProjectData(projectId);
   const collections = data?.projectContents?.collections ?? [];
   return collections.filter(c => c.parentCollectionId === sessionId);
 }
 
-/**
- * useSessionMedia:
- * Returns the media list for a given session.
- */
 export function useSessionMedia(projectId, sessionId) {
   const { data } = useProjectData(projectId);
-  const media = data?.projectContents?.media ?? [];
-  // Since media isn't directly tagged with session_id, we infer it from workflow 
-  // (though often we just rely on useFilteredWorkflows anyway)
-  return media; // Note: filtering media by session is complex without joining, UI relies on workflows.
+  return data?.projectContents?.media ?? [];
 }
 
-/**
- * useSessionWorkflows:
- * Returns the workflows list for a given session/project.
- */
 export function useSessionWorkflows(projectId, sessionId) {
   const { data } = useProjectData(projectId);
   const workflows = data?.projectContents?.workflows ?? [];
   return workflows.filter(w => w.session_id === sessionId || w.metadata?.sessionId === sessionId);
 }
-
-// ── BACKWARD COMPAT: Old useGenerations mapped to new hook ────────────────────
-export function useWorkflows(projectId, sessionId) {
-  return useProjectData(projectId, sessionId);
-}
-
-export function useGenerations(projectId, sessionId) {
-  return useProjectData(projectId, sessionId);
-}
-
 
 // ── Mutations ─────────────────────────────────────────────────────────────────
 
@@ -104,19 +87,13 @@ export function useGenerateMutation({ onError } = {}) {
       if (isLighting) endpoint = '/lighting/change-lighting';
       if (isUpscale) endpoint = '/media/upscale';
       
-      // Separate Edit Endpoints
       if (!isVideo && !isCamera && !isLighting && !isUpscale) {
-        if (payload.edit_type === 'edit') {
-          endpoint = '/images/generated/edit/existing';
-        } else if (payload.edit_type === 'img2img') {
-          endpoint = '/images/generated/edit/new';
-        }
+        if (payload.edit_type === 'edit') endpoint = '/images/generated/edit/existing';
+        else if (payload.edit_type === 'img2img') endpoint = '/images/generated/edit/new';
       } else if (isVideo && payload.edit_type === 'edit') {
-        // Dedicated endpoint for video editing
         endpoint = '/video/edit';
       }
       
-      // Explicit Motion Routing
       if (payload.section === 'motion' || payload.edit_type === 'motion') {
          endpoint = '/video/motion';
       }
@@ -125,7 +102,7 @@ export function useGenerateMutation({ onError } = {}) {
       if (!res.ok) throw new Error(res.message || 'Workflow execution failed');
       return res;
     },
-    onMutate: async ({ payload }) => {
+    onMutate: async () => {
       useWorkflowsStore.getState().fireScrollToTop();
       return {};
     },
@@ -134,23 +111,15 @@ export function useGenerateMutation({ onError } = {}) {
       if (typeof onError === 'function') onError(err);
     },
     onSuccess: (res, { payload }) => {
-      const { project_id: projectId, session_id: sessionId } = payload || {};
-      // Invalidate the unified project data cache to trigger a refetch
+      const { project_id: projectId } = payload || {};
       if (projectId) {
+        // 🔥 Invalidate for instant update
         queryClient.invalidateQueries({ queryKey: queryKeys.projectData.byProject(projectId) });
-        if (sessionId) {
-          queryClient.invalidateQueries({
-            queryKey: queryKeys.projectData.byProjectAndSession(projectId, sessionId),
-          });
-        }
       }
     },
   });
 }
 
-/**
- * mutation for creating structured element sheets
- */
 export function useCreateElementSheetMutation({ onError } = {}) {
   const queryClient = useQueryClient();
   return useMutation({
@@ -170,14 +139,9 @@ export function useCreateElementSheetMutation({ onError } = {}) {
       if (typeof onError === 'function') onError(err);
     },
     onSuccess: (res, { payload }) => {
-      const { project_id: projectId, session_id: sessionId } = payload || {};
+      const { project_id: projectId } = payload || {};
       if (projectId) {
         queryClient.invalidateQueries({ queryKey: queryKeys.projectData.byProject(projectId) });
-        if (sessionId) {
-          queryClient.invalidateQueries({
-            queryKey: queryKeys.projectData.byProjectAndSession(projectId, sessionId),
-          });
-        }
       }
     },
   });
@@ -201,14 +165,9 @@ export function useExtendVideoMutation({ onError } = {}) {
       if (typeof onError === 'function') onError(err);
     },
     onSuccess: (res, { payload }) => {
-      const { project_id: projectId, session_id: sessionId } = payload || {};
+      const { project_id: projectId } = payload || {};
       if (projectId) {
         queryClient.invalidateQueries({ queryKey: queryKeys.projectData.byProject(projectId) });
-        if (sessionId) {
-          queryClient.invalidateQueries({
-            queryKey: queryKeys.projectData.byProjectAndSession(projectId, sessionId),
-          });
-        }
       }
     },
   });
@@ -222,7 +181,7 @@ export function useRemoveWorkflow() {
       if (!res.ok) throw new Error(res.message);
       return workflowId;
     },
-    onSettled: () => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['projectData'] });
     },
   });
@@ -236,7 +195,7 @@ export function useRemoveWorkflowItem() {
       if (!res.ok) throw new Error(res.message);
       return itemId;
     },
-    onSettled: () => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['projectData'] });
     },
   });
@@ -250,7 +209,7 @@ export function useToggleLike() {
       if (!res.ok) throw new Error(res.message);
       return itemId;
     },
-    onSettled: () => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['projectData'] });
     },
   });
@@ -264,7 +223,7 @@ export function useToggleWorkflowLike() {
       if (!res.ok) throw new Error(res.message);
       return workflowId;
     },
-    onSettled: () => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['projectData'] });
     },
   });
@@ -284,117 +243,20 @@ export function useUpdateWorkflow() {
   });
 }
 
-/**
- * useElementSheetWorkflows
- * Returns all project-level workflows whose type starts with "ELEMENT_SHEET_"
- * (CHARACTER, LOCATION, PRODUCT). These are session-less — session_id = null.
- *
- * Each item has the shape returned by the unified project-data endpoint.
- */
-export function useElementSheetWorkflows(projectId) {
-  const { data, isLoading, isError } = useProjectData(projectId);
-  const workflows = data?.projectContents?.workflows ?? [];
-  const media = data?.projectContents?.media ?? [];
-  const filters = useWorkflowsStore((s) => s._elementFilters);
-
-  const allElements = workflows
-    .filter((w) => w.workflow_type === "ELEMENT_SHEET")
-    .map((w) => {
-      const items = media.filter((m) => m.workflowId === w.name);
-      return {
-        ...w,
-        items,
-        isMultiMedia: items.length > 1,
-      };
-    });
-
-  const filteredElements = allElements
-    .filter((w) => {
-      if (filters?.liked && !w.metadata?.favorited) return false;
-
-      // Find if any item has the prompt
-      const wPrompt = (w.items?.[0]?.generationConfig?.prompt || '').toLowerCase();
-        
-      // 1. Text Search Filter
-      if (filters?.prompt?.trim()) {
-        const q = filters.prompt.toLowerCase();
-        const wName = (w.name || '').toLowerCase();
-        const wDisplayName = (w.metadata?.displayName || '').toLowerCase();
-        
-        if (!wName.includes(q) && !wDisplayName.includes(q) && !wPrompt.includes(q)) {
-          return false;
-        }
-      }
-
-      // 2. Gender Filter
-      if (filters?.gender?.length > 0) {
-        // e.g. "male" could match "female", so it's safer to use regex boundary for precision
-        // or just simple string checks if tags are structured like <Trait: Male>
-        const hasGenderMatch = filters.gender.some(g => wPrompt.match(new RegExp(`\\b${g}\\b`, 'i')));
-        if (!hasGenderMatch) return false;
-      }
-
-      // 3. Rendering Style Filter
-      if (filters?.renderingStyles?.length > 0) {
-        const hasStyleMatch = filters.renderingStyles.some(rs => {
-            // "hyper-realistic" -> "hyper-realistic" etc
-            return wPrompt.includes(rs.toLowerCase().replace('-', ' ')); 
-        });
-        if (!hasStyleMatch) return false;
-      }
-
-      return true;
-    })
-    .sort((a, b) => {
-      const tA = new Date(a.metadata?.createTime || 0).getTime();
-      const tB = new Date(b.metadata?.createTime || 0).getTime();
-      return filters?.sort === 'oldest' ? tA - tB : tB - tA;
-    });
-
-  return { 
-      workflows: filteredElements, 
-      filteredCount: filteredElements.length,
-      total: allElements.length,
-      isLoading, 
-      isError 
-  };
-}
-
-// ── Alias for compatibility ──────────────────────────────────────────────────
-export const useRemoveGeneration = useRemoveWorkflow;
-export const useRemoveGenerationItem = useRemoveWorkflowItem;
-
 export function useSetPrimaryMedia() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ workflowId, mediaId, projectId, sessionId }) => {
+    mutationFn: async ({ workflowId, mediaId }) => {
       const res = await api.patch(`/workflows/workflows/${workflowId}/primary-media`, { media_id: mediaId });
       if (!res.ok) throw new Error(res.message || 'Failed to set primary media');
       return res;
     },
-    onSuccess: (_, { projectId, sessionId }) => {
-      if (projectId) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.projectData.byProject(projectId) });
-        if (sessionId) {
-          queryClient.invalidateQueries({
-            queryKey: queryKeys.projectData.byProjectAndSession(projectId, sessionId),
-          });
-        }
-      }
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['projectData'] });
     },
   });
 }
 
-/**
- * useMoveWorkflow
- * Moves a workflow to a different session (or creates a new session automatically).
- *
- * Usage — move to existing session:
- *   moveWorkflow({ workflowId, sessionId, projectId })
- *
- * Usage — create new session and move:
- *   moveWorkflow({ workflowId, newsession: true, sessionName: "My Session", projectId })
- */
 export function useMoveWorkflow() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -413,27 +275,8 @@ export function useMoveWorkflow() {
       if (!res.ok) throw new Error(res.message || 'Failed to move workflow');
       return res;
     },
-    onSuccess: (res, { projectId, sessionId }) => {
-      // Invalidate the source project/session
-      if (projectId) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.projectData.byProject(projectId) });
-        if (sessionId) {
-          queryClient.invalidateQueries({
-            queryKey: queryKeys.projectData.byProjectAndSession(projectId, sessionId),
-          });
-        }
-      }
-      // Also invalidate the destination session if different
-      const newSessionId = res?.workflow?.session_id;
-      const newProjectId = res?.workflow?.project_id;
-      if (newProjectId) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.projectData.byProject(newProjectId) });
-        if (newSessionId) {
-          queryClient.invalidateQueries({
-            queryKey: queryKeys.projectData.byProjectAndSession(newProjectId, newSessionId),
-          });
-        }
-      }
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['projectData'] });
     },
   });
 }
@@ -451,15 +294,8 @@ export function useDetachMedia() {
       if (!res.ok) throw new Error(res.message || 'Failed to detach media');
       return res;
     },
-    onSuccess: (_, { projectId, sessionId }) => {
-      if (projectId) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.projectData.byProject(projectId) });
-        if (sessionId) {
-          queryClient.invalidateQueries({
-            queryKey: queryKeys.projectData.byProjectAndSession(projectId, sessionId),
-          });
-        }
-      }
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['projectData'] });
     },
   });
 }
@@ -476,4 +312,39 @@ export function useDeleteMedia() {
       queryClient.invalidateQueries({ queryKey: ['projectData'] });
     },
   });
+}
+
+/**
+ * useElementSheetWorkflows: Consumers only logic
+ */
+export function useElementSheetWorkflows(projectId) {
+  const { data, isLoading, isError } = useProjectData(projectId);
+  const workflows = data?.projectContents?.workflows ?? [];
+  const media = data?.projectContents?.media ?? [];
+  const filters = useWorkflowsStore((s) => s._elementFilters);
+
+  const allElements = workflows
+    .filter((w) => w.workflow_type === "ELEMENT_SHEET")
+    .map((w) => {
+      const items = media.filter((m) => m.workflowId === w.name);
+      return { ...w, items, isMultiMedia: items.length > 1 };
+    });
+
+  const filteredElements = allElements
+    .filter((w) => {
+      if (filters?.liked && !w.metadata?.favorited) return false;
+      const wPrompt = (w.items?.[0]?.generationConfig?.prompt || '').toLowerCase();
+      if (filters?.prompt?.trim()) {
+        const q = filters.prompt.toLowerCase();
+        if (!(w.name || '').toLowerCase().includes(q) && !(w.metadata?.displayName || '').toLowerCase().includes(q) && !wPrompt.includes(q)) return false;
+      }
+      return true;
+    })
+    .sort((a, b) => {
+      const tA = new Date(a.metadata?.createTime || 0).getTime();
+      const tB = new Date(b.metadata?.createTime || 0).getTime();
+      return filters?.sort === 'oldest' ? tA - tB : tB - tA;
+    });
+
+  return { workflows: filteredElements, isLoading, isError };
 }

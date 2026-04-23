@@ -14,6 +14,7 @@ export async function apiRequest(endpoint, options = {}) {
     }
 
     const config = {
+        credentials: "include", // Required to send HttpOnly cookies
         ...options,
         headers,
     };
