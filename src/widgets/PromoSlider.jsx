@@ -45,16 +45,18 @@ const ITEMS = [
 ]
 
 // ─── Card ─────────────────────────────────────────────────────────────────────
-function TickerCard({ item, width }) {
+function TickerCard({ item, width, isEmpty }) {
+  const cardHeight = isEmpty ? 600 : 400;
+  
   return (
     <motion.div
       initial={{ opacity: 1 }}
       animate={{ opacity: 1 }}
       draggable={false}
-      className="relative flex flex-col justify-end shrink-0 cursor-pointer overflow-hidden rounded-[22px] bg-[#0e0f11] border border-white/10 group select-none pointer-events-auto"
+      className="relative flex flex-col justify-end shrink-0 cursor-pointer overflow-hidden rounded-[20px] group select-none pointer-events-auto transition-all duration-500"
       style={{
         width,
-        height: 400,
+        height: cardHeight,
       }}
     >
       {/* Background Media */}
@@ -78,14 +80,14 @@ function TickerCard({ item, width }) {
       <div className="absolute inset-0 z-10 bg-linear-to-t from-black/80 via-black/20 to-transparent" />
 
       {/* Content */}
-      <div className="relative z-20 p-8 flex flex-col items-flex-start gap-2">
-        <h2 className="text-3xl font-bold text-white m-0 tracking-tight">
+      <div className="relative z-20 p-10 flex flex-col items-flex-start gap-4">
+        <h2 className="text-5xl md:text-6xl font-black text-white m-0 tracking-tighter leading-none">
           {item.title}
         </h2>
-        <p className="text-sm text-white/70 m-0 max-w-[80%] leading-relaxed line-clamp-2">
+        <p className="text-lg md:text-xl text-white/80 m-0 max-w-[90%] leading-relaxed font-medium">
           {item.subtitle}
         </p>
-        <Button className="mt-4 px-5 py-2 rounded-full w-fit bg-white/10 border border-white/20 text-white text-sm font-semibold cursor-pointer backdrop-blur-xl transition-all hover:bg-white/20 hover:border-white/30">
+        <Button className="mt-6 px-8 py-4 h-auto rounded-full w-fit bg-white/10 border border-white/20 text-white text-base font-bold cursor-pointer backdrop-blur-xl transition-all hover:bg-white/20 hover:border-white/30 hover:scale-105 active:scale-95 flex items-center gap-2">
           {item.cta}
         </Button>
       </div>
@@ -94,7 +96,7 @@ function TickerCard({ item, width }) {
 }
 
 // ─── Draggable Slider Row ─────────────────────────────────────────────────────
-function DraggableRow({ items, gap = 16 }) {
+function DraggableRow({ items, gap = 16, isEmpty }) {
   const containerRef = useRef(null)
   const [cardWidth, setCardWidth] = useState(0)
   const cardWidthRef = useRef(0)
@@ -112,7 +114,7 @@ function DraggableRow({ items, gap = 16 }) {
     if (!node) return
     const ro = new ResizeObserver(([entry]) => {
       const w = entry.contentRect.width
-      const cw = Math.floor(w * 0.98)
+      const cw = Math.floor(w * 1.0)
       cardWidthRef.current = cw
       setCardWidth(cw)
     })
@@ -185,7 +187,7 @@ function DraggableRow({ items, gap = 16 }) {
     return (
       <div 
         ref={(node) => { containerRef.current = node; measuredRef(node) }}
-        className="w-full h-[320px] mb-10" 
+        className={`w-full mb-10 transition-all duration-500 ${isEmpty ? 'h-[600px]' : 'h-[400px]'}`}
       />
     )
   }
@@ -205,7 +207,7 @@ function DraggableRow({ items, gap = 16 }) {
         }}
       >
         {items.map((item, i) => (
-          <TickerCard key={`${item.id}-${i}`} item={item} width={cardWidth} />
+          <TickerCard key={`${item.id}-${i}`} item={item} width={cardWidth} isEmpty={isEmpty} />
         ))}
       </motion.div>
     </div>
@@ -213,10 +215,10 @@ function DraggableRow({ items, gap = 16 }) {
 }
 
 // ─── Main Export ──────────────────────────────────────────────────────────────
-export function MarqueeTicker() {
+export function MarqueeTicker({ isEmpty }) {
   return (
     <div className="flex flex-col gap-[10px] w-full overflow-hidden">
-      <DraggableRow items={ITEMS} gap={16} />
+      <DraggableRow items={ITEMS} gap={8} isEmpty={isEmpty} />
     </div>
   )
 }

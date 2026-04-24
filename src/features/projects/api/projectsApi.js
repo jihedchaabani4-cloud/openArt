@@ -28,7 +28,12 @@ export function useCreateProject() {
     mutationFn: async (projectData) => {
       const res = await api.post('/projects', projectData);
       if (res.ok === false || res.success === false) throw new Error(res.message || 'Failed to create project');
-      return res.data;
+      
+      // Normalize ID for immediate navigation
+      return {
+        ...res.data,
+        project_id: res.data.project_id ?? res.data.id
+      };
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.projects.all() });

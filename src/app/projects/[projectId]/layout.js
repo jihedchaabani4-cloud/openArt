@@ -2,7 +2,7 @@
 
 import { usePathname, useParams } from "next/navigation"
 import { useEffect, useState, useCallback } from "react"
-import { AnimatePresence } from "framer-motion"
+import { AnimatePresence, motion } from "framer-motion"
 import { useQueryClient } from "@tanstack/react-query"
 
 import { SessionSidebar } from "@/widgets/StudioLayout/SessionSidebar/SessionSidebar"
@@ -86,24 +86,44 @@ export default function StudioLayout({ children }) {
     }
 
     return (
-        <div className="flex flex-col h-screen overflow-hidden relative">
-            <AnimatePresence>
-                {showIntro && <LoadingScreen key="global-loader" />}
+        <div className="flex flex-col h-screen overflow-hidden relative bg-[#050505]">
+            <AnimatePresence mode="wait">
+                {showIntro ? (
+                    <motion.div
+                        key="loader-wrapper"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="flex-1 flex flex-col overflow-hidden"
+                    >
+                        <LoadingScreen  fullScreen={false} />
+                    </motion.div>
+                ) : (
+                    <motion.div
+                        key="content-wrapper"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.4 }}
+                        className="flex-1 flex flex-col overflow-hidden"
+                    >
+                        {!isEditPage ? (
+                            <div className="flex-1 min-h-0 flex overflow-hidden">
+                                <SessionSidebar />
+                                <div className="flex-1 min-w-0 flex flex-col relative overflow-hidden">
+                                    <StudioNavbar />
+                                    {children}
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="flex-1 relative overflow-hidden">
+                                {children}
+                            </div>
+                        )}
+                    </motion.div>
+                )}
             </AnimatePresence>
-
-            {!isEditPage ? (
-                <div className="flex-1 min-h-0 flex overflow-hidden">
-                    <SessionSidebar />
-                    <div className="flex-1 min-w-0 flex flex-col relative overflow-hidden">
-                        <StudioNavbar />
-                        {children}
-                    </div>
-                </div>
-            ) : (
-                <div className="flex-1 relative overflow-hidden">
-                    {children}
-                </div>
-            )}
         </div>
     )
+
 }

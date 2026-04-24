@@ -22,35 +22,16 @@ import { LoadingScreen } from "@/shared/ui/LoadingScreen";
 // ─── Sub-Components ──────────────────────────────────────────────────────────
 
 const EmptyState = ({ message }) => (
-    <div className="w-full h-full flex flex-col items-center justify-center relative overflow-hidden">
-        {/* Decorative corner markers */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-[260px] -translate-y-[100px] w-6 h-6 border-t border-l border-white/20" />
-        <div className="absolute top-1/2 left-1/2 translate-x-[236px] -translate-y-[100px] w-6 h-6 border-t border-r border-white/20" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-[260px] translate-y-[76px] w-6 h-6 border-b border-l border-white/20" />
-        <div className="absolute top-1/2 left-1/2 translate-x-[236px] translate-y-[76px] w-6 h-6 border-b border-r border-white/20" />
-
+    <div className="w-full h-full flex flex-col items-center justify-center">
         <motion.div 
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col items-center gap-6 z-10"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="flex flex-col items-center gap-2"
         >
-            <span className="text-[10px] font-bold tracking-[0.4em] text-white/40 uppercase">
-                Workflows Studio
-            </span>
-            
-            <h1 className="text-4xl md:text-5xl font-bold text-center max-w-2xl leading-tight tracking-tight px-6">
-                <span className="bg-linear-to-br from-[#FFB8D9] via-[#E2B8FF] to-[#FFD194] bg-clip-text text-transparent opacity-90">
-                    What would you shoot<br/>with infinite budget?
-                </span>
-            </h1>
-
-            {message && message !== "No cinematic shots found" && message !== "No audio workflows found" && message !== "No generated images found" && (
-                <p className="text-sm font-medium tracking-wide uppercase text-white/20 mt-4">{message}</p>
-            )}
+            <p className="text-white/30 text-lg font-medium tracking-tight text-center px-6">
+                {"Start creating or upload media"}
+            </p>
         </motion.div>
-
-        {/* Subtle background glow */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[300px] bg-purple-500/5 rounded-full blur-[100px]" />
     </div>
 )
 
@@ -183,23 +164,7 @@ export default function GenerationsPage({ params }) {
 
     return (
         <div className="flex h-full w-full overflow-hidden text-white bg-[#050505] relative">
-            {/* ── Soft ambient glow ── */}
-            <motion.div 
-                initial={{ opacity: 0, scale: 0.8 }} 
-                animate={{ opacity: 1, scale: 1 }} 
-                transition={{ duration: 1.5, ease: "easeOut" }} 
-                style={{ 
-                    position: "absolute", 
-                    top: "30%", 
-                    left: "60%", 
-                    width: "680px", 
-                    height: "440px", 
-                    background: "radial-gradient(ellipse, rgba(50,90,130,0.11) 0%, transparent 70%)", 
-                    transform: "translate(-50%, -50%)", 
-                    pointerEvents: "none", 
-                    zIndex: 0 
-                }} 
-            />
+
 
             <main className="flex-1 flex flex-col relative min-w-0 overflow-hidden z-10">
                 <AnimatePresence>

@@ -9,35 +9,16 @@ import PromptBar from "@/features/prompt-bar"
 // ─── Sub-Components ──────────────────────────────────────────────────────────
 
 const EmptyState = ({ message }) => (
-    <div className="w-full h-full flex flex-col items-center justify-center relative overflow-hidden">
-        {/* Decorative corner markers */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-[260px] -translate-y-[100px] w-6 h-6 border-t border-l border-white/20" />
-        <div className="absolute top-1/2 left-1/2 translate-x-[236px] -translate-y-[100px] w-6 h-6 border-t border-r border-white/20" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-[260px] translate-y-[76px] w-6 h-6 border-b border-l border-white/20" />
-        <div className="absolute top-1/2 left-1/2 translate-x-[236px] translate-y-[76px] w-6 h-6 border-b border-r border-white/20" />
-
+    <div className="w-full h-full flex flex-col items-center justify-center">
         <motion.div 
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col items-center gap-6 z-10"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="flex flex-col items-center gap-2"
         >
-            <span className="text-[10px] font-bold tracking-[0.4em] text-white/40 uppercase">
-                Generations Studio
-            </span>
-            
-            <h1 className="text-4xl md:text-5xl font-bold text-center max-w-2xl leading-tight tracking-tight px-6">
-                <span className="bg-linear-to-br from-[#FFB8D9] via-[#E2B8FF] to-[#FFD194] bg-clip-text text-transparent opacity-90">
-                    What would you shoot<br/>with infinite budget?
-                </span>
-            </h1>
-
-            {message && message !== "No cinematic shots found" && message !== "No generated images found" && (
-                <p className="text-sm font-medium tracking-wide uppercase text-white/20 mt-4">{message}</p>
-            )}
+            <p className="text-white/30 text-lg font-medium tracking-tight">
+                {"Start creating your masterpiece."}
+            </p>
         </motion.div>
-
-        {/* Subtle background glow */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[300px] bg-purple-500/5 rounded-full blur-[100px]" />
     </div>
 )
 

@@ -6,22 +6,18 @@ import { ProjectsNavbar } from "@/widgets/ProjectsNavbar/ProjectsNavbar"
 /**
  * Layout for all /projects/* routes.
  * Shows ProjectsNavbar ONLY on the /projects listing page.
- * The /projects/[projectId] page has its own layout with StudioNavbar.
  */
 export default function ProjectsLayout({ children }) {
     const pathname = usePathname()
 
-    // Show the projects navbar only on the exact /projects listing page
-    // (and optionally /projects/new).
-    // Any route with a projectId segment gets the StudioNavbar from the nested layout.
     const isListing = pathname === "/projects" || pathname === "/projects/new"
 
     return (
-        <>
-            {isListing && <ProjectsNavbar />}
-            <div className={isListing ? "pt-[60px]" : ""}>
+        <div className="min-h-screen flex flex-col bg-[#050505]">
+                {isListing && <ProjectsNavbar />}
+            <main className={isListing ? "pt-[75px] flex-1 flex flex-col" : "flex-1 flex flex-col"}>
                 {children}
-            </div>
-        </>
+            </main>
+        </div>
     )
 }

@@ -1,24 +1,38 @@
 "use client"
 
 import * as React from "react"
-import { motion, AnimatePresence } from "framer-motion"
 import { MarqueeTicker } from "./PromoSlider"
 import { useProjects, useCreateProject, useDeleteProject, useUpdateProject } from "@/features/projects/api/projectsApi"
+import { useRouter } from "next/navigation"
 import { sortProjectsByRecent } from "./projects/model/projectList"
 import { ProjectsGrid } from "./projects/ui/ProjectsGrid"
 import { ProjectsFloatingAction } from "./projects/ui/ProjectsFloatingAction"
 import { LoadingScreen } from "@/shared/ui/LoadingScreen"
+import { AnimatePresence, motion } from "framer-motion"
+import { useQueryClient } from "@tanstack/react-query"
+import { queryKeys } from "@/shared/api/queryKeys"
 
 export function ProjectsPage() {
+    const router = useRouter()
+    const queryClient = useQueryClient()
+    
+    // Clear cache when unmounting so next visit is fresh
+    React.useEffect(() => {
+        return () => {
+            queryClient.removeQueries({ queryKey: queryKeys.projects.all() })
+        }
+    }, [queryClient])
+
     const { data: projects = [], isLoading, error } = useProjects()
-    const { mutateAsync: createProject } = useCreateProject()
+    const { mutateAsync: createProject, isPending: isCreating } = useCreateProject()
     const { mutateAsync: deleteProject } = useDeleteProject()
     const { mutateAsync: updateProject } = useUpdateProject()
 
     const handleCreateNew = async () => {
-        const name = prompt("Project Name:", "")
-        if (name) {
-            await createProject({ project_name: name })
+        // 🚀 Backend now handles automatic naming with date/time
+        const project = await createProject({})
+        if (project?.project_id) {
+            router.push(`/projects/${project.project_id}`)
         }
     }
 
@@ -32,37 +46,41 @@ export function ProjectsPage() {
     const sortedProjects = React.useMemo(() => sortProjectsByRecent(projects), [projects])
 
     return (
-        <div className="min-h-screen bg-transparent text-white font-sans selection:bg-[#D4FF00]/30">
-            <AnimatePresence mode="wait">
-                {isLoading ? (
-                    <LoadingScreen key="loader" />
-                ) : (
-                    <motion.div 
-                        key="content"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="px-8 pt-2 pb-20"
-                    >
-                        <MarqueeTicker />
+        <AnimatePresence mode="wait">
+            {isLoading ? (
+                <motion.div
+                    key="loader"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="fixed inset-0 z-[200] bg-[#050505] flex items-center justify-center"
+                >
+                    <LoadingScreen fullScreen={false} />
+                </motion.div>
+            ) : (
+                <motion.div 
+                    key="content"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.4 }}
+                    className="px-5 pt-2 pb-20"
+                >
+                    <MarqueeTicker isEmpty={projects.length === 0} />
 
-                        {error && (
-                            <div className="mb-8 rounded-md border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-400">
-                                {error.message || String(error)}
-                            </div>
-                        )}
+                    <ProjectsGrid
+                        projects={sortedProjects}
+                        isLoading={isLoading}
+                        onDelete={deleteProject}
+                        onRename={handleRename}
+                        onCreate={handleCreateNew}
+                        isCreating={isCreating}
+                    />
 
-                        <ProjectsGrid
-                            projects={sortedProjects}
-                            isLoading={isLoading}
-                            onDelete={deleteProject}
-                            onRename={handleRename}
-                        />
-                    </motion.div>
-                )}
-            </AnimatePresence>
-
-            {!isLoading && <ProjectsFloatingAction onCreate={handleCreateNew} />}
-        </div>
+                    <ProjectsFloatingAction onCreate={handleCreateNew} isLoading={isCreating} />
+                </motion.div>
+            )}
+        </AnimatePresence>
     )
+
 }

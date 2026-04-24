@@ -2,10 +2,14 @@
 
 import React from "react";
 import { motion } from "framer-motion";
+import { cn } from "@/shared/lib/utils";
 
-export function LoadingScreen({ message = "Open Art" }) {
+export function LoadingScreen({ message = "Art", fullScreen = false }) {
   return (
-    <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#111111] overflow-hidden">
+    <div className={cn(
+      "flex flex-col items-center justify-center overflow-hidden bg-[#050505]",
+      fullScreen ? "fixed inset-0 z-[100]" : "w-full h-full flex-1"
+    )}>
       
       {/* Central Content */}
       <motion.div 
@@ -15,30 +19,26 @@ export function LoadingScreen({ message = "Open Art" }) {
         className="relative z-10 flex flex-col items-center"
       >
         {/* Branding Text */}
-        <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-white mb-6 uppercase italic">
+        <h1 className="text-2xl md:text-3xl font-black tracking-tighter text-white/70 mb-4 uppercase">
           {message}
         </h1>
 
         {/* Minimal Progress Line Container */}
-        <div className="w-48 h-[3px] bg-white/10 rounded-full overflow-hidden relative">
+        <div className="w-34 h-[2px] bg-white/5 rounded-full overflow-hidden relative">
           {/* Animated Progress Fill */}
           <motion.div
             initial={{ x: "-100%" }}
-            animate={{ x: ["-100%", "0%", "100%"] }}
+            animate={{ x: ["-100%", "0%", "100%"] }} 
             transition={{ 
-              duration: 2, 
+              duration: 1.5, 
               repeat: Infinity, 
               ease: "easeInOut" 
             }}
-            className="absolute inset-0 bg-blue-500 w-1/2 rounded-full"
+            className="absolute inset-0 bg-white/90 w-1/3 rounded-full shadow-[0_0_10px_rgba(59,130,246,0.5)]"
           />
-          
-          {/* Static progress fill for smoother look if needed, but the above is more dynamic */}
         </div>
       </motion.div>
-
-      {/* Very subtle background glow to keep it premium but minimal */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-blue-500/5 rounded-full blur-[120px] pointer-events-none" />
     </div>
   );
 }
+
