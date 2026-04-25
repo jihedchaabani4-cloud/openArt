@@ -57,7 +57,7 @@ export default function ElementWorkflowEditPage() {
     // Redirect back if workflow not found after loading
     React.useEffect(() => {
         if (!isLoading && !workflow && projectData) {
-            router.replace(`/projects/${projectId}/elements`);
+            router.replace(`/cinema-studio/${projectId}/elements`);
         }
     }, [isLoading, workflow, projectData, router, projectId]);
 

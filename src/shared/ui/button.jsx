@@ -1,4 +1,3 @@
-import * as React from "react"
 import { cva } from "class-variance-authority";
 import { Slot } from "radix-ui"
 
@@ -25,6 +24,10 @@ const buttonVariants = cva(
         "studio-error": "flex items-center justify-center gap-3 h-11 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500 hover:bg-red-500/20 transition-all",
         "studio-white": " px-[12px] py-[8px] bg-white text-black hover:bg-white/90 transition-all  ",
         "studio-ghost": "  px-[12px] py-[8px]  bg-white/5  text-white hover:bg-white/40 transition-all font-semibold",
+        "user-menu-filled":
+          "rounded-full bg-white/12  py-2 text-[15px] font-semibold text-white hover:bg-white/16",
+        "user-menu-outline":
+          "rounded-full border border-white/14 bg-[#1b1b1b]  py-2 text-[15px] font-semibold text-white hover:bg-white/8",
         "studio-overlay-icon":
           "w-9 h-9 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center text-white/70 hover:text-white hover:bg-black/60 transition-all",
         "studio-node-thumb":

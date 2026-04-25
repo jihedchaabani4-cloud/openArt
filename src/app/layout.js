@@ -2,7 +2,6 @@ import "./globals.css";
 import { Geist_Mono } from "next/font/google";
 import localFont from "next/font/local";
 
-import { DragPreview } from "@/shared/ui/DragPreview";
 import { ReactQueryProvider } from "@/shared/lib/ReactQueryProvider";
 
 const geistMono = Geist_Mono({

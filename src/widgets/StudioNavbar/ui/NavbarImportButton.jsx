@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useRef } from "react";
+import { useRef } from "react";
 import { Plus, Loader2 } from "lucide-react";
 import { useMediaLibrary } from "@/features/media/model/useMediaLibrary";
 import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows";
@@ -13,6 +13,7 @@ export function NavbarImportButton() {
   if (activeStudioTab !== 'generations') return null;
 
   const handleClick = () => {
+    if (!projectId) return;
     fileInputRef.current?.click();
   };
 
@@ -46,9 +47,9 @@ export function NavbarImportButton() {
       <button
         type="button"
         onClick={handleClick}
-        disabled={lib.loading}
+        disabled={lib.loading || !projectId}
         className="size-11 rounded-full flex items-center justify-center text-white/90 hover:text-white hover:bg-white/10 transition-all border border-white/5 disabled:opacity-50 disabled:cursor-not-allowed"
-        title="Upload Media"
+        title={projectId ? "Upload Media" : "Project is still loading"}
       >
         {lib.loading ? (
             <Loader2 className="size-6 animate-spin text-white/40" />

@@ -16,8 +16,8 @@ export default function LegacyWorkflowEditRedirectPage() {
 
         const destination =
             workflow.workflow_type === "ELEMENT_SHEET"
-                ? `/projects/${projectId}/elements/edit/${workflowId}`
-                : `/projects/${projectId}/generations/edit/${workflowId}`;
+                ? `/cinema-studio/${projectId}/elements/edit/${workflowId}`
+                : `/cinema-studio/${projectId}/generations/edit/${workflowId}`;
 
         router.replace(destination);
     }, [projectData, projectId, router, workflowId]);

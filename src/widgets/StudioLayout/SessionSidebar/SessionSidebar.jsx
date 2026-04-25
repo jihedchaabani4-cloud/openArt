@@ -216,7 +216,7 @@ export function SessionSidebar() {
                 transition={{ duration: 0.85, ease: [0.16, 1, 0.3, 1] }}
             >
                 <Link 
-                    href="/projects"
+                    href="/cinema-studio"
                     className="flex items-center justify-center w-10 h-10 rounded-xl bg-white/5 hover:bg-white/10 text-white/90 hover:text-white transition-colors"
                 >
                     <ArrowLeft className="w-6 h-6" />
@@ -226,7 +226,7 @@ export function SessionSidebar() {
             {/* Tabs for Studio Views */}
             <div className="flex flex-col items-center gap-2 pt-2 relative z-50 w-full">
                 <Link 
-                    href={`/projects/${selectedProjectId}/generations`}
+                    href={`/cinema-studio/${selectedProjectId}/generations`}
                     className={cn(
                         "flex items-center justify-center w-10 h-10 rounded-xl transition-all",
                         !isElementsActive
@@ -238,7 +238,7 @@ export function SessionSidebar() {
                     <LayoutGrid className="w-6 h-6" strokeWidth={2.5} />
                 </Link>
                 <Link 
-                    href={`/projects/${selectedProjectId}/elements`}
+                    href={`/cinema-studio/${selectedProjectId}/elements`}
                     className={cn(
                         "flex items-center justify-center w-10 h-10 rounded-xl transition-all",
                         isElementsActive

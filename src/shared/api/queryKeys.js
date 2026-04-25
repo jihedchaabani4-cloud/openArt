@@ -1,46 +1,46 @@
-// [FSD Layer: shared/api] — Centralized React Query key factory
-// Use these exclusively — no raw string arrays in any queryKey field.
-
 export const queryKeys = {
-    // ── Projects ──────────────────────────────────────────────────────────────
-    projects: {
-        all:  ()           => ['projects'],
-        list: ()           => ['projects', 'list'],
-    },
+  auth: {
+    me: () => ["auth", "me"],
+  },
 
-    // ── Sessions ──────────────────────────────────────────────────────────────
-    sessions: {
-        all:       ()            => ['sessions'],
-        byProject: (projectId)   => ['sessions', projectId],
-    },
+  projects: {
+    all: () => ["projects"],
+    list: () => ["projects", "list"],
+  },
 
-    // ── Workflows ─────────────────────────────────────────────────────────────
-    workflows: {
-        all:       ()                          => ['workflows'],
-        byProject: (projectId, sessionId)      => ['workflows', projectId, sessionId],
-        paginated: (page)                      => ['allWorkflows', page],
-    },
+  sessions: {
+    all: () => ["sessions"],
+    byProject: (projectId) => ["sessions", projectId],
+  },
 
-    // ── Backward Compat: generations ──────────────────────────────────────────
-    generations: {
-        all:       ()                          => ['workflows'],
-        byProject: (projectId, sessionId)      => ['workflows', projectId, sessionId],
-    },
+  workflows: {
+    all: () => ["workflows"],
+    byProject: (projectId, sessionId) => ["workflows", projectId, sessionId],
+    paginated: (page) => ["allWorkflows", page],
+  },
 
-    // ── Assets ────────────────────────────────────────────────────────────────
-    assets: {
-        all:       ()                                     => ['assets'],
-        byProject: (projectId, offset, type, mediaType)   => ['assets', projectId, offset, type, mediaType],
-    },
+  generations: {
+    all: () => ["workflows"],
+    byProject: (projectId, sessionId) => ["workflows", projectId, sessionId],
+  },
 
-    // ── Models ────────────────────────────────────────────────────────────────
-    models: {
-        studio: () => ['studioModels'],
-    },
+  assets: {
+    all: () => ["assets"],
+    byProject: (projectId, offset, type, mediaType) => ["assets", projectId, offset, type, mediaType],
+  },
 
-    // ── Project Data (Unified: sessions + collections + workflows + media) ────
-    projectData: {
-        byProject:           (projectId)             => ['projectData', projectId],
-        byProjectAndSession: (projectId, sessionId)  => ['projectData', projectId, sessionId],
-    },
-};
+  library: {
+    all: () => ["library"],
+    user: (params = {}) => ["library", "user", params],
+    detail: (workflowId) => ["library", "detail", workflowId],
+  },
+
+  models: {
+    studio: () => ["studioModels"],
+  },
+
+  projectData: {
+    byProject: (projectId) => ["projectData", projectId],
+    byProjectAndSession: (projectId, sessionId) => ["projectData", projectId, sessionId],
+  },
+}

@@ -62,7 +62,7 @@ export function useSessionCollections(projectId, sessionId) {
   return collections.filter(c => c.parentCollectionId === sessionId);
 }
 
-export function useSessionMedia(projectId, sessionId) {
+export function useSessionMedia(projectId, _sessionId) {
   const { data } = useProjectData(projectId);
   return data?.projectContents?.media ?? [];
 }
@@ -176,13 +176,25 @@ export function useExtendVideoMutation({ onError } = {}) {
 export function useRemoveWorkflow() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (workflowId) => {
-      const res = await api.delete(`/workflows/workflows/${workflowId}`);
+    mutationFn: async (workflowIdOrIds) => {
+      const workflowIds = Array.isArray(workflowIdOrIds)
+        ? workflowIdOrIds.filter(Boolean)
+        : [workflowIdOrIds].filter(Boolean);
+
+      if (workflowIds.length === 0) throw new Error("workflowId is required");
+
+      const res = workflowIds.length === 1
+        ? await api.delete(`/workflows/workflows/${workflowIds[0]}`)
+        : await api.delete(`/workflows/workflows`, {
+            body: JSON.stringify({ workflow_ids: workflowIds }),
+          });
+
       if (!res.ok) throw new Error(res.message);
-      return workflowId;
+      return workflowIds;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['projectData'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.library.all() });
     },
   });
 }
@@ -218,13 +230,26 @@ export function useToggleLike() {
 export function useToggleWorkflowLike() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ workflowId }) => {
-      const res = await api.patch(`/workflows/workflows/${workflowId}/like`);
+    mutationFn: async ({ workflowId, workflowIds, favorited } = {}) => {
+      const normalizedIds = Array.isArray(workflowIds)
+        ? workflowIds.filter(Boolean)
+        : [workflowId].filter(Boolean);
+
+      if (normalizedIds.length === 0) throw new Error("workflowId is required");
+
+      const res = normalizedIds.length === 1
+        ? await api.patch(`/workflows/workflows/${normalizedIds[0]}/like`)
+        : await api.patch(`/workflows/workflows/like`, {
+            workflow_ids: normalizedIds,
+            ...(favorited !== undefined ? { favorited: !!favorited } : {}),
+          });
+
       if (!res.ok) throw new Error(res.message);
-      return workflowId;
+      return normalizedIds;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['projectData'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.library.all() });
     },
   });
 }

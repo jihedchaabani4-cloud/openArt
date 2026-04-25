@@ -114,7 +114,7 @@ export function EditNavbar({
                 <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => router.push(`/projects/${projectId}/generations`)}
+                    onClick={() => router.push(`/cinema-studio/${projectId}/generations`)}
                     className="rounded-full hover:bg-white/10 text-whit transition-all"
                 >
                     <ArrowLeft className="size-6" />
@@ -145,7 +145,7 @@ export function EditNavbar({
 
                 <Button
                     variant="studio-white"
-                    onClick={() => router.push(`/projects/${projectId}/generations`)}
+                    onClick={() => router.push(`/cinema-studio/${projectId}/generations`)}
                 >
                     Done
                 </Button>

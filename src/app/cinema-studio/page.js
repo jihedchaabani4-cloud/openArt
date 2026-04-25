@@ -1,7 +1,7 @@
 import { ProjectsPage } from "@/views";
 
 export const metadata = {
-  title: "My Projects | Open Art",
+  title: "Cinema Studio | Open Art",
   description: "View and manage your AI-generated art projects",
 };
 

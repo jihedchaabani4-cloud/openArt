@@ -1,6 +1,7 @@
 "use client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
+import { AuthSessionBootstrap } from "@/shared/lib/AuthSessionBootstrap";
 
 export function ReactQueryProvider({ children }) {
     const [queryClient] = useState(() => new QueryClient({
@@ -17,6 +18,7 @@ export function ReactQueryProvider({ children }) {
     }));
     return (
         <QueryClientProvider client={queryClient}>
+            <AuthSessionBootstrap />
             {children}
         </QueryClientProvider>
     );

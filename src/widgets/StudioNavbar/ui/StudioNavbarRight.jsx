@@ -1,9 +1,9 @@
 "use client"
 
-import * as React from "react"
 import { cn } from "@/shared/lib/utils"
 import { StudioSettingsDropdown } from "./StudioSettingsDropdown"
 import { NavbarImportButton } from "./NavbarImportButton"
+import { UserDropdown } from "./UserDropdown"
 
 export function StudioNavbarRight({
     searchExpanded,
@@ -40,11 +40,7 @@ export function StudioNavbarRight({
                 showUploadedMedia={showUploadedMedia}
                 setShowUploadedMedia={setShowUploadedMedia}
             />
-
-            {/* Avatar placeholder */}
-            <div className="size-9 rounded-xl shrink-0 bg-linear-to-br from-white/10 to-white/5 border border-white/10 flex items-center justify-center">
-                <div className="size-2 rounded-full bg-white/20" />
-            </div>
+            <UserDropdown />
         </div>
     )
 }

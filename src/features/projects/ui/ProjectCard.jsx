@@ -7,6 +7,10 @@ import { MdDelete } from "react-icons/md"
 import { Button } from "@/shared/ui/button"
 import { EditableDisplayName } from "@/shared/ui/EditableDisplayName"
 
+function isVideoUrl(url = "") {
+    return /\.(mp4|webm|mov)$/i.test(url)
+}
+
 /**
  * ProjectCard component with a full-cover design.
  * 
@@ -16,7 +20,11 @@ import { EditableDisplayName } from "@/shared/ui/EditableDisplayName"
  */
 export function ProjectCard({ project, onDelete, onRename }) {
     const editRef = React.useRef(null)
+    const videoRef = React.useRef(null)
     const [isEditing, setIsEditing] = React.useState(false)
+    const thumbnailUrl = project.thumbnail_url || ""
+    const hasThumbnail = Boolean(thumbnailUrl)
+    const isVideoThumbnail = isVideoUrl(thumbnailUrl)
 
     return (
         <motion.div
@@ -25,15 +33,40 @@ export function ProjectCard({ project, onDelete, onRename }) {
             animate={{ opacity: 1, y: 0 }}
             className="group relative flex flex-col overflow-hidden rounded-[22px] bg-transparent transition-all duration-300 shadow-2xl"
         >
-            <Link href={`/projects/${project.project_id}`} className="block">
-                <div className="relative overflow-hidden rounded-[18px] aspect-[1.6/1]">
-                    {project.thumbnail_url ? (
+            <Link href={`/cinema-studio/${project.project_id}`} className="block">
+                <div
+                    className="relative overflow-hidden rounded-[18px] aspect-[1.6/1]"
+                    onMouseEnter={() => {
+                        if (isVideoThumbnail) {
+                            videoRef.current?.play().catch(() => {})
+                        }
+                    }}
+                    onMouseLeave={() => {
+                        if (isVideoThumbnail && videoRef.current) {
+                            videoRef.current.pause()
+                            videoRef.current.currentTime = 0
+                        }
+                    }}
+                >
+                    {hasThumbnail ? (
                         <>
-                            <img
-                                src={project.thumbnail_url}
-                                alt={project.project_name || project.name}
-                                className="h-full w-full object-cover transition-transform duration-700 ease-out"
-                            />
+                            {isVideoThumbnail ? (
+                                <video
+                                    ref={videoRef}
+                                    src={thumbnailUrl}
+                                    muted
+                                    loop
+                                    playsInline
+                                    preload="metadata"
+                                    className="h-full w-full object-cover transition-transform duration-700 ease-out"
+                                />
+                            ) : (
+                                <img
+                                    src={thumbnailUrl}
+                                    alt={project.project_name || project.name}
+                                    className="h-full w-full object-cover transition-transform duration-700 ease-out"
+                                />
+                            )}
                             <div className="absolute inset-0 bg-linear-to-t from-black/20 via-transparent to-white/5 opacity-60" />
                         </>
                     ) : (

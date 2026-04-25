@@ -247,7 +247,7 @@ export function usePromptBar({ isNewProject = false } = {}) {
             setActiveSessionId(res.session_id);
           }
           if (isNewProject && window.location.pathname.includes("/project/new")) {
-            window.location.href = `/projects/${res.project_id}`;
+            window.location.href = `/cinema-studio/${res.project_id}`;
           }
         }
 

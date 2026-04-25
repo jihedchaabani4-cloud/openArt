@@ -19,6 +19,8 @@ import { getPrimaryMedia } from "@/shared/lib/generationUtils";
 import { getItemMetadata as getDisplayMeta } from "@/shared/lib/displayUtils";
 import { LoadingScreen } from "@/shared/ui/LoadingScreen";
 
+const PAGE_SIZE = 30;
+
 // ─── Sub-Components ──────────────────────────────────────────────────────────
 
 const EmptyState = ({ message }) => (
@@ -29,7 +31,7 @@ const EmptyState = ({ message }) => (
             className="flex flex-col items-center gap-2"
         >
             <p className="text-white/30 text-lg font-medium tracking-tight text-center px-6">
-                {"Start creating or upload media"}
+                {message || "Start creating or upload media"}
             </p>
         </motion.div>
     </div>
@@ -49,7 +51,8 @@ export default function GenerationsPage({ params }) {
     }, [projectId, setSelectedProjectId, setActiveStudioTab])
 
     // Fetch sessions for this project
-    const sessions = useProjectSessions(projectId) || []
+    const projectSessions = useProjectSessions(projectId)
+    const sessions = React.useMemo(() => projectSessions || [], [projectSessions])
 
     // Auto-select the most recent session if none is active
     React.useEffect(() => {
@@ -62,19 +65,41 @@ export default function GenerationsPage({ params }) {
     const router = useRouter();
     
     const { data: fetchResult, isLoading } = useFilteredGenerations(projectId, activeSessionId);
-    const workflows = fetchResult?.filteredWorkflows || [];
+    const workflows = React.useMemo(
+        () => fetchResult?.filteredWorkflows || [],
+        [fetchResult?.filteredWorkflows]
+    );
+    const workflowListKey = React.useMemo(
+        () => workflows.map((workflow) => workflow.id || workflow.name).join("|"),
+        [workflows]
+    );
+    const [visibleCount, setVisibleCount] = React.useState(PAGE_SIZE);
+    const hasMore = visibleCount < workflows.length;
+    const visibleWorkflows = React.useMemo(
+        () => workflows.slice(0, visibleCount),
+        [workflows, visibleCount]
+    );
 
     // Navigate to the Edit Page for this workflow
     const handleWorkflowClick = (workflow) => {
         const workflowId = workflow.id || workflow.name;
         if (!workflowId || !projectId) return;
-        router.push(`/projects/${projectId}/generations/edit/${workflowId}`);
+        router.push(`/cinema-studio/${projectId}/generations/edit/${workflowId}`);
     };
 
     const scrollRef = React.useRef(null);
     const prevScrollTop = React.useRef(0);
     const rafRef = React.useRef(null);
     const [showTopBtn, setShowTopBtn] = React.useState(false);
+    
+    const loadMore = React.useCallback(() => {
+        setVisibleCount((current) => Math.min(current + PAGE_SIZE, workflows.length));
+    }, [workflows.length]);
+
+    React.useEffect(() => {
+        setVisibleCount(PAGE_SIZE);
+        prevScrollTop.current = 0;
+    }, [projectId, activeSessionId, workflowListKey]);
 
     // ─── 144fps scroll handler via requestAnimationFrame ─────────────────────
     const handleScroll = React.useCallback(() => {
@@ -95,9 +120,15 @@ export default function GenerationsPage({ params }) {
                 if (isCurrentlyHidden) setIsNavbarHidden(false);
             }
 
+            const remainingScroll =
+                scrollRef.current.scrollHeight - (currentScrollTop + scrollRef.current.clientHeight);
+            if (remainingScroll <= 240 && hasMore) {
+                loadMore();
+            }
+
             prevScrollTop.current = currentScrollTop;
         });
-    }, [setIsNavbarHidden]);
+    }, [hasMore, loadMore, setIsNavbarHidden]);
 
     // Cancel any pending rAF on unmount
     React.useEffect(() => {
@@ -105,6 +136,15 @@ export default function GenerationsPage({ params }) {
             if (rafRef.current) cancelAnimationFrame(rafRef.current);
         };
     }, []);
+
+    React.useEffect(() => {
+        const el = scrollRef.current;
+        if (!el || !hasMore) return;
+
+        if (el.scrollHeight <= el.clientHeight + 120) {
+            loadMore();
+        }
+    }, [hasMore, loadMore, visibleWorkflows.length]);
 
     React.useEffect(() => {
         setIsGridResizing(true);
@@ -135,7 +175,7 @@ export default function GenerationsPage({ params }) {
     const targetRowHeight = gridSize === "lg" ? 380 : gridSize === "md" ? 280 : 200;
 
     const photos = React.useMemo(() => {
-        return workflows.reduce((acc, workflow, i) => {
+        return visibleWorkflows.reduce((acc, workflow, i) => {
             const primaryItem = getPrimaryMedia(workflow);
             if (!primaryItem) return acc;
 
@@ -159,8 +199,12 @@ export default function GenerationsPage({ params }) {
             });
             return acc;
         }, []);
-    }, [workflows]);
+    }, [visibleWorkflows]);
 
+
+    if (isLoading && workflows.length === 0) {
+        return <LoadingScreen message="Loading generations" />
+    }
 
     return (
         <div className="flex h-full w-full overflow-hidden text-white bg-[#050505] relative">
@@ -215,6 +259,11 @@ export default function GenerationsPage({ params }) {
                                         ),
                                     }}
                                 />
+                                {hasMore && (
+                                    <div className="flex justify-center pt-2 text-sm text-white/45">
+                                        Scroll down to load 30 more
+                                    </div>
+                                )}
                             </motion.div>
                         ) : (
                             <motion.div 

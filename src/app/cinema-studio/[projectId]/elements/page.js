@@ -15,6 +15,9 @@ import { MediaGridItem } from "@/widgets/StudioLayout/GenerationsStudio/MediaGri
 import { usePromptStore } from "@/features/prompt-bar/model/usePromptStore";
 import { getPrimaryMedia } from "@/shared/lib/generationUtils";
 import { getItemMetadata as getDisplayMeta } from "@/shared/lib/displayUtils";
+import { LoadingScreen } from "@/shared/ui/LoadingScreen";
+
+const PAGE_SIZE = 30;
 
 // ─── Sub-Components ──────────────────────────────────────────────────────────
 
@@ -51,18 +54,37 @@ export default function ElementsPage({ params }) {
     
     // Natively fetch element sheet workflows
     const { workflows: existingSheets, isLoading } = useElementSheetWorkflows(projectId)
+    const sheetsListKey = React.useMemo(
+        () => existingSheets.map((workflow) => workflow.id || workflow.name).join("|"),
+        [existingSheets]
+    );
+    const [visibleCount, setVisibleCount] = React.useState(PAGE_SIZE);
+    const hasMore = visibleCount < existingSheets.length;
+    const visibleSheets = React.useMemo(
+        () => existingSheets.slice(0, visibleCount),
+        [existingSheets, visibleCount]
+    );
 
     // Navigate to the Edit Page for this workflow
     const handleWorkflowClick = (workflow) => {
         const workflowId = workflow.id || workflow.name;
         if (!workflowId || !projectId) return;
-        router.push(`/projects/${projectId}/elements/edit/${workflowId}`);
+        router.push(`/cinema-studio/${projectId}/elements/edit/${workflowId}`);
     };
 
     const scrollRef = React.useRef(null);
     const prevScrollTop = React.useRef(0);
     const rafRef = React.useRef(null);
     const [showTopBtn, setShowTopBtn] = React.useState(false);
+
+    const loadMore = React.useCallback(() => {
+        setVisibleCount((current) => Math.min(current + PAGE_SIZE, existingSheets.length));
+    }, [existingSheets.length]);
+
+    React.useEffect(() => {
+        setVisibleCount(PAGE_SIZE);
+        prevScrollTop.current = 0;
+    }, [projectId, sheetsListKey]);
 
     // ─── 144fps scroll handler via requestAnimationFrame ─────────────────────
     const handleScroll = React.useCallback(() => {
@@ -85,9 +107,15 @@ export default function ElementsPage({ params }) {
                 if (isCurrentlyHidden) setIsNavbarHidden(false);
             }
 
+            const remainingScroll =
+                scrollRef.current.scrollHeight - (currentScrollTop + scrollRef.current.clientHeight);
+            if (remainingScroll <= 240 && hasMore) {
+                loadMore();
+            }
+
             prevScrollTop.current = currentScrollTop;
         });
-    }, [setIsNavbarHidden]);
+    }, [hasMore, loadMore, setIsNavbarHidden]);
 
     // Cancel any pending rAF on unmount
     React.useEffect(() => {
@@ -95,6 +123,15 @@ export default function ElementsPage({ params }) {
             if (rafRef.current) cancelAnimationFrame(rafRef.current);
         };
     }, []);
+
+    React.useEffect(() => {
+        const el = scrollRef.current;
+        if (!el || !hasMore) return;
+
+        if (el.scrollHeight <= el.clientHeight + 120) {
+            loadMore();
+        }
+    }, [hasMore, loadMore, visibleSheets.length]);
 
     React.useEffect(() => {
         setIsGridResizing(true);
@@ -128,7 +165,7 @@ export default function ElementsPage({ params }) {
 
     // Build the photo descriptors
     const photos = React.useMemo(() => {
-        return existingSheets.reduce((acc, workflow, i) => {
+        return visibleSheets.reduce((acc, workflow, i) => {
             const primaryItem = getPrimaryMedia(workflow);
             if (!primaryItem) return acc;
 
@@ -152,8 +189,12 @@ export default function ElementsPage({ params }) {
             });
             return acc;
         }, []);
-    }, [existingSheets]);
+    }, [visibleSheets]);
 
+
+    if (isLoading && existingSheets.length === 0) {
+        return <LoadingScreen message="Loading elements" />
+    }
 
     return (
         <div className="flex h-full w-full overflow-hidden text-white bg-[#050505] relative">
@@ -207,6 +248,11 @@ export default function ElementsPage({ params }) {
                                         ),
                                     }}
                                 />
+                                {hasMore && (
+                                    <div className="flex justify-center pt-2 text-sm text-white/45">
+                                        Scroll down to load 30 more
+                                    </div>
+                                )}
                             </motion.div>
                         ) : (
                             <motion.div 

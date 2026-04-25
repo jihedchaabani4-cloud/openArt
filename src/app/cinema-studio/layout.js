@@ -1,7 +1,7 @@
 "use client"
 
 import { usePathname } from "next/navigation"
-import { ProjectsNavbar } from "@/widgets/ProjectsNavbar/ProjectsNavbar"
+import { ProjectsNavbar } from "@/widgets/ProjectsNavbar/ProjectsNavbar";
 
 /**
  * Layout for all /projects/* routes.
@@ -10,11 +10,11 @@ import { ProjectsNavbar } from "@/widgets/ProjectsNavbar/ProjectsNavbar"
 export default function ProjectsLayout({ children }) {
     const pathname = usePathname()
 
-    const isListing = pathname === "/projects" || pathname === "/projects/new"
+    const isListing = pathname === "/cinema-studio" || pathname === "/cinema-studio/new"
 
     return (
         <div className="min-h-screen flex flex-col bg-[#050505]">
-                {isListing && <ProjectsNavbar />}
+            {isListing && <ProjectsNavbar />}
             <main className={isListing ? "pt-[75px] flex-1 flex flex-col" : "flex-1 flex flex-col"}>
                 {children}
             </main>

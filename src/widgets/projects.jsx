@@ -32,7 +32,7 @@ export function ProjectsPage() {
         // 🚀 Backend now handles automatic naming with date/time
         const project = await createProject({})
         if (project?.project_id) {
-            router.push(`/projects/${project.project_id}`)
+            router.push(`/cinema-studio/${project.project_id}`)
         }
     }
 

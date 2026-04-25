@@ -1,6 +1,6 @@
 // [FSD Layer: features/media] — Server State (React Query)
 // Canonical location for useAssets — do NOT import or redeclare in workflowsApi.js
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api} from '@/shared/api/client';
 import { queryKeys } from '@/shared/api/queryKeys';
 
@@ -64,10 +64,110 @@ export function useAssets(projectId, { enabled = false, offset = 0, type, mediaT
   });
 }
 
+export function useUserLibrary({
+  enabled = false,
+  limit = 30,
+  offset = 0,
+  projectId,
+  sessionId,
+} = {}) {
+  return useQuery({
+    queryKey: queryKeys.library.user({ limit, offset, projectId: projectId || null, sessionId: sessionId || null }),
+    queryFn: async () => {
+      const params = new URLSearchParams({
+        limit: String(limit),
+        offset: String(offset),
+      });
+
+      if (projectId) params.set("project_id", projectId);
+      if (sessionId) params.set("session_id", sessionId);
+
+      const res = await api.get(`/workflows/library?${params.toString()}`);
+      if (res.ok === false || res.success === false) {
+        throw new Error(res.message || "Failed to fetch library");
+      }
+
+      return {
+        data: res.data ?? [],
+        total: res.total ?? 0,
+        hasMore: res.hasMore ?? false,
+      };
+    },
+    enabled,
+    staleTime: 60_000,
+  });
+}
+
+export function useInfiniteUserLibrary({
+  enabled = false,
+  limit = 30,
+  projectId,
+  sessionId,
+} = {}) {
+  return useInfiniteQuery({
+    queryKey: queryKeys.library.user({
+      limit,
+      projectId: projectId || null,
+      sessionId: sessionId || null,
+      mode: "infinite",
+    }),
+    queryFn: async ({ pageParam = 0 }) => {
+      const params = new URLSearchParams({
+        limit: String(limit),
+        offset: String(pageParam),
+      });
+
+      if (projectId) params.set("project_id", projectId);
+      if (sessionId) params.set("session_id", sessionId);
+
+      const res = await api.get(`/workflows/library?${params.toString()}`);
+      if (res.ok === false || res.success === false) {
+        throw new Error(res.message || "Failed to fetch library");
+      }
+
+      const pageData = res.data ?? [];
+      const hasMore = res.hasMore ?? pageData.length === limit;
+
+      return {
+        data: pageData,
+        total: res.total ?? 0,
+        hasMore,
+        nextOffset: hasMore ? pageParam + limit : undefined,
+      };
+    },
+    initialPageParam: 0,
+    getNextPageParam: (lastPage) => lastPage.nextOffset,
+    enabled,
+    staleTime: 60_000,
+  });
+}
+
+export function useLibraryWorkflowDetail(workflowId, { enabled = true, initialData } = {}) {
+  return useQuery({
+    queryKey: queryKeys.library.detail(workflowId),
+    queryFn: async () => {
+      const res = await api.get(`/workflows/library/${workflowId}`);
+      if (res.ok === false || res.success === false) {
+        throw new Error(res.message || "Failed to fetch workflow details");
+      }
+
+      return res.data ?? null;
+    },
+    enabled: !!workflowId && enabled,
+    staleTime: 60_000,
+    initialData,
+  });
+}
+
+
 export function useUploadAsset() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ file, projectId, sessionId, metadata }) => {
+      if (!projectId) {
+        throw new Error("Cannot upload media before the active project is ready.");
+      }
+
       let payloadMeta = metadata;
       if (!payloadMeta && file) {
           payloadMeta = await getMediaMetadata(file);
