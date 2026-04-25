@@ -90,11 +90,18 @@ export function LibraryMediaGridItem({
             <Check className="h-3.5 w-3.5" strokeWidth={3} />
           </button>
 
-          {isVideo ? (
-            <div className="absolute left-3 bottom-3 z-30 inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/18 text-white shadow-[0_8px_24px_rgba(0,0,0,0.28)] backdrop-blur-md">
-              <Play className="h-3.5 w-3.5 fill-white text-white" />
-            </div>
-          ) : null}
+            <div className="absolute bottom-3 left-3 z-30 flex  items-center ">
+            {isVideo && (
+              <div className="inline-flex h-8 w-8 items-center justify-center rounded-full text-white ">
+                <Play className="h-3.5 w-3.5 fill-white text-white" />
+              </div>
+            )}
+            {isLiked && (
+              <div className="inline-flex h-8 w-8 items-center justify-center rounded-full  text-white ">
+                <Heart className="h-3.5 w-3.5 fill-white text-white" />
+              </div>
+            )}
+          </div>
 
           <ImageStatusView
             status={status}
@@ -140,11 +147,6 @@ export function LibraryMediaGridItem({
             </div>
           </div>
 
-          {(isLiked || isVideo) && (
-            <div className="absolute bottom-3 left-3 z-20 flex items-center gap-2 pointer-events-none drop-shadow-md">
-              {isLiked && <Heart className="size-4 fill-white text-white" />}
-            </div>
-          )}
         </div>
       </article>
 
