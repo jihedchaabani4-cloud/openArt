@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Check, Heart, Play, Trash2 } from "lucide-react";
 
@@ -36,6 +36,7 @@ export function LibraryMediaGridItem({
   style,
 }) {
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  const videoRef = useRef(null);
   const router = useRouter();
   const { mutate: toggleLike } = useToggleWorkflowLike();
   const { mutate: removeWorkflow } = useRemoveWorkflow();
@@ -52,6 +53,17 @@ export function LibraryMediaGridItem({
       <article
         onClick={() => {
           if (workflow.id) router.push(`/assets/${workflow.id}`);
+        }}
+        onMouseEnter={() => {
+          if (isVideo && videoRef.current) {
+            videoRef.current.play().catch(() => {});
+          }
+        }}
+        onMouseLeave={() => {
+          if (isVideo && videoRef.current) {
+            videoRef.current.pause();
+            videoRef.current.currentTime = 0;
+          }
         }}
         className={cn(
           "group relative cursor-pointer overflow-hidden rounded-[14px] bg-[#0a0a0a] shadow-lg transition-all duration-300 hover:shadow-2xl",
@@ -78,6 +90,12 @@ export function LibraryMediaGridItem({
             <Check className="h-3.5 w-3.5" strokeWidth={3} />
           </button>
 
+          {isVideo ? (
+            <div className="absolute left-3 bottom-3 z-30 inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/18 text-white shadow-[0_8px_24px_rgba(0,0,0,0.28)] backdrop-blur-md">
+              <Play className="h-3.5 w-3.5 fill-white text-white" />
+            </div>
+          ) : null}
+
           <ImageStatusView
             status={status}
             src={media.url}
@@ -89,16 +107,12 @@ export function LibraryMediaGridItem({
           >
             {isVideo && media.url ? (
               <video
+                ref={videoRef}
                 src={media.url}
                 className="h-full w-full object-cover"
                 muted
                 loop
                 playsInline
-                onMouseEnter={(e) => e.currentTarget.play().catch(() => {})}
-                onMouseLeave={(e) => {
-                  e.currentTarget.pause();
-                  e.currentTarget.currentTime = 0;
-                }}
               />
             ) : null}
           </ImageStatusView>
@@ -129,7 +143,6 @@ export function LibraryMediaGridItem({
           {(isLiked || isVideo) && (
             <div className="absolute bottom-3 left-3 z-20 flex items-center gap-2 pointer-events-none drop-shadow-md">
               {isLiked && <Heart className="size-4 fill-white text-white" />}
-              {isVideo && <Play className="size-4 fill-white text-white" />}
             </div>
           )}
         </div>
