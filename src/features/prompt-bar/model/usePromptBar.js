@@ -70,12 +70,16 @@ export function usePromptBar({ isNewProject = false } = {}) {
   );
 
   // ─── Model sync (extracted hook) ──────────────────────────────────────────
-  const { model, setModel, selectedModel, maxRefs } = useModelSync(
+  const { model, selectedModel, maxRefs } = useModelSync(
     studioModels,
     studioModelsLoading,
     generationMode,
     modelId
   );
+
+  const setModel = useCallback((nextModel) => {
+    setModelId(nextModel?.id ?? null);
+  }, [setModelId]);
 
   useEffect(() => {
     console.log("🎯 [usePromptBar] Sync Check:", {
@@ -230,7 +234,7 @@ export function usePromptBar({ isNewProject = false } = {}) {
         section:          (generationMode === "motion" || generationMode === "motion-control") ? "motion" : (isVideo ? "video_studio" : "image_generator"),
         project_id:       isNewProject ? null : projectId,
         session_id:       isNewProject ? null : activeSessionId,
-        reference_workflow_ids: referenceImages.map(r => r.workflow_id).filter(Boolean),
+        reference_workflow_ids: referenceImages.map(r => r.workflowId || r.workflow_id || r.id || r.asset_id).filter(Boolean),
         references:       buildReferencesPayload(referenceImages),
       };
 

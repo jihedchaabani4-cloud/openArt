@@ -160,99 +160,150 @@ export function useLibraryWorkflowDetail(workflowId, { enabled = true, initialDa
 }
 
 
-export function useUploadAsset() {
+export function useBatchUploadAssets() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ file, projectId, sessionId, metadata }) => {
-      if (!projectId) {
-        throw new Error("Cannot upload media before the active project is ready.");
-      }
-
-      let payloadMeta = metadata;
-      if (!payloadMeta && file) {
-          payloadMeta = await getMediaMetadata(file);
-      }
-
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("project_id", projectId || "");
-      formData.append("session_id", sessionId || "");
-      if (payloadMeta) formData.append("metadata", JSON.stringify(payloadMeta));
-      return await api.postForm("/assets/upload", formData);
+    mutationFn: async ({ files, projectId, sessionId }) => {
+      if (!projectId) throw new Error("Project ID required");
+      
+      const results = await Promise.all(files.map(async (file) => {
+        // Since we already calculated metadata in onMutate, we can pass it here or re-calculate.
+        // To keep it simple and parallel, we re-calculate if needed, or better, pass a metadata map.
+        const metadata = await getMediaMetadata(file); 
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("project_id", projectId);
+        formData.append("session_id", sessionId || "");
+        if (metadata) formData.append("metadata", JSON.stringify(metadata));
+        return api.postForm("/assets/upload", formData);
+      }));
+      
+      return results;
     },
 
-    // ── Optimistic Update: inject a 'uploading' entry into the timeline cache ──
-    onMutate: async ({ file, projectId, sessionId }) => {
-      const queryKey = queryKeys.generations.byProject(projectId, sessionId);
+    onMutate: async ({ files, projectId, sessionId }) => {
+      const generationsKey = queryKeys.generations.byProject(projectId, sessionId);
+      const projectDataKey = queryKeys.projectData.byProject(projectId);
 
-      // Extract real dimensions first for accurate aspect ratio preview
-      const metadata = await getMediaMetadata(file);
+      await queryClient.cancelQueries({ queryKey: generationsKey });
+      await queryClient.cancelQueries({ queryKey: projectDataKey });
 
-      // Cancel any in-flight refetches so they don't overwrite our optimistic entry
-      await queryClient.cancelQueries({ queryKey });
+      const previousGenerations = queryClient.getQueryData(generationsKey);
+      const previousProjectData  = queryClient.getQueryData(projectDataKey);
 
-      // Snapshot current data so we can roll back on error
-      const previousData = queryClient.getQueryData(queryKey);
+      const optimisticWorkflows = [];
+      const optimisticMediaItems = [];
+      const optimisticEntries = [];
+      const localUrls = [];
 
-      // Build the synthetic optimistic entry
-      const optimisticId = `optimistic-upload-${Date.now()}`;
-      const isVideo = file?.type?.startsWith('video/');
-      const localUrl = file ? URL.createObjectURL(file) : null;
+      // Parallelize metadata extraction
+      const metadatas = await Promise.all(files.map(f => getMediaMetadata(f)));
 
-      const optimisticEntry = {
-        feed_type:       'upload',
-        id:              optimisticId,
-        type:            isVideo ? 'video' : 'image',
-        status:          'uploading',
-        model:           null,
-        model_label:     'Upload',
-        model_icon_url:  null,
-        params:          { prompt: isVideo ? 'Vidéo importée' : 'Image importée' },
-        session_id:      sessionId,
-        created_at:      new Date().toISOString(),
-        items: [{
-          id:         `${optimisticId}-item`,
-          index:      0,
-          status:     'uploading',
-          is_liked:   false,
-          duration_ms: 0,
-          asset: {
-            id:         optimisticId,
-            file_url:   localUrl,
-            mime_type:  file?.type || 'image/jpeg',
-            asset_type: 'uploaded',
-            media_type: isVideo ? 'video' : 'image',
-            meta_data: metadata,  // ← use DB column name for correct ratio in displayUtils
+      files.forEach((file, idx) => {
+        const metadata = metadatas[idx];
+        const optimisticId = `optimistic-upload-${Date.now()}-${idx}`;
+        const isVideo = file.type.startsWith('video/');
+        const localUrl = URL.createObjectURL(file);
+        localUrls.push(localUrl);
+
+        // Timeline format
+        optimisticEntries.push({
+          feed_type:       'upload',
+          id:              optimisticId,
+          type:            isVideo ? 'video' : 'image',
+          status:          'uploading',
+          model:           null,
+          model_label:     'Upload',
+          model_icon_url:  null,
+          params:          { prompt: isVideo ? 'Vidéo importée' : 'Image importée' },
+          session_id:      sessionId,
+          created_at:      new Date().toISOString(),
+          items: [{
+            id:         `${optimisticId}-item`,
+            index:      0,
+            status:     'uploading',
+            is_liked:   false,
+            duration_ms: 0,
+            asset: {
+              id:         optimisticId,
+              file_url:   localUrl,
+              mime_type:  file.type || 'image/jpeg',
+              asset_type: 'uploaded',
+              media_type: isVideo ? 'video' : 'image',
+              meta_data: metadata,
+            }
+          }]
+        });
+
+        // ProjectData format
+        optimisticWorkflows.push({
+          name:          optimisticId,
+          projectId:     projectId,
+          workflow_type: 'GENERATION',
+          metadata: {
+            displayName:    isVideo ? 'Vidéo importée' : 'Image importée',
+            createTime:     new Date().toISOString(),
+            primaryMediaId: `${optimisticId}-item`,
+            sessionId:      sessionId,
+            favorited:      false,
+          },
+        });
+
+        optimisticMediaItems.push({
+          id:             `${optimisticId}-item`,
+          name:           `${optimisticId}-item`,
+          url:            localUrl,
+          status:         'uploading',
+          projectId:      projectId,
+          workflowId:     optimisticId,
+          workflowStepId: 'upload',
+          mediaMetadata: {
+            createTime: new Date().toISOString(),
+            visibility: 'PRIVATE',
+          },
+          [isVideo ? 'video' : 'image']: {
+            dimensions: metadata ? { width: metadata.width, height: metadata.height } : { width: 1024, height: 1024 },
+            [isVideo ? 'generatedVideo' : 'generatedImage']: null,
           }
-        }]
-      };
+        });
+      });
 
-      // Inject it at the beginning of the cached list (newest first)
-      queryClient.setQueryData(queryKey, (old) => {
+      // Apply Updates to all matching queries
+      queryClient.setQueriesData({ queryKey: queryKeys.generations.all() }, (old) => {
         const list = Array.isArray(old) ? old : (old?.data ?? []);
-        return [optimisticEntry, ...list];
+        return [...optimisticEntries, ...list];
       });
 
-      return { previousData, queryKey, localUrl };
+      queryClient.setQueriesData({ queryKey: ["projectData", projectId] }, (old) => {
+        if (!old) return old;
+        return {
+          ...old,
+          projectContents: {
+            ...old.projectContents,
+            workflows: [...optimisticWorkflows,  ...(old.projectContents?.workflows || [])],
+            media:     [...optimisticMediaItems, ...(old.projectContents?.media     || [])],
+          }
+        };
+      });
+
+      return { previousGenerations, previousProjectData, generationsKey, projectDataKey, localUrls };
     },
 
-    // ── Roll back on error ──────────────────────────────────────────────────────
     onError: (_err, _vars, context) => {
-      if (context?.queryKey && context?.previousData !== undefined) {
-        queryClient.setQueryData(context.queryKey, context.previousData);
+      if (context?.generationsKey && context?.previousGenerations !== undefined) {
+        queryClient.setQueryData(context.generationsKey, context.previousGenerations);
       }
-      if (context?.localUrl) URL.revokeObjectURL(context.localUrl);
+      if (context?.projectDataKey && context?.previousProjectData !== undefined) {
+        queryClient.setQueryData(context.projectDataKey, context.previousProjectData);
+      }
+      context?.localUrls?.forEach(url => URL.revokeObjectURL(url));
     },
 
-    // ── Always refetch & clean up object URL after completion ──────────────────
     onSettled: (_data, _err, variables, context) => {
-      if (context?.localUrl) URL.revokeObjectURL(context.localUrl);
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.assets.byProject(variables.projectId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.generations.byProject(variables.projectId, variables.sessionId),
-      });
+      context?.localUrls?.forEach(url => URL.revokeObjectURL(url));
+      queryClient.invalidateQueries({ queryKey: queryKeys.assets.byProject(variables.projectId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.generations.byProject(variables.projectId, variables.sessionId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.projectData.byProject(variables.projectId) });
     },
   });
 }
@@ -260,37 +311,47 @@ export function useUploadAsset() {
 export function useRemoveAsset() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ assetId }) => {
+    mutationFn: async ({ assetId, projectId }) => {
       const res = await api.delete(`/assets/${assetId}`);
       if (res.ok === false) throw new Error(res.error || 'Failed to delete asset');
       return res;
     },
 
-    onMutate: async ({ assetId }) => {
-      // Cancel any in-flight refetches
-      await queryClient.cancelQueries({ queryKey: queryKeys.generations.all() });
+    onMutate: async ({ assetId, projectId }) => {
+      if (!projectId) return {};
+      const projectKey = queryKeys.projectData.byProject(projectId);
 
-      // Snapshot current data for fallback
-      const previousGenerations = queryClient.getQueriesData({ queryKey: queryKeys.generations.all() });
+      await queryClient.cancelQueries({ queryKey: projectKey });
+      const previousData = queryClient.getQueryData(projectKey);
 
-      // Optimistically update the caches
-      queryClient.setQueriesData({ queryKey: queryKeys.generations.all() }, (old) => {
-        const list = Array.isArray(old) ? old : (old?.data ?? []);
-        return list.filter(item => item.id !== assetId);
-      });
+      if (previousData) {
+        queryClient.setQueryData(projectKey, (old) => {
+          if (!old) return old;
+          return {
+            ...old,
+            projectContents: {
+              ...old.projectContents,
+              media: (old.projectContents?.media || []).filter(
+                m => m.id !== assetId && m.name !== assetId
+              )
+            }
+          };
+        });
+      }
 
-      return { previousGenerations };
+      return { previousData, projectKey };
     },
 
     onError: (_err, _vars, context) => {
-      if (context?.previousGenerations) {
-        context.previousGenerations.forEach(([queryKey, data]) => {
-          queryClient.setQueryData(queryKey, data);
-        });
+      if (context?.previousData) {
+        queryClient.setQueryData(context.projectKey, context.previousData);
       }
     },
 
-    onSettled: () => {
+    onSettled: (res, err, variables) => {
+      if (variables.projectId) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.projectData.byProject(variables.projectId) });
+      }
       queryClient.invalidateQueries({ queryKey: queryKeys.assets.all() });
       queryClient.invalidateQueries({ queryKey: queryKeys.generations.all() });
     },

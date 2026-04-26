@@ -156,8 +156,6 @@ export function ImageStatusView({
             }}
           />
           <div className="absolute inset-0 bg-black/18" />
-
-
         </div>
       ) : isFailed || isRejected ? (
         <div className="w-full h-full relative overflow-hidden bg-[#0f1012] p-4 text-center">

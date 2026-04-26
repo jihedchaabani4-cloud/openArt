@@ -45,7 +45,7 @@ export function useDeleteProject() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (projectId) => {
-      const res = await api.delete(`/cinema-studio/${projectId}`);
+      const res = await api.delete(`/projects/${projectId}`);
       if (res.ok === false || res.success === false) throw new Error(res.message || 'Failed to delete project');
       return projectId;
     },
@@ -59,7 +59,7 @@ export function useUpdateProject() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ projectId, projectData }) => {
-      const res = await api.patch(`/cinema-studio/${projectId}`, projectData);
+      const res = await api.patch(`/projects/${projectId}`, projectData);
       if (res.ok === false || res.success === false) throw new Error(res.message || 'Failed to update project');
       return res.data;
     },

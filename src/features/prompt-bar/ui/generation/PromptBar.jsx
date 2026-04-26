@@ -138,7 +138,11 @@ export default function PromptBar({ hideBackground = false, isNewProject = false
                     }}
                     onUploadFromPC={(files) => {
                         const items = Array.isArray(files) ? files : [files];
-                        items.forEach((file) => s.handleUploadFromPC?.(file, targetRole));
+                        if (items.length > 1) {
+                            s.handleBatchUpload?.(items, targetRole);
+                        } else {
+                            s.handleUploadFromPC?.(items[0], targetRole);
+                        }
 
                         if (mentionCallback && files.length > 0) {
                             mentionCallback(items);
@@ -245,7 +249,25 @@ export default function PromptBar({ hideBackground = false, isNewProject = false
                     e.preventDefault();
                     e.stopPropagation();
                     if (e.dataTransfer?.files?.length > 0) {
-                        Array.from(e.dataTransfer.files).forEach((file) => {
+                        const files = Array.from(e.dataTransfer.files);
+                        
+                        if (files.length > 1) {
+                            // Collect roles for each file (since different files might have different roles)
+                            // But usually on a single drop area, they share the same base role logic.
+                            // For simplicity, we use the same role determination for the batch if they are all images/videos.
+                            
+                            let role = "normal";
+                            const firstIsVideo = files[0].type.startsWith("video/");
+                            if (["motion-control", "motion"].includes(s.generationMode)) {
+                                role = firstIsVideo ? "mc_video" : "mc_image";
+                            } else if (s.generationMode === "keyframe") {
+                                const hasStart = s.referenceImages.some(r => r.role === 'start');
+                                role = hasStart ? "end" : "start";
+                            }
+
+                            s.handleBatchUpload?.(files, role);
+                        } else {
+                            const file = files[0];
                             let role = "normal";
                             const isVideo = file.type.startsWith("video/");
                             
@@ -257,7 +279,7 @@ export default function PromptBar({ hideBackground = false, isNewProject = false
                             }
                             
                             s.handleUploadFromPC?.(file, role);
-                        });
+                        }
                     }
                 }}
             >

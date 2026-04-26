@@ -102,18 +102,80 @@ export function useGenerateMutation({ onError } = {}) {
       if (!res.ok) throw new Error(res.message || 'Workflow execution failed');
       return res;
     },
-    onMutate: async () => {
+    onMutate: async ({ payload, isVideo }) => {
       useWorkflowsStore.getState().fireScrollToTop();
-      return {};
+      
+      const projectId = payload.project_id;
+      if (!projectId) return {};
+
+      const projectKey = queryKeys.projectData.byProject(projectId);
+      await queryClient.cancelQueries({ queryKey: projectKey });
+      const previousData = queryClient.getQueryData(projectKey);
+
+      if (previousData) {
+        const optimisticId = `optimistic-gen-${Date.now()}`;
+        const sessionId = payload.session_id;
+
+        const optimisticWorkflow = {
+          name: optimisticId,
+          projectId: projectId,
+          workflow_type: 'GENERATION',
+          metadata: {
+            displayName: payload.prompt || (isVideo ? "Video Generation" : "Image Generation"),
+            createTime: new Date().toISOString(),
+            sessionId: sessionId,
+            favorited: false,
+          }
+        };
+
+        const optimisticMedia = {
+          id: `${optimisticId}-item`,
+          name: `${optimisticId}-item`,
+          url: null, // Placeholder
+          status: 'pending',
+          projectId: projectId,
+          workflowId: optimisticId,
+          workflowStepId: 'GEN',
+          mediaMetadata: {
+            createTime: new Date().toISOString(),
+            visibility: 'PRIVATE',
+          },
+          generationConfig: {
+            prompt: payload.prompt,
+            model: payload.model_name || payload.model,
+            ratio: payload.aspect_ratio || payload.ratio,
+          },
+          [isVideo ? 'video' : 'image']: {
+            dimensions: { width: 1024, height: 1024 },
+            [isVideo ? 'generatedVideo' : 'generatedImage']: null,
+          }
+        };
+
+        queryClient.setQueryData(projectKey, (old) => {
+          if (!old) return old;
+          return {
+            ...old,
+            projectContents: {
+              ...old.projectContents,
+              workflows: [optimisticWorkflow, ...(old.projectContents?.workflows || [])],
+              media: [optimisticMedia, ...(old.projectContents?.media || [])]
+            }
+          };
+        });
+      }
+
+      return { previousData, projectKey };
     },
-    onError: (err) => {
+    onError: (err, variables, context) => {
       console.error('❌ Workflow execution failed:', err);
+      if (context?.previousData) {
+        queryClient.setQueryData(context.projectKey, context.previousData);
+      }
       if (typeof onError === 'function') onError(err);
     },
     onSuccess: (res, { payload }) => {
       const { project_id: projectId } = payload || {};
       if (projectId) {
-        // 🔥 Invalidate for instant update
         queryClient.invalidateQueries({ queryKey: queryKeys.projectData.byProject(projectId) });
       }
     },
@@ -130,12 +192,73 @@ export function useCreateElementSheetMutation({ onError } = {}) {
       if (!res.ok) throw new Error(res.message || 'Element sheet creation failed');
       return res;
     },
-    onMutate: () => {
+    onMutate: async ({ payload }) => {
       useWorkflowsStore.getState().fireScrollToTop();
-      return {};
+      
+      const projectId = payload.project_id;
+      if (!projectId) return {};
+
+      const projectKey = queryKeys.projectData.byProject(projectId);
+      await queryClient.cancelQueries({ queryKey: projectKey });
+      const previousData = queryClient.getQueryData(projectKey);
+
+      if (previousData) {
+        const optimisticId = `optimistic-element-${Date.now()}`;
+        
+        const optimisticWorkflow = {
+          name: optimisticId,
+          projectId: projectId,
+          workflow_type: 'ELEMENT_SHEET',
+          metadata: {
+            displayName: payload.prompt || "Element Sheet",
+            createTime: new Date().toISOString(),
+            sessionId: payload.session_id,
+            favorited: false,
+          }
+        };
+
+        const optimisticMedia = {
+          id: `${optimisticId}-item`,
+          name: `${optimisticId}-item`,
+          url: null,
+          status: 'pending',
+          projectId: projectId,
+          workflowId: optimisticId,
+          workflowStepId: 'CAE',
+          mediaMetadata: {
+            createTime: new Date().toISOString(),
+            visibility: 'PRIVATE',
+          },
+          generationConfig: {
+            prompt: payload.prompt,
+            model: payload.model_name || payload.model,
+          },
+          image: {
+            dimensions: { width: 1024, height: 1024 },
+            generatedImage: null,
+          }
+        };
+
+        queryClient.setQueryData(projectKey, (old) => {
+          if (!old) return old;
+          return {
+            ...old,
+            projectContents: {
+              ...old.projectContents,
+              workflows: [optimisticWorkflow, ...(old.projectContents?.workflows || [])],
+              media: [optimisticMedia, ...(old.projectContents?.media || [])]
+            }
+          };
+        });
+      }
+
+      return { previousData, projectKey };
     },
-    onError: (err) => {
-      console.error('❌ Character sheet creation failed:', err);
+    onError: (err, variables, context) => {
+      console.error('❌ Element sheet creation failed:', err);
+      if (context?.previousData) {
+        queryClient.setQueryData(context.projectKey, context.previousData);
+      }
       if (typeof onError === 'function') onError(err);
     },
     onSuccess: (res, { payload }) => {
@@ -176,24 +299,59 @@ export function useExtendVideoMutation({ onError } = {}) {
 export function useRemoveWorkflow() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (workflowIdOrIds) => {
-      const workflowIds = Array.isArray(workflowIdOrIds)
-        ? workflowIdOrIds.filter(Boolean)
-        : [workflowIdOrIds].filter(Boolean);
+    mutationFn: async ({ workflowId, workflowIds, projectId }) => {
+      const ids = workflowIds || (workflowId ? [workflowId] : []);
+      if (ids.length === 0) throw new Error("workflowId is required");
 
-      if (workflowIds.length === 0) throw new Error("workflowId is required");
-
-      const res = workflowIds.length === 1
-        ? await api.delete(`/workflows/workflows/${workflowIds[0]}`)
+      const res = ids.length === 1
+        ? await api.delete(`/workflows/workflows/${ids[0]}`)
         : await api.delete(`/workflows/workflows`, {
-            body: JSON.stringify({ workflow_ids: workflowIds }),
+            body: JSON.stringify({ workflow_ids: ids }),
           });
 
       if (!res.ok) throw new Error(res.message);
-      return workflowIds;
+      return ids;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['projectData'] });
+
+    onMutate: async ({ workflowId, workflowIds, projectId }) => {
+      if (!projectId) return {};
+      const idsToRemove = workflowIds || (workflowId ? [workflowId] : []);
+      const projectKey = queryKeys.projectData.byProject(projectId);
+
+      await queryClient.cancelQueries({ queryKey: projectKey });
+      const previousData = queryClient.getQueryData(projectKey);
+
+      if (previousData) {
+        queryClient.setQueryData(projectKey, (old) => {
+          if (!old) return old;
+          return {
+            ...old,
+            projectContents: {
+              ...old.projectContents,
+              workflows: (old.projectContents?.workflows || []).filter(
+                wf => !idsToRemove.includes(wf.id) && !idsToRemove.includes(wf.name)
+              ),
+              media: (old.projectContents?.media || []).filter(
+                m => !idsToRemove.includes(m.workflowId)
+              )
+            }
+          };
+        });
+      }
+
+      return { previousData, projectKey, projectId };
+    },
+
+    onError: (err, variables, context) => {
+      if (context?.previousData) {
+        queryClient.setQueryData(context.projectKey, context.previousData);
+      }
+    },
+
+    onSettled: (res, err, variables) => {
+      if (variables.projectId) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.projectData.byProject(variables.projectId) });
+      }
       queryClient.invalidateQueries({ queryKey: queryKeys.library.all() });
     },
   });
@@ -300,8 +458,53 @@ export function useMoveWorkflow() {
       if (!res.ok) throw new Error(res.message || 'Failed to move workflow');
       return res;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['projectData'] });
+
+    onMutate: async ({ workflowId, sessionId, projectId }) => {
+      // 1. Cancel in-flight queries
+      const projectKey = queryKeys.projectData.byProject(projectId);
+      await queryClient.cancelQueries({ queryKey: projectKey });
+
+      // 2. Snapshot current state
+      const previousData = queryClient.getQueryData(projectKey);
+
+      // 3. Optimistically update
+      if (previousData) {
+        queryClient.setQueryData(projectKey, (old) => {
+          if (!old?.projectContents?.workflows) return old;
+          
+          return {
+            ...old,
+            projectContents: {
+              ...old.projectContents,
+              workflows: old.projectContents.workflows.map(wf => {
+                if (wf.id === workflowId || wf.name === workflowId) {
+                  return {
+                    ...wf,
+                    session_id: sessionId,
+                    metadata: {
+                      ...(wf.metadata || {}),
+                      sessionId: sessionId
+                    }
+                  };
+                }
+                return wf;
+              })
+            }
+          };
+        });
+      }
+
+      return { previousData, projectKey };
+    },
+
+    onError: (err, variables, context) => {
+      if (context?.previousData) {
+        queryClient.setQueryData(context.projectKey, context.previousData);
+      }
+    },
+
+    onSettled: (res, err, variables) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.projectData.byProject(variables.projectId) });
     },
   });
 }

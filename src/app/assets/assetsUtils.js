@@ -23,24 +23,19 @@ export function formatDateHeading(value) {
 
 export function resolveLibraryCategory(entry) {
   const workflowType = (entry?.workflow?.workflow_type || "").toUpperCase();
-  const haystack = [
-    entry?.workflow?.display_name,
-    entry?.generation_info?.prompt,
-  ]
-    .filter(Boolean)
-    .join(" ")
-    .toLowerCase();
+  const displayName = (entry?.workflow?.display_name || "").toLowerCase();
+  const prompt = (entry?.generation_info?.prompt || "").toLowerCase();
+  const haystack = [displayName, prompt].filter(Boolean).join(" ");
 
+  // 1. Structured Element Sheets
   if (workflowType === "ELEMENT_SHEET") {
     if (haystack.includes("product")) return "product";
     if (haystack.includes("location")) return "location";
+    // Default for Element Sheets is character
     return "character";
   }
 
-  if (haystack.includes("product")) return "product";
-  if (haystack.includes("location")) return "location";
-  if (haystack.includes("character")) return "character";
-
+  // 2. All other generations (Image/Video) go to Media
   return "media";
 }
 

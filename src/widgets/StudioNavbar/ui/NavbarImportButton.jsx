@@ -16,17 +16,14 @@ export function NavbarImportButton() {
     if (!projectId) return;
     fileInputRef.current?.click();
   };
-
   const handleFileChange = async (e) => {
     const files = Array.from(e.target.files ?? []);
     if (files.length === 0) return;
 
-    for (const file of files) {
-        try {
-            await lib.handleUpload(file, activeSessionId);
-        } catch (err) {
-            console.error("Upload failed for file:", file.name, err);
-        }
+    try {
+        await lib.handleUpload(files, activeSessionId);
+    } catch (err) {
+        console.error("Batch upload failed in Navbar:", err);
     }
     
     // Reset the input so the same file can be uploaded again if needed

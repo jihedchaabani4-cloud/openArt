@@ -6,7 +6,7 @@ import { getPrimaryMedia, getItemMetadata } from "@/shared/lib/generationUtils";
 import dynamic from "next/dynamic";
 const WorkflowMediaCanvas = dynamic(() => import("@/features/workflows/ui/WorkflowMediaCanvas").then(mod => mod.WorkflowMediaCanvas), { ssr: false });
 import { useEditStore } from "@/features/prompt-bar/model/useEditStore";
-import { useUploadAsset } from "@/features/media/api/mediaApi";
+import { useBatchUploadAssets } from "@/features/media/api/mediaApi";
 
 export function WorkflowMediaPreview({
   workflow,
@@ -55,7 +55,7 @@ export function WorkflowMediaPreview({
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
 
-  const { mutateAsync: uploadAsset } = useUploadAsset();
+  const { mutateAsync: uploadBatch } = useBatchUploadAssets();
 
   // FIX 1: Sync `muted` DOM attribute directly — React doesn't propagate
   // the `muted` prop to the DOM element reliably (known React issue).
@@ -126,8 +126,8 @@ export function WorkflowMediaPreview({
       const resolvedProjectId = projectId || workflow.project_id || activeItem?.project_id;
       const resolvedSessionId = sessionId || workflow.session_id || workflow.metadata?.sessionId || activeItem?.session_id;
 
-      await uploadAsset({
-        file,
+      await uploadBatch({
+        files: [file],
         projectId: resolvedProjectId,
         sessionId: resolvedSessionId,
       });

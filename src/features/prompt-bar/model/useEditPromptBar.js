@@ -141,10 +141,10 @@ export function useEditPromptBar() {
               ratio,
               edit_type:        "camera",
               project_id:       projectId,
-              session_id:       activeSessionId,
+              session_id:       activeSessionId || editTarget?.session_id,
               workflow_id:      editTarget?.workflow_id,
               video_workflow_id: editTarget?.workflow_id,
-              reference_workflow_ids: referenceImages.map(r => r.workflow_id).filter(Boolean),
+              reference_workflow_ids: referenceImages.map(r => r.workflowId || r.workflow_id || r.id || r.asset_id).filter(Boolean),
           };
 
           try {
@@ -168,13 +168,13 @@ export function useEditPromptBar() {
               rotation:                cameraState.rotation ?? 0,
               tilt:                    cameraState.tilt    ?? 0,
               zoom:                    cameraState.zoom    ?? 6,
-              project_id:              projectId,
-              session_id:              activeSessionId,
+              project_id:       projectId,
+              session_id:       activeSessionId || editTarget?.session_id,
               workflow_id:             editTarget?.workflow_id,
               ratio,
               quality:                 resolution,
               model_name:              "seedream-pro",
-              reference_workflow_ids:  referenceImages.map(r => r.workflow_id).filter(Boolean),
+              reference_workflow_ids:  referenceImages.map(r => r.workflowId || r.workflow_id || r.id || r.asset_id).filter(Boolean),
           };
 
           try {
@@ -203,10 +203,10 @@ export function useEditPromptBar() {
         edit_type:        "edit",
         section:          "image_generator",
         project_id:       projectId,
-        session_id:       activeSessionId,
+        session_id:       activeSessionId || editTarget?.session_id,
         workflow_id:      editTarget?.workflow_id,
         video_workflow_id: editTarget?.workflow_id,
-        reference_workflow_ids: referenceImages.map(r => r.workflow_id).filter(Boolean),
+        reference_workflow_ids: referenceImages.map(r => r.workflowId || r.workflow_id || r.id || r.asset_id).filter(Boolean),
         mask_selection:   selection,
         activeTab:        activeTab,
         upscaleScale:     upscaleScale,

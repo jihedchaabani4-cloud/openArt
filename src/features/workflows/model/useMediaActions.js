@@ -27,16 +27,9 @@ export function useWorkflowActions(workflow, item = null) {
     activeSessionId,
   } = useWorkflowsStore();
 
-  const editStore = useEditStore();
-  const elementStore = useElementStore();
-  const promptStore = usePromptStore();
-
   const { mutate: toggleLike } = useToggleWorkflowLike();
   const { mutate: removeWorkflow } = useRemoveWorkflow();
   const { mutate: removeAsset } = useRemoveAsset();
-
-  // Determine which store to use for prompt/reference actions
-  const activeStore = isEditPage ? editStore : promptStore;
 
   // If item is provided, use it. Otherwise, use the primary item of the workflow.
   const targetItem = item || getPrimaryMedia(workflow);
@@ -46,7 +39,9 @@ export function useWorkflowActions(workflow, item = null) {
   const workflowSessionId = workflow?.metadata?.sessionId ?? workflow?.session_id ?? null;
   const isSameSession = !activeSessionId || !workflowSessionId || workflowSessionId === activeSessionId;
   const isInProgress = ["processing", "pending", "uploading"].includes(metadata?.status);
+  const isUpload = targetItem?.workflowStepId === "upload" || !targetItem?.generationConfig;
   const canUseAsInput = isSameSession && metadata?.status === "completed" && !!url;
+  const canReuseSettings = isSameSession && !isInProgress && !isUpload;
   const canEnterEdit = isSameSession && (metadata?.status === "completed" || isInProgress);
   // Delete is allowed cross-session in UI (server enforces auth separately);
   // only block while a job is in progress to avoid race/confusion.
@@ -66,10 +61,11 @@ export function useWorkflowActions(workflow, item = null) {
 
   const handleDelete = () => {
     if (!canDelete) return;
+    const projectId = workflow.projectId || workflow.project_id;
     if (item) {
-      removeAsset(item.name || item.id);
+      removeAsset({ assetId: item.name || item.id, projectId });
     } else {
-      removeWorkflow(workflow.name || workflow.id);
+      removeWorkflow({ workflowId: workflow.name || workflow.id, projectId });
     }
   };
 
@@ -78,11 +74,15 @@ export function useWorkflowActions(workflow, item = null) {
   };
 
   const handleReuseSettings = () => {
-    if (!canUseAsInput) return;
+    if (!canReuseSettings) return;
 
     if (isElementSheet) {
       const draft = buildElementSheetDraft(workflow, targetItem);
       if (!draft) return;
+
+      const elementStore = useElementStore.getState();
+      const promptStore = usePromptStore.getState();
+      const editStore = useEditStore.getState();
 
       elementStore.hydrateElementDraft({
         mode: draft.mode,
@@ -121,7 +121,16 @@ export function useWorkflowActions(workflow, item = null) {
     }
 
     const config = (targetItem?.generationConfig) || getPrimaryMediaConfig(workflow) || {};
-    const modelName = config.model_name || config.model || "";
+    const params = targetItem?.params || {};
+    const modelName = config.model_name || config.model || params.model_name || params.model || "";
+    
+    // Extract other settings from both config and params
+    const ratioVal = config.ratio || config.aspectRatio || config.aspect_ratio || params.ratio || params.aspectRatio || params.aspect_ratio || "1:1";
+    const qualityVal = config.quality || params.quality;
+    const videoResVal = config.videoResolution || params.videoResolution;
+    const durationVal = config.duration || params.duration;
+    const motionVal = config.motion || params.motion;
+    const countVal = config.count || params.count || params.num_images || 1;
     
     const refs = (config.references || []).map(r => ({
       ...r,
@@ -129,18 +138,32 @@ export function useWorkflowActions(workflow, item = null) {
     }));
 
     if (isEditPage) {
+      const editStore = useEditStore.getState();
       // In edit page, reuse settings might mean setting up the edit bar
-      editStore.setPrompt(prompt || config.prompt || "");
-      editStore.setModelId(modelName);
-      editStore.setRatio(config.ratio || config.aspectRatio || "1:1");
+      editStore.setPrompt(prompt || config.prompt || params.prompt || "");
+      editStore.setModelId(modelName || "nanobana_pro");
+      editStore.setRatio(ratioVal);
       editStore.setReferenceImages(refs);
+
+      if (editStore.setQuality) editStore.setQuality(qualityVal || "2K");
+      if (editStore.setVideoResolution) editStore.setVideoResolution(videoResVal || "1080p");
+      if (editStore.setDuration) editStore.setDuration(durationVal || "5s");
+      if (editStore.setMotion) editStore.setMotion(motionVal ?? 50);
+      if (editStore.setCount) editStore.setCount(countVal);
     } else {
+      const promptStore = usePromptStore.getState();
       // In normal page, reuse settings for the generation bar
       promptStore.setGenerationMode(isVideo ? "video" : "image");
-      promptStore.setPrompt(prompt || config.prompt || "");
-      promptStore.setModelId(modelName);
-      promptStore.setRatio(config.ratio || config.aspectRatio || "1:1");
+      promptStore.setPrompt(prompt || config.prompt || params.prompt || "");
+      promptStore.setModelId(modelName || "nanobana_pro");
+      promptStore.setRatio(ratioVal);
       promptStore.setReferenceImages(refs);
+
+      if (promptStore.setQuality) promptStore.setQuality(qualityVal || "2K");
+      if (promptStore.setVideoResolution) promptStore.setVideoResolution(videoResVal || "1080p");
+      if (promptStore.setDuration) promptStore.setDuration(durationVal || "5s");
+      if (promptStore.setMotion) promptStore.setMotion(motionVal ?? 50);
+      if (promptStore.setCount) promptStore.setCount(countVal);
     }
   };
 
@@ -149,6 +172,8 @@ export function useWorkflowActions(workflow, item = null) {
     const config = (targetItem?.generationConfig) || getPrimaryMediaConfig(workflow) || {};
     const modelName = config.model_name || config.model || "";
     const assetId = targetItem?.asset_id || targetItem?.name || targetItem?.id || "";
+
+    const editStore = useEditStore.getState();
 
     // Set edit target and redirect
     editStore.setEditTarget({ 
@@ -171,6 +196,7 @@ export function useWorkflowActions(workflow, item = null) {
       // If we are in edit page, animate might not be directly supported in the edit bar,
       // but we can add as reference if needed. For now, let's keep it consistent.
     } else {
+      const promptStore = usePromptStore.getState();
       promptStore.setGenerationMode("video");
       promptStore.clearReferences();
       promptStore.addReference({
@@ -190,6 +216,7 @@ export function useWorkflowActions(workflow, item = null) {
       is_video: isVideo 
     };
     
+    const activeStore = isEditPage ? useEditStore.getState() : usePromptStore.getState();
     activeStore.addReference(asset, "normal");
   };
 
@@ -207,6 +234,7 @@ export function useWorkflowActions(workflow, item = null) {
     handleAddToPrompt,
     handleSetParameters,
     canDelete,
+    canReuseSettings,
     isVideo,
     url,
     aspect: metadata.aspect,

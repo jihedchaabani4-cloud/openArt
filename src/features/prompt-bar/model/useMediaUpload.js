@@ -1,8 +1,5 @@
-// src/features/prompt-bar/model/useMediaUpload.js
-// ✅ Single responsibility: file upload + drag-and-drop.
-
 import { useState, useCallback } from "react";
-import { useUploadAsset } from "@/features/media/api/mediaApi";
+import { useBatchUploadAssets } from "@/features/media/api/mediaApi";
 
 const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 const ALLOWED_VIDEO_TYPES = ["video/mp4", "video/webm", "video/quicktime"];
@@ -24,7 +21,7 @@ export function useMediaUpload({ projectId, activeSessionId, addReference, refer
   const [isDragging, setIsDragging] = useState(false);
   const [uploadError, setUploadError] = useState(null);
 
-  const { mutateAsync: uploadAssetToServer } = useUploadAsset();
+  const { mutateAsync: uploadBatchToServer } = useBatchUploadAssets();
 
   // ─── Validation helper ────────────────────────────────────────────────────
   const getVideoDuration = (file) => {
@@ -80,56 +77,59 @@ export function useMediaUpload({ projectId, activeSessionId, addReference, refer
     }
 
     return { ok: true };
-  }, []);
+  }, [allowedType]);
 
-  // ─── Upload from file picker ──────────────────────────────────────────────
-  const handleUploadFromPC = useCallback(
-    async (file, role = "normal") => {
+  // ─── Main Upload Handler (Always uses batch mutation) ─────────────────────
+  const handleUpload = useCallback(
+    async (filesOrFile, role = "normal") => {
+      const files = Array.isArray(filesOrFile) ? filesOrFile : [filesOrFile];
       setUploadError(null);
 
-      // ✅ FIX: validate file type + size (and duration) before anything else
-      const fileValidation = await validateFile(file);
-      if (!fileValidation.ok) {
-        setUploadError(fileValidation.reason);
-        return;
+      // 1. Filter valid files
+      const validFiles = [];
+      for (const file of files) {
+        const v = await validateFile(file);
+        if (v.ok) validFiles.push(file);
+        else setUploadError(v.reason); // Show first error
       }
 
-      // Capacity check for normal/image_ref roles
+      if (validFiles.length === 0) return;
+
+      // 2. Truncate by capacity
+      let toUpload = validFiles;
       if (role === "normal" || role === "image_ref") {
-        const count = referenceImages.filter(
-          (r) => r.role === "normal" || r.role === "image_ref"
-        ).length;
-        if (count >= maxRefs) {
-          setUploadError(`Max ${maxRefs} references reached.`);
-          return;
-        }
+         const currentCount = referenceImages.filter(r => r.role === "normal" || r.role === "image_ref").length;
+         const available = Math.max(0, maxRefs - currentCount);
+         toUpload = validFiles.slice(0, available);
+      }
+      
+      if (toUpload.length === 0) {
+        setUploadError(`Max ${maxRefs} references reached.`);
+        return;
       }
 
       try {
         setUploading(true);
-
-        // Call the centralized upload mutation from mediaApi.js
-        const data = await uploadAssetToServer({ 
-          file, 
-          projectId: projectId ?? "", 
-          sessionId: activeSessionId ?? "" 
+        const results = await uploadBatchToServer({
+           files: toUpload,
+           projectId: projectId ?? "",
+           sessionId: activeSessionId ?? ""
         });
 
-        addReference(
-          {
-            url:      data.url,
-            asset_id: data.asset_id,
-            type:     data.type,
-            is_video: data.type === "video",
-            width:       data.width,
-            height:      data.height,
-            ratio:       data.ratio,
-            resolution:  data.resolution,
-            size:        data.size,
-          },
-          role,
-          maxRefs
-        );
+        // Add all to references (if applicable)
+        results.forEach(data => {
+           if (!data) return;
+           addReference({
+              url: data.url,
+              asset_id: data.asset_id,
+              type: data.type,
+              is_video: data.type === "video",
+              width: data.width,
+              height: data.height,
+              ratio: data.ratio
+           }, role, maxRefs);
+        });
+
       } catch (err) {
         console.error("❌ Upload failed:", err);
         setUploadError(err.message ?? "Upload failed.");
@@ -137,7 +137,7 @@ export function useMediaUpload({ projectId, activeSessionId, addReference, refer
         setUploading(false);
       }
     },
-    [projectId, activeSessionId, addReference, referenceImages, maxRefs, validateFile]
+    [projectId, activeSessionId, addReference, referenceImages, maxRefs, validateFile, uploadBatchToServer]
   );
 
   // ─── Drag-and-drop ────────────────────────────────────────────────────────
@@ -163,9 +163,7 @@ export function useMediaUpload({ projectId, activeSessionId, addReference, refer
 
       // Check if the user dropped actual files from their OS
       if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-        Array.from(e.dataTransfer.files).slice(0, maxRefs).forEach(file => {
-          handleUploadFromPC(file, role);
-        });
+        handleUpload(Array.from(e.dataTransfer.files), role);
         return;
       }
 
@@ -194,7 +192,7 @@ export function useMediaUpload({ projectId, activeSessionId, addReference, refer
         maxRefs
       );
     },
-    [addReference, maxRefs, handleUploadFromPC]
+    [addReference, maxRefs, handleUpload, allowedType]
   );
 
   return {
@@ -202,7 +200,9 @@ export function useMediaUpload({ projectId, activeSessionId, addReference, refer
     isDragging,
     uploadError,
     clearUploadError: () => setUploadError(null),
-    handleUploadFromPC,
+    handleUpload,
+    handleUploadFromPC: handleUpload, // Alias for backward compatibility
+    handleBatchUpload:  handleUpload, // Alias for backward compatibility
     handleDragEnter,
     handleDragLeave,
     handleDragOver,

@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback } from "react";
-import { useUploadAsset } from "../api/mediaApi";
+import { useBatchUploadAssets } from "../api/mediaApi";
 import { useProjectData } from "@/features/workflows/api/workflowsApi";
 
 /**
@@ -15,7 +15,7 @@ export function useMediaLibrary(projectId, initialMode = "all") {
   // Instead of querying /api/media directly, we just read from the unified project data cache
   const { data: projectData, isFetching: loading } = useProjectData(projectId);
 
-  const { mutateAsync: uploadAssetToServer } = useUploadAsset();
+  const { mutateAsync: uploadBatchToServer } = useBatchUploadAssets();
 
   const items = useMemo(() => {
     if (!projectData?.projectContents?.media) return [];
@@ -42,11 +42,23 @@ export function useMediaLibrary(projectId, initialMode = "all") {
         };
     });
 
-    // filter by 'source' ('upload' vs 'generation')
+    // filter by 'source'
     if (source !== "all") {
+       const ACCEPTED_GENERATION_STEPS = ["GEN", "EDIT", "CAE", "LIT", "VID", "UP"];
+       
        allMedia = allMedia.filter(m => {
-           const isUpload = m.workflowStepId === "upload" || !m.generationConfig;
-           return source === "upload" ? isUpload : !isUpload;
+           const stepId = (m.workflowStepId || "").toUpperCase();
+           const isGeneration = !!m.generationConfig && ACCEPTED_GENERATION_STEPS.includes(stepId);
+           
+           if (source === "upload") {
+               return !isGeneration;
+           }
+           if (source === "generation") {
+               return isGeneration;
+           }
+           
+           // specific stepId filtering (GEN, EDIT, CAE, LIT, VID, UP)
+           return stepId === source.toUpperCase();
        });
     }
 
@@ -67,19 +79,20 @@ export function useMediaLibrary(projectId, initialMode = "all") {
     // Pagination is mostly handled by caching the entire project now
   }, []);
 
-  const handleUpload = useCallback(async (file, sessionId = "") => {
+  const handleUpload = useCallback(async (filesOrFile, sessionId = "") => {
+    const files = Array.isArray(filesOrFile) ? filesOrFile : [filesOrFile];
     try {
-      const data = await uploadAssetToServer({ 
-        file, 
+      const results = await uploadBatchToServer({ 
+        files, 
         projectId: projectId ?? "", 
         sessionId 
       });
-      return data;
+      return Array.isArray(filesOrFile) ? results : results[0];
     } catch (err) {
       console.error("❌ Media Library Upload Error:", err);
       throw err;
     }
-  }, [projectId, uploadAssetToServer]);
+  }, [projectId, uploadBatchToServer]);
 
   return {
     items,

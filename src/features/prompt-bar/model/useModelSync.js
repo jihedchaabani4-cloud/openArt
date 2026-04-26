@@ -33,23 +33,13 @@ function supportsGenerationMode(model, generationMode) {
  * @returns {{ model: { id: string } | null, setModel: Function, selectedModel: object | null, maxRefs: number }}
  */
 export function useModelSync(studioModels, _studioModelsLoading, generationMode, preferredModelId = null) {
-  const [manualModelId, setManualModelId] = useState(null);
-
   const supportedModels = useMemo(
     () => studioModels.filter((item) => supportsGenerationMode(item, generationMode)),
     [studioModels, generationMode]
   );
 
   const selectedModelId = useMemo(() => {
-    // 1. Prioritize manual selection (user intent)
-    if (manualModelId) {
-      const manualModel = studioModels.find((item) => item.key === manualModelId);
-      if (manualModel) {
-        return manualModel.key;
-      }
-    }
-
-    // 2. Fallback to preferred model from store
+    // Fallback to preferred model from store
     if (preferredModelId) {
       const preferredModel = studioModels.find((item) => item.key === preferredModelId);
       if (supportsGenerationMode(preferredModel, generationMode)) {
@@ -58,7 +48,7 @@ export function useModelSync(studioModels, _studioModelsLoading, generationMode,
     }
 
     return supportedModels[0]?.key ?? studioModels[0]?.key ?? null;
-  }, [preferredModelId, manualModelId, studioModels, supportedModels, generationMode]);
+  }, [preferredModelId, studioModels, supportedModels, generationMode]);
 
   const selectedModel = useMemo(
     () => studioModels.find((item) => item.key === selectedModelId) ?? null,
@@ -75,7 +65,6 @@ export function useModelSync(studioModels, _studioModelsLoading, generationMode,
 
   return {
     model: selectedModelId ? { id: selectedModelId } : null,
-    setModel: (nextModel) => setManualModelId(nextModel?.id ?? null),
     selectedModel,
     maxRefs,
   };

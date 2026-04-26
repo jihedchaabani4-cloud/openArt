@@ -45,7 +45,7 @@ export function MediaGridItem({
     handleLike, handleDelete, handleDownload,
     handleReuseSettings, handleEdit, handleAnimate, handleAddToPrompt,
     handleSetParameters,
-    isVideo, url, isLiked, status, aspect, prompt, item, canDelete,
+    isVideo, url, isLiked, status, aspect, prompt, item, canDelete, canReuseSettings,
   } = useWorkflowActions(workflow, propItem);
 
   // ── State ──────────────────────────────────────────────────────────────
@@ -115,7 +115,7 @@ export function MediaGridItem({
   // ── Derived values (pure computation — no hooks) ───────────────────────
   const isDone   = status === "completed" && !!url;
   const isError  = ["rejected", "failed", "error"].includes(status);
-  const canReuse = item?.workflowStepId === "CAE";
+  const canReuse = workflow?.workflow_type !== "UPLOAD" && workflow?.feed_type !== "upload";
   const isElementSheet = workflow?.workflow_type === "ELEMENT_SHEET";
   const isDraggable = isDone && !isElementSheet;
 
@@ -246,7 +246,7 @@ export function MediaGridItem({
                     <ActionBtn onClick={(e) => { e.stopPropagation(); handleLike(); }}>
                       <Heart className={cn(iconCls, isLiked && "fill-[#303031] text-[#303031]")} />
                     </ActionBtn>
-                    {canReuse && !isElementSheet && (
+                    {canReuseSettings && !isElementSheet && (
                       <ActionBtn onClick={(e) => { e.stopPropagation(); handleReuseSettings(); }}>
                         <Undo2 className={iconCls} />
                       </ActionBtn>
@@ -284,10 +284,15 @@ export function MediaGridItem({
               </div>
             )}
 
-            {/* ── Error quick-delete ── */}
+            {/* ── Error quick-actions ── */}
             {isError && !isDone && (
               <div className="absolute bottom-2 right-2 z-30 pointer-events-auto">
                 <ButtonGroup className="bg-white/60 backdrop-blur-md rounded-lg">
+                  {canReuseSettings && (
+                    <ActionBtn onClick={(e) => { e.stopPropagation(); handleReuseSettings(); }} title="Reuse Settings">
+                      <Undo2 className={iconCls} />
+                    </ActionBtn>
+                  )}
                   <ActionBtn
                     onClick={(e) => { e.stopPropagation(); if (canDelete) setIsDeleteConfirmOpen(true); }}
                     disabled={!canDelete}

@@ -24,6 +24,8 @@ export function ImportMediaPopover({
   maxAllowed = 1,
   onUploadFromPC,
   anchorRef,
+  assetSource,
+  setAssetSource,
 }) {
   const {
     search,          setSearch,
@@ -173,14 +175,14 @@ export function ImportMediaPopover({
 
 
           {/* Search & Upload Bar */}
-          <div className="px-4 py-3">
+          <div className="px-4 py-3 flex flex-col gap-3 shrink-0">
             <div className="relative group">
               <Input
                 type="search"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search assets..."
-                className="h-9 rounded-lg border-none pl-9 pr-10 text-xs"
+                className="h-9 rounded-lg border-none pl-9 pr-10 text-xs bg-white/5"
               />
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/20 size-3.5" />
               <button
@@ -190,6 +192,33 @@ export function ImportMediaPopover({
               >
                 <Upload size={14} />
               </button>
+            </div>
+
+            {/* Category Filter Bar */}
+            <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-hide pb-1">
+              {[
+                { id: "all",        label: "All" },
+                { id: "upload",     label: "Uploads" },
+                { id: "gen",        label: "Generations" },
+                { id: "cae",        label: "Elements" },
+                { id: "edit",       label: "Edits" },
+                { id: "lit",        label: "Lighting" },
+                { id: "vid",        label: "Videos" },
+                { id: "up",         label: "Upscales" },
+              ].map((cat) => (
+                <button
+                  key={cat.id}
+                  onClick={() => setAssetSource?.(cat.id)}
+                  className={cn(
+                    "px-3 py-1.5 rounded-full text-[10px] font-medium uppercase tracking-wider whitespace-nowrap transition-all",
+                    (assetSource || "all") === cat.id
+                      ? "bg-white text-black"
+                      : "bg-white/5 text-white/40 hover:bg-white/10 hover:text-white/60"
+                  )}
+                >
+                  {cat.label}
+                </button>
+              ))}
             </div>
           </div>
 

@@ -84,17 +84,11 @@ export function validateReference(asset, role, currentRefs, maxRefs, generationM
   return { ok: true };
 }
 
-/**
- * Builds the references payload for the generate API call.
- */
 export function buildReferencesPayload(referenceImages) {
   return referenceImages.map((r) => ({
-    url:      r.url,
-    asset_id: r.asset_id ?? null,
-    media_id: r.asset_id ?? null, // Backend controller expects media_id
-    id:       r.asset_id ?? null, // Fallback alias
-    role:     r.role ?? "normal",
-    type:     r.type ?? "image",
+    workflow_id: r.workflowId || r.workflow_id || r.id || r.asset_id || null,
+    role:        r.role ?? "normal",
+    type:        r.type ?? "image",
   }));
 }
 

@@ -57,9 +57,13 @@ export default function GenerationsPage({ params }) {
     // Auto-select the most recent session if none is active
     React.useEffect(() => {
         if (sessions.length > 0 && !activeSessionId) {
-            setActiveSessionId(sessions[0].session_id)
+            // Sort by createTime descending to get the LATEST one first
+            const sorted = [...sessions].sort((a, b) => 
+                new Date(b.metadata?.createTime || 0) - new Date(a.metadata?.createTime || 0)
+            );
+            setActiveSessionId(sorted[0].session_id);
         }
-    }, [sessions, activeSessionId, setActiveSessionId])
+    }, [sessions, activeSessionId, setActiveSessionId]);
 
     const isDragging = usePromptStore(s => s.isDraggingGalleryItem);
     const router = useRouter();

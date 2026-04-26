@@ -161,7 +161,7 @@ export function PromptEditor({
       <div className="relative min-h-[38px] w-full items-start">
         <RichTextPlugin
           contentEditable={
-            <ContentEditable className="outline-none text-white text-[14.5px] leading-relaxed min-h-[36px] py-1.5" />
+            <ContentEditable className="outline-none text-white text-[14.5px] leading-relaxed min-h-[36px] py-1.5 max-h-[200px] overflow-y-auto scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent" />
           }
           placeholder={
             !value && (
