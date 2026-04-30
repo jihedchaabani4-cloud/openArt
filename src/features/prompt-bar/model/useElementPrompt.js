@@ -6,6 +6,7 @@ import { usePromptStore } from "./usePromptStore";
 import { extractFeaturesFromPrompt } from "./feature-constants";
 import { useCreateElementSheetMutation } from "@/features/workflows/api/workflowsApi";
 import { useWorkflowsStore } from "@/features/workflows";
+import { getElementSheetConfig, isElementSheetMode } from "@/features/workflows/model/elementSheetConfig";
 import { buildReferencesPayload } from "@/shared/lib/referenceUtils";
 import { queryKeys } from "@/shared/api/queryKeys";
 
@@ -20,16 +21,6 @@ export function useElementPrompt() {
 
     const { selectedProjectId: projectId } = useWorkflowsStore();
     const { mutateAsync: runCreateElementSheet, isPending: creatingSheet } = useCreateElementSheetMutation();
-
-    const fallbackSelectedModel = {
-        key: "elements_default",
-        support: {
-            references: { max: 5 },
-            quality: { items: ["2K"] },
-            ratio: { items: ["1:1"] },
-        },
-    };
-    const maxRefs = s.selectedModel?.support?.references?.max ?? fallbackSelectedModel.support.references.max;
 
     const {
         prompts,
@@ -52,6 +43,14 @@ export function useElementPrompt() {
 
     const prompt = prompts[elementMode] || "";
     const referenceImages = references[elementMode] || [];
+    const sheetConfig = React.useMemo(() => getElementSheetConfig(elementMode), [elementMode]);
+    const fallbackSelectedModel = React.useMemo(() => ({
+        key: sheetConfig.model || "elements_default",
+        support: sheetConfig.support,
+    }), [sheetConfig]);
+    const maxRefs = isElementSheetMode(elementMode)
+        ? sheetConfig.maxReferences
+        : (s.selectedModel?.support?.references?.max ?? fallbackSelectedModel.support.references.max);
     const normalizedFeatures = React.useMemo(() => extractFeaturesFromPrompt(prompt), [prompt]);
     const hasPromptFeatures = React.useMemo(() => {
         const sections = [normalizedFeatures.identity, normalizedFeatures.head, normalizedFeatures.details];
@@ -119,7 +118,7 @@ export function useElementPrompt() {
         if (e) e.preventDefault();
         if (!prompt.trim() || creatingSheet || s.generating) return;
 
-        if (["character", "location", "product"].includes(elementMode)) {
+        if (isElementSheetMode(elementMode)) {
             const payload = {
                 type: elementMode,
                 prompt,
@@ -159,7 +158,7 @@ export function useElementPrompt() {
         setElementMode,
         placeholder,
         referenceImages,
-        selectedModel: s.selectedModel || fallbackSelectedModel,
+        selectedModel: isElementSheetMode(elementMode) ? fallbackSelectedModel : (s.selectedModel || fallbackSelectedModel),
         isDraggingGalleryItem,
         draggedItem,
         dragError,

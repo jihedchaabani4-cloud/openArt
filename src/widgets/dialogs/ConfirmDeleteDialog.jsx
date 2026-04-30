@@ -8,19 +8,12 @@ import {
   DialogHeader,
   DialogTitle,
   DialogClose,
+  DialogTrigger,
 } from "@/shared/ui/dialog";
+import { AlertTriangle } from "lucide-react";
 
 /**
  * Generic delete confirmation dialog. Use it anywhere you need a simple "Are you sure?" delete flow.
- *
- * @param {boolean} open - Controlled open state
- * @param {function} onOpenChange - (open: boolean) => void
- * @param {string} title - Dialog title (e.g. "Delete element?")
- * @param {string} description - Dialog description (e.g. "This element will be deleted forever.")
- * @param {function} onConfirm - Called when user clicks confirm (e.g. async () => { await api.delete(...) })
- * @param {string} [confirmLabel="Yes, delete"]
- * @param {string} [cancelLabel="No, keep them"]
- * @param {boolean} [loading=false] - Show loading state on confirm button
  */
 export function ConfirmDeleteDialog({
   open,
@@ -28,50 +21,64 @@ export function ConfirmDeleteDialog({
   title,
   description,
   onConfirm,
-  confirmLabel = "Yes, delete",
-  cancelLabel = "No, keep them",
+  confirmLabel = "Supprimer",
+  cancelLabel = "Annuler",
   loading = false,
+  children,
 }) {
+  const [internalOpen, setInternalOpen] = React.useState(false);
+  
+  const isControlled = open !== undefined;
+  const isOpen = isControlled ? open : internalOpen;
+  const setIsOpen = isControlled ? onOpenChange : setInternalOpen;
+
   const handleConfirm = async () => {
     await onConfirm();
-    onOpenChange(false);
+    setIsOpen(false);
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      {children && <DialogTrigger asChild>{children}</DialogTrigger>}
       <DialogContent
-      variant="small"
-        className="bg-[#1B1B1BBF] border-[#1C1F23] text-white rounded-2xl max-w-md w-[200px] sm:w-full p-6"
+        variant="small"
+        className="bg-[#121212c9] border border-white/5 text-white rounded-[28px] max-w-[250px] p-2 "
         showCloseButton={false}
       >
-        <DialogHeader className="text-left mb-6">
-          <DialogTitle className="sr-only">{title}</DialogTitle>
-          <DialogDescription className="text-white/90 text-[14px] font-medium text-center leading-relaxed">
-            {description}
-          </DialogDescription>
-        </DialogHeader>
+        <div className="flex flex-col items-center text-center">
+          <div className="mb-3">
+            <AlertTriangle className="size-8 text-white" strokeWidth={1.5} />
+          </div>
+          
+          <DialogHeader className="space-y-1">
+            <DialogTitle className="sr-only">Confirm Deletion</DialogTitle>
+            <DialogDescription className="text-white/90 text-[14px] font-medium text-center leading-snug">
+              {description}
+            </DialogDescription>
+          </DialogHeader>
 
-        <div className="mt-6 flex gap-3 justify-center">
-          <DialogClose asChild>
+          <div className="mt-2 flex gap-2.5 w-full">
+            <DialogClose asChild>
+              <button
+                type="button"
+                disabled={loading}
+                className="flex-1 h-10 rounded-xl bg-[#2A2A2A] hover:bg-[#333333] text-white font-semibold text-[10px] transition-all active:scale-95"
+              >
+                {cancelLabel}
+              </button>
+            </DialogClose>
             <button
               type="button"
+              onClick={handleConfirm}
               disabled={loading}
-              className="h-11 px-7 rounded-xl bg-white/5 hover:bg-white/10 text-white font-medium text-[14px] transition-colors disabled:opacity-50"
+              className="flex-1 h-10 rounded-xl bg-white hover:bg-white/90 text-black font-semibold text-[10px] transition-all active:scale-95 flex items-center justify-center gap-2"
             >
-              {cancelLabel}
+              {loading && (
+                <span className="size-2.5 rounded-full " />
+              )}
+              {confirmLabel}
             </button>
-          </DialogClose>
-          <button
-            type="button"
-            onClick={handleConfirm}
-            disabled={loading}
-            className="h-11 px-7 rounded-xl bg-white hover:bg-white/80 text-black font-medium text-[14px] transition-colors disabled:opacity-50 flex items-center gap-2"
-          >
-            {loading && (
-              <span className="size-4 rounded-full border-2 border-current border-t-transparent animate-spin" />
-            )}
-            {confirmLabel}
-          </button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

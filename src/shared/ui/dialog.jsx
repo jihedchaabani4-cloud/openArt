@@ -66,7 +66,7 @@ function DialogContent({
             fixed z-50
             bottom-[30%] left-1/2
             translate-x-[-50%] translate-y-0 
-            w-[800px] max-w-[95%]
+            w-[300px] max-w-[95%]
             h-auto max-h-[60vh]
             rounded-3xl bg-[#161718] backdrop-blur-[80px] shadow-[0px_16px_32px_-8px_rgba(0,0,0,0.4)] overflow-hidden
             flex flex-col
@@ -96,9 +96,8 @@ function DialogContent({
             z-50 bg-background
             fixed top-[50%] left-[50%]
             translate-x-[-50%] translate-y-[-50%]
-            w-full max-w-[calc(100%-2rem)]
-            sm:max-w-sm
-            rounded-lg border p-6 shadow-lg
+            w-full max-w-[250px] max-h-[200px]
+            rounded-lg border p-2 shadow-lg
             data-[state=open]:animate-in
             data-[state=closed]:animate-out
           `,

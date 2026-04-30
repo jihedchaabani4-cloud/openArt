@@ -10,7 +10,7 @@ import { useQueryClient } from "@tanstack/react-query";
  * [FSD Layer: shared/ui]
  * Standardized ProjectError with Legacy Design and Smart Logic.
  */
-export function ProjectError() {
+export function ProjectError({ error, reset, onRetry }) {
   const router = useRouter();
   const queryClient = useQueryClient();
 
@@ -29,6 +29,10 @@ export function ProjectError() {
     }
   }, [queryClient]);
 
+  React.useEffect(() => {
+    if (error) console.error("Project Studio Error:", error);
+  }, [error]);
+
   const handleBack = () => {
     clearProjectStudioState();
     router.push("/projects");
@@ -45,13 +49,24 @@ export function ProjectError() {
         Un problème est survenu.
       </h2>
       
-      <button
-        onClick={handleBack}
-        className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-6 py-2.5 text-sm font-medium text-white transition hover:bg-white/10 shadow-lg"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        Retour aux projets
-      </button>
+      <div className="flex gap-4">
+        {onRetry && (
+          <button
+            onClick={onRetry}
+            className="flex items-center gap-2 rounded-full bg-white px-6 py-2.5 text-sm font-medium text-black transition hover:bg-white/90 shadow-lg"
+          >
+            Réessayer
+          </button>
+        )}
+        
+        <button
+          onClick={handleBack}
+          className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-6 py-2.5 text-sm font-medium text-white transition hover:bg-white/10 shadow-lg"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Retour aux projets
+        </button>
+      </div>
     </motion.div>
   );
 }

@@ -34,6 +34,36 @@ export const useEditStore = create((set) => ({
   lighting: null,
   setLighting: (lighting) => set({ lighting }),
 
+  // ─── DNA State (from useStudioStore) ─────────────────────────────────────
+  stagedDna: {
+    camera_dna: {
+      rotation: 0,
+      tilt: 0,
+      zoom: 0
+    },
+    lighting_dna: {
+      angle: 0,
+      elevation: 0,
+      intensity: 5,
+      type: 'soft',
+      brightness: 40,
+      color: '#ffffff'
+    }
+  },
+  setStagedDna: (stagedDna) => set({ stagedDna }),
+  setCameraDna: (cameraDna) => set((state) => ({
+    stagedDna: {
+      ...state.stagedDna,
+      camera_dna: cameraDna
+    }
+  })),
+  setLightingDna: (lightingDna) => set((state) => ({
+    stagedDna: {
+      ...state.stagedDna,
+      lighting_dna: lightingDna
+    }
+  })),
+
   upscaleScale: "x2", // x2 | x4 | x8  (capped at 19 MP output)
   setUpscaleScale: (scale) => set({ upscaleScale: scale }),
 

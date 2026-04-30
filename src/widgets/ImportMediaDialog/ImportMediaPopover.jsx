@@ -1,9 +1,18 @@
 import React from "react";
-import { Upload, Search, X } from "lucide-react";
+import { Upload, Search, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useParams } from "next/navigation";
 import { useLibraryFilter } from "@/features/prompt-bar/model/useLibraryFilter";
+import { useProjectData } from "@/features/workflows/api/workflowsApi";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/shared/ui/dropdown-menu";
 import { RowsPhotoAlbum } from 'react-photo-album';
 import 'react-photo-album/rows.css';
 import { cn } from "@/shared/lib/utils";
@@ -24,13 +33,73 @@ export function ImportMediaPopover({
   maxAllowed = 1,
   onUploadFromPC,
   anchorRef,
-  assetSource,
-  setAssetSource,
 }) {
+  const params = useParams();
+  const projectId = params?.projectId;
+  const { data: projectData } = useProjectData(projectId);
+
+  // Build session name lookup from project data
+  // Backend schema: { name: UUID, metadata: { displayName: "human name" } }
+  const sessionNameMap = React.useMemo(() => {
+    const raw = projectData?.projectContents?.sessions ?? [];
+    const map = {};
+    raw.forEach(s => {
+      if (s.name) map[s.name] = s.metadata?.displayName || null;
+    });
+    return map;
+  }, [projectData]);
+
   const {
     search,          setSearch,
+    selectedSession, setSelectedSession,
     visibleItems,
   } = useLibraryFilter(library, mode);
+
+  // Extract unique sessions from the library using the session ID and create time
+  const sessions = React.useMemo(() => {
+    const flatItems = library.flatMap(i => i.items ?? i);
+    const unique = new Map();
+
+    flatItems.forEach(item => {
+      const sId =
+        item.session_id ||
+        item.sessionId ||
+        item.mediaMetadata?.sessionId ||
+        item.mediaMetadata?.session_id ||
+        item.metadata?.sessionId ||
+        item.metadata?.session_id;
+
+      if (!sId || unique.has(sId)) return;
+
+      // Look up display name from project sessions
+      const displayName = sessionNameMap[sId];
+
+      // Fallback: format the create_time of this item as the session label
+      const time =
+        item.mediaMetadata?.createTime ||
+        item.created_at ||
+        item.create_time ||
+        item.metadata?.createTime;
+
+      const formattedDate = time
+        ? new Date(time).toLocaleString("fr-FR", {
+            day: "2-digit",
+            month: "short",
+            hour: "2-digit",
+            minute: "2-digit",
+          })
+        : "Unknown Session";
+
+      unique.set(sId, {
+        id:   sId,
+        name: displayName || formattedDate,
+      });
+    });
+
+    return Array.from(unique.values()).sort((a, b) => b.id.localeCompare(a.id));
+  }, [library, sessionNameMap]);
+  const activeSessionName = sessions.find(s => s.id === selectedSession)?.name || "All Sessions";
+
   const [selectedItems, setSelectedItems] = React.useState([]);
   const fileInputRef = React.useRef(null);
   const popoverRef = React.useRef(null);
@@ -42,6 +111,16 @@ export function ImportMediaPopover({
     const handleClickOutside = (event) => {
       // Ignore clicks on the anchor/trigger button — it handles its own toggle
       if (anchorRef?.current && anchorRef.current.contains(event.target)) return;
+      
+      // IMPORTANT: Ignore clicks if the target is inside a Radix UI Portal or Menu
+      const isPortalClick = 
+        event.target.closest('[data-radix-popper-content-wrapper]') ||
+        event.target.closest('[role="menu"]') ||
+        event.target.closest('[data-radix-menu-content]') ||
+        event.target.closest('.radix-themes'); // common in some radix setups
+
+      if (isPortalClick) return;
+
       if (popoverRef.current && !popoverRef.current.contains(event.target)) {
         onOpenChange(false);
       }
@@ -58,9 +137,10 @@ export function ImportMediaPopover({
     const isVideo = item.type === "video" || item.is_video || !!item.video;
     
     const asset = {
-      url:      itemUrl,
-      asset_id: item.id,
-      is_video: isVideo,
+      url:         itemUrl,
+      asset_id:    item.id,
+      workflow_id: item.workflow_id || item.workflowId,
+      is_video:    isVideo,
     };
 
     setSelectedItems((prev) => {
@@ -117,7 +197,6 @@ export function ImportMediaPopover({
     : mode === "video"
     ? "video/mp4,video/webm"
     : "image/*,video/mp4,video/webm";
-
   // ─── Photo descriptors for RowsPhotoAlbum ────────────────────────────────
   const photos = React.useMemo(() => {
     const BASE = 1200;
@@ -171,55 +250,55 @@ export function ImportMediaPopover({
             accept={uploadAccept}
             onChange={handleFileChange}
           />
+          {/* Search & Filters Bar */}
+          <div className="px-4 py-3 flex items-center gap-2 shrink-0 ">
+            {/* Session Selector */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="flex items-center gap-2 px-3 py-2 bg-white/5 hover:bg-white/10 rounded-xl text-sm font-medium text-white/70 hover:text-white transition-all min-w-[140px] justify-between border border-white/5">
+                  <span className="truncate">{activeSessionName}</span>
+                  <ChevronDown className="size-4 opacity-40" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-56 bg-[#1A1B1C] border-white/10 rounded-xl">
+                <DropdownMenuItem onClick={() => setSelectedSession("all_sessions")} className="text-sm">All Sessions</DropdownMenuItem>
+                <DropdownMenuSeparator className="bg-white/5" />
+                <div className="max-h-[200px] overflow-y-auto custom-scrollbar">
+                   {sessions.map(s => (
+                     <DropdownMenuItem 
+                       key={s.id} 
+                       onClick={() => setSelectedSession(s.id)}
+                       className={cn("text-sm", selectedSession === s.id && "bg-white/10 text-white")}
+                     >
+                       {s.name}
+                     </DropdownMenuItem>
+                   ))}
+                   {sessions.length === 0 && (
+                     <DropdownMenuItem className="text-xs text-white/40 pointer-events-none italic">No sessions found</DropdownMenuItem>
+                   )}
+                </div>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
-
-
-          {/* Search & Upload Bar */}
-          <div className="px-4 py-3 flex flex-col gap-3 shrink-0">
-            <div className="relative group">
+            {/* Search Input */}
+            <div className="relative flex-1 group">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-white/20 group-focus-within:text-white/50 transition-colors" />
               <Input
                 type="search"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search assets..."
-                className="h-9 rounded-lg border-none pl-9 pr-10 text-xs bg-white/5"
+                placeholder="Search for Assets"
+                className="w-full pl-9 bg-white/5 border-none focus-visible:ring-1 focus-visible:ring-white/20 rounded-xl h-10 text-sm placeholder:text-white/20 transition-all"
               />
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/20 size-3.5" />
-              <button
-                 onClick={() => fileInputRef.current?.click()}
-                 className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-md hover:bg-white/5 text-white/30 hover:text-white transition-all"
-                 title="Upload from computer"
-              >
-                <Upload size={14} />
-              </button>
             </div>
-
-            {/* Category Filter Bar */}
-            <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-hide pb-1">
-              {[
-                { id: "all",        label: "All" },
-                { id: "upload",     label: "Uploads" },
-                { id: "gen",        label: "Generations" },
-                { id: "cae",        label: "Elements" },
-                { id: "edit",       label: "Edits" },
-                { id: "lit",        label: "Lighting" },
-                { id: "vid",        label: "Videos" },
-                { id: "up",         label: "Upscales" },
-              ].map((cat) => (
-                <button
-                  key={cat.id}
-                  onClick={() => setAssetSource?.(cat.id)}
-                  className={cn(
-                    "px-3 py-1.5 rounded-full text-[10px] font-medium uppercase tracking-wider whitespace-nowrap transition-all",
-                    (assetSource || "all") === cat.id
-                      ? "bg-white text-black"
-                      : "bg-white/5 text-white/40 hover:bg-white/10 hover:text-white/60"
-                  )}
-                >
-                  {cat.label}
-                </button>
-              ))}
-            </div>
+            {/* Upload Button */}
+            <button
+               onClick={() => fileInputRef.current?.click()}
+               className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/40 hover:text-white transition-all border border-white/5 shrink-0"
+               title="Upload from computer"
+            >
+              <Upload size={18} />
+            </button>
           </div>
 
           {/* Grid Area - Scrollable */}

@@ -37,17 +37,6 @@ export function PromptBarBase({
                 className={cn("w-full flex flex-col relative", className)}
                 {...props}
             >
-                {s.hasChanges && (
-                    <button
-                        type="button"
-                        onClick={s.handleReset}
-                        className="absolute right-3 top-3 p-1.5 text-white/30 hover:text-white bg-transparent transition-colors z-50 outline-none"
-                        title="Clear everything"
-                    >
-                        <X size={16} />
-                    </button>
-                )}
-
                 {children}
             </div>
         </form>

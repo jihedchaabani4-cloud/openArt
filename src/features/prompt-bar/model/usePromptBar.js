@@ -39,11 +39,12 @@ export function usePromptBar({ isNewProject = false } = {}) {
     setDuration,
     videoResolution,
     setVideoResolution,
-    referenceImages,
     addReference,
     removeReference,
+    updateReferenceRole,
     clearReferences,
     setReferenceImages,
+    referenceImages,
     swapFrames,
     popoverOpen,
     setPopoverOpen,
@@ -121,9 +122,12 @@ export function usePromptBar({ isNewProject = false } = {}) {
     const support = selectedModel.support || {};
     
     // 1. Prune references if they exceed the new model's max allowed
-    // Note: maxRefs is properly overridden for motion models in useModelSync
-    if (referenceImages.length > maxRefs) {
-      setReferenceImages(referenceImages.slice(0, maxRefs));
+    // Note: Slotted roles (start/end/mc) are NEVER pruned — they're mode-specific
+    const SLOTTED_ROLES = ["start", "end", "mc_image", "mc_video"];
+    const slottedRefs = referenceImages.filter(r => SLOTTED_ROLES.includes(r.role));
+    const normalRefs  = referenceImages.filter(r => !SLOTTED_ROLES.includes(r.role));
+    if (normalRefs.length > maxRefs) {
+      setReferenceImages([...slottedRefs, ...normalRefs.slice(0, maxRefs)]);
     }
 
     // 2. Sync ratio and resolution
@@ -238,8 +242,6 @@ export function usePromptBar({ isNewProject = false } = {}) {
         references:       buildReferencesPayload(referenceImages),
       };
 
-      console.log("🚀 [usePromptBar] Sending Generation Payload:", payload);
-
       try {
         const res = await runGenerate({ payload, isVideo });
 
@@ -328,6 +330,7 @@ export function usePromptBar({ isNewProject = false } = {}) {
       return addReference(normalizedAsset, finalRole, maxRefs);
     },
     handleRemoveReference: removeReference,
+    handleUpdateReferenceRole: updateReferenceRole,
     handleClearReferences: clearReferences,
     handleSwapFrames:      swapFrames,
     maxRefs,

@@ -7,6 +7,7 @@ import { FaPen } from "react-icons/fa6"
 import { MdDelete } from "react-icons/md"
 import { Button } from "@/shared/ui/button"
 import { EditableDisplayName } from "@/shared/ui/EditableDisplayName"
+import { ConfirmDeleteDialog } from "@/widgets/dialogs/ConfirmDeleteDialog"
 
 function isVideoUrl(url = "") {
     return /\.(mp4|webm|mov)$/i.test(url)
@@ -103,15 +104,20 @@ export function ProjectCard({ project, onDelete, onRename }) {
                 </div>
 
                 {!isEditing && (
-                    <Button
-                        variant="ghost"
-                        size="icon-xs"
-                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDelete(project.project_id); }}
-                        className="h-auto w-auto p-0 ml-4 transition-all duration-300 opacity-0 group-hover:opacity-100 text-white"
-                        aria-label={`Delete ${project.project_name}`}
+                    <ConfirmDeleteDialog
+                        onConfirm={() => onDelete(project.project_id)}
+                        title="Delete project?"
+                        description={`The project "${project.name}" will be deleted forever.`}
                     >
-                        <MdDelete className="size-5" />
-                    </Button>
+                        <Button
+                            variant="ghost"
+                            size="icon-xs"
+                            className="h-auto w-auto p-0 ml-4 transition-all duration-300 opacity-0 group-hover:opacity-100 text-white"
+                            aria-label={`Delete ${project.project_name}`}
+                        >
+                            <MdDelete className="size-5" />
+                        </Button>
+                    </ConfirmDeleteDialog>
                 )}
             </div>
         </motion.div>

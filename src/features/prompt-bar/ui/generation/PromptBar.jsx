@@ -15,7 +15,7 @@ import { RatioSelector } from "../common/selectors/RatioSelector";
 import { VariationSelector } from "../common/selectors/VariationSelector";
 import { DurationSelector } from "../common/selectors/DurationSelector";
 import { VideoResolutionSelector } from "../common/selectors/VideoResolutionSelector";
-import { VscSettings } from "react-icons/vsc";
+import { VscSettings, VscChromeClose } from "react-icons/vsc";
 
 
 export default function PromptBar({ hideBackground = false, isNewProject = false, initialMode = null }) {
@@ -104,6 +104,9 @@ export default function PromptBar({ hideBackground = false, isNewProject = false
         s.handleOpenLibrary?.(mode);
     };
 
+    const isVideoModel = s.selectedModel?.category === 'video' || s.selectedModel?.type === 'video';
+    const isVideoMode = s.generationMode !== 'image';
+
     return (
         <PromptBarShell
             variant="generation"
@@ -117,6 +120,7 @@ export default function PromptBar({ hideBackground = false, isNewProject = false
                     error={dragError} 
                     referenceImages={s.referenceImages}
                     draggedItem={draggedItem}
+                    maxRefs={s.maxRefs}
                 />
             }
             popover={
@@ -161,6 +165,17 @@ export default function PromptBar({ hideBackground = false, isNewProject = false
                 />
             }
         >
+            {s.hasChanges && (
+                <button
+                    type="button"
+                    onClick={s.handleReset}
+                    className="absolute right-4 top-4 p-1 text-white/20 hover:text-white bg-transparent transition-colors z-[60] outline-none"
+                    title="Clear everything"
+                >
+                    <VscChromeClose size={18} />
+                </button>
+            )}
+
             <AnimatePresence>
                 {variationsOpen && (
                     <motion.div
@@ -209,10 +224,24 @@ export default function PromptBar({ hideBackground = false, isNewProject = false
             </AnimatePresence>
 
             <AnimatePresence>
-                {(s.referenceImages.length > 0 ||
-                    s.generationMode === "keyframe" ||
-                    s.generationMode === "motion-control" ||
-                    s.generationMode === "motion") && (
+                {(() => {
+                    const showReferenceBar = isVideoModel ? isVideoMode : true;
+
+                    if (!showReferenceBar) return false;
+
+                    const hasVisibleRefs = s.referenceImages.some(r => {
+                        if (s.generationMode === 'keyframe') return r.role === 'start' || r.role === 'end';
+                        if (s.generationMode === 'motion' || s.generationMode === 'motion-control') return r.role === 'mc_video' || r.role === 'mc_image';
+                        return !['start', 'end', 'mc_video', 'mc_image'].includes(r.role);
+                    });
+
+                    return (
+                        hasVisibleRefs ||
+                        s.generationMode === "keyframe" ||
+                        s.generationMode === "motion-control" ||
+                        s.generationMode === "motion"
+                    );
+                })() && (
                     <motion.div
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: "auto", opacity: 1 }}
@@ -283,7 +312,7 @@ export default function PromptBar({ hideBackground = false, isNewProject = false
                     }
                 }}
             >
-                <div className="flex flex-col w-full gap-1.5">
+                <div className="flex flex-col w-full gap-0.5">
                     <div className="flex items-start gap-2" onPointerDown={() => setVariationsOpen(false)}>
                         <PromptTextarea
                             value={s.prompt}
@@ -292,8 +321,15 @@ export default function PromptBar({ hideBackground = false, isNewProject = false
                             textareaRef={s.textareaRef}
                             referenceImages={s.referenceImages}
                             onTriggerMentionDialog={
-                                ["image", "multiref"].includes(s.generationMode)
-                                    ? (cb) => openDialog("image", "normal", cb)
+                                ["image", "multiref", "keyframe"].includes(s.generationMode)
+                                    ? (cb) => {
+                                        let role = "normal";
+                                        if (s.generationMode === "keyframe") {
+                                          const hasStart = s.referenceImages.some(r => r.role === 'start');
+                                          role = hasStart ? "end" : "start";
+                                        }
+                                        openDialog("image", role, cb);
+                                      }
                                     : undefined
                             }
                         />
@@ -314,11 +350,29 @@ export default function PromptBar({ hideBackground = false, isNewProject = false
                             onSubmit: s.handleGenerate,
                             prompt: s.prompt,
                         }}
+                        showPaperclip={isVideoModel ? (s.generationMode === 'multiref') : true}
                         onToggleVariations={() => setVariationsOpen((prev) => !prev)}
                         variationsOpen={variationsOpen}
                         mediaOpen={dialogOpen}
                         paperclipRef={paperclipRef}
-                        onAddClick={() => (dialogOpen ? setDialogOpen(false) : openDialog("image", "normal"))}
+                        onAddClick={() => {
+                            if (dialogOpen) {
+                                setDialogOpen(false);
+                            } else {
+                                // Smart role determination
+                                let role = "normal";
+                                if (s.generationMode === "keyframe") {
+                                    const hasStart = s.referenceImages.some(r => r.role === 'start');
+                                    role = hasStart ? "end" : "start";
+                                } else if (["motion", "motion-control"].includes(s.generationMode)) {
+                                    const hasMcVideo = s.referenceImages.some(r => r.role === 'mc_video');
+                                    role = hasMcVideo ? "mc_image" : "mc_video";
+                                }
+                                
+                                const type = role === "mc_video" ? "video" : "image";
+                                openDialog(type, role);
+                            }
+                        }}
                         onReset={s.handleReset}
                         hasChanges={s.hasChanges}
                     />

@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { useProjectData } from '../api/workflowsApi';
 import { useWorkflowsStore } from './useWorkflowsStore';
+import { getGenerationConfig } from '@/shared/lib/referenceUtils';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // helpers
@@ -40,13 +41,13 @@ function resolveConfig(wfItems) {
   );
   
   const caeItem        = sortedItems.find(i => i.workflowStepId === "CAE");
-  const latestEditItem = sortedItems.find(i => i.generationConfig && i.workflowStepId !== "CAE");
+  const latestEditItem = sortedItems.find(i => i.generationConfig || i.mediaMetadata?.requestData);
   const firstMedia     = sortedItems[0] || {};
   
   // Priority: CAE Item -> Latest Edit -> First Media
   const sourceItem = caeItem || latestEditItem || firstMedia;
-  const config = sourceItem.generationConfig || {};
-  const model = config.model || config.model_name || '';
+  const config = getGenerationConfig(sourceItem) || {};
+  const model = config.model_name || config.model || '';
   const isUpload = !model && !config.prompt && (sourceItem.asset_type === 'upload' || sourceItem.asset_id || sourceItem.workflowStepId === 'upload');
 
   return { 

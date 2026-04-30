@@ -3,7 +3,7 @@ import { VscSettings } from "react-icons/vsc";
 import { ModelSelector } from '../common/selectors/ModelSelector';
 import { ActionButton } from '../common/ActionButton';
 
-export function Row2({ paramsProps, actionProps, onToggleVariations, variationsOpen, onAddClick, mediaOpen, paperclipRef }) {
+export function Row2({ paramsProps, actionProps, onToggleVariations, variationsOpen, onAddClick, mediaOpen, paperclipRef, showPaperclip = true }) {
   const {
     model,
     studioModels,
@@ -15,7 +15,7 @@ export function Row2({ paramsProps, actionProps, onToggleVariations, variationsO
 
   return (
     <div className="flex items-center gap-1.5 flex-wrap">
-      {['image', 'multiref'].includes(generationMode) && (
+      {showPaperclip && (
         <button
           ref={paperclipRef}
           onClick={onAddClick}

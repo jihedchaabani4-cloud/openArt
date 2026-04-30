@@ -3,7 +3,6 @@
 import { cn } from "@/shared/lib/utils";
 import { useEditStore } from "../../model/useEditStore";
 import { useWorkflowsStore } from "@/features/workflows";
-import { getPromptBarVariant } from "../common/promptBarVariants";
 import { DropdownSegmentedWithLabel } from "@/shared/ui/DropdownShell";
 
 
@@ -14,7 +13,6 @@ export function EditPromptBarBase({
     children,
     className,
 }) {
-    const variantConfig = getPromptBarVariant("edit");
     const { activeSessionId } = useWorkflowsStore();
     const { editTarget, activeTab: storedTab, setActiveTab } = useEditStore();
 
@@ -49,9 +47,8 @@ export function EditPromptBarBase({
                     options={segmentedOptions}
                 />
             )}
-            <div className={variantConfig.cardClassName}>
                 {typeof children === "function" ? children(activeTab) : children}
-            </div>
+            
         </div>
     );
 }

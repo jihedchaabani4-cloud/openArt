@@ -10,7 +10,7 @@ export const usePromptStore = create((set, get) => ({
   prompt: "",
   setPrompt: (prompt) => set({ prompt }),
 
-  generationMode: "image", // "image" | "video" | "motion-control"
+  generationMode: "image", // "image" | "keyframe" | "multiref" | "motion-control"
   setGenerationMode: (mode) => {
     const { generationMode, referenceImages, referencesByMode } = get();
     if (mode === generationMode) return;
@@ -165,6 +165,20 @@ export const usePromptStore = create((set, get) => ({
       referencesByMode: { ...state.referencesByMode, [state.generationMode]: newRefs }
     };
   }),
+
+  updateReferenceRole: (assetId, role) => {
+    set((state) => {
+      const newRefs = state.referenceImages.map((r) => 
+        (r.asset_id === assetId || r.workflow_id === assetId || r.id === assetId) 
+          ? { ...r, role } 
+          : r
+      );
+      return {
+        referenceImages: newRefs,
+        referencesByMode: { ...state.referencesByMode, [state.generationMode]: newRefs }
+      };
+    });
+  },
 
   // ─── Reset Store ──────────────────────────────────────────────────────────
   resetPromptStore: () => set({

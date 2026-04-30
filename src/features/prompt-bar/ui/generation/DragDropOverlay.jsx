@@ -8,7 +8,7 @@ import { cn } from "@/shared/lib/utils";
  * A premium, dynamic overlay that appears when dragging media.
  * Adapts its layout and text based on the generation mode and errors.
  */
-export function DragDropOverlay({ mode, onDrop, error, referenceImages = [], draggedItem }) {
+export function DragDropOverlay({ mode, onDrop, error, referenceImages = [], draggedItem, maxRefs = 4 }) {
   const isKeyframe = mode === "keyframe";
   const isMotion   = mode === "motion" || mode === "motion-control";
   const isDual     = isKeyframe || isMotion;
@@ -21,10 +21,13 @@ export function DragDropOverlay({ mode, onDrop, error, referenceImages = [], dra
   // Resolve Slots
   const slots = React.useMemo(() => {
     if (isKeyframe) {
-      return {
+      const s = {
         s1: { role: "start", label: "start frame", asset: referenceImages.find(r => r.role === 'start'), accepts: 'image' },
-        s2: { role: "end",   label: "end frame",   asset: referenceImages.find(r => r.role === 'end'),   accepts: 'image' },
       };
+      if (maxRefs >= 2) {
+        s.s2 = { role: "end", label: "end frame", asset: referenceImages.find(r => r.role === 'end'), accepts: 'image' };
+      }
+      return s;
     }
     if (isMotion) {
       return {
@@ -51,22 +54,26 @@ export function DragDropOverlay({ mode, onDrop, error, referenceImages = [], dra
         </div>
       ) : isDual ? (
         <>
-          <DropZone 
-            label={`${slots.s1.asset ? 'Replace' : 'Add'} ${slots.s1.label}`}
-            onDrop={() => onDrop?.(slots.s1.role)} 
-            previewUrl={slots.s1.asset?.url}
-            isVideo={slots.s1.asset?.is_video}
-            requiredType={slots.s1.accepts}
-            draggedIsVideo={draggedIsVideo}
-          />
-          <DropZone 
-            label={`${slots.s2.asset ? 'Replace' : 'Add'} ${slots.s2.label}`}
-            onDrop={() => onDrop?.(slots.s2.role)} 
-            previewUrl={slots.s2.asset?.url}
-            isVideo={slots.s2.asset?.is_video}
-            requiredType={slots.s2.accepts}
-            draggedIsVideo={draggedIsVideo}
-          />
+          {slots.s1 && (
+            <DropZone 
+              label={`${slots.s1.asset ? 'Replace' : 'Add'} ${slots.s1.label}`}
+              onDrop={() => onDrop?.(slots.s1.role)} 
+              previewUrl={slots.s1.asset?.url}
+              isVideo={slots.s1.asset?.is_video}
+              requiredType={slots.s1.accepts}
+              draggedIsVideo={draggedIsVideo}
+            />
+          )}
+          {slots.s2 && (
+            <DropZone 
+              label={`${slots.s2.asset ? 'Replace' : 'Add'} ${slots.s2.label}`}
+              onDrop={() => onDrop?.(slots.s2.role)} 
+              previewUrl={slots.s2.asset?.url}
+              isVideo={slots.s2.asset?.is_video}
+              requiredType={slots.s2.accepts}
+              draggedIsVideo={draggedIsVideo}
+            />
+          )}
         </>
       ) : (
         /* Unified Ingredient Zone */

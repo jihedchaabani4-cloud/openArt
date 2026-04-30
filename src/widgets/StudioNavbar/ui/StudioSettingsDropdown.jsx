@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Settings, Grid2X2, Layers, Volume2, Eye, Eraser, Upload } from "lucide-react"
+import { Settings, Upload } from "lucide-react"
 import {
   DropdownShell,
   DropdownSection,
@@ -13,14 +13,6 @@ import {
 export function StudioSettingsDropdown({
   gridSize,
   setGridSize,
-  soundOnHover,
-  setSoundOnHover,
-  showTileDetails,
-  setShowTileDetails,
-  showDetails,
-  setShowDetails,
-  clearPromptOnSubmit,
-  setClearPromptOnSubmit,
   showUploadedMedia,
   setShowUploadedMedia,
 }) {
@@ -50,22 +42,6 @@ export function StudioSettingsDropdown({
 
       {/* Toggle rows */}
       <div className="border-t border-white/5 mt-1 pt-1">
-        <DropdownRow icon={<Volume2 />} label="Sound on hover">
-          <DropdownToggle value={soundOnHover} onChange={setSoundOnHover} />
-        </DropdownRow>
-
-        <DropdownRow icon={<Eye />} label="Show tile details">
-          <DropdownToggle value={showTileDetails} onChange={setShowTileDetails} />
-        </DropdownRow>
-
-        <DropdownRow icon={<Layers />} label="Show sidebar details">
-          <DropdownToggle value={showDetails} onChange={setShowDetails} />
-        </DropdownRow>
-
-        <DropdownRow icon={<Eraser />} label="Clear prompt on submit">
-          <DropdownToggle value={clearPromptOnSubmit} onChange={setClearPromptOnSubmit} />
-        </DropdownRow>
-
         <DropdownRow icon={<Upload />} label="Show imported media">
           <DropdownToggle value={showUploadedMedia} onChange={setShowUploadedMedia} />
         </DropdownRow>

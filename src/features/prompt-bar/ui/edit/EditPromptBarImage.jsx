@@ -13,9 +13,9 @@ import { EditPromptBarBase } from "./EditPromptBarBase";
 
 const TABS = [
     { id: "describe", label: "Describe", icon: Sparkles },
-    { id: "upscale",  label: "Upscale",  icon: Maximize  },
-    { id: "camera",   label: "Camera",   icon: Camera    },
-    { id: "lighting", label: "Lighting", icon: Sun       },
+    { id: "upscale", label: "Upscale", icon: Maximize },
+    { id: "camera", label: "Camera", icon: Camera },
+    { id: "lighting", label: "Lighting", icon: Sun },
 ];
 
 /**
@@ -39,17 +39,13 @@ export function EditPromptBarImage({ className }) {
                             onGenerate={() => s.handleGenerate()}
                         />
                     ) : activeTab === "camera" ? (
-                        <div className="flex flex-col gap-4 w-full p-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                            <AnglesPanel
-                                previewImageUrl={s.editTarget?.primaryMediaUrl || s.editTarget?.url}
-                            />
-                        </div>
+                        <AnglesPanel
+                            previewImageUrl={s.editTarget?.primaryMediaUrl || s.editTarget?.url}
+                        />
                     ) : activeTab === "lighting" ? (
-                        <div className="flex flex-col gap-4 w-full p-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                            <LightingPanel
-                                previewImageUrl={s.editTarget?.primaryMediaUrl || s.editTarget?.url}
-                            />
-                        </div>
+                        <LightingPanel
+                            previewImageUrl={s.editTarget?.primaryMediaUrl || s.editTarget?.url}
+                        />
                     ) : null}
                 </>
             )}

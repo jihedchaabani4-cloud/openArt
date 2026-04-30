@@ -24,7 +24,7 @@ export function ElementsPromptBar({ hideBackground = false }) {
             hideBackground={hideBackground}
             isDragging={s.isDraggingGalleryItem}
             dragOverlay={
-                <DragDropOverlay mode={s.generationMode} onDrop={s.handleGalleryDrop} error={s.dragError} />
+                <DragDropOverlay mode={s.generationMode} onDrop={s.handleGalleryDrop} error={s.dragError} maxRefs={s.maxRefs} />
             }
             popover={
                 <>

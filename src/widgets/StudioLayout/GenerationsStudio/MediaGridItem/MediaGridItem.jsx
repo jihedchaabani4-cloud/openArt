@@ -115,7 +115,11 @@ export function MediaGridItem({
   // ── Derived values (pure computation — no hooks) ───────────────────────
   const isDone   = status === "completed" && !!url;
   const isError  = ["rejected", "failed", "error"].includes(status);
-  const canReuse = workflow?.workflow_type !== "UPLOAD" && workflow?.feed_type !== "upload";
+  
+  // Stricter check for generated content: must have generation config and not be an upload type
+  const hasConfig = !!(item?.generationConfig || workflow?.metadata?.generationConfig);
+  const isUploadType = workflow?.workflow_type === "UPLOAD" || workflow?.feed_type === "upload";
+  const canReuse = hasConfig && !isUploadType;
   const isElementSheet = workflow?.workflow_type === "ELEMENT_SHEET";
   const isDraggable = isDone && !isElementSheet;
 
@@ -123,11 +127,9 @@ export function MediaGridItem({
     { key: "add",      icon: Plus,     label: "Add to prompt",            onClick: handleAddToPrompt },
     { key: "like",     icon: Heart,    label: isLiked ? "Unlike" : "Like", iconClassName: cn(isLiked && "fill-white"), onClick: handleLike },
     ...(canReuse ? [
-      { key: "edit",   icon: Wand2,    label: "Edit Image",               onClick: handleEdit },
       { key: "reuse",  icon: Undo2,    label: "Reuse Settings",           onClick: handleReuseSettings },
     ] : []),
     { key: "download", icon: Download, label: "Download",                  onClick: handleDownload },
-    ...(!isVideo ? [{ key: "animate", icon: Wand2, label: "Animate Image", onClick: handleAnimate }] : []),
     { key: "delete",   icon: Trash2,   label: "Delete", disabled: !canDelete, onClick: () => setIsDeleteConfirmOpen(true) },
   ];
 
@@ -164,23 +166,25 @@ export function MediaGridItem({
     onDragEnd(e);
   };
 
+  // Enable click if the current item is valid OR if the workflow has any other valid media
+  const hasAnyValidMedia = workflow?.items?.some(i => ["completed", "processing"].includes(i.status));
+  const canNavigate = isDone || status === "processing" || hasAnyValidMedia;
+
   // ── Render ─────────────────────────────────────────────────────────────
   return (
     <>
       <ContextMenu>
         <ContextMenuTrigger asChild>
           <motion.div
-            layout={disableLayoutAnimation ? false : "position"}
-            transition={disableLayoutAnimation ? { duration: 0.18, ease: [0.22, 1, 0.36, 1] } : springGentle}
             draggable={isDraggable}
             onDragStart={isDraggable ? handleDragStart : undefined}
             onDrag={isDraggable ? handleDrag : undefined}
             onDragEnd={isDraggable ? handleDragEnd : undefined}
-            onClick={(isDone || status === "processing") ? onClick : undefined}
+            onClick={canNavigate ? onClick : undefined}
             className={cn(
               "group relative overflow-hidden bg-[#0a0a0a] rounded-2xl",
-              "outline-2 outline-transparent transition-all duration-300",
-              (isDone || status === "processing")
+              "outline-2 outline-transparent",
+              canNavigate
                 ? (isElementSheet ? "cursor-pointer shadow-lg hover:shadow-2xl" : "cursor-grab active:cursor-grabbing shadow-lg hover:shadow-2xl")
                 : "cursor-default",
               className
@@ -190,12 +194,12 @@ export function MediaGridItem({
                 ? {
                     width: albumWidth,
                     height: albumHeight,
-                    willChange: disableLayoutAnimation ? "auto" : "transform",
+                    willChange: "auto",
                   }
                 : {
                     width: "100%",
                     aspectRatio: aspect,
-                    willChange: disableLayoutAnimation ? "auto" : "transform",
+                    willChange: "auto",
                   }
             }
           >
@@ -246,7 +250,7 @@ export function MediaGridItem({
                     <ActionBtn onClick={(e) => { e.stopPropagation(); handleLike(); }}>
                       <Heart className={cn(iconCls, isLiked && "fill-[#303031] text-[#303031]")} />
                     </ActionBtn>
-                    {canReuseSettings && !isElementSheet && (
+                    {canReuse && !isElementSheet && (
                       <ActionBtn onClick={(e) => { e.stopPropagation(); handleReuseSettings(); }}>
                         <Undo2 className={iconCls} />
                       </ActionBtn>
@@ -288,7 +292,7 @@ export function MediaGridItem({
             {isError && !isDone && (
               <div className="absolute bottom-2 right-2 z-30 pointer-events-auto">
                 <ButtonGroup className="bg-white/60 backdrop-blur-md rounded-lg">
-                  {canReuseSettings && (
+                  {canReuse && (
                     <ActionBtn onClick={(e) => { e.stopPropagation(); handleReuseSettings(); }} title="Reuse Settings">
                       <Undo2 className={iconCls} />
                     </ActionBtn>

@@ -21,6 +21,13 @@ export function useMediaLibrary(projectId, initialMode = "all") {
     if (!projectData?.projectContents?.media) return [];
     
     let allMedia = [...projectData.projectContents.media];
+    const workflows = projectData.projectContents.workflows || [];
+    const workflowSessionMap = new Map(
+      workflows.map((workflow) => [
+        workflow.name || workflow.id,
+        workflow.metadata?.sessionId || workflow.session_id || null,
+      ])
+    );
     
     // Sort by descending create_time
     allMedia.sort((a, b) => {
@@ -32,12 +39,23 @@ export function useMediaLibrary(projectId, initialMode = "all") {
     // Determine type: 'video' or 'image' and map structure
     allMedia = allMedia.map(m => {
         const isVid = !!m.video || (m.url && /\.(mp4|webm|mov)$/i.test(m.url));
+        const workflowId = m.workflowId || m.workflow_id;
+        const sessionId =
+          m.session_id ||
+          m.sessionId ||
+          m.mediaMetadata?.sessionId ||
+          m.mediaMetadata?.session_id ||
+          workflowSessionMap.get(workflowId) ||
+          null;
+
         return {
             ...m,
             id: m.name || m.id,
             type: isVid ? 'video' : 'image',
             is_video: isVid,
-            workflow_id: m.workflowId || m.workflow_id,
+            workflow_id: workflowId,
+            session_id: sessionId,
+            sessionId,
             primaryMediaId: m.name || m.id // requested by user to extract the media id
         };
     });

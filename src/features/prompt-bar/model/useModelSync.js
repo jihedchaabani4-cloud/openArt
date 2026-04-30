@@ -60,6 +60,7 @@ export function useModelSync(studioModels, _studioModelsLoading, generationMode,
     if (generationMode === "motion" || generationMode === "motion-control") {
       count = 2;
     }
+    // keyframe uses the model's own max (Row1 handles start-only vs start+end via supportsEndFrame = maxRefs >= 2)
     return count;
   }, [selectedModel, generationMode]);
 

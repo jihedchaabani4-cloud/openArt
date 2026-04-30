@@ -24,7 +24,7 @@ export function EditDescribeTab({ s }) {
   };
 
   return (
-    <div className="p-2">
+    <div className="p-2 bg-(--color-imagine-grey-2) backdrop-blur-[80px] rounded-xl w-full min-w-[400px]">
       {/* Reference list - renders above the input bar if images exist */}
       {s.referenceImages.length > 0 && (
         <div className="p-2 border-b border-white/5 bg-black/40">
@@ -118,6 +118,7 @@ export function EditDescribeTab({ s }) {
         onLoadMore={s.handleLoadMoreAssets}
         assetSource={s.assetSource}
         setAssetSource={s.setAssetSource}
+        sessions={s.projectSessions}
         mode="image"
       />
     </div>

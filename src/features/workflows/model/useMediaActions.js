@@ -1,9 +1,9 @@
 import { useWorkflowsStore } from "./useWorkflowsStore";
 import { useToggleWorkflowLike, useRemoveWorkflow } from "../api/workflowsApi";
-import { getItemMetadata, getPrimaryMedia, getPrimaryMediaConfig } from "@/shared/lib/generationUtils";
+import { getItemMetadata, getPrimaryMedia, getPrimaryMediaConfig, getGenerationConfig } from "@/shared/lib/generationUtils";
 import { downloadFile } from "@/shared/lib/utils";
 import { useRemoveAsset } from "@/features/media/api/mediaApi";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 import { useEditStore } from "@/features/prompt-bar/model/useEditStore";
 import { useElementStore } from "@/features/prompt-bar/model/useElementStore";
@@ -19,6 +19,7 @@ import { buildElementSheetDraft } from "./elementSheetConfig";
  */
 export function useWorkflowActions(workflow, item = null) {
   const pathname = usePathname();
+  const router = useRouter();
   const isEditPage =
     pathname?.includes("/generations/edit/") ||
     pathname?.includes("/elements/edit/");
@@ -120,7 +121,7 @@ export function useWorkflowActions(workflow, item = null) {
       return;
     }
 
-    const config = (targetItem?.generationConfig) || getPrimaryMediaConfig(workflow) || {};
+    const config = getGenerationConfig(targetItem, workflow) || {};
     const params = targetItem?.params || {};
     const modelName = config.model_name || config.model || params.model_name || params.model || "";
     
@@ -175,7 +176,7 @@ export function useWorkflowActions(workflow, item = null) {
 
     const editStore = useEditStore.getState();
 
-    // Set edit target and redirect
+    // Set edit target
     editStore.setEditTarget({ 
       workflow_id: workflow.id || workflow.name,
       media_id:    assetId,
@@ -184,8 +185,11 @@ export function useWorkflowActions(workflow, item = null) {
       ratio:       config.ratio || config.aspectRatio || "",
     });
     
-    // The redirect logic usually happens outside or via router.push in the component
-    // but here we just set the store state.
+    // Redirect to edit page
+    const projectId = workflow.projectId || workflow.project_id;
+    if (projectId) {
+      router.push(`/projects/${projectId}/generations/edit/${assetId}`);
+    }
   };
 
   const handleAnimate = () => {
@@ -197,7 +201,7 @@ export function useWorkflowActions(workflow, item = null) {
       // but we can add as reference if needed. For now, let's keep it consistent.
     } else {
       const promptStore = usePromptStore.getState();
-      promptStore.setGenerationMode("video");
+      promptStore.setGenerationMode("keyframe");
       promptStore.clearReferences();
       promptStore.addReference({
         url,
@@ -213,7 +217,8 @@ export function useWorkflowActions(workflow, item = null) {
     const asset = { 
       url, 
       asset_id: assetId, 
-      is_video: isVideo 
+      is_video: isVideo,
+      workflow_type: workflow?.workflow_type
     };
     
     const activeStore = isEditPage ? useEditStore.getState() : usePromptStore.getState();

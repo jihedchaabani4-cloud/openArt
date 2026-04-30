@@ -26,8 +26,18 @@ export function useProjectData(projectId, sessionId = null) {
       
       try {
         const res = await api.get(url);
-        if (res?.result?.data?.json) return res.result.data.json;
-        throw new Error('Project not found');
+        console.log("DEBUG: Raw API Response from /project-data:", res);
+        
+        // Comprehensive check for all possible backend response structures
+        const data = 
+          res?.data?.data?.json || 
+          res?.data?.json || 
+          res?.result?.data?.json || 
+          res?.json || 
+          res?.data;
+
+        if (data && (data.projectContents || data.projectName)) return data;
+        throw new Error('Project data structure invalid or not found');
       } catch (err) {
         throw err;
       }
@@ -37,7 +47,7 @@ export function useProjectData(projectId, sessionId = null) {
     staleTime: 60_000, 
     refetchOnMount: false,
     refetchOnWindowFocus: false,
-    retry: 1, // Don't hang forever on bad IDs
+    retry: false, // Don't hang forever on bad IDs
     throwOnError: false, // Controlled handling
   });
 }
@@ -48,11 +58,11 @@ export function useProjectData(projectId, sessionId = null) {
  */
 export function useProjectSessions(projectId) {
   const { data } = useProjectData(projectId);
-  const sessions = data?.projectContents?.sessions ?? [];
-  return sessions.map(s => ({
-    ...s,
-    session_id: s.name,
-    session_name: s.metadata?.displayName || "Untitled Session"
+  const rawSessions = data?.projectContents?.sessions ?? [];
+  // Backend schema: { name: "uuid", metadata: { displayName: "human name" } }
+  return rawSessions.map(s => ({
+    session_id:   s.name,                                          // UUID stored in "name"
+    session_name: s.metadata?.displayName || s.name || "Untitled Session",
   }));
 }
 

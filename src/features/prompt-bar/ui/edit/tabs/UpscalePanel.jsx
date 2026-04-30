@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import { Loader2, ChevronDown, Sparkles } from "lucide-react";
+import { Loader2, ChevronDown, Sparkles, ArrowRight } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 import { DropdownSegmentedWithLabel } from "@/shared/ui/DropdownShell";
 import {
@@ -80,7 +80,7 @@ export default function UpscalePanel({
     });
 
     return (
-        <div className="flex items-center gap-2 w-full p-3 animate-in fade-in zoom-in-95 duration-300">
+        <div className="flex items-center gap-2 p-1.5 animate-in fade-in  duration-300 bg-(--color-imagine-grey-2) backdrop-blur-[80px] rounded-xl min-w-[390px]">
 
             {/* Scale — DropdownSegmentedWithLabel */}
             <div className="flex-1 min-w-0">
@@ -89,6 +89,7 @@ export default function UpscalePanel({
                     value={upscaleScale}
                     onChange={setUpscaleScale}
                     options={scaleOptions}
+                    className="p-0"
                     transparent
                 />
             </div>
@@ -97,15 +98,15 @@ export default function UpscalePanel({
             <Button
                 onClick={onGenerate}
                 disabled={generating || selectedExceedsLimit}
-                className="h-full shrink-0 px-4 py-2 rounded-xl bg-[#6C5CE7] hover:bg-[#7C6CF7] text-white text-[13px] font-semibold flex items-center gap-2 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                 variant="studio-white"
+              className="size-9 rounded-full p-0 flex items-center justify-center shadow-xl active:scale-95 transition-all bg-[#3E3E3E] hover:bg-[#4E4E4E] text-white border-none"
             >
-                {generating ? (
-                    <Loader2 className="size-4 animate-spin" />
-                ) : (
-                    <Sparkles className="size-4" />
-                )}
-                Process
+              {generating ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <ArrowRight className="size-4" />
+              )}
             </Button>
-        </div>
+        </div>  
     );
 }

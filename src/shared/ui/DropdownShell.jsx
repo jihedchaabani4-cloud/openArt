@@ -116,11 +116,11 @@ export const DropdownSegmentedWithLabel = React.memo(({ label, value, onChange, 
   return (
     <div className={cn(
       "flex items-center gap-3 p-1.5 rounded-xl overflow-hidden",
-      !transparent && "bg-[#1D1D1E]",
+      !transparent && "bg-(--color-imagine-grey-2)",
       className
     )}>
       {label && (
-        <span className="text-[14px] font-semibold text-white  whitespace-nowrap pl-2 shrink-0">
+        <span className="text-[14px] font-semibold text-foreground/90 whitespace-nowrap pl-2 shrink-0">
           {label}
         </span>
       )}
@@ -135,12 +135,12 @@ export const DropdownSegmentedWithLabel = React.memo(({ label, value, onChange, 
               className={cn(
                 "flex-1 min-w-fit px-3 font-semibold py-2 rounded-lg text-[14px] transition-all flex flex-row items-center justify-center gap-2 relative whitespace-nowrap",
                 isSelected
-                  ? (variant === "white" ? "bg-white/80 text-black" : transparent ? "bg-white/10 text-white" : "bg-[#363637] text-white")
+                  ? (variant === "white" ? "bg-white/80 text-black" : transparent ? "bg-white/10 text-foreground" : "bg-white/10 text-foreground")
                   : opt.disabled
                   ? "opacity-30 cursor-not-allowed"
                   : transparent
-                  ? "text-white/50 hover:text-white hover:bg-white/10"
-                  : "text-white hover:text-white hover:bg-[#363637]"
+                  ? "text-foreground/70 hover:text-foreground hover:bg-white/10"
+                  : "text-foreground hover:text-foreground hover:bg-white/5"
               )}
             >
               {opt.icon && <span>{opt.icon}</span>}

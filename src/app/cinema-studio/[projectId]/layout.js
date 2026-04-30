@@ -26,10 +26,43 @@ export default function StudioLayout({ children }) {
     const pathname = usePathname()
     const { projectId } = useParams()
     const queryClient = useQueryClient()
-    const setIsNavbarHidden = useWorkflowsStore((s) => s.setIsNavbarHidden)
+    const { 
+        selectedProjectId, 
+        setSelectedProjectId, 
+        activeSessionId, 
+        setActiveSessionId,
+        setIsNavbarHidden
+    } = useWorkflowsStore();
     
     // 🔹 Data Layer (Pure Hook, controlled error)
-    const { isLoading, isError, refetch } = useProjectData(projectId)
+    const { data: projectData, isLoading, isError, refetch } = useProjectData(projectId)
+
+    // 🚀 Sync selectedProjectId with URL
+    useEffect(() => {
+        if (projectId && projectId !== selectedProjectId) {
+            setSelectedProjectId(projectId);
+        }
+    }, [projectId, selectedProjectId, setSelectedProjectId]);
+
+    // 🚀 Auto-select last session if current one is invalid or missing
+    useEffect(() => {
+        if (!projectData) return;
+        
+        const sessions = projectData?.projectContents?.sessions || [];
+        if (sessions.length === 0) return;
+
+        const sessionExists = sessions.some(s => s.name === activeSessionId);
+
+        if (!activeSessionId || !sessionExists) {
+            // Pick the newest session based on createTime
+            const sorted = [...sessions].sort((a, b) => 
+                new Date(b.metadata?.createTime || 0) - new Date(a.metadata?.createTime || 0)
+            );
+            if (sorted[0]) {
+                setActiveSessionId(sorted[0].name);
+            }
+        }
+    }, [projectData, activeSessionId, setActiveSessionId]);
     
     // 🔹 Local Entry state
     const [isEntryLoading, setIsEntryLoading] = useState(true)

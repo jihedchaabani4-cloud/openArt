@@ -102,6 +102,7 @@ export function StudioNavbar() {
                     searchExpanded={searchExpanded}
                     selectedProjectName={selectedProjectName}
                     onEditProjectName={handleEditProjectName}
+                    activeProjectId={activeProjectId}
                     projectSessions={projectSessions}
                     activeSessionId={activeSessionId}
                     setActiveSessionId={setActiveSessionId}

@@ -53,6 +53,7 @@ export default function WorkflowEditPage() {
     // Sync activeItem and edit store when workflow is loaded or active item changes
     React.useEffect(() => {
         if (workflow) {
+            console.log("🚀 [WorkflowEditPage] Workflow Data:", workflow);
             const currentItem = activeItem || getPrimaryMedia(workflow);
             if (!activeItem) setActiveItem(currentItem);
 

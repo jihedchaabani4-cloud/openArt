@@ -7,6 +7,50 @@ const ELEMENT_MODE_BY_DNA_TYPE = {
   PRODUCT: "product",
 };
 
+export const ELEMENT_SHEET_CONFIGS = {
+  character: {
+    type: "character",
+    label: "Character",
+    maxReferences: 5,
+    support: {
+      references: { min: 0, max: 5 },
+    },
+  },
+  location: {
+    type: "location",
+    label: "Location",
+    maxReferences: 1,
+    support: {
+      references: { min: 0, max: 1 },
+    },
+  },
+  product: {
+    type: "product",
+    label: "Product",
+    maxReferences: 1,
+    support: {
+      references: { min: 0, max: 1 },
+    },
+  },
+};
+
+const DEFAULT_ELEMENT_SHEET_CONFIG = {
+  type: "default",
+  label: "Element",
+  maxReferences: 5,
+  support: {
+    references: { min: 0, max: 5 },
+  },
+};
+
+export function isElementSheetMode(mode) {
+  return Object.prototype.hasOwnProperty.call(ELEMENT_SHEET_CONFIGS, mode);
+}
+
+export function getElementSheetConfig(mode) {
+  return ELEMENT_SHEET_CONFIGS[mode] || DEFAULT_ELEMENT_SHEET_CONFIG;
+}
+
 export function normalizeElementMode(dnaType) {
   return ELEMENT_MODE_BY_DNA_TYPE[(dnaType || "").toUpperCase()] || "character";
 }
@@ -68,6 +112,7 @@ export function buildElementSheetDraft(workflow, targetItem = null) {
   const workflowPrompt = primaryConfig.prompt || currentItem?.params?.prompt || meta.prompt || "";
   const dna = primaryConfig.dna || null;
   const elementMode = normalizeElementMode(dna?.type);
+  const elementConfig = getElementSheetConfig(elementMode);
   const prompt = buildElementPrompt(workflowPrompt, dna?.traits || []);
   const references = normalizeElementReferences(primaryConfig.references || []);
   const features = extractFeaturesFromPrompt(prompt);

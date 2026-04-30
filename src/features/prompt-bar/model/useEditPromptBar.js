@@ -4,7 +4,11 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import { useWorkflowsStore } from "@/features/workflows";
 import { useEditStore } from "./useEditStore";
-import { useProjectData, useGenerateMutation, useExtendVideoMutation } from "@/features/workflows/api/workflowsApi";
+import { 
+  useProjectData, 
+  useGenerateMutation, 
+  useExtendVideoMutation,
+} from "@/features/workflows/api/workflowsApi";
 import { queryKeys } from "@/shared/api/queryKeys";
 import { buildReferencesPayload } from "@/shared/lib/referenceUtils";
 import { useModelSync } from "./useModelSync";
@@ -173,7 +177,7 @@ export function useEditPromptBar() {
               workflow_id:             editTarget?.workflow_id,
               ratio,
               quality:                 resolution,
-              model_name:              "seedream-pro",
+              model_name:              "gpt-image-2",
               reference_workflow_ids:  referenceImages.map(r => r.workflowId || r.workflow_id || r.id || r.asset_id).filter(Boolean),
           };
 
@@ -282,6 +286,16 @@ export function useEditPromptBar() {
     ]
   );
 
+  // Extract sessions directly from already-loaded projectData
+  // Backend schema: { name: "uuid", metadata: { displayName: "human name" } }
+  const projectSessions = React.useMemo(() => {
+    const raw = projectData?.projectContents?.sessions ?? [];
+    return raw.map(s => ({
+      session_id:   s.name,
+      session_name: s.metadata?.displayName || s.name || "Untitled Session",
+    }));
+  }, [projectData]);
+
   return {
     prompt, setPrompt,
     textareaRef,
@@ -322,6 +336,7 @@ export function useEditPromptBar() {
     setUpscaleScale,
     projectId,
     activeSessionId,
+    projectSessions,
     editTarget,
     setEditTarget,
     resetEditStore,

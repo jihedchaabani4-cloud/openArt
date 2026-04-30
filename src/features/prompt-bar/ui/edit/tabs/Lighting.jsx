@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect, useCallback, memo, useMemo } from "react";
-import { useStudioStore } from "@/store/useStudioStore";
 import { useEditStore } from "@/features/prompt-bar/model/useEditStore";
 import { Button } from "@/shared/ui/button";
 import { Sun, Sparkles } from "lucide-react";
@@ -267,7 +266,7 @@ const RangeSlider = memo(function RangeSlider({ label, min, max, step, value, on
 });
 
 export default function LightingPanel({ onClose, onGenerate, previewImageUrl }) {
-  const { stagedDna, setLightingDna } = useStudioStore()
+  const { stagedDna, setLightingDna } = useEditStore()
   const { editTarget, setLighting } = useEditStore()
   const generateMutation = useGenerateMutation();
   
@@ -375,7 +374,7 @@ export default function LightingPanel({ onClose, onGenerate, previewImageUrl }) 
   };
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 p-1.5  bg-(--color-imagine-grey-2) backdrop-blur-[80px] rounded-xl w-full min-w-[400px]">
       <div className="flex flex-row gap-4">
         <div
           className="relative flex items-center justify-center w-[70%] rounded-xl overflow-hidden group/viewport"

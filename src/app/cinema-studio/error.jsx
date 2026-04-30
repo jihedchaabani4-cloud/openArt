@@ -1,7 +1,6 @@
 "use client";
-
 import { ProjectError } from "@/shared/ui/ProjectError";
 
-export default function GlobalProjectError({ error, reset }) {
-  return <ProjectError />;
+export default function ErrorBoundary({ error, reset }) {
+  return <ProjectError error={error} reset={reset} onRetry={reset} />;
 }

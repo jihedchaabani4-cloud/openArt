@@ -6,7 +6,7 @@ import { cn } from "@/shared/lib/utils"
 import { DialogClose } from "@/shared/ui/dialog"
 import { useRemoveWorkflow as useRemoveGeneration, useToggleLike } from "@/features/workflows/api/workflowsApi"
 import { useRemoveAsset } from "@/features/media/api/mediaApi"
-import { DeleteWorkflowDialog as DeleteGenerationDialog } from "./DeleteWorkflowDialog"
+import { ConfirmDeleteDialog } from "./ConfirmDeleteDialog"
 
 const TABS = [
     { id: "overview",  label: "Overview",  icon: LayoutGrid },
@@ -298,16 +298,17 @@ export function ImageInfoSidebar({ item, group, onClose }) {
                     Download
                 </button>
 
-                <DeleteGenerationDialog 
+                <ConfirmDeleteDialog 
                     onConfirm={handleDelete} 
-                    itemName={isUpload ? 'media' : (item.asset?.asset_type || "generation")}
+                    title={`Delete ${isUpload ? 'media' : (item.asset?.asset_type || "item")}?`}
+                    description="This action cannot be undone. It will be permanently removed."
                 >
                     <button 
                         className="button button-md h-12 flex items-center justify-center rounded-xl transition-all duration-200 border border-white/10 bg-white/5 hover:bg-red-500/10 hover:border-red-500/20 text-white/40 hover:text-red-500 col-span-1"
                     >
                         <Trash2 className="size-5" />
                     </button>
-                </DeleteGenerationDialog>
+                </ConfirmDeleteDialog>
             </div>
             
             <style jsx>{`
