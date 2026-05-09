@@ -9,6 +9,8 @@ export async function apiRequest(endpoint, options = {}) {
         return Promise.reject(new Error("API URL is not defined"));
     }
 
+    console.log("API Request using NEXT_PUBLIC_API_URL:", process.env.NEXT_PUBLIC_API_URL);
+
     const url = `${BASE_URL}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
     
     const headers = { ...options.headers };
