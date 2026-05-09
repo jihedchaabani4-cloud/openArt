@@ -1,12 +1,14 @@
+import { PricingSection } from "@/features/payments/ui/PricingSection";
+
 export const metadata = {
   title: "Pricing | Open Art",
-  description: "Choose the plan that fits your creative workflow",
+  description: "Buy AI credits to generate images, videos and more with Open Art.",
 };
 
 export default function PricingPage() {
   return (
-    <div className="min-h-screen bg-[#050505] flex items-center justify-center">
-      <p className="text-white/20 text-lg font-medium tracking-tight">Coming soon</p>
-    </div>
+    <main className="min-h-screen bg-[#050505]">
+      <PricingSection />
+    </main>
   );
 }
