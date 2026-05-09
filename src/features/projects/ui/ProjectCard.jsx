@@ -3,8 +3,7 @@
 import * as React from "react"
 import Link from "next/link"
 import { motion } from "framer-motion"
-import { FaPen } from "react-icons/fa6"
-import { MdDelete } from "react-icons/md"
+import { GoogleIcon } from "@/shared/ui/GoogleIcon"
 import { Button } from "@/shared/ui/button"
 import { EditableDisplayName } from "@/shared/ui/EditableDisplayName"
 import { ConfirmDeleteDialog } from "@/widgets/dialogs/ConfirmDeleteDialog"
@@ -98,27 +97,28 @@ export function ProjectCard({ project, onDelete, onRename }) {
                             className="h-auto w-auto p-0 transition-all duration-300 opacity-0 group-hover:opacity-100 text-white shrink-0"
                             aria-label={`Rename ${project.project_name}`}
                         >
-                            <FaPen className="size-3" />
+                            <GoogleIcon iconName="edit" className="text-[14px]" />
                         </Button>
                     )}
                 </div>
 
-                {!isEditing && (
+                <div className="flex items-center">
                     <ConfirmDeleteDialog
+                        description={`Are you sure you want to delete "${project.name}"?`}
                         onConfirm={() => onDelete(project.project_id)}
-                        title="Delete project?"
-                        description={`The project "${project.name}" will be deleted forever.`}
-                    >
-                        <Button
-                            variant="ghost"
-                            size="icon-xs"
-                            className="h-auto w-auto p-0 ml-4 transition-all duration-300 opacity-0 group-hover:opacity-100 text-white"
-                            aria-label={`Delete ${project.project_name}`}
-                        >
-                            <MdDelete className="size-5" />
-                        </Button>
-                    </ConfirmDeleteDialog>
-                )}
+                        trigger={
+                            <Button
+                                variant="ghost"
+                                size="icon-xs"
+                                className="h-auto w-auto p-0 transition-all duration-300 opacity-0 group-hover:opacity-100 text-white"
+                                aria-label={`Delete ${project.project_name}`}
+                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                            >
+                                <GoogleIcon iconName="delete" className="text-[18px]" />
+                            </Button>
+                        }
+                    />
+                </div>
             </div>
         </motion.div>
     )

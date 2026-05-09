@@ -94,6 +94,13 @@ export const useEditStore = create((set) => ({
 
   setReferenceImages: (images) => set({ referenceImages: images }),
 
+  patchEditTarget: (partial) =>
+    set((state) =>
+      state.editTarget
+        ? { editTarget: { ...state.editTarget, ...partial } }
+        : state
+    ),
+
   // ─── Reset Store ──────────────────────────────────────────────────────────
   resetEditStore: () => set({
     editTarget: null,

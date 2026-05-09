@@ -82,7 +82,7 @@ export function ProjectsNavbar() {
                                 onClick={() => setLoginOpen(true)}
                                 variant="studio-ghost"
                                 size="sm"
-                                className="text-white gap-2 font-semibold text-[16px]"
+                                className="text-white gap-2 font-semibold text-[14px]"
                             >
                                 Login
                             </Button>

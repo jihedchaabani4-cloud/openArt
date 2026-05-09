@@ -75,7 +75,7 @@ export function ElementsPromptBar({ hideBackground = false }) {
                         textareaRef={s.textareaRef}
                         referenceImages={s.referenceImages}
                         placeholder={s.placeholder}
-                        onTriggerMentionDialog={(cb) => s.openDialog("image", "normal", cb)}
+                        onTriggerMentionDialog={s.maxRefs > 0 ? (cb) => s.openDialog("image", "normal", cb) : undefined}
                     />
                     <ElementsRow2
                         paramsProps={{
@@ -88,13 +88,16 @@ export function ElementsPromptBar({ hideBackground = false }) {
                         actionProps={{
                             generating: s.generating,
                             onSubmit: s.handleGenerate,
-                            prompt: s.prompt,
+                            appOverride: `${s.elementMode}_sheet`,
+                            generationMode: s.generationMode,
+                            hasContent: (s.prompt || "").trim().length > 0,
                         }}
                         onToggleVariations={s.toggleVariations}
                         variationsOpen={s.variationsOpen}
                         onAddClick={s.handleAddClick}
                         mediaOpen={s.dialogOpen}
                         paperclipRef={paperclipRef}
+                        showPaperclip={s.maxRefs > 0}
                     />
                 </div>
             </PromptBarBase>

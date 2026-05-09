@@ -6,6 +6,14 @@ import { useProjectData } from "@/features/workflows/api/workflowsApi";
  * [FSD Layer: features/media]
  * A shared hook for managing the Media Library state, 
  * using cached project data instead of independent fetching.
+import { useState, useMemo, useCallback } from "react";
+import { useBatchUploadAssets } from "../api/mediaApi";
+import { useProjectData } from "@/features/workflows/api/workflowsApi";
+
+/**
+ * [FSD Layer: features/media]
+ * A shared hook for managing the Media Library state, 
+ * using cached project data instead of independent fetching.
  */
 export function useMediaLibrary(projectId, initialMode = "all") {
   const [enabled,   setEnabled]   = useState(false);
@@ -13,7 +21,8 @@ export function useMediaLibrary(projectId, initialMode = "all") {
   const [mediaType, setMediaType] = useState(initialMode); // 'image' | 'video' | 'all'
 
   // Instead of querying /api/media directly, we just read from the unified project data cache
-  const { data: projectData, isFetching: loading } = useProjectData(projectId);
+  // We only enable this fetch if the library is actually being used
+  const { data: projectData, isFetching: loading } = useProjectData(projectId, null, false, { enabled });
 
   const { mutateAsync: uploadBatchToServer } = useBatchUploadAssets();
 

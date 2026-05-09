@@ -3,7 +3,7 @@
 import { cn } from "@/shared/lib/utils"
 import * as React from "react"
 import { EditableDisplayName } from "@/shared/ui/EditableDisplayName"
-import { MoreVertical, Pencil, Trash2 } from "lucide-react"
+import { GoogleIcon } from "@/shared/ui/GoogleIcon"
 import { useDeleteProject } from "@/features/projects/api/projectsApi"
 import { useRouter } from "next/navigation"
 import {
@@ -12,8 +12,8 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/shared/ui/dropdown-menu"
-import { ConfirmDeleteDialog } from "@/widgets/dialogs/ConfirmDeleteDialog"
 import { Button } from "@/shared/ui/button"
+import { ConfirmDeleteDialog } from "@/widgets/dialogs/ConfirmDeleteDialog"
 
 export function StudioNavbarLeft({
     searchExpanded,
@@ -69,21 +69,20 @@ export function StudioNavbarLeft({
 
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                    <button className="p-1.5 text-white/40 hover:text-white hover:bg-white/10 rounded-lg transition-all shrink-0">
-                        <MoreVertical size={16} />
-                    </button>
+                    <Button variant="studio-ghost" size="sm">
+                        <GoogleIcon iconName="more_vert" className="text-[13px]" />
+                    </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="min-w-[140px]">
                     <DropdownMenuItem onClick={() => nameRef.current?.startEditing()}>
-                        <Pencil className="size-3.5" />
-                        <span>Rename</span>
+                        <GoogleIcon iconName="edit" className="text-[13px]" />
+                      Rename
                     </DropdownMenuItem>
                     <DropdownMenuItem 
                         onClick={() => setIsDeleteDialogOpen(true)}
-                        className="text-red-400 focus:text-red-400 focus:bg-red-400/10"
                     >
-                        <Trash2 className="size-3.5" />
-                        <span>Delete</span>
+                        <GoogleIcon iconName="delete" className="text-[13px]" />
+                        Delete
                     </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>

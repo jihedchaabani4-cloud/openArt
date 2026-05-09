@@ -1,9 +1,8 @@
 import { useState, useRef, useEffect, useCallback, memo, useMemo } from "react";
 import { useEditStore } from "@/features/prompt-bar/model/useEditStore";
-import { Button } from "@/shared/ui/button";
-import { cn } from "@/shared/lib/utils";
-import { useGenerateMutation } from "@/features/workflows/api/workflowsApi";
 
+import { useGenerateMutation } from "@/features/workflows/api/workflowsApi";
+import { ActionButton } from "../../common/ActionButton";
 
 const LATITUDE_RINGS = [
   { w: 158, translateY: 10 },
@@ -307,6 +306,8 @@ export default function AnglesPanel({ onClose, onGenerate, previewImageUrl }) {
   const generateMutation = useGenerateMutation();
   
   const activeImageUrl = previewImageUrl || editTarget?.primaryMediaUrl || editTarget?.url || editTarget?.thumbnail_url;
+  const isVideo = activeImageUrl && /\.(mp4|webm|mov)$/i.test(activeImageUrl);
+  const appOverrideKey = isVideo ? "camera_video" : "camera";
   
   const cameraDna = stagedDna?.camera_dna || { rotation: 0, tilt: 0, zoom: 0 }
 
@@ -497,14 +498,11 @@ export default function AnglesPanel({ onClose, onGenerate, previewImageUrl }) {
             <RangeSlider label="Zoom" min={0} max={10} step={5} value={zoom} onChange={(val) => { setZoom(val); const newDna = { rotation, tilt, zoom: val }; setCamera?.(newDna); setCameraDna?.(newDna); onGenerate?.(newDna); }} displayValue={Math.round(zoom)} />
           </div>
           <div className="flex items-center justify-end">
-            <Button
-              variant="studio-white"
-              onClick={handleUpdateAngle}
-              disabled={generateMutation.isPending}
-              className="h-8 px-4 rounded-full text-xs"
-            >
-              {generateMutation.isPending ? "Generating..." : "Update Angle"}
-            </Button>
+            <ActionButton
+              generating={generateMutation.isPending}
+              onSubmit={handleUpdateAngle}
+              appOverride={appOverrideKey}
+            />
           </div>
         </div>
       </div>

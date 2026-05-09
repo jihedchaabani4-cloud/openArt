@@ -89,7 +89,7 @@ html {
   --radius-4xl: calc(var(--radius) + 16px);
 
   /* Custom UI Tokens */
-  --color-imagine-grey-2: light-dark(#dadae0, #1b1b1c);
+  --color-imagine-grey-2: light-dark(rgba(218, 218, 224, 0.85), rgba(27, 27, 28, 0.85));
   --color-ui-panel-bg: #161718;
   --color-ui-border: rgba(255,255,255,0.05);
   --color-ui-text-primary: #f5f5f5;

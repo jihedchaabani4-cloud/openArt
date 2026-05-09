@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { motion, useMotionValue, useTransform } from "framer-motion";
-import { Play, Heart, Trash2, Download, Wand2, Undo2, Plus, MoreVertical, Layers } from "lucide-react";
+import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { cn } from "@/shared/lib/utils";
 import { ImageStatusView } from "@/features/workflows/ui/ImageStatusView";
 import { ButtonGroup } from "@/shared/ui/button-group";
@@ -16,6 +16,7 @@ import {
 import { ConfirmDeleteDialog } from "@/widgets/dialogs/ConfirmDeleteDialog";
 import { useWorkflowActions } from "@/features/workflows/model/useMediaActions";
 import { usePromptStore } from "@/features/prompt-bar/model/usePromptStore";
+import { useWorkflowsStore } from "@/features/workflows/model/useWorkflowsStore";
 import { ActionBtn } from "./ActionBtn";
 import { springGentle, iconCls } from "./constants";
 
@@ -52,6 +53,12 @@ export function MediaGridItem({
   const [isDropdownOpen,      setIsDropdownOpen]      = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [isDragging,          setIsDragging]          = useState(false);
+  
+  const showTileDetails = useWorkflowsStore(s => s.showTileDetails);
+  const setShowTileDetails = useWorkflowsStore(s => s.setShowTileDetails);
+  
+  const toggleTileDetails = () => setShowTileDetails(!showTileDetails);
+
 
   // ── Motion values ──────────────────────────────────────────────────────
   const mouseX        = useMotionValue(-500);
@@ -123,22 +130,28 @@ export function MediaGridItem({
   const isElementSheet = workflow?.workflow_type === "ELEMENT_SHEET";
   const isDraggable = isDone && !isElementSheet;
 
+  const displayName = workflow?.metadata?.displayName || null;
+
   let menuItems = [
-    { key: "add",      icon: Plus,     label: "Add to prompt",            onClick: handleAddToPrompt },
-    { key: "like",     icon: Heart,    label: isLiked ? "Unlike" : "Like", iconClassName: cn(isLiked && "fill-white"), onClick: handleLike },
+    { key: "add",      icon: "add",     label: "Add to prompt",            onClick: handleAddToPrompt },
+    { key: "like",     icon: "favorite",    label: isLiked ? "Unlike" : "Like", iconClassName: cn(isLiked && "fill-white"), onClick: handleLike },
     ...(canReuse ? [
-      { key: "reuse",  icon: Undo2,    label: "Reuse Settings",           onClick: handleReuseSettings },
+      { key: "reuse",  icon: "history",    label: "Reuse Settings",           onClick: handleReuseSettings },
     ] : []),
-    { key: "download", icon: Download, label: "Download",                  onClick: handleDownload },
-    { key: "delete",   icon: Trash2,   label: "Delete", disabled: !canDelete, onClick: () => setIsDeleteConfirmOpen(true) },
+    { key: "download", icon: "download", label: "Download",                  onClick: handleDownload },
+    { key: "separator" },
+    { key: "tileDetails", icon: showTileDetails ? "visibility_off" : "visibility", label: showTileDetails ? "Hide tile details" : "Show tile details", onClick: toggleTileDetails },
+    { key: "delete",   icon: "delete",   label: "Delete", disabled: !canDelete, onClick: () => setIsDeleteConfirmOpen(true) },
   ];
 
   if (isElementSheet) {
     menuItems = [
-      { key: "reuse", icon: Undo2, label: "Reuse Settings", onClick: handleSetParameters },
-      { key: "like",     icon: Heart,    label: isLiked ? "Unlike" : "Like", iconClassName: cn(isLiked && "fill-white"), onClick: handleLike },
-      { key: "download", icon: Download, label: "Download",                  onClick: handleDownload },
-      { key: "delete",   icon: Trash2,   label: "Delete", disabled: !canDelete, onClick: () => setIsDeleteConfirmOpen(true) },
+      { key: "reuse", icon: "history", label: "Reuse Settings", onClick: handleSetParameters },
+      { key: "like",     icon: "favorite",    label: isLiked ? "Unlike" : "Like", iconClassName: cn(isLiked && "fill-white"), onClick: handleLike },
+      { key: "download", icon: "download", label: "Download",                  onClick: handleDownload },
+      { key: "separator" },
+      { key: "tileDetails", icon: showTileDetails ? "visibility_off" : "visibility", label: showTileDetails ? "Hide tile details" : "Show tile details", onClick: toggleTileDetails },
+      { key: "delete",   icon: "delete",   label: "Delete", disabled: !canDelete, onClick: () => setIsDeleteConfirmOpen(true) },
     ];
   }
 
@@ -248,17 +261,21 @@ export function MediaGridItem({
                 <div className="flex justify-end pointer-events-auto">
                   <ButtonGroup className="bg-white/60 backdrop-blur-md rounded-lg">
                     <ActionBtn onClick={(e) => { e.stopPropagation(); handleLike(); }}>
-                      <Heart className={cn(iconCls, isLiked && "fill-[#303031] text-[#303031]")} />
+                      <GoogleIcon 
+                        iconName={isLiked ? "favorite" : "favorite"} 
+                        fill={isLiked}
+                        className={cn("text-[13px]", isLiked ? "text-[#303031]" : "text-[#303031]")} 
+                      />
                     </ActionBtn>
                     {canReuse && !isElementSheet && (
                       <ActionBtn onClick={(e) => { e.stopPropagation(); handleReuseSettings(); }}>
-                        <Undo2 className={iconCls} />
+                        <GoogleIcon iconName="history" className="text-[13px] text-[#303031]" />
                       </ActionBtn>
                     )}
                     <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
                       <DropdownMenuTrigger asChild>
                         <ActionBtn onClick={(e) => e.stopPropagation()}>
-                          <MoreVertical className={iconCls} />
+                          <GoogleIcon iconName="more_vert" className="text-[13px] text-[#303031]" />
                         </ActionBtn>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="w-44">
@@ -277,7 +294,12 @@ export function MediaGridItem({
                                   m.onClick();
                                 }}
                               >
-                                <m.icon className={m.iconClassName} /> {m.label}
+                                <GoogleIcon 
+                                    iconName={m.icon} 
+                                    className={cn("text-[13px] mr-2", m.iconClassName)} 
+                                    fill={m.key === "like" && isLiked}
+                                /> 
+                                {m.label}
                               </DropdownMenuItem>
                             )
                         )}
@@ -294,7 +316,7 @@ export function MediaGridItem({
                 <ButtonGroup className="bg-white/60 backdrop-blur-md rounded-lg">
                   {canReuse && (
                     <ActionBtn onClick={(e) => { e.stopPropagation(); handleReuseSettings(); }} title="Reuse Settings">
-                      <Undo2 className={iconCls} />
+                      <GoogleIcon iconName="history" className="text-[13px] text-[#303031]" />
                     </ActionBtn>
                   )}
                   <ActionBtn
@@ -302,7 +324,7 @@ export function MediaGridItem({
                     disabled={!canDelete}
                     title={canDelete ? "Delete" : "Cannot delete while processing"}
                   >
-                    <Trash2 className={iconCls} />
+                    <GoogleIcon iconName="delete" className="text-[13px] text-[#303031]" />
                   </ActionBtn>
                 </ButtonGroup>
               </div>
@@ -312,14 +334,36 @@ export function MediaGridItem({
             {isDone && (isLiked || isVideo || workflow.isMultiMedia) && (
               <div className="absolute top-3 left-3 z-20 flex items-center gap-2 pointer-events-none drop-shadow-md">
                 {workflow.isMultiMedia && (
-                  <Layers className="size-4 text-white" />
+                  <GoogleIcon iconName="layers" className="text-[12px] text-white" />
                 )}
                 {isLiked && (
-                  <Heart className="size-4 fill-white text-white" />
+                  <GoogleIcon iconName="favorite" fill className="text-[12px] text-white" />
                 )}
                 {isVideo && (
-                  <Play className="size-4 fill-white text-white" />
+                  <GoogleIcon iconName="play_arrow" fill className="text-[12px] text-white" />
                 )}
+              </div>
+            )}
+
+            {/* ── Display name label ── */}
+            {displayName && (
+              <div className={cn(
+                "absolute bottom-0 left-0 right-0 z-20 pointer-events-none transition-opacity duration-200",
+                showTileDetails ? "opacity-100" : "opacity-0 group-hover:opacity-100",
+              )}>
+                <div className="px-2 py-1.5 flex items-center gap-1.5">
+                  {isElementSheet
+                    ? <GoogleIcon iconName="layers" className="text-[12px] text-white shrink-0" />
+                    : isVideo
+                      ? <GoogleIcon iconName="play_arrow" fill className="text-[12px] text-white shrink-0" />
+                      : <GoogleIcon iconName="image" className="text-[12px] text-white shrink-0" />
+                  }
+                  <span
+                    className="text-white/90 truncate text-[12px] font-semibold max-w-[80%]"
+                  >
+                    {displayName}
+                  </span>
+                </div>
               </div>
             )}
           </motion.div>
@@ -332,7 +376,12 @@ export function MediaGridItem({
                 ? <ContextMenuSeparator key={i} />
                 : (
                   <ContextMenuItem key={m.key} variant={m.variant} onClick={(e) => { e.stopPropagation(); m.onClick(); }}>
-                    <m.icon className={m.iconClassName} /> {m.label}
+                    <GoogleIcon 
+                        iconName={m.icon} 
+                        className={cn("text-[14px] mr-2", m.iconClassName)} 
+                        fill={m.key === "like" && isLiked}
+                    /> 
+                    {m.label}
                   </ContextMenuItem>
                 )
             )}

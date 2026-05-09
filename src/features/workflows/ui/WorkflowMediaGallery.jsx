@@ -8,6 +8,7 @@ import { ButtonGroup } from "@/shared/ui/button-group";
 import { cn } from "@/shared/lib/utils";
 import { getItemMetadata } from "@/shared/lib/generationUtils";
 import { ImageStatusView } from "./ImageStatusView";
+import { ConfirmDeleteDialog } from "@/widgets/dialogs/ConfirmDeleteDialog";
 
 function tokenizePrompt(prompt = "") {
   const tokens = [];
@@ -60,15 +61,11 @@ export function WorkflowMediaGallery({
   const deleteMediaMutation = useDeleteMedia();
   const detachMediaMutation = useDetachMedia();
 
-  const handleDetach = (e, mediaId) => {
-    e.stopPropagation();
-    if (!confirm("Are you sure you want to detach this media to a new workflow?")) return;
+  const handleDetach = (mediaId) => {
     detachMediaMutation.mutate({ mediaId, projectId, sessionId });
   };
 
-  const handleDelete = (e, mediaId) => {
-    e.stopPropagation();
-    if (!confirm("Are you sure you want to delete this media? This cannot be undone.")) return;
+  const handleDelete = (mediaId) => {
     deleteMediaMutation.mutate({ mediaId });
   };
 
@@ -181,18 +178,25 @@ export function WorkflowMediaGallery({
                   {/* Actions Overlay */}
                   <div className="absolute top-2 left-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-20">
                     <ButtonGroup className="bg-white/60 backdrop-blur-md rounded-lg scale-90 origin-top-left">
-                      <ActionBtn
-                        onClick={(e) => handleDetach(e, itemId)}
-                        title="Detach to new workflow"
+                      <ConfirmDeleteDialog
+                        onConfirm={() => handleDetach(itemId)}
+                        description="Voulez-vous détacher ce média vers un nouveau workflow ?"
+                        confirmLabel="Détacher"
                       >
-                        <Scissors className="size-3.5" />
-                      </ActionBtn>
-                      <ActionBtn
-                        onClick={(e) => handleDelete(e, itemId)}
-                        title="Delete media"
+                        <ActionBtn title="Detach to new workflow">
+                          <Scissors className="size-3.5" />
+                        </ActionBtn>
+                      </ConfirmDeleteDialog>
+                      
+                      <ConfirmDeleteDialog
+                        onConfirm={() => handleDelete(itemId)}
+                        description="Cette action est irréversible. Le média sera définitivement supprimé."
+                        confirmLabel="Supprimer"
                       >
-                        <Trash2 className="size-3.5" />
-                      </ActionBtn>
+                        <ActionBtn title="Delete media">
+                          <Trash2 className="size-3.5" />
+                        </ActionBtn>
+                      </ConfirmDeleteDialog>
                     </ButtonGroup>
                   </div>
                 </div>

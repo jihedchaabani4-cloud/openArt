@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Search, X } from "lucide-react"
+import { GoogleIcon } from "@/shared/ui/GoogleIcon"
 import { cn } from "@/shared/lib/utils"
 import { Input } from "@/shared/ui/input"
 import { WorkflowsFilterDropdown as GenerationsFilterDropdown } from "@/features/workflows/ui/WorkflowsFilterDropdown"
@@ -32,9 +32,9 @@ export function StudioNavbarCenter({
                 />
                 <Input
                     ref={searchInputRef}
-                    icon={Search}
+                    icon={() => <GoogleIcon iconName="search" className="text-[20px]" />}
                     onClear={searchExpanded ? handleCloseSearch : undefined}
-                    clearIcon={X}
+                    clearIcon={() => <GoogleIcon iconName="close" className="text-[20px]" />}
                     type="search"
                     value={filters.prompt}
                     onChange={(e) => setFilter('prompt', e.target.value)}

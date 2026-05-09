@@ -1,5 +1,5 @@
 import React from "react";
-import { Play, ImageIcon, Film } from "lucide-react";
+import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { cn } from "@/shared/lib/utils";
 import { getItemMetadata } from "@/shared/lib/generationUtils";
 
@@ -52,14 +52,14 @@ export function WorkflowMediaSidebar({
               <img src={iUrl} className="w-full h-full object-cover" alt="" />
             ) : (
               <div className="w-full h-full flex items-center justify-center bg-white/5">
-                {iVideo ? <Film className="size-4 text-white/40" /> : <ImageIcon className="size-4 text-white/40" />}
+                {iVideo ? <GoogleIcon iconName="movie" className="text-[14px] text-white/40" /> : <GoogleIcon iconName="image" className="text-[14px] text-white/40" />}
               </div>
             )}
             
             {/* Micro-indicator for video on thumbnail */}
             {iVideo && (
-              <div className="absolute top-1 right-1 p-0.5 bg-black/40 backdrop-blur-sm rounded-sm">
-                <Play className="size-2 fill-white text-white" />
+              <div className="absolute top-1 right-1 p-0.5 bg-black/40 backdrop-blur-sm rounded-sm flex items-center justify-center">
+                <GoogleIcon iconName="play_arrow" fill className="text-[10px] text-white" />
               </div>
             )}
             

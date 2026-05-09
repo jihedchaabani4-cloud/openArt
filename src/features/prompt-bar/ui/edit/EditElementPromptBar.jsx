@@ -75,30 +75,35 @@ export function EditElementPromptBar({ className }) {
             textareaRef={s.textareaRef}
             referenceImages={s.referenceImages}
             placeholder={s.placeholder}
-            onTriggerMentionDialog={(cb) => s.openDialog("image", "normal", cb)}
+            onTriggerMentionDialog={s.maxRefs > 0 ? (cb) => s.openDialog("image", "normal", cb) : undefined}
           />
 
           <div className="flex items-center justify-between gap-3">
-            <Button
-              ref={paperclipRef}
-              onClick={s.handleAddClick}
-              variant="ghost"
-              size="icon"
-              className={cn(
-                "rounded-lg transition-colors shrink-0 w-10 h-10",
-                s.dialogOpen
-                  ? "bg-white/10 text-white"
-                  : "text-neutral-400 hover:bg-white/5 hover:text-neutral-100"
-              )}
-              title="Upload media"
-              type="button"
-            >
-              <Paperclip className="w-4 h-4" />
-            </Button>
+            {s.maxRefs > 0 && (
+              <Button
+                ref={paperclipRef}
+                onClick={s.handleAddClick}
+                variant="ghost"
+                size="icon"
+                className={cn(
+                  "rounded-lg transition-colors shrink-0 w-10 h-10",
+                  s.dialogOpen
+                    ? "bg-white/10 text-white"
+                    : "text-neutral-400 hover:bg-white/5 hover:text-neutral-100"
+                )}
+                title="Upload media"
+                type="button"
+              >
+                <Paperclip className="w-4 h-4" />
+              </Button>
+            )}
 
             <ActionButton
               generating={s.generating}
-              prompt={s.prompt}
+              onSubmit={() => s.handleGenerate()}
+              appOverride={`${s.elementMode}_sheet`}
+              generationMode={s.generationMode}
+              hasContent={(s.prompt || "").trim().length > 0}
             />
           </div>
         </div>

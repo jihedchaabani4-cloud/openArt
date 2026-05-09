@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { cn } from "@/shared/lib/utils";
 import { Info, ArrowRight, LayoutGrid } from "lucide-react";
 import { ModelSelector } from "../../common/selectors/ModelSelector";
+import { ActionButton } from "../../common/ActionButton";
 import { PromptTextarea } from "../../common/PromptTextarea";
 const CAMERA_MOTIONS = [
     { id: "static", label: "Static", video: "https://res.cloudinary.com/dsak0vfdj/video/upload/v1776729328/Static_j4m7uu.mp4" },
@@ -37,6 +38,7 @@ import { Loader2 } from "lucide-react";
 import { RangeSlider } from "@/shared/ui/RangeSlider";
 
 export function CameraView({ s }) {
+    const appOverrideKey = s.editTarget?.isVideo ? "camera_video" : "camera";
     const [activeTab, setActiveTab] = useState("motion");
     // Local selection state for UI, but also sync with store
     // Sync with store
@@ -58,7 +60,7 @@ export function CameraView({ s }) {
         if (posItem) setSelectedPosition(posItem.id);
     }, [s.camera]);
     const [isExpanded, setIsExpanded] = useState(false);
-    const [duration, setDuration] = useState(5);
+
 
     // Dragger logic — uses Pointer Events API (compatible with framer-motion)
     const sliderRef = useRef(null);
@@ -265,18 +267,7 @@ export function CameraView({ s }) {
 
             {/* Bottom Row */}
             <div className="flex w-full items-center justify-between pb-2 px-6 pt-1 gap-3">
-                {/* Time Selector */}
-                <div className="w-36 shrink-0">
-                    <RangeSlider
-                        label="Duration"
-                        min={1}
-                        max={10}
-                        step={1}
-                        value={duration}
-                        onChange={setDuration}
-                        displayValue={`${duration}s`}
-                    />
-                </div>
+
                 <div className="flex items-center gap-3 ml-auto">
                     <ModelSelector
                         type="motion"
@@ -292,24 +283,12 @@ export function CameraView({ s }) {
                     >
                         <Info size={18} strokeWidth={2.5} />
                     </button>
-                    <button 
-                        type="button"
-                        onClick={() => s.handleGenerate()}
-                        disabled={s.generating || !currentSelected}
-                        className={cn(
-                            "w-10 h-10 flex items-center justify-center rounded-full transition-all border shadow-sm active:scale-95",
-                            currentSelected
-                                ? "bg-white text-black border-white hover:bg-white/90"
-                                : "bg-white/5 text-white/50 border-white/5 hover:bg-white/10 hover:text-white",
-                            "disabled:opacity-30 disabled:hover:bg-white/5"
-                        )}
-                    >
-                        {s.generating ? (
-                            <Loader2 size={18} className="animate-spin" />
-                        ) : (
-                            <ArrowRight size={18} strokeWidth={2.5} />
-                        )}
-                    </button>
+                    <ActionButton
+                        generating={s.generating}
+                        onSubmit={() => s.handleGenerate()}
+                        appOverride={appOverrideKey}
+                        hasContent={true}
+                    />
                 </div>
             </div>
         </div>

@@ -2,7 +2,12 @@ import React, { useRef, useEffect, useState, useMemo, useCallback } from "react"
 import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-motion";
 import { Play, Pause, Maximize, Layers, Heart, Volume2, VolumeX, Camera, Loader2 } from "lucide-react";
 import { ImageStatusView } from "@/features/workflows/ui/ImageStatusView";
-import { getPrimaryMedia, getItemMetadata } from "@/shared/lib/generationUtils";
+import {
+  getPrimaryMedia,
+  getItemMetadata,
+  intrinsicSizeToCssAspect,
+  intrinsicSizeToRatioLabel,
+} from "@/shared/lib/generationUtils";
 import dynamic from "next/dynamic";
 const WorkflowMediaCanvas = dynamic(() => import("@/features/workflows/ui/WorkflowMediaCanvas").then(mod => mod.WorkflowMediaCanvas), { ssr: false });
 import { useEditStore } from "@/features/prompt-bar/model/useEditStore";
@@ -32,6 +37,23 @@ export function WorkflowMediaPreview({
 
   const activeMetadata = useMemo(() => activeItem ? getItemMetadata(activeItem) : null, [activeItem]);
   const { isVideo, url, status, aspect, prompt } = activeMetadata || {};
+
+  const [intrinsicAspectCss, setIntrinsicAspectCss] = useState(null);
+
+  useEffect(() => {
+    setIntrinsicAspectCss(null);
+  }, [activeItem?.id, activeItem?.name]);
+
+  const displayAspect = intrinsicAspectCss ?? aspect;
+
+  const applyIntrinsicDimensions = useCallback((w, h) => {
+    setIntrinsicAspectCss(intrinsicSizeToCssAspect(w, h));
+    const { editTarget: et, patchEditTarget, setRatio } = useEditStore.getState();
+    if (!et) return;
+    const label = intrinsicSizeToRatioLabel(w, h);
+    patchEditTarget({ ratio: label });
+    setRatio(label);
+  }, []);
 
   const { activeTab, selection, setSelection, clearSelection, editTarget } = useEditStore();
   const disableSelection = !!editTarget?.isElementSheet;
@@ -186,13 +208,13 @@ export function WorkflowMediaPreview({
             {/* Wrapper that grows to fill space but respects the video's aspect ratio */}
             <div
               className="relative h-full"
-              style={{ aspectRatio: aspect, maxWidth: "100%", maxHeight: "100%" }}
+              style={{ aspectRatio: displayAspect, maxWidth: "100%", maxHeight: "100%" }}
             >
             <ImageStatusView
               status={status}
               src={url}
               alt={prompt}
-              aspect={aspect}
+              aspect={displayAspect}
               error={activeItem.error}
               showOverlay
               className="w-full h-full drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)] rounded-2xl overflow-hidden bg-black/40"
@@ -225,7 +247,11 @@ export function WorkflowMediaPreview({
                         }
                       }
                     }}
-                    onLoadedMetadata={() => {
+                    onLoadedMetadata={(e) => {
+                      const v = e.currentTarget;
+                      if (v.videoWidth && v.videoHeight) {
+                        applyIntrinsicDimensions(v.videoWidth, v.videoHeight);
+                      }
                       if (videoRef.current) {
                         setDuration(videoRef.current.duration);
                         videoRef.current.muted = isMuted;
@@ -350,6 +376,7 @@ export function WorkflowMediaPreview({
                   selection={disableSelection ? null : selection}
                   onSelectionChange={disableSelection ? undefined : setSelection}
                   readOnly={disableSelection || activeTab !== "describe"}
+                  onIntrinsicSize={applyIntrinsicDimensions}
                 />
               ) : null}
             </ImageStatusView>

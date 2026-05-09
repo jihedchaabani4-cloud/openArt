@@ -56,7 +56,10 @@ export function useWorkflowActions(workflow, item = null) {
 
   const handleLike = () => {
     if (workflow.id || workflow.name) {
-      toggleLike({ workflowId: workflow.id || workflow.name });
+      toggleLike({ 
+        workflowId: workflow.id || workflow.name,
+        projectId: workflow.projectId || workflow.project_id
+      });
     }
   };
 
@@ -92,7 +95,7 @@ export function useWorkflowActions(workflow, item = null) {
         features: draft.features,
       });
 
-      promptStore.setGenerationMode(draft.isVideo ? "video" : "image");
+      promptStore.setGenerationMode(draft.isVideo ? "keyframe" : "image");
       if (draft.promptConfig.model) promptStore.setModelId(draft.promptConfig.model);
       if (draft.promptConfig.ratio) promptStore.setRatio(draft.promptConfig.ratio);
       if (draft.promptConfig.quality) promptStore.setQuality(draft.promptConfig.quality);
@@ -154,7 +157,7 @@ export function useWorkflowActions(workflow, item = null) {
     } else {
       const promptStore = usePromptStore.getState();
       // In normal page, reuse settings for the generation bar
-      promptStore.setGenerationMode(isVideo ? "video" : "image");
+      promptStore.setGenerationMode(isVideo ? "keyframe" : "image");
       promptStore.setPrompt(prompt || config.prompt || params.prompt || "");
       promptStore.setModelId(modelName || "nanobana_pro");
       promptStore.setRatio(ratioVal);

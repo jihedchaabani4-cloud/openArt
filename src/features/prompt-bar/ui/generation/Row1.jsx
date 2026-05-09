@@ -1,6 +1,6 @@
 import React from 'react';
 import { ReferenceButton, ViewReference } from '../common/ReferenceButton';
-import { ArrowLeftRight } from 'lucide-react';
+import { GoogleIcon } from '@/shared/ui/GoogleIcon';
 
 
 
@@ -16,6 +16,7 @@ export function Row1({
     selectedModel   = null,
     onRemoveReference,
     onSwapFrames,
+    handleUploadFromPC,
     maxRefs = 4,
     openDialog,
     showAddButton = true,
@@ -101,7 +102,7 @@ export function Row1({
                             disabled={!(startFrame && endFrame)}
                             className="shrink-0 flex items-center justify-center w-7 h-7 rounded-full  text-white hover:text-white/80 hover:bg-white/10 transition-all disabled:opacity-20 disabled:cursor-not-allowed cursor-pointer"
                         >
-                            <ArrowLeftRight size={14} strokeWidth={2} />
+                            <GoogleIcon iconName="swap_horiz" className="text-[12px]" />
                         </button>
                     )}
 

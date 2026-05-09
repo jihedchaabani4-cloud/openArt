@@ -10,6 +10,7 @@ import {
     DropdownMenuTrigger,
 } from "@/shared/ui/dropdown-menu";
 import { cn } from "@/shared/lib/utils";
+import { ActionButton } from "../../common/ActionButton";
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 const MAX_MP = 19;
@@ -95,18 +96,11 @@ export default function UpscalePanel({
             </div>
 
             {/* Process Button */}
-            <Button
-                onClick={onGenerate}
-                disabled={generating || selectedExceedsLimit}
-                 variant="studio-white"
-              className="size-9 rounded-full p-0 flex items-center justify-center shadow-xl active:scale-95 transition-all bg-[#3E3E3E] hover:bg-[#4E4E4E] text-white border-none"
-            >
-              {generating ? (
-                <Loader2 className="size-4 animate-spin" />
-              ) : (
-                <ArrowRight className="size-4" />
-              )}
-            </Button>
+            <ActionButton
+                generating={generating}
+                onSubmit={onGenerate}
+                appOverride="upscale"
+            />
         </div>  
     );
 }

@@ -1,9 +1,10 @@
 "use client"
 
 import { useRef } from "react";
-import { Plus, Loader2 } from "lucide-react";
+import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { useMediaLibrary } from "@/features/media/model/useMediaLibrary";
 import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows";
+import { Button } from "@/shared/ui/button";
 
 export function NavbarImportButton() {
   const { selectedProjectId: projectId, activeSessionId, activeStudioTab } = useGenerationsStore();
@@ -41,19 +42,19 @@ export function NavbarImportButton() {
         accept="image/*,video/mp4,video/webm"
       />
       
-      <button
-        type="button"
+      <Button
         onClick={handleClick}
         disabled={lib.loading || !projectId}
-        className="size-11 rounded-full flex items-center justify-center text-white/90 hover:text-white hover:bg-white/10 transition-all border border-white/5 disabled:opacity-50 disabled:cursor-not-allowed"
+        variant="studio-ghost"
+        size="icon"
         title={projectId ? "Upload Media" : "Project is still loading"}
       >
         {lib.loading ? (
-            <Loader2 className="size-6 animate-spin text-white/40" />
+            <GoogleIcon iconName="progress_activity" className="text-[13px] animate-spin text-white/40" />
         ) : (
-            <Plus className="size-6 " strokeWidth={3}  />
+            <GoogleIcon iconName="add" className="text-[13px]" />
         )}
-      </button>
+      </Button>
     </>
   );
 }

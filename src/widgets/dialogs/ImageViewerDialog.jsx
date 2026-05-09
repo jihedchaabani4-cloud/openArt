@@ -8,7 +8,7 @@ import {
     DialogClose,
     DialogTitle
 } from "@/shared/ui/dialog"
-import { X } from "lucide-react"
+import { GoogleIcon } from "@/shared/ui/GoogleIcon"
 import { cn } from "@/shared/lib/utils"
 
 import { ImageInfoSidebar } from "./ImageInfoSidebar"
@@ -64,8 +64,8 @@ export function ImageViewerDialog({ children, item, group, src, title, showSideb
                 {!item && (
                     <div className=" top-6 right-6 z-50">
                         <DialogClose asChild>
-                            <button className="p-3 rounded-full bg-white/5 hover:bg-white/10 text-white transition-all duration-300 border border-white/10 group backdrop-blur-md">
-                                <X className="w-6 h-6 opacity-40 group-hover:opacity-100" />
+                            <button className="p-3 rounded-full bg-white/5 hover:bg-white/10 text-white transition-all duration-300 border border-white/10 group backdrop-blur-md flex items-center justify-center">
+                                <GoogleIcon iconName="close" className="text-[24px] opacity-40 group-hover:opacity-100" />
                             </button>
                         </DialogClose>
                     </div>

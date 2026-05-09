@@ -2,7 +2,7 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { MoreHorizontal, Check } from "lucide-react";
+import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { cn } from "@/shared/lib/utils";
 import {
     DropdownMenu,
@@ -18,7 +18,7 @@ import {
 } from "@/shared/ui/context-menu";
 import { SPRING_FAST } from "./constants";
 import { formatRelativeTime } from "./utils";
-
+import { Button } from "@/shared/ui/button";
 /**
  * SessionItem — a single session row inside the sidebar.
  */
@@ -55,7 +55,7 @@ export function SessionItem({
             className={cn(
                 "w-[230px] rounded-md transition-all duration-0",
                 dragOverSessionId === sessionId
-                    ? "outline outline-2 outline-white/40 -outline-offset-2 bg-white/5"
+                    ? "outline outline-2 outline-white/10 -outline-offset-2 bg-white/10"
                     : ""
             )}
             onDragOver={(e) => onDragOver(e, sessionId)}
@@ -72,13 +72,13 @@ export function SessionItem({
                         animate={{
                             opacity: 1,
                             x: 0,
-                            backgroundColor: isActive && isExpanded ? "rgba(30,30,30,1)" : "rgba(0,0,0,0)",
+                            backgroundColor: isActive && isExpanded ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0)",
                             pointerEvents: isDraggingOver ? "none" : "auto",
                         }}
                         transition={{ ...SPRING_FAST, delay: index * 0.03 }}
                         whileHover={{
                             backgroundColor: isActive && isExpanded
-                                ? "rgba(30,30,30,1)"
+                                ? "rgba(255,255,255,0.05)"
                                 : "rgba(255,255,255,0.05)",
                         }}
                     >
@@ -121,7 +121,7 @@ export function SessionItem({
                                                 }}
                                                 title="Save"
                                             >
-                                                <Check className="w-3.5 h-3.5" />
+                                                <GoogleIcon iconName="check" className="text-[13px]" />
                                             </button>
                                         </div>
                                     ) : (
@@ -140,23 +140,18 @@ export function SessionItem({
                                     onOpenChange={(open) => onDropdownOpenChange(open, sessionId)}
                                 >
                                     <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                                        <button className="text-white/40 hover:text-white p-1 rounded-md hover:bg-white/10 opacity-0 group-hover/item:opacity-100 transition-opacity">
-                                            <MoreHorizontal className="w-4 h-4" />
+                                        <button className="shrink-0 p-1 rounded-lg text-white/0 group-hover/item:text-white/50 hover:!text-white hover:bg-white/10 transition-all duration-150 outline-none flex items-center justify-center">
+                                            <GoogleIcon iconName="more_horiz" className="text-[13px]" />
                                         </button>
                                     </DropdownMenuTrigger>
-                                    <DropdownMenuContent
-                                        align="end"
-                                        className="bg-[#1e1e1e] border-white/10 text-white min-w-[140px] rounded-md z-50 shadow-2xl"
-                                    >
+                                    <DropdownMenuContent align="end" className="min-w-[140px]">
                                         <DropdownMenuItem
                                             onClick={(e) => { e.stopPropagation(); onRename(sessionId, displayName); }}
-                                            className="focus:bg-white/10 cursor-pointer"
                                         >
                                             Edit title
                                         </DropdownMenuItem>
                                         <DropdownMenuItem
                                             onClick={(e) => { e.stopPropagation(); onDelete(sessionId); }}
-                                            className="text-red-400 focus:text-red-400 focus:bg-red-500/10 cursor-pointer"
                                         >
                                             Delete
                                         </DropdownMenuItem>
@@ -200,16 +195,14 @@ export function SessionItem({
 
                 {/* Context menu (right-click) */}
                 {openContextMenuId === sessionId && (
-                    <ContextMenuContent className="bg-[#1e1e1e] border-white/10 text-white min-w-[140px] rounded-md z-50 shadow-2xl">
+                    <ContextMenuContent className="min-w-[140px]">
                         <ContextMenuItem
                             onClick={(e) => { e.stopPropagation(); onRename(sessionId, displayName); }}
-                            className="focus:bg-white/10 cursor-pointer"
                         >
                             Edit title
                         </ContextMenuItem>
                         <ContextMenuItem
                             onClick={(e) => { e.stopPropagation(); onDelete(sessionId); }}
-                            className="text-red-400 focus:text-red-400 focus:bg-red-500/10 cursor-pointer"
                         >
                             Delete session
                         </ContextMenuItem>

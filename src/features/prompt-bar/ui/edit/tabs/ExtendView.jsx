@@ -3,6 +3,7 @@ import { Loader2, ArrowRight } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 import { PromptTextarea } from "../../common/PromptTextarea";
 import { ModelSelector } from "../../common/selectors/ModelSelector";
+import { ActionButton } from "../../common/ActionButton";
 
 export function ExtendView({ s }) {
     if (!s) return null;
@@ -17,7 +18,7 @@ export function ExtendView({ s }) {
                         onSubmit={() => s.handleExtendVideo()}
                         textareaRef={s.textareaRef}
                         placeholder="Describe how to extend the scene (optional)…"
-                        className="flex-1 flex gap-1.5 items-start w-full min-h-[40px] py-2 text-[16px] leading-relaxed placeholder:text-white/20 bg-transparent border-none focus:ring-0"
+                        className="flex-1 flex gap-1.5 items-start w-full min-h-[40px] py-2 text-[14px] leading-relaxed placeholder:text-white/20 bg-transparent border-none focus:ring-0"
                     />
                 </div>
 
@@ -31,20 +32,17 @@ export function ExtendView({ s }) {
                         loading={s.studioModelsLoading}
                         className="border-none bg-transparent hover:bg-transparent h-8 text-[12px] font-bold text-white/60 hover:text-white transition-colors"
                     />
-                    <Button
-                        type="submit"
-                        onClick={() => s.handleExtendVideo()}
-                        disabled={s.extendingVideo}
-                        variant="studio-white"
-                        className="size-10 rounded-full p-0 flex items-center justify-center shadow-xl active:scale-95 transition-all bg-[#3E3E3E] hover:bg-[#4E4E4E] text-white border-none"
-                        title="Extend Video"
-                    >
-                        {s.extendingVideo ? (
-                            <Loader2 className="size-5 animate-spin" />
-                        ) : (
-                            <ArrowRight className="size-5" />
-                        )}
-                    </Button>
+                    <ActionButton
+                        generating={s.extendingVideo}
+                        onSubmit={() => s.handleExtendVideo()}
+                        modelId={s.model?.id || s.modelId}
+                        generationMode={s.generationMode}
+                        duration={s.duration}
+                        videoResolution={s.videoResolution}
+                        quality={s.quality || s.resolution}
+                        count={s.count}
+                        hasContent={(s.prompt || "").trim().length > 0}
+                    />
                 </div>
             </div>
     

@@ -82,8 +82,9 @@ export function validateReference(asset, role, currentRefs, maxRefs, generationM
 
 export function buildReferencesPayload(referenceImages) {
   return referenceImages.map((r) => ({
-    id: r.workflowId || r.workflow_id || r.id || r.asset_id || null,
-    workflow_id: r.workflowId || r.workflow_id || r.id || r.asset_id || null,
+    id: r.asset_id || r.id || r.ref_media_id || null,
+    media_id: r.asset_id || r.id || r.ref_media_id || null,
+    workflow_id: r.workflowId || r.workflow_id || null,
     role: r.role ?? "normal",
     type: r.type ?? "image",
     label: r.label ?? "unnamed",

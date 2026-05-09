@@ -384,13 +384,53 @@ export function useRemoveWorkflowItem() {
 export function useToggleLike() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ itemId }) => {
+    mutationFn: async ({ itemId, projectId }) => {
       const res = await api.patch(`/workflows/items/${itemId}/like`);
       if (!res.ok) throw new Error(res.message);
       return itemId;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['projectData'] });
+    onMutate: async ({ itemId, projectId }) => {
+      if (!projectId) return {};
+      const projectKey = queryKeys.projectData.byProject(projectId);
+
+      await queryClient.cancelQueries({ queryKey: projectKey });
+      const previousData = queryClient.getQueryData(projectKey);
+
+      if (previousData) {
+        queryClient.setQueryData(projectKey, (old) => {
+          if (!old?.projectContents?.media) return old;
+          return {
+            ...old,
+            projectContents: {
+              ...old.projectContents,
+              media: old.projectContents.media.map((m) => {
+                if (m.id === itemId || m.name === itemId) {
+                  return {
+                    ...m,
+                    is_liked: !m.is_liked,
+                    is_Like: !m.is_Like, // Support both naming conventions found in UI
+                  };
+                }
+                return m;
+              }),
+            },
+          };
+        });
+      }
+
+      return { previousData, projectKey };
+    },
+    onError: (err, variables, context) => {
+      if (context?.previousData) {
+        queryClient.setQueryData(context.projectKey, context.previousData);
+      }
+    },
+    onSettled: (res, err, variables) => {
+      if (variables.projectId) {
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.projectData.byProject(variables.projectId),
+        });
+      }
     },
   });
 }
@@ -398,7 +438,7 @@ export function useToggleLike() {
 export function useToggleWorkflowLike() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ workflowId, workflowIds, favorited } = {}) => {
+    mutationFn: async ({ workflowId, workflowIds, favorited, projectId } = {}) => {
       const normalizedIds = Array.isArray(workflowIds)
         ? workflowIds.filter(Boolean)
         : [workflowId].filter(Boolean);
@@ -415,8 +455,53 @@ export function useToggleWorkflowLike() {
       if (!res.ok) throw new Error(res.message);
       return normalizedIds;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['projectData'] });
+    onMutate: async ({ workflowId, workflowIds, favorited, projectId }) => {
+      if (!projectId) return {};
+      const projectKey = queryKeys.projectData.byProject(projectId);
+      const normalizedIds = Array.isArray(workflowIds)
+        ? workflowIds.filter(Boolean)
+        : [workflowId].filter(Boolean);
+
+      await queryClient.cancelQueries({ queryKey: projectKey });
+      const previousData = queryClient.getQueryData(projectKey);
+
+      if (previousData) {
+        queryClient.setQueryData(projectKey, (old) => {
+          if (!old?.projectContents?.workflows) return old;
+          return {
+            ...old,
+            projectContents: {
+              ...old.projectContents,
+              workflows: old.projectContents.workflows.map((wf) => {
+                if (normalizedIds.includes(wf.id) || normalizedIds.includes(wf.name)) {
+                  return {
+                    ...wf,
+                    metadata: {
+                      ...(wf.metadata || {}),
+                      favorited: favorited !== undefined ? favorited : !wf.metadata?.favorited,
+                    },
+                  };
+                }
+                return wf;
+              }),
+            },
+          };
+        });
+      }
+
+      return { previousData, projectKey };
+    },
+    onError: (err, variables, context) => {
+      if (context?.previousData) {
+        queryClient.setQueryData(context.projectKey, context.previousData);
+      }
+    },
+    onSettled: (res, err, variables) => {
+      if (variables.projectId) {
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.projectData.byProject(variables.projectId),
+        });
+      }
       queryClient.invalidateQueries({ queryKey: queryKeys.library.all() });
     },
   });
@@ -571,7 +656,40 @@ export function useElementSheetWorkflows(projectId) {
   const filteredElements = allElements
     .filter((w) => {
       if (filters?.liked && !w.metadata?.favorited) return false;
-      const wPrompt = (w.items?.[0]?.generationConfig?.prompt || '').toLowerCase();
+      
+      const config = w.items?.[0]?.generationConfig || {};
+      const wPrompt = (config.prompt || '').toLowerCase();
+      
+      // Element Type Filter
+      if (filters?.elementTypes?.length > 0) {
+        const dnaType = (config.dna?.type || '').toLowerCase();
+        let elementType = 'character';
+        if (dnaType === 'product') elementType = 'product';
+        if (dnaType === 'location') elementType = 'location';
+        if (!filters.elementTypes.includes(elementType)) return false;
+      }
+
+      // Gender Filter
+      if (filters?.gender?.length > 0) {
+        const isMale = wPrompt.includes('<trait: male>') || wPrompt.includes('<trait: boy>') || wPrompt.includes('<trait: man>') || wPrompt.includes('<trait: homme>');
+        const isFemale = wPrompt.includes('<trait: female>') || wPrompt.includes('<trait: girl>') || wPrompt.includes('<trait: woman>') || wPrompt.includes('<trait: femme>');
+        
+        if (filters.gender.includes('male') && filters.gender.includes('female')) {
+           // Both selected, show if it matches either
+           if (!isMale && !isFemale) return false;
+        } else if (filters.gender.includes('male')) {
+           if (!isMale && isFemale) return false; 
+        } else if (filters.gender.includes('female')) {
+           if (!isFemale && isMale) return false;
+        }
+      }
+
+      // Rendering Style Filter
+      if (filters?.renderingStyles?.length > 0) {
+        const hasMatchingStyle = filters.renderingStyles.some(style => wPrompt.includes(`<trait: ${style.toLowerCase()}>`) || wPrompt.includes(style.toLowerCase().replace('-', ' ')));
+        if (!hasMatchingStyle) return false;
+      }
+
       if (filters?.prompt?.trim()) {
         const q = filters.prompt.toLowerCase();
         if (!(w.name || '').toLowerCase().includes(q) && !(w.metadata?.displayName || '').toLowerCase().includes(q) && !wPrompt.includes(q)) return false;

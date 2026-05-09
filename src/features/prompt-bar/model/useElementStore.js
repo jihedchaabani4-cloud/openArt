@@ -265,12 +265,31 @@ export const useElementStore = create((set) => ({
     }),
 
   setReferenceImages: (images) =>
-    set((state) => ({
-      references: {
-        ...state.references,
-        [state.elementMode]: images,
-      },
-    })),
+    set((state) => {
+      const mode = state.elementMode;
+      const currentRefs = state.references[mode] || [];
+      const removedIds = currentRefs
+        .filter(old => !images.some(img => img.asset_id === old.asset_id))
+        .map(img => img.asset_id);
+      
+      let newPrompt = state.prompts[mode] || "";
+      removedIds.forEach(id => {
+        const tagRegex = new RegExp(`<MediaAsset:\\s*${id}>`, "gi");
+        newPrompt = newPrompt.replace(tagRegex, "");
+      });
+      newPrompt = newPrompt.replace(/\s\s+/g, ' ').trim();
+
+      return {
+        prompts: {
+          ...state.prompts,
+          [mode]: newPrompt,
+        },
+        references: {
+          ...state.references,
+          [mode]: images,
+        },
+      };
+    }),
 
   hydrateElementDraft: ({
     mode = "character",

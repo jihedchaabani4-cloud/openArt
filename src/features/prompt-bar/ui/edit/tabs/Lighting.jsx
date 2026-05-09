@@ -4,6 +4,7 @@ import { Button } from "@/shared/ui/button";
 import { Sun, Sparkles } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import { useGenerateMutation } from "@/features/workflows/api/workflowsApi";
+import { ActionButton } from "../../common/ActionButton";
 
 const LATITUDE_RINGS = [
   { w: 158, translateY: 10 },
@@ -587,14 +588,11 @@ export default function LightingPanel({ onClose, onGenerate, previewImageUrl }) 
             </div>
           </div>
           <div className="flex items-end justify-end">
-            <Button
-              onClick={handleUpdateLighting}
-              disabled={generateMutation.isPending}
-              variant="studio-white"
-              className="w-fit"
-            >
-              {generateMutation.isPending ? "Generating..." : "Update Lighting"}
-            </Button>
+            <ActionButton
+              generating={generateMutation.isPending}
+              onSubmit={handleUpdateLighting}
+              appOverride="lighting"
+            />
           </div>
   
         </div>

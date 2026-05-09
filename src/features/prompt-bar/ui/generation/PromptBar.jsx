@@ -2,6 +2,8 @@ import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePromptBar } from "../../model/usePromptBar";
 import { usePromptStore } from "../../model/usePromptStore";
+import { useCreditEstimate } from "../../model/useCreditEstimate";
+import { useWalletBalance } from "@/shared/api/auth";
 import { PromptBarBase } from "./PromptBarBase";
 import { Row1 } from "./Row1";
 import { Row2 } from "./Row2";
@@ -15,7 +17,7 @@ import { RatioSelector } from "../common/selectors/RatioSelector";
 import { VariationSelector } from "../common/selectors/VariationSelector";
 import { DurationSelector } from "../common/selectors/DurationSelector";
 import { VideoResolutionSelector } from "../common/selectors/VideoResolutionSelector";
-import { VscSettings, VscChromeClose } from "react-icons/vsc";
+import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 
 
 export default function PromptBar({ hideBackground = false, isNewProject = false, initialMode = null }) {
@@ -107,6 +109,19 @@ export default function PromptBar({ hideBackground = false, isNewProject = false
     const isVideoModel = s.selectedModel?.category === 'video' || s.selectedModel?.type === 'video';
     const isVideoMode = s.generationMode !== 'image';
 
+    const { credits: creditCost } = useCreditEstimate({
+        selectedModel:   s.selectedModel,
+        generationMode:  s.generationMode,
+        duration:        s.duration,
+        videoResolution: s.videoResolution,
+        quality:         s.resolution,
+        operation:       "generated",
+        count:           s.count,
+    });
+
+    const { data: walletBalance = 0 } = useWalletBalance();
+    const isLowBalance = creditCost !== null && walletBalance < creditCost;
+
     return (
         <PromptBarShell
             variant="generation"
@@ -169,10 +184,10 @@ export default function PromptBar({ hideBackground = false, isNewProject = false
                 <button
                     type="button"
                     onClick={s.handleReset}
-                    className="absolute right-4 top-4 p-1 text-white/20 hover:text-white bg-transparent transition-colors z-[60] outline-none"
+                    className="absolute right-4 top-4 p-1 text-white/20 hover:text-white bg-transparent transition-colors z-[60] outline-none flex items-center justify-center"
                     title="Clear everything"
                 >
-                    <VscChromeClose size={18} />
+                    <GoogleIcon iconName="close" className="text-[13px]" />
                 </button>
             )}
 
@@ -198,7 +213,6 @@ export default function PromptBar({ hideBackground = false, isNewProject = false
                                     value={s.resolution}
                                     onChange={s.setResolution}
                                     options={s.selectedModel?.support?.quality?.options || s.selectedModel?.support?.quality}
-                                    className="!w-full !bg-white/5 !rounded-2xl"
                                 />
                             ) : (
                                 s.selectedModel?.support?.resolution && (
@@ -206,7 +220,6 @@ export default function PromptBar({ hideBackground = false, isNewProject = false
                                         value={s.videoResolution}
                                         onChange={s.setVideoResolution}
                                         options={s.selectedModel?.support?.resolution?.options || s.selectedModel?.support?.resolution}
-                                        className="!w-full !bg-white/5 !rounded-2xl"
                                     />
                                 )
                             )}
@@ -217,6 +230,15 @@ export default function PromptBar({ hideBackground = false, isNewProject = false
                                     options={s.selectedModel?.support?.duration}
                                     className="!w-full !bg-white/5 !rounded-2xl"
                                 />
+                            )}
+
+                            {/* Simplified Credit Estimate Summary - Matching Screenshot */}
+                            {creditCost !== undefined && (
+                                <div className="mt-4 pt-4 border-t border-white/5 flex justify-center">
+                                    <span className="text-[11px] text-white/40 font-medium tracking-wide">
+                                        La génération utilisera <span className="text-white font-bold underline underline-offset-4 decoration-white/30">{creditCost} crédits</span>
+                                    </span>
+                                </div>
                             )}
                         </div>
                     </motion.div>
@@ -321,7 +343,7 @@ export default function PromptBar({ hideBackground = false, isNewProject = false
                             textareaRef={s.textareaRef}
                             referenceImages={s.referenceImages}
                             onTriggerMentionDialog={
-                                ["image", "multiref", "keyframe"].includes(s.generationMode)
+                                (s.maxRefs > 0 && ["image", "multiref", "keyframe"].includes(s.generationMode))
                                     ? (cb) => {
                                         let role = "normal";
                                         if (s.generationMode === "keyframe") {
@@ -348,9 +370,15 @@ export default function PromptBar({ hideBackground = false, isNewProject = false
                         actionProps={{
                             generating: s.generating,
                             onSubmit: s.handleGenerate,
-                            prompt: s.prompt,
+                            hasContent: (s.prompt || "").trim().length > 0,
+                            modelId: s.model?.id || s.modelId,
+                            generationMode: s.generationMode,
+                            duration: s.duration,
+                            videoResolution: s.videoResolution,
+                            quality: s.resolution,
+                            count: s.count,
                         }}
-                        showPaperclip={isVideoModel ? (s.generationMode === 'multiref') : true}
+                        showPaperclip={s.maxRefs > 0}
                         onToggleVariations={() => setVariationsOpen((prev) => !prev)}
                         variationsOpen={variationsOpen}
                         mediaOpen={dialogOpen}

@@ -146,6 +146,49 @@ export function getItemMetadata(item, group) {
   };
 }
 
+/** Greatest common divisor for simplifying pixel dimensions to a ratio label. */
+function gcdInt(a, b) {
+  let x = Math.abs(Math.round(a));
+  let y = Math.abs(Math.round(b));
+  while (y !== 0) {
+    const t = y;
+    y = x % y;
+    x = t;
+  }
+  return x || 1;
+}
+
+/**
+ * Pixel width/height → stable "W:H" label for edit UI / API (snaps near common presets).
+ */
+export function intrinsicSizeToRatioLabel(width, height) {
+  if (!width || !height) return "1:1";
+  const r = width / height;
+  const presets = [
+    [16 / 9, "16:9"],
+    [9 / 16, "9:16"],
+    [4 / 3, "4:3"],
+    [3 / 4, "3:4"],
+    [1, "1:1"],
+    [3 / 2, "3:2"],
+    [2 / 3, "2:3"],
+    [21 / 9, "21:9"],
+  ];
+  for (const [val, label] of presets) {
+    if (Math.abs(r - val) < 0.02) return label;
+  }
+  const g = gcdInt(width, height);
+  const rw = Math.round(width / g);
+  const rh = Math.round(height / g);
+  return `${rw}:${rh}`;
+}
+
+/** CSS aspect-ratio value from real pixel dimensions (more accurate than metadata ratio). */
+export function intrinsicSizeToCssAspect(width, height) {
+  if (!width || !height) return "1 / 1";
+  return `${Math.round(width)} / ${Math.round(height)}`;
+}
+
 /**
  * Returns the primary media item for a workflow (CAE or upload).
  * Fallback to the first item if no CAE/upload found.

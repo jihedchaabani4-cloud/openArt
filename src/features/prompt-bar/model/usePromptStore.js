@@ -12,8 +12,11 @@ export const usePromptStore = create((set, get) => ({
 
   generationMode: "image", // "image" | "keyframe" | "multiref" | "motion-control"
   setGenerationMode: (mode) => {
+    // Legacy alias: some flows (e.g. reuse settings) used "video" — not a row-2 ModeSelector value
+    const normalized = mode === "video" ? "keyframe" : mode;
+
     const { generationMode, referenceImages, referencesByMode } = get();
-    if (mode === generationMode) return;
+    if (normalized === generationMode) return;
 
     // 1. Save current active refs to the old mode's slot
     const updatedByMode = {
@@ -21,11 +24,15 @@ export const usePromptStore = create((set, get) => ({
       [generationMode]: referenceImages,
     };
 
-    // 2. Load refs for the new mode (or empty if none)
-    const newRefs = updatedByMode[mode] || [];
+    // 2. Load refs for the new mode (empty array is valid — do not fall back incorrectly)
+    let newRefs = updatedByMode[normalized];
+    if (newRefs === undefined && normalized === "keyframe") {
+      newRefs = updatedByMode.video;
+    }
+    newRefs = newRefs ?? [];
 
     set({
-      generationMode: mode,
+      generationMode: normalized,
       referencesByMode: updatedByMode,
       referenceImages: newRefs,
     });
@@ -56,6 +63,8 @@ export const usePromptStore = create((set, get) => ({
   referencesByMode: {
     image: [],
     video: [],
+    keyframe: [],
+    multiref: [],
     "motion-control": [],
   },
 
@@ -145,10 +154,24 @@ export const usePromptStore = create((set, get) => ({
     };
   }),
 
-  setReferenceImages: (images) => set((state) => ({ 
-    referenceImages: images,
-    referencesByMode: { ...state.referencesByMode, [state.generationMode]: images }
-  })),
+  setReferenceImages: (images) => set((state) => {
+    const removedIds = state.referenceImages
+      .filter(old => !images.some(img => img.asset_id === old.asset_id))
+      .map(img => img.asset_id);
+    
+    let newPrompt = state.prompt;
+    removedIds.forEach(id => {
+      const tagRegex = new RegExp(`<MediaAsset:\\s*${id}>`, "gi");
+      newPrompt = newPrompt.replace(tagRegex, "");
+    });
+    newPrompt = newPrompt.replace(/\s\s+/g, ' ').trim();
+
+    return { 
+      prompt: newPrompt,
+      referenceImages: images,
+      referencesByMode: { ...state.referencesByMode, [state.generationMode]: images }
+    };
+  }),
 
   swapFrames: () => set((state) => {
     const refs  = [...state.referenceImages];
@@ -194,6 +217,8 @@ export const usePromptStore = create((set, get) => ({
     referencesByMode: {
       image: [],
       video: [],
+      keyframe: [],
+      multiref: [],
       "motion-control": [],
     },
   }),

@@ -137,10 +137,9 @@ export function ImportMediaPopover({
     const isVideo = item.type === "video" || item.is_video || !!item.video;
     
     const asset = {
-      url:         itemUrl,
-      asset_id:    item.id,
-      workflow_id: item.workflow_id || item.workflowId,
-      is_video:    isVideo,
+      url:      itemUrl,
+      asset_id: item.id,
+      is_video: isVideo,
     };
 
     setSelectedItems((prev) => {
@@ -236,7 +235,7 @@ export function ImportMediaPopover({
           transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
           className={cn(
             "absolute bottom-full left-1/2 -translate-x-1/2 mb-4 z-50",
-            "bg-[#161718E6] backdrop-blur-[30px]  border border-white/10  rounded-2xl flex flex-col overflow-hidden",
+            "bg-(--color-imagine-grey-2) backdrop-blur-[80px]   rounded-3xl flex flex-col overflow-hidden",
             "h-[500px] max-w-[750px] w-full",
             
           )}
@@ -260,7 +259,7 @@ export function ImportMediaPopover({
                   <ChevronDown className="size-4 opacity-40" />
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-56 bg-[#1A1B1C] border-white/10 rounded-xl">
+              <DropdownMenuContent align="start" className="w-56 bg-(--color-imagine-grey-2) backdrop-blur-[80px] border-white/10 rounded-xl">
                 <DropdownMenuItem onClick={() => setSelectedSession("all_sessions")} className="text-sm">All Sessions</DropdownMenuItem>
                 <DropdownMenuSeparator className="bg-white/5" />
                 <div className="max-h-[200px] overflow-y-auto custom-scrollbar">

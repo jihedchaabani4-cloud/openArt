@@ -91,16 +91,17 @@ export default function WorkflowEditPage() {
     if (!workflow) return null; // Let the redirect handle it
 
     return (
-        <div className="flex flex-col h-full w-full bg-[#050505] text-white overflow-hidden">
+        <div className="flex flex-col h-full w-full text-white overflow-hidden" style={{ background: "radial-gradient(ellipse 80% 60% at 50% 0%, #111116 0%, #050505 70%)" }}>
             <EditNavbar 
                 workflow={workflow} 
+                activeItem={activeItem}
                 showHistory={showHistory} 
                 onToggleHistory={() => setShowHistory(!showHistory)} 
             />
             
             <div className="flex-1 flex flex-col overflow-hidden p-4 pt-20">
                 {/* ── Main Content Area ── */}
-                <main className="flex-1 flex overflow-hidden relative rounded-2xl border border-white/5 bg-black/20">
+                <main className="flex-1 flex overflow-hidden relative">
                     
                     {/* Left Side - Preview (Flexible Width) */}
                     <div className="flex-1 flex flex-col gap-6 relative h-full">
@@ -129,7 +130,7 @@ export default function WorkflowEditPage() {
 
                     {/* Right Side - Gallery Sidebar */}
                     {showHistory && (
-                        <aside className="w-[300px] shrink-0 border-l border-white/5 flex flex-col overflow-hidden">
+                        <aside className="w-[300px] shrink-0  flex flex-col overflow-hidden">
                             <WorkflowMediaGallery 
                                 items={workflow.items}
                                 activeItem={activeItem}

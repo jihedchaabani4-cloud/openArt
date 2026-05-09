@@ -2,7 +2,7 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { Loader2, ArrowLeft, Shapes, LayoutGrid } from "lucide-react";
+import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { cn } from "@/shared/lib/utils";
 import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows";
 import { usePromptStore } from "@/features/prompt-bar/model/usePromptStore";
@@ -219,7 +219,7 @@ export function SessionSidebar() {
                     href="/cinema-studio"
                     className="flex items-center justify-center w-10 h-10 rounded-xl bg-white/5 hover:bg-white/10 text-white/90 hover:text-white transition-colors"
                 >
-                    <ArrowLeft className="w-6 h-6" />
+                    <GoogleIcon iconName="arrow_back" className="text-[13px]" />
                 </Link>
             </motion.div>
 
@@ -230,24 +230,24 @@ export function SessionSidebar() {
                     className={cn(
                         "flex items-center justify-center w-10 h-10 rounded-xl transition-all",
                         !isElementsActive
-                            ? "bg-white/10 text-white shadow-sm" 
-                            : "bg-transparent text-white/40 hover:bg-white/5 hover:text-white"
+                            ? "bg-white/10 text-white " 
+                            : "bg-transparent text-white hover:bg-white/5"
                     )}
                     title="Generations"
                 >
-                    <LayoutGrid className="w-6 h-6" strokeWidth={2.5} />
+                    <GoogleIcon iconName="auto_awesome" className="text-[13px]" />
                 </Link>
                 <Link 
                     href={`/cinema-studio/${selectedProjectId}/elements`}
                     className={cn(
                         "flex items-center justify-center w-10 h-10 rounded-xl transition-all",
                         isElementsActive
-                            ? "bg-white/10 text-white shadow-sm" 
-                            : "bg-transparent text-white/40 hover:bg-white/5 hover:text-white"
+                            ? "bg-white/10 text-white " 
+                            : "bg-transparent text-white hover:bg-white/5"
                     )}
                     title="Elements Library"
                 >
-                    <Shapes className="w-6 h-6" strokeWidth={2.5} />
+                    <GoogleIcon iconName="package_2" className="text-[13px]" />
                 </Link>
             </div>
 
@@ -259,7 +259,7 @@ export function SessionSidebar() {
                         "absolute left-0 top-0 max-h-[calc(100vh-120px)] pl-2.5 h-fit flex flex-col items-start overflow-hidden py-2 rounded-2xl border transition-colors",
                     )}
                 animate={{
-                    backgroundColor: isExpanded ? "#161718e6" : "rgba(0,0,0,0)",
+                    backgroundColor: isExpanded ? "rgba(27, 27, 28, 0.85)" : "rgba(0,0,0,0)",
                     backdropFilter: isExpanded ? "blur(80px)" : "blur(0px)",
                     width: isExpanded ? 260 : 60,
                     boxShadow: isExpanded
@@ -312,7 +312,7 @@ export function SessionSidebar() {
                     <div className="w-[260px] max-h-[60vh] gap-3 overflow-y-auto overflow-x-hidden hide-scrollbar flex flex-col  pb-1 shrink">
                         {isLoading ? (
                             <div className="w-full flex justify-end pr-5">
-                                <Loader2 className="w-4 h-4 animate-spin text-white/30" />
+                                <GoogleIcon iconName="progress_activity" className="text-[14px] animate-spin text-white/30" />
                             </div>
                         ) : (
                             sortedSessions.map((session, index) => (

@@ -1,8 +1,8 @@
 "use client"
 
 import * as React from "react"
-import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react"
-import { Select as SelectPrimitive } from "radix-ui"
+import { GoogleIcon } from "@/shared/ui/GoogleIcon"
+import * as SelectPrimitive from "@radix-ui/react-select"
 
 import { cn } from "@/shared/lib/utils"
 
@@ -72,6 +72,9 @@ function SelectTrigger({ className, size = "default", asChild = false, children,
       {...props}
     >
       {children}
+      <SelectPrimitive.Icon asChild>
+        <GoogleIcon iconName="keyboard_arrow_down" className="text-[18px] opacity-50" />
+      </SelectPrimitive.Icon>
     </SelectPrimitive.Trigger>
   )
 }
@@ -241,7 +244,7 @@ function SelectItem({ className, children, icon, subtitle, badge, iconVariant = 
       {/* size-3.5 (14px), color #737373, only visible when item is selected  */}
       <span className="flex-shrink-0 flex size-3.5 items-center justify-center text-[#737373]">
         <SelectPrimitive.ItemIndicator>
-          <CheckIcon className="size-4" />
+          <GoogleIcon iconName="check" className="text-[12px]" />
         </SelectPrimitive.ItemIndicator>
       </span>
     </SelectPrimitive.Item>
@@ -275,7 +278,7 @@ function SelectScrollUpButton({ className, ...props }) {
       )}
       {...props}
     >
-      <ChevronUpIcon className="size-4" />
+      <GoogleIcon iconName="keyboard_arrow_up" className="text-[18px]" />
     </SelectPrimitive.ScrollUpButton>
   )
 }
@@ -290,7 +293,7 @@ function SelectScrollDownButton({ className, ...props }) {
       )}
       {...props}
     >
-      <ChevronDownIcon className="size-4" />
+      <GoogleIcon iconName="keyboard_arrow_down" className="text-[18px]" />
     </SelectPrimitive.ScrollDownButton>
   )
 }

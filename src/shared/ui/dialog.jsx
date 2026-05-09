@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { XIcon } from "lucide-react"
+import { GoogleIcon } from "@/shared/ui/GoogleIcon"
 import * as DialogPrimitive from "@radix-ui/react-dialog"
 
 import { cn } from "@/shared/lib/utils"
@@ -58,7 +58,7 @@ function DialogContent({
         className={cn(
           // FULL SCREEN
           variant === "full" &&
-            "fixed inset-0 z-50 w-screen h-screen outline-none bg-[#131517]",
+            "fixed inset-0 z-50 w-screen h-screen outline-none bg-(--color-imagine-grey-2) backdrop-blur-[80px]",
 
           // FLOATING (فوق prompt bar)
           variant === "floating" &&
@@ -68,7 +68,7 @@ function DialogContent({
             translate-x-[-50%] translate-y-0 
             w-[300px] max-w-[95%]
             h-auto max-h-[60vh]
-            rounded-3xl bg-[#161718] backdrop-blur-[80px] shadow-[0px_16px_32px_-8px_rgba(0,0,0,0.4)] overflow-hidden
+            rounded-3xl bg-(--color-imagine-grey-2) backdrop-blur-[80px] shadow-[0px_16px_32px_-8px_rgba(0,0,0,0.4)] overflow-hidden
             flex flex-col
             data-[state=open]:animate-in
             data-[state=closed]:animate-out
@@ -109,9 +109,9 @@ function DialogContent({
 
         {showCloseButton && (
           <DialogPrimitive.Close
-            className="absolute top-4 right-4 text-white/40 hover:text-white transition"
+            className="absolute top-4 right-4 text-white/40 hover:text-white transition flex items-center justify-center"
           >
-            <XIcon className="size-5" />
+            <GoogleIcon iconName="close" className="text-[20px]" />
             <span className="sr-only">Close</span>
           </DialogPrimitive.Close>
         )}

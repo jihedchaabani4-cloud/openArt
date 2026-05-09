@@ -21,3 +21,17 @@ export function useAuthSession(options = {}) {
     ...options,
   })
 }
+
+async function fetchWalletBalance() {
+  const res = await api.get("/auth/wallet/balance")
+  return res?.balance ?? 0
+}
+
+export function useWalletBalance(options = {}) {
+  return useQuery({
+    queryKey: queryKeys.auth.walletBalance(),
+    queryFn: fetchWalletBalance,
+    staleTime: 5 * 60 * 1000,
+    ...options,
+  })
+}

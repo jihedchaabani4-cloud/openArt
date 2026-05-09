@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect, useCallback } from "react"
 import { createPortal } from "react-dom"
 import { cn } from "@/shared/lib/utils"
-import { CheckIcon } from "lucide-react"
+import { GoogleIcon } from "@/shared/ui/GoogleIcon"
 import { Button } from "@/shared/ui/button"
 
 // ─── RatioIcon ───────────────────────────────────────────────────────────────
@@ -206,7 +206,11 @@ export function BaseSelect({
                     </div>
 
                     {/* Checkmark */}
-                    {isSelected && <CheckIcon className="size-4 shrink-0 text-white/60 ml-auto" />}
+                    {isSelected && (
+                      <div className="ml-auto shrink-0 flex items-center justify-center">
+                        <GoogleIcon iconName="check" className="text-[12px]" />
+                      </div>
+                    )}
                   </button>
                 );
               })}

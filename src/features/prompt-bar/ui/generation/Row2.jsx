@@ -1,5 +1,4 @@
-import { Paperclip } from 'lucide-react';
-import { VscSettings } from "react-icons/vsc";
+import { GoogleIcon } from '@/shared/ui/GoogleIcon';
 import { ModelSelector } from '../common/selectors/ModelSelector';
 import { ActionButton } from '../common/ActionButton';
 
@@ -19,13 +18,13 @@ export function Row2({ paramsProps, actionProps, onToggleVariations, variationsO
         <button
           ref={paperclipRef}
           onClick={onAddClick}
-          className={`p-2 rounded-lg transition-colors ${
+          className={`p-2 rounded-lg transition-colors flex items-center justify-center ${
             mediaOpen ? 'bg-white/10 text-white' : 'text-neutral-400 hover:bg-white/5 hover:text-neutral-100'
           }`}
           title="Add Reference Images"
           type="button"
         >
-          <Paperclip className="w-4 h-4" />
+          <GoogleIcon iconName="attachment" className="text-[13px] rotate-[-45deg]" />
         </button>
       )}
 
@@ -39,13 +38,13 @@ export function Row2({ paramsProps, actionProps, onToggleVariations, variationsO
         />
         <button
           onClick={(e) => { e.preventDefault(); e.stopPropagation(); onToggleVariations(); }}
-          className={`p-2 rounded-lg transition-colors ${
+          className={`p-2 rounded-lg transition-colors flex items-center justify-center ${
             variationsOpen ? 'bg-white/10 text-white' : 'text-white/90 hover:bg-white/5 hover:text-neutral-100'
           }`}
           title="Generation Settings"
           type="button"
         >
-          <VscSettings className="w-5 h-5" /> 
+          <GoogleIcon iconName="tune" className="text-[13px]" /> 
         </button>
         <ActionButton {...actionProps} />
       </div>

@@ -2,10 +2,10 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { Plus } from "lucide-react";
+import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { cn } from "@/shared/lib/utils";
 import { SPRING_FAST } from "./constants";
-
+import { Button } from "@/shared/ui/button";
 /**
  * NewSessionButton — the "+" button at the top of the session sidebar.
  *
@@ -28,7 +28,10 @@ export function NewSessionButton({
 }) {
     return (
         <div className="w-[230px] flex  justify-start mb-2 shrink-0">
-            <button
+            <Button
+                onClick={onCreate}
+                onDragOver={onDragOver}
+                onDrop={onDrop}
                 className={cn(
                     "flex items-center justify-start w-full p-0 rounded-md transition-all group/btn text-white/40 hover:text-white",
                     isDragOverNew
@@ -52,7 +55,7 @@ export function NewSessionButton({
                     whileTap={{ scale: 0.93 }}
                     transition={SPRING_FAST}
                 >
-                    <Plus className="w-4 h-4" />
+                    <GoogleIcon iconName="add" className="text-[13px]" />
                 </motion.div>
 
                 {/* Animated label */}
@@ -66,7 +69,7 @@ export function NewSessionButton({
                 >
                     New session
                 </motion.span>
-            </button>
+            </Button>
         </div>
     );
 }

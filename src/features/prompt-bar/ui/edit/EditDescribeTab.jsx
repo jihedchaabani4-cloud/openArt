@@ -6,6 +6,7 @@ import { Button } from "@/shared/ui/button";
 import { PromptTextarea } from "../common/PromptTextarea";
 import { ModelSelector } from "../common/selectors/ModelSelector";
 import { Row1 } from "../generation/Row1";
+import { ActionButton } from "../common/ActionButton";
 import { ImportMediaPopover } from "@/widgets/ImportMediaDialog/ImportMediaPopover";
 
 /**
@@ -14,6 +15,7 @@ import { ImportMediaPopover } from "@/widgets/ImportMediaDialog/ImportMediaPopov
  */
 export function EditDescribeTab({ s }) {
   const [dialogOpen, setDialogOpen] = React.useState(false);
+  const paperclipRef = React.useRef(null);
   const isVideo = !!s.editTarget?.isVideo;
 
   const handleOpenMedia = (e) => {
@@ -54,7 +56,7 @@ export function EditDescribeTab({ s }) {
             onSubmit={() => s.handleGenerate()}
             textareaRef={s.textareaRef}
             placeholder={isVideo ? "Describe the next scene…" : "What happens next?"}
-            className="flex-1 flex gap-1.5 items-start w-full min-h-[40px] py-2 text-[16px] leading-relaxed placeholder:text-white/20 bg-transparent border-none focus:ring-0"
+            className="flex-1 flex gap-1.5 items-start w-full min-h-[40px] py-2 text-[14px] leading-relaxed placeholder:text-white/20 bg-transparent border-none focus:ring-0"
           />
         </div>
 
@@ -62,6 +64,7 @@ export function EditDescribeTab({ s }) {
         <div className="flex gap-3 shrink-0 mb-0.5 justify-between">
           {/* Attachment Button */}
           <button
+            ref={paperclipRef}
             type="button"
             onClick={handleOpenMedia}
             className="p-2 mb-0.5 rounded-full hover:bg-white/5 text-white/40 hover:text-white transition-colors shrink-0"
@@ -81,19 +84,13 @@ export function EditDescribeTab({ s }) {
               className="border-none bg-transparent hover:bg-transparent h-8 text-[12px] font-bold text-white/60 hover:text-white transition-colors"
             />
 
-            <Button
-              type="submit"
-              onClick={() => s.handleGenerate()}
-              disabled={s.generating || !s.prompt.trim()}
-              variant="studio-white"
-              className="size-10 rounded-full p-0 flex items-center justify-center shadow-xl active:scale-95 transition-all bg-[#3E3E3E] hover:bg-[#4E4E4E] text-white border-none"
-            >
-              {s.generating ? (
-                <Loader2 className="size-5 animate-spin" />
-              ) : (
-                <ArrowRight className="size-5" />
-              )}
-            </Button>
+            <ActionButton
+              generating={s.generating}
+              onSubmit={() => s.handleGenerate()}
+              modelId={s.model?.id || s.modelId}
+              generationMode={isVideo ? "video" : "image"}
+              hasContent={(s.prompt || "").trim().length > 0}
+            />
           </div>
         </div>
       </div>
@@ -101,6 +98,7 @@ export function EditDescribeTab({ s }) {
       <ImportMediaPopover
         open={dialogOpen}
         onOpenChange={setDialogOpen}
+        anchorRef={paperclipRef}
         maxAllowed={Math.max(0, (s.maxRefs || 4) - s.referenceImages.length)}
         onSelect={(assets) => {
           const items = Array.isArray(assets) ? assets : [assets];

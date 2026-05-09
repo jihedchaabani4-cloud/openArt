@@ -148,7 +148,7 @@ export function useEditPromptBar() {
               session_id:       activeSessionId || editTarget?.session_id,
               workflow_id:      editTarget?.workflow_id,
               video_workflow_id: editTarget?.workflow_id,
-              reference_workflow_ids: referenceImages.map(r => r.workflowId || r.workflow_id || r.id || r.asset_id).filter(Boolean),
+              reference_media_ids: referenceImages.map(r => r.asset_id || r.id || r.ref_media_id).filter(Boolean),
           };
 
           try {
@@ -178,7 +178,7 @@ export function useEditPromptBar() {
               ratio,
               quality:                 resolution,
               model_name:              "gpt-image-2",
-              reference_workflow_ids:  referenceImages.map(r => r.workflowId || r.workflow_id || r.id || r.asset_id).filter(Boolean),
+              reference_media_ids:  referenceImages.map(r => r.asset_id || r.id || r.ref_media_id).filter(Boolean),
           };
 
           try {
@@ -210,7 +210,7 @@ export function useEditPromptBar() {
         session_id:       activeSessionId || editTarget?.session_id,
         workflow_id:      editTarget?.workflow_id,
         video_workflow_id: editTarget?.workflow_id,
-        reference_workflow_ids: referenceImages.map(r => r.workflowId || r.workflow_id || r.id || r.asset_id).filter(Boolean),
+        reference_media_ids: referenceImages.map(r => r.asset_id || r.id || r.ref_media_id).filter(Boolean),
         mask_selection:   selection,
         activeTab:        activeTab,
         upscaleScale:     upscaleScale,

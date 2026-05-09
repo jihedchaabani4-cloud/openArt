@@ -44,7 +44,7 @@ export function DragDropOverlay({ mode, onDrop, error, referenceImages = [], dra
     <div className="relative w-full h-full flex gap-3">
       {error ? (
         /* ── Global Error State ── */
-        <div className="flex-1 h-[60px] flex flex-row items-center justify-center gap-3 backdrop-blur-[80px] bg-[#161718e6] border border-[#ff4d8d]/50 rounded-2xl px-8 shadow-2xl">
+        <div className="flex-1 h-[60px] flex flex-row items-center justify-center gap-3 bg-(--color-imagine-grey-2) backdrop-blur-[80px] border border-[#ff4d8d]/50 rounded-2xl px-8 shadow-2xl">
            <div className="flex items-center justify-center text-[#ff4d8d]">
             <Ban className="size-6" strokeWidth={1.8} />
           </div>

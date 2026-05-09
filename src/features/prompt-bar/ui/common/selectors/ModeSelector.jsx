@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Image, Video, Frame, FlaskConical, Activity } from "lucide-react";
+import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { BaseSelector } from "./BaseSelector";
 
 export const MODES = [
@@ -14,18 +14,20 @@ export function ModeSelector({ value, onChange, className }) {
 
   // Row 1: Top Level (Image vs Video)
   const row1Options = [
-    { value: 'image', label: 'Image', icon: <Image size={15} className="mr-1" /> },
-    { value: 'video', label: 'Video', icon: <Video size={15} className="mr-1" /> },
+    { value: 'image', label: 'Image', icon: <GoogleIcon iconName="image" className="text-[14px] mr-1" /> },
+    { value: 'video', label: 'Video', icon: <GoogleIcon iconName="movie" className="text-[14px] mr-1" /> },
   ];
 
   const row2Options = [
-    { value: 'keyframe', label: 'Frames',      icon: <Frame size={15} className="mr-1" /> },
-    { value: 'multiref', label: 'Ingredients', icon: <FlaskConical size={15} className="mr-1" /> },
-    { value: 'motion-control', label: 'Control', icon: <Activity size={15} className="mr-1" /> },
+    { value: 'keyframe', label: 'Frames',      icon: <GoogleIcon iconName="filter_frames" className="text-[14px] mr-1" /> },
+    { value: 'multiref', label: 'Ingredients', icon: <GoogleIcon iconName="experiment" className="text-[14px] mr-1" /> },
+    { value: 'motion-control', label: 'Control', icon: <GoogleIcon iconName="joystick" className="text-[14px] mr-1" /> },
   ];
 
-  // Determine top row value
+  // Determine top row value (legacy "video" mode maps to video bucket in UI)
   const row1Value = isVideoMode ? 'video' : 'image';
+
+  const row2EffectiveValue = value === 'video' ? 'keyframe' : value;
 
   const handleRow1Change = (newVal) => {
     if (newVal === 'image') {
@@ -57,7 +59,7 @@ export function ModeSelector({ value, onChange, className }) {
             className="overflow-hidden"
           >
             <BaseSelector
-              value={value}
+              value={row2EffectiveValue}
               onChange={onChange}
               options={row2Options}
               variant="white"

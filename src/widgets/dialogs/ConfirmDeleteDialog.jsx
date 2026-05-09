@@ -10,7 +10,7 @@ import {
   DialogClose,
   DialogTrigger,
 } from "@/shared/ui/dialog";
-import { AlertTriangle } from "lucide-react";
+import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 
 /**
  * Generic delete confirmation dialog. Use it anywhere you need a simple "Are you sure?" delete flow.
@@ -47,7 +47,7 @@ export function ConfirmDeleteDialog({
       >
         <div className="flex flex-col items-center text-center">
           <div className="mb-3">
-            <AlertTriangle className="size-8 text-white" strokeWidth={1.5} />
+            <GoogleIcon iconName="warning" className="text-[32px] text-white" />
           </div>
           
           <DialogHeader className="space-y-1">

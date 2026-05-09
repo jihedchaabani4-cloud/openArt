@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { CheckIcon, ChevronRightIcon, CircleIcon } from "lucide-react"
+import { GoogleIcon } from "@/shared/ui/GoogleIcon"
 import { ContextMenu as ContextMenuPrimitive } from "radix-ui"
 
 import { cn } from "@/shared/lib/utils"
@@ -62,7 +62,7 @@ function ContextMenuSubTrigger({
       )}
       {...props}>
       {children}
-      <ChevronRightIcon className="ml-auto size-4" />
+      <GoogleIcon iconName="chevron_right" className="ml-auto text-[14px]" />
     </ContextMenuPrimitive.SubTrigger>
   );
 }
@@ -75,8 +75,8 @@ function ContextMenuSubContent({
     <ContextMenuPrimitive.SubContent
       data-slot="context-menu-sub-content"
       className={cn(
-        "z-50 min-w-[8rem] origin-(--radix-context-menu-content-transform-origin) overflow-hidden rounded-xl p-1",
-        "backdrop-blur-[80px] bg-[#161718E6] border border-white/10 text-white shadow-2xl",
+        "z-50 min-w-[8rem] origin-(--radix-context-menu-content-transform-origin) overflow-hidden rounded-xl p-2",
+        "bg-(--color-imagine-grey-2) backdrop-blur-[80px] text-white shadow-2xl",
         "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
         className
       )}
@@ -94,9 +94,9 @@ function ContextMenuContent({
         data-slot="context-menu-content"
         className={cn(
           // Layout & shape
-          "z-50 min-w-[8rem] overflow-hidden rounded-xl p-1",
+          "z-50 min-w-[8rem] overflow-hidden rounded-xl p-2",
           // Dark theme defaults
-          "backdrop-blur-[80px] bg-[#161718E6] border border-white/10 text-white shadow-2xl",
+          "bg-(--color-imagine-grey-2) backdrop-blur-[80px] text-white shadow-2xl",
           // Animations
           "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
           className
@@ -119,11 +119,11 @@ function ContextMenuItem({
       data-variant={variant}
       className={cn(
         // Layout
-        "relative flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2.5 text-sm outline-hidden select-none",
-        // Dark theme defaults
-        "text-white hover:bg-white/10 focus:bg-white/10 focus:text-white",
-        // Icon defaults
-        "[&_svg:not([class*='text-'])]:text-white [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-3.5",
+        "relative flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-[12px] font-medium outline-hidden select-none",
+        // Dark theme defaults: white text, white/10 hover & focus
+        "text-white hover:bg-white/10 focus:bg-white/10 focus:text-white transition-colors duration-200",
+        // Icon defaults: white
+        "[&_svg:not([class*='text-'])]:text-white [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4.5",
         // Disabled & inset
         "data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[inset]:pl-8",
         // Destructive variant
@@ -152,9 +152,9 @@ function ContextMenuCheckboxItem({
       )}
       checked={checked}
       {...props}>
-      <span className="pointer-events-none absolute left-2 flex size-3.5 items-center justify-center">
+      <span className="absolute left-2 flex size-3.5 items-center justify-center">
         <ContextMenuPrimitive.ItemIndicator>
-          <CheckIcon className="size-4" />
+          <GoogleIcon iconName="check" className="text-[12px]" />
         </ContextMenuPrimitive.ItemIndicator>
       </span>
       {children}
@@ -178,9 +178,9 @@ function ContextMenuRadioItem({
         className
       )}
       {...props}>
-      <span className="pointer-events-none absolute left-2 flex size-3.5 items-center justify-center">
+      <span className="absolute left-2 flex size-3.5 items-center justify-center">
         <ContextMenuPrimitive.ItemIndicator>
-          <CircleIcon className="size-2 fill-current" />
+          <GoogleIcon iconName="circle" fill className="text-[8px]" />
         </ContextMenuPrimitive.ItemIndicator>
       </span>
       {children}

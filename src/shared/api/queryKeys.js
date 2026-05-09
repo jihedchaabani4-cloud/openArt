@@ -1,6 +1,7 @@
 export const queryKeys = {
   auth: {
     me: () => ["auth", "me"],
+    walletBalance: () => ["auth", "walletBalance"],
   },
 
   projects: {

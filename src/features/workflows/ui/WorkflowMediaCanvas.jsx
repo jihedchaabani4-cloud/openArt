@@ -27,7 +27,8 @@ export function WorkflowMediaCanvas({
   readOnly = false,
   className,
   onLoad,    // Added to handle ImageStatusView integration
-  onError    // Added to handle ImageStatusView integration
+  onError,   // Added to handle ImageStatusView integration
+  onIntrinsicSize,
 }) {
   // Try with anonymous first, if it fails, it might be a CORS issue
   const [image, status] = useImage(imageUrl, "anonymous");
@@ -46,6 +47,22 @@ export function WorkflowMediaCanvas({
 
   const activeImage = retryWithNoCors ? imageNoCors : image;
   const activeStatus = retryWithNoCors ? statusNoCors : status;
+
+  const prevIntrinsicRef = useRef(null);
+  useEffect(() => {
+    prevIntrinsicRef.current = null;
+  }, [imageUrl]);
+
+  useEffect(() => {
+    if (activeStatus !== "loaded" || !activeImage) return;
+    const w = activeImage.naturalWidth || activeImage.width;
+    const h = activeImage.naturalHeight || activeImage.height;
+    if (!w || !h) return;
+    const key = `${w}x${h}`;
+    if (prevIntrinsicRef.current === key) return;
+    prevIntrinsicRef.current = key;
+    onIntrinsicSize?.(w, h);
+  }, [activeImage, activeStatus, onIntrinsicSize]);
 
   // Mouse Handlers for Drawing
   const handleMouseDown = (e) => {

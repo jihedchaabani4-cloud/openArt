@@ -3,10 +3,10 @@
 import * as React from "react"
 import { useRouter } from "next/navigation"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { CircleDollarSign, LogOut, MessageSquare } from "lucide-react"
+import { GoogleIcon } from "@/shared/ui/GoogleIcon"
 
 import { api } from "@/shared/api/client"
-import { useAuthSession } from "@/shared/api/auth"
+import { useAuthSession, useWalletBalance } from "@/shared/api/auth"
 import { queryKeys } from "@/shared/api/queryKeys"
 import { cn } from "@/shared/lib/utils"
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/ui/avatar"
@@ -33,7 +33,7 @@ function getDisplayName(user) {
   return user?.name || user?.email?.split("@")[0] || "Open Art User"
 }
 
-function UserMenuButton({ icon: Icon, label, onClick, variant = "filled", iconColor }) {
+function UserMenuButton({ iconName, label, onClick, variant = "filled", iconColor }) {
   return (
     <Button
       type="button"
@@ -41,37 +41,24 @@ function UserMenuButton({ icon: Icon, label, onClick, variant = "filled", iconCo
       variant={variant === "filled" ? "user-menu-filled" : "user-menu-outline"}
       className="h-fit w-full justify-center gap-2.5"
     >
-      {Icon ? (
-        typeof Icon === "string" ? (
-          <div
-            style={{
-              maskImage: `url(${Icon})`,
-              maskRepeat: "no-repeat",
-              maskPosition: "center",
-              maskSize: "contain",
-              backgroundColor: iconColor || "currentColor",
-            }}
-            className={cn(
-              "h-6 w-6",
-              !iconColor && "bg-white/82"
-            )}
-          />
-        ) : (
-          <Icon className="h-4.5 w-4.5 text-white/82" />
-        )
+      {iconName ? (
+        <GoogleIcon iconName={iconName} className="text-[18px] text-white/82" />
       ) : null}
       <span className="text-[14px]">{label}</span>
     </Button>
   )
 }
 
-export function UserDropdown({ credits = 0, className }) {
+export function UserDropdown({ className }) {
   const router = useRouter()
   const queryClient = useQueryClient()
   const [loginOpen, setLoginOpen] = React.useState(false)
   const discordUrl = process.env.NEXT_PUBLIC_DISCORD_URL || "https://discord.com"
 
   const { data: currentUser, isLoading } = useAuthSession()
+  const { data: walletBalance = 0 } = useWalletBalance({
+    enabled: !!currentUser,
+  })
 
   const logoutMutation = useMutation({
     mutationFn: () => api.post("/auth/logout", {}),
@@ -130,7 +117,7 @@ export function UserDropdown({ credits = 0, className }) {
       <DropdownMenuContent
         align="end"
         sideOffset={10}
-        className="w-[344px] rounded-[26px] border border-white/8 bg-[#161718c5] backdrop-blur-[120px] p-4 shadow-[0_22px_80px_rgba(0,0,0,0.45)]"
+        className="w-[344px] rounded-[26px] border border-white/8 bg-(--color-imagine-grey-2) backdrop-blur-[80px] p-4 shadow-[0_22px_80px_rgba(0,0,0,0.45)]"
       >
         <div className="mb-4 flex items-center gap-3">
           <Avatar className="size-10 rounded-full bg-transparent">
@@ -150,42 +137,26 @@ export function UserDropdown({ credits = 0, className }) {
           </div>
         </div>
 
-        <div className="mb-4 rounded-[24px] bg-white/11 px-5 py-4">
-          <div className="flex items-start gap-2.5">
-            <CircleDollarSign className="mt-1 h-4.5 w-4.5 text-white/90" />
-            <div>
-              <p className="text-[14px] font-semibold text-white underline decoration-white/45 underline-offset-3">
-                {credits} AI Credits
-              </p>
-              <p className="mt-1 text-[14px] leading-snug text-white/62">
-                Credits are refreshed daily
-              </p>
-            </div>
+        <div className="space-y-2 pt-2">
+          <UserMenuButton
+            iconName="monetization_on"
+            label={`${walletBalance} credits`}
+            onClick={() => {}}
+          />
+          <div className="grid grid-cols-2 gap-2">
+            <UserMenuButton
+              iconName="forum"
+              label="Discord"
+              variant="outline"
+              onClick={() => window.open(discordUrl, "_blank")}
+            />
+            <UserMenuButton
+              iconName="logout"
+              label="Log out"
+              variant="outline"
+              onClick={() => logoutMutation.mutate()}
+            />
           </div>
-
-          <Button
-            type="button"
-            onClick={() => router.push("/pricing")}
-            className="mt-5 h-fit w-full rounded-full bg-[#f1f1f1] px-5 py-3.5 text-[15px] font-medium text-[#252525] hover:bg-white"
-          >
-            Upgrade plan
-          </Button>
-        </div>
-
-        <div className="space-y-3">
-          <UserMenuButton
-            icon="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/discord.svg"
-            label="Join Discord"
-            onClick={() => window.open(discordUrl, "_blank", "noopener,noreferrer")}
-            variant="filled"
-            iconColor="white"
-          />
-          <UserMenuButton
-            icon={LogOut}
-            label={logoutMutation.isPending ? "Signing out..." : "Sign out"}
-            onClick={() => logoutMutation.mutate()}
-            variant="outline"
-          />
         </div>
       </DropdownMenuContent>
     </DropdownMenu>

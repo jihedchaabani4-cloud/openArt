@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Copy, Info, ChevronDown, ChevronUp, X, Download, Heart, Trash2, LayoutGrid, Maximize2, Sparkles, Sun, Eraser, Box } from "lucide-react"
+import { GoogleIcon } from "@/shared/ui/GoogleIcon"
 import { cn } from "@/shared/lib/utils"
 import { DialogClose } from "@/shared/ui/dialog"
 import { useRemoveWorkflow as useRemoveGeneration, useToggleLike } from "@/features/workflows/api/workflowsApi"
@@ -9,12 +9,12 @@ import { useRemoveAsset } from "@/features/media/api/mediaApi"
 import { ConfirmDeleteDialog } from "./ConfirmDeleteDialog"
 
 const TABS = [
-    { id: "overview",  label: "Overview",  icon: LayoutGrid },
-    { id: "upscale",   label: "Upscale",   icon: Maximize2 },
-    { id: "enhancer",  label: "Enhancer",  icon: Sparkles },
-    { id: "relight",   label: "Relight",   icon: Sun },
-    { id: "inpaint",   label: "Inpaint",   icon: Eraser },
-    { id: "angles",    label: "Angles",    icon: Box },
+    { id: "overview",  label: "Overview",  iconName: "grid_view" },
+    { id: "upscale",   label: "Upscale",   iconName: "aspect_ratio" },
+    { id: "enhancer",  label: "Enhancer",  iconName: "auto_awesome" },
+    { id: "relight",   label: "Relight",   iconName: "light_mode" },
+    { id: "inpaint",   label: "Inpaint",   iconName: "draw" },
+    { id: "angles",    label: "Angles",    iconName: "view_in_ar" },
 ];
 
 export function ImageInfoSidebar({ item, group, onClose }) {
@@ -112,7 +112,7 @@ export function ImageInfoSidebar({ item, group, onClose }) {
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2 text-white/40">
                             <span className="text-[10px] font-bold uppercase tracking-widest flex items-center gap-2">
-                                <Info className="w-4 h-4" />
+                                <GoogleIcon iconName="info" className="text-[13px]" />
                                 {isUpload ? 'Media importé' : 'Details'}
                             </span>
                         </div>
@@ -133,13 +133,13 @@ export function ImageInfoSidebar({ item, group, onClose }) {
                             {onClose ? (
                                 <button 
                                     onClick={onClose}
-                                    className="p-1.5 rounded-md bg-transparent text-white transition-all duration-300 border border-white/10 group backdrop-blur-md">
-                                    <X className="w-4 h-4 opacity-40 group-hover:opacity-100" />
+                                    className="p-1.5 rounded-md bg-transparent text-white transition-all duration-300 border border-white/10 group backdrop-blur-md flex items-center justify-center">
+                                    <GoogleIcon iconName="close" className="text-[13px] opacity-40 group-hover:opacity-100" />
                                 </button>
                             ) : (
                                 <DialogClose asChild>
-                                    <button className="p-1.5 rounded-md bg-transparent text-white transition-all duration-300 border border-white/10 group backdrop-blur-md">
-                                        <X className="w-4 h-4 opacity-40 group-hover:opacity-100" />
+                                    <button className="p-1.5 rounded-md bg-transparent text-white transition-all duration-300 border border-white/10 group backdrop-blur-md flex items-center justify-center">
+                                        <GoogleIcon iconName="close" className="text-[13px] opacity-40 group-hover:opacity-100" />
                                     </button>
                                 </DialogClose>
                             )}
@@ -149,7 +149,6 @@ export function ImageInfoSidebar({ item, group, onClose }) {
                     {/* ── Tab Bar ── */}
                     <div className="flex items-center gap-1 bg-[#1a1a1a] border border-white/[0.08] rounded-xl p-1">
                         {TABS.map((tab) => {
-                            const Icon = tab.icon;
                             const isActive = activeTab === tab.id;
                             return (
                                 <button
@@ -162,7 +161,7 @@ export function ImageInfoSidebar({ item, group, onClose }) {
                                             : "text-white/40 hover:text-white/70"
                                     )}
                                 >
-                                    <Icon className="w-3.5 h-3.5 shrink-0" />
+                                    <GoogleIcon iconName={tab.iconName} className="text-[12px] shrink-0" />
                                     <span className="hidden xl:inline">{tab.label}</span>
                                 </button>
                             );
@@ -173,7 +172,7 @@ export function ImageInfoSidebar({ item, group, onClose }) {
                     {activeTab !== "overview" && (
                         <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
                             <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center">
-                                <Sparkles className="w-5 h-5 text-white/30" />
+                                <GoogleIcon iconName="auto_awesome" className="text-[20px] text-white/30" />
                             </div>
                             <p className="text-sm font-medium text-white/40">Coming soon</p>
                             <p className="text-xs text-white/20">This feature is under development</p>
@@ -233,31 +232,56 @@ export function ImageInfoSidebar({ item, group, onClose }) {
                                     {/* ── Information Section ── */}
                                     <section className="flex flex-col gap-4">
                                         <div className="flex items-center gap-2 text-white/40">
-                                            <Info className="w-4 h-4" />
+                                            <GoogleIcon iconName="info" className="text-[12px]" />
                                             <span className="text-[10px] font-bold uppercase tracking-widest">Information</span>
                                         </div>
 
-                                        <div className="bg-white/5 rounded-xl border border-white/5 overflow-hidden">
-                                            <div className="flex flex-col divide-y divide-white/5">
-                                                <InfoItem label="Model" value={model} />
-                                                <InfoItem label="Quality" value={quality} />
-                                                
-                                                <div className={cn(
-                                                    "flex flex-col divide-y divide-white/5 transition-all duration-300",
-                                                    !showFullInfo && "max-h-0 overflow-hidden"
-                                                )}>
-                                                    <InfoItem label="Ratio" value={ratio} />
-                                                    <InfoItem label="Size" value={displaySize} />
-                                                    <InfoItem label="Created" value={createdAt} />
-                                                </div>
+                                        <div className="grid grid-cols-2 gap-3">
+                                        <div className="bg-white/5 rounded-xl border border-white/5 p-3">
+                                            <div className="flex items-center gap-2 text-white/30 mb-1">
+                                                <GoogleIcon iconName="aspect_ratio" className="text-[12px]" />
+                                                <span className="text-[10px] font-bold uppercase tracking-wider">Ratio</span>
                                             </div>
-                                            <button 
-                                                onClick={() => setShowFullInfo(!showFullInfo)}
-                                                className="w-full py-3 px-4 flex items-center justify-between text-[10px] font-bold text-white/40 hover:text-white transition-colors"
-                                            >
-                                                <span>{showFullInfo ? "Show less" : "Show more"}</span>
-                                                {showFullInfo ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-                                            </button>
+                                            <p className="text-xs font-semibold text-white/90">{ratio}</p>
+                                        </div>
+                                        <div className="bg-white/5 rounded-xl border border-white/5 p-3">
+                                            <div className="flex items-center gap-2 text-white/30 mb-1">
+                                                <GoogleIcon iconName="high_quality" className="text-[12px]" />
+                                                <span className="text-[10px] font-bold uppercase tracking-wider">Quality</span>
+                                            </div>
+                                            <p className="text-xs font-semibold text-white/90">{quality}</p>
+                                        </div>
+                                    </div>
+
+                                    {/* ── Additional Info ── */}
+                                    <div className="flex flex-col gap-2">
+                                        <button 
+                                            onClick={() => setShowFullInfo(!showFullInfo)}
+                                            className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all text-white/60 hover:text-white"
+                                        >
+                                            <span className="text-[10px] font-bold uppercase tracking-widest">More Info</span>
+                                            <GoogleIcon 
+                                                iconName={showFullInfo ? "keyboard_arrow_up" : "keyboard_arrow_down"} 
+                                                className="text-[13px]" 
+                                            />
+                                        </button>
+
+                                            {showFullInfo && (
+                                                <div className="flex flex-col gap-2 p-1">
+                                                    <div className="flex items-center justify-between text-xs px-2 py-1">
+                                                        <span className="text-white/30">Created</span>
+                                                        <span className="text-white/60">{createdAt}</span>
+                                                    </div>
+                                                    <div className="flex items-center justify-between text-xs px-2 py-1">
+                                                        <span className="text-white/30">Size</span>
+                                                        <span className="text-white/60">{displaySize}</span>
+                                                    </div>
+                                                    <div className="flex items-center justify-between text-xs px-2 py-1">
+                                                        <span className="text-white/30">Model</span>
+                                                        <span className="text-white/60">{model}</span>
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
                                     </section>
                                 </>
@@ -272,7 +296,10 @@ export function ImageInfoSidebar({ item, group, onClose }) {
             <div className="p-6 pt-4 border-t border-white/5 bg-[#0F1113] grid grid-cols-5 gap-2">
                 {!isUpload && (
                     <button 
-                        onClick={() => toggleLike({ itemId: item.id })}
+                        onClick={() => toggleLike({ 
+                            itemId: item.id, 
+                            projectId: item.projectId || item.project_id || group?.projectId || group?.project_id 
+                        })}
                         className={cn(
                             "button button-md h-12 flex items-center justify-center rounded-xl transition-all duration-200 border col-span-1",
                             isLiked 
@@ -280,7 +307,7 @@ export function ImageInfoSidebar({ item, group, onClose }) {
                                 : "bg-white/5 hover:bg-white/10 border-white/10 text-white/40 hover:text-white"
                         )}
                     >
-                        <Heart className={cn("size-5", isLiked && "fill-current")} />
+                        <GoogleIcon iconName="favorite" className={cn("text-[13px]", isLiked && "text-red-500")} />
                     </button>
                 )}
 
@@ -292,9 +319,7 @@ export function ImageInfoSidebar({ item, group, onClose }) {
                         isUpload ? "col-span-4" : "col-span-3"
                     )}
                 >
-                    <svg className="size-5" aria-hidden="true" width="24px" height="24px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M20.25 14.75V19.25C20.25 19.8023 19.8023 20.25 19.25 20.25H4.75C4.19772 20.25 3.75 19.8023 3.75 19.25V14.75M12 15V3.75M12 15L8.5 11.5M12 15L15.5 11.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></path>
-                    </svg>
+                    <GoogleIcon iconName="download" className="text-[13px]" />
                     Download
                 </button>
 
@@ -306,7 +331,7 @@ export function ImageInfoSidebar({ item, group, onClose }) {
                     <button 
                         className="button button-md h-12 flex items-center justify-center rounded-xl transition-all duration-200 border border-white/10 bg-white/5 hover:bg-red-500/10 hover:border-red-500/20 text-white/40 hover:text-red-500 col-span-1"
                     >
-                        <Trash2 className="size-5" />
+                        <GoogleIcon iconName="delete" className="text-[13px]" />
                     </button>
                 </ConfirmDeleteDialog>
             </div>

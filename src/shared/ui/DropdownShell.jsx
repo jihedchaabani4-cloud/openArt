@@ -1,14 +1,15 @@
 "use client"
 
 import * as React from "react"
-import { X, Volume2, Eye, Eraser } from "lucide-react"
+import { Volume2, Eye, Eraser } from "lucide-react"
+import { GoogleIcon } from "@/shared/ui/GoogleIcon"
 import { cn } from "@/shared/lib/utils"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/shared/ui/dropdown-menu"
-
+import { Button } from "@/shared/ui/button"
 // ─────────────────────────────────────────────────────────────────────────────
 // DropdownShell — base template for all studio dropdowns (filter, settings…)
 // ─────────────────────────────────────────────────────────────────────────────
@@ -81,19 +82,19 @@ export function DropdownSection({ label, action, className, children }) {
 
 export const DropdownSegmented = React.memo(({ value, onChange, options, className, variant = "default" }) => {
   return (
-    <div className={cn("flex gap-1 p-1.5 bg-[#1D1D1E] rounded-xl overflow-x-auto scrollbar-hide", className)}>
+    <div className={cn("flex gap-1 p-1.5 bg-white/5 rounded-xl overflow-x-auto scrollbar-hide", className)}>
       {options.map((opt) => {
         const isSelected = value === opt.value && !opt.disabled;
         
         return (
-          <button
+          <Button
             key={opt.value}
             onClick={() => !opt.disabled && onChange(opt.value)}
             disabled={opt.disabled}
             className={cn(
               "flex-1 min-w-fit px-3 py-1.5 rounded-lg text-[13px] transition-all  flex flex-row items-center justify-center gap-2 relative whitespace-nowrap",
               isSelected
-                ? (variant === "white" ? "bg-white text-black" : "bg-[#363637] text-white")
+                ? (variant === "white" ? "bg-white text-black" : "bg-white/10 text-white")
                 : opt.disabled
                 ? "opacity-30 cursor-not-allowed"
                 : "text-white hover:text-white hover:bg-[#363637]"
@@ -101,7 +102,7 @@ export const DropdownSegmented = React.memo(({ value, onChange, options, classNa
           >
             {opt.icon && <span className="">{opt.icon}</span>}
             {opt.label}
-          </button>
+          </Button>
         );
       })}
     </div>
@@ -219,16 +220,18 @@ export function DropdownStat({ count, total, label = "Showing" }) {
 // DropdownReset — "Reset all" button
 // ─────────────────────────────────────────────────────────────────────────────
 
-export function DropdownReset({ onClick, label = "Reset all" }) {
+export function DropdownReset({ onReset, label = "Reset", className }) {
   return (
-    <button
-      onClick={onClick}
-      className="group flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-white hover:text-white hover:bg-white/5 transition-all"
+    <Button
+      variant="ghost"
+      size="sm"
+      onClick={onReset}
+      className={cn("h-7 px-2 text-[11px] font-medium text-white/40 hover:text-white hover:bg-white/5", className)}
     >
-      <X className="size-3 group-hover:rotate-90 transition-transform duration-300" />
+      <GoogleIcon iconName="close" className="mr-1.5 text-[14px]" />
       {label}
-    </button>
-  )
+    </Button>
+  );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

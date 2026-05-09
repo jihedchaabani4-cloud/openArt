@@ -5,7 +5,7 @@ import { useElementStore } from '../../model/useElementStore';
 import { BaseSelect, useSelectLogic } from '../common/selectors/DropdownEngine';
 import { cn } from '@/shared/lib/utils';
 import { Button } from '@/shared/ui/button';
-export function ElementsRow2({ paramsProps, actionProps, onToggleVariations, variationsOpen, onAddClick, mediaOpen, paperclipRef }) {
+export function ElementsRow2({ paramsProps, actionProps, onToggleVariations, variationsOpen, onAddClick, mediaOpen, paperclipRef, showPaperclip = true }) {
   const { elementMode, setElementMode, featureEditorOpen, setFeatureEditorOpen, sparklesRef } = paramsProps;
 
   const { open, panelStyle, triggerRef, panelRef, handleToggle, handleSelect } = useSelectLogic(
@@ -31,20 +31,22 @@ export function ElementsRow2({ paramsProps, actionProps, onToggleVariations, var
       
       {/* ── LEFT SIDE ── */}
       <div className="flex items-center gap-1.5">
-        <Button
-            ref={paperclipRef}
-            onClick={onAddClick}
-            variant="ghost"
-            size="icon"
-            className={cn(
-              "rounded-lg transition-colors shrink-0 w-9 h-9",
-               mediaOpen ? 'bg-white/10 text-white' : 'text-neutral-400 hover:bg-white/5 hover:text-neutral-100'
-            )}
-            title="Add Reference Images"
-            type="button"
-          >
-            <Paperclip className="w-4 h-4" />
-        </Button>
+        {showPaperclip && (
+          <Button
+              ref={paperclipRef}
+              onClick={onAddClick}
+              variant="ghost"
+              size="icon"
+              className={cn(
+                "rounded-lg transition-colors shrink-0 w-9 h-9",
+                 mediaOpen ? 'bg-white/10 text-white' : 'text-neutral-400 hover:bg-white/5 hover:text-neutral-100'
+              )}
+              title="Add Reference Images"
+              type="button"
+            >
+              <Paperclip className="w-4 h-4" />
+          </Button>
+        )}
 
         <div className="flex justify-center group/select px-2">
             <BaseSelect 
