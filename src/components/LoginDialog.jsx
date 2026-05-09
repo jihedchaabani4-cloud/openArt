@@ -113,11 +113,13 @@ export function LoginDialog({ open, onClose }) {
   if (!open) return null;
 
   const handleGoogleLogin = () => {
-    window.location.href = "http://localhost:5000/api/auth/google";
+    if (!process.env.NEXT_PUBLIC_API_URL) return;
+    window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/auth/google`;
   };
 
   const handleMicrosoftLogin = () => {
-    window.location.href = "http://localhost:5000/api/auth/microsoft";
+    if (!process.env.NEXT_PUBLIC_API_URL) return;
+    window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/auth/microsoft`;
   };
 
   return (

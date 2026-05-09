@@ -3,6 +3,7 @@ import { Geist_Mono } from "next/font/google";
 import localFont from "next/font/local";
 
 import { ReactQueryProvider } from "@/shared/lib/ReactQueryProvider";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
@@ -44,6 +45,7 @@ export default function RootLayout({ children }) {
       >
         <ReactQueryProvider>
           {children}
+          <SpeedInsights />
         </ReactQueryProvider>
       </body>
     </html>

@@ -1,9 +1,14 @@
-const BASE_URL = "http://localhost:5000/api";
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 /**
  * Centralized API request helper
  */
 export async function apiRequest(endpoint, options = {}) {
+    if (!BASE_URL) {
+        console.warn("API URL is not defined. Request aborted.");
+        return Promise.reject(new Error("API URL is not defined"));
+    }
+
     const url = `${BASE_URL}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
     
     const headers = { ...options.headers };
