@@ -1,6 +1,7 @@
 import "./globals.css";
 import { Geist_Mono } from "next/font/google";
 import localFont from "next/font/local";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 import { ReactQueryProvider } from "@/shared/lib/ReactQueryProvider";
 
@@ -45,6 +46,7 @@ export default function RootLayout({ children }) {
         <ReactQueryProvider>
           {children}
         </ReactQueryProvider>
+        <SpeedInsights />
       </body>
     </html>
   );
