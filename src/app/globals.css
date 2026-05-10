@@ -225,6 +225,19 @@ html {
     left: -50%;
     mask-image: linear-gradient(to bottom, black, transparent 70%);
   }
+
+  .bg-dashed-grid {
+    background-image: 
+      repeating-linear-gradient(to right, rgba(255, 255, 255, 0.1) 0, rgba(255, 255, 255, 0.1) 1px, transparent 1px, transparent 40px),
+      repeating-linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 0, rgba(255, 255, 255, 0.1) 1px, transparent 1px, transparent 40px);
+    background-size: 40px 40px;
+    border-top: 1px dashed rgba(255,255,255,0.1);
+    border-left: 1px dashed rgba(255,255,255,0.1);
+  }
+
+  .font-handwriting {
+    font-family: 'Caveat', cursive;
+  }
 }
 img {
   -webkit-user-drag: none; /* Empêche le drag sur Safari/Chrome */

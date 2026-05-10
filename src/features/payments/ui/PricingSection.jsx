@@ -152,6 +152,73 @@ function PackCard({ pkg, onBuy, isLoading }) {
     );
 }
 
+// ─── Trial Pack Card ──────────────────────────────────────────────────────────
+function TrialPackCard({ pkg, onBuy, isLoading }) {
+    const features = pkg.features || [
+        "400 monthly credits",
+        "~ 400 image generations",
+        "~ 40-80 video generations",
+        "~ 80 audio generations",
+        "Basic plan benefits",
+        "Workflows"
+    ];
+    
+    return (
+        <div className="col-span-1 md:col-span-3 bg-[#0d0d0d] rounded-3xl border border-white/[0.05] overflow-hidden flex flex-col md:flex-row">
+            {/* Left Section */}
+            <div className="flex-1 p-8 md:p-12 flex flex-col gap-8">
+                <div>
+                    <h3 className="text-white font-bold text-2xl mb-1">{pkg.label || "Education"}</h3>
+                    <p className="text-white/40 text-lg">{pkg.description || "For students and teachers"}</p>
+                </div>
+
+                <div>
+                    <div className="flex items-baseline gap-2">
+                        <span className="text-5xl font-black text-white">${pkg.price || 4}</span>
+                        <span className="text-white/30 text-xl">/ month</span>
+                    </div>
+                    {pkg.yearly_price && (
+                        <p className="text-white/30 mt-2">billed as ${pkg.yearly_price} per year</p>
+                    )}
+                </div>
+
+                <button
+                    onClick={() => onBuy(pkg.id)}
+                    disabled={isLoading}
+                    className="mt-4 w-full max-w-xs py-4 rounded-2xl bg-white/[0.05] hover:bg-white/[0.08] border border-white/10 text-white/40 font-semibold transition-all cursor-pointer flex items-center justify-center gap-2"
+                >
+                    {isLoading ? <Loader2 size={18} className="animate-spin" /> : "Upgrade"}
+                </button>
+            </div>
+
+            {/* Right Section (Grid) */}
+            <div className="flex-[1.5] p-8 md:p-12 bg-dashed-grid relative min-h-[300px]">
+                <ul className="flex flex-col gap-5 relative z-10">
+                    {features.map((f, idx) => (
+                        <li key={idx} className="flex items-center gap-4 text-white text-lg font-medium">
+                            {f.startsWith("~") ? (
+                                <span className="text-white/40 text-2xl leading-none">~</span>
+                            ) : (
+                                <Check size={20} className="text-white shrink-0" />
+                            )}
+                            {f.startsWith("~") ? f.substring(1).trim() : f}
+                        </li>
+                    ))}
+                </ul>
+
+                {/* Hand-written text */}
+                <div className="absolute right-12 bottom-20 md:right-24 md:bottom-32 rotate-[-5deg] pointer-events-none">
+                    <p className="font-handwriting text-[#d4af37] text-2xl md:text-3xl leading-tight text-center">
+                        Requires a valid<br />
+                        school email<br />
+                        address
+                    </p>
+                </div>
+            </div>
+        </div>
+    );
+}
+
 // ─── Main Export ──────────────────────────────────────────────────────────────
 export function PricingSection() {
     const { data: packages = [], isLoading, isError } = usePackages();
@@ -175,7 +242,7 @@ export function PricingSection() {
             </div>
 
             {/* Cards Grid */}
-            <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-5">
+            <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-8">
                 {isLoading && [1, 2, 3].map((i) => <SkeletonCard key={i} />)}
                 {isError && (
                     <div className="col-span-3 text-center text-white/30 text-sm py-12">
@@ -183,12 +250,21 @@ export function PricingSection() {
                     </div>
                 )}
                 {!isLoading && packages.map((pkg) => (
-                    <PackCard
-                        key={pkg.id}
-                        pkg={pkg}
-                        onBuy={(id) => checkout(id)}
-                        isLoading={isPending && pendingPackageId === pkg.id}
-                    />
+                    pkg.is_trial ? (
+                        <TrialPackCard
+                            key={pkg.id}
+                            pkg={pkg}
+                            onBuy={(id) => checkout(id)}
+                            isLoading={isPending && pendingPackageId === pkg.id}
+                        />
+                    ) : (
+                        <PackCard
+                            key={pkg.id}
+                            pkg={pkg}
+                            onBuy={(id) => checkout(id)}
+                            isLoading={isPending && pendingPackageId === pkg.id}
+                        />
+                    )
                 ))}
             </div>
 
