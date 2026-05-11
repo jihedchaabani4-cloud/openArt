@@ -119,7 +119,7 @@ export default function StudioLayout({ children }) {
     }
 
     return (
-        <div className="flex flex-col h-screen overflow-hidden relative bg-[#050505]">
+        <div className="flex flex-col h-screen overflow-hidden relative bg-background">
             <AnimatePresence mode="wait">
                 {showIntro ? (
                     <motion.div

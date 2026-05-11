@@ -54,7 +54,7 @@ export function ProjectsPage() {
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.3 }}
-                    className="fixed inset-0 z-[200] bg-[#050505] flex items-center justify-center"
+                    className="fixed inset-0 z-[200] bg-background flex items-center justify-center"
                 >
                     <LoadingScreen fullScreen={false} />
                 </motion.div>

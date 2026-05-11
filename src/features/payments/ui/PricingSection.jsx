@@ -1,276 +1,233 @@
 "use client";
 
 import { usePackages, useCheckout } from "@/features/payments/api/paymentsApi";
-import { Zap, Star, Sparkles, Check, Loader2 } from "lucide-react";
+import { Check, Loader2, Zap } from "lucide-react";
 
-// ─── Icons per pack ───────────────────────────────────────────────────────────
-const PACK_ICONS = {
-    pack_100: Zap,
-    pack_500: Star,
-    pack_1000: Sparkles,
-};
-
-// ─── Gradient per pack ────────────────────────────────────────────────────────
-const PACK_GRADIENTS = {
-    pack_100: "from-blue-500/20 to-cyan-500/10",
-    pack_500: "from-violet-500/20 to-purple-500/10",
-    pack_1000: "from-amber-500/20 to-orange-500/10",
-};
-
-const PACK_GLOW = {
-    pack_100: "rgba(59,130,246,0.15)",
-    pack_500: "rgba(139,92,246,0.2)",
-    pack_1000: "rgba(245,158,11,0.15)",
-};
-
-const PACK_BORDER = {
-    pack_100: "rgba(59,130,246,0.2)",
-    pack_500: "rgba(139,92,246,0.35)",
-    pack_1000: "rgba(245,158,11,0.2)",
-};
-
-const PACK_ICON_COLOR = {
-    pack_100: "#60a5fa",
-    pack_500: "#a78bfa",
-    pack_1000: "#fbbf24",
-};
-
-const PACK_BUTTON_STYLE = {
-    pack_100: "bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 hover:border-blue-500/40 text-blue-300",
-    pack_500: "bg-violet-500 hover:bg-violet-400 text-white shadow-lg shadow-violet-500/30",
-    pack_1000: "bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 hover:border-amber-500/40 text-amber-300",
-};
-
-// ─── Features per pack ────────────────────────────────────────────────────────
 const PACK_FEATURES = {
-    pack_100: ["100 AI Generations", "All models access", "No expiry date"],
-    pack_500: ["500 AI Generations", "All models access", "Priority queue", "No expiry date"],
-    pack_1000: ["1000 AI Generations", "All models access", "Priority queue", "No expiry date", "Batch generation"],
+    pack_100: ["100 AI generations", "Access to all models", "Credits never expire"],
+    pack_500: ["500 AI generations", "Access to all models", "Priority queue", "Credits never expire"],
+    pack_1000: ["1000 AI generations", "Access to all models", "Priority queue", "Batch generation", "Credits never expire"],
 };
 
-// ─── Skeleton Card ────────────────────────────────────────────────────────────
-function SkeletonCard() {
-    return (
-        <div className="rounded-2xl border border-white/[0.05] bg-white/[0.02] p-7 flex flex-col gap-5 animate-pulse">
-            <div className="w-10 h-10 rounded-xl bg-white/[0.06]" />
-            <div className="space-y-2">
-                <div className="h-5 w-28 rounded bg-white/[0.06]" />
-                <div className="h-3 w-40 rounded bg-white/[0.04]" />
-            </div>
-            <div className="h-10 w-36 rounded bg-white/[0.06]" />
-            <div className="space-y-2 pt-2">
-                {[1, 2, 3].map((i) => (
-                    <div key={i} className="h-3 w-full rounded bg-white/[0.04]" />
-                ))}
-            </div>
-            <div className="h-11 rounded-xl bg-white/[0.06] mt-auto" />
-        </div>
-    );
+function formatPrice(value) {
+    if (value == null) {
+        return "$0";
+    }
+
+    return `$${value}`;
 }
 
-// ─── Pack Card ────────────────────────────────────────────────────────────────
-function PackCard({ pkg, onBuy, isLoading }) {
-    const Icon = PACK_ICONS[pkg.id] ?? Zap;
-    const gradient = PACK_GRADIENTS[pkg.id] ?? "from-white/10 to-white/5";
-    const glow = PACK_GLOW[pkg.id];
-    const border = PACK_BORDER[pkg.id] ?? "rgba(255,255,255,0.08)";
-    const iconColor = PACK_ICON_COLOR[pkg.id] ?? "#fff";
-    const btnStyle = PACK_BUTTON_STYLE[pkg.id] ?? "bg-white/10 hover:bg-white/20 text-white border border-white/10";
-    const features = PACK_FEATURES[pkg.id] ?? [];
-    const pricePerCredit = (pkg.price / pkg.credits).toFixed(3);
+function getPlanFeatures(pkg) {
+    if (Array.isArray(pkg.features) && pkg.features.length > 0) {
+        return pkg.features.map((feature) => feature.replace(/^~\s*/, ""));
+    }
+
+    return PACK_FEATURES[pkg.id] ?? [];
+}
+
+function PricingCard({ pkg, onBuy, isLoading }) {
+    const features = getPlanFeatures(pkg);
+    const isPopular = Boolean(pkg.popular);
+    const buttonClass = isPopular
+        ? "bg-[#1f6fff] text-white hover:bg-[#3a82ff]"
+        : "bg-white/[0.08] text-white hover:bg-white/[0.12]";
 
     return (
-        <div
-            className={`relative rounded-2xl p-7 flex flex-col gap-5 transition-all duration-300 hover:-translate-y-1 hover:scale-[1.01]`}
-            style={{
-                background: `radial-gradient(ellipse at top left, ${glow}, transparent 70%), rgba(255,255,255,0.02)`,
-                border: `1px solid ${pkg.popular ? border : "rgba(255,255,255,0.06)"}`,
-                boxShadow: pkg.popular ? `0 0 40px ${glow}` : "none",
-            }}
+        <article
+            className="flex h-full flex-col rounded-[28px] border border-white/[0.08] bg-[#1b1b1c] p-6 text-white transition-colors duration-200"
         >
-            {/* Popular badge */}
-            {pkg.popular && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-violet-500 text-white text-xs font-semibold tracking-wide shadow-lg shadow-violet-500/40">
-                    Most Popular
+            <div className="flex items-start justify-between gap-4">
+                <div>
+                    <h3 className="text-[18px] font-semibold tracking-[-0.03em] text-white">{pkg.label}</h3>
+                    <p className="mt-2 text-sm leading-6 text-white/42">
+                        {pkg.description || "Flexible credits for everyday creative work."}
+                    </p>
                 </div>
-            )}
-
-            {/* Icon */}
-            <div
-                className="w-11 h-11 rounded-xl flex items-center justify-center"
-                style={{ background: `${glow}`, border: `1px solid ${border}` }}
-            >
-                <Icon size={20} color={iconColor} strokeWidth={2} />
-            </div>
-
-            {/* Label + description */}
-            <div>
-                <h3 className="text-white font-semibold text-lg leading-tight">{pkg.label}</h3>
-                {pkg.description && (
-                    <p className="text-white/40 text-sm mt-1 leading-snug">{pkg.description}</p>
+                {isPopular && (
+                    <span className="rounded-full bg-[#1f6fff]/16 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#8ab0ff]">
+                        Popular
+                    </span>
                 )}
             </div>
 
-            {/* Price */}
-            <div className="flex items-end gap-2">
-                <span className="text-4xl font-black text-white tracking-tight">
-                    ${pkg.price}
-                </span>
-                <div className="mb-1 text-white/30 text-sm leading-tight">
-                    <div>{pkg.credits} credits</div>
-                    <div>${pricePerCredit}/credit</div>
+            <div className="mt-8">
+                <div className="flex items-end gap-2">
+                    <span className="text-[46px] font-bold leading-none tracking-[-0.05em] text-white">
+                        {formatPrice(pkg.price)}
+                    </span>
+                    <span className="pb-1 text-lg text-white/46">/ month</span>
+                </div>
+                <p className="mt-2 text-sm text-white/42">
+                    {pkg.yearly_price ? `billed as $${pkg.yearly_price} per year` : `${pkg.credits} credits included`}
+                </p>
+            </div>
+
+            <div className="mt-6">
+                <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/38">
+                    Credits per month
+                </div>
+                <div className="mt-2 rounded-xl bg-black/24 px-4 py-3 text-center text-lg font-semibold text-white">
+                    {pkg.credits}
                 </div>
             </div>
 
-            {/* Features */}
-            <ul className="flex flex-col gap-2">
-                {features.map((f) => (
-                    <li key={f} className="flex items-center gap-2 text-white/60 text-sm">
-                        <Check size={14} className="text-white/30 shrink-0" />
-                        {f}
-                    </li>
-                ))}
-            </ul>
-
-            {/* CTA Button */}
             <button
                 id={`buy-${pkg.id}`}
                 onClick={() => onBuy(pkg.id)}
                 disabled={isLoading}
-                className={`mt-auto w-full py-3 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer flex items-center justify-center gap-2 ${btnStyle}`}
+                className={`mt-5 inline-flex h-12 w-full items-center justify-center rounded-xl text-sm font-semibold transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-70 ${buttonClass}`}
             >
-                {isLoading ? (
-                    <Loader2 size={15} className="animate-spin" />
-                ) : (
-                    <>
-                        <Zap size={14} />
-                        Get {pkg.credits} credits
-                    </>
-                )}
+                {isLoading ? <Loader2 size={16} className="animate-spin" /> : "Upgrade"}
             </button>
-        </div>
+
+            <div className="my-6 h-px bg-white/[0.08]" />
+
+            <ul className="space-y-3">
+                {features.map((feature) => (
+                    <li key={feature} className="flex items-start gap-3 text-sm leading-6 text-white/78">
+                        <Check size={16} className="mt-1 shrink-0 text-white" />
+                        <span>{feature}</span>
+                    </li>
+                ))}
+            </ul>
+        </article>
     );
 }
 
-// ─── Trial Pack Card ──────────────────────────────────────────────────────────
-function TrialPackCard({ pkg, onBuy, isLoading }) {
-    const features = pkg.features || [
-        "400 monthly credits",
-        "~ 400 image generations",
-        "~ 40-80 video generations",
-        "~ 80 audio generations",
-        "Basic plan benefits",
-        "Workflows"
-    ];
-    
+function EducationCard({ pkg, onBuy, isLoading }) {
+    const features = getPlanFeatures(pkg);
+
     return (
-        <div className="col-span-1 md:col-span-3 bg-[#0d0d0d] rounded-3xl border border-white/[0.05] overflow-hidden flex flex-col md:flex-row">
-            {/* Left Section */}
-            <div className="flex-1 p-8 md:p-12 flex flex-col gap-8">
-                <div>
-                    <h3 className="text-white font-bold text-2xl mb-1">{pkg.label || "Education"}</h3>
-                    <p className="text-white/40 text-lg">{pkg.description || "For students and teachers"}</p>
-                </div>
-
-                <div>
-                    <div className="flex items-baseline gap-2">
-                        <span className="text-5xl font-black text-white">${pkg.price || 4}</span>
-                        <span className="text-white/30 text-xl">/ month</span>
+        <article className="overflow-hidden rounded-[28px] border border-white/[0.08] bg-[#1b1b1c] text-white md:col-span-3">
+            <div className="grid gap-0 lg:grid-cols-[280px_minmax(0,1fr)]">
+                <div className="flex h-full flex-col p-6 lg:border-r lg:border-white/[0.08]">
+                    <div>
+                        <h3 className="text-[18px] font-semibold tracking-[-0.03em] text-white">
+                            {pkg.label || "Education"}
+                        </h3>
+                        <p className="mt-2 text-sm leading-6 text-white/42">
+                            {pkg.description || "For students and teachers"}
+                        </p>
                     </div>
-                    {pkg.yearly_price && (
-                        <p className="text-white/30 mt-2">billed as ${pkg.yearly_price} per year</p>
-                    )}
+
+                    <div className="mt-8">
+                        <div className="flex items-end gap-2">
+                            <span className="text-[46px] font-bold leading-none tracking-[-0.05em] text-white">
+                                {formatPrice(pkg.price || 4)}
+                            </span>
+                            <span className="pb-1 text-lg text-white/46">/ month</span>
+                        </div>
+                        <p className="mt-2 text-sm text-white/42">
+                            billed as ${pkg.yearly_price || 48} per year
+                        </p>
+                    </div>
+
+                    <button
+                        onClick={() => onBuy(pkg.id)}
+                        disabled={isLoading}
+                        className="mt-6 inline-flex h-12 w-full items-center justify-center rounded-xl bg-white/[0.08] text-sm font-semibold text-white transition-colors duration-200 hover:bg-white/[0.12] disabled:cursor-not-allowed disabled:opacity-70"
+                    >
+                        {isLoading ? <Loader2 size={16} className="animate-spin" /> : "Upgrade"}
+                    </button>
                 </div>
 
-                <button
-                    onClick={() => onBuy(pkg.id)}
-                    disabled={isLoading}
-                    className="mt-4 w-full max-w-xs py-4 rounded-2xl bg-white/[0.05] hover:bg-white/[0.08] border border-white/10 text-white/40 font-semibold transition-all cursor-pointer flex items-center justify-center gap-2"
-                >
-                    {isLoading ? <Loader2 size={18} className="animate-spin" /> : "Upgrade"}
-                </button>
-            </div>
+                <div className="flex h-full flex-col justify-between p-6">
+                    <div className="grid gap-0 md:grid-cols-2">
+                        {features.map((feature, index) => (
+                            <div
+                                key={feature}
+                                className={`flex items-center gap-3 border-white/[0.06] py-3 text-sm text-white/82 ${
+                                    index < features.length - 1 ? "border-b" : ""
+                                } ${index % 2 === 0 ? "md:pr-6" : "md:pl-6"} ${index < features.length - 2 ? "md:border-b" : ""}`}
+                            >
+                                <Check size={16} className="shrink-0 text-white" />
+                                <span>{feature.replace(/^~\s*/, "")}</span>
+                            </div>
+                        ))}
+                    </div>
 
-            {/* Right Section (Grid) */}
-            <div className="flex-[1.5] p-8 md:p-12 bg-dashed-grid relative min-h-[300px]">
-                <ul className="flex flex-col gap-5 relative z-10">
-                    {features.map((f, idx) => (
-                        <li key={idx} className="flex items-center gap-4 text-white text-lg font-medium">
-                            {f.startsWith("~") ? (
-                                <span className="text-white/40 text-2xl leading-none">~</span>
-                            ) : (
-                                <Check size={20} className="text-white shrink-0" />
-                            )}
-                            {f.startsWith("~") ? f.substring(1).trim() : f}
-                        </li>
-                    ))}
-                </ul>
-
-                {/* Hand-written text */}
-                <div className="absolute right-12 bottom-20 md:right-24 md:bottom-32 rotate-[-5deg] pointer-events-none">
-                    <p className="font-handwriting text-[#d4af37] text-2xl md:text-3xl leading-tight text-center">
-                        Requires a valid<br />
-                        school email<br />
-                        address
+                    <p className="mt-6 text-sm font-medium text-[#b79a49]">
+                        Requires a valid school email address.
                     </p>
                 </div>
             </div>
+        </article>
+    );
+}
+
+function SkeletonCard() {
+    return (
+        <div className="rounded-[28px] border border-white/[0.08] bg-[#1b1b1c] p-6 animate-pulse">
+            <div className="h-8 w-28 rounded bg-white/[0.07]" />
+            <div className="mt-3 h-4 w-40 rounded bg-white/[0.05]" />
+            <div className="mt-8 h-12 w-28 rounded bg-white/[0.07]" />
+            <div className="mt-6 h-12 rounded-xl bg-white/[0.07]" />
+            <div className="mt-6 space-y-3">
+                {[1, 2, 3, 4].map((item) => (
+                    <div key={item} className="h-4 rounded bg-white/[0.05]" />
+                ))}
+            </div>
         </div>
     );
 }
 
-// ─── Main Export ──────────────────────────────────────────────────────────────
 export function PricingSection() {
     const { data: packages = [], isLoading, isError } = usePackages();
     const { mutate: checkout, isPending, variables: pendingPackageId } = useCheckout();
+    const standardPackages = packages.filter((pkg) => !pkg.is_trial);
+    const trialPackage = packages.find((pkg) => pkg.is_trial);
 
     return (
-        <section className="w-full max-w-5xl mx-auto px-6 py-20 flex flex-col items-center gap-16">
-
-            {/* Header */}
-            <div className="text-center flex flex-col items-center gap-4">
-                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/10 bg-white/[0.04] text-white/50 text-xs font-medium tracking-wide">
+        <section className="mx-auto flex w-full max-w-7xl flex-col gap-10 px-6 py-20">
+            <div className="max-w-2xl">
+                <div className="inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.03] px-4 py-2 text-xs font-medium uppercase tracking-[0.16em] text-white/48">
                     <Zap size={12} />
-                    Credits never expire
+                    Flexible pricing
                 </div>
-                <h1 className="text-5xl md:text-6xl font-black text-white tracking-tight leading-none">
-                    Power your creativity
+                <h1 className="mt-5 text-4xl font-semibold tracking-[-0.05em] text-white md:text-5xl">
+                    Simple plans, designed to feel premium.
                 </h1>
-                <p className="text-white/40 text-lg max-w-md leading-relaxed">
-                    Buy once, use anytime. Generate images, videos, and more with AI.
+                <p className="mt-4 max-w-xl text-base leading-7 text-white/42">
+                    Clear pricing, clean structure, and the right amount of detail to help users choose fast.
                 </p>
             </div>
 
-            {/* Cards Grid */}
-            <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-8">
-                {isLoading && [1, 2, 3].map((i) => <SkeletonCard key={i} />)}
+            <div className="space-y-7">
+                <div>
+                    <p className="mb-4 text-sm font-semibold text-white/40">Best for individuals</p>
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+                        {isLoading && [1, 2, 3].map((item) => <SkeletonCard key={item} />)}
+                        {!isLoading && !isError && standardPackages.map((pkg) => (
+                            <PricingCard
+                                key={pkg.id}
+                                pkg={pkg}
+                                onBuy={(id) => checkout(id)}
+                                isLoading={isPending && pendingPackageId === pkg.id}
+                            />
+                        ))}
+                    </div>
+                </div>
+
                 {isError && (
-                    <div className="col-span-3 text-center text-white/30 text-sm py-12">
+                    <div className="rounded-[28px] border border-white/[0.08] bg-[#1b1b1c] px-6 py-12 text-center text-sm text-white/42 md:col-span-3">
                         Could not load packages. Please try again later.
                     </div>
                 )}
-                {!isLoading && packages.map((pkg) => (
-                    pkg.is_trial ? (
-                        <TrialPackCard
-                            key={pkg.id}
-                            pkg={pkg}
+
+                {!isLoading && !isError && trialPackage && (
+                    <div>
+                        <p className="mb-4 text-sm font-semibold text-white/40">Best for teams</p>
+                        <EducationCard
+                            pkg={trialPackage}
                             onBuy={(id) => checkout(id)}
-                            isLoading={isPending && pendingPackageId === pkg.id}
+                            isLoading={isPending && pendingPackageId === trialPackage.id}
                         />
-                    ) : (
-                        <PackCard
-                            key={pkg.id}
-                            pkg={pkg}
-                            onBuy={(id) => checkout(id)}
-                            isLoading={isPending && pendingPackageId === pkg.id}
-                        />
-                    )
-                ))}
+                    </div>
+                )}
             </div>
 
-            {/* Footer note */}
-            <p className="text-white/20 text-xs text-center">
-                Secure payments powered by Lemon Squeezy · Credits are added instantly after payment
+            <p className="text-center text-xs text-white/24">
+                Secure payments powered by Lemon Squeezy. Credits are added instantly after payment.
             </p>
         </section>
     );

@@ -211,7 +211,7 @@ export default function GenerationsPage({ params }) {
     }
 
     return (
-        <div className="flex h-full w-full overflow-hidden text-white bg-[#050505] relative">
+        <div className="flex h-full w-full overflow-hidden text-white bg-background relative">
 
 
             <main className="flex-1 flex flex-col relative min-w-0 overflow-hidden z-10">

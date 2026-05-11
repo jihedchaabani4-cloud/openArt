@@ -7,7 +7,7 @@ import { cn } from "@/shared/lib/utils";
 export function LoadingScreen({ message = "Art", fullScreen = false }) {
   return (
     <div className={cn(
-      "flex flex-col items-center justify-center overflow-hidden bg-[#050505]",
+      "flex flex-col items-center justify-center overflow-hidden bg-background",
       fullScreen ? "fixed inset-0 z-[100]" : "w-full h-full flex-1"
     )}>
       

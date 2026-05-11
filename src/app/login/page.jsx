@@ -25,7 +25,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-[#0a0a0a] text-white flex items-center justify-center relative overflow-hidden font-sans">
+    <div className="min-h-screen w-full bg-background text-white flex items-center justify-center relative overflow-hidden font-sans">
       <AnimatePresence mode="wait">
         {isLoading ? (
           <LoadingScreen key="loader" />

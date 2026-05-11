@@ -41,7 +41,7 @@ export default function RootLayout({ children }) {
         <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&display=swap" rel="stylesheet" />
       </head>
       <body
-        className={`${googleSans.variable} ${geistMono.variable} antialiased bg-black text-white font-sans`}
+        className={`${googleSans.variable} ${geistMono.variable} antialiased bg-background text-white font-sans`}
         suppressHydrationWarning
       >
         <ReactQueryProvider>

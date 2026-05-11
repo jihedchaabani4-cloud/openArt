@@ -256,14 +256,14 @@ export default function AssetsPageClient() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#050505] flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <p className="text-white/40 text-lg font-medium tracking-tight">Loading library...</p>
       </div>
     );
   }
 
   return (
-    <div className="relative min-h-screen bg-[#050505] text-white">
+    <div className="relative min-h-screen bg-background text-white">
       <div className="w-full ">
         {filteredItems.length === 0 ? (
           <div className=" py-16 text-center text-white/35">
