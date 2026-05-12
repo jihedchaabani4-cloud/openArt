@@ -8,7 +8,10 @@ export function usePackages() {
     return useQuery({
         queryKey: ["credit-packages"],
         queryFn: () => api.get("/payments/packages"),
-        select: (data) => data.packages ?? [],
+        select: (data) => ({
+            packages: data.packages ?? [],
+            modelsComparison: data.modelsComparison ?? { image: [], video: [] },
+        }),
         staleTime: 1000 * 60 * 10, // Cache for 10 min (packages rarely change)
     });
 }
