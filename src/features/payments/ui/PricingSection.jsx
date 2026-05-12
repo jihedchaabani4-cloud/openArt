@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef, useState } from "react";
 import { usePackages, useCheckout } from "@/features/payments/api/paymentsApi";
 import {
     Accordion,
@@ -7,7 +8,7 @@ import {
     AccordionItem,
     AccordionTrigger,
 } from "@/shared/ui/accordion";
-import { Check, Loader2 } from "lucide-react";
+import { Check, ChevronDown, Loader2 } from "lucide-react";
 
 function formatPrice(value, currency = "USD") {
     if (value == null) {
@@ -128,56 +129,182 @@ function formatModelBasis(item) {
     return `${item.creditsPerGeneration} credits / ${item.unitLabel}`;
 }
 
-function ModelComparisonTable({ title, description, items, packages }) {
+function CompareCategorySection({ title, items, packages, initialVisibleCount = 3 }) {
+    const [isExpanded, setIsExpanded] = useState(false);
+
     if (!items?.length || !packages?.length) {
         return null;
     }
 
+    const visibleItems = isExpanded ? items : items.slice(0, initialVisibleCount);
+    const hasMore = items.length > initialVisibleCount;
+    const gridTemplateColumns = `minmax(220px, 1.45fr) repeat(${packages.length}, minmax(160px, 1fr))`;
+
     return (
-        <div className="rounded-[28px] border border-white/[0.08] bg-white/[0.03]">
-            <div className="border-b border-white/[0.08] px-6 py-6">
-                <h3 className="text-2xl font-bold tracking-[-0.03em] text-white">{title}</h3>
-                <p className="mt-2 text-sm leading-6 text-white/50">{description}</p>
+        <div className="border-t border-white/[0.08] first:border-t-0">
+            <div className="px-5 py-5">
+                <h3 className="text-[28px] font-bold tracking-[-0.03em] text-white">{title}</h3>
             </div>
 
-            <div className="overflow-x-auto">
-                <div className="min-w-[760px]">
-                    <div
-                        className="grid border-b border-white/[0.08] px-6 py-5"
-                        style={{ gridTemplateColumns: `minmax(260px, 1.6fr) repeat(${packages.length}, minmax(140px, 1fr))` }}
-                    >
-                        <div className="text-xs font-medium uppercase tracking-[0.18em] text-white/35">
-                            Model
-                        </div>
-                        {packages.map((pkg) => (
-                            <div key={pkg.id} className="text-left">
-                                <p className="text-sm font-semibold text-white">{pkg.label}</p>
-                                <p className="mt-1 text-xs text-white/45">{pkg.credits} credits</p>
-                            </div>
-                        ))}
+            <div className="grid items-center border-b border-white/[0.06] px-5 py-4 text-sm"
+                style={{ gridTemplateColumns }}
+            >
+                <div className="pr-5 text-white">Concurrent Jobs</div>
+                {packages.map((pkg, index) => (
+                    <div key={`${title}-${pkg.id}-concurrent`} className="font-medium text-white">
+                        {index + 1} concurrent job{index === 0 ? "" : "s"}
+                    </div>
+                ))}
+            </div>
+
+            {visibleItems.map((item) => (
+                <div
+                    key={item.key}
+                    className="grid items-center border-b border-white/[0.06] px-5 py-4"
+                    style={{ gridTemplateColumns }}
+                >
+                    <div className="pr-5">
+                        <p className="text-sm font-semibold text-white">{item.displayName}</p>
+                        <p className="mt-1 text-xs text-white/45">{formatModelBasis(item)}</p>
                     </div>
 
-                    {items.map((item) => (
-                        <div
-                            key={item.key}
-                            className="grid items-center border-b border-white/[0.06] px-6 py-5 last:border-b-0"
-                            style={{ gridTemplateColumns: `minmax(260px, 1.6fr) repeat(${packages.length}, minmax(140px, 1fr))` }}
-                        >
-                            <div className="pr-6">
-                                <p className="text-sm font-semibold text-white">{item.displayName}</p>
-                                <p className="mt-1 text-xs text-white/45">{formatModelBasis(item)}</p>
+                    {packages.map((pkg) => {
+                        const packageCount = item.packageCounts?.find((entry) => entry.packageId === pkg.id);
+                        return (
+                            <div key={`${item.key}-${pkg.id}`} className="text-sm font-medium text-white">
+                                {formatGenerationCount(packageCount?.count ?? 0, item.unitLabel)}
                             </div>
+                        );
+                    })}
+                </div>
+            ))}
 
-                            {packages.map((pkg) => {
-                                const packageCount = item.packageCounts?.find((entry) => entry.packageId === pkg.id);
-                                return (
-                                    <div key={`${item.key}-${pkg.id}`} className="text-sm font-medium text-white">
-                                        {formatGenerationCount(packageCount?.count ?? 0, item.unitLabel)}
-                                    </div>
-                                );
-                            })}
+            {hasMore && (
+                <div className="px-5 py-4">
+                    <button
+                        type="button"
+                        onClick={() => setIsExpanded((current) => !current)}
+                        className="inline-flex items-center gap-2 text-sm font-medium text-white/60 transition-colors hover:text-white"
+                    >
+                        <ChevronDown
+                            size={16}
+                            className={`transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`}
+                        />
+                        {isExpanded ? "View less" : "View more"}
+                    </button>
+                </div>
+            )}
+        </div>
+    );
+}
+
+function ComparePlansSection({ packages, modelsComparison, onBuy, isPending, pendingPackageId }) {
+    const headerScrollRef = useRef(null);
+    const bodyScrollRef = useRef(null);
+    const syncingRef = useRef(null);
+
+    if (!packages?.length) {
+        return null;
+    }
+
+    const gridTemplateColumns = `minmax(220px, 1.45fr) repeat(${packages.length}, minmax(160px, 1fr))`;
+
+    function syncHorizontalScroll(source, target, sourceKey) {
+        if (!source || !target) {
+            return;
+        }
+
+        if (syncingRef.current === sourceKey) {
+            syncingRef.current = null;
+            return;
+        }
+
+        syncingRef.current = sourceKey;
+        target.scrollLeft = source.scrollLeft;
+    }
+
+    return (
+        <div className="space-y-5">
+            <div className="text-center">
+                <h2 className="text-[40px] font-bold uppercase tracking-[-0.04em] text-white md:text-[52px]">
+                    Compare Plans
+                </h2>
+            </div>
+
+            <div className="rounded-[24px] border border-white/[0.08] bg-white/[0.03]">
+                <div className="sticky top-0 z-30 border-b border-white/[0.08] bg-[#0b0b0c]/95 backdrop-blur-xl">
+                    <div
+                        ref={headerScrollRef}
+                        onScroll={(event) =>
+                            syncHorizontalScroll(event.currentTarget, bodyScrollRef.current, "header")
+                        }
+                        className="overflow-x-auto"
+                    >
+                        <div className="min-w-[1020px]">
+                            <div
+                                className="grid px-5 py-5"
+                                style={{ gridTemplateColumns }}
+                            >
+                                <div className="text-xs font-medium uppercase tracking-[0.18em] text-white/35">
+                                    Models
+                                </div>
+
+                                {packages.map((pkg) => {
+                                    const price = formatPrice(pkg.price, pkg.currency);
+                                    const ctaLabel = pkg.cta_label || `Get ${pkg.label}`;
+
+                                    return (
+                                        <div key={`sticky-${pkg.id}`} className="pr-3">
+                                            <p className="text-base font-bold text-white">{pkg.label}</p>
+                                            {price && (
+                                                <p className="mt-2 text-sm font-semibold text-white">
+                                                    {price}
+                                                    {getPlanKind(pkg) === "subscription" ? "/month" : ""}
+                                                </p>
+                                            )}
+                                            <p className="mt-1 text-xs text-white/45">{pkg.credits} credits</p>
+                                            <button
+                                                type="button"
+                                                onClick={() => onBuy(pkg.id)}
+                                                disabled={isPending && pendingPackageId === pkg.id}
+                                                className="mt-3 inline-flex h-10 w-full items-center justify-center rounded-2xl bg-white/15 px-4 text-sm font-semibold text-white transition-colors hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-70"
+                                            >
+                                                {isPending && pendingPackageId === pkg.id ? (
+                                                    <Loader2 size={16} className="animate-spin" />
+                                                ) : (
+                                                    ctaLabel
+                                                )}
+                                            </button>
+                                        </div>
+                                    );
+                                })}
+                            </div>
                         </div>
-                    ))}
+                    </div>
+                </div>
+
+                <div
+                    ref={bodyScrollRef}
+                    onScroll={(event) =>
+                        syncHorizontalScroll(event.currentTarget, headerScrollRef.current, "body")
+                    }
+                    className="overflow-x-auto"
+                >
+                    <div className="min-w-[1020px]">
+                        <div className="min-w-[1020px]">
+                            <CompareCategorySection
+                                title="Video"
+                                items={modelsComparison.video}
+                                packages={packages}
+                            />
+
+                            <CompareCategorySection
+                                title="Image"
+                                items={modelsComparison.image}
+                                packages={packages}
+                            />
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -191,29 +318,29 @@ function TemplatePricingCard({ pkg, onBuy, isLoading }) {
     const colors = getPlanColor(pkg.label);
 
     return (
-        <article className="flex aspect-[1/1.1] w-full flex-col rounded-xl backdrop-blur-[80px] p-5 text-white transition-all duration-300 bg-white/[0.06] hover:bg-white/[0.09]">
+        <article className="flex aspect-[1/1.08] w-full flex-col rounded-xl bg-white/[0.1] p-4 text-white backdrop-blur-[80px] transition-all duration-300 hover:bg-white/[0.13]">
             <div className="flex items-center gap-2 text-white">
-                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white text-black text-[11px] font-bold">
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white text-[10px] font-bold text-black">
                     P
                 </span>
-                <span className="text-[15px] font-medium">{pkg.badge_label || "Premium"}</span>
+                <span className="text-sm font-medium">{pkg.badge_label || "Premium"}</span>
             </div>
 
-            <div className="mt-4">
-                <h3 className="text-[32px] font-bold tracking-[-0.03em]" style={{ color: colors.title }}>
+            <div className="mt-3">
+                <h3 className="text-[28px] font-bold tracking-[-0.03em]" style={{ color: colors.title }}>
                     {pkg.label}
                 </h3>
                 {price && (
-                    <p className="mt-1 text-[22px] font-bold text-white">
+                    <p className="mt-1 text-[19px] font-bold text-white">
                         {price}
                         {getPlanKind(pkg) === "subscription" ? "/mois" : ""}
                     </p>
                 )}
             </div>
 
-            <div className="mt-5 h-px bg-white/[0.10]" />
+            <div className="mt-4 h-px bg-white/[0.10]" />
 
-            <ul className="mt-5  text-[15px] leading-7 text-white">
+            <ul className="mt-4 text-sm leading-6 text-white">
                 {features.map((feature) => (
                     <li key={feature} className="flex items-start gap-2">
                         <Check size={16} className="mt-1.5 shrink-0 text-white" />
@@ -226,7 +353,7 @@ function TemplatePricingCard({ pkg, onBuy, isLoading }) {
                 id={`buy-${pkg.id}`}
                 onClick={() => onBuy(pkg.id)}
                 disabled={isLoading}
-                className="mt-auto inline-flex h-12 w-full items-center justify-center rounded-full px-5 text-sm font-bold text-[#1d1d1d] transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-70"
+                className="mt-auto inline-flex h-11 w-full items-center justify-center rounded-full px-4 text-sm font-bold text-[#1d1d1d] transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-70"
                 style={{ 
                     backgroundColor: colors.button,
                     "--hover-bg": colors.hover
@@ -248,7 +375,7 @@ function TemplatePricingCard({ pkg, onBuy, isLoading }) {
 
 function SkeletonCard() {
     return (
-        <div className="aspect-[1/1.1] w-full rounded-xl bg-white/[0.06] backdrop-blur-[80px]" />
+        <div className="aspect-[1/1.08] w-full rounded-xl bg-white/[0.06] backdrop-blur-[80px]" />
     );
 }
 
@@ -293,18 +420,18 @@ export function PricingSection() {
     ];
 
     return (
-        <section className="mx-auto flex w-full max-w-7xl flex-col gap-10 px-6 py-20">
+        <section className="mx-auto flex w-full max-w-[1200px] flex-col gap-8 px-5 py-16">
             <div className="max-w-2xl">
-                <h1 className="mt-5 text-4xl font-bold tracking-[-0.05em] text-white md:text-5xl">
+                <h1 className="mt-4 text-3xl font-bold tracking-[-0.05em] text-white md:text-[52px]">
                     Simple plans, designed to feel premium.
                 </h1>
-                <p className="mt-4 max-w-xl text-base leading-7 text-white/42">
+                <p className="mt-3 max-w-xl text-sm leading-6 text-white/42 md:text-[15px]">
                     Clear pricing, clean structure, and the right amount of detail to help users choose fast.
                 </p>
             </div>
 
-            <div className="space-y-7">
-                <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
+            <div className="space-y-6">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                     {isLoading && [1, 2, 3].map((item) => <SkeletonCard key={`sub-${item}`} />)}
                     {!isLoading && !isError && nonTrialPackages.map((pkg) => (
                         <TemplatePricingCard
@@ -329,34 +456,19 @@ export function PricingSection() {
 
             {!isLoading && !isError && nonTrialPackages.length > 0 && (
                 <div className="space-y-6 pt-4">
-                    <div className="max-w-3xl">
-                        <h2 className="text-3xl font-bold tracking-[-0.04em] text-white md:text-4xl">
-                            Compare what each pack can generate
-                        </h2>
-                        <p className="mt-3 text-sm leading-6 text-white/50">
-                            Counts below are based on default generation settings for each model. Images use the standard setting, and videos use 5-second 720p generations.
-                        </p>
-                    </div>
-
-                    <ModelComparisonTable
-                        title="Video models"
-                        description="See how many videos each credit pack can generate for the current video lineup."
-                        items={modelsComparison.video}
+                    <ComparePlansSection
                         packages={nonTrialPackages}
-                    />
-
-                    <ModelComparisonTable
-                        title="Image models"
-                        description="See how many images each credit pack can generate for the current image lineup."
-                        items={modelsComparison.image}
-                        packages={nonTrialPackages}
+                        modelsComparison={modelsComparison}
+                        onBuy={(id) => checkout(id)}
+                        isPending={isPending}
+                        pendingPackageId={pendingPackageId}
                     />
                 </div>
             )}
 
-            <div className="mx-auto w-full max-w-4xl pt-8">
+            <div className="mx-auto w-full max-w-[920px] pt-6">
                 <div className="text-center">
-                    <h2 className="text-3xl font-bold tracking-[-0.04em] text-white md:text-4xl">
+                    <h2 className="text-[28px] font-bold tracking-[-0.04em] text-white md:text-[34px]">
                         Frequently asked questions
                     </h2>
                     <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-white/50">
