@@ -11,10 +11,23 @@ import {
 import { Button } from "@/shared/ui/button";
 import { Check, ChevronDown, Loader2 } from "lucide-react";
 
-const SOFT_DARK_PANEL_BACKGROUND =
-    "linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.02) 100%), linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 42%, rgba(0, 0, 0, 0) 100%), rgba(14, 16, 18, 0.96)";
-
-const COMPARE_SURFACE_BACKGROUND = "#121416";
+const SURFACE_BACKGROUND = "#1a1a1a";
+const SURFACE_BACKGROUND_ELEVATED = "#222222";
+const SURFACE_BORDER = "#2f2f2f";
+const SURFACE_BORDER_SUBTLE = "#2a2a2a";
+const TEXT_PRIMARY = "#f3f3f3";
+const TEXT_SECONDARY = "#d2d2d2";
+const TEXT_MUTED = "#a3a3a3";
+const TEXT_FAINT = "#7a7a7a";
+const BUTTON_SURFACE = "#323232";
+const BUTTON_SURFACE_HOVER = "#3a3a3a";
+const BUTTON_PRIMARY = "#1a73e8";
+const BUTTON_PRIMARY_HOVER = "#2b7de9";
+const PLAN_COLORS = {
+    title: TEXT_PRIMARY,
+    button: BUTTON_SURFACE,
+    hover: BUTTON_SURFACE_HOVER,
+};
 
 function formatPrice(value, currency = "USD") {
     if (value == null) {
@@ -45,46 +58,7 @@ function getPlanKind(pkg) {
 }
 
 function getPlanColor(label) {
-    const l = label?.toLowerCase() || "";
-    
-    if (l.includes("starter pack")) {
-        return {
-            title: "#f5f5f5",
-            button: "#f3f3f3",
-            hover: "#ffffff"
-        };
-    }
-    
-    if (l.includes("creator pack")) {
-        return {
-            title: "#f2f2f2",
-            button: "#f1f1f1",
-            hover: "#ffffff"
-        };
-    }
-
-    if (l.includes("studio pack")) {
-        return {
-            title: "#ffffff",
-            button: "#ededed",
-            hover: "#ffffff"
-        };
-    }
-
-    if (l.includes("duo")) {
-        return {
-            title: "#f0f0f0",
-            button: "#efefef",
-            hover: "#ffffff"
-        };
-    }
-
-    // Default
-    return {
-        title: "#f5f5f5",
-        button: "#f4f4f4",
-        hover: "#ffffff"
-    };
+    return PLAN_COLORS;
 }
 
 function getPlanSuffix(pkg) {
@@ -144,7 +118,7 @@ function CompareCategorySection({ title, items, packages, initialVisibleCount = 
     return (
         <div className=" ">
             <div className="px-5 py-5">
-                <h3 className="text-[28px] font-bold tracking-[-0.03em] text-white">{title}</h3>
+                <h3 className="text-[28px] font-bold tracking-[-0.03em]" style={{ color: TEXT_PRIMARY }}>{title}</h3>
             </div>
 
 
@@ -152,12 +126,12 @@ function CompareCategorySection({ title, items, packages, initialVisibleCount = 
             {visibleItems.map((item) => (
                 <div
                     key={item.key}
-                    className="grid items-center border-b border-white/[0.06] px-5 py-4"
-                    style={{ gridTemplateColumns }}
+                    className="grid items-center px-5 py-4"
+                    style={{ gridTemplateColumns, borderBottom: `1px solid ${SURFACE_BORDER_SUBTLE}` }}
                 >
                     <div className="pr-5">
-                        <p className="text-sm font-semibold text-white">{item.displayName}</p>
-                        <p className="mt-1 text-xs text-white/45">{formatModelBasis(item)}</p>
+                        <p className="text-sm font-semibold" style={{ color: TEXT_PRIMARY }}>{item.displayName}</p>
+                        <p className="mt-1 text-xs" style={{ color: TEXT_MUTED }}>{formatModelBasis(item)}</p>
                     </div>
 
                     {packages.map((pkg) => {
@@ -165,7 +139,8 @@ function CompareCategorySection({ title, items, packages, initialVisibleCount = 
                         return (
                             <div
                                 key={`${item.key}-${pkg.id}`}
-                                className="text-sm font-medium text-white"
+                                className="text-sm font-medium"
+                                style={{ color: TEXT_PRIMARY }}
                             >
                                 {formatGenerationCount(packageCount?.count ?? 0, item.unitLabel)}
                             </div>
@@ -181,7 +156,8 @@ function CompareCategorySection({ title, items, packages, initialVisibleCount = 
                         variant="ghost"
                         size="sm"
                         onClick={() => setIsExpanded((current) => !current)}
-                        className="h-auto p-0 text-sm font-medium text-white/60 hover:bg-transparent hover:text-white"
+                        className="h-auto p-0 text-sm font-medium hover:bg-transparent hover:text-white"
+                        style={{ color: TEXT_MUTED }}
                     >
                         <ChevronDown
                             size={16}
@@ -223,19 +199,18 @@ function ComparePlansSection({ packages, modelsComparison, onBuy, isPending, pen
     return (
         <div className="space-y-5">
             <div className="text-center">
-                <h2 className="text-[40px] font-bold uppercase tracking-[-0.04em] text-white md:text-[52px]">
+                <h2 className="text-[40px] font-bold uppercase tracking-[-0.04em] md:text-[52px]" style={{ color: TEXT_PRIMARY }}>
                     Compare Credit Packs
                 </h2>
             </div>
 
             <div
-                style={{ background: COMPARE_SURFACE_BACKGROUND }}
-                className="rounded-[24px] border border-white/[0.06] shadow-[0_20px_60px_rgba(0,0,0,0.35)]"
+                className="rounded-[24px]  "
             >
-                <div className="rounded-[24px]">
+                <div className="">
                     <div
-                        style={{ background: COMPARE_SURFACE_BACKGROUND }}
-                        className="sticky top-0 z-30 border-b border-white/[0.04] backdrop-blur-xl"
+                        className="sticky rounded-[24px] bg-white/5 backdrop-blur-[80px] top-0 z-30 
+                        "
                     >
                         <div
                             ref={headerScrollRef}
@@ -257,20 +232,21 @@ function ComparePlansSection({ packages, modelsComparison, onBuy, isPending, pen
 
                                         return (
                                             <div key={`sticky-${pkg.id}`} className="pr-3">
-                                                <p className="text-base font-bold text-white">{pkg.label}</p>
+                                                <p className="text-base font-bold" style={{ color: TEXT_PRIMARY }}>{pkg.label}</p>
                                                 {price && (
-                                                    <p className="mt-2 text-sm font-semibold text-white">
+                                                    <p className="mt-2 text-sm font-semibold" style={{ color: TEXT_PRIMARY }}>
                                                         {price}
                                                         {getPlanKind(pkg) === "subscription" ? "/month" : ""}
                                                     </p>
                                                 )}
-                                                <p className="mt-1 text-xs text-white/42">{pkg.credits} credits</p>
+                                                <p className="mt-1 text-xs" style={{ color: TEXT_MUTED }}>{pkg.credits} credits</p>
                                                 <Button
                                                     type="button"
                                                     variant="ghost"
                                                     onClick={() => onBuy(pkg.id)}
                                                     disabled={isPending && pendingPackageId === pkg.id}
-                                                    className="mt-3 h-10 w-full rounded-2xl bg-white/[0.06] px-4 text-sm font-semibold text-white hover:bg-white/[0.1]"
+                                                    className="mt-3 h-10 w-full rounded-xl px-4 text-sm font-semibold hover:text-white"
+                                                    style={{ background: BUTTON_SURFACE, color: TEXT_PRIMARY }}
                                                 >
                                                     {isPending && pendingPackageId === pkg.id ? (
                                                         <Loader2 size={16} className="animate-spin" />
@@ -440,8 +416,7 @@ function TemplatePricingCard({ pkg, modelsComparison, onBuy, isLoading }) {
 
     return (
         <article
-            style={{ background: SOFT_DARK_PANEL_BACKGROUND }}
-            className="flex min-h-[480px] w-full flex-col rounded-xl   p-4 text-white shadow-[0_0_0_1px_rgba(255,255,255,0.02)] transition-all duration-300 hover:border-white/[0.14] hover:bg-white/[0.05]"
+            className="flex min-h-[480px] bg-white/7 backdrop-blur-[80px]  w-full flex-col rounded-2xl  p-5 text-white transition-colors duration-300 hover:border-[#3a3a3a] hover:bg-white/10"
         >
             {/* <div className="flex items-center gap-2 text-white/85">
                 <span className="flex h-5 w-5 items-center justify-center rounded-full border border-white/[0.12] bg-white/[0.04] text-[10px] font-bold text-white">
@@ -455,7 +430,7 @@ function TemplatePricingCard({ pkg, modelsComparison, onBuy, isLoading }) {
                     {pkg.label}
                 </h3>
                 {price && (
-                    <p className="mt-3 text-[19px] font-bold text-white/92">
+                    <p className="mt-3 text-[19px] font-bold" style={{ color: TEXT_PRIMARY }}>
                         {price}
                         {getPlanSuffix(pkg)}
                     </p>
@@ -463,21 +438,21 @@ function TemplatePricingCard({ pkg, modelsComparison, onBuy, isLoading }) {
             </div>
 
             {generatedBreakdown.length > 0 && (
-                <div className="mt-6 min-h-[116px] space-y-2 border-b border-white/[0.08] pb-5">
+                <div className="mt-6 min-h-[116px] space-y-2 pb-5" style={{ borderBottom: `1px solid ${SURFACE_BORDER}` }}>
                     {generatedBreakdown.map((item, i) => (
-                        <p key={i} className="text-sm font-medium leading-5 text-white/58">
+                        <p key={i} className="text-sm font-medium leading-5" style={{ color: TEXT_MUTED }}>
                             {item.text}
                         </p>
                     ))}
                 </div>
             )}
 
-            {!generatedBreakdown.length && <div className="mt-6 border-b border-white/[0.08]" />}
+            {!generatedBreakdown.length && <div className="mt-6" style={{ borderBottom: `1px solid ${SURFACE_BORDER}` }} />}
 
-            <ul className="mt-5 space-y-2 text-sm leading-5 text-white/76">
+            <ul className="mt-5 space-y-2 text-sm leading-5" style={{ color: TEXT_SECONDARY }}>
                 {features.map((feature) => (
                     <li key={feature} className="flex items-start gap-2">
-                        <Check size={16} className="mt-0.5 shrink-0 text-white/90" />
+                        <Check size={16} className="mt-0.5 shrink-0" style={{ color: TEXT_PRIMARY }} />
                         <span>{feature}</span>
                     </li>
                 ))}
@@ -488,17 +463,23 @@ function TemplatePricingCard({ pkg, modelsComparison, onBuy, isLoading }) {
                 type="button"
                 onClick={() => onBuy(pkg.id)}
                 disabled={isLoading}
-                className="mt-auto h-11 w-full rounded-full px-4 text-sm font-bold text-black transition-opacity duration-200 hover:opacity-100"
+                className="mt-auto h-11 w-full rounded-xl px-4 text-sm font-semibold transition-colors duration-200"
                 style={{
                     backgroundColor: colors.button,
-                    opacity: 0.96,
+                    color: TEXT_PRIMARY,
+                }}
+                onMouseOver={(event) => {
+                    event.currentTarget.style.backgroundColor = colors.hover;
+                }}
+                onMouseOut={(event) => {
+                    event.currentTarget.style.backgroundColor = colors.button;
                 }}
             >
                 {isLoading ? <Loader2 size={16} className="animate-spin" /> : ctaLabel}
             </Button>
 
             {pkg.disclaimer && (
-                <p className="mt-8 text-center text-xs text-white/40 underline underline-offset-4">
+                <p className="mt-8 text-center text-xs underline underline-offset-4" style={{ color: TEXT_FAINT }}>
                     {pkg.disclaimer}
                 </p>
             )}
@@ -509,8 +490,8 @@ function TemplatePricingCard({ pkg, modelsComparison, onBuy, isLoading }) {
 function SkeletonCard() {
     return (
         <div
-            style={{ background: SOFT_DARK_PANEL_BACKGROUND }}
-            className="aspect-[1/1.08] w-full rounded-xl border border-white/[0.06]"
+            style={{ background: SURFACE_BACKGROUND_ELEVATED, borderColor: SURFACE_BORDER }}
+            className="aspect-[1/1.08] w-full rounded-xl border"
         />
     );
 }
@@ -567,7 +548,7 @@ export function PricingSection() {
     return (
         <section className="mx-auto flex w-full max-w-[1200px] flex-col gap-8 px-5 py-16">
             <div className="text-center">
-                <h2 className="mt-4 text-[40px] font-bold tracking-[-0.05em] text-white md:text-[52px]">
+                <h2 className="mt-4 text-[40px] font-bold tracking-[-0.05em] md:text-[52px]" style={{ color: TEXT_PRIMARY }}>
                     Choose the plan that suits you best
                 </h2>
             </div>
@@ -588,15 +569,15 @@ export function PricingSection() {
 
                 {isError && (
                     <div
-                        style={{ background: SOFT_DARK_PANEL_BACKGROUND }}
-                        className="rounded-[28px] border border-white/[0.08] px-6 py-12 text-center text-sm text-white/42 md:col-span-3"
+                        style={{ background: SURFACE_BACKGROUND_ELEVATED, borderColor: SURFACE_BORDER, color: TEXT_MUTED }}
+                        className="rounded-[28px] border px-6 py-12 text-center text-sm md:col-span-3"
                     >
                         Could not load packages. Please try again later.
                     </div>
                 )}
             </div>
 
-            <p className="text-center text-xs text-white/24">
+            <p className="text-center text-xs" style={{ color: TEXT_FAINT }}>
                 Secure payments powered by Lemon Squeezy. Credits are added instantly after payment.
             </p>
 
@@ -614,10 +595,10 @@ export function PricingSection() {
 
             <div className="mx-auto w-full max-w-[920px] pt-6">
                 <div className="text-center">
-                    <h2 className="text-[28px] font-bold tracking-[-0.04em] text-white md:text-[34px]">
+                    <h2 className="text-[28px] font-bold tracking-[-0.04em] md:text-[34px]" style={{ color: TEXT_PRIMARY }}>
                         Frequently asked questions
                     </h2>
-                    <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-white/50">
+                    <p className="mx-auto mt-3 max-w-2xl text-sm leading-6" style={{ color: TEXT_MUTED }}>
                         Short answers to the pricing questions people usually check before they buy.
                     </p>
                 </div>
@@ -627,13 +608,13 @@ export function PricingSection() {
                         <AccordionItem
                             key={item.question}
                             value={`faq-${index}`}
-                            style={{ background: SOFT_DARK_PANEL_BACKGROUND }}
-                            className="rounded-2xl border border-white/[0.08] px-5"
+                            style={{ background: SURFACE_BACKGROUND_ELEVATED, borderColor: SURFACE_BORDER }}
+                            className="rounded-2xl border px-5"
                         >
-                            <AccordionTrigger className="py-5 text-base font-semibold text-white hover:no-underline">
+                            <AccordionTrigger className="py-5 text-base font-semibold hover:no-underline" style={{ color: TEXT_PRIMARY }}>
                                 {item.question}
                             </AccordionTrigger>
-                            <AccordionContent className="pb-5 text-sm leading-7 text-white/65">
+                            <AccordionContent className="pb-5 text-sm leading-7" style={{ color: TEXT_SECONDARY }}>
                                 {item.answer}
                             </AccordionContent>
                         </AccordionItem>
@@ -641,7 +622,7 @@ export function PricingSection() {
                 </Accordion>
 
                 <div className="mt-10 flex items-center justify-center gap-4 text-center">
-                    <p className="text-sm font-semibold text-white/78">Ready to get started?</p>
+                    <p className="text-sm font-semibold" style={{ color: TEXT_SECONDARY }}>Ready to get started?</p>
                     <Button
                         type="button"
                         onClick={() => {
@@ -660,7 +641,14 @@ export function PricingSection() {
                             });
                         }}
                         disabled={!nonTrialPackages.length}
-                        className="h-10 rounded-2xl bg-white px-5 text-sm font-semibold text-black hover:bg-white/90"
+                        className="h-10 rounded-xl px-5 text-sm font-semibold text-white transition-colors"
+                        style={{ background: BUTTON_PRIMARY }}
+                        onMouseOver={(event) => {
+                            event.currentTarget.style.backgroundColor = BUTTON_PRIMARY_HOVER;
+                        }}
+                        onMouseOut={(event) => {
+                            event.currentTarget.style.backgroundColor = BUTTON_PRIMARY;
+                        }}
                     >
                         Choose your pack
                     </Button>
