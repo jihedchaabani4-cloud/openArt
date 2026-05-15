@@ -8,7 +8,13 @@ import {
     AccordionItem,
     AccordionTrigger,
 } from "@/shared/ui/accordion";
+import { Button } from "@/shared/ui/button";
 import { Check, ChevronDown, Loader2 } from "lucide-react";
+
+const SOFT_DARK_PANEL_BACKGROUND =
+    "linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.02) 100%), linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 42%, rgba(0, 0, 0, 0) 100%), rgba(14, 16, 18, 0.96)";
+
+const COMPARE_SURFACE_BACKGROUND = "#121416";
 
 function formatPrice(value, currency = "USD") {
     if (value == null) {
@@ -16,14 +22,6 @@ function formatPrice(value, currency = "USD") {
     }
 
     return `${value} ${currency}`;
-}
-
-function getPlanFeatures(pkg) {
-    if (Array.isArray(pkg.features) && pkg.features.length > 0) {
-        return pkg.features.map((feature) => feature.replace(/^~\s*/, ""));
-    }
-
-    return [];
 }
 
 function getPlanKind(pkg) {
@@ -51,41 +49,41 @@ function getPlanColor(label) {
     
     if (l.includes("starter pack")) {
         return {
-            title: "#d6c8ff",
-            button: "#c5b4e3",
-            hover: "#d5c8f2"
+            title: "#f5f5f5",
+            button: "#f3f3f3",
+            hover: "#ffffff"
         };
     }
     
     if (l.includes("creator pack")) {
         return {
-            title: "#ffd1da",
-            button: "#f7c4ce",
-            hover: "#ffd3db"
+            title: "#f2f2f2",
+            button: "#f1f1f1",
+            hover: "#ffffff"
         };
     }
 
     if (l.includes("studio pack")) {
         return {
-            title: "#d1e2f5",
-            button: "#a8c5da",
-            hover: "#c1d6e6"
+            title: "#ffffff",
+            button: "#ededed",
+            hover: "#ffffff"
         };
     }
 
     if (l.includes("duo")) {
         return {
-            title: "#ffe2ad",
-            button: "#ffc86b",
-            hover: "#ffd694"
+            title: "#f0f0f0",
+            button: "#efefef",
+            hover: "#ffffff"
         };
     }
 
-    // Default (Personnel colors)
+    // Default
     return {
-        title: "#ffd1da",
-        button: "#f7c4ce",
-        hover: "#ffd3db"
+        title: "#f5f5f5",
+        button: "#f4f4f4",
+        hover: "#ffffff"
     };
 }
 
@@ -113,6 +111,9 @@ function buildPriceSummary(packages) {
 
 function formatGenerationCount(count, unitLabel) {
     const safeCount = Number.isFinite(count) ? count : 0;
+    if (safeCount === 0) {
+        return "X";
+    }
     const label = safeCount === 1 ? unitLabel : `${unitLabel}s`;
     return `${safeCount} ${label}`;
 }
@@ -141,21 +142,12 @@ function CompareCategorySection({ title, items, packages, initialVisibleCount = 
     const gridTemplateColumns = `minmax(220px, 1.45fr) repeat(${packages.length}, minmax(160px, 1fr))`;
 
     return (
-        <div className="border-t border-white/[0.08] first:border-t-0">
+        <div className=" ">
             <div className="px-5 py-5">
                 <h3 className="text-[28px] font-bold tracking-[-0.03em] text-white">{title}</h3>
             </div>
 
-            <div className="grid items-center border-b border-white/[0.06] px-5 py-4 text-sm"
-                style={{ gridTemplateColumns }}
-            >
-                <div className="pr-5 text-white">Concurrent Jobs</div>
-                {packages.map((pkg, index) => (
-                    <div key={`${title}-${pkg.id}-concurrent`} className="font-medium text-white">
-                        {index + 1} concurrent job{index === 0 ? "" : "s"}
-                    </div>
-                ))}
-            </div>
+
 
             {visibleItems.map((item) => (
                 <div
@@ -171,7 +163,10 @@ function CompareCategorySection({ title, items, packages, initialVisibleCount = 
                     {packages.map((pkg) => {
                         const packageCount = item.packageCounts?.find((entry) => entry.packageId === pkg.id);
                         return (
-                            <div key={`${item.key}-${pkg.id}`} className="text-sm font-medium text-white">
+                            <div
+                                key={`${item.key}-${pkg.id}`}
+                                className="text-sm font-medium text-white"
+                            >
                                 {formatGenerationCount(packageCount?.count ?? 0, item.unitLabel)}
                             </div>
                         );
@@ -181,17 +176,19 @@ function CompareCategorySection({ title, items, packages, initialVisibleCount = 
 
             {hasMore && (
                 <div className="px-5 py-4">
-                    <button
+                    <Button
                         type="button"
+                        variant="ghost"
+                        size="sm"
                         onClick={() => setIsExpanded((current) => !current)}
-                        className="inline-flex items-center gap-2 text-sm font-medium text-white/60 transition-colors hover:text-white"
+                        className="h-auto p-0 text-sm font-medium text-white/60 hover:bg-transparent hover:text-white"
                     >
                         <ChevronDown
                             size={16}
                             className={`transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`}
                         />
                         {isExpanded ? "View less" : "View more"}
-                    </button>
+                    </Button>
                 </div>
             )}
         </div>
@@ -227,82 +224,89 @@ function ComparePlansSection({ packages, modelsComparison, onBuy, isPending, pen
         <div className="space-y-5">
             <div className="text-center">
                 <h2 className="text-[40px] font-bold uppercase tracking-[-0.04em] text-white md:text-[52px]">
-                    Compare Plans
+                    Compare Credit Packs
                 </h2>
             </div>
 
-            <div className="rounded-[24px] border border-white/[0.08] bg-white/[0.03]">
-                <div className="sticky top-0 z-30 border-b border-white/[0.08] bg-[#0b0b0c]/95 backdrop-blur-xl">
+            <div
+                style={{ background: COMPARE_SURFACE_BACKGROUND }}
+                className="rounded-[24px] border border-white/[0.06] shadow-[0_20px_60px_rgba(0,0,0,0.35)]"
+            >
+                <div className="rounded-[24px]">
                     <div
-                        ref={headerScrollRef}
+                        style={{ background: COMPARE_SURFACE_BACKGROUND }}
+                        className="sticky top-0 z-30 border-b border-white/[0.04] backdrop-blur-xl"
+                    >
+                        <div
+                            ref={headerScrollRef}
+                            onScroll={(event) =>
+                                syncHorizontalScroll(event.currentTarget, bodyScrollRef.current, "header")
+                            }
+                            className="overflow-x-auto"
+                        >
+                            <div className="min-w-[1020px]">
+                                <div
+                                    className="grid px-5 pb-6 pt-5"
+                                    style={{ gridTemplateColumns, background: "transparent" }}
+                                >
+                                    <div className="pr-5" />
+
+                                    {packages.map((pkg) => {
+                                        const price = formatPrice(pkg.price, pkg.currency);
+                                        const ctaLabel = pkg.cta_label || `Get ${pkg.label}`;
+
+                                        return (
+                                            <div key={`sticky-${pkg.id}`} className="pr-3">
+                                                <p className="text-base font-bold text-white">{pkg.label}</p>
+                                                {price && (
+                                                    <p className="mt-2 text-sm font-semibold text-white">
+                                                        {price}
+                                                        {getPlanKind(pkg) === "subscription" ? "/month" : ""}
+                                                    </p>
+                                                )}
+                                                <p className="mt-1 text-xs text-white/42">{pkg.credits} credits</p>
+                                                <Button
+                                                    type="button"
+                                                    variant="ghost"
+                                                    onClick={() => onBuy(pkg.id)}
+                                                    disabled={isPending && pendingPackageId === pkg.id}
+                                                    className="mt-3 h-10 w-full rounded-2xl bg-white/[0.06] px-4 text-sm font-semibold text-white hover:bg-white/[0.1]"
+                                                >
+                                                    {isPending && pendingPackageId === pkg.id ? (
+                                                        <Loader2 size={16} className="animate-spin" />
+                                                    ) : (
+                                                        ctaLabel
+                                                    )}
+                                                </Button>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div
+                        ref={bodyScrollRef}
                         onScroll={(event) =>
-                            syncHorizontalScroll(event.currentTarget, bodyScrollRef.current, "header")
+                            syncHorizontalScroll(event.currentTarget, headerScrollRef.current, "body")
                         }
                         className="overflow-x-auto"
                     >
                         <div className="min-w-[1020px]">
-                            <div
-                                className="grid px-5 py-5"
-                                style={{ gridTemplateColumns }}
-                            >
-                                <div className="text-xs font-medium uppercase tracking-[0.18em] text-white/35">
-                                    Models
-                                </div>
+                            <div className="min-w-[1020px]">
+                                <CompareCategorySection
+                                    title="Video"
+                                    items={modelsComparison.video}
+                                    packages={packages}
+                                />
 
-                                {packages.map((pkg) => {
-                                    const price = formatPrice(pkg.price, pkg.currency);
-                                    const ctaLabel = pkg.cta_label || `Get ${pkg.label}`;
-
-                                    return (
-                                        <div key={`sticky-${pkg.id}`} className="pr-3">
-                                            <p className="text-base font-bold text-white">{pkg.label}</p>
-                                            {price && (
-                                                <p className="mt-2 text-sm font-semibold text-white">
-                                                    {price}
-                                                    {getPlanKind(pkg) === "subscription" ? "/month" : ""}
-                                                </p>
-                                            )}
-                                            <p className="mt-1 text-xs text-white/45">{pkg.credits} credits</p>
-                                            <button
-                                                type="button"
-                                                onClick={() => onBuy(pkg.id)}
-                                                disabled={isPending && pendingPackageId === pkg.id}
-                                                className="mt-3 inline-flex h-10 w-full items-center justify-center rounded-2xl bg-white/15 px-4 text-sm font-semibold text-white transition-colors hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-70"
-                                            >
-                                                {isPending && pendingPackageId === pkg.id ? (
-                                                    <Loader2 size={16} className="animate-spin" />
-                                                ) : (
-                                                    ctaLabel
-                                                )}
-                                            </button>
-                                        </div>
-                                    );
-                                })}
+                                <CompareCategorySection
+                                    title="Image"
+                                    items={modelsComparison.image}
+                                    packages={packages}
+                                />
                             </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div
-                    ref={bodyScrollRef}
-                    onScroll={(event) =>
-                        syncHorizontalScroll(event.currentTarget, headerScrollRef.current, "body")
-                    }
-                    className="overflow-x-auto"
-                >
-                    <div className="min-w-[1020px]">
-                        <div className="min-w-[1020px]">
-                            <CompareCategorySection
-                                title="Video"
-                                items={modelsComparison.video}
-                                packages={packages}
-                            />
-
-                            <CompareCategorySection
-                                title="Image"
-                                items={modelsComparison.image}
-                                packages={packages}
-                            />
                         </div>
                     </div>
                 </div>
@@ -311,61 +315,190 @@ function ComparePlansSection({ packages, modelsComparison, onBuy, isPending, pen
     );
 }
 
-function TemplatePricingCard({ pkg, onBuy, isLoading }) {
-    const features = getPlanFeatures(pkg);
+function TemplatePricingCard({ pkg, modelsComparison, onBuy, isLoading }) {
+    const features = Array.isArray(pkg.features)
+        ? pkg.features.map((feature) => feature.replace(/^~\s*/, ""))
+        : [];
     const price = formatPrice(pkg.price, pkg.currency);
     const ctaLabel = pkg.cta_label || `Get ${pkg.label}`;
     const colors = getPlanColor(pkg.label);
 
+    const generatedBreakdown = [];
+    if (modelsComparison) {
+        // --- IMAGE GROUPS ---
+        const imageGroups = [
+            { name: "Nano Banana", match: (n) => n.includes("nano") },
+            { name: "GPT Image 2", match: (n) => n.includes("gpt") || n.includes("gbt") }
+        ];
+
+        imageGroups.forEach(group => {
+            let counts = [];
+            modelsComparison.image?.forEach(item => {
+                const name = item.displayName.toLowerCase();
+                if (group.match(name)) {
+                    const countObj = item.packageCounts?.find(entry => entry.packageId === pkg.id);
+                    if (countObj && countObj.count > 0) {
+                        counts.push(countObj.count);
+                    }
+                }
+            });
+
+            if (counts.length > 0) {
+                const min = Math.min(...counts);
+                const max = Math.max(...counts);
+                const countStr = min === max ? `${max}` : `${min}-${max}`;
+                generatedBreakdown.push({
+                    text: `≈ ${countStr} ${group.name} Generations`,
+                    isVideo: false
+                });
+            }
+        });
+
+        // Find max image model to highlight (e.g. z-image)
+        let maxImageItem = null;
+        let maxCountValue = 0;
+        modelsComparison.image?.forEach(item => {
+            const countObj = item.packageCounts?.find(entry => entry.packageId === pkg.id);
+            if (countObj && countObj.count > maxCountValue) {
+                maxCountValue = countObj.count;
+                maxImageItem = item;
+            }
+        });
+
+        if (maxImageItem) {
+            const nameLower = maxImageItem.displayName.toLowerCase();
+            const isCovered = imageGroups.some(group => group.match(nameLower));
+            if (!isCovered) {
+                generatedBreakdown.push({
+                    text: `≈ ${maxCountValue} ${maxImageItem.displayName} Generations`,
+                    isVideo: false
+                });
+            }
+        }
+
+        // --- VIDEO GROUPS ---
+        const videoGroups = [
+            { name: "Kling 3.0", match: (n) => n.includes("kling") },
+            { name: "Seedance", match: (n) => n.includes("seedream") || n.includes("sea dream") || n.includes("seedance") }
+        ];
+
+        videoGroups.forEach(group => {
+            let counts = [];
+            modelsComparison.video?.forEach(item => {
+                const name = item.displayName.toLowerCase();
+                if (group.match(name)) {
+                    const countObj = item.packageCounts?.find(entry => entry.packageId === pkg.id);
+                    if (countObj && countObj.count > 0) {
+                        counts.push(countObj.count);
+                    }
+                }
+            });
+
+            if (counts.length > 0) {
+                const min = Math.min(...counts);
+                const max = Math.max(...counts);
+                const countStr = min === max ? `${max}` : `${min}-${max}`;
+                generatedBreakdown.push({
+                    text: `~ ${countStr} ${group.name} videos`,
+                    isVideo: true
+                });
+            }
+        });
+
+        // Find max video model to highlight
+        let maxVideoItem = null;
+        let maxVideoCountValue = 0;
+        modelsComparison.video?.forEach(item => {
+            const countObj = item.packageCounts?.find(entry => entry.packageId === pkg.id);
+            if (countObj && countObj.count > maxVideoCountValue) {
+                maxVideoCountValue = countObj.count;
+                maxVideoItem = item;
+            }
+        });
+
+        if (maxVideoItem) {
+            const nameLower = maxVideoItem.displayName.toLowerCase();
+            const isCovered = videoGroups.some(group => group.match(nameLower));
+            if (!isCovered) {
+                generatedBreakdown.push({
+                    text: `~ ${maxVideoCountValue} ${maxVideoItem.displayName} videos`,
+                    isVideo: true
+                });
+            }
+        }
+    }
+
+    // Fallback to credit_breakdown if modelsComparison is empty
+    if (generatedBreakdown.length === 0 && Array.isArray(pkg.credit_breakdown) && pkg.credit_breakdown.length > 0) {
+        pkg.credit_breakdown.forEach((item) => {
+            generatedBreakdown.push({
+                text: item,
+                isVideo: item.toLowerCase().includes("video")
+            });
+        });
+    }
+
     return (
-        <article className="flex aspect-[1/1.08] w-full flex-col rounded-xl bg-white/[0.1] p-4 text-white backdrop-blur-[80px] transition-all duration-300 hover:bg-white/[0.13]">
-            <div className="flex items-center gap-2 text-white">
-                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white text-[10px] font-bold text-black">
+        <article
+            style={{ background: SOFT_DARK_PANEL_BACKGROUND }}
+            className="flex min-h-[480px] w-full flex-col rounded-xl   p-4 text-white shadow-[0_0_0_1px_rgba(255,255,255,0.02)] transition-all duration-300 hover:border-white/[0.14] hover:bg-white/[0.05]"
+        >
+            {/* <div className="flex items-center gap-2 text-white/85">
+                <span className="flex h-5 w-5 items-center justify-center rounded-full border border-white/[0.12] bg-white/[0.04] text-[10px] font-bold text-white">
                     P
                 </span>
-                <span className="text-sm font-medium">{pkg.badge_label || "Premium"}</span>
-            </div>
+                <span className="text-sm font-medium text-white/62">{pkg.badge_label || "Premium"}</span>
+            </div> */}
 
-            <div className="mt-3">
-                <h3 className="text-[28px] font-bold tracking-[-0.03em]" style={{ color: colors.title }}>
+            <div className="mt-5">
+                <h3 className="text-[32px] font-bold leading-none tracking-[-0.03em]" style={{ color: colors.title }}>
                     {pkg.label}
                 </h3>
                 {price && (
-                    <p className="mt-1 text-[19px] font-bold text-white">
+                    <p className="mt-3 text-[19px] font-bold text-white/92">
                         {price}
-                        {getPlanKind(pkg) === "subscription" ? "/mois" : ""}
+                        {getPlanSuffix(pkg)}
                     </p>
                 )}
             </div>
 
-            <div className="mt-4 h-px bg-white/[0.10]" />
+            {generatedBreakdown.length > 0 && (
+                <div className="mt-6 min-h-[116px] space-y-2 border-b border-white/[0.08] pb-5">
+                    {generatedBreakdown.map((item, i) => (
+                        <p key={i} className="text-sm font-medium leading-5 text-white/58">
+                            {item.text}
+                        </p>
+                    ))}
+                </div>
+            )}
 
-            <ul className="mt-4 text-sm leading-6 text-white">
+            {!generatedBreakdown.length && <div className="mt-6 border-b border-white/[0.08]" />}
+
+            <ul className="mt-5 space-y-2 text-sm leading-5 text-white/76">
                 {features.map((feature) => (
                     <li key={feature} className="flex items-start gap-2">
-                        <Check size={16} className="mt-1.5 shrink-0 text-white" />
+                        <Check size={16} className="mt-0.5 shrink-0 text-white/90" />
                         <span>{feature}</span>
                     </li>
                 ))}
             </ul>
 
-            <button
+            <Button
                 id={`buy-${pkg.id}`}
+                type="button"
                 onClick={() => onBuy(pkg.id)}
                 disabled={isLoading}
-                className="mt-auto inline-flex h-11 w-full items-center justify-center rounded-full px-4 text-sm font-bold text-[#1d1d1d] transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-70"
-                style={{ 
+                className="mt-auto h-11 w-full rounded-full px-4 text-sm font-bold text-black transition-opacity duration-200 hover:opacity-100"
+                style={{
                     backgroundColor: colors.button,
-                    "--hover-bg": colors.hover
+                    opacity: 0.96,
                 }}
-                onMouseOver={(e) => e.currentTarget.style.backgroundColor = colors.hover}
-                onMouseOut={(e) => e.currentTarget.style.backgroundColor = colors.button}
             >
                 {isLoading ? <Loader2 size={16} className="animate-spin" /> : ctaLabel}
-            </button>
+            </Button>
 
             {pkg.disclaimer && (
-                <p className="mt-8 text-center text-xs text-white underline underline-offset-4">
+                <p className="mt-8 text-center text-xs text-white/40 underline underline-offset-4">
                     {pkg.disclaimer}
                 </p>
             )}
@@ -375,11 +508,15 @@ function TemplatePricingCard({ pkg, onBuy, isLoading }) {
 
 function SkeletonCard() {
     return (
-        <div className="aspect-[1/1.08] w-full rounded-xl bg-white/[0.06] backdrop-blur-[80px]" />
+        <div
+            style={{ background: SOFT_DARK_PANEL_BACKGROUND }}
+            className="aspect-[1/1.08] w-full rounded-xl border border-white/[0.06]"
+        />
     );
 }
 
 export function PricingSection() {
+    const packsSectionRef = useRef(null);
     const { data, isLoading, isError } = usePackages();
     const { mutate: checkout, isPending, variables: pendingPackageId } = useCheckout();
     const packages = data?.packages ?? [];
@@ -390,13 +527,21 @@ export function PricingSection() {
     const priceSummary = buildPriceSummary(nonTrialPackages);
     const faqItems = [
         {
-            question: "How much does each plan cost?",
-            answer: `${priceSummary} Pick the plan that matches how often you create and how many credits you want available.`,
+            question: "How do credits work?",
+            answer: "Each image or video generation uses a specific number of credits depending on the model and settings you choose. Your credit balance is used as you generate, and you can compare pack sizes on this page before buying.",
         },
         {
-            question: "Which plan should I choose?",
+            question: "How much does each credit pack cost?",
+            answer: `${priceSummary} Choose the pack that fits how many generations you want available for image and video creation.`,
+        },
+        {
+            question: "How many images or videos can I generate?",
+            answer: "It depends on the model you use. Faster or lighter models generate more with the same pack, while premium models use more credits. The comparison table above shows estimated output for each pack.",
+        },
+        {
+            question: "Which credit pack should I choose?",
             answer:
-                "Choose the lightest plan if you are testing the product, a mid-tier plan if you create every week, and the largest plan if you need the best value and more room to generate consistently.",
+                "Choose the smallest pack if you are testing the product, a mid-tier pack if you create every week, and the largest pack if you need the best value and more room to generate consistently.",
         },
         {
             question: "Do I get credits instantly after payment?",
@@ -404,39 +549,37 @@ export function PricingSection() {
                 "Yes. Payments are processed securely and your credits are added to your account right after the checkout is completed.",
         },
         {
-            question: "Is billing recurring or a one-time purchase?",
+            question: "Are these recurring subscriptions or one-time credit packs?",
             answer:
                 hasSubscriptions && hasOneTimePlans
-                    ? "This page can include both recurring subscriptions and one-time credit packs. You can tell which is which from the plan price and label before checkout."
+                    ? "This page can include both recurring subscriptions and one-time credit packs. You can tell which is which from the pack price and label before checkout."
                     : hasSubscriptions
-                      ? "The available plans on this page are recurring subscriptions, so they renew automatically based on the billing cycle shown."
-                      : "The available plans on this page are one-time purchases, so you only pay when you decide to buy again.",
+                      ? "The available offers on this page are recurring subscriptions, so they renew automatically based on the billing cycle shown."
+                      : "The available offers on this page are one-time credit packs, so you only pay when you decide to buy again.",
         },
         {
-            question: "Can I change plans later?",
+            question: "Can I buy more credits later?",
             answer:
-                "Yes. You can move to a different plan when your needs change, so you are not locked into the same option forever.",
+                "Yes. You can come back anytime and buy another credit pack when you need more credits.",
         },
     ];
 
     return (
         <section className="mx-auto flex w-full max-w-[1200px] flex-col gap-8 px-5 py-16">
-            <div className="max-w-2xl">
-                <h1 className="mt-4 text-3xl font-bold tracking-[-0.05em] text-white md:text-[52px]">
-                    Simple plans, designed to feel premium.
-                </h1>
-                <p className="mt-3 max-w-xl text-sm leading-6 text-white/42 md:text-[15px]">
-                    Clear pricing, clean structure, and the right amount of detail to help users choose fast.
-                </p>
+            <div className="text-center">
+                <h2 className="mt-4 text-[40px] font-bold tracking-[-0.05em] text-white md:text-[52px]">
+                    Choose the plan that suits you best
+                </h2>
             </div>
 
-            <div className="space-y-6">
+            <div ref={packsSectionRef} className="space-y-6">
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                     {isLoading && [1, 2, 3].map((item) => <SkeletonCard key={`sub-${item}`} />)}
                     {!isLoading && !isError && nonTrialPackages.map((pkg) => (
                         <TemplatePricingCard
                             key={pkg.id}
                             pkg={pkg}
+                            modelsComparison={modelsComparison}
                             onBuy={(id) => checkout(id)}
                             isLoading={isPending && pendingPackageId === pkg.id}
                         />
@@ -444,7 +587,10 @@ export function PricingSection() {
                 </div>
 
                 {isError && (
-                    <div className="rounded-[28px] border border-white/[0.08] bg-white/[0.03] px-6 py-12 text-center text-sm text-white/42 md:col-span-3">
+                    <div
+                        style={{ background: SOFT_DARK_PANEL_BACKGROUND }}
+                        className="rounded-[28px] border border-white/[0.08] px-6 py-12 text-center text-sm text-white/42 md:col-span-3"
+                    >
                         Could not load packages. Please try again later.
                     </div>
                 )}
@@ -481,7 +627,8 @@ export function PricingSection() {
                         <AccordionItem
                             key={item.question}
                             value={`faq-${index}`}
-                            className="rounded-2xl  bg-white/[0.1] px-5 backdrop-blur-[80px]"
+                            style={{ background: SOFT_DARK_PANEL_BACKGROUND }}
+                            className="rounded-2xl border border-white/[0.08] px-5"
                         >
                             <AccordionTrigger className="py-5 text-base font-semibold text-white hover:no-underline">
                                 {item.question}
@@ -492,6 +639,32 @@ export function PricingSection() {
                         </AccordionItem>
                     ))}
                 </Accordion>
+
+                <div className="mt-10 flex items-center justify-center gap-4 text-center">
+                    <p className="text-sm font-semibold text-white/78">Ready to get started?</p>
+                    <Button
+                        type="button"
+                        onClick={() => {
+                            const element = packsSectionRef.current;
+                            if (!element) {
+                                return;
+                            }
+
+                            const rect = element.getBoundingClientRect();
+                            const absoluteTop = window.scrollY + rect.top;
+                            const centeredTop = absoluteTop - (window.innerHeight - rect.height) / 2;
+
+                            window.scrollTo({
+                                top: Math.max(0, centeredTop),
+                                behavior: "smooth",
+                            });
+                        }}
+                        disabled={!nonTrialPackages.length}
+                        className="h-10 rounded-2xl bg-white px-5 text-sm font-semibold text-black hover:bg-white/90"
+                    >
+                        Choose your pack
+                    </Button>
+                </div>
             </div>
         </section>
     );
