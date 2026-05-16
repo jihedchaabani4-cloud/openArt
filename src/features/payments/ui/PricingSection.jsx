@@ -433,76 +433,78 @@ function TemplatePricingCard({ pkg, modelsComparison, onBuy, isLoading }) {
         });
     }
 
+    const primaryFeatures = features.slice(0, 2);
+    const secondaryFeatures = features.slice(2, 5);
+
     return (
-        <article
-            className="flex  p-2 rounded-[24px] w-full flex-col overflow-hidden  text-white  transition-colors duration-300 bg-white/5 backdrop-blur-[80px]"
-        >
-            <div
-                className="relative rounded-[24px] px-6 pb-7 pt-6"
-                style={{ background: getPlanHeroBackground(pkg.label) }}
-            >
-                <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.02)_0%,rgba(0,0,0,0.18)_100%)]" />
-                <div className="relative z-10 flex h-full flex-col justify-end">
-                    <p className=" text-[32px] font-bold leading-[1.25]" style={{ color: colors.title }}>
+        <article className="mx-auto flex w-full max-w-[290px] flex-col border-t border-white/12 pt-4 text-white sm:max-w-[310px]">
+            <div className="space-y-3">
+                <div className="space-y-2.5">
+                    <p className="text-center text-[22px] font-medium tracking-[-0.04em] sm:text-[25px] opacity-80" style={{ color: colors.title }}>
                         {pkg.label}
                     </p>
                     {price && (
-                        <p className="mt-3 text-[25px] font-bold text-white">
-                            {price}
-                            {getPlanSuffix(pkg)}
+                        <p className="text-center text-[33px] font-semibold tracking-[-0.06em] text-white sm:text-[42px]">
+                            ${Number(pkg.price).toFixed(2)}
+                            <span className="text-[0.8em]">{getPlanSuffix(pkg) || ""}</span>
                         </p>
                     )}
-                    <p className="mt-2 text-sm text-white/72">{pkg.credits} credits included</p>
                 </div>
-            </div>
-
-            <div className="flex flex-1 flex-col px-6 pb-6 pt-5">
-                {generatedBreakdown.length > 0 && (
-                    <div className="min-h-[108px] space-y-2 pb-5" style={{ borderBottom: `1px solid ${SURFACE_BORDER}` }}>
-                        {generatedBreakdown.map((item, i) => (
-                            <p key={i} className="text-sm font-medium leading-5" style={{ color: TEXT_MUTED }}>
-                                {item.text}
-                            </p>
-                        ))}
-                    </div>
-                )}
-{/* 
-                {!generatedBreakdown.length && <div style={{ borderBottom: `1px solid ${SURFACE_BORDER}` }} />}
-
-                <ul className="mt-5 space-y-2 text-sm leading-5" style={{ color: TEXT_SECONDARY }}>
-                {features.map((feature) => (
-                    <li key={feature} className="flex items-start gap-2">
-                        <Check size={16} className="mt-0.5 shrink-0" style={{ color: TEXT_PRIMARY }} />
-                        <span>{feature}</span>
-                    </li>
-                ))}
-                </ul> */}
 
                 <Button
                     id={`buy-${pkg.id}`}
                     type="button"
                     onClick={() => onBuy(pkg.id)}
                     disabled={isLoading}
-                    className="mt-auto h-11 w-full rounded-xl px-4 text-sm font-semibold transition-colors duration-200"
+                    className="h-9 w-full rounded-full px-4 text-[13px] font-medium transition-colors duration-200 sm:h-10 sm:text-sm"
                     style={{
-                        backgroundColor: colors.button,
-                        color: TEXT_PRIMARY,
-                    }}
-                    onMouseOver={(event) => {
-                        event.currentTarget.style.backgroundColor = colors.hover;
-                    }}
-                    onMouseOut={(event) => {
-                        event.currentTarget.style.backgroundColor = colors.button;
+                        backgroundColor: "#d9d9de",
+                        color: "#202020",
                     }}
                 >
-                    {isLoading ? <Loader2 size={16} className="animate-spin" /> : ctaLabel}
+                    {isLoading ? <Loader2 size={16} className="animate-spin" /> : "Get Started"}
                 </Button>
+            </div>
 
-                {pkg.disclaimer && (
-                    <p className="mt-5 text-center text-xs underline underline-offset-4" style={{ color: TEXT_FAINT }}>
-                        {pkg.disclaimer}
-                    </p>
+            <div className="mt-7 flex flex-1 flex-col gap-4">
+
+                <ul className="space-y-4 text-[13px] leading-5.5 sm:text-[13px]" style={{ color: TEXT_PRIMARY }}>
+                    {primaryFeatures.map((feature) => (
+                        <li key={feature} className="flex items-start gap-3">
+                            <Check size={16} className="mt-1 shrink-0" />
+                            <span>{feature}</span>
+                        </li>
+                    ))}
+                </ul>
+
+                {(secondaryFeatures.length > 0 || generatedBreakdown.length > 0) && (
+                    <div className="flex items-center gap-4 py-1">
+                        <div className="h-px flex-1 bg-white/10" />
+                        <Plus size={18} className="shrink-0 text-white" />
+                        <div className="h-px flex-1 bg-white/10" />
+                    </div>
                 )}
+
+                <ul className="space-y-4 text-[13px] leading-5.5 sm:text-[13px]" style={{ color: TEXT_PRIMARY }}>
+                    {secondaryFeatures.map((feature) => (
+                        <li key={feature} className="flex items-start gap-3">
+                            <Check size={16} className="mt-1 shrink-0" />
+                            <span>{feature}</span>
+                        </li>
+                    ))}
+                    {generatedBreakdown.map((item) => {
+                        const prefix = item.text.startsWith("~") ? "~" : "≈";
+                        const cleanText = item.text.replace(/^[≈~]\s*/, "");
+                        return (
+                            <li key={item.text} className="flex items-start gap-3">
+                                <span className="mt-0.5 flex w-4 shrink-0 rounded-2xl justify-center text-[20px] font-normal opacity-90">
+                                    {prefix}
+                                </span>
+                                <span>{cleanText}</span>
+                            </li>
+                        );
+                    })}
+                </ul>
             </div>
         </article>
     );
@@ -568,33 +570,15 @@ export function PricingSection() {
     ];
 
     return (
-        <section className="mx-auto  space-y-4 flex w-full max-w-[1200px] flex-col gap-8 px-5 py-16">
+        <section className="mx-auto flex w-full max-w-[1200px] flex-col gap-8 space-y-4 px-5 py-14">
             <div className="text-center">
                 <h2 className="mt-4 text-[40px] font-bold tracking-[-0.05em] md:text-[52px]" style={{ color: TEXT_PRIMARY }}>
                     Choose the plan that suits you best
                 </h2>
-                {!isLoading && !isError && nonTrialPackages.length >= 3 && (
-                    <div className="mt-5">
-                        <Button
-                            type="button"
-                            onClick={() => setIsPackageDialogOpen(true)}
-                            className="h-11 rounded-2xl px-5 text-sm font-semibold text-white transition-colors"
-                            style={{ background: "rgba(255,255,255,0.08)" }}
-                            onMouseOver={(event) => {
-                                event.currentTarget.style.backgroundColor = "rgba(255,255,255,0.14)";
-                            }}
-                            onMouseOut={(event) => {
-                                event.currentTarget.style.backgroundColor = "rgba(255,255,255,0.08)";
-                            }}
-                        >
-                            Open compact package dialog
-                        </Button>
-                    </div>
-                )}
             </div>
 
             <div ref={packsSectionRef} className="space-y-6">
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                <div className="grid grid-cols-1 gap-8 md:grid-cols-3 xl:grid-cols-3">
                     {isLoading && [1, 2, 3].map((item) => <SkeletonCard key={`sub-${item}`} />)}
                     {!isLoading && !isError && nonTrialPackages.map((pkg) => (
                         <TemplatePricingCard
