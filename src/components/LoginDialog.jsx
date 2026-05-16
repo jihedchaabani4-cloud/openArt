@@ -1,8 +1,5 @@
-import { useEffect } from "react";
-import { useQueryClient } from "@tanstack/react-query";
 import { X } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@/shared/ui/dialog";
-import { queryKeys } from "@/shared/api/queryKeys";
 
 function GoogleIcon() {
   return (
@@ -107,47 +104,13 @@ function LeftPanel() {
 
 export function LoginDialog({ open, onClose }) {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-  const queryClient = useQueryClient();
-  const apiOrigin = apiUrl ? new URL(apiUrl).origin : null;
-
-  useEffect(() => {
-    function handleOAuthSuccess(event) {
-      if (apiOrigin && event.origin !== apiOrigin) return;
-      if (event.data?.type !== "oauth-login-success") return;
-
-      onClose?.();
-      queryClient.refetchQueries({ queryKey: queryKeys.auth.me(), type: "active" });
-      queryClient.refetchQueries({ queryKey: queryKeys.auth.walletBalance(), type: "active" });
-    }
-
-    window.addEventListener("message", handleOAuthSuccess);
-    return () => window.removeEventListener("message", handleOAuthSuccess);
-  }, [apiOrigin, onClose, queryClient]);
-
-  const openAuthPopup = (provider) => {
-    const frontendOrigin = encodeURIComponent(window.location.origin);
-    const returnTo = encodeURIComponent(
-      `${window.location.pathname}${window.location.search}${window.location.hash}`
-    );
-    const authUrl = `${apiUrl}/auth/${provider}?popup=1&frontendOrigin=${frontendOrigin}&returnTo=${returnTo}`;
-
-    const popup = window.open(
-      authUrl,
-      "openart-auth-popup",
-      "width=560,height=720,left=100,top=100,resizable=yes,scrollbars=yes"
-    );
-
-    if (!popup) {
-      window.location.href = `${apiUrl}/auth/${provider}?frontendOrigin=${frontendOrigin}&returnTo=${returnTo}`;
-    }
-  };
 
   const handleGoogleLogin = () => {
-    openAuthPopup("google");
+    window.location.href = `${apiUrl}/auth/google`;
   };
 
   const handleMicrosoftLogin = () => {
-    openAuthPopup("microsoft");
+    window.location.href = `${apiUrl}/auth/microsoft`;
   };
 
   return (
