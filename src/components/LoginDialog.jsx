@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@/shared/ui/dialog";
 
@@ -53,49 +54,143 @@ function AuthButton({ icon, children, onClick, inverted = false }) {
   );
 }
 
-function LeftPanel() {
-  const modelAvatars = [
-    "https://cdn-chatly.vyro.ai/chatly-web/images/auth-modal/grok.png",
-    "https://cdn-chatly.vyro.ai/chatly-web/images/auth-modal/gemini.png",
-    "https://cdn-chatly.vyro.ai/chatly-web/images/auth-modal/claude.png",
-    "https://cdn-chatly.vyro.ai/chatly-web/images/auth-modal/kimik2.png",
-    "https://cdn-chatly.vyro.ai/chatly-web/images/auth-modal/deepseek.png",
-    "https://cdn-chatly.vyro.ai/chatly-web/images/auth-modal/klip.png",
-    "https://cdn-chatly.vyro.ai/chatly-web/images/auth-modal/qwen.png",
+function LeftPanel({ open }) {
+  const showcaseVideos = [
+    "https://res.cloudinary.com/dsak0vfdj/video/upload/v1778928777/hf_20260331_191024_b78d9842-046f-4725-8187-4e14b287beed_tsydgs.mp4",
+    "https://res.cloudinary.com/dsak0vfdj/video/upload/v1778928774/hf_20260331_191029_757b3a01-f81e-4c78-9bd7-b00d22ff154d_rhhq_tmonkc.mp4",
+    "https://res.cloudinary.com/dsak0vfdj/video/upload/v1778928775/hf_20260331_191130_a9d02a6e-1e68-4109-99aa-e0cda5a44dfb_rhhq_mtfii8.mp4",
+    "https://res.cloudinary.com/dsak0vfdj/video/upload/v1778936591/76b88693-695f-45fe-99a8-1f460ff04fb3_oom74v.mp4",
+    "https://res.cloudinary.com/dsak0vfdj/video/upload/v1778936722/hf_20260331_203041_504d6417-0215-4e01-98b6-434293f3d596_rhhq_1_t1nhob.mp4",
   ];
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [previousVideo, setPreviousVideo] = useState(null);
+  const [progress, setProgress] = useState(0);
+  const [isSliding, setIsSliding] = useState(false);
+  const videoRef = useRef(null);
+  const frameRef = useRef(null);
+  const slideStartTimeoutRef = useRef(null);
+  const slideCleanupTimeoutRef = useRef(null);
+  const activeVideo = showcaseVideos[activeIndex];
+
+  const pickNextVideo = () => {
+    setProgress(0);
+    setPreviousVideo(showcaseVideos[activeIndex]);
+    setIsSliding(false);
+
+    if (slideStartTimeoutRef.current) {
+      window.clearTimeout(slideStartTimeoutRef.current);
+    }
+    if (slideCleanupTimeoutRef.current) {
+      window.clearTimeout(slideCleanupTimeoutRef.current);
+    }
+
+    const nextIndex = showcaseVideos.length <= 1 ? 0 : (activeIndex + 1) % showcaseVideos.length;
+    setActiveIndex(nextIndex);
+
+    slideStartTimeoutRef.current = window.setTimeout(() => {
+      setIsSliding(true);
+    }, 20);
+
+    slideCleanupTimeoutRef.current = window.setTimeout(() => {
+      setPreviousVideo(null);
+    }, 720);
+  };
+
+  useEffect(() => {
+    if (!open) return;
+    setPreviousVideo(null);
+    setIsSliding(false);
+    setProgress(0);
+    setActiveIndex(0);
+  }, [open]);
+
+  useEffect(() => {
+    const syncProgress = () => {
+      const video = videoRef.current;
+
+      if (video && video.duration > 0) {
+        setProgress((video.currentTime / video.duration) * 100);
+      }
+
+      frameRef.current = window.requestAnimationFrame(syncProgress);
+    };
+
+    frameRef.current = window.requestAnimationFrame(syncProgress);
+
+    return () => {
+      if (frameRef.current) {
+        window.cancelAnimationFrame(frameRef.current);
+      }
+    };
+  }, [activeVideo]);
+
+  useEffect(() => {
+    return () => {
+      if (slideStartTimeoutRef.current) {
+        window.clearTimeout(slideStartTimeoutRef.current);
+      }
+      if (slideCleanupTimeoutRef.current) {
+        window.clearTimeout(slideCleanupTimeoutRef.current);
+      }
+    };
+  }, []);
 
   return (
-    <div className="relative hidden min-h-[620px] flex-1 overflow-hidden rounded-[28px] bg-[radial-gradient(circle_at_22%_15%,rgba(255,255,255,0.18),transparent_22%),linear-gradient(180deg,#09111d_0%,#05080f_52%,#090d14_100%)] px-10 pb-10 pt-12 lg:flex">
+    <div className="relative hidden h-full min-h-0 flex-1 overflow-hidden rounded-[28px] bg-[radial-gradient(circle_at_22%_15%,rgba(255,255,255,0.18),transparent_22%),linear-gradient(180deg,#09111d_0%,#05080f_52%,#090d14_100%)] lg:flex">
+      <div className="relative size-full overflow-hidden">
+        <div className="absolute inset-0">
+          {previousVideo ? (
+            <video
+              key={`previous-${previousVideo}`}
+              autoPlay
+              muted
+              playsInline
+              preload="metadata"
+              aria-hidden="true"
+              className={[
+                "absolute inset-0 size-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]",
+                isSliding ? "translate-x-full" : "translate-x-0",
+              ].join(" ")}
+            >
+              <source src={previousVideo} type="video/mp4" />
+            </video>
+          ) : null}
 
-      <div className="relative z-10 flex h-full flex-col justify-end">
-
-
-        <div className="relative z-10 space-y-5">
-          <div className="flex items-start justify-start">
-            {modelAvatars.map((avatar) => (
-              <div
-                key={avatar}
-                className="-mr-2 size-8 shrink-0 overflow-hidden rounded-full border border-white/15 bg-white xl:size-9"
-              >
-                <img
-                  alt=""
-                  loading="lazy"
-                  width="36"
-                  height="36"
-                  src={avatar}
-                  className="size-full object-contain p-1.5"
-                />
-              </div>
-            ))}
-            <div className="-mr-2 flex h-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/15 bg-white px-3 xl:h-9">
-              <p className="text-center text-[13px] font-medium text-black">
-                +39 plus de modeles d'IA
-              </p>
-            </div>
+          <video
+            key={activeVideo}
+            ref={videoRef}
+            autoPlay
+            muted
+            playsInline
+            preload="metadata"
+            onLoadedMetadata={() => {
+              setProgress(0);
+            }}
+            onEnded={pickNextVideo}
+            className={[
+              "absolute inset-0 size-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]",
+              previousVideo ? (isSliding ? "translate-x-0" : "-translate-x-full") : "translate-x-0",
+            ].join(" ")}
+          >
+            <source src={activeVideo} type="video/mp4" />
+          </video>
+        </div>
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#02050c]/92 via-[#02050c]/28 to-white/10" />
+        <div className="pointer-events-none absolute bottom-7 left-7 right-7 z-10 h-[2px] overflow-hidden rounded-full bg-white/20">
+          <div
+            className="h-full rounded-full bg-white"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+        <div className="relative z-10 flex h-full flex-col justify-end p-10">
+          <div className="space-y-3">
+            <p className="max-w-[320px] text-[28px] font-semibold tracking-[-0.03em] text-white">
+              Bring your ideas to life faster.
+            </p>
+            <p className="max-w-[360px] text-[13px] leading-6 text-white/68">
+              Sign in to generate images, edit visuals, and access stronger creative tools with your account.
+            </p>
           </div>
-          <p className="max-w-[360px] text-[13px] leading-6 text-white/52">
-            Sign in to generate images, edit visuals, and access stronger creative tools with your account.
-          </p>
         </div>
       </div>
     </div>
@@ -115,7 +210,7 @@ export function LoginDialog({ open, onClose }) {
 
   return (
     <Dialog open={open} onOpenChange={(nextOpen) => !nextOpen && onClose?.()}>
-      <DialogContent className="p-0 bg-(--background-base-pri)" >
+      <DialogContent className="h-[min(740px,84vh)] w-[min(1240px,94vw)] max-w-[1240px] overflow-hidden rounded-[32px] p-0 bg-(--background-base-pri)" >
         <span className="sr-only">
           <DialogTitle>Authentication</DialogTitle>
         </span>
@@ -129,11 +224,11 @@ export function LoginDialog({ open, onClose }) {
           <X className="size-5" />
         </button>
 
-        <div className="flex w-full justify-center ">
-          <LeftPanel />
+        <div className="flex h-full w-full items-stretch justify-center p-3">
+          <LeftPanel open={open} />
 
-          <div className="flex w-full flex-col justify-center md:items-center lg:w-[416px] xl:w-[432px]">
-            <div className="flex w-full flex-col gap-8 px-2 py-10 md:max-w-[432px] md:px-6 md:py-6">
+          <div className="flex h-full w-full flex-col justify-center md:items-center lg:w-[460px] xl:w-[480px]">
+            <div className="flex w-full flex-col gap-8 px-2 py-10 md:max-w-[440px] md:px-6 md:py-6">
               <div className="space-y-2 text-center">
                 <p className="text-[28px] font-semibold tracking-[-0.02em] text-white">
                   Sign in or create your account
