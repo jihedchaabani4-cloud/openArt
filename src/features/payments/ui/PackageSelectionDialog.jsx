@@ -113,22 +113,37 @@ function estimateCreditsLabel(pkg) {
     return `${credits}`;
 }
 
-const DIALOG_MODEL_ICON_KEYS = ["kling", "nanobana", "gpt", "seedream", "seedance"];
+function getModelFamilyKey(model) {
+    const key = model?.key?.toLowerCase() || "";
+    const name = model?.displayName?.toLowerCase() || "";
+    const source = `${key} ${name}`;
+
+    if (source.includes("nanobana")) return "nanobana";
+    if (source.includes("gpt-image") || source.includes("gpt image")) return "gpt-image";
+    if (source.includes("imagen") || source.includes("google") || source.includes("veo")) return "google";
+    if (source.includes("seedream")) return "seedream";
+    if (source.includes("seedance")) return "seedance";
+    if (source.includes("kling")) return "kling";
+    if (source.includes("runway")) return "runway";
+    if (source.includes("z-image") || source.includes("z image") || source.includes("zimage")) return "z-image";
+    if (source.includes("topaz")) return "topaz";
+
+    return key || name;
+}
 
 function pickTopModelIcons(modelsComparison = { image: [], video: [] }) {
     const unique = new Map();
     const allModels = [...(modelsComparison.image ?? []), ...(modelsComparison.video ?? [])];
 
-    const ordered = DIALOG_MODEL_ICON_KEYS
-        .map((needle) =>
-            allModels.find((model) => model.key?.toLowerCase().includes(needle))
-        )
-        .filter(Boolean);
+    for (const model of allModels) {
+        if (!model?.icon) {
+            continue;
+        }
 
-    for (const model of ordered) {
-        if (model.icon && !unique.has(model.key)) {
-            unique.set(model.key, {
-                key: model.key,
+        const familyKey = getModelFamilyKey(model);
+        if (!unique.has(familyKey)) {
+            unique.set(familyKey, {
+                key: familyKey,
                 icon: model.icon,
                 name: model.displayName || model.key,
             });
@@ -136,6 +151,26 @@ function pickTopModelIcons(modelsComparison = { image: [], video: [] }) {
     }
 
     return Array.from(unique.values());
+}
+
+function buildModelsCaption(models) {
+    if (!models.length) {
+        return "Access the top generation models included in this package.";
+    }
+
+    const names = models.map((model) => model.name);
+
+    if (names.length === 1) {
+        return `Access ${names[0]} in this package.`;
+    }
+
+    if (names.length === 2) {
+        return `Access ${names[0]} and ${names[1]} in this package.`;
+    }
+
+    const last = names[names.length - 1];
+    const rest = names.slice(0, -1).join(", ");
+    return `Access ${rest}, and ${last} in this package.`;
 }
 
 export function PackageSelectionDialog({
@@ -164,6 +199,7 @@ export function PackageSelectionDialog({
     const selectedPackage = visiblePackages.find((pkg) => pkg.id === selectedPackageId) ?? visiblePackages[0] ?? null;
     const heroPackage = visiblePackages[1] ?? visiblePackages[0] ?? null;
     const topModelIcons = pickTopModelIcons(modelsComparison);
+    const modelsCaption = buildModelsCaption(topModelIcons);
 
     if (!visiblePackages.length) {
         return null;
@@ -223,7 +259,7 @@ export function PackageSelectionDialog({
                                     )}
                                 </div>
                                 <p className="max-w-[420px] text-[14px] leading-8 text-white/42">
-                                    Gain access to the top image generation models from Google, xAI, Seedream, Flux, Ideogram and Qwen
+                                    {modelsCaption}
                                 </p>
                             </div>
                         </div>
