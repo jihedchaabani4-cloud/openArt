@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { usePackages, useCheckout } from "@/features/payments/api/paymentsApi";
+import { PackageSelectionDialog } from "@/features/payments/ui/PackageSelectionDialog";
 import {
     Accordion,
     AccordionContent,
@@ -9,7 +10,7 @@ import {
     AccordionTrigger,
 } from "@/shared/ui/accordion";
 import { Button } from "@/shared/ui/button";
-import { Check, ChevronDown, Loader2 } from "lucide-react";
+import { Check, ChevronDown, Loader2, Plus } from "lucide-react";
 
 const SURFACE_BACKGROUND = "#1a1a1a";
 const SURFACE_BACKGROUND_ELEVATED = "#222222";
@@ -17,8 +18,8 @@ const SURFACE_BORDER = "#2f2f2f";
 const SURFACE_BORDER_SUBTLE = "#2a2a2a";
 const TEXT_PRIMARY = "#f3f3f3";
 const TEXT_SECONDARY = "#d2d2d2";
-const TEXT_MUTED = "#a3a3a3";
-const TEXT_FAINT = "#7a7a7a";
+const TEXT_MUTED = "white/50";
+const TEXT_FAINT = "white/40";
 const BUTTON_SURFACE = "#323232";
 const BUTTON_SURFACE_HOVER = "#3a3a3a";
 const BUTTON_PRIMARY = "#1a73e8";
@@ -59,6 +60,24 @@ function getPlanKind(pkg) {
 
 function getPlanColor(label) {
     return PLAN_COLORS;
+}
+
+function getPlanHeroBackground(label) {
+    const value = label?.toLowerCase() || "";
+
+    if (value.includes("starter")) {
+        return "radial-gradient(circle at 24% 14%, rgba(255,255,255,0.38), transparent 24%), radial-gradient(circle at 72% 22%, rgba(124, 108, 255, 0.42), transparent 34%), radial-gradient(circle at 88% 72%, rgba(238, 224, 255, 0.22), transparent 26%), linear-gradient(135deg, #0d4ed3 0%, #2f63f2 46%, #9d79ff 100%)";
+    }
+
+    if (value.includes("creator")) {
+        return "radial-gradient(circle at 22% 12%, rgba(255,255,255,0.32), transparent 23%), radial-gradient(circle at 78% 24%, rgba(152, 112, 255, 0.46), transparent 33%), radial-gradient(circle at 90% 78%, rgba(255, 240, 255, 0.18), transparent 24%), linear-gradient(135deg, #164fd9 0%, #4d57f1 48%, #bb84ff 100%)";
+    }
+
+    if (value.includes("studio")) {
+        return "radial-gradient(circle at 20% 10%, rgba(255,255,255,0.34), transparent 22%), radial-gradient(circle at 76% 18%, rgba(130, 103, 255, 0.5), transparent 30%), radial-gradient(circle at 92% 70%, rgba(255, 245, 255, 0.24), transparent 25%), linear-gradient(135deg, #1c44d9 0%, #5b4ff0 50%, #d1a3ff 100%)";
+    }
+
+    return "radial-gradient(circle at 18% 16%, rgba(255,255,255,0.18), transparent 24%), radial-gradient(circle at 80% 18%, rgba(145, 99, 255, 0.32), transparent 30%), linear-gradient(135deg, #1e55d8 0%, #5347ea 50%, #9f7cff 100%)";
 }
 
 function getPlanSuffix(pkg) {
@@ -416,73 +435,75 @@ function TemplatePricingCard({ pkg, modelsComparison, onBuy, isLoading }) {
 
     return (
         <article
-            className="flex min-h-[480px] bg-white/7 backdrop-blur-[80px]  w-full flex-col rounded-2xl  p-5 text-white transition-colors duration-300 hover:border-[#3a3a3a] hover:bg-white/10"
+            className="flex  p-2 rounded-[24px] w-full flex-col overflow-hidden  text-white  transition-colors duration-300 bg-white/5 backdrop-blur-[80px]"
         >
-            {/* <div className="flex items-center gap-2 text-white/85">
-                <span className="flex h-5 w-5 items-center justify-center rounded-full border border-white/[0.12] bg-white/[0.04] text-[10px] font-bold text-white">
-                    P
-                </span>
-                <span className="text-sm font-medium text-white/62">{pkg.badge_label || "Premium"}</span>
-            </div> */}
-
-            <div className="mt-5">
-                <h3 className="text-[32px] font-bold leading-none tracking-[-0.03em]" style={{ color: colors.title }}>
-                    {pkg.label}
-                </h3>
-                {price && (
-                    <p className="mt-3 text-[19px] font-bold" style={{ color: TEXT_PRIMARY }}>
-                        {price}
-                        {getPlanSuffix(pkg)}
+            <div
+                className="relative rounded-[24px] px-6 pb-7 pt-6"
+                style={{ background: getPlanHeroBackground(pkg.label) }}
+            >
+                <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.02)_0%,rgba(0,0,0,0.18)_100%)]" />
+                <div className="relative z-10 flex h-full flex-col justify-end">
+                    <p className=" text-[32px] font-bold leading-[1.25]" style={{ color: colors.title }}>
+                        {pkg.label}
                     </p>
-                )}
+                    {price && (
+                        <p className="mt-3 text-[25px] font-bold text-white">
+                            {price}
+                            {getPlanSuffix(pkg)}
+                        </p>
+                    )}
+                    <p className="mt-2 text-sm text-white/72">{pkg.credits} credits included</p>
+                </div>
             </div>
 
-            {generatedBreakdown.length > 0 && (
-                <div className="mt-6 min-h-[116px] space-y-2 pb-5" style={{ borderBottom: `1px solid ${SURFACE_BORDER}` }}>
-                    {generatedBreakdown.map((item, i) => (
-                        <p key={i} className="text-sm font-medium leading-5" style={{ color: TEXT_MUTED }}>
-                            {item.text}
-                        </p>
-                    ))}
-                </div>
-            )}
+            <div className="flex flex-1 flex-col px-6 pb-6 pt-5">
+                {generatedBreakdown.length > 0 && (
+                    <div className="min-h-[108px] space-y-2 pb-5" style={{ borderBottom: `1px solid ${SURFACE_BORDER}` }}>
+                        {generatedBreakdown.map((item, i) => (
+                            <p key={i} className="text-sm font-medium leading-5" style={{ color: TEXT_MUTED }}>
+                                {item.text}
+                            </p>
+                        ))}
+                    </div>
+                )}
+{/* 
+                {!generatedBreakdown.length && <div style={{ borderBottom: `1px solid ${SURFACE_BORDER}` }} />}
 
-            {!generatedBreakdown.length && <div className="mt-6" style={{ borderBottom: `1px solid ${SURFACE_BORDER}` }} />}
-
-            <ul className="mt-5 space-y-2 text-sm leading-5" style={{ color: TEXT_SECONDARY }}>
+                <ul className="mt-5 space-y-2 text-sm leading-5" style={{ color: TEXT_SECONDARY }}>
                 {features.map((feature) => (
                     <li key={feature} className="flex items-start gap-2">
                         <Check size={16} className="mt-0.5 shrink-0" style={{ color: TEXT_PRIMARY }} />
                         <span>{feature}</span>
                     </li>
                 ))}
-            </ul>
+                </ul> */}
 
-            <Button
-                id={`buy-${pkg.id}`}
-                type="button"
-                onClick={() => onBuy(pkg.id)}
-                disabled={isLoading}
-                className="mt-auto h-11 w-full rounded-xl px-4 text-sm font-semibold transition-colors duration-200"
-                style={{
-                    backgroundColor: colors.button,
-                    color: TEXT_PRIMARY,
-                }}
-                onMouseOver={(event) => {
-                    event.currentTarget.style.backgroundColor = colors.hover;
-                }}
-                onMouseOut={(event) => {
-                    event.currentTarget.style.backgroundColor = colors.button;
-                }}
-            >
-                {isLoading ? <Loader2 size={16} className="animate-spin" /> : ctaLabel}
-            </Button>
+                <Button
+                    id={`buy-${pkg.id}`}
+                    type="button"
+                    onClick={() => onBuy(pkg.id)}
+                    disabled={isLoading}
+                    className="mt-auto h-11 w-full rounded-xl px-4 text-sm font-semibold transition-colors duration-200"
+                    style={{
+                        backgroundColor: colors.button,
+                        color: TEXT_PRIMARY,
+                    }}
+                    onMouseOver={(event) => {
+                        event.currentTarget.style.backgroundColor = colors.hover;
+                    }}
+                    onMouseOut={(event) => {
+                        event.currentTarget.style.backgroundColor = colors.button;
+                    }}
+                >
+                    {isLoading ? <Loader2 size={16} className="animate-spin" /> : ctaLabel}
+                </Button>
 
-            {pkg.disclaimer && (
-                <p className="mt-8 text-center text-xs underline underline-offset-4" style={{ color: TEXT_FAINT }}>
-                    {pkg.disclaimer}
-                </p>
-            )}
+                {pkg.disclaimer && (
+                    <p className="mt-5 text-center text-xs underline underline-offset-4" style={{ color: TEXT_FAINT }}>
+                        {pkg.disclaimer}
+                    </p>
+                )}
+            </div>
         </article>
     );
 }
@@ -498,6 +519,7 @@ function SkeletonCard() {
 
 export function PricingSection() {
     const packsSectionRef = useRef(null);
+    const [isPackageDialogOpen, setIsPackageDialogOpen] = useState(false);
     const { data, isLoading, isError } = usePackages();
     const { mutate: checkout, isPending, variables: pendingPackageId } = useCheckout();
     const packages = data?.packages ?? [];
@@ -546,11 +568,29 @@ export function PricingSection() {
     ];
 
     return (
-        <section className="mx-auto flex w-full max-w-[1200px] flex-col gap-8 px-5 py-16">
+        <section className="mx-auto  space-y-4 flex w-full max-w-[1200px] flex-col gap-8 px-5 py-16">
             <div className="text-center">
                 <h2 className="mt-4 text-[40px] font-bold tracking-[-0.05em] md:text-[52px]" style={{ color: TEXT_PRIMARY }}>
                     Choose the plan that suits you best
                 </h2>
+                {!isLoading && !isError && nonTrialPackages.length >= 3 && (
+                    <div className="mt-5">
+                        <Button
+                            type="button"
+                            onClick={() => setIsPackageDialogOpen(true)}
+                            className="h-11 rounded-2xl px-5 text-sm font-semibold text-white transition-colors"
+                            style={{ background: "rgba(255,255,255,0.08)" }}
+                            onMouseOver={(event) => {
+                                event.currentTarget.style.backgroundColor = "rgba(255,255,255,0.14)";
+                            }}
+                            onMouseOut={(event) => {
+                                event.currentTarget.style.backgroundColor = "rgba(255,255,255,0.08)";
+                            }}
+                        >
+                            Open compact package dialog
+                        </Button>
+                    </div>
+                )}
             </div>
 
             <div ref={packsSectionRef} className="space-y-6">
@@ -581,6 +621,18 @@ export function PricingSection() {
                 Secure payments powered by Lemon Squeezy. Credits are added instantly after payment.
             </p>
 
+            {!isLoading && !isError && nonTrialPackages.length >= 3 && (
+                <PackageSelectionDialog
+                    open={isPackageDialogOpen}
+                    onOpenChange={setIsPackageDialogOpen}
+                    packages={nonTrialPackages}
+                    modelsComparison={modelsComparison}
+                    onBuy={(id) => checkout(id)}
+                    isPending={isPending}
+                    pendingPackageId={pendingPackageId}
+                />
+            )}
+
             {!isLoading && !isError && nonTrialPackages.length > 0 && (
                 <div className="space-y-6 pt-4">
                     <ComparePlansSection
@@ -593,33 +645,53 @@ export function PricingSection() {
                 </div>
             )}
 
-            <div className="mx-auto w-full max-w-[920px] pt-6">
-                <div className="text-center">
-                    <h2 className="text-[28px] font-bold tracking-[-0.04em] md:text-[34px]" style={{ color: TEXT_PRIMARY }}>
-                        Frequently asked questions
-                    </h2>
-                    <p className="mx-auto mt-3 max-w-2xl text-sm leading-6" style={{ color: TEXT_MUTED }}>
-                        Short answers to the pricing questions people usually check before they buy.
-                    </p>
-                </div>
+            <div className="w-full pt-10">
+                <div className="grid gap-10 lg:grid-cols-[340px_minmax(0,1fr)] lg:gap-14">
+                    <div className="lg:pt-3">
+                        <h2
+                            className="max-w-[280px] text-[52px] font-bold leading-[0.94] tracking-[-0.06em] sm:text-[64px] md:text-[76px]"
+                            style={{ color: TEXT_PRIMARY }}
+                        >
+                            Your
+                            <br />
+                            questions,
+                            <br />
+                            answered!
+                        </h2>
+                    </div>
 
-                <Accordion type="single" collapsible className="mt-8 space-y-4">
+                    <Accordion type="single" collapsible className="space-y-0">
                     {faqItems.map((item, index) => (
                         <AccordionItem
                             key={item.question}
                             value={`faq-${index}`}
-                            style={{ background: SURFACE_BACKGROUND_ELEVATED, borderColor: SURFACE_BORDER }}
-                            className="rounded-2xl border px-5"
+                            style={{ borderColor: SURFACE_BORDER_SUBTLE }}
+                            className="border-b first:border-t"
                         >
-                            <AccordionTrigger className="py-5 text-base font-semibold hover:no-underline" style={{ color: TEXT_PRIMARY }}>
+                            <AccordionTrigger
+                                className="py-6 text-left text-[20px] font-semibold tracking-[-0.03em] hover:no-underline"
+                                style={{ color: TEXT_PRIMARY }}
+                                icon={
+                                    <span
+                                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full"
+                                        style={{ background: "rgba(255,255,255,0.08)", color: TEXT_PRIMARY }}
+                                    >
+                                        <Plus size={16} />
+                                    </span>
+                                }
+                            >
                                 {item.question}
                             </AccordionTrigger>
-                            <AccordionContent className="pb-5 text-sm leading-7" style={{ color: TEXT_SECONDARY }}>
+                            <AccordionContent
+                                className="max-w-3xl pb-6 pr-12 text-sm leading-7"
+                                style={{ color: TEXT_SECONDARY }}
+                            >
                                 {item.answer}
                             </AccordionContent>
                         </AccordionItem>
                     ))}
-                </Accordion>
+                    </Accordion>
+                </div>
 
                 <div className="mt-10 flex items-center justify-center gap-4 text-center">
                     <p className="text-sm font-semibold" style={{ color: TEXT_SECONDARY }}>Ready to get started?</p>

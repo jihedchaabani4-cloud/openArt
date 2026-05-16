@@ -108,7 +108,7 @@ html {
 }
 
 :root {
-  --background-primary:#000000;
+  --background-primary: #080808;
   --background-base-primary:#121212;
   --packages-bg:rgb(43, 43, 43,0.8);
   --radius: 0.625rem;

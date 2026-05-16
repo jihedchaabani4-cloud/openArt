@@ -27,6 +27,8 @@ function AccordionItem({
 function AccordionTrigger({
   className,
   children,
+  icon,
+  iconClassName,
   ...props
 }) {
   return (
@@ -39,10 +41,12 @@ function AccordionTrigger({
         )}
         {...props}>
         {children}
-        <GoogleIcon
-          iconName="keyboard_arrow_down"
-          className="text-[18px] text-muted-foreground transition-transform duration-200"
-        />
+        {icon ?? (
+          <GoogleIcon
+            iconName="keyboard_arrow_down"
+            className={cn("text-[18px] text-muted-foreground transition-transform duration-200", iconClassName)}
+          />
+        )}
       </AccordionPrimitive.Trigger>
     </AccordionPrimitive.Header>
   );
