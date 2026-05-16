@@ -1,196 +1,209 @@
-"use client";
+import { useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { X } from "lucide-react";
+import { Dialog, DialogContent, DialogTitle } from "@/shared/ui/dialog";
+import { queryKeys } from "@/shared/api/queryKeys";
 
-import { useState } from "react";
-
-// ─── Icons ───────────────────────────────────────────────────────────────────
-const GoogleIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 18 18">
-    <path d="M16.51 8H8.98v3h4.3c-.18 1-.74 1.84-1.6 2.4v2h2.6c1.52-1.4 2.4-3.5 2.4-5.96 0-.57-.05-1.12-.17-1.64z" fill="#4285F4" />
-    <path d="M8.98 17c2.16 0 3.97-.72 5.3-1.94l-2.6-2.01c-.72.48-1.64.77-2.7.77-2.08 0-3.84-1.4-4.47-3.3H1.83v2.07C3.15 15.19 5.89 17 8.98 17z" fill="#34A853" />
-    <path d="M4.51 10.52A5.14 5.14 0 0 1 4.24 9c0-.53.09-1.04.27-1.52V5.41H1.83A8.97 8.97 0 0 0 1 9c0 1.45.35 2.82.96 4.03z" fill="#FBBC05" />
-    <path d="M8.98 3.58c1.18 0 2.23.41 3.06 1.2l2.28-2.28C12.95 1.22 11.14.5 8.98.5 5.89.5 3.15 2.31 1.83 4.97l2.68 2.07c.63-1.9 2.39-3.3 4.47-3.3z" fill="#EA4335" />
-  </svg>
-);
-
-const AppleIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 814 1000" fill="currentColor">
-    <path d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76.5 0-103.7 40.8-165.9 40.8s-105-57.8-155.5-127.4C46 790.7 0 663 0 541.8c0-207.5 135.4-317.5 269-317.5 70.1 0 128.4 46.4 172.5 46.4 42.1 0 108.2-49 191.6-49 30.8 0 130.4 2.6 198.3 99.2zm-234-181.5c31.1-36.9 53.1-88.1 53.1-139.3 0-7.1-.6-14.3-1.9-20.1-50.6 1.9-110.8 33.7-147.1 75.8-28.5 32.4-55.1 83.6-55.1 135.5 0 7.8 1.3 15.6 1.9 18.1 3.2.6 8.4 1.3 13.6 1.3 45.4 0 102.5-30.4 135.5-71.3z" />
-  </svg>
-);
-
-const MicrosoftIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 18 18">
-    <rect x="1" y="1" width="7" height="7" fill="#f25022" />
-    <rect x="10" y="1" width="7" height="7" fill="#7fba00" />
-    <rect x="1" y="10" width="7" height="7" fill="#00a4ef" />
-    <rect x="10" y="10" width="7" height="7" fill="#ffb900" />
-  </svg>
-);
-
-const EmailIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-    <rect x="1" y="3.5" width="16" height="11" rx="2" stroke="#888" strokeWidth="1.2" />
-    <path d="M1 6l8 5 8-5" stroke="#888" strokeWidth="1.2" />
-  </svg>
-);
-
-const HiggsLogo = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-    <path d="M6 6 C6 6 10 4 12 12 C14 4 18 6 18 6" stroke="#0a0a0a" strokeWidth="2.5" strokeLinecap="round" />
-    <path d="M6 18 C6 18 10 16 12 8 C14 16 18 18 18 18" stroke="#0a0a0a" strokeWidth="2.5" strokeLinecap="round" />
-  </svg>
-);
-
-// ─── Sub-components ───────────────────────────────────────────────────────────
-const AuthButton = ({
-  icon,
-  label,
-  onClick,
-}) => (
-  <button
-    onClick={onClick}
-    className="flex w-full items-center gap-3 rounded-[10px] border border-white/10 bg-white/5 px-4 py-[11px] text-sm font-medium text-neutral-200 transition hover:border-white/20 hover:bg-white/10"
-  >
-    <span className="flex-shrink-0">{icon}</span>
-    {label}
-  </button>
-);
-
-const ModelPanel = () => {
-  const tabs = ["Nano Banana Pro", "Kling 3.0", "Higgsfield Soul", "Cinematic App"];
-  const [active, setActive] = useState(0);
-
+function GoogleIcon() {
   return (
-    <div className="relative hidden w-[240px] flex-shrink-0 overflow-hidden rounded-r-2xl md:flex">
-      {/* Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f0c29]" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_70%_30%,rgba(192,132,252,0.35),transparent_70%)]" />
-
-      {/* Close */}
-      <button
-        className="absolute right-2.5 top-2.5 z-10 flex h-6 w-6 items-center justify-center rounded-full border border-white/15 bg-black/50 text-[11px] text-neutral-400 transition hover:bg-white/10"
-      >
-        ✕
-      </button>
-
-      {/* Overlay content */}
-      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent px-3 pb-3 pt-12">
-        <span className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-2.5 py-0.5 text-[10px] font-medium text-neutral-300">
-          <span className="h-1.5 w-1.5 rounded-full bg-[#b9f751]" />
-          4K Resolution
-        </span>
-
-        <p className="font-syne text-[1.05rem] font-extrabold uppercase leading-tight tracking-tight text-white">
-          Nano Banana<br />Pro 4K
-        </p>
-
-        <p className="mt-1 text-[10px] leading-relaxed text-neutral-400">
-          The best image model, for the best price in the industry, only on Higgsfield
-        </p>
-
-        <div className="mt-2 flex border-t border-white/10 pt-2">
-          {tabs.map((t, i) => (
-            <button
-              key={t}
-              onClick={() => setActive(i)}
-              className={`flex-1 pb-1 text-[8px] transition ${
-                active === i
-                  ? "border-b border-white text-white"
-                  : "text-neutral-600 hover:text-neutral-400"
-              }`}
-            >
-              {t}
-            </button>
-          ))}
-        </div>
-      </div>
-    </div>
+    <svg viewBox="0 0 18 18" fill="none" className="size-5">
+      <path
+        d="M15.747 9.151a6.478 6.478 0 0 1-.49 2.695 6.589 6.589 0 0 1-1.563 2.268l-2.235-1.699c.358-.23.666-.528.903-.877.238-.349.401-.741.48-1.154H9.136V7.771h6.486c.084.455.126.917.125 1.38Z"
+        fill="#4285F4"
+      />
+      <path
+        d="M13.694 14.114a6.654 6.654 0 0 1-4.558 1.633 6.992 6.992 0 0 1-3.611-1.005 6.802 6.802 0 0 1-2.536-2.713l1.765-1.368.5-.374c.2.588.533 1.124.976 1.566.443.443.984.78 1.58.985a4.22 4.22 0 0 0 3.624-.422l2.26 1.698Z"
+        fill="#34A853"
+      />
+      <path
+        d="M5.06 9c.003.435.077.868.22 1.281l-.501.374-1.79 1.369a6.572 6.572 0 0 1 0-6.05l2.29 1.743a3.97 3.97 0 0 0-.218 1.282Z"
+        fill="#FBBC05"
+      />
+      <path
+        d="m13.743 4.011-1.971 1.92a3.8 3.8 0 0 0-2.636-.993 4.169 4.169 0 0 0-2.383.783A4.036 4.036 0 0 0 5.28 7.717L2.989 5.975a6.801 6.801 0 0 1 2.535-2.716A6.99 6.99 0 0 1 9.136 2.25a6.68 6.68 0 0 1 4.607 1.761Z"
+        fill="#EA4335"
+      />
+    </svg>
   );
-};
+}
 
-// ─── Main Dialog ──────────────────────────────────────────────────────────────
-export function LoginDialog({ open, onClose }) {
-  if (!open) return null;
+function MicrosoftIcon() {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" className="size-5">
+      <path d="M2 2h7.6v7.6H2V2Z" fill="#F25022" />
+      <path d="M10.4 2H18v7.6h-7.6V2Z" fill="#7FBA00" />
+      <path d="M2 10.4h7.6V18H2v-7.6Z" fill="#00A4EF" />
+      <path d="M10.4 10.4H18V18h-7.6v-7.6Z" fill="#FFB900" />
+    </svg>
+  );
+}
 
-  const handleGoogleLogin = () => {
-    if (!process.env.NEXT_PUBLIC_API_URL) return;
-    window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/auth/google`;
-  };
+function AuthButton({ icon, children, onClick, inverted = false }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={[
+        "flex h-12 w-full items-center justify-center gap-2 rounded-full px-4 text-[15px] font-medium transition-colors",
+        inverted
+          ? "bg-white text-black hover:bg-zinc-100"
+          : "bg-zinc-800 text-white hover:bg-zinc-700",
+      ].join(" ")}
+    >
+      {icon}
+      <span>{children}</span>
+    </button>
+  );
+}
 
-  const handleMicrosoftLogin = () => {
-    if (!process.env.NEXT_PUBLIC_API_URL) return;
-    window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/auth/microsoft`;
-  };
+function LeftPanel() {
+  const modelAvatars = [
+    "https://cdn-chatly.vyro.ai/chatly-web/images/auth-modal/grok.png",
+    "https://cdn-chatly.vyro.ai/chatly-web/images/auth-modal/gemini.png",
+    "https://cdn-chatly.vyro.ai/chatly-web/images/auth-modal/claude.png",
+    "https://cdn-chatly.vyro.ai/chatly-web/images/auth-modal/kimik2.png",
+    "https://cdn-chatly.vyro.ai/chatly-web/images/auth-modal/deepseek.png",
+    "https://cdn-chatly.vyro.ai/chatly-web/images/auth-modal/klip.png",
+    "https://cdn-chatly.vyro.ai/chatly-web/images/auth-modal/qwen.png",
+  ];
 
   return (
-    <div
-      className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm"
-      onClick={(e) => e.target === e.currentTarget && onClose()}
-    >
-      <div className="flex w-[700px] max-w-full overflow-hidden rounded-2xl border border-white/10 bg-[#111]">
-        {/* ── Left: Auth form ── */}
-        <div className="flex flex-1 flex-col items-center justify-center px-8 py-10 relative">
-          
-          {/* Close button for mobile/overall */}
-          <button
-            onClick={onClose}
-            className="absolute right-4 top-4 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-neutral-400 transition hover:bg-white/10 md:hidden"
-          >
-            ✕
-          </button>
-          
-          {/* Logo */}
-          <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-xl bg-[#b9f751]">
-            <HiggsLogo />
-          </div>
+    <div className="relative hidden min-h-[620px] flex-1 overflow-hidden rounded-[28px] bg-[radial-gradient(circle_at_22%_15%,rgba(255,255,255,0.18),transparent_22%),linear-gradient(180deg,#09111d_0%,#05080f_52%,#090d14_100%)] px-10 pb-10 pt-12 lg:flex">
 
-          <h1 className="font-syne mb-1 text-center text-xl font-bold text-white">
-            Welcome to Higgsfield
-          </h1>
-          <p className="mb-6 text-center text-[13px] text-neutral-500">
-            Sign up and generate for free
-          </p>
+      <div className="relative z-10 flex h-full flex-col justify-end">
 
-          {/* Buttons */}
-          <div className="flex w-full flex-col gap-2.5">
-            <AuthButton icon={<GoogleIcon />} label="Continue with Google" onClick={handleGoogleLogin} />
-            <AuthButton icon={<AppleIcon />} label="Continue with Apple" />
-            <AuthButton icon={<MicrosoftIcon />} label="Continue with Microsoft" onClick={handleMicrosoftLogin} />
 
-            <div className="relative my-1 text-center text-[11px] text-neutral-600">
-              <span className="relative z-10 bg-[#111] px-3">OR</span>
-              <div className="absolute inset-y-1/2 left-0 right-0 h-px bg-white/8" />
+        <div className="relative z-10 space-y-5">
+          <div className="flex items-start justify-start">
+            {modelAvatars.map((avatar) => (
+              <div
+                key={avatar}
+                className="-mr-2 size-8 shrink-0 overflow-hidden rounded-full border border-white/15 bg-white xl:size-9"
+              >
+                <img
+                  alt=""
+                  loading="lazy"
+                  width="36"
+                  height="36"
+                  src={avatar}
+                  className="size-full object-contain p-1.5"
+                />
+              </div>
+            ))}
+            <div className="-mr-2 flex h-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/15 bg-white px-3 xl:h-9">
+              <p className="text-center text-[13px] font-medium text-black">
+                +39 plus de modeles d'IA
+              </p>
             </div>
-
-            <AuthButton icon={<EmailIcon />} label="Continue with Email" />
           </div>
-
-          {/* SSO */}
-          <p className="mt-3 text-[11px] text-neutral-600">
-            ☁ SSO available on{" "}
-            <a href="#" className="underline underline-offset-2 hover:text-neutral-400">
-              Business and Enterprise
-            </a>{" "}
-            plans
-          </p>
-
-          {/* Legal */}
-          <p className="mt-4 text-center text-[11px] leading-relaxed text-neutral-700">
-            By continuing, I acknowledge the{" "}
-            <a href="#" className="underline underline-offset-2 hover:text-neutral-500">
-              Privacy Policy
-            </a>{" "}
-            and agree to the{" "}
-            <a href="#" className="underline underline-offset-2 hover:text-neutral-500">
-              Terms of Use
-            </a>
-            . I also confirm that I am at least 18 years old
+          <p className="max-w-[360px] text-[13px] leading-6 text-white/52">
+            Sign in to generate images, edit visuals, and access stronger creative tools with your account.
           </p>
         </div>
-
-        {/* ── Right: Model showcase ── */}
-        <ModelPanel />
       </div>
     </div>
   );
 }
+
+export function LoginDialog({ open, onClose }) {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  const queryClient = useQueryClient();
+  const apiOrigin = apiUrl ? new URL(apiUrl).origin : null;
+
+  useEffect(() => {
+    function handleOAuthSuccess(event) {
+      if (apiOrigin && event.origin !== apiOrigin) return;
+      if (event.data?.type !== "oauth-login-success") return;
+
+      onClose?.();
+      queryClient.refetchQueries({ queryKey: queryKeys.auth.me(), type: "active" });
+      queryClient.refetchQueries({ queryKey: queryKeys.auth.walletBalance(), type: "active" });
+    }
+
+    window.addEventListener("message", handleOAuthSuccess);
+    return () => window.removeEventListener("message", handleOAuthSuccess);
+  }, [apiOrigin, onClose, queryClient]);
+
+  const openAuthPopup = (provider) => {
+    const frontendOrigin = encodeURIComponent(window.location.origin);
+    const returnTo = encodeURIComponent(
+      `${window.location.pathname}${window.location.search}${window.location.hash}`
+    );
+    const authUrl = `${apiUrl}/auth/${provider}?popup=1&frontendOrigin=${frontendOrigin}&returnTo=${returnTo}`;
+
+    const popup = window.open(
+      authUrl,
+      "openart-auth-popup",
+      "width=560,height=720,left=100,top=100,resizable=yes,scrollbars=yes"
+    );
+
+    if (!popup) {
+      window.location.href = `${apiUrl}/auth/${provider}?frontendOrigin=${frontendOrigin}&returnTo=${returnTo}`;
+    }
+  };
+
+  const handleGoogleLogin = () => {
+    openAuthPopup("google");
+  };
+
+  const handleMicrosoftLogin = () => {
+    openAuthPopup("microsoft");
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={(nextOpen) => !nextOpen && onClose?.()}>
+      <DialogContent className="p-0 bg-(--background-base-pri)" >
+        <span className="sr-only">
+          <DialogTitle>Authentication</DialogTitle>
+        </span>
+
+        <button
+          type="button"
+          onClick={onClose}
+          className="absolute right-3 top-3 z-20 flex size-9 items-center justify-center rounded-full text-white/70 transition-colors hover:bg-white/8 hover:text-white"
+          aria-label="Close login dialog"
+        >
+          <X className="size-5" />
+        </button>
+
+        <div className="flex w-full justify-center ">
+          <LeftPanel />
+
+          <div className="flex w-full flex-col justify-center md:items-center lg:w-[416px] xl:w-[432px]">
+            <div className="flex w-full flex-col gap-8 px-2 py-10 md:max-w-[432px] md:px-6 md:py-6">
+              <div className="space-y-2 text-center">
+                <p className="text-[28px] font-semibold tracking-[-0.02em] text-white">
+                  Sign in or create your account
+                </p>
+                <p className="text-[14px] leading-6 text-white/58">
+                  Get smarter results, save your work, and unlock premium image and video tools.
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                <AuthButton icon={<GoogleIcon />} onClick={handleGoogleLogin} inverted>
+                  Continue with Google
+                </AuthButton>
+                <AuthButton icon={<MicrosoftIcon />} onClick={handleMicrosoftLogin}>
+                  Continue with Microsoft
+                </AuthButton>
+              </div>
+
+              <div className="space-y-3 text-center">
+                <div className="inline-flex items-center gap-2 text-[12px] text-white/55">
+                  <span className="size-3 rounded-sm border border-white/25" />
+                  Your account data stays secure and private.
+                </div>
+                <p className="text-[11px] leading-5 text-white/38">
+                  By continuing, you agree to our Terms of Service and Privacy Policy.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export default LoginDialog;

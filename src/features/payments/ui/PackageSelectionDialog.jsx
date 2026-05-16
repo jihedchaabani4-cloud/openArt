@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import {
     Check,
     Loader2,
     Sparkles,
-    CreditCard,
-    ArrowRight,
+    ShieldCheck,
+    ArrowUpRight,
 } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@/shared/ui/dialog";
 import { Button } from "@/shared/ui/button";
@@ -70,26 +71,15 @@ function getPlanHeroBackground(label) {
     return "radial-gradient(circle at 22% 12%, rgba(255,255,255,0.16), transparent 18%), radial-gradient(circle at 70% 18%, rgba(31,61,133,0.28), transparent 34%), linear-gradient(180deg, #071018 0%, #05080c 100%)";
 }
 
-function estimateDailyPrice(pkg) {
+function estimateTenCreditsPrice(pkg) {
     const value = Number(pkg?.price);
-    if (!Number.isFinite(value) || value <= 0) {
+    const credits = Number(pkg?.credits);
+
+    if (!Number.isFinite(value) || value <= 0 || !Number.isFinite(credits) || credits <= 0) {
         return null;
     }
 
-    const label = (pkg?.label || "").toLowerCase();
-    const planKind = getPlanKind(pkg);
-
-    let divisor = 30;
-
-    if (label.includes("year") || label.includes("annual") || label.includes("annuel")) {
-        divisor = 365;
-    } else if (label.includes("quarter") || label.includes("trim")) {
-        divisor = 90;
-    } else if (planKind !== "subscription") {
-        divisor = 30;
-    }
-
-    return `$${(value / divisor).toFixed(2)}/day`;
+    return `$${((value / credits) * 10).toFixed(2)}/ 10 CREDITS`;
 }
 
 function packageTagline(pkg, index) {
@@ -155,22 +145,16 @@ function pickTopModelIcons(modelsComparison = { image: [], video: [] }) {
 
 function buildModelsCaption(models) {
     if (!models.length) {
-        return "Access the top generation models included in this package.";
+        return "Access top and pro models in one package.";
     }
 
-    const names = models.map((model) => model.name);
+    const hasProModel = models.some((model) => /pro|ultra|turbo/i.test(model.name));
 
-    if (names.length === 1) {
-        return `Access ${names[0]} in this package.`;
+    if (hasProModel) {
+        return "Access the best models, including pro and premium generation models.";
     }
 
-    if (names.length === 2) {
-        return `Access ${names[0]} and ${names[1]} in this package.`;
-    }
-
-    const last = names[names.length - 1];
-    const rest = names.slice(0, -1).join(", ");
-    return `Access ${rest}, and ${last} in this package.`;
+    return "Access the best generation models in one package.";
 }
 
 export function PackageSelectionDialog({
@@ -181,6 +165,7 @@ export function PackageSelectionDialog({
     onBuy,
     isPending = false,
     pendingPackageId,
+    showViewAllLink = false,
 }) {
     const visiblePackages = useMemo(() => packages.slice(0, 3), [packages]);
     const [selectedPackageId, setSelectedPackageId] = useState(visiblePackages[0]?.id ?? null);
@@ -209,7 +194,7 @@ export function PackageSelectionDialog({
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent
                 showCloseButton
-                className="w-[min(1008px,calc(100vw-40px))] overflow-hidden rounded-[28px] border-0 bg-[#171717] p-0 text-white shadow-[0_24px_80px_rgba(0,0,0,0.58)] sm:max-w-[1008px]"
+                className="w-[min(1008px,calc(100vw-40px))] overflow-hidden rounded-[28px] border-0 bg-(--background-base-pri) backdrop-blur-[80px] p-0 text-white shadow-[0_24px_80px_rgba(0,0,0,0.58)] sm:max-w-[1008px]"
             >
                 <DialogTitle className="sr-only">Choose your package</DialogTitle>
 
@@ -224,54 +209,47 @@ export function PackageSelectionDialog({
                             <div className="absolute left-[-6%] top-[49%] h-[120px] w-[122%] rotate-[8deg] rounded-full border-t-[4px] border-white/30 opacity-80" />
                             <div className="absolute bottom-[14%] left-[24%] h-[360px] w-[220px] rounded-[120px] bg-[radial-gradient(circle_at_60%_36%,rgba(255,255,255,0.18),transparent_18%),linear-gradient(180deg,#13171c_0%,#090b0d_60%,#030405_100%)] shadow-[0_24px_80px_rgba(0,0,0,0.75)] before:absolute before:inset-0 before:rounded-[120px] before:border before:border-white/8 before:content-[''] after:absolute after:left-[55%] after:top-[31%] after:h-[4px] after:w-[140px] after:-translate-x-1/2 after:rotate-[14deg] after:bg-[linear-gradient(90deg,rgba(255,0,0,0),rgba(255,43,43,1)_30%,rgba(255,92,92,1)_50%,rgba(255,0,0,0)_100%)] after:shadow-[0_0_18px_rgba(255,0,0,0.95)] after:content-['']" />
 
-                            <div className="relative z-10 max-w-[280px] space-y-4">
+                            <div className="relative z-10 max-w-[280px] space-y-2">
                                 <div className="flex w-fit items-center gap-2 text-[14px] font-semibold text-white/92">
-                                    <Sparkles size={13} className="text-[#5bb0ff]" />
-                                    Created with Open Art premium packs
+                                    Premium creative access
                                 </div>
                                 <p className="max-w-[260px] text-[18px] font-semibold leading-[1.25] tracking-[-0.03em] text-white">
-                                    Join 200,000+ creators already making with Open Art
+                                    Unlock stronger image and video models for your workflow.
                                 </p>
                             </div>
 
                             <div className="relative z-10 space-y-5">
                                 <div className="flex gap-4 text-white/92">
-                                    {topModelIcons.length > 0 ? (
+                                    {topModelIcons.length > 0 && (
                                         topModelIcons.map((model) => (
                                             <div
                                                 key={model.key}
-                                                className="flex h-10 w-10 items-center justify-center"
+                                                className="flex h-12 w-12 items-center justify-center"
                                                 title={model.name}
                                             >
                                                 <img
                                                     src={model.icon}
                                                     alt={model.name}
-                                                    className="h-8 w-8 object-contain brightness-0 invert"
+                                                    className="h-12 w-12 object-contain brightness-0 invert"
                                                 />
-                                            </div>
-                                        ))
-                                    ) : (
-                                        [Sparkles, CreditCard, ArrowRight].map((Icon, index) => (
-                                            <div key={index} className="flex h-10 w-10 items-center justify-center text-white">
-                                                <Icon size={28} strokeWidth={1.8} />
                                             </div>
                                         ))
                                     )}
                                 </div>
-                                <p className="max-w-[420px] text-[14px] leading-8 text-white/42">
+                                <p className="text-[18px] font-[100]  text-white/42">
                                     {modelsCaption}
                                 </p>
                             </div>
                         </div>
                     </div>
 
-                    <div className="flex flex-col px-7 pb-6 pt-10 sm:px-8">
+                    <div className="flex flex-col justify-center px-7 pb-6 pt-10 sm:px-8">
                         <div className="max-w-[428px]">
-                            <h3 className="text-[31px] font-semibold leading-[1.05] tracking-[-0.045em]" style={{ color: TEXT_PRIMARY }}>
-                                Le moteur ne s’arrête pas là.
+                            <h3 className="text-[22px] font-semibold leading-[1.15] tracking-[-0.03em]" style={{ color: TEXT_PRIMARY }}>
+                                Unlock more image and video power.
                             </h3>
-                            <p className="mt-3 max-w-[420px] text-[15px] leading-9 tracking-[-0.02em]" style={{ color: TEXT_SECONDARY }}>
-                                Images, Docs, diapositives, recherche, vidéo. Un seul espace de travail.
+                            <p className="mt-2 max-w-[420px] text-[12px] font-normal leading-5" style={{ color: TEXT_SECONDARY }}>
+                                Generate, edit, and scale high-quality images and videos with the models that matter most.
                             </p>
                         </div>
 
@@ -280,7 +258,7 @@ export function PackageSelectionDialog({
                                 const isSelected = pkg.id === selectedPackageId;
                                 const price = formatPrice(pkg.price, pkg.currency);
                                 const tag = packageTagline(pkg, index);
-                                const daily = estimateDailyPrice(pkg);
+                                const tenCreditsPrice = estimateTenCreditsPrice(pkg);
                                 const creditsLabel = estimateCreditsLabel(pkg);
 
                                 return (
@@ -288,7 +266,7 @@ export function PackageSelectionDialog({
                                         key={pkg.id}
                                         type="button"
                                         onClick={() => setSelectedPackageId(pkg.id)}
-                                        className="w-full rounded-[20px] border px-4 py-4 text-left transition-all duration-200"
+                                        className="w-full rounded-[16px] border px-4 py-3 text-left transition-all duration-200"
                                         style={{
                                             borderColor: isSelected ? "rgba(255,255,255,0.88)" : SURFACE_BORDER,
                                             background: isSelected ? SURFACE_PANEL : "transparent",
@@ -296,7 +274,7 @@ export function PackageSelectionDialog({
                                     >
                                         <div className="flex items-start gap-3">
                                             <span
-                                                className="mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border"
+                                                className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border"
                                                 style={{
                                                     borderColor: isSelected ? "#ffffff" : "rgba(255,255,255,0.16)",
                                                     background: isSelected ? "#ffffff" : "transparent",
@@ -309,18 +287,18 @@ export function PackageSelectionDialog({
                                                 <div className="flex items-start justify-between gap-4">
                                                     <div>
                                                         <div className="flex flex-wrap items-center gap-2">
-                                                            <p className="text-[17px] font-semibold leading-none tracking-[-0.03em]" style={{ color: TEXT_PRIMARY }}>
+                                                            <p className="text-[15px] font-medium leading-none tracking-[-0.02em]" style={{ color: TEXT_PRIMARY }}>
                                                                 {pkg.label}
                                                             </p>
                                                             {tag === "Most popular" && (
-                                                                <span className="rounded-lg bg-[#173d70] px-2 py-1 text-[11px] font-semibold leading-none text-[#b6d5ff]">
+                                                                <span className="rounded-md bg-[#173d70] px-1.5 py-0.5 text-[10px] font-medium leading-none text-[#b6d5ff]">
                                                                     Economisez
                                                                 </span>
                                                             )}
                                                         </div>
 
                                                         {price && (
-                                                            <p className="mt-1.5 text-[15px] font-normal leading-none" style={{ color: TEXT_SECONDARY }}>
+                                                            <p className="mt-1 text-[12px] font-normal leading-none" style={{ color: TEXT_SECONDARY }}>
                                                                 {price}
                                                                 {getPlanSuffix(pkg)}
                                                             </p>
@@ -328,23 +306,23 @@ export function PackageSelectionDialog({
                                                     </div>
 
                                                     <div className="text-right">
-                                                        <p className="flex items-center justify-end gap-1 text-[13px] font-medium" style={{ color: TEXT_PRIMARY }}>
+                                                        <p className="flex items-center justify-end gap-1 text-[11px] font-normal" style={{ color: TEXT_PRIMARY }}>
                                                             <Sparkles size={13} />
                                                             {creditsLabel}
                                                         </p>
-                                                        {daily && (
-                                                            <p className="mt-1.5 text-[16px] font-semibold leading-none" style={{ color: TEXT_PRIMARY }}>
-                                                                {daily}
+                                                        {tenCreditsPrice && (
+                                                            <p className="mt-1 text-[14px] font-medium leading-none" style={{ color: TEXT_PRIMARY }}>
+                                                                {tenCreditsPrice}
                                                             </p>
                                                         )}
                                                     </div>
                                                 </div>
 
                                                 {tag === "Most popular" && (
-                                                    <div className="mt-3 flex w-full items-start gap-1 rounded-md bg-[#bcff1f] px-2.5 py-2 text-[12px] font-medium leading-4 text-black shadow-[0_0_4px_0_#d2ff1f]">
-                                                        <Sparkles size={14} className="mt-0.5 shrink-0" />
+                                                    <div className="mt-3 flex w-full items-start gap-1 rounded-md bg-[#bcff1f] px-2 py-1.5 text-[10px] font-medium leading-3.5 text-black shadow-[0_0_4px_0_#d2ff1f]">
+                                                        <Sparkles size={12} className="mt-0.5 shrink-0" />
                                                         <span>
-                                                            Le plus populaire - Profitez du meilleur rapport qualité-prix avant qu’il ne disparaisse
+                                                            Most popular - Get the strongest value for image and video generation before it changes.
                                                         </span>
                                                     </div>
                                                 )}
@@ -356,45 +334,31 @@ export function PackageSelectionDialog({
                         </div>
 
                         {selectedPackage && getPlanKind(selectedPackage) === "subscription" && (
-                            <p className="mt-5 text-center text-[13px] font-medium leading-6 lg:text-left" style={{ color: TEXT_MUTED }}>
-                                Avec le forfait sélectionné,{" "}
+                            <p className="mt-5 text-center text-[11px] font-normal leading-5 lg:text-left" style={{ color: TEXT_MUTED }}>
+                                With the selected plan,{" "}
                                 <span style={{ color: TEXT_PRIMARY }}>
-                                    nous vous facturerons {formatPrice(selectedPackage.price, selectedPackage.currency)} chaque cycle
+                                    you will be charged {formatPrice(selectedPackage.price, selectedPackage.currency)} each billing cycle
                                 </span>{" "}
-                                jusqu’à résiliation
+                                until you cancel.
                             </p>
                         )}
 
                         {selectedPackage && (
                             <div className="mt-6 border-t border-white/10 pt-4">
                                 <div className="flex items-center justify-between gap-4">
-                                    <p className="text-[17px] font-semibold tracking-[-0.03em]" style={{ color: TEXT_FAINT }}>
+                                    <p className="text-[12px] font-medium tracking-[-0.02em]" style={{ color: TEXT_FAINT }}>
                                         Total Cost
                                     </p>
-                                    <p className="text-[18px] font-semibold tracking-[-0.03em]" style={{ color: TEXT_PRIMARY }}>
+                                    <p className="text-[14px] font-semibold tracking-[-0.02em]" style={{ color: TEXT_PRIMARY }}>
                                         {formatPrice(selectedPackage.price, selectedPackage.currency)}
                                     </p>
                                 </div>
                             </div>
                         )}
 
-                        <div className="mt-6 space-y-3">
-                            <Button
-                                type="button"
-                                disabled={!selectedPackage || (isPending && pendingPackageId === selectedPackage.id)}
-                                className="h-12 w-full rounded-[18px] bg-white text-[16px] font-medium text-[#111] hover:bg-white/92"
-                            >
-                                Buy with G Pay
-                            </Button>
+       
 
-                            <Button
-                                type="button"
-                                disabled={!selectedPackage || (isPending && pendingPackageId === selectedPackage.id)}
-                                className="h-12 w-full rounded-[18px] bg-white text-[16px] font-medium text-[#111] hover:bg-white/92"
-                            >
-                                Credit or Debit Card
-                            </Button>
-
+                        <div className="mt-6 space-y-4">
                             <Button
                                 type="button"
                                 disabled={!selectedPackage || (isPending && pendingPackageId === selectedPackage.id)}
@@ -403,7 +367,7 @@ export function PackageSelectionDialog({
                                         onBuy?.(selectedPackage.id);
                                     }
                                 }}
-                                className="h-12 w-full rounded-[18px] text-[16px] font-medium text-white transition-colors"
+                                className="relative h-14 w-full overflow-hidden rounded-[20px] px-5 py-4 text-[16px] font-medium text-white transition-colors before:absolute before:left-[-40%] before:top-0 before:h-full before:w-[8%] before:skew-x-[-20deg] before:bg-[linear-gradient(90deg,transparent_0%,rgba(255,255,255,0.5)_50%,transparent_100%)] before:content-['']"
                                 style={{ background: BUTTON_PRIMARY }}
                                 onMouseOver={(event) => {
                                     event.currentTarget.style.backgroundColor = BUTTON_PRIMARY_HOVER;
@@ -415,9 +379,49 @@ export function PackageSelectionDialog({
                                 {isPending && pendingPackageId === selectedPackage?.id ? (
                                     <Loader2 size={18} className="animate-spin" />
                                 ) : (
-                                    "Continue with Stripe"
+                                    "Continuer"
                                 )}
                             </Button>
+                            <div className="flex w-full flex-col gap-1">
+                                <div className="flex w-full items-center justify-center gap-2">
+                                    <ShieldCheck size={16} />
+                                    <p className="text-center text-[11px] font-normal" style={{ color: TEXT_PRIMARY }}>
+                                        Paiement sur et securise
+                                    </p>
+                                </div>
+                                <div className="flex w-full items-center justify-center gap-3">
+                                    {[
+                                        "paypal.svg",
+                                        "visa.svg",
+                                        "mastercard.svg",
+                                        "amex.svg",
+                                        "discover.svg",
+                                        "jcb.svg",
+                                    ].map((logo) => (
+                                        <img
+                                            key={logo}
+                                            alt="card-vendor"
+                                            width="36"
+                                            height="23"
+                                            src={`https://cdn-chatly.vyro.ai/chatly-web/images/pro-modal/payment-cards/${logo}`}
+                                        />
+                                    ))}
+                                </div>
+                            </div>
+                 {showViewAllLink && (
+                            <div className="mt-4 flex w-full items-center justify-center">
+                                <Link
+                                    href="/pricing"
+                                    onClick={() => onOpenChange?.(false)}
+                                    className="group inline-flex h-8 items-center justify-center gap-1.5 rounded-xl px-2.5 py-1.5 text-[13px] font-medium text-white transition-colors hover:bg-white/6"
+                                >
+                                    <span className="relative">View all plans and features</span>
+                                    <span className="relative">
+                                        <ArrowUpRight size={16} className="text-white transition-colors group-hover:text-white/70" />
+                                    </span>
+                                </Link>
+                            </div>
+                        )}
                         </div>
                     </div>
                 </div>

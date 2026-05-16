@@ -89,6 +89,7 @@ html {
   --radius-4xl: calc(var(--radius) + 16px);
 
   /* Custom UI Tokens */
+  --background-base-pri:rgba(22, 23, 24, 0.9);
   --color-imagine-grey-2: light-dark(rgba(218, 218, 224, 0.85), rgba(27, 27, 28, 0.85));
   --color-imagine-grey-3: light-dark(rgba(255, 255, 255, 0.85), rgba(27, 27, 28, 0.85));
   --color-ui-panel-bg: #161718;
