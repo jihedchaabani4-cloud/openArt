@@ -30,7 +30,7 @@ export default function AssetsLayout({ children }) {
       <div className="min-h-screen bg-[#050505]">
         <div className="mx-auto flex min-h-screen w-full max-w-[1720px] flex-col">
           {!isAssetDetailPage ? <AssetsNavbar hidden={hidden} /> : null}
-          <div className="flex flex-1">
+          <div className="flex flex-1 space-x-4">
             {!isAssetDetailPage ? <AssetsSidebar hidden={hidden} /> : null}
             <main className="min-w-0 flex-1 flex flex-col">{children}</main>
           </div>

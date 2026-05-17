@@ -75,6 +75,9 @@ export function ProjectsNavbar() {
                 {/* ── Right: Navigation & Actions ── */}
                 <div className="flex items-center gap-3">
                     <div className="hidden md:flex items-center gap-1 mr-2 pr-4 border-r border-white/10">
+                        <Link href="/pricing" className="text-[14px] font-semibold text-white/90 hover:text-white transition-colors px-3 py-2 rounded-xl hover:bg-white/5">
+                            Pricing
+                        </Link>
                         <Link href="/assets" className="text-[14px] font-semibold text-white/90 hover:text-white transition-colors px-3 py-2 rounded-xl hover:bg-white/5">
                             Assets
                         </Link>

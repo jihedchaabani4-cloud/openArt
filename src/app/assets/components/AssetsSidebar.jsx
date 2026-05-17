@@ -31,7 +31,7 @@ export function AssetsSidebar({ hidden = false }) {
       }}
       animate={hidden ? "hidden" : "visible"}
       transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-      className="sticky top-[75px]  h-fit w-[228px] shrink-0  bg-(--color-imagine-grey-2) backdrop-blur-[80px] px-3 py-4"
+      className="sticky top-[75px]  h-fit w-[228px] shrink-0  bg-(--background-base-pri)  rounded-[24px] backdrop-blur-[80px] px-3 py-4"
     >
       <div className="flex h-full flex-col">
         <div className="mb-5">
