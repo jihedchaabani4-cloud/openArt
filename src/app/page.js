@@ -8,20 +8,34 @@ import { LoginDialog } from "@/components/LoginDialog";
 import { useAuthSession } from "@/shared/api/auth";
 
 const showcaseVideos = [
-  "https://res.cloudinary.com/dsak0vfdj/video/upload/v1778999872/hf_20260331_203115_bba695c8-2ba4-491a-8096-70c065073742_rjwqcc.mp4",
-  "https://res.cloudinary.com/dsak0vfdj/video/upload/v1778999871/main-mini_n6gokd.mp4",
-  "https://res.cloudinary.com/dsak0vfdj/video/upload/v1778999875/hf_20260409_094650_fcb53912-4cd8-490b-8a2d-49a137eff2bb_v85lq0.mp4",
-  "https://res.cloudinary.com/dsak0vfdj/video/upload/v1778999875/hf_20260331_203100_b588f82e-050b-4120-a4ed-abe71d20c562_b6ebf9.mp4",
-  "https://res.cloudinary.com/dsak0vfdj/video/upload/v1778936722/hf_20260331_203041_504d6417-0215-4e01-98b6-434293f3d596_rhhq_1_t1nhob.mp4",
-  "https://res.cloudinary.com/dsak0vfdj/video/upload/v1778928777/hf_20260331_191024_b78d9842-046f-4725-8187-4e14b287beed_tsydgs.mp4",
-  "https://res.cloudinary.com/dsak0vfdj/video/upload/v1778928774/hf_20260331_191029_757b3a01-f81e-4c78-9bd7-b00d22ff154d_rhhq_tmonkc.mp4",
-  "https://res.cloudinary.com/dsak0vfdj/video/upload/v1778928775/hf_20260331_191130_a9d02a6e-1e68-4109-99aa-e0cda5a44dfb_rhhq_mtfii8.mp4",
-  "https://res.cloudinary.com/dsak0vfdj/video/upload/v1778936591/76b88693-695f-45fe-99a8-1f460ff04fb3_oom74v.mp4",
-"https://res.cloudinary.com/dsak0vfdj/video/upload/v1779040861/b4543834-64ab-412b-95a7-5af00e39d591_qasyj0.mp4",
-"https://res.cloudinary.com/dsak0vfdj/video/upload/v1779040876/original-80071a533bd3c78d18f93bf70c273d1a_zmzwwy.mp4"
-,"https://res.cloudinary.com/dsak0vfdj/video/upload/v1779040853/hf_20260331_191037_04f72a6e-7458-4618-95c0-faf27fc34172_mzuihp.mp4"
-,"https://res.cloudinary.com/dsak0vfdj/video/upload/v1779040843/0ad7a436-9a7d-4391-bf3a-ba1a400d6218_fuzcla.mp4","https://res.cloudinary.com/dsak0vfdj/video/upload/v1779040859/hf_20260331_185422_f1d47845-13f3-4f21-b3a5-f06a5b70e09a_sepayv.mp4"];
+  "https://res.cloudinary.com/dsak0vfdj/video/upload/q_auto:low,f_auto,w_480/v1778999872/hf_20260331_203115_bba695c8-2ba4-491a-8096-70c065073742_rjwqcc.mp4",
 
+  "https://res.cloudinary.com/dsak0vfdj/video/upload/q_auto:low,f_auto,w_480/v1778999871/main-mini_n6gokd.mp4",
+
+  "https://res.cloudinary.com/dsak0vfdj/video/upload/q_auto:low,f_auto,w_480/v1778999875/hf_20260409_094650_fcb53912-4cd8-490b-8a2d-49a137eff2bb_v85lq0.mp4",
+
+  "https://res.cloudinary.com/dsak0vfdj/video/upload/q_auto:low,f_auto,w_480/v1778999875/hf_20260331_203100_b588f82e-050b-4120-a4ed-abe71d20c562_b6ebf9.mp4",
+
+  "https://res.cloudinary.com/dsak0vfdj/video/upload/q_auto:low,f_auto,w_480/v1778936722/hf_20260331_203041_504d6417-0215-4e01-98b6-434293f3d596_rhhq_1_t1nhob.mp4",
+
+  "https://res.cloudinary.com/dsak0vfdj/video/upload/q_auto:low,f_auto,w_480/v1778928777/hf_20260331_191024_b78d9842-046f-4725-8187-4e14b287beed_tsydgs.mp4",
+
+  "https://res.cloudinary.com/dsak0vfdj/video/upload/q_auto:low,f_auto,w_480/v1778928774/hf_20260331_191029_757b3a01-f81e-4c78-9bd7-b00d22ff154d_rhhq_tmonkc.mp4",
+
+  "https://res.cloudinary.com/dsak0vfdj/video/upload/q_auto:low,f_auto,w_480/v1778928775/hf_20260331_191130_a9d02a6e-1e68-4109-99aa-e0cda5a44dfb_rhhq_mtfii8.mp4",
+
+  "https://res.cloudinary.com/dsak0vfdj/video/upload/q_auto:low,f_auto,w_480/v1778936591/76b88693-695f-45fe-99a8-1f460ff04fb3_oom74v.mp4",
+
+  "https://res.cloudinary.com/dsak0vfdj/video/upload/q_auto:low,f_auto,w_480/v1779040861/b4543834-64ab-412b-95a7-5af00e39d591_qasyj0.mp4",
+
+  "https://res.cloudinary.com/dsak0vfdj/video/upload/q_auto:low,f_auto,w_480/v1779040876/original-80071a533bd3c78d18f93bf70c273d1a_zmzwwy.mp4",
+
+  "https://res.cloudinary.com/dsak0vfdj/video/upload/q_auto:low,f_auto,w_480/v1779040853/hf_20260331_191037_04f72a6e-7458-4618-95c0-faf27fc34172_mzuihp.mp4",
+
+  "https://res.cloudinary.com/dsak0vfdj/video/upload/q_auto:low,f_auto,w_480/v1779040843/0ad7a436-9a7d-4391-bf3a-ba1a400d6218_fuzcla.mp4",
+
+  "https://res.cloudinary.com/dsak0vfdj/video/upload/q_auto:low,f_auto,w_480/v1779040859/hf_20260331_185422_f1d47845-13f3-4f21-b3a5-f06a5b70e09a_sepayv.mp4"
+];
 // Duplicate to fill the masonry grid
 const MEDIA_ITEMS = Array.from({ length: 24 }).map((_, i) => ({
   id: i + 1,
