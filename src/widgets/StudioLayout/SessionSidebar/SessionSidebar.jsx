@@ -259,7 +259,7 @@ export function SessionSidebar() {
                         "absolute left-0 top-0 max-h-[calc(100vh-120px)] pl-2.5 h-fit flex flex-col items-start overflow-hidden py-2 rounded-2xl border transition-colors",
                     )}
                 animate={{
-                    backgroundColor: isExpanded ? "rgba(27, 27, 28, 0.85)" : "rgba(0,0,0,0)",
+                    backgroundColor: isExpanded ? "var(--background-base-pri)" : "rgba(0,0,0,0)",
                     backdropFilter: isExpanded ? "blur(80px)" : "blur(0px)",
                     width: isExpanded ? 260 : 60,
                     boxShadow: isExpanded

@@ -27,7 +27,7 @@ export function ElementsRow2({ paramsProps, actionProps, onToggleVariations, var
   const currentItem = groups[0].items.find(i => i.value === elementMode);
 
   return (
-    <div className="flex items-center justify-between gap-1.5 w-full relative">
+    <div className="flex items-center justify-between gap-1 w-full relative">
       
       {/* ── LEFT SIDE ── */}
       <div className="flex items-center gap-1.5">
@@ -48,7 +48,7 @@ export function ElementsRow2({ paramsProps, actionProps, onToggleVariations, var
           </Button>
         )}
 
-        <div className="flex justify-center group/select px-2">
+        <div className="flex justify-center group/select">
             <BaseSelect 
               value={elementMode}
               displayLabel={currentItem?.label || "Select Type"}

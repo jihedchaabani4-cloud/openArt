@@ -1,11 +1,21 @@
 "use client"
 
-import { useState, useRef, useCallback, useEffect } from "react"
-import { motion, useMotionValue, useSpring } from "framer-motion"
+import { useState, useEffect } from "react"
+import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/shared/ui/button"
+import { Progress } from "@/shared/ui/progress"
 
 // ─── Data ────────────────────────────────────────────────────────────────────
 const ITEMS = [
+  {
+    id: "nano-banana",
+    tag: "Speed",
+    title: "Nano Banana Pro\nHas Arrived!",
+    subtitle: "Unlock improved precision editing and control, state of the art text rendering and more with Google's latest image model. Available in all paid plans.",
+    cta: "See it in action.",
+    video: "https://res.cloudinary.com/dsak0vfdj/video/upload/v1776521045/Man_tilting_head_202604181500_gttli5.mp4",
+    img: "https://res.cloudinary.com/dsak0vfdj/video/upload/v1776521045/Man_tilting_head_202604181500_gttli5.mp4",
+  },
   {
     id: "ltx-23",
     tag: "New model",
@@ -25,15 +35,6 @@ const ITEMS = [
     img: "https://cdn.app.ltx.studio/assets/scaler-promo-fR1yqxDL.webp",
   },
   {
-    id: "nano-banana",
-    tag: "Speed",
-    title: "Nano Banana 2",
-    subtitle: "More speed. Sharper text. Stronger consistency.",
-    cta: "Try it now",
-    video: "https://res.cloudinary.com/dsak0vfdj/video/upload/v1776521045/Man_tilting_head_202604181500_gttli5.mp4",
-    img: "https://res.cloudinary.com/dsak0vfdj/video/upload/v1776521045/Man_tilting_head_202604181500_gttli5.mp4",
-  },
-  {
     id: "motion-control",
     tag: "Feature",
     title: "Motion Control",
@@ -44,172 +45,123 @@ const ITEMS = [
   },
 ]
 
-// ─── Card ─────────────────────────────────────────────────────────────────────
-function TickerCard({ item, width, isEmpty }) {
-  const cardHeight = isEmpty ? 600 : 400;
-  
-  return (
-    <motion.div
-      initial={{ opacity: 1 }}
-      animate={{ opacity: 1 }}
-      draggable={false}
-      className="relative flex flex-col justify-end shrink-0 cursor-pointer overflow-hidden rounded-[20px] group select-none pointer-events-auto transition-all duration-500"
-      style={{
-        width,
-        height: cardHeight,
-      }}
-    >
-      {/* Background Media */}
-      <div className="absolute inset-0 z-0">
-        <img 
-          src={item.img} 
-          alt="" 
-          className="absolute inset-0 w-full h-full object-cover transition-transform duration-700" 
-        />
-        <video
-          src={item.video}
-          autoPlay
-          muted
-          loop
-          playsInline
-          className="absolute inset-0 w-full h-full object-cover transition-transform duration-700"
-        />
-      </div>
+// ─── Single View Slider ─────────────────────────────────────────────────────
+function SingleViewSlider({ items, isEmpty }) {
+  const [currentIndex, setCurrentIndex] = useState(0)
+  const [progressValue, setProgressValue] = useState(0)
 
-      {/* Overlays */}
-      <div className="absolute inset-0 z-10 bg-linear-to-t from-black/80 via-black/20 to-transparent" />
+  // Auto-play logic
+  useEffect(() => {
+    if (items.length <= 1) return;
+    
+    setProgressValue(0);
+    const duration = 5000;
+    const start = Date.now();
+    let animationFrameId;
 
-      {/* Content */}
-      <div className="relative z-20 p-10 flex flex-col items-flex-start gap-4">
-        <h2 className="text-5xl md:text-6xl font-black text-white m-0 tracking-tighter leading-none">
-          {item.title}
-        </h2>
-        <p className="text-lg md:text-xl text-white/80 m-0 max-w-[90%] leading-relaxed font-medium">
-          {item.subtitle}
-        </p>
-        <Button className="mt-6 px-8 py-4 h-auto rounded-full w-fit bg-white/10 border border-white/20 text-white text-base font-bold cursor-pointer backdrop-blur-xl transition-all hover:bg-white/20 hover:border-white/30 hover:scale-105 active:scale-95 flex items-center gap-2">
-          {item.cta}
-        </Button>
-      </div>
-    </motion.div>
-  )
-}
-
-// ─── Draggable Slider Row ─────────────────────────────────────────────────────
-function DraggableRow({ items, gap = 16, isEmpty }) {
-  const containerRef = useRef(null)
-  const [cardWidth, setCardWidth] = useState(0)
-  const cardWidthRef = useRef(0)
-
-  const xSpring = useSpring(0, { stiffness: 300, damping: 35, mass: 1 })
-  const rawX = useRef(0)
-
-  const isDragging = useRef(false)
-  const startPointerX = useRef(0)
-  const startRawX = useRef(0)
-  const velTracker = useRef({ x: 0, t: 0 })
-  const lastVel = useRef(0)
-
-  const measuredRef = useCallback((node) => {
-    if (!node) return
-    const ro = new ResizeObserver(([entry]) => {
-      const w = entry.contentRect.width
-      const cw = Math.floor(w * 1.0)
-      cardWidthRef.current = cw
-      setCardWidth(cw)
-    })
-    ro.observe(node)
-    return () => ro.disconnect()
-  }, [])
-
-  function maxScroll() {
-    const total = items.length * (cardWidthRef.current + gap) - gap
-    const visible = containerRef.current?.offsetWidth ?? 0
-    return Math.max(0, total - visible)
-  }
-
-  function clamp(val) {
-    return Math.min(0, Math.max(-maxScroll(), val))
-  }
-
-  function onPointerDown(e) {
-    isDragging.current = false
-    startPointerX.current = e.clientX
-    startRawX.current = rawX.current
-    velTracker.current = { x: e.clientX, t: performance.now() }
-    lastVel.current = 0
-
-    const move = (me) => {
-      const dx = me.clientX - startPointerX.current
-      if (!isDragging.current && Math.abs(dx) > 4) {
-        isDragging.current = true
+    const tick = () => {
+      const elapsed = Date.now() - start;
+      const newProgress = Math.min((elapsed / duration) * 100, 100);
+      setProgressValue(newProgress);
+      
+      if (elapsed < duration) {
+        animationFrameId = requestAnimationFrame(tick);
       }
-      if (!isDragging.current) return
+    };
+    
+    animationFrameId = requestAnimationFrame(tick);
 
-      const now = performance.now()
-      const dt = now - velTracker.current.t
-      lastVel.current = dt > 0 ? (me.clientX - velTracker.current.x) / dt : 0
-      velTracker.current = { x: me.clientX, t: now }
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % items.length);
+    }, duration);
+    
+    return () => {
+      clearInterval(interval);
+      cancelAnimationFrame(animationFrameId);
+    };
+  }, [currentIndex, items.length]);
 
-      rawX.current = clamp(startRawX.current + dx)
-      xSpring.set(rawX.current)
-    }
-
-    const up = (ue) => {
-      window.removeEventListener("pointermove", move)
-      window.removeEventListener("pointerup", up)
-
-      if (!isDragging.current) return
-
-      // Reduced momentum for less "free" feel
-      const momentum = lastVel.current * 100
-      const target = rawX.current + momentum
-
-      // Snapping logic
-      const totalItemWidth = cardWidthRef.current + gap
-      const nearestIndex = Math.round(target / -totalItemWidth)
-      const snappedX = clamp(-nearestIndex * totalItemWidth)
-
-      rawX.current = snappedX
-      xSpring.set(snappedX)
-      isDragging.current = false
-    }
-
-    window.addEventListener("pointermove", move)
-    window.addEventListener("pointerup", up)
-  }
-
-  function onClickCapture(e) {
-    if (isDragging.current) e.preventDefault()
-  }
-
-  if (cardWidth === 0) {
-    return (
-      <div 
-        ref={(node) => { containerRef.current = node; measuredRef(node) }}
-        className={`w-full mb-10 transition-all duration-500 ${isEmpty ? 'h-[600px]' : 'h-[400px]'}`}
-      />
-    )
-  }
+  const activeItem = items[currentIndex];
+  const cardHeight = isEmpty ? 600 : 400;
 
   return (
-    <div
-      ref={(node) => { containerRef.current = node; measuredRef(node) }}
-      onPointerDown={onPointerDown}
-      onClickCapture={onClickCapture}
-      className="relative w-full overflow-hidden cursor-grab active:cursor-grabbing select-none touch-pan-y mb-10"
+    <div 
+      className="relative w-full overflow-hidden rounded-[20px] transition-all duration-500 mb-10"
+      style={{ height: cardHeight }}
     >
-      <motion.div
-        className="flex max-content will-change-transform"
-        style={{
-          x: xSpring,
-          gap,
-        }}
-      >
-        {items.map((item, i) => (
-          <TickerCard key={`${item.id}-${i}`} item={item} width={cardWidth} isEmpty={isEmpty} />
-        ))}
-      </motion.div>
+      <AnimatePresence initial={false}>
+        <motion.div
+          key={activeItem.id}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+          className="absolute inset-0 w-full h-full flex flex-col justify-end group select-none pointer-events-auto"
+        >
+          {/* Background Media */}
+          <div className="absolute inset-0 z-0 bg-black">
+            <img 
+              src={activeItem.img} 
+              alt="" 
+              className="absolute inset-0 w-full h-full object-cover transition-transform duration-700" 
+            />
+            <video
+              src={activeItem.video}
+              autoPlay
+              muted
+              loop
+              playsInline
+              className="absolute inset-0 w-full h-full object-cover transition-transform duration-700"
+            />
+          </div>
+
+          {/* Overlays */}
+          <div className="absolute inset-0 z-10 bg-linear-to-t from-black/80 via-black/20 to-transparent" />
+
+          {/* Content */}
+          <div className="relative z-20 p-10 flex flex-col items-start gap-3">
+            <h2 className="text-4xl md:text-[44px] font-medium text-white m-0 tracking-tight leading-[1.1] whitespace-pre-line">
+              {activeItem.title}
+            </h2>
+            <p className="text-[15px] md:text-base text-white/90 m-0 max-w-[600px] leading-relaxed">
+              {activeItem.subtitle}
+            </p>
+            <Button className="mt-4 px-5 py-2 h-auto rounded-full w-fit bg-white text-black text-[13px] font-medium cursor-pointer transition-all hover:bg-white/90 hover:scale-105 active:scale-95 flex items-center gap-2">
+              {activeItem.cta}
+            </Button>
+          </div>
+        </motion.div>
+      </AnimatePresence>
+
+      {/* Pagination Indicators */}
+      {items.length > 1 && (
+        <div className="absolute bottom-8 left-10 z-30 flex gap-2">
+          {items.map((_, i) => (
+            <div 
+              key={i} 
+              onClick={() => {
+                if (i !== currentIndex) setCurrentIndex(i);
+              }}
+              className={`relative h-[3px] overflow-hidden rounded-full cursor-pointer transition-all duration-500 ${
+                i === currentIndex ? 'w-16 bg-white/20' : 'w-16 bg-white/30 hover:bg-white/50'
+              }`} 
+            >
+              {/* Completed state for previous slides */}
+              {i < currentIndex && (
+                <div className="absolute inset-0 bg-white" />
+              )}
+              
+              {/* Animating state for current slide */}
+              {i === currentIndex && (
+                <Progress 
+                  value={progressValue} 
+                  className="h-full w-full bg-transparent [&>[data-slot=progress-indicator]]:bg-white" 
+                />
+              )}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
@@ -217,8 +169,8 @@ function DraggableRow({ items, gap = 16, isEmpty }) {
 // ─── Main Export ──────────────────────────────────────────────────────────────
 export function MarqueeTicker({ isEmpty }) {
   return (
-    <div className="flex flex-col gap-[10px] w-full overflow-hidden">
-      <DraggableRow items={ITEMS} gap={8} isEmpty={isEmpty} />
+    <div className="flex flex-col w-full overflow-hidden">
+      <SingleViewSlider items={ITEMS} isEmpty={isEmpty} />
     </div>
   )
 }

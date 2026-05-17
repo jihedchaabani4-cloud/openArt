@@ -9,6 +9,7 @@ import {
     ShieldCheck,
     ArrowUpRight,
 } from "lucide-react";
+import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { Dialog, DialogContent, DialogTitle } from "@/shared/ui/dialog";
 import { Button } from "@/shared/ui/button";
 import { usePackages, useCheckout } from "@/features/payments/api/paymentsApi";
@@ -336,8 +337,8 @@ export function PackageSelectionDialog({
                                                     </div>
 
                                                     <div className="shrink-0 text-right">
-                                                        <p className="flex items-center justify-end gap-1 text-[11px] font-normal" style={{ color: TEXT_PRIMARY }}>
-                                                            <Sparkles size={13} />
+                                                        <p className="flex items-center justify-end gap-1 text-[13px] font-normal" style={{ color: TEXT_PRIMARY }}>
+                                                            <GoogleIcon iconName="stars" className="text-[13px] text-white" />
                                                             {creditsLabel}
                                                         </p>
                                                         {tenCreditsPrice && (
@@ -350,7 +351,7 @@ export function PackageSelectionDialog({
 
                                                 {tag === "Most popular" && (
                                                     <div className="mt-3 flex w-full items-start gap-1 rounded-md bg-white/5 border border-white/10 px-2 py-1.5 text-[10px] font-medium leading-3.5 text-white/70">
-                                                        <Sparkles size={12} className="mt-0.5 shrink-0" />
+                                                        <GoogleIcon iconName="stars" className="text-[12px] text-white mt-[2px] shrink-0" />
                                                         <span>
                                                             Most popular - Get the strongest value for image and video generation before it changes.
                                                         </span>

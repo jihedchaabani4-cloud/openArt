@@ -23,16 +23,21 @@ const PAGE_SIZE = 30;
 
 // ─── Sub-Components ──────────────────────────────────────────────────────────
 
-const EmptyState = ({ message }) => (
+const EmptyState = () => (
     <div className="w-full h-full flex flex-col items-center justify-center">
-        <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="flex flex-col items-center gap-2"
+        <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            className="flex flex-col items-center gap-4"
         >
-            <p className="text-white/30 text-lg font-medium tracking-tight text-center px-6">
-                {message || "Start creating or upload media"}
-            </p>
+
+
+            <div className="flex flex-col items-center gap-1">
+                <p className="text-[18px] text-white/35 font-normal tracking-wide text-center">
+                    Start creating or drop media
+                </p>
+            </div>
         </motion.div>
     </div>
 )
@@ -277,7 +282,7 @@ export default function GenerationsPage({ params }) {
                                 exit={{ opacity: 0, scale: 1.05 }}
                                 className="w-full h-full flex items-center justify-center"
                             >
-                                <EmptyState message="NO WORKFLOWS FOUND" />
+                                <EmptyState />
                             </motion.div>
                         )}
                     </AnimatePresence>
