@@ -49,10 +49,10 @@ export function ProjectsNavbar() {
                 }}
                 animate={hidden ? "hidden" : "visible"}
                 transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                className="fixed top-0 left-0 w-full z-[100] flex items-center justify-between  px-8 h-[75px]"
+                className="fixed top-0 left-0 w-full z-[100] flex items-center justify-between px-8 h-[75px]"
             >
-                {/* ── Left: Branding & Links ── */}
-                <div className="flex items-center gap-8">
+                {/* ── Left: Branding ── */}
+                <div className="flex items-center">
                     <Link
                         href="/cinema-studio"
                         className="flex items-center gap-3 group transition-opacity hover:opacity-100"
@@ -61,42 +61,38 @@ export function ProjectsNavbar() {
                             Open Art
                         </span>
                     </Link>
-
-                    <div className="hidden md:flex items-center gap-6">
-                        <Link href="/explore" className="text-[14px] font-semibold text-white/90 hover:text-white transition-colors">
-                            Explore
-                        </Link>
-                        <Link href="/cinema-studio" className="text-[14px] font-semibold text-white/90 hover:text-white transition-colors">
-                            Cinema Studio
-                        </Link>
-                    </div>
                 </div>
 
-                {/* ── Right: Navigation & Actions ── */}
-                <div className="flex items-center gap-3">
-                    <div className="hidden md:flex items-center gap-1 mr-2 pr-4 border-r border-white/10">
-                        <Link href="/pricing" className="text-[14px] font-semibold text-white/90 hover:text-white transition-colors px-3 py-2 rounded-xl hover:bg-white/5">
-                            Pricing
-                        </Link>
-                        <Link href="/assets" className="text-[14px] font-semibold text-white/90 hover:text-white transition-colors px-3 py-2 rounded-xl hover:bg-white/5">
-                            Assets
-                        </Link>
-                    </div>
+                {/* ── Center: Nav Links ── */}
+                <div className="absolute left-1/2 -translate-x-1/2 hidden md:flex items-center gap-1">
+                    <Link href="/explore" className="text-[14px] font-semibold text-white/90 hover:text-white transition-colors px-3 py-2 rounded-xl hover:bg-white/5">
+                        Explore
+                    </Link>
+                    <Link href="/cinema-studio" className="text-[14px] font-semibold text-white/90 hover:text-white transition-colors px-3 py-2 rounded-xl hover:bg-white/5">
+                        Cinema Studio
+                    </Link>
+                    <Link href="/pricing" className="text-[14px] font-semibold text-white/90 hover:text-white transition-colors px-3 py-2 rounded-xl hover:bg-white/5">
+                        Pricing
+                    </Link>
+                    <Link href="/assets" className="text-[14px] font-semibold text-white/90 hover:text-white transition-colors px-3 py-2 rounded-xl hover:bg-white/5">
+                        Assets
+                    </Link>
+                </div>
 
-                    <div className="flex items-center gap-3">
-                        {currentUser ? (
-                            <UserDropdown />
-                        ) : (
-                            <Button
-                                onClick={() => setLoginOpen(true)}
-                                variant="studio-ghost"
-                                size="sm"
-                                className="text-white gap-2 font-semibold text-[14px]"
-                            >
-                                Login
-                            </Button>
-                        )}
-                    </div>
+                {/* ── Right: Actions ── */}
+                <div className="flex items-center gap-3">
+                    {currentUser ? (
+                        <UserDropdown />
+                    ) : (
+                        <Button
+                            onClick={() => setLoginOpen(true)}
+                            variant="studio-ghost"
+                            size="sm"
+                            className="text-white gap-2 font-semibold text-[14px]"
+                        >
+                            Login
+                        </Button>
+                    )}
                 </div>
             </motion.nav>
 

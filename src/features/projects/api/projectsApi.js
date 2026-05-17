@@ -2,8 +2,10 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/shared/api/client';
 import { queryKeys } from '@/shared/api/queryKeys';
+import { useAuthSession } from '@/shared/api/auth';
 
 export function useProjects() {
+  const { data: user, isLoading: authLoading } = useAuthSession();
   return useQuery({
     queryKey: queryKeys.projects.all(),
     queryFn: async () => {
@@ -16,6 +18,7 @@ export function useProjects() {
       ...p,
       project_id: p.project_id ?? p.id,
     })),
+    enabled: !authLoading && !!user, // ⛔ Block until auth resolves
     staleTime: 2 * 60 * 1000,
     refetchOnWindowFocus: false,
   });

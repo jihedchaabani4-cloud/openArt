@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/shared/api/client';
 import { queryKeys } from '@/shared/api/queryKeys';
 import { useWorkflowsStore } from '../model/useWorkflowsStore';
+import { useAuthSession } from '@/shared/api/auth';
 
 // ── Project Data (Unified Hook) ───────────────────────────────────────────────
 
@@ -14,6 +15,7 @@ import { useWorkflowsStore } from '../model/useWorkflowsStore';
  * Logic is handled by the Layout (Control Layer).
  */
 export function useProjectData(projectId, sessionId = null) {
+  const { data: user, isLoading: authLoading } = useAuthSession();
   const queryKey = sessionId
     ? queryKeys.projectData.byProjectAndSession(projectId, sessionId)
     : queryKeys.projectData.byProject(projectId);
@@ -42,7 +44,7 @@ export function useProjectData(projectId, sessionId = null) {
         throw err;
       }
     },
-    enabled: !!projectId,
+    enabled: !authLoading && !!user && !!projectId, // ⛔ Block until auth resolves
     // 🎯 SaaS Settings
     staleTime: 60_000, 
     refetchOnMount: false,

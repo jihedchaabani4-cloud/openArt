@@ -12,6 +12,7 @@ import { downloadBlob } from "@/shared/lib/utils";
 import { useInfiniteUserLibrary } from "@/features/media";
 import { useRemoveWorkflow, useToggleWorkflowLike } from "@/features/workflows/api/workflowsApi";
 import { ConfirmDeleteDialog } from "@/widgets/dialogs/ConfirmDeleteDialog";
+import { useAuthSession } from "@/shared/api/auth";
 
 export default function AssetsPageClient() {
   const loadMoreRef = React.useRef(null);
@@ -21,6 +22,7 @@ export default function AssetsPageClient() {
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = React.useState(false);
   const [isDeletingSelection, setIsDeletingSelection] = React.useState(false);
   const { searchQuery, mediaFilter, categoryFilter } = useAssetsFilters();
+  const { data: currentUser, isLoading: authLoading } = useAuthSession();
   const { mutateAsync: toggleWorkflowLike } = useToggleWorkflowLike();
   const { mutateAsync: removeWorkflow } = useRemoveWorkflow();
   const {
@@ -30,7 +32,7 @@ export default function AssetsPageClient() {
     isFetchingNextPage,
     fetchNextPage,
   } = useInfiniteUserLibrary({
-    enabled: true,
+    enabled: !authLoading && !!currentUser,
     limit: PAGE_SIZE,
   });
 

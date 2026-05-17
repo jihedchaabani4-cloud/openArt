@@ -142,7 +142,7 @@ export function useInfiniteUserLibrary({
   });
 }
 
-export function useLibraryWorkflowDetail(workflowId, { enabled = true, initialData } = {}) {
+export function useLibraryWorkflowDetail(workflowId, { enabled = false, initialData } = {}) {
   return useQuery({
     queryKey: queryKeys.library.detail(workflowId),
     queryFn: async () => {
