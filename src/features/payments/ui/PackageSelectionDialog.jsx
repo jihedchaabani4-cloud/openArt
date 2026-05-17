@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@/shared/ui/dialog";
 import { Button } from "@/shared/ui/button";
+import { usePackages, useCheckout } from "@/features/payments/api/paymentsApi";
 
 const SURFACE_BORDER = "rgba(255,255,255,0.1)";
 const SURFACE_PANEL = "#1b1b1b";
@@ -18,8 +19,9 @@ const TEXT_PRIMARY = "#f3f3f3";
 const TEXT_SECONDARY = "rgba(255,255,255,0.72)";
 const TEXT_MUTED = "rgba(255,255,255,0.56)";
 const TEXT_FAINT = "rgba(255,255,255,0.4)";
-const BUTTON_PRIMARY = "#1a73e8";
-const BUTTON_PRIMARY_HOVER = "#2b7de9";
+const BUTTON_PRIMARY = "#d9d9de";
+const BUTTON_PRIMARY_HOVER = "#e8e8eb";
+const BUTTON_TEXT = "#202020";
 
 function formatPrice(value, currency = "USD") {
     if (value == null) {
@@ -53,23 +55,6 @@ function getPlanSuffix(pkg) {
     return getPlanKind(pkg) === "subscription" ? "/month" : "";
 }
 
-function getPlanHeroBackground(label) {
-    const value = label?.toLowerCase() || "";
-
-    if (value.includes("starter")) {
-        return "radial-gradient(circle at 22% 12%, rgba(255,255,255,0.16), transparent 18%), radial-gradient(circle at 70% 18%, rgba(18,52,112,0.28), transparent 34%), linear-gradient(180deg, #071018 0%, #05080c 100%)";
-    }
-
-    if (value.includes("creator")) {
-        return "radial-gradient(circle at 22% 12%, rgba(255,255,255,0.16), transparent 18%), radial-gradient(circle at 70% 18%, rgba(26,58,124,0.28), transparent 34%), linear-gradient(180deg, #08111a 0%, #05080c 100%)";
-    }
-
-    if (value.includes("studio")) {
-        return "radial-gradient(circle at 22% 12%, rgba(255,255,255,0.16), transparent 18%), radial-gradient(circle at 70% 18%, rgba(31,61,133,0.28), transparent 34%), linear-gradient(180deg, #071018 0%, #05080c 100%)";
-    }
-
-    return "radial-gradient(circle at 22% 12%, rgba(255,255,255,0.16), transparent 18%), radial-gradient(circle at 70% 18%, rgba(31,61,133,0.28), transparent 34%), linear-gradient(180deg, #071018 0%, #05080c 100%)";
-}
 
 function estimateTenCreditsPrice(pkg) {
     const value = Number(pkg?.price);
@@ -103,70 +88,145 @@ function estimateCreditsLabel(pkg) {
     return `${credits}`;
 }
 
-function getModelFamilyKey(model) {
-    const key = model?.key?.toLowerCase() || "";
-    const name = model?.displayName?.toLowerCase() || "";
-    const source = `${key} ${name}`;
 
-    if (source.includes("nanobana")) return "nanobana";
-    if (source.includes("gpt-image") || source.includes("gpt image")) return "gpt-image";
-    if (source.includes("imagen") || source.includes("google") || source.includes("veo")) return "google";
-    if (source.includes("seedream")) return "seedream";
-    if (source.includes("seedance")) return "seedance";
-    if (source.includes("kling")) return "kling";
-    if (source.includes("runway")) return "runway";
-    if (source.includes("z-image") || source.includes("z image") || source.includes("zimage")) return "z-image";
-    if (source.includes("topaz")) return "topaz";
+function LeftPanel({ open }) {
+    const showcaseImages = useMemo(() => [
+        "https://res.cloudinary.com/dsak0vfdj/image/upload/v1779001221/videoframe_7532_zo71ss.png",
+        "https://res.cloudinary.com/dsak0vfdj/image/upload/v1779001219/image-04_xs1uvy.jpg",
+        "https://res.cloudinary.com/dsak0vfdj/image/upload/v1779001220/image-01_rxwgwy.jpg",
+        "https://res.cloudinary.com/dsak0vfdj/image/upload/v1779001220/image-06_wxuiwl.webp",
+        "https://res.cloudinary.com/dsak0vfdj/image/upload/v1779001221/j9yarb7pc4c2emfbpirdt3fu_jn9sjy.jpg",
+    ], []);
+    
+    const [activeIndex, setActiveIndex] = useState(0);
+    const [previousImage, setPreviousImage] = useState(null);
+    const [progress, setProgress] = useState(0);
+    const [isSliding, setIsSliding] = useState(false);
+    
+    const slideDuration = 4000;
+    const activeImage = showcaseImages[activeIndex];
 
-    return key || name;
-}
+    useEffect(() => {
+        if (!open) return;
+        setPreviousImage(null);
+        setIsSliding(false);
+        setProgress(0);
+        setActiveIndex(0);
+    }, [open]);
 
-function pickTopModelIcons(modelsComparison = { image: [], video: [] }) {
-    const unique = new Map();
-    const allModels = [...(modelsComparison.image ?? []), ...(modelsComparison.video ?? [])];
+    useEffect(() => {
+        if (!open) return;
 
-    for (const model of allModels) {
-        if (!model?.icon) {
-            continue;
-        }
+        let startTimestamp = Date.now();
+        let animationFrameId;
 
-        const familyKey = getModelFamilyKey(model);
-        if (!unique.has(familyKey)) {
-            unique.set(familyKey, {
-                key: familyKey,
-                icon: model.icon,
-                name: model.displayName || model.key,
-            });
-        }
-    }
+        const syncProgress = () => {
+            const elapsed = Date.now() - startTimestamp;
+            const newProgress = Math.min((elapsed / slideDuration) * 100, 100);
+            setProgress(newProgress);
 
-    return Array.from(unique.values());
-}
+            if (elapsed < slideDuration) {
+                animationFrameId = window.requestAnimationFrame(syncProgress);
+            }
+        };
 
-function buildModelsCaption(models) {
-    if (!models.length) {
-        return "Access top and pro models in one package.";
-    }
+        animationFrameId = window.requestAnimationFrame(syncProgress);
 
-    const hasProModel = models.some((model) => /pro|ultra|turbo/i.test(model.name));
+        const intervalId = setInterval(() => {
+            setProgress(0);
+            setPreviousImage(showcaseImages[activeIndex]);
+            setIsSliding(false);
 
-    if (hasProModel) {
-        return "Access the best models, including pro and premium generation models.";
-    }
+            const nextIndex = (activeIndex + 1) % showcaseImages.length;
+            setActiveIndex(nextIndex);
+            
+            startTimestamp = Date.now();
 
-    return "Access the best generation models in one package.";
+            setTimeout(() => {
+                setIsSliding(true);
+            }, 20);
+
+            setTimeout(() => {
+                setPreviousImage(null);
+            }, 720);
+
+        }, slideDuration);
+
+        return () => {
+            clearInterval(intervalId);
+            if (animationFrameId) window.cancelAnimationFrame(animationFrameId);
+        };
+    }, [activeIndex, open, showcaseImages]);
+
+    return (
+        <div className="relative hidden h-[280px] sm:h-[360px] lg:h-full lg:min-h-[420px] w-full overflow-hidden rounded-[20px] lg:flex border border-white/8">
+            <div className="relative size-full overflow-hidden">
+                <div className="absolute inset-0">
+                    {previousImage ? (
+                        <img
+                            key={`previous-${previousImage}`}
+                            src={previousImage}
+                            alt="Showcase Previous"
+                            aria-hidden="true"
+                            className={[
+                                "absolute inset-0 size-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]",
+                                isSliding ? "translate-x-full" : "translate-x-0",
+                            ].join(" ")}
+                        />
+                    ) : null}
+
+                    <img
+                        key={activeImage}
+                        src={activeImage}
+                        alt="Showcase Active"
+                        className={[
+                            "absolute inset-0 size-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]",
+                            previousImage ? (isSliding ? "translate-x-0" : "-translate-x-full") : "translate-x-0",
+                        ].join(" ")}
+                    />
+                </div>
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#02050c]/92 via-[#02050c]/28 to-white/10" />
+                <div className="pointer-events-none absolute bottom-7 left-7 right-7 z-10 h-[2px] overflow-hidden rounded-full bg-white/20">
+                    <div
+                        className="h-full rounded-full bg-white"
+                        style={{ width: `${progress}%` }}
+                    />
+                </div>
+                <div className="relative z-10 flex h-full flex-col justify-end p-5 lg:p-6 pb-9 lg:pb-10">
+                    <div className="space-y-2">
+                        <div className="flex w-fit items-center gap-2 text-[12px] font-semibold text-white/92 sm:text-[14px]">
+                            Premium creative access
+                        </div>
+                        <p className="max-w-[280px] text-[16px] font-semibold leading-[1.25] tracking-[-0.03em] text-white sm:text-[18px]">
+                            Unlock stronger image and video models for your workflow.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
 }
 
 export function PackageSelectionDialog({
     open,
     onOpenChange,
-    packages = [],
-    modelsComparison = { image: [], video: [] },
-    onBuy,
-    isPending = false,
-    pendingPackageId,
+    packages: packagesProp,
+    modelsComparison: modelsComparisonProp,
+    onBuy: onBuyProp,
+    isPending: isPendingProp = false,
+    pendingPackageId: pendingPackageIdProp,
     showViewAllLink = false,
 }) {
+    // Self-fetch data when not provided as props (standalone usage)
+    const { data: fetchedData } = usePackages();
+    const checkoutMutation = useCheckout();
+
+    const packages = packagesProp ?? fetchedData?.packages ?? [];
+    const modelsComparison = modelsComparisonProp ?? fetchedData?.modelsComparison ?? { image: [], video: [] };
+    const onBuy = onBuyProp ?? ((pkgId) => checkoutMutation.mutate(pkgId));
+    const isPending = isPendingProp || checkoutMutation.isPending;
+    const pendingPackageId = pendingPackageIdProp ?? (checkoutMutation.isPending ? checkoutMutation.variables : undefined);
+
     const visiblePackages = useMemo(() => packages.slice(0, 3), [packages]);
     const [selectedPackageId, setSelectedPackageId] = useState(visiblePackages[0]?.id ?? null);
 
@@ -182,65 +242,35 @@ export function PackageSelectionDialog({
     }, [visiblePackages]);
 
     const selectedPackage = visiblePackages.find((pkg) => pkg.id === selectedPackageId) ?? visiblePackages[0] ?? null;
-    const heroPackage = visiblePackages[1] ?? visiblePackages[0] ?? null;
-    const topModelIcons = pickTopModelIcons(modelsComparison);
-    const modelsCaption = buildModelsCaption(topModelIcons);
+
+    // Show loading state if no packages fetched yet
+    if (!open) return null;
 
     if (!visiblePackages.length) {
-        return null;
+        return (
+            <Dialog open={open} onOpenChange={onOpenChange}>
+                <DialogContent
+                    showCloseButton
+                    className="flex h-[min(740px,84vh)] w-[min(960px,94vw)] max-w-[960px] items-center justify-center overflow-hidden rounded-[32px] border-0 bg-(--background-base-pri) p-0 text-white shadow-[0_24px_80px_rgba(0,0,0,0.58)] backdrop-blur-[80px]"
+                >
+                    <DialogTitle className="sr-only">Choose your package</DialogTitle>
+                    <Loader2 className="animate-spin text-white/40" size={32} />
+                </DialogContent>
+            </Dialog>
+        );
     }
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent
                 showCloseButton
-                className="h-[min(92vh,980px)] w-[min(1008px,calc(100vw-20px))] overflow-hidden rounded-[24px] border-0 bg-(--background-base-pri) p-0 text-white shadow-[0_24px_80px_rgba(0,0,0,0.58)] backdrop-blur-[80px] sm:w-[min(1008px,calc(100vw-32px))] sm:rounded-[28px] sm:max-w-[1008px]"
+                className="h-[min(740px,84vh)] w-[min(960px,94vw)] max-w-[960px] overflow-hidden rounded-[32px] border-0 bg-(--background-base-pri) p-0 text-white shadow-[0_24px_80px_rgba(0,0,0,0.58)] backdrop-blur-[80px]"
             >
                 <DialogTitle className="sr-only">Choose your package</DialogTitle>
 
                 <div className="grid h-full min-h-0 grid-cols-1 lg:grid-cols-[minmax(360px,520px)_minmax(0,1fr)]">
                     <div className="hidden p-3 pb-0 lg:block lg:pb-4">
-                        <div
-                            className="relative flex h-[280px] flex-col justify-between overflow-hidden rounded-[20px] border border-white/8 p-4 sm:h-[360px] sm:p-5 lg:h-full lg:min-h-[420px] lg:p-6"
-                            style={{ background: getPlanHeroBackground(heroPackage?.label) }}
-                        >
-                            <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_55%,rgba(255,0,0,0.22),transparent_12%),linear-gradient(180deg,rgba(2,6,23,0.05)_0%,rgba(0,0,0,0.18)_34%,rgba(0,0,0,0.84)_100%)]" />
-                            <div className="absolute left-[-4%] top-[44%] h-[92px] w-[118%] rotate-[8deg] rounded-full border-t-[4px] border-white/75 opacity-90 blur-[1px]" />
-                            <div className="absolute left-[-6%] top-[49%] h-[120px] w-[122%] rotate-[8deg] rounded-full border-t-[4px] border-white/30 opacity-80" />
-                            <div className="absolute bottom-[14%] left-[24%] h-[360px] w-[220px] rounded-[120px] bg-[radial-gradient(circle_at_60%_36%,rgba(255,255,255,0.18),transparent_18%),linear-gradient(180deg,#13171c_0%,#090b0d_60%,#030405_100%)] shadow-[0_24px_80px_rgba(0,0,0,0.75)] before:absolute before:inset-0 before:rounded-[120px] before:border before:border-white/8 before:content-[''] after:absolute after:left-[55%] after:top-[31%] after:h-[4px] after:w-[140px] after:-translate-x-1/2 after:rotate-[14deg] after:bg-[linear-gradient(90deg,rgba(255,0,0,0),rgba(255,43,43,1)_30%,rgba(255,92,92,1)_50%,rgba(255,0,0,0)_100%)] after:shadow-[0_0_18px_rgba(255,0,0,0.95)] after:content-['']" />
-
-                            <div className="relative z-10 max-w-[280px] space-y-2">
-                                <div className="flex w-fit items-center gap-2 text-[12px] font-semibold text-white/92 sm:text-[14px]">
-                                    Premium creative access
-                                </div>
-                                <p className="max-w-[260px] text-[16px] font-semibold leading-[1.25] tracking-[-0.03em] text-white sm:text-[18px]">
-                                    Unlock stronger image and video models for your workflow.
-                                </p>
-                            </div>
-
-                            <div className="relative z-10 space-y-4 sm:space-y-5">
-                                <div className="flex flex-wrap gap-3 sm:gap-4 text-white/92">
-                                    {topModelIcons.length > 0 && (
-                                        topModelIcons.map((model) => (
-                                            <div
-                                                key={model.key}
-                                                className="flex h-10 w-10 items-center justify-center sm:h-12 sm:w-12"
-                                                title={model.name}
-                                            >
-                                                <img
-                                                    src={model.icon}
-                                                    alt={model.name}
-                                                    className="h-10 w-10 object-contain brightness-0 invert sm:h-12 sm:w-12"
-                                                />
-                                            </div>
-                                        ))
-                                    )}
-                                </div>
-                                <p className="text-[14px] font-[100] text-white/42 sm:text-[18px]">
-                                    {modelsCaption}
-                                </p>
-                            </div>
-                        </div>
+                        <LeftPanel open={open} />
                     </div>
 
                     <div className="flex min-h-0 flex-col justify-start px-4 pb-4 pt-5 sm:px-6 sm:pb-6 sm:pt-7 lg:px-7 lg:pt-10 xl:px-8">
@@ -291,7 +321,7 @@ export function PackageSelectionDialog({
                                                                 {pkg.label}
                                                             </p>
                                                             {tag === "Most popular" && (
-                                                                <span className="rounded-md bg-[#173d70] px-1.5 py-0.5 text-[10px] font-medium leading-none text-[#b6d5ff]">
+                                                                <span className="rounded-md bg-white/10 px-1.5 py-0.5 text-[10px] font-medium leading-none text-white/80">
                                                                     Economisez
                                                                 </span>
                                                             )}
@@ -319,7 +349,7 @@ export function PackageSelectionDialog({
                                                 </div>
 
                                                 {tag === "Most popular" && (
-                                                    <div className="mt-3 flex w-full items-start gap-1 rounded-md bg-[#bcff1f] px-2 py-1.5 text-[10px] font-medium leading-3.5 text-black shadow-[0_0_4px_0_#d2ff1f]">
+                                                    <div className="mt-3 flex w-full items-start gap-1 rounded-md bg-white/5 border border-white/10 px-2 py-1.5 text-[10px] font-medium leading-3.5 text-white/70">
                                                         <Sparkles size={12} className="mt-0.5 shrink-0" />
                                                         <span>
                                                             Most popular - Get the strongest value for image and video generation before it changes.
@@ -356,7 +386,6 @@ export function PackageSelectionDialog({
                             </div>
                         )}
 
-       
 
                         <div className="mt-5 space-y-4 lg:mt-6">
                             <Button
@@ -367,8 +396,8 @@ export function PackageSelectionDialog({
                                         onBuy?.(selectedPackage.id);
                                     }
                                 }}
-                                className="relative h-12 w-full overflow-hidden rounded-[18px] px-5 py-3 text-[15px] font-medium text-white transition-colors before:absolute before:left-[-40%] before:top-0 before:h-full before:w-[8%] before:skew-x-[-20deg] before:bg-[linear-gradient(90deg,transparent_0%,rgba(255,255,255,0.5)_50%,transparent_100%)] before:content-[''] sm:h-14 sm:rounded-[20px] sm:py-4 sm:text-[16px]"
-                                style={{ background: BUTTON_PRIMARY }}
+                                className="relative h-12 w-full overflow-hidden rounded-[18px] px-5 py-3 text-[15px] font-semibold transition-colors before:absolute before:left-[-40%] before:top-0 before:h-full before:w-[8%] before:skew-x-[-20deg] before:bg-[linear-gradient(90deg,transparent_0%,rgba(255,255,255,0.5)_50%,transparent_100%)] before:content-[''] sm:h-14 sm:rounded-[20px] sm:py-4 sm:text-[16px]"
+                                style={{ background: BUTTON_PRIMARY, color: BUTTON_TEXT }}
                                 onMouseOver={(event) => {
                                     event.currentTarget.style.backgroundColor = BUTTON_PRIMARY_HOVER;
                                 }}

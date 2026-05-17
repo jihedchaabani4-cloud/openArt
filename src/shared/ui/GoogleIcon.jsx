@@ -16,11 +16,11 @@ export const GoogleIcon = ({
     fill = false, 
     weight = 400, 
     grade = 0, 
-    opticalSize = 20 
+    opticalSize = 34 
 }) => {
     return (
         <span 
-            className={cn("material-symbols-outlined select-none text-[12px]", className)}
+            className={cn("material-symbols-outlined select-none text-[20px]", className)}
             style={{
                 fontVariationSettings: `'FILL' ${fill ? 1 : 0}, 'wght' ${weight}, 'GRAD' ${grade}, 'opsz' ${opticalSize}`
             }}

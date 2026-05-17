@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { X } from "lucide-react";
+import { Loader2, X } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@/shared/ui/dialog";
 
 function GoogleIcon() {
@@ -36,19 +36,20 @@ function MicrosoftIcon() {
   );
 }
 
-function AuthButton({ icon, children, onClick, inverted = false }) {
+function AuthButton({ icon, children, onClick, inverted = false, isLoading = false }) {
   return (
     <button
       type="button"
       onClick={onClick}
+      disabled={isLoading}
       className={[
-        "flex h-12 w-full items-center justify-center gap-2 rounded-full px-4 text-[15px] font-medium transition-colors",
+        "flex h-12 w-full items-center justify-center gap-2 rounded-full px-4 text-[15px] font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed",
         inverted
           ? "bg-white text-black hover:bg-zinc-100"
           : "bg-zinc-800 text-white hover:bg-zinc-700",
       ].join(" ")}
     >
-      {icon}
+      {isLoading ? <Loader2 className="size-5 animate-spin" /> : icon}
       <span>{children}</span>
     </button>
   );
@@ -56,13 +57,17 @@ function AuthButton({ icon, children, onClick, inverted = false }) {
 
 function LeftPanel({ open }) {
   const showcaseVideos = [
-    "https://res.cloudinary.com/dsak0vfdj/video/upload/v1778928777/hf_20260331_191024_b78d9842-046f-4725-8187-4e14b287beed_tsydgs.mp4",
+    "https://res.cloudinary.com/dsak0vfdj/video/upload/v1778999872/hf_20260331_203115_bba695c8-2ba4-491a-8096-70c065073742_rjwqcc.mp4",
+    "https://res.cloudinary.com/dsak0vfdj/video/upload/v1778999871/main-mini_n6gokd.mp4",
+    "https://res.cloudinary.com/dsak0vfdj/video/upload/v1778999875/hf_20260409_094650_fcb53912-4cd8-490b-8a2d-49a137eff2bb_v85lq0.mp4",
+    "https://res.cloudinary.com/dsak0vfdj/video/upload/v1778999875/hf_20260331_203100_b588f82e-050b-4120-a4ed-abe71d20c562_b6ebf9.mp4",
+      "https://res.cloudinary.com/dsak0vfdj/video/upload/v1778936722/hf_20260331_203041_504d6417-0215-4e01-98b6-434293f3d596_rhhq_1_t1nhob.mp4", "https://res.cloudinary.com/dsak0vfdj/video/upload/v1778928777/hf_20260331_191024_b78d9842-046f-4725-8187-4e14b287beed_tsydgs.mp4",
     "https://res.cloudinary.com/dsak0vfdj/video/upload/v1778928774/hf_20260331_191029_757b3a01-f81e-4c78-9bd7-b00d22ff154d_rhhq_tmonkc.mp4",
     "https://res.cloudinary.com/dsak0vfdj/video/upload/v1778928775/hf_20260331_191130_a9d02a6e-1e68-4109-99aa-e0cda5a44dfb_rhhq_mtfii8.mp4",
     "https://res.cloudinary.com/dsak0vfdj/video/upload/v1778936591/76b88693-695f-45fe-99a8-1f460ff04fb3_oom74v.mp4",
-    "https://res.cloudinary.com/dsak0vfdj/video/upload/v1778936722/hf_20260331_203041_504d6417-0215-4e01-98b6-434293f3d596_rhhq_1_t1nhob.mp4",
-  ];
-  const [activeIndex, setActiveIndex] = useState(0);
+    "https://res.cloudinary.com/dsak0vfdj/video/upload/v1778936722/hf_20260331_203041_504d6417-0215-4e01-98b6-434293f3d596_rhhq_1_t1nhob.mp4",];
+ 
+      const [activeIndex, setActiveIndex] = useState(0);
   const [previousVideo, setPreviousVideo] = useState(null);
   const [progress, setProgress] = useState(0);
   const [isSliding, setIsSliding] = useState(false);
@@ -199,18 +204,22 @@ function LeftPanel({ open }) {
 
 export function LoginDialog({ open, onClose }) {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [isMicrosoftLoading, setIsMicrosoftLoading] = useState(false);
 
   const handleGoogleLogin = () => {
+    setIsGoogleLoading(true);
     window.location.href = `${apiUrl}/auth/google`;
   };
 
   const handleMicrosoftLogin = () => {
+    setIsMicrosoftLoading(true);
     window.location.href = `${apiUrl}/auth/microsoft`;
   };
 
   return (
     <Dialog open={open} onOpenChange={(nextOpen) => !nextOpen && onClose?.()}>
-      <DialogContent className="h-[min(740px,84vh)] w-[min(1240px,94vw)] max-w-[1240px] overflow-hidden rounded-[32px] p-0 bg-(--background-base-pri)" >
+      <DialogContent className="h-[min(740px,84vh)] w-[min(960px,94vw)] max-w-[960px] overflow-hidden rounded-[32px] p-0 bg-(--background-base-pri) backdrop-blur-[80px]" >
         <span className="sr-only">
           <DialogTitle>Authentication</DialogTitle>
         </span>
@@ -227,8 +236,8 @@ export function LoginDialog({ open, onClose }) {
         <div className="flex h-full w-full items-stretch justify-center p-3">
           <LeftPanel open={open} />
 
-          <div className="flex h-full w-full flex-col justify-center md:items-center lg:w-[460px] xl:w-[480px]">
-            <div className="flex w-full flex-col gap-8 px-2 py-10 md:max-w-[440px] md:px-6 md:py-6">
+          <div className="flex h-full w-full flex-col justify-center md:items-center lg:w-[400px] xl:w-[400px]">
+            <div className="flex w-full flex-col gap-8 px-2 py-10 md:max-w-[360px] md:px-6 md:py-6">
               <div className="space-y-2 text-center">
                 <p className="text-[28px] font-semibold tracking-[-0.02em] text-white">
                   Sign in or create your account
@@ -239,10 +248,10 @@ export function LoginDialog({ open, onClose }) {
               </div>
 
               <div className="space-y-3">
-                <AuthButton icon={<GoogleIcon />} onClick={handleGoogleLogin} inverted>
+                <AuthButton icon={<GoogleIcon />} onClick={handleGoogleLogin} inverted isLoading={isGoogleLoading}>
                   Continue with Google
                 </AuthButton>
-                <AuthButton icon={<MicrosoftIcon />} onClick={handleMicrosoftLogin}>
+                <AuthButton icon={<MicrosoftIcon />} onClick={handleMicrosoftLogin} isLoading={isMicrosoftLoading}>
                   Continue with Microsoft
                 </AuthButton>
               </div>

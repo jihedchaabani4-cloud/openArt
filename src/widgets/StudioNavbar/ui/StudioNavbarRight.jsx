@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import { cn } from "@/shared/lib/utils"
 import { StudioSettingsDropdown } from "./StudioSettingsDropdown"
 import { NavbarImportButton } from "./NavbarImportButton"
@@ -40,6 +41,12 @@ export function StudioNavbarRight({
                 showUploadedMedia={showUploadedMedia}
                 setShowUploadedMedia={setShowUploadedMedia}
             />
+            <Link
+                href="/pricing"
+                className="flex h-9 items-center justify-center rounded-xl px-4 text-[13px] font-medium text-white/70 transition-colors hover:bg-white/8 hover:text-white"
+            >
+                Pricing
+            </Link>
             <UserDropdown />
         </div>
     )

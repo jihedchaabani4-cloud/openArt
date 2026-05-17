@@ -219,7 +219,7 @@ export function SessionSidebar() {
                     href="/cinema-studio"
                     className="flex items-center justify-center w-10 h-10 rounded-xl bg-white/5 hover:bg-white/10 text-white/90 hover:text-white transition-colors"
                 >
-                    <GoogleIcon iconName="arrow_back" className="text-[13px]" />
+                    <GoogleIcon iconName="arrow_back" className="text-[20px]" />
                 </Link>
             </motion.div>
 
@@ -235,7 +235,7 @@ export function SessionSidebar() {
                     )}
                     title="Generations"
                 >
-                    <GoogleIcon iconName="auto_awesome" className="text-[13px]" />
+                    <GoogleIcon iconName="dashboard" className="text-[20px]" />
                 </Link>
                 <Link 
                     href={`/cinema-studio/${selectedProjectId}/elements`}
@@ -247,7 +247,7 @@ export function SessionSidebar() {
                     )}
                     title="Elements Library"
                 >
-                    <GoogleIcon iconName="package_2" className="text-[13px]" />
+                    <GoogleIcon iconName="horizontal_split" className="text-[20px]" />
                 </Link>
             </div>
 
