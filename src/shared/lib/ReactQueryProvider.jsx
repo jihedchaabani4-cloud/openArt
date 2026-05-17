@@ -2,6 +2,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 import { AuthSessionBootstrap } from "@/shared/lib/AuthSessionBootstrap";
+import { AuthGuard } from "@/shared/lib/AuthGuard";
 
 export function ReactQueryProvider({ children }) {
     const [queryClient] = useState(() => new QueryClient({
@@ -19,6 +20,7 @@ export function ReactQueryProvider({ children }) {
     return (
         <QueryClientProvider client={queryClient}>
             <AuthSessionBootstrap />
+            <AuthGuard />
             {children}
         </QueryClientProvider>
     );

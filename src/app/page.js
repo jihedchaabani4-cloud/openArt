@@ -1,9 +1,11 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "@/shared/ui/button";
+import { LoginDialog } from "@/components/LoginDialog";
+import { useAuthSession } from "@/shared/api/auth";
 
 const showcaseVideos = [
   "https://res.cloudinary.com/dsak0vfdj/video/upload/v1778999872/hf_20260331_203115_bba695c8-2ba4-491a-8096-70c065073742_rjwqcc.mp4",
@@ -28,6 +30,18 @@ const MEDIA_ITEMS = Array.from({ length: 24 }).map((_, i) => ({
 }));
 
 export default function HomePage() {
+  const [loginOpen, setLoginOpen] = useState(false);
+  const router = useRouter();
+  const { data: user } = useAuthSession();
+
+  const handleCTA = () => {
+    if (user) {
+      router.push("/cinema-studio");
+    } else {
+      setLoginOpen(true);
+    }
+  };
+
   return (
     <div className="relative min-h-screen bg-[#050505] overflow-hidden font-sans">
       
@@ -101,11 +115,12 @@ export default function HomePage() {
             transition={{ duration: 0.8, delay: 0.4 }}
             className="pointer-events-auto"
           >
-            <Link href="/cinema-studio">
-              <Button className="mt-8 px-8 py-6 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 backdrop-blur-xl text-white text-[17px] font-semibold transition-all hover:scale-105 active:scale-95 shadow-2xl">
-                Create with Flow
-              </Button>
-            </Link>
+            <Button
+              onClick={handleCTA}
+              className="mt-8 px-8 py-6 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 backdrop-blur-xl text-white text-[17px] font-semibold transition-all hover:scale-105 active:scale-95 shadow-2xl"
+            >
+              Create with Flow
+            </Button>
           </motion.div>
           
           <motion.div
@@ -122,6 +137,8 @@ export default function HomePage() {
 
 
       </div>
+
+      <LoginDialog open={loginOpen} onClose={() => setLoginOpen(false)} />
 
       <style jsx global>{`
         .custom-scrollbar::-webkit-scrollbar {
