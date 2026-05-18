@@ -47,14 +47,23 @@ export function AssetsGroupSection({
         rowConstraints={{ singleRowMaxHeight: 440 }}
         render={{
           photo: (_, { photo, width, height }) => (
-            <LibraryMediaGridItem
-              key={photo.key}
-              entry={photo.entry}
-              isSelected={selectedIds.has(photo.key)}
-              onToggleSelect={() => onTogglePhotoSelection(photo.key)}
-              className="border border-white/10"
-              style={{ width, height }}
-            />
+            <div
+              className="react-photo-album--photo"
+              style={{
+                width,
+                height,
+                "--react-photo-album--photo-width": width,
+                "--react-photo-album--photo-height": height,
+              }}
+            >
+              <LibraryMediaGridItem
+                key={photo.key}
+                entry={photo.entry}
+                isSelected={selectedIds.has(photo.key)}
+                onToggleSelect={() => onTogglePhotoSelection(photo.key)}
+                className="border border-white/10 w-full h-full"
+              />
+            </div>
           ),
         }}
       />

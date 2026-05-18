@@ -241,15 +241,25 @@ export default function ElementsPage({ params }) {
                                     rowConstraints={{ singleRowMaxHeight: targetRowHeight * 1.6 }}
                                     render={{
                                         photo: (_, { photo, width, height }) => (
-                                            <MediaGridItem
-                                                key={photo.key}
-                                                workflow={photo.workflow}
-                                                onClick={() => handleWorkflowClick(photo.workflow)}
-                                                className="rounded-2xl border-none shadow-xl"
-                                                width={width}
-                                                height={height}
-                                                disableLayoutAnimation={isGridResizing}
-                                            />
+                                            <div
+                                                className="react-photo-album--photo"
+                                                style={{
+                                                    width,
+                                                    height,
+                                                    "--react-photo-album--photo-width": width,
+                                                    "--react-photo-album--photo-height": height,
+                                                }}
+                                            >
+                                                <MediaGridItem
+                                                    key={photo.key}
+                                                    workflow={photo.workflow}
+                                                    onClick={() => handleWorkflowClick(photo.workflow)}
+                                                    className="rounded-2xl border-none shadow-xl w-full h-full"
+                                                    width={width}
+                                                    height={height}
+                                                    disableLayoutAnimation={isGridResizing}
+                                                />
+                                            </div>
                                         ),
                                     }}
                                 />
