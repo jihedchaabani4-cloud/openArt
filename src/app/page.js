@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { Button } from "@/shared/ui/button";
 import { LoginDialog } from "@/components/LoginDialog";
 import { useAuthSession } from "@/shared/api/auth";
+import { Loader2 } from "lucide-react";
 
 const showcaseVideos = [
  
@@ -33,7 +34,14 @@ const MEDIA_ITEMS = Array.from({ length: 24 }).map((_, i) => ({
 export default function HomePage() {
   const [loginOpen, setLoginOpen] = useState(false);
   const router = useRouter();
-  const { data: user } = useAuthSession();
+  const { data: user, isLoading: authLoading } = useAuthSession();
+
+  // Redirect to cinema studio if already logged in
+  useEffect(() => {
+    if (user) {
+      router.replace("/cinema-studio");
+    }
+  }, [user, router]);
 
   const handleCTA = () => {
     if (user) {
@@ -117,10 +125,17 @@ export default function HomePage() {
             className="pointer-events-auto"
           >
             <Button
-              onClick={handleCTA}
-              className="mt-8 px-8 py-6 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 backdrop-blur-xl text-white text-[17px] font-semibold transition-all hover:scale-105 active:scale-95 shadow-2xl"
+              onClick={!authLoading ? handleCTA : undefined}
+              disabled={authLoading}
+              className="mt-8 px-8 py-6 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 backdrop-blur-xl text-white text-[17px] font-semibold transition-all hover:scale-105 active:scale-95 shadow-2xl disabled:opacity-60 disabled:cursor-default disabled:scale-100 flex items-center gap-2"
             >
-              Create with Flow
+              {authLoading ? (
+                <><Loader2 className="size-5 animate-spin" /> Connexion...</>
+              ) : user ? (
+                "Cinema Studio"
+              ) : (
+                "Se connecter"
+              )}
             </Button>
           </motion.div>
           
