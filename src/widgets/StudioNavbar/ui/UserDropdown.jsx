@@ -32,7 +32,8 @@ function getInitials(name, email) {
 }
 
 function getDisplayName(user) {
-  return user?.name || user?.email?.split("@")[0] || "Open Art User"
+  const appName = process.env.NEXT_PUBLIC_APP_NAME || "Labveil"
+  return user?.name || user?.email?.split("@")[0] || `${appName} User`
 }
 
 function UserMenuButton({ iconName, label, onClick, variant = "filled", isLoading = false, className }) {

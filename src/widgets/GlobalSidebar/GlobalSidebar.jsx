@@ -23,7 +23,7 @@ export function GlobalSidebar() {
                     <GoogleIcon iconName="auto_awesome" className="text-[14px] text-white" />
                 </div>
                 <span className="hidden sm:block text-[15px] font-bold tracking-tight text-white uppercase italic">
-                    Open Art
+                    {process.env.NEXT_PUBLIC_APP_NAME || "Labveil"}
                 </span>
             </div>
 

@@ -81,7 +81,8 @@ export function ImageInfoSidebar({ item, group, onClose }) {
             const blobUrl = window.URL.createObjectURL(blob)
             const link = document.createElement('a')
             link.href = blobUrl
-            link.download = `openart-${item.id}.jpg`
+            const appName = (process.env.NEXT_PUBLIC_APP_NAME || "Labveil").toLowerCase()
+            link.download = `${appName}-${item.id}.jpg`
             document.body.appendChild(link)
             link.click()
             document.body.removeChild(link)

@@ -164,7 +164,8 @@ export default function AssetsPageClient() {
       String(now.getMinutes()).padStart(2, "0"),
     ].join("-");
 
-    return `openart-assets-${timestamp}.zip`;
+    const appName = (process.env.NEXT_PUBLIC_APP_NAME || "Labveil").toLowerCase()
+    return `${appName}-assets-${timestamp}.zip`;
   }, []);
 
   const handleDownloadSelected = React.useCallback(async () => {

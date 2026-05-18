@@ -1,5 +1,7 @@
+const appName = process.env.NEXT_PUBLIC_APP_NAME || "Labveil";
+
 export const metadata = {
-  title: "Assets | Open Art",
+  title: `Assets | ${appName}`,
   description: "Browse and manage your uploaded media assets",
 };
 

@@ -58,7 +58,7 @@ export function ProjectsNavbar() {
                         className="flex items-center gap-3 group transition-opacity hover:opacity-100"
                     >
                         <span className="text-[14px] font-bold tracking-[-0.03em] leading-tight text-white uppercase italic">
-                            Open Art
+                            {process.env.NEXT_PUBLIC_APP_NAME || "Labveil"}
                         </span>
                     </Link>
                 </div>

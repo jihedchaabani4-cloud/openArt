@@ -8,6 +8,8 @@ import { LoginDialog } from "@/components/LoginDialog";
 import { useAuthSession } from "@/shared/api/auth";
 import { Loader2 } from "lucide-react";
 
+const appName = process.env.NEXT_PUBLIC_APP_NAME || "Level Labs";
+
 const showcaseVideos = [
  
   "https://res.cloudinary.com/dsak0vfdj/video/upload/q_auto:low,f_auto,w_360/v1778928775/hf_20260331_191130_a9d02a6e-1e68-4109-99aa-e0cda5a44dfb_rhhq_mtfii8.mp4",
@@ -105,7 +107,7 @@ export default function HomePage() {
             <div className="absolute w-[80%] h-[50%] bg-white/30 blur-[30px] rounded-full pointer-events-none" />
             
             <h1 className="text-[100px] md:text-[140px] lg:text-[200px] font-medium text-white tracking-tighter leading-none m-0 drop-shadow-lg relative z-10">
-              Flow
+              {appName}
             </h1>
           </div>
           
@@ -137,17 +139,6 @@ export default function HomePage() {
                 "Se connecter"
               )}
             </Button>
-          </motion.div>
-          
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.6 }}
-            className="mt-6 pointer-events-auto"
-          >
-            <p className="text-[13px] text-white/50">
-              Explore <a href="#" className="underline hover:text-white transition-colors">Google AI Subscriptions</a>. See <a href="#" className="underline hover:text-white transition-colors">FAQ</a>.
-            </p>
           </motion.div>
         </div>
 
