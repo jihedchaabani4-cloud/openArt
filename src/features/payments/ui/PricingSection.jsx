@@ -11,6 +11,8 @@ import {
 } from "@/shared/ui/accordion";
 import { Button } from "@/shared/ui/button";
 import { Check, ChevronDown, Loader2, Plus } from "lucide-react";
+import { useAuthSession } from "@/shared/api/auth";
+import { LoginDialog } from "@/components/LoginDialog";
 
 const SURFACE_BACKGROUND = "#1a1a1a";
 const SURFACE_BACKGROUND_ELEVATED = "#222222";
@@ -522,8 +524,19 @@ function SkeletonCard() {
 export function PricingSection({ hideFaq = false }) {
     const packsSectionRef = useRef(null);
     const [isPackageDialogOpen, setIsPackageDialogOpen] = useState(false);
+    const [loginOpen, setLoginOpen] = useState(false);
+    const { data: user } = useAuthSession();
     const { data, isLoading, isError } = usePackages();
     const { mutate: checkout, isPending, variables: pendingPackageId } = useCheckout();
+
+    const handleBuy = (id) => {
+        if (!user) {
+            setLoginOpen(true);
+        } else {
+            checkout(id);
+        }
+    };
+
     const packages = data?.packages ?? [];
     const modelsComparison = data?.modelsComparison ?? { image: [], video: [] };
     const nonTrialPackages = packages.filter((pkg) => !pkg.is_trial);
@@ -585,7 +598,7 @@ export function PricingSection({ hideFaq = false }) {
                             key={pkg.id}
                             pkg={pkg}
                             modelsComparison={modelsComparison}
-                            onBuy={(id) => checkout(id)}
+                            onBuy={handleBuy}
                             isLoading={isPending && pendingPackageId === pkg.id}
                         />
                     ))}
@@ -611,7 +624,7 @@ export function PricingSection({ hideFaq = false }) {
                     onOpenChange={setIsPackageDialogOpen}
                     packages={nonTrialPackages}
                     modelsComparison={modelsComparison}
-                    onBuy={(id) => checkout(id)}
+                    onBuy={handleBuy}
                     isPending={isPending}
                     pendingPackageId={pendingPackageId}
                 />
@@ -622,7 +635,7 @@ export function PricingSection({ hideFaq = false }) {
                     <ComparePlansSection
                         packages={nonTrialPackages}
                         modelsComparison={modelsComparison}
-                        onBuy={(id) => checkout(id)}
+                        onBuy={handleBuy}
                         isPending={isPending}
                         pendingPackageId={pendingPackageId}
                     />
@@ -712,6 +725,7 @@ export function PricingSection({ hideFaq = false }) {
                     </div>
                 </div>
             )}
+            <LoginDialog open={loginOpen} onClose={() => setLoginOpen(false)} />
         </section>
     );
 }

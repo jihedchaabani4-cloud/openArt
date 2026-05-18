@@ -46,7 +46,6 @@ const bentoRow3 = [
   { key: "bleeding-edge", src: "bleeding-edge", width: 200, height: 150 },
   { key: "1000-styles", src: "1000-styles", width: 200, height: 150 },
   { key: "image-editor", src: "image-editor", width: 200, height: 150 },
-  { key: "realtime-canvas", src: "realtime-canvas", width: 200, height: 150 },
   { key: "lipsync", src: "lipsync", width: 200, height: 150 },
 ];
 
@@ -334,34 +333,7 @@ export default function HomePage() {
         </motion.div>
       )}
 
-      {photo.key === "realtime-canvas" && (
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-          className="w-full h-full rounded-[24px] overflow-hidden relative border border-white/10 bg-[#0d0d0d] shadow-2xl flex flex-col justify-between p-1 gap-1"
-        >
-          <div className="relative h-[48%] rounded-2xl overflow-hidden bg-black group border border-white/5">
-            <img src="https://s.krea.ai/realtimeBase.webp" className="absolute top-0 left-0 z-0 h-full w-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700 pointer-events-none" loading="lazy" alt="" />
-            <img src="https://www.krea.ai/_app/48bb267943e0aab3/immutable/assets/realtimeOverlay.Dw-O4V0Z.png" className="absolute top-0 left-0 z-10 h-full w-full object-cover pointer-events-none" loading="lazy" alt="" />
-            <div className="absolute inset-0 bg-black/15 z-20 pointer-events-none" />
-            <span className="relative z-30 mx-auto text-center text-[10px] font-bold text-white pt-2 block tracking-tight">Realtime Canvas</span>
-          </div>
 
-          <div className="relative h-[50%] rounded-2xl overflow-hidden bg-[#ffffff] p-2 flex flex-col items-center justify-between text-black border border-white/5 shadow-inner">
-            <span className="text-[10px] font-bold tracking-tight bg-gradient-to-br from-neutral-950 to-neutral-600 bg-clip-text text-transparent">Text to 3D</span>
-            <div className="relative w-8 h-8 my-0.5" style={{ perspective: "100px" }}>
-              <div className="w-full h-full relative flex items-center justify-center animate-[spin_8s_linear_infinite]" style={{ transformStyle: "preserve-3d" }}>
-                <div className="absolute inset-0 border border-neutral-300 bg-neutral-100 rounded-sm" style={{ transform: "rotateY(0deg) translateZ(16px)", opacity: 0.9 }} />
-                <div className="absolute inset-0 border border-neutral-300 bg-neutral-200 rounded-sm" style={{ transform: "rotateY(90deg) translateZ(16px)", opacity: 0.95 }} />
-                <div className="absolute inset-0 border border-neutral-300 bg-neutral-100 rounded-sm" style={{ transform: "rotateX(90deg) translateZ(16px)", opacity: 0.9 }} />
-              </div>
-            </div>
-            <span className="text-[7.5px] text-neutral-500 font-bold tracking-tight">Generate mesh</span>
-          </div>
-        </motion.div>
-      )}
     </div>
   );
 
@@ -380,7 +352,7 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#050505] overflow-x-hidden font-sans scroll-smooth text-white">
+    <div className="min-h-screen overflow-x-hidden font-sans scroll-smooth text-white">
 
       {/* ─── Hero Section ─── */}
       <section className="relative h-screen overflow-hidden">
@@ -479,7 +451,7 @@ export default function HomePage() {
       </section>
 
       {/* ─── Intermediate Models Showcase Section ─── */}
-      <section className="relative py-28 z-30 w-full bg-[#050505] flex flex-col items-center justify-center text-center overflow-hidden">
+      <section className="relative py-28  z-30 w-full flex flex-col items-center justify-center text-center overflow-hidden">
         <div className="w-full max-w-7xl mx-auto px-6 md:px-12">
           
           {/* Headline Animé */}
@@ -557,19 +529,20 @@ export default function HomePage() {
       </section>
 
       {/* ─── Bento Grid Section ─── */}
-{/* ─── Bento Grid Section ─── */}
-<section
-  className="relative pb-32 px-6 md:px-12 lg:px-24 z-30 w-full"
-  style={{ background: "#050505" }}
->
-  {/* Absolute Masked Background Image */}
-  <div
-    className="absolute inset-0 pointer-events-none overflow-hidden z-0 opacity-55"
-    style={{
-      maskImage: "radial-gradient(circle, rgb(0, 0, 0) 0%, rgba(0, 0, 0, 0) 300%)",
-      WebkitMaskImage: "radial-gradient(circle, rgb(0, 0, 0) 0%, rgba(0, 0, 0, 0) 300%)",
-    }}
-  >
+      <section
+        className="relative py-40 px-6 md:px-12 lg:px-24 z-30 w-full min-h-[150vh] flex flex-col items-center justify-center"
+        style={{
+          transform: "translateY(15px)",
+        }}
+      >
+        {/* Absolute Masked Background Image */}
+        <div
+          className="absolute inset-0 pointer-events-none overflow-hidden z-0 opacity-55"
+          style={{
+            maskImage: "linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 1) 15%, rgba(0, 0, 0, 1) 85%, rgba(0, 0, 0, 0) 100%)",
+            WebkitMaskImage: "linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 1) 15%, rgba(0, 0, 0, 1) 85%, rgba(0, 0, 0, 0) 100%)",
+          }}
+        >
     <img
       src="https://storage.googleapis.com/pinhole-about-assets-prod-us/video-section/background.webp"
       alt="Background for section"
@@ -596,7 +569,7 @@ export default function HomePage() {
     }}
   />
 
-  <div className="max-w-6xl mx-auto pt-64 relative z-10">
+  <div className="max-w-6xl w-full flex flex-col items-center justify-center mx-auto pt-8 relative z-10">
     <div className="mb-10 text-center">
       <motion.h2
         initial={{ opacity: 0, y: 20 }}
@@ -649,7 +622,7 @@ export default function HomePage() {
 </section>
 
       {/* ─── Pricing Section ─── */}
-      <section className="relative z-30 w-full bg-[#050505] border-t border-white/5 py-12">
+      <section className="relative z-30 w-full  py-28 flex items-center justify-center">
         <PricingSection hideFaq={true} />
       </section>
 
