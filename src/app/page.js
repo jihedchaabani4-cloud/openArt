@@ -86,7 +86,7 @@ export default function HomePage() {
   useEffect(() => {
     const interval = setInterval(() => {
       setWordIndex((prevIndex) => (prevIndex + 1) % WORDS.length);
-    }, 2500);
+    }, 10800);
     return () => clearInterval(interval);
   }, []);
 
@@ -481,28 +481,39 @@ export default function HomePage() {
           
           {/* Headline Animé */}
           <motion.h2
+            layout
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
+            transition={{
+              layout: { type: "spring", stiffness: 50, damping: 18 },
+              opacity: { duration: 0.8 },
+              y: { duration: 0.8 },
+            }}
             className="text-3xl md:text-5xl lg:text-[54px] font-extrabold tracking-tight leading-[1.1] text-white mb-16 h-[2.2em] md:h-auto"
           >
             The industry's best{" "}
-            <span className="inline-block relative overflow-hidden align-middle h-[1.25em] min-w-[3.8em] text-left">
-              <AnimatePresence mode="wait">
+            <span className="inline-flex relative overflow-hidden align-middle h-[1.25em] text-left">
+              <AnimatePresence mode="popLayout">
                 <motion.span
                   key={WORDS[wordIndex]}
-                  initial={{ y: 30, opacity: 0 }}
+                  initial={{ y: 24, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
-                  exit={{ y: -30, opacity: 0 }}
-                  transition={{ duration: 0.4, ease: "easeInOut" }}
-                  className="absolute left-0 top-0 block w-full text-white"
+                  exit={{ y: -24, opacity: 0 }}
+                  transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+                  className="block text-white"
                 >
                   {WORDS[wordIndex]}
                 </motion.span>
               </AnimatePresence>
             </span>{" "}
-            models.
+            <motion.span
+              layout
+              transition={{ type: "spring", stiffness: 50, damping: 18 }}
+              className="inline-block"
+            >
+              models.
+            </motion.span>
             <br />
             <span className="text-white/40">In one subscription.</span>
           </motion.h2>
