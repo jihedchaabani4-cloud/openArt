@@ -9,6 +9,7 @@ import { useAuthSession } from "@/shared/api/auth";
 import { Loader2 } from "lucide-react";
 import { RowsPhotoAlbum } from "react-photo-album";
 import "react-photo-album/rows.css";
+import { PricingSection } from "@/features/payments/ui/PricingSection";
 
 const appName = process.env.NEXT_PUBLIC_APP_NAME || "Level Labs";
 
@@ -49,28 +50,30 @@ const bentoRow3 = [
   { key: "lipsync", src: "lipsync", width: 200, height: 150 },
 ];
 
+const ICONS = {
+    nanobana:   "https://unpkg.com/@lobehub/icons-static-svg@latest/icons/minimax.svg",
+    google:     "https://unpkg.com/@lobehub/icons-static-svg@latest/icons/google.svg",
+    gpt:        "https://unpkg.com/@lobehub/icons-static-svg@latest/icons/openai.svg",
+    seedream:   "https://unpkg.com/@lobehub/icons-static-svg@latest/icons/baichuan.svg",
+    seedance:   "https://unpkg.com/@lobehub/icons-static-svg@latest/icons/baichuan.svg",
+    zimage:     "https://unpkg.com/@lobehub/icons-static-svg@latest/icons/zhipu.svg",
+    kling:      "https://unpkg.com/@lobehub/icons-static-svg@latest/icons/kling.svg",
+    runway:     "https://unpkg.com/@lobehub/icons-static-svg@latest/icons/runway.svg",
+    wan:        "https://unpkg.com/@lobehub/icons-static-svg@latest/icons/runway.svg",
+    hailuo:     "https://unpkg.com/@lobehub/icons-static-svg@latest/icons/minimax-color.svg",
+};
+
 const SHOWCASE_MODELS = [
-  { name: "Veo 3.1", icon: (
-    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M12 2a7 7 0 1 0 10 10" /><circle cx="12" cy="12" r="3" /></svg>
-  )},
-  { name: "Ideogram", icon: (
-    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M8 12a4 4 0 1 1 8 0 4 4 0 0 1-8 0z" /><path d="M12 2v20M2 12h20" /></svg>
-  )},
-  { name: "Runway", icon: (
-    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" /><path d="M12 6v12M9 9h6" /></svg>
-  )},
-  { name: "Luma", icon: (
-    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg>
-  )},
-  { name: "Flux", icon: (
-    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="currentColor" /></svg>
-  )},
-  { name: "Gemini", icon: (
-    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.5 7.5L22 12l-7.5 2.5L12 22l-2.5-7.5L2 12l7.5-2.5L12 2z" /></svg>
-  )},
-  { name: "Krea 1", icon: (
-    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z" fill="currentColor" /></svg>
-  )}
+  { name: "Nanobana", iconUrl: ICONS.nanobana },
+  { name: "Google", iconUrl: ICONS.google },
+  { name: "GPT", iconUrl: ICONS.gpt },
+  { name: "Seedream", iconUrl: ICONS.seedream },
+  { name: "Seedance", iconUrl: ICONS.seedance },
+  { name: "ZImage", iconUrl: ICONS.zimage },
+  { name: "Kling", iconUrl: ICONS.kling },
+  { name: "Runway", iconUrl: ICONS.runway },
+  { name: "Wan", iconUrl: ICONS.wan },
+  { name: "Hailuo", iconUrl: ICONS.hailuo },
 ];
 
 const DUPLICATED_MODELS = [...SHOWCASE_MODELS, ...SHOWCASE_MODELS, ...SHOWCASE_MODELS];
@@ -86,7 +89,7 @@ export default function HomePage() {
   useEffect(() => {
     const interval = setInterval(() => {
       setWordIndex((prevIndex) => (prevIndex + 1) % WORDS.length);
-    }, 10800);
+    }, 1800);
     return () => clearInterval(interval);
   }, []);
 
@@ -509,7 +512,7 @@ export default function HomePage() {
             </span>{" "}
             <motion.span
               layout
-              transition={{ type: "spring", stiffness: 50, damping: 18 }}
+              transition={{ type: "spring", stiffness: 100, damping: 18 }}
               className="inline-block"
             >
               models.
@@ -535,8 +538,12 @@ export default function HomePage() {
                   key={index} 
                   className="flex items-center gap-2.5 group cursor-default text-white/45 hover:text-white transition-colors duration-300 shrink-0"
                 >
-                  <div className="text-white/45 group-hover:text-white transition-colors duration-300">
-                    {model.icon}
+                  <div className="w-5 h-5 flex items-center justify-center shrink-0">
+                    <img
+                      src={model.iconUrl}
+                      alt={model.name}
+                      className="w-5 h-5 object-contain opacity-45 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300 pointer-events-none invert brightness-200"
+                    />
                   </div>
                   <span className="text-sm md:text-[15px] font-bold tracking-tight">
                     {model.name}
@@ -550,92 +557,100 @@ export default function HomePage() {
       </section>
 
       {/* ─── Bento Grid Section ─── */}
-      <section
-        className="relative pb-32 px-6 md:px-12 lg:px-24 z-30 w-full"
-        style={{ background: "#050505" }}
+{/* ─── Bento Grid Section ─── */}
+<section
+  className="relative pb-32 px-6 md:px-12 lg:px-24 z-30 w-full"
+  style={{ background: "#050505" }}
+>
+  {/* Absolute Masked Background Image */}
+  <div
+    className="absolute inset-0 pointer-events-none overflow-hidden z-0 opacity-55"
+    style={{
+      maskImage: "radial-gradient(circle, rgb(0, 0, 0) 0%, rgba(0, 0, 0, 0) 300%)",
+      WebkitMaskImage: "radial-gradient(circle, rgb(0, 0, 0) 0%, rgba(0, 0, 0, 0) 300%)",
+    }}
+  >
+    <img
+      src="https://storage.googleapis.com/pinhole-about-assets-prod-us/video-section/background.webp"
+      alt="Background for section"
+      loading="lazy"
+      className="w-full h-full object-cover"
+    />
+  </div>
+
+  {/* Smooth transition overlay at the top of Section 2 */}
+  <div
+    className="absolute top-0 left-0 right-0 pointer-events-none z-10"
+    style={{
+      height: "280px",
+      background: "linear-gradient(to bottom, #050505 0%, rgba(5, 5, 5, 0) 100%)",
+    }}
+  />
+
+  {/* Subtle radial glow — very faint, just enough depth */}
+  <div
+    className="absolute inset-0 pointer-events-none z-0"
+    style={{
+      background:
+        "radial-gradient(ellipse 70% 50% at 20% 70%, rgba(120, 95, 65, 0.15) 0%, rgba(65, 48, 32, 0.05) 60%, transparent 100%)",
+    }}
+  />
+
+  <div className="max-w-6xl mx-auto pt-64 relative z-10">
+    <div className="mb-10 text-center">
+      <motion.h2
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        className="text-4xl md:text-5xl font-extrabold tracking-tighter text-white mb-2"
       >
-        {/* Absolute Masked Background Image */}
-        <div
-          className="absolute inset-0 pointer-events-none overflow-hidden z-0 opacity-55"
-          style={{
-            maskImage: "radial-gradient(circle, rgb(0, 0, 0) 0%, rgba(0, 0, 0, 0) 300%)",
-            WebkitMaskImage: "radial-gradient(circle, rgb(0, 0, 0) 0%, rgba(0, 0, 0, 0) 300%)",
-          }}
-        >
-          <img
-            src="https://storage.googleapis.com/pinhole-about-assets-prod-us/video-section/background.webp"
-            alt="Background for section"
-            loading="lazy"
-            className="w-full h-full object-cover"
-          />
-        </div>
+        Designed for Creators
+      </motion.h2>
+      <motion.p
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ delay: 0.1 }}
+        className="text-base text-white/50 max-w-xl mx-auto font-medium"
+      >
+        Experience next-generation tools built with industrial-grade AI and elegant design.
+      </motion.p>
+    </div>
 
-        {/* Smooth transition overlay at the top of Section 2 */}
-        <div
-          className="absolute top-0 left-0 right-0 pointer-events-none z-10"
-          style={{
-            height: "280px",
-            background: "linear-gradient(to bottom, #050505 0%, rgba(5, 5, 5, 0) 100%)",
-          }}
-        />
+    <div className="w-full space-y-2">
+      {/* Row 1 */}
+      <RowsPhotoAlbum
+        photos={bentoRow1}
+        targetRowHeight={175}
+        spacing={8}
+        rowConstraints={{ singleRowMaxHeight: 280 }}
+        render={{ photo: renderBentoPhoto }}
+      />
+      {/* Row 2 */}
+      <RowsPhotoAlbum
+        photos={bentoRow2}
+        targetRowHeight={250}
+        spacing={8}
+        rowConstraints={{ singleRowMaxHeight: 320 }}
+        render={{ photo: renderBentoPhoto }}
+      />
+      {/* Row 3 */}
+      <RowsPhotoAlbum
+        photos={bentoRow3}
+        targetRowHeight={140}
+        spacing={8}
+        rowConstraints={{ singleRowMaxHeight: 280 }}
+        render={{ photo: renderBentoPhoto }}
+      />
+    </div>
 
-        {/* Subtle radial glow — very faint, just enough depth */}
-        <div
-          className="absolute inset-0 pointer-events-none z-0"
-          style={{
-            background:
-              "radial-gradient(ellipse 70% 50% at 20% 70%, rgba(120, 95, 65, 0.15) 0%, rgba(65, 48, 32, 0.05) 60%, transparent 100%)",
-          }}
-        />
+  
+  </div>
+</section>
 
-        <div className="max-w-6xl mx-auto pt-64 relative z-10">
-          <div className="mb-10 text-center">
-            <motion.h2
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="text-4xl md:text-5xl font-extrabold tracking-tighter text-white mb-2"
-            >
-              Designed for Creators
-            </motion.h2>
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.1 }}
-              className="text-base text-white/50 max-w-xl mx-auto font-medium"
-            >
-              Experience next-generation tools built with industrial-grade AI and elegant design.
-            </motion.p>
-          </div>
-
-          <div className="w-full space-y-2">
-            {/* Row 1 */}
-            <RowsPhotoAlbum
-              photos={bentoRow1}
-              targetRowHeight={175}
-              spacing={8}
-              rowConstraints={{ singleRowMaxHeight: 280 }}
-              render={{ photo: renderBentoPhoto }}
-            />
-            {/* Row 2 */}
-            <RowsPhotoAlbum
-              photos={bentoRow2}
-              targetRowHeight={250}
-              spacing={8}
-              rowConstraints={{ singleRowMaxHeight: 320 }}
-              render={{ photo: renderBentoPhoto }}
-            />
-            {/* Row 3 */}
-            <RowsPhotoAlbum
-              photos={bentoRow3}
-              targetRowHeight={140}
-              spacing={8}
-              rowConstraints={{ singleRowMaxHeight: 280 }}
-              render={{ photo: renderBentoPhoto }}
-            />
-          </div>
-        </div>
+      {/* ─── Pricing Section ─── */}
+      <section className="relative z-30 w-full bg-[#050505] border-t border-white/5 py-12">
+        <PricingSection hideFaq={true} />
       </section>
 
       <LoginDialog open={loginOpen} onClose={() => setLoginOpen(false)} />

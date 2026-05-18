@@ -519,7 +519,7 @@ function SkeletonCard() {
     );
 }
 
-export function PricingSection() {
+export function PricingSection({ hideFaq = false }) {
     const packsSectionRef = useRef(null);
     const [isPackageDialogOpen, setIsPackageDialogOpen] = useState(false);
     const { data, isLoading, isError } = usePackages();
@@ -617,7 +617,7 @@ export function PricingSection() {
                 />
             )}
 
-            {!isLoading && !isError && nonTrialPackages.length > 0 && (
+            {!hideFaq && !isLoading && !isError && nonTrialPackages.length > 0 && (
                 <div className="space-y-6 pt-4">
                     <ComparePlansSection
                         packages={nonTrialPackages}
@@ -629,87 +629,89 @@ export function PricingSection() {
                 </div>
             )}
 
-            <div className="w-full pt-10">
-                <div className="grid gap-10 lg:grid-cols-[340px_minmax(0,1fr)] lg:gap-14">
-                    <div className="lg:pt-3">
-                        <h2
-                            className="max-w-[280px] text-[52px] font-bold leading-[0.94] tracking-[-0.06em] sm:text-[64px] md:text-[76px]"
-                            style={{ color: TEXT_PRIMARY }}
-                        >
-                            Your
-                            <br />
-                            questions,
-                            <br />
-                            answered!
-                        </h2>
+            {!hideFaq && (
+                <div className="w-full pt-10">
+                    <div className="grid gap-10 lg:grid-cols-[340px_minmax(0,1fr)] lg:gap-14">
+                        <div className="lg:pt-3">
+                            <h2
+                                className="max-w-[280px] text-[52px] font-bold leading-[0.94] tracking-[-0.06em] sm:text-[64px] md:text-[76px]"
+                                style={{ color: TEXT_PRIMARY }}
+                            >
+                                Your
+                                <br />
+                                questions,
+                                <br />
+                                answered!
+                            </h2>
+                        </div>
+
+                        <Accordion type="single" collapsible className="space-y-0">
+                        {faqItems.map((item, index) => (
+                            <AccordionItem
+                                key={item.question}
+                                value={`faq-${index}`}
+                                style={{ borderColor: SURFACE_BORDER_SUBTLE }}
+                                className="border-b first:border-t"
+                            >
+                                <AccordionTrigger
+                                    className="py-6 text-left text-[20px] font-semibold tracking-[-0.03em] hover:no-underline"
+                                    style={{ color: TEXT_PRIMARY }}
+                                    icon={
+                                        <span
+                                            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full"
+                                            style={{ background: "rgba(255,255,255,0.08)", color: TEXT_PRIMARY }}
+                                        >
+                                            <Plus size={16} />
+                                        </span>
+                                    }
+                                >
+                                    {item.question}
+                                </AccordionTrigger>
+                                <AccordionContent
+                                    className="max-w-3xl pb-6 pr-12 text-sm leading-7"
+                                    style={{ color: TEXT_SECONDARY }}
+                                >
+                                    {item.answer}
+                                </AccordionContent>
+                            </AccordionItem>
+                        ))}
+                        </Accordion>
                     </div>
 
-                    <Accordion type="single" collapsible className="space-y-0">
-                    {faqItems.map((item, index) => (
-                        <AccordionItem
-                            key={item.question}
-                            value={`faq-${index}`}
-                            style={{ borderColor: SURFACE_BORDER_SUBTLE }}
-                            className="border-b first:border-t"
-                        >
-                            <AccordionTrigger
-                                className="py-6 text-left text-[20px] font-semibold tracking-[-0.03em] hover:no-underline"
-                                style={{ color: TEXT_PRIMARY }}
-                                icon={
-                                    <span
-                                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full"
-                                        style={{ background: "rgba(255,255,255,0.08)", color: TEXT_PRIMARY }}
-                                    >
-                                        <Plus size={16} />
-                                    </span>
+                    <div className="mt-10 flex items-center justify-center gap-4 text-center">
+                        <p className="text-sm font-semibold" style={{ color: TEXT_SECONDARY }}>Ready to get started?</p>
+                        <Button
+                            type="button"
+                            onClick={() => {
+                                const element = packsSectionRef.current;
+                                if (!element) {
+                                    return;
                                 }
-                            >
-                                {item.question}
-                            </AccordionTrigger>
-                            <AccordionContent
-                                className="max-w-3xl pb-6 pr-12 text-sm leading-7"
-                                style={{ color: TEXT_SECONDARY }}
-                            >
-                                {item.answer}
-                            </AccordionContent>
-                        </AccordionItem>
-                    ))}
-                    </Accordion>
+
+                                const rect = element.getBoundingClientRect();
+                                const absoluteTop = window.scrollY + rect.top;
+                                const centeredTop = absoluteTop - (window.innerHeight - rect.height) / 2;
+
+                                window.scrollTo({
+                                    top: Math.max(0, centeredTop),
+                                    behavior: "smooth",
+                                });
+                            }}
+                            disabled={!nonTrialPackages.length}
+                            className="h-10 rounded-xl px-5 text-sm font-semibold text-white transition-colors"
+                            style={{ background: BUTTON_PRIMARY }}
+                            onMouseOver={(event) => {
+                                event.currentTarget.style.backgroundColor = BUTTON_PRIMARY_HOVER;
+                            }}
+                            onMouseOut={(event) => {
+                                event.currentTarget.style.backgroundColor = BUTTON_PRIMARY;
+                            }}
+                        >
+                            Choose your pack
+                        </Button>
+                    </div>
                 </div>
-
-                <div className="mt-10 flex items-center justify-center gap-4 text-center">
-                    <p className="text-sm font-semibold" style={{ color: TEXT_SECONDARY }}>Ready to get started?</p>
-                    <Button
-                        type="button"
-                        onClick={() => {
-                            const element = packsSectionRef.current;
-                            if (!element) {
-                                return;
-                            }
-
-                            const rect = element.getBoundingClientRect();
-                            const absoluteTop = window.scrollY + rect.top;
-                            const centeredTop = absoluteTop - (window.innerHeight - rect.height) / 2;
-
-                            window.scrollTo({
-                                top: Math.max(0, centeredTop),
-                                behavior: "smooth",
-                            });
-                        }}
-                        disabled={!nonTrialPackages.length}
-                        className="h-10 rounded-xl px-5 text-sm font-semibold text-white transition-colors"
-                        style={{ background: BUTTON_PRIMARY }}
-                        onMouseOver={(event) => {
-                            event.currentTarget.style.backgroundColor = BUTTON_PRIMARY_HOVER;
-                        }}
-                        onMouseOut={(event) => {
-                            event.currentTarget.style.backgroundColor = BUTTON_PRIMARY;
-                        }}
-                    >
-                        Choose your pack
-                    </Button>
-                </div>
-            </div>
+            )}
         </section>
     );
 }
