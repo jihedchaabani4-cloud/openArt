@@ -1,9 +1,65 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/shared/ui/button"
 import { Progress } from "@/shared/ui/progress"
+
+// Helper to get an image URL from a video URL (Cloudinary specific)
+const getPosterUrl = (videoUrl, imgUrl) => {
+  // If the provided img is a video format, try to get a jpg out of it
+  if (imgUrl && (imgUrl.endsWith(".mp4") || imgUrl.endsWith(".mov") || imgUrl.endsWith(".webm"))) {
+    if (imgUrl.includes("cloudinary.com")) {
+      return imgUrl.replace(/\.(mp4|mov|webm)$/i, ".jpg");
+    }
+    // Fallback: Use the video element's poster attribute feature natively or let it fail
+  }
+  return imgUrl;
+};
+
+// ─── Video with image fallback until ready ────────────────────────────────────
+function VideoWithFallback({ src, poster }) {
+  const [videoReady, setVideoReady] = useState(false)
+  const videoRef = useRef(null)
+
+  // Reset readiness whenever the slide changes (src changes)
+  useEffect(() => {
+    setVideoReady(false)
+    // If the video is already cached and ready, fire immediately
+    const v = videoRef.current
+    if (v && v.readyState >= 3) setVideoReady(true)
+  }, [src])
+
+  const finalPoster = getPosterUrl(src, poster)
+
+  return (
+    <>
+      {/* Poster image — always rendered, fades out once video is ready */}
+      <img
+        src={finalPoster}
+        alt=""
+        className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${
+          videoReady ? "opacity-0" : "opacity-100"
+        }`}
+      />
+
+      {/* Video — invisible until canPlay fires */}
+      <video
+        ref={videoRef}
+        key={src}
+        src={src}
+        autoPlay
+        muted
+        loop
+        playsInline
+        onCanPlay={() => setVideoReady(true)}
+        className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${
+          videoReady ? "opacity-100" : "opacity-0"
+        }`}
+      />
+    </>
+  )
+}
 
 // ─── Data ────────────────────────────────────────────────────────────────────
 const ITEMS = [
@@ -98,21 +154,9 @@ function SingleViewSlider({ items, isEmpty }) {
           transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
           className="absolute inset-0 w-full h-full flex flex-col justify-end group select-none pointer-events-auto"
         >
-          {/* Background Media */}
+          {/* Background Media — image shown until video is ready */}
           <div className="absolute inset-0 z-0 bg-black">
-            <img 
-              src={activeItem.img} 
-              alt="" 
-              className="absolute inset-0 w-full h-full object-cover transition-transform duration-700" 
-            />
-            <video
-              src={activeItem.video}
-              autoPlay
-              muted
-              loop
-              playsInline
-              className="absolute inset-0 w-full h-full object-cover transition-transform duration-700"
-            />
+            <VideoWithFallback src={activeItem.video} poster={activeItem.img} />
           </div>
 
           {/* Overlays */}
