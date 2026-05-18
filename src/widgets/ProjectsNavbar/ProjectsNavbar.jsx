@@ -22,7 +22,7 @@ export function ProjectsNavbar() {
 
     const pathname = usePathname()
     const isListing = pathname === "/" || pathname === "/cinema-studio" || pathname === "/cinema-studio/new"
-        || pathname === "/pricing" || pathname === "/assets" || pathname.startsWith("/explore")
+        || pathname === "/pricing" || pathname === "/assets"
 
     useMotionValueEvent(scrollY, "change", (latest) => {
         const previous = scrollY.getPrevious()
@@ -65,9 +65,7 @@ export function ProjectsNavbar() {
 
                 {/* ── Center: Nav Links ── */}
                 <div className="absolute left-1/2 -translate-x-1/2 hidden md:flex items-center gap-1">
-                    <Link href="/explore" className="text-[14px] font-semibold text-white/90 hover:text-white transition-colors px-3 py-2 rounded-xl hover:bg-white/5">
-                        Explore
-                    </Link>
+
                     <Link href="/cinema-studio" className="text-[14px] font-semibold text-white/90 hover:text-white transition-colors px-3 py-2 rounded-xl hover:bg-white/5">
                         Cinema Studio
                     </Link>
