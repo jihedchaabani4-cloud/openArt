@@ -38,6 +38,8 @@ export default function HomePage() {
   const router = useRouter();
   const { data: user, isLoading: authLoading } = useAuthSession();
 
+
+
   // Redirect to cinema studio if already logged in
   useEffect(() => {
     if (user) {
@@ -58,44 +60,111 @@ export default function HomePage() {
       
       {/* ─── Background Masonry Gallery ─── */}
       <div className="absolute inset-0 overflow-y-auto overflow-x-hidden custom-scrollbar">
-        <div className="columns-3 sm:columns-3 md:columns-3 xl:columns-4 gap-4 lg:gap-5 p-4 lg:p-6 opacity-50">
+        <motion.div
+          animate={{
+            y: [0, -40, 0]
+          }}
+          transition={{
+            duration: 20,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+          className="columns-3 sm:columns-3 md:columns-3 xl:columns-4 gap-4 lg:gap-5 p-4 lg:p-6 opacity-70"
+        >
           {MEDIA_ITEMS.map((item, index) => (
-            <motion.div 
+            <motion.div
               key={index}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }}
-              className="break-inside-avoid mb-3 lg:mb-4 rounded-[20px] overflow-hidden relative shadow-[0_8px_30px_rgb(0,0,0,0.4)]"
+              initial={{
+                opacity: 0,
+                y: 80,
+                scale: 0.9,
+                rotateX: 8
+              }}
+              animate={{
+                opacity: 1,
+                y: 0,
+                scale: 1,
+                rotateX: 0
+              }}
+              transition={{
+                duration: 1.4,
+                delay: index * 0.04,
+                ease: [0.16, 1, 0.3, 1]
+              }}
+              whileHover={{
+                scale: 1.03,
+                y: -6,
+                transition: {
+                  duration: 0.4,
+                  ease: "easeOut"
+                }
+              }}
+              className="group break-inside-avoid mb-3 lg:mb-4 rounded-[24px] overflow-hidden relative"
+              style={{
+                transformStyle: "preserve-3d"
+              }}
             >
-              {item.isVideo ? (
-                <video 
-                  src={item.url} 
-                  autoPlay 
-                  loop 
-                  muted 
-                  playsInline 
-                  className="w-full h-auto block object-cover"
-                />
-              ) : (
-                <img 
-                  src={item.url} 
-                  alt="" 
-                  className="w-full h-auto block object-cover"
-                />
-              )}
-              {/* Optional inner shadow/overlay for grid items */}
-              <div className="absolute inset-0 ring-1 ring-inset ring-white/5 rounded-[20px]" />
+              {/* cinematic shadow */}
+              <div className="absolute inset-0 bg-black/10 z-10 pointer-events-none" />
+
+              {/* moving light reflection */}
+              <motion.div
+                animate={{
+                  x: ["-120%", "120%"]
+                }}
+                transition={{
+                  duration: 6,
+                  repeat: Infinity,
+                  ease: "linear",
+                  delay: index * 0.2
+                }}
+                className="absolute inset-0 z-20 bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-12 pointer-events-none"
+              />
+
+              <motion.video
+                src={item.url}
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="w-full h-auto block object-cover will-change-transform"
+                animate={{
+                  scale: [1, 1.04, 1]
+                }}
+                transition={{
+                  duration: 12,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+              />
+
+              {/* border glow */}
+              <div className="absolute inset-0 rounded-[24px] ring-1 ring-white/10 group-hover:ring-white/20 transition-all duration-500" />
+
+              {/* gradient depth */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-white/5" />
             </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
 
       {/* ─── Foreground Overlay ─── */}
       <div className="absolute inset-0 pointer-events-none flex flex-col items-center justify-center z-10">
+        <motion.div
+          animate={{
+            opacity: [0.4, 0.55, 0.4]
+          }}
+          transition={{
+            duration: 5,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+          className="absolute inset-0 bg-black z-0"
+        />
         
         {/* Dark Vignette to make text readable (no blur) */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(5,5,5,1)_0%,rgba(5,5,5,0.15)_30%,rgba(5,5,5,0.15)_70%,rgba(5,5,5,1)_100%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,0,0,0.1)_0%,rgba(0,0,0,0.65)_100%)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(5,5,5,1)_0%,rgba(5,5,5,0.15)_30%,rgba(5,5,5,0.15)_70%,rgba(5,5,5,1)_100%)] z-10" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,0,0,0.1)_0%,rgba(0,0,0,0.65)_100%)] z-10" />
 
         {/* Central Content */}
         <div className="relative z-20 flex flex-col items-center text-center mt-[-10vh]">
@@ -103,10 +172,10 @@ export default function HomePage() {
           {/* FLOW Text Container */}
           <div className="relative flex justify-center items-center">
             {/* The lighter glowing blur behind the text */}
-            <div className="absolute w-[110%] h-[70%] bg-white/20 blur-[50px] rounded-full pointer-events-none" />
-            <div className="absolute w-[80%] h-[50%] bg-white/30 blur-[30px] rounded-full pointer-events-none" />
+            <div className="absolute w-[110%] h-[70%] bg-white/20 blur-[120px] rounded-full pointer-events-none" />
+            <div className="absolute w-[80%] h-[50%] bg-white/30 blur-[120px] rounded-full pointer-events-none" />
             
-            <h1 className="text-[100px] md:text-[140px] lg:text-[200px] font-medium text-white tracking-tighter leading-none m-0 drop-shadow-lg relative z-10">
+            <h1 className="text-[100px] md:text-[140px] lg:text-[200px] font-medium text-white tracking-tighter leading-none m-0 drop-shadow-lg relative z-10 cursor-default flex items-center justify-center pointer-events-auto">
               {appName}
             </h1>
           </div>
