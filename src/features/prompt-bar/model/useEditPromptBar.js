@@ -72,11 +72,17 @@ export function useEditPromptBar() {
   const studioFamilies = projectData?.modelConfig?.families ?? [];
 
   const generationMode = editTarget?.isVideo ? "video" : "image";
-  const { model, setModel, selectedModel, maxRefs } = useModelSync(
+  const { model, setModel, selectedModel, maxRefs: rawMaxRefs } = useModelSync(
     studioModels,
     studioModelsLoading,
     generationMode
   );
+
+  // In edit mode, the editTarget itself is the first reference.
+  // So the number of additional references allowed is rawMaxRefs - 1.
+  const maxRefs = React.useMemo(() => {
+    return Math.max(0, rawMaxRefs - 1);
+  }, [rawMaxRefs]);
 
   // Synchronize local model state with store model state
   useEffect(() => {

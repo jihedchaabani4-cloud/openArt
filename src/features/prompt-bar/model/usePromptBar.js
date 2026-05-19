@@ -111,6 +111,7 @@ export function usePromptBar({ isNewProject = false } = {}) {
   // ─── Local UI state (Error only) ───────────────────────────────────────────
   const [generationError, setGenerationError] = useState(null);
   const textareaRef = useRef(null);
+  const prevModelKeyRef = useRef(selectedModel?.key);
 
   const { mutateAsync: runGenerate, isPending: generating } = useGenerateMutation({
     onError: (err) => setGenerationError(err.message),
@@ -120,6 +121,31 @@ export function usePromptBar({ isNewProject = false } = {}) {
   useEffect(() => {
     if (!selectedModel) return;
     const support = selectedModel.support || {};
+    
+    const modelChanged = prevModelKeyRef.current !== selectedModel?.key;
+    prevModelKeyRef.current = selectedModel?.key;
+
+    // Helper to extract min/first duration
+    const extractMinDuration = (raw) => {
+      if (!raw) return "5s";
+      if (typeof raw === 'object' && 'min' in raw) {
+        const unit = raw.unit ?? "s";
+        return `${raw.min}${unit}`;
+      }
+      if (Array.isArray(raw)) {
+        const first = raw[0];
+        const val = (first && typeof first === 'object') ? first.value : first;
+        return val ?? "5s";
+      }
+      return "5s";
+    };
+
+    if (modelChanged) {
+      const defDuration = extractMinDuration(support.duration);
+      if (defDuration !== duration) {
+        setDuration(defDuration);
+      }
+    }
     
     // 1. Prune references if they exceed the new model's max allowed
     // Note: Slotted roles (start/end/mc) are NEVER pruned — they're mode-specific
@@ -186,6 +212,8 @@ export function usePromptBar({ isNewProject = false } = {}) {
     setVideoResolution,
     videoResolution,
     maxRefs,
+    duration,
+    setDuration,
   ]);
 
   // ─── Library ──────────────────────────────────────────────────────────────

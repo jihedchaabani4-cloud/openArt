@@ -242,6 +242,7 @@ export default function ElementsPage({ params }) {
                                     render={{
                                         photo: (_, { photo, width, height }) => (
                                             <div
+                                                key={photo.key}
                                                 className="react-photo-album--photo"
                                                 style={{
                                                     width,

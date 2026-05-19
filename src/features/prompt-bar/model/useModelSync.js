@@ -56,6 +56,9 @@ export function useModelSync(studioModels, _studioModelsLoading, generationMode,
   );
 
   const maxRefs = useMemo(() => {
+    if (!selectedModel?.support?.references) {
+      return 1;
+    }
     let count = selectedModel?.support?.references?.max ?? 4;
     if (generationMode === "motion" || generationMode === "motion-control") {
       count = 2;

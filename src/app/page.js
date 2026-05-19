@@ -126,6 +126,7 @@ export default function HomePage() {
 
   const renderBentoPhoto = (_, { photo, width, height }) => (
     <div
+      key={photo.key}
       className="react-photo-album--photo"
       style={{
         width,

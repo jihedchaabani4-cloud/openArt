@@ -401,7 +401,7 @@ export default function AnglesPanel({ onClose, onGenerate, previewImageUrl }) {
   };
 
   return (
-    <div className="flex flex-col p-1.5 gap-4 bg-(--color-imagine-grey-2) backdrop-blur-[80px] rounded-xl w-full min-w-[400px] ">
+    <div className="flex flex-col p-1 gap-4 bg-transparent w-full min-w-[400px]">
       <div className="flex flex-row gap-4">
         <div
           className="relative flex items-center justify-center w-[70%] rounded-xl overflow-hidden group/viewport"

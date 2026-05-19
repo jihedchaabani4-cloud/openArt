@@ -9,7 +9,7 @@ export function ExtendView({ s }) {
     if (!s) return null;
 
     return (
-            <div className="flex flex-col gap-1 min-h-[64px] p-2 bg-(--color-imagine-grey-2) backdrop-blur-[80px] rounded-xl w-full min-w-[400px] ">
+            <div className="flex flex-col gap-1 min-h-[64px] p-1 bg-transparent w-full min-w-[400px]">
                 {/* Text Area Input */}
                 <div className="flex-1 min-w-0">
                     <PromptTextarea

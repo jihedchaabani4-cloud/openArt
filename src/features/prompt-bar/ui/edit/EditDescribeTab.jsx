@@ -26,10 +26,10 @@ export function EditDescribeTab({ s }) {
   };
 
   return (
-    <div className="p-2 bg-(--color-imagine-grey-2) backdrop-blur-[80px] rounded-xl w-full min-w-[400px]">
+    <div className="p-1 bg-transparent w-full min-w-[400px]">
       {/* Reference list - renders above the input bar if images exist */}
       {s.referenceImages.length > 0 && (
-        <div className="p-2 border-b border-white/5 bg-black/40">
+        <div className="p-2 w-full">
           <Row1
             key={`${s.selectedModel?.key}-${isVideo ? "video" : "image"}`}
             referenceImages={s.referenceImages}
@@ -63,15 +63,17 @@ export function EditDescribeTab({ s }) {
         {/* Bottom Actions Row */}
         <div className="flex gap-3 shrink-0 mb-0.5 justify-between">
           {/* Attachment Button */}
-          <button
-            ref={paperclipRef}
-            type="button"
-            onClick={handleOpenMedia}
-            className="p-2 mb-0.5 rounded-full hover:bg-white/5 text-white/40 hover:text-white transition-colors shrink-0"
-            title="Add Reference"
-          >
-            <Paperclip className="size-5" />
-          </button>
+          {s.maxRefs > 0 && (
+            <button
+              ref={paperclipRef}
+              type="button"
+              onClick={handleOpenMedia}
+              className="p-2 mb-0.5 rounded-full hover:bg-white/5 text-white/40 hover:text-white transition-colors shrink-0"
+              title="Add Reference"
+            >
+              <Paperclip className="size-5" />
+            </button>
+          )}
 
           {/* Right Actions: Model Selector & Submit */}
           <div className="flex items-center gap-3 shrink-0">
@@ -99,7 +101,7 @@ export function EditDescribeTab({ s }) {
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         anchorRef={paperclipRef}
-        maxAllowed={Math.max(0, (s.maxRefs || 4) - s.referenceImages.length)}
+        maxAllowed={Math.max(0, (s.maxRefs ?? 4) - s.referenceImages.length)}
         onSelect={(assets) => {
           const items = Array.isArray(assets) ? assets : [assets];
           items.forEach((asset) => s.handleAddReference?.(asset, "normal"));

@@ -135,7 +135,7 @@ export function CameraView({ s }) {
     const currentSelected = activeTab === "motion" ? selectedMotion : selectedPosition;
 
     return (
-        <div className="flex flex-col w-full gap-3 bg-(--color-imagine-grey-2) backdrop-blur-[80px] rounded-xl w-full min-w-[400px]">
+        <div className="flex flex-col w-full gap-3 bg-transparent min-w-[400px]">
             {/* Sub-tabs Header */}
             <div className="flex items-center gap-6 px-6 pt-3">
                 <button 

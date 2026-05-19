@@ -81,7 +81,7 @@ export default function UpscalePanel({
     });
 
     return (
-        <div className="flex items-center gap-2 p-1.5 animate-in fade-in  duration-300 bg-(--color-imagine-grey-2) backdrop-blur-[80px] rounded-xl min-w-[390px]">
+        <div className="flex items-center gap-2 p-1 animate-in fade-in duration-300 bg-transparent min-w-[390px] w-full">
 
             {/* Scale — DropdownSegmentedWithLabel */}
             <div className="flex-1 min-w-0">

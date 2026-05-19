@@ -19,9 +19,9 @@ export function ModeSelector({ value, onChange, className }) {
   ];
 
   const row2Options = [
-    { value: 'keyframe', label: 'Frames',      icon: <GoogleIcon iconName="filter_frames" className="text-[14px] mr-1" /> },
-    { value: 'multiref', label: 'Ingredients', icon: <GoogleIcon iconName="experiment" className="text-[14px] mr-1" /> },
-    { value: 'motion-control', label: 'Control', icon: <GoogleIcon iconName="joystick" className="text-[14px] mr-1" /> },
+    { value: 'keyframe', label: 'Frames',      icon: <GoogleIcon iconName="panorama_wide_angle" className="text-[14px] mr-1" /> },
+    { value: 'multiref', label: 'Ingredients', icon: <GoogleIcon iconName="extension" className="text-[14px] mr-1" /> },
+    { value: 'motion-control', label: 'Control', icon: <GoogleIcon iconName="replace_video" className="text-[14px] mr-1" /> },
   ];
 
   // Determine top row value (legacy "video" mode maps to video bucket in UI)

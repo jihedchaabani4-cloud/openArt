@@ -81,18 +81,87 @@ export function DropdownSection({ label, action, className, children }) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const DropdownSegmented = React.memo(({ value, onChange, options, className, variant = "default" }) => {
+  const containerRef = React.useRef(null);
+  const [isDragging, setIsDragging] = React.useState(false);
+
+  React.useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    let isDown = false;
+    let startX;
+    let scrollLeft;
+    let hasMoved = false;
+
+    const handleMouseDown = (e) => {
+      isDown = true;
+      hasMoved = false;
+      startX = e.pageX - el.offsetLeft;
+      scrollLeft = el.scrollLeft;
+    };
+
+    const handleMouseLeave = () => {
+      isDown = false;
+      setIsDragging(false);
+    };
+
+    const handleMouseUp = () => {
+      isDown = false;
+      // Slight delay so child click handlers can detect isDragging
+      setTimeout(() => {
+        setIsDragging(false);
+      }, 50);
+    };
+
+    const handleMouseMove = (e) => {
+      if (!isDown) return;
+      const x = e.pageX - el.offsetLeft;
+      const walk = x - startX;
+      if (Math.abs(walk) > 5) {
+        if (!hasMoved) {
+          hasMoved = true;
+          setIsDragging(true);
+        }
+        e.preventDefault();
+        el.scrollLeft = scrollLeft - walk;
+      }
+    };
+
+    el.addEventListener("mousedown", handleMouseDown);
+    el.addEventListener("mouseleave", handleMouseLeave);
+    el.addEventListener("mouseup", handleMouseUp);
+    el.addEventListener("mousemove", handleMouseMove);
+
+    return () => {
+      el.removeEventListener("mousedown", handleMouseDown);
+      el.removeEventListener("mouseleave", handleMouseLeave);
+      el.removeEventListener("mouseup", handleMouseUp);
+      el.removeEventListener("mousemove", handleMouseMove);
+    };
+  }, []);
+
   return (
-    <div className={cn("flex gap-1 p-1.5 bg-white/5 rounded-xl overflow-x-auto scrollbar-hide", className)}>
+    <div
+      ref={containerRef}
+      className={cn(
+        "flex gap-1 p-1.5 bg-white/5 rounded-xl overflow-x-auto scrollbar-hide min-w-0 w-full cursor-grab active:cursor-grabbing select-none",
+        className
+      )}
+    >
       {options.map((opt) => {
         const isSelected = value === opt.value && !opt.disabled;
         
         return (
           <Button
             key={opt.value}
-            onClick={() => !opt.disabled && onChange(opt.value)}
+            onClick={() => {
+              if (isDragging) return;
+              if (!opt.disabled) onChange(opt.value);
+            }}
             disabled={opt.disabled}
             className={cn(
-              "flex-1 min-w-fit px-3 py-1.5 rounded-lg text-[13px] transition-all  flex flex-row items-center justify-center gap-2 relative whitespace-nowrap",
+              "flex-1 min-w-fit px-3 py-1.5 rounded-lg text-[13px] transition-all flex flex-row items-center justify-center gap-2 relative whitespace-nowrap",
+              isDragging && "pointer-events-none",
               isSelected
                 ? (variant === "white" ? "bg-white text-black" : "bg-white/10 text-white")
                 : opt.disabled
