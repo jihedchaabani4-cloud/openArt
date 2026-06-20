@@ -1,14 +1,13 @@
 "use client";
 
 import * as React from "react";
-import JSZip from "jszip";
 import "react-photo-album/rows.css";
 
 import { useAssetsFilters } from "./AssetsFiltersContext";
 import { buildGroupedPhotos, isVideoUrl, PAGE_SIZE, resolveLibraryCategory } from "./assetsUtils";
 import { AssetsGroupSection } from "./components/AssetsGroupSection";
 import { AssetsSelectionBar } from "./components/AssetsSelectionBar";
-import { downloadBlob } from "@/shared/lib/utils";
+import { downloadAssetsAsZip } from "@/shared/api/assets";
 import { useInfiniteUserLibrary } from "@/features/media";
 import { useRemoveWorkflow, useToggleWorkflowLike } from "@/features/workflows/api/workflowsApi";
 import { ConfirmDeleteDialog } from "@/widgets/dialogs/ConfirmDeleteDialog";
@@ -173,38 +172,9 @@ export default function AssetsPageClient() {
 
     setIsDownloadingSelection(true);
     try {
-      const zip = new JSZip();
-      const usedNames = new Set();
-
-      for (const entry of selectedEntries) {
-        const url = entry?.primary_media?.url;
-        if (!url) continue;
-
-        const response = await fetch(url);
-        if (!response.ok) {
-          throw new Error(`Failed to fetch media: ${response.status}`);
-        }
-
-        const blob = await response.blob();
-        const originalName = buildDownloadFilename(entry);
-        let finalName = originalName;
-        let duplicateIndex = 1;
-
-        while (usedNames.has(finalName)) {
-          const dotIndex = originalName.lastIndexOf(".");
-          const hasExtension = dotIndex > 0;
-          const basename = hasExtension ? originalName.slice(0, dotIndex) : originalName;
-          const extension = hasExtension ? originalName.slice(dotIndex) : "";
-          finalName = `${basename}-${duplicateIndex}${extension}`;
-          duplicateIndex += 1;
-        }
-
-        usedNames.add(finalName);
-        zip.file(finalName, blob);
-      }
-
-      const zipBlob = await zip.generateAsync({ type: "blob" });
-      downloadBlob(zipBlob, buildZipFilename());
+      await downloadAssetsAsZip(selectedEntries, buildDownloadFilename, buildZipFilename());
+    } catch (error) {
+      console.error("❌ Failed to download assets as zip:", error);
     } finally {
       setIsDownloadingSelection(false);
     }

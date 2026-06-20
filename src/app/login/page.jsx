@@ -20,7 +20,7 @@ export default function LoginPage() {
     
     // Simulate fetching project data after login
     setTimeout(() => {
-      router.push("/projects");
+      router.push("/");
     }, 2500);
   };
 

@@ -35,7 +35,7 @@ export function ProjectError({ error, reset, onRetry }) {
 
   const handleBack = () => {
     clearProjectStudioState();
-    router.push("/projects");
+    router.push("/");
   };
 
   return (

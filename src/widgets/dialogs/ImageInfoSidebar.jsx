@@ -5,7 +5,7 @@ import { GoogleIcon } from "@/shared/ui/GoogleIcon"
 import { cn } from "@/shared/lib/utils"
 import { DialogClose } from "@/shared/ui/dialog"
 import { useRemoveWorkflow as useRemoveGeneration, useToggleLike } from "@/features/workflows/api/workflowsApi"
-import { useRemoveAsset } from "@/features/media/api/mediaApi"
+import { useRemoveAsset, downloadMediaItem } from "@/features/media/api/mediaApi"
 import { ConfirmDeleteDialog } from "./ConfirmDeleteDialog"
 
 const TABS = [
@@ -75,21 +75,9 @@ export function ImageInfoSidebar({ item, group, onClose }) {
 
     const handleDownload = async () => {
         if (!url) return
-        try {
-            const response = await fetch(url)
-            const blob = await response.blob()
-            const blobUrl = window.URL.createObjectURL(blob)
-            const link = document.createElement('a')
-            link.href = blobUrl
-            const appName = (process.env.NEXT_PUBLIC_APP_NAME || "Labveil").toLowerCase()
-            link.download = `${appName}-${item.id}.jpg`
-            document.body.appendChild(link)
-            link.click()
-            document.body.removeChild(link)
-            window.URL.revokeObjectURL(blobUrl)
-        } catch (err) {
-            console.error("Download failed:", err)
-        }
+        const appName = (process.env.NEXT_PUBLIC_APP_NAME || "Labveil").toLowerCase()
+        const filename = `${appName}-${item.id}.jpg`
+        await downloadMediaItem(url, filename)
     }
 
     const handleDelete = () => {

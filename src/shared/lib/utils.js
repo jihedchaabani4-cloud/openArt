@@ -1,5 +1,6 @@
 import { clsx } from "clsx";
-import { twMerge } from "tailwind-merge"
+import { twMerge } from "tailwind-merge";
+import { api } from "@/shared/api/client";
 
 export function cn(...inputs) {
   return twMerge(clsx(inputs));
@@ -20,11 +21,10 @@ export function downloadBlob(blob, filename) {
 
 export async function downloadFile(url, filename) {
   try {
-    const response = await fetch(url);
-    const blob = await response.blob();
+    const blob = await api.getBlob(url);
     downloadBlob(blob, filename);
   } catch (error) {
-    console.error("âŒ Download failed:", error);
+    console.error("❌ Download failed:", error);
     // Fallback: just open in new tab if blob fetch fails (e.g. CORS)
     window.open(url, "_blank");
   }

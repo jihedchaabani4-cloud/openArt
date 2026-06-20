@@ -49,4 +49,20 @@ export const api = {
     patch: (endpoint, body, options) => apiRequest(endpoint, { ...options, method: "PATCH", body: JSON.stringify(body) }),
     put: (endpoint, body, options) => apiRequest(endpoint, { ...options, method: "PUT", body: JSON.stringify(body) }),
     delete: (endpoint, options) => apiRequest(endpoint, { ...options, method: "DELETE" }),
+    getBlob: async (url, options = {}) => {
+        const config = {
+            method: "GET",
+            ...options,
+        };
+        try {
+            const response = await fetch(url, config);
+            if (!response.ok) {
+                throw new Error(`Failed to fetch blob: ${response.status} ${response.statusText}`);
+            }
+            return await response.blob();
+        } catch (error) {
+            console.error(`🔌 API getBlob Failed [${url}]:`, error.message);
+            throw error;
+        }
+    },
 };
