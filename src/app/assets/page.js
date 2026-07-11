@@ -5,8 +5,8 @@ export const metadata = {
   description: "Browse and manage your uploaded media assets",
 };
 
-import AssetsPageClient from "./AssetsPageClient";
+import { AssetsLibraryPage } from "@/views";
 
 export default function AssetsPage() {
-  return <AssetsPageClient />;
+  return <AssetsLibraryPage />;
 }

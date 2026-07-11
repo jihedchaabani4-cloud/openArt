@@ -2,10 +2,13 @@
 
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Mail, Lock, Github, Chrome, ArrowRight, Sparkles } from "lucide-react";
+import { Mail, Lock, Chrome, ArrowRight, Sparkles, Laptop } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { LoadingScreen } from "@/shared/ui/LoadingScreen";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const DOMAIN_SERVER = process.env.NEXT_PUBLIC_DOMAIN_SERVER;
 
 export default function LoginPage() {
   const router = useRouter();
@@ -13,15 +16,45 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [isHovered, setIsHovered] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    
-    // Simulate fetching project data after login
-    setTimeout(() => {
+    setError("");
+
+    try {
+      const res = await fetch(`${API_URL}/auth/login`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || "Login failed. Please try again.");
+        setIsLoading(false);
+        return;
+      }
+
+      // Success — navigate to studio
       router.push("/");
-    }, 2500);
+    } catch (err) {
+      console.error("[Login] Error:", err);
+      setError("Network error. Please check your connection.");
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = () => {
+    // Server-side OAuth redirect — backend generates Supabase OAuth URL
+    window.location.href = `${DOMAIN_SERVER}/api/auth/google`;
+  };
+
+  const handleMicrosoftLogin = () => {
+    window.location.href = `${DOMAIN_SERVER}/api/auth/microsoft`;
   };
 
   return (
@@ -106,13 +139,26 @@ export default function LoginPage() {
                   </div>
                 </div>
 
+                {/* Error Message */}
+                {error && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 text-center"
+                  >
+                    {error}
+                  </motion.div>
+                )}
+
                 {/* Submit Button */}
                 <motion.button
+                  type="submit"
                   whileHover={{ scale: 1.01 }}
                   whileTap={{ scale: 0.98 }}
                   onHoverStart={() => setIsHovered(true)}
                   onHoverEnd={() => setIsHovered(false)}
-                  className="w-full mt-6 bg-gradient-to-r from-purple-600 to-blue-600 text-white font-medium py-3 rounded-xl flex items-center justify-center space-x-2 shadow-lg shadow-purple-500/25 border border-white/10 overflow-hidden relative group"
+                  disabled={isLoading}
+                  className="w-full mt-6 bg-gradient-to-r from-purple-600 to-blue-600 text-white font-medium py-3 rounded-xl flex items-center justify-center space-x-2 shadow-lg shadow-purple-500/25 border border-white/10 overflow-hidden relative group disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   <span className="relative z-10 flex items-center gap-2">
                     Sign In
@@ -139,14 +185,18 @@ export default function LoginPage() {
               {/* Social Logins */}
               <div className="grid grid-cols-2 gap-3">
                 <motion.button 
+                  type="button"
+                  onClick={handleMicrosoftLogin}
                   whileHover={{ scale: 1.02, backgroundColor: "rgba(255,255,255,0.1)" }}
                   whileTap={{ scale: 0.98 }}
                   className="flex items-center justify-center gap-2 py-2.5 bg-white/[0.03] border border-white/10 rounded-xl transition-colors"
                 >
-                  <Github className="w-5 h-5 text-white/80" />
-                  <span className="text-sm font-medium text-white/80">Github</span>
+                  <Laptop className="w-5 h-5 text-white/80" />
+                  <span className="text-sm font-medium text-white/80">Microsoft</span>
                 </motion.button>
                 <motion.button 
+                  type="button"
+                  onClick={handleGoogleLogin}
                   whileHover={{ scale: 1.02, backgroundColor: "rgba(255,255,255,0.1)" }}
                   whileTap={{ scale: 0.98 }}
                   className="flex items-center justify-center gap-2 py-2.5 bg-white/[0.03] border border-white/10 rounded-xl transition-colors"

@@ -4,10 +4,10 @@
 import { useMemo } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
+import { isVideoUrl } from "@/features/assets";
 import { useLibraryWorkflowDetail } from "@/features/media";
-import { queryKeys } from "@/shared/api/queryKeys";
-import { isVideoUrl } from "../assetsUtils";
 import { useAuthSession } from "@/shared/api/auth";
+import { queryKeys } from "@/shared/api/queryKeys";
 
 function findCachedLibraryEntry(queryClient, workflowId) {
   const detailEntry = queryClient.getQueryData(queryKeys.library.detail(workflowId));
@@ -82,7 +82,7 @@ function MediaViewer({ media, alt, isVideo }) {
   );
 }
 
-export default function AssetDetailPageClient({ workflowId }) {
+export function AssetDetailPage({ workflowId }) {
   const queryClient = useQueryClient();
   const { data: currentUser, isLoading: authLoading } = useAuthSession();
   const cachedData = useMemo(
@@ -117,3 +117,5 @@ export default function AssetDetailPageClient({ workflowId }) {
     </div>
   );
 }
+
+export default AssetDetailPage;

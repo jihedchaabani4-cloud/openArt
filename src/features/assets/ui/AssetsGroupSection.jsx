@@ -3,7 +3,7 @@
 import { Check, Minus } from "lucide-react";
 import { RowsPhotoAlbum } from "react-photo-album";
 
-import { LibraryMediaGridItem } from "../LibraryMediaGridItem";
+import { LibraryMediaGridItem } from "./LibraryMediaGridItem";
 
 export function AssetsGroupSection({
   group,

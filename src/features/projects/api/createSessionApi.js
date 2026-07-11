@@ -97,7 +97,7 @@ export function useDeleteSession() {
     mutationFn: async ({ sessionId }) => {
       const res = await api.delete(`/sessions/${sessionId}`);
       if (res.ok === false || res.success === false) throw new Error(res.message || 'Failed to delete session');
-      return sessionId;
+      return res; // returns { ok: true, replacementSession }
     },
     onMutate: async ({ sessionId, projectId }) => {
       const projectKey = queryKeys.projectData.byProject(projectId);

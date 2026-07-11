@@ -1,7 +1,7 @@
-import AssetDetailPageClient from "./AssetDetailPageClient";
+import { AssetDetailPage } from "@/views";
 
 export default async function AssetWorkflowPage({ params }) {
   const { workflowId } = await params;
 
-  return <AssetDetailPageClient workflowId={workflowId} />;
+  return <AssetDetailPage workflowId={workflowId} />;
 }

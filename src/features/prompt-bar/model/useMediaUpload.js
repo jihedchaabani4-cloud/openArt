@@ -3,7 +3,6 @@ import { useBatchUploadAssets } from "@/features/media/api/mediaApi";
 
 const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 const ALLOWED_VIDEO_TYPES = ["video/mp4", "video/webm", "video/quicktime"];
-const MAX_FILE_SIZE_MB    = 10;
 
 /**
  * ✅ FIX: Added file type and size validation before hitting the API.

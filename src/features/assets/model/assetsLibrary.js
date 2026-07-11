@@ -39,6 +39,32 @@ export function resolveLibraryCategory(entry) {
   return "media";
 }
 
+export function filterLibraryItems(items = [], { searchQuery = "", mediaFilter = "all", categoryFilter = "all" } = {}) {
+  const query = searchQuery.trim().toLowerCase();
+
+  return items.filter((entry) => {
+    const workflow = entry?.workflow || {};
+    const media = entry?.primary_media || {};
+    const isVideo = isVideoUrl(media.url);
+    const category = resolveLibraryCategory(entry);
+    const searchableText = [
+      workflow.display_name,
+      entry?.generation_info?.prompt,
+      entry?.generation_info?.model,
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+
+    if (query && !searchableText.includes(query)) return false;
+    if (mediaFilter === "image" && isVideo) return false;
+    if (mediaFilter === "video" && !isVideo) return false;
+    if (categoryFilter !== "all" && category !== categoryFilter) return false;
+
+    return true;
+  });
+}
+
 export function buildGroupedPhotos(items = []) {
   const BASE = 1200;
   const groups = new Map();
@@ -71,4 +97,34 @@ export function buildGroupedPhotos(items = []) {
     label,
     photos,
   }));
+}
+
+export function buildDownloadFilename(entry) {
+  const media = entry?.primary_media || {};
+  const workflow = entry?.workflow || {};
+  const rawUrl = media.url || "";
+  const extensionMatch = rawUrl.match(/\.([a-z0-9]+)(?:[?#].*)?$/i);
+  const fallbackExtension = isVideoUrl(rawUrl) ? "mp4" : "png";
+  const extension = extensionMatch?.[1] || fallbackExtension;
+  const baseName =
+    workflow.display_name?.trim().replace(/[<>:"/\\|?*\x00-\x1F]/g, "-") ||
+    workflow.id ||
+    media.id ||
+    "asset";
+
+  return `${baseName}.${extension}`;
+}
+
+export function buildAssetsZipFilename() {
+  const now = new Date();
+  const timestamp = [
+    now.getFullYear(),
+    String(now.getMonth() + 1).padStart(2, "0"),
+    String(now.getDate()).padStart(2, "0"),
+    String(now.getHours()).padStart(2, "0"),
+    String(now.getMinutes()).padStart(2, "0"),
+  ].join("-");
+
+  const appName = (process.env.NEXT_PUBLIC_APP_NAME || "Labveil").toLowerCase();
+  return `${appName}-assets-${timestamp}.zip`;
 }

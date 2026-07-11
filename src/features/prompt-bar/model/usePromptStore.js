@@ -1,4 +1,15 @@
 import { create } from "zustand";
+import {
+  createPromptBarState,
+  createPromptBarReferencesByMode,
+} from "./core/promptBarState";
+import {
+  cleanAllMediaAssetTags,
+  cleanMediaAssetTags,
+  getReferenceAssetKey,
+  normalizeGenerationMode,
+  shouldAllowReferenceAdd,
+} from "./core/promptBarRules";
 
 /**
  * usePromptStore
@@ -6,231 +17,150 @@ import { create } from "zustand";
  * Keeps track of standard generation parameters, references, and status.
  */
 export const usePromptStore = create((set, get) => ({
-  // ─── Local UI State ───────────────────────────────────────────────────────
-  prompt: "",
+  ...createPromptBarState(),
+
   setPrompt: (prompt) => set({ prompt }),
 
-  generationMode: "image", // "image" | "keyframe" | "multiref" | "motion-control"
   setGenerationMode: (mode) => {
-    // Legacy alias: some flows (e.g. reuse settings) used "video" — not a row-2 ModeSelector value
-    const normalized = mode === "video" ? "keyframe" : mode;
-
+    const normalized = normalizeGenerationMode(mode);
     const { generationMode, referenceImages, referencesByMode } = get();
     if (normalized === generationMode) return;
 
-    // 1. Save current active refs to the old mode's slot
     const updatedByMode = {
-      ...referencesByMode,
+      ...createPromptBarReferencesByMode(referencesByMode),
       [generationMode]: referenceImages,
     };
 
-    // 2. Load refs for the new mode (empty array is valid — do not fall back incorrectly)
     let newRefs = updatedByMode[normalized];
     if (newRefs === undefined && normalized === "keyframe") {
       newRefs = updatedByMode.video;
     }
-    newRefs = newRefs ?? [];
 
     set({
       generationMode: normalized,
       referencesByMode: updatedByMode,
-      referenceImages: newRefs,
+      referenceImages: newRefs ?? [],
     });
   },
 
-  modelId: "nanobana_pro",
   setModelId: (modelId) => set({ modelId }),
-
-  ratio: "1:1",
   setRatio: (ratio) => set({ ratio }),
-
-  quality: "2K",
   setQuality: (quality) => set({ quality }),
-
-  count: 1,
   setCount: (count) => set({ count }),
-
-  duration: "5s",
   setDuration: (duration) => set({ duration }),
-
-  videoResolution: "1080p",
   setVideoResolution: (videoResolution) => set({ videoResolution }),
-
-  motion: 50,
   setMotion: (motion) => set({ motion }),
 
-  // ─── Mode-specific references storage ─────────────────────────────────────
-  referencesByMode: {
-    image: [],
-    video: [],
-    keyframe: [],
-    multiref: [],
-    "motion-control": [],
-  },
-
-  referenceImages: [],
-  
   addReference: (asset, role = "normal", maxRefs = 4) => {
     set((state) => {
       const { referenceImages, generationMode, referencesByMode } = state;
-      
-      // Better exists check
-      const exists = referenceImages.find((r) => 
-        (asset.asset_id && r.asset_id === asset.asset_id) || 
-        (asset.url && r.url === asset.url)
-      );
+      const assetKey = getReferenceAssetKey(asset);
+      const exists = referenceImages.find((r) => getReferenceAssetKey(r) === assetKey);
       if (exists) return state;
-      
-      const isSingularRole = ["start", "end", "mc_image", "mc_video"].includes(role);
-      
-      // If adding a normal ref and max reached, abort
-      if (!isSingularRole && referenceImages.length >= maxRefs) return state;
 
-      const isVideo = asset.is_video || (asset.url?.toLowerCase().endsWith('.mp4') || asset.url?.toLowerCase().endsWith('.webm'));
-      const isMotionMode = ["motion", "motion-control"].includes(generationMode);
-      const isKeyframeMode = generationMode === "keyframe";
-      const isSlottedMode = isMotionMode || isKeyframeMode;
+      const validation = shouldAllowReferenceAdd({
+        generationMode,
+        role,
+        asset,
+        referenceImages,
+        maxRefs,
+      });
 
-      // 1. Block 'normal' refs in slotted modes (must use specific roles)
-      if (isSlottedMode && role === "normal") {
-        console.warn(`[usePromptStore] Blocked 'normal' ref in slotted mode: ${generationMode}. Use specific roles.`);
+      if (!validation.ok) {
+        console.warn(`[usePromptStore] ${validation.reason}`);
         return state;
       }
 
-      // 2. Strict type-role enforcement for Motion
-      if (isMotionMode) {
-        if (role === "mc_video" && !isVideo) {
-          console.warn("[usePromptStore] mc_video role requires a video.");
-          return state;
-        }
-        if (role === "mc_image" && isVideo) {
-          console.warn("[usePromptStore] mc_image role requires an image.");
-          return state;
-        }
-      }
-
-      // 3. Block videos in non-motion modes
-      if (isVideo && !isMotionMode) {
-        console.warn(`[usePromptStore] Videos only allowed in motion modes. Blocked for: ${generationMode}`);
-        return state;
-      }
-      
+      const nextRole = validation.nextRole ?? role;
+      const isVideo = validation.isVideo;
+      const isSingularRole = ["start", "end", "mc_image", "mc_video"].includes(nextRole);
       const type = isVideo ? "video" : "image";
-      
-      // Remove previous asset of the same singular role if replacing
-      const filteredRefs = isSingularRole 
-        ? referenceImages.filter(r => r.role !== role) 
-        : referenceImages;
-        
-      const newRefs = [...filteredRefs, { ...asset, role, type, is_video: isVideo }];
-      
-      return { 
+      const filteredRefs = isSingularRole ? referenceImages.filter((r) => r.role !== nextRole) : referenceImages;
+      const newRefs = [...filteredRefs, { ...asset, role: nextRole, type, is_video: isVideo }];
+
+      return {
         referenceImages: newRefs,
-        referencesByMode: { ...referencesByMode, [generationMode]: newRefs }
+        referencesByMode: { ...referencesByMode, [generationMode]: newRefs },
       };
     });
   },
 
   removeReference: (assetId) => {
     set((state) => {
-      const newRefs = state.referenceImages.filter((r) => r.asset_id !== assetId);
-      const tagRegex = new RegExp(`<MediaAsset:\\s*${assetId}>`, "gi");
-      const newPrompt = state.prompt.replace(tagRegex, "").replace(/\s\s+/g, ' ').trim();
+      const newRefs = state.referenceImages.filter((r) => getReferenceAssetKey(r) !== assetId);
+      const newPrompt = cleanMediaAssetTags(state.prompt, [assetId]);
 
       return {
         prompt: newPrompt,
         referenceImages: newRefs,
-        referencesByMode: { ...state.referencesByMode, [state.generationMode]: newRefs }
+        referencesByMode: { ...state.referencesByMode, [state.generationMode]: newRefs },
       };
     });
   },
 
-  clearReferences: () => set((state) => {
-    const newPrompt = state.prompt.replace(/<MediaAsset:\s*[a-f0-9-]+>/gi, "").replace(/\s\s+/g, ' ').trim();
-    return { 
-      prompt: newPrompt,
-      referenceImages: [],
-      referencesByMode: { ...state.referencesByMode, [state.generationMode]: [] }
-    };
-  }),
+  clearReferences: () =>
+    set((state) => {
+      const newPrompt = cleanAllMediaAssetTags(state.prompt);
+      return {
+        prompt: newPrompt,
+        referenceImages: [],
+        referencesByMode: { ...state.referencesByMode, [state.generationMode]: [] },
+      };
+    }),
 
-  setReferenceImages: (images) => set((state) => {
-    const removedIds = state.referenceImages
-      .filter(old => !images.some(img => img.asset_id === old.asset_id))
-      .map(img => img.asset_id);
-    
-    let newPrompt = state.prompt;
-    removedIds.forEach(id => {
-      const tagRegex = new RegExp(`<MediaAsset:\\s*${id}>`, "gi");
-      newPrompt = newPrompt.replace(tagRegex, "");
-    });
-    newPrompt = newPrompt.replace(/\s\s+/g, ' ').trim();
+  setReferenceImages: (images) =>
+    set((state) => {
+      const removedIds = state.referenceImages
+        .filter((old) => !images.some((img) => img.asset_id === old.asset_id))
+        .map((img) => img.asset_id);
 
-    return { 
-      prompt: newPrompt,
-      referenceImages: images,
-      referencesByMode: { ...state.referencesByMode, [state.generationMode]: images }
-    };
-  }),
+      const newPrompt = cleanMediaAssetTags(state.prompt, removedIds);
 
-  swapFrames: () => set((state) => {
-    const refs  = [...state.referenceImages];
-    const start = refs.findIndex((r) => r.role === "start");
-    const end   = refs.findIndex((r) => r.role === "end");
-    if (start === -1 || end === -1) return state;
-    
-    const newRefs = [...refs];
-    newRefs[start] = { ...refs[end],   role: "start" };
-    newRefs[end]   = { ...refs[start], role: "end"   };
-    
-    return { 
-      referenceImages: newRefs,
-      referencesByMode: { ...state.referencesByMode, [state.generationMode]: newRefs }
-    };
-  }),
+      return {
+        prompt: newPrompt,
+        referenceImages: images,
+        referencesByMode: { ...state.referencesByMode, [state.generationMode]: images },
+      };
+    }),
+
+  swapFrames: () =>
+    set((state) => {
+      const refs = [...state.referenceImages];
+      const start = refs.findIndex((r) => r.role === "start");
+      const end = refs.findIndex((r) => r.role === "end");
+      if (start === -1 || end === -1) return state;
+
+      const newRefs = [...refs];
+      newRefs[start] = { ...refs[end], role: "start" };
+      newRefs[end] = { ...refs[start], role: "end" };
+
+      return {
+        referenceImages: newRefs,
+        referencesByMode: { ...state.referencesByMode, [state.generationMode]: newRefs },
+      };
+    }),
 
   updateReferenceRole: (assetId, role) => {
     set((state) => {
-      const newRefs = state.referenceImages.map((r) => 
-        (r.asset_id === assetId || r.workflow_id === assetId || r.id === assetId) 
-          ? { ...r, role } 
+      const newRefs = state.referenceImages.map((r) =>
+        (r.asset_id === assetId || r.workflow_id === assetId || r.id === assetId)
+          ? { ...r, role }
           : r
       );
+
       return {
         referenceImages: newRefs,
-        referencesByMode: { ...state.referencesByMode, [state.generationMode]: newRefs }
+        referencesByMode: { ...state.referencesByMode, [state.generationMode]: newRefs },
       };
     });
   },
 
-  // ─── Reset Store ──────────────────────────────────────────────────────────
-  resetPromptStore: () => set({
-    prompt: "",
-    generationMode: "image",
-    modelId: "nanobana_pro",
-    ratio: "1:1",
-    quality: "2K",
-    count: 1,
-    duration: "5s",
-    videoResolution: "1080p",
-    referenceImages: [],
-    referencesByMode: {
-      image: [],
-      video: [],
-      keyframe: [],
-      multiref: [],
-      "motion-control": [],
-    },
-  }),
+  resetPromptStore: () =>
+    set(() => createPromptBarState()),
 
-  // ─── Popover State ────────────────────────────────────────────────────────
-  popoverOpen: false,
   setPopoverOpen: (popoverOpen) => set({ popoverOpen }),
   togglePopover: () => set((state) => ({ popoverOpen: !state.popoverOpen })),
 
-  // ─── Global Drag State ─────────────────────────────────────────────────────
-  isDraggingGalleryItem: false,
-  draggedItem: null,
   setIsDraggingGalleryItem: (val) => set({ isDraggingGalleryItem: val }),
   setDraggedItem: (item) => set({ draggedItem: item }),
 }));

@@ -1,111 +1,13 @@
 import { create } from "zustand";
-import { getFeatureInfoFromLabel } from "./feature-constants";
-
-const createEmptyFeatures = () => ({
-  era: null,
-  renderingStyle: null,
-  identity: {
-    characterType: null,
-    gender: null,
-    race: null,
-    age: null,
-    build: null,
-    height: null,
-  },
-  head: {
-    hairStyle: null,
-    hairTexture: null,
-    hairColor: null,
-  },
-  details: {
-    eyeColor: null,
-    skinCondition: null,
-    rightArm: null,
-    leftArm: null,
-    rightLeg: null,
-    leftLeg: null,
-  },
-  outfit: null,
-});
-
-function clearFeatureSelection(features, featureInfo) {
-  if (!featureInfo?.section) return features;
-
-  if (["outfit", "era", "renderingStyle"].includes(featureInfo.section)) {
-    return {
-      ...features,
-      [featureInfo.section]: null,
-    };
-  }
-
-  if (!featureInfo.key) return features;
-
-  return {
-    ...features,
-    [featureInfo.section]: {
-      ...features[featureInfo.section],
-      [featureInfo.key]: null,
-    },
-  };
-}
-
-function applyFeatureSelection(features, featureInfo) {
-  if (!featureInfo?.section) return features;
-
-  if (["outfit", "era", "renderingStyle"].includes(featureInfo.section)) {
-    return {
-      ...features,
-      [featureInfo.section]: featureInfo.value,
-    };
-  }
-
-  if (!featureInfo.key) return features;
-
-  return {
-    ...features,
-    [featureInfo.section]: {
-      ...features[featureInfo.section],
-      [featureInfo.key]: featureInfo.value,
-    },
-  };
-}
-
-function mergeElementFeatures(features) {
-  const base = createEmptyFeatures();
-  if (!features) return base;
-
-  return {
-    ...base,
-    ...features,
-    identity: {
-      ...base.identity,
-      ...features.identity,
-    },
-    head: {
-      ...base.head,
-      ...features.head,
-    },
-    details: {
-      ...base.details,
-      ...features.details,
-    },
-  };
-}
-
-function resolveFeatureEditorSelection(featureInfo) {
-  if (!featureInfo?.section) {
-    return { activeTab: "identity", activeSubTab: "characterType" };
-  }
-
-  if (["era", "renderingStyle", "outfit"].includes(featureInfo.section)) {
-    return { activeTab: featureInfo.section, activeSubTab: null };
-  }
-
-  return {
-    activeTab: featureInfo.section,
-    activeSubTab: featureInfo.key || null,
-  };
-}
+import { 
+  createEmptyFeatures,
+  applyFeatureSelection,
+  clearFeatureSelection,
+  mergeElementFeatures,
+  resolveFeatureEditorSelection,
+  getFeatureInfoFromLabel,
+} from "./feature-constants";
+import { cleanAllMediaAssetTags, cleanMediaAssetTags, isVideoAsset, getReferenceAssetKey } from "./core/promptBarRules";
 
 /**
  * useElementStore
@@ -206,15 +108,12 @@ export const useElementStore = create((set) => ({
   addReference: (asset, role = "normal", maxRefs = 5) => {
     set((state) => {
       const modeRefs = state.references[state.elementMode] || [];
+      const assetKey = getReferenceAssetKey(asset);
 
-      const exists = modeRefs.find((ref) => ref.asset_id === asset.asset_id);
+      const exists = modeRefs.find((ref) => getReferenceAssetKey(ref) === assetKey);
       if (exists || modeRefs.length >= maxRefs) return state;
 
-      const isVideo =
-        asset.is_video ||
-        asset.url?.toLowerCase().endsWith(".mp4") ||
-        asset.url?.toLowerCase().endsWith(".webm");
-
+      const isVideo = isVideoAsset(asset);
       const newRefs = [...modeRefs, { ...asset, role, type: isVideo ? "video" : "image", is_video: isVideo }];
 
       return {
@@ -230,8 +129,7 @@ export const useElementStore = create((set) => ({
     set((state) => {
       const mode = state.elementMode;
       const currentPrompt = state.prompts[mode] || "";
-      const tagRegex = new RegExp(`<MediaAsset:\\s*${assetId}>`, "gi");
-      const newPrompt = currentPrompt.replace(tagRegex, "").replace(/\s\s+/g, " ").trim();
+      const newPrompt = cleanMediaAssetTags(currentPrompt, [assetId]);
 
       return {
         prompts: {
@@ -240,7 +138,7 @@ export const useElementStore = create((set) => ({
         },
         references: {
           ...state.references,
-          [mode]: (state.references[mode] || []).filter((ref) => ref.asset_id !== assetId),
+          [mode]: (state.references[mode] || []).filter((ref) => getReferenceAssetKey(ref) !== assetId),
         },
       };
     });
@@ -250,7 +148,7 @@ export const useElementStore = create((set) => ({
     set((state) => {
       const mode = state.elementMode;
       const currentPrompt = state.prompts[mode] || "";
-      const newPrompt = currentPrompt.replace(/<MediaAsset:\s*[a-f0-9-]+>/gi, "").replace(/\s\s+/g, " ").trim();
+      const newPrompt = cleanAllMediaAssetTags(currentPrompt);
 
       return {
         prompts: {
@@ -269,15 +167,10 @@ export const useElementStore = create((set) => ({
       const mode = state.elementMode;
       const currentRefs = state.references[mode] || [];
       const removedIds = currentRefs
-        .filter(old => !images.some(img => img.asset_id === old.asset_id))
-        .map(img => img.asset_id);
-      
-      let newPrompt = state.prompts[mode] || "";
-      removedIds.forEach(id => {
-        const tagRegex = new RegExp(`<MediaAsset:\\s*${id}>`, "gi");
-        newPrompt = newPrompt.replace(tagRegex, "");
-      });
-      newPrompt = newPrompt.replace(/\s\s+/g, ' ').trim();
+        .filter((old) => !images.some((img) => img.asset_id === old.asset_id))
+        .map((img) => img.asset_id);
+
+      const newPrompt = cleanMediaAssetTags(state.prompts[mode] || "", removedIds);
 
       return {
         prompts: {

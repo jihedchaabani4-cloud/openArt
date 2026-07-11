@@ -1,4 +1,10 @@
 import { create } from "zustand";
+import { createEditPromptBarState } from "./core/promptBarState";
+import {
+  cleanAllMediaAssetTags,
+  cleanMediaAssetTags,
+  getReferenceAssetKey,
+} from "./core/promptBarRules";
 
 /**
  * useEditStore
@@ -6,78 +12,41 @@ import { create } from "zustand";
  * Keeps track of edit-specific parameters, references, and status.
  */
 export const useEditStore = create((set) => ({
-  // ─── Edit Target (Workflow & Media) ───────────────────────────────────────
-  editTarget: null, // { workflow_id, media_id, initialPrompt, model_name, etc }
-  
+  ...createEditPromptBarState(),
+
   setEditTarget: (target) => set({ editTarget: target }),
   clearEditTarget: () => set({ editTarget: null }),
 
-  // ─── Local Edit State ─────────────────────────────────────────────────────
-  prompt: "",
   setPrompt: (prompt) => set({ prompt }),
-
-  modelId: "nanobana_pro",
   setModelId: (modelId) => set({ modelId }),
-
-  ratio: "1:1",
   setRatio: (ratio) => set({ ratio }),
-
-  quality: "standard",
   setQuality: (quality) => set({ quality }),
-
-  activeTab: "describe", // describe | camera | upscale | extend | insert | remove
   setActiveTab: (tab) => set({ activeTab: tab }),
-
-  camera: null,
   setCamera: (camera) => set({ camera }),
-
-  lighting: null,
   setLighting: (lighting) => set({ lighting }),
-
-  // ─── DNA State (from useStudioStore) ─────────────────────────────────────
-  stagedDna: {
-    camera_dna: {
-      rotation: 0,
-      tilt: 0,
-      zoom: 0
-    },
-    lighting_dna: {
-      angle: 0,
-      elevation: 0,
-      intensity: 5,
-      type: 'soft',
-      brightness: 40,
-      color: '#ffffff'
-    }
-  },
   setStagedDna: (stagedDna) => set({ stagedDna }),
-  setCameraDna: (cameraDna) => set((state) => ({
-    stagedDna: {
-      ...state.stagedDna,
-      camera_dna: cameraDna
-    }
-  })),
-  setLightingDna: (lightingDna) => set((state) => ({
-    stagedDna: {
-      ...state.stagedDna,
-      lighting_dna: lightingDna
-    }
-  })),
-
-  upscaleScale: "x2", // x2 | x4 | x8  (capped at 19 MP output)
+  setCameraDna: (cameraDna) =>
+    set((state) => ({
+      stagedDna: {
+        ...state.stagedDna,
+        camera_dna: cameraDna,
+      },
+    })),
+  setLightingDna: (lightingDna) =>
+    set((state) => ({
+      stagedDna: {
+        ...state.stagedDna,
+        lighting_dna: lightingDna,
+      },
+    })),
   setUpscaleScale: (scale) => set({ upscaleScale: scale }),
-
-  // ─── Selection for Inpainting/Editing ─────────────────────────────────────
-  selection: null, // { x, y, width, height }
   setSelection: (selection) => set({ selection }),
   clearSelection: () => set({ selection: null }),
 
-  // ─── References for Edit Mode ─────────────────────────────────────────────
-  referenceImages: [],
-  
   addReference: (asset, role = "normal", maxRefs = 4) => {
     set((state) => {
-      const exists = state.referenceImages.find((r) => r.asset_id === asset.asset_id);
+      const assetKey = getReferenceAssetKey(asset);
+      const exists = state.referenceImages.find((r) => getReferenceAssetKey(r) === assetKey);
       if (exists) return state;
       if (state.referenceImages.length >= maxRefs) return state;
       return { referenceImages: [...state.referenceImages, { ...asset, role }] };
@@ -86,11 +55,16 @@ export const useEditStore = create((set) => ({
 
   removeReference: (assetId) => {
     set((state) => ({
-      referenceImages: state.referenceImages.filter((r) => r.asset_id !== assetId),
+      prompt: cleanMediaAssetTags(state.prompt, [assetId]),
+      referenceImages: state.referenceImages.filter((r) => getReferenceAssetKey(r) !== assetId),
     }));
   },
 
-  clearReferences: () => set({ referenceImages: [] }),
+  clearReferences: () =>
+    set((state) => ({
+      prompt: cleanAllMediaAssetTags(state.prompt),
+      referenceImages: [],
+    })),
 
   setReferenceImages: (images) => set({ referenceImages: images }),
 
@@ -101,14 +75,5 @@ export const useEditStore = create((set) => ({
         : state
     ),
 
-  // ─── Reset Store ──────────────────────────────────────────────────────────
-  resetEditStore: () => set({
-    editTarget: null,
-    prompt: "",
-    modelId: "nanobana_pro",
-    ratio: "1:1",
-    quality: "standard",
-    activeTab: "describe",
-    referenceImages: [],
-  }),
+  resetEditStore: () => set(() => createEditPromptBarState()),
 }));

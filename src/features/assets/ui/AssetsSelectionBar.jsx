@@ -1,6 +1,6 @@
 "use client";
 
-import { Download, FolderPlus, Heart, Trash2, X } from "lucide-react";
+import { Download, Heart, Trash2, X } from "lucide-react";
 
 import { Button } from "@/shared/ui/button";
 

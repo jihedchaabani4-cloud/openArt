@@ -4,11 +4,9 @@ import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { useMotionValueEvent, useScroll } from "framer-motion";
 
-import {
-  AssetsFiltersProvider,
-} from "./AssetsFiltersContext";
-import { AssetsNavbar } from "./components/AssetsNavbar";
-import { AssetsSidebar } from "./components/AssetsSidebar";
+import { AssetsFiltersProvider } from "@/features/assets/model/assetsFilters";
+import { AssetsNavbar } from "@/features/assets/ui/AssetsNavbar";
+import { AssetsSidebar } from "@/features/assets/ui/AssetsSidebar";
 
 export default function AssetsLayout({ children }) {
   const { scrollY } = useScroll();

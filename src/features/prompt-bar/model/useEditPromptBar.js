@@ -10,7 +10,6 @@ import {
   useExtendVideoMutation,
 } from "@/features/workflows/api/workflowsApi";
 import { queryKeys } from "@/shared/api/queryKeys";
-import { buildReferencesPayload } from "@/shared/lib/referenceUtils";
 import { useModelSync } from "./useModelSync";
 import { useMediaUpload } from "./useMediaUpload";
 import { useMediaLibrary } from "@/features/media/model/useMediaLibrary";

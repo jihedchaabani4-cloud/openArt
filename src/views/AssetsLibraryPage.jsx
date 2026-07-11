@@ -3,19 +3,25 @@
 import * as React from "react";
 import "react-photo-album/rows.css";
 
-import { useAssetsFilters } from "./AssetsFiltersContext";
-import { buildGroupedPhotos, isVideoUrl, PAGE_SIZE, resolveLibraryCategory } from "./assetsUtils";
-import { AssetsGroupSection } from "./components/AssetsGroupSection";
-import { AssetsSelectionBar } from "./components/AssetsSelectionBar";
-import { downloadAssetsAsZip } from "@/shared/api/assets";
+import {
+  AssetsGroupSection,
+  AssetsSelectionBar,
+  PAGE_SIZE,
+  buildAssetsZipFilename,
+  buildDownloadFilename,
+  buildGroupedPhotos,
+  filterLibraryItems,
+  useAssetsFilters,
+  useAssetsSelection,
+} from "@/features/assets";
 import { useInfiniteUserLibrary } from "@/features/media";
 import { useRemoveWorkflow, useToggleWorkflowLike } from "@/features/workflows/api/workflowsApi";
-import { ConfirmDeleteDialog } from "@/widgets/dialogs/ConfirmDeleteDialog";
+import { downloadAssetsAsZip } from "@/shared/api/assets";
 import { useAuthSession } from "@/shared/api/auth";
+import { ConfirmDeleteDialog } from "@/widgets/dialogs/ConfirmDeleteDialog";
 
-export default function AssetsPageClient() {
+export function AssetsLibraryPage() {
   const loadMoreRef = React.useRef(null);
-  const [selectedIds, setSelectedIds] = React.useState(() => new Set());
   const [isDownloadingSelection, setIsDownloadingSelection] = React.useState(false);
   const [isFavoritingSelection, setIsFavoritingSelection] = React.useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = React.useState(false);
@@ -39,33 +45,10 @@ export default function AssetsPageClient() {
     () => data?.pages?.flatMap((page) => page.data || []) || [],
     [data]
   );
-  const filteredItems = React.useMemo(() => {
-    return items.filter((entry) => {
-      const workflow = entry?.workflow || {};
-      const media = entry?.primary_media || {};
-      const isVideo = isVideoUrl(media.url);
-      const category = resolveLibraryCategory(entry);
-      const searchableText = [
-        workflow.display_name,
-        entry?.generation_info?.prompt,
-        entry?.generation_info?.model,
-      ]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase();
-
-      if (searchQuery.trim()) {
-        const query = searchQuery.trim().toLowerCase();
-        if (!searchableText.includes(query)) return false;
-      }
-
-      if (mediaFilter === "image" && isVideo) return false;
-      if (mediaFilter === "video" && !isVideo) return false;
-      if (categoryFilter !== "all" && category !== categoryFilter) return false;
-
-      return true;
-    });
-  }, [categoryFilter, items, mediaFilter, searchQuery]);
+  const filteredItems = React.useMemo(
+    () => filterLibraryItems(items, { searchQuery, mediaFilter, categoryFilter }),
+    [categoryFilter, items, mediaFilter, searchQuery]
+  );
 
   React.useEffect(() => {
     const sentinel = loadMoreRef.current;
@@ -86,110 +69,34 @@ export default function AssetsPageClient() {
   }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   const groupedPhotos = React.useMemo(() => buildGroupedPhotos(filteredItems), [filteredItems]);
-  const visibleWorkflowIds = React.useMemo(
-    () => new Set(filteredItems.map((entry) => entry?.workflow?.id).filter(Boolean)),
-    [filteredItems]
-  );
-
-  React.useEffect(() => {
-    setSelectedIds((current) => {
-      const next = new Set([...current].filter((id) => visibleWorkflowIds.has(id)));
-      return next.size === current.size ? current : next;
-    });
-  }, [visibleWorkflowIds]);
-
-  const togglePhotoSelection = React.useCallback((photoKey) => {
-    setSelectedIds((current) => {
-      const next = new Set(current);
-      if (next.has(photoKey)) {
-        next.delete(photoKey);
-      } else {
-        next.add(photoKey);
-      }
-      return next;
-    });
-  }, []);
-
-  const toggleGroupSelection = React.useCallback((groupPhotos) => {
-    setSelectedIds((current) => {
-      const next = new Set(current);
-      const keys = groupPhotos.map((photo) => photo.key);
-      const shouldSelectAll = keys.some((key) => !next.has(key));
-
-      keys.forEach((key) => {
-        if (shouldSelectAll) {
-          next.add(key);
-        } else {
-          next.delete(key);
-        }
-      });
-
-      return next;
-    });
-  }, []);
-
-  const clearSelection = React.useCallback(() => {
-    setSelectedIds(new Set());
-  }, []);
-
-  const selectedEntries = React.useMemo(
-    () => filteredItems.filter((entry) => selectedIds.has(entry?.workflow?.id)),
-    [filteredItems, selectedIds]
-  );
-
-  const buildDownloadFilename = React.useCallback((entry) => {
-    const media = entry?.primary_media || {};
-    const workflow = entry?.workflow || {};
-    const rawUrl = media.url || "";
-    const extensionMatch = rawUrl.match(/\.([a-z0-9]+)(?:[?#].*)?$/i);
-    const fallbackExtension = isVideoUrl(rawUrl) ? "mp4" : "png";
-    const extension = extensionMatch?.[1] || fallbackExtension;
-    const baseName =
-      workflow.display_name?.trim().replace(/[<>:"/\\|?*\x00-\x1F]/g, "-") ||
-      workflow.id ||
-      media.id ||
-      "asset";
-
-    return `${baseName}.${extension}`;
-  }, []);
-
-  const buildZipFilename = React.useCallback(() => {
-    const now = new Date();
-    const timestamp = [
-      now.getFullYear(),
-      String(now.getMonth() + 1).padStart(2, "0"),
-      String(now.getDate()).padStart(2, "0"),
-      String(now.getHours()).padStart(2, "0"),
-      String(now.getMinutes()).padStart(2, "0"),
-    ].join("-");
-
-    const appName = (process.env.NEXT_PUBLIC_APP_NAME || "Labveil").toLowerCase()
-    return `${appName}-assets-${timestamp}.zip`;
-  }, []);
+  const {
+    selectedIds,
+    selectedEntries,
+    selectedWorkflowIds,
+    selectedCount,
+    togglePhotoSelection,
+    toggleGroupSelection,
+    clearSelection,
+  } = useAssetsSelection(filteredItems);
 
   const handleDownloadSelected = React.useCallback(async () => {
-    if (isDownloadingSelection || selectedEntries.length === 0) return;
+    if (isDownloadingSelection || selectedCount === 0) return;
 
     setIsDownloadingSelection(true);
     try {
-      await downloadAssetsAsZip(selectedEntries, buildDownloadFilename, buildZipFilename());
+      await downloadAssetsAsZip(selectedEntries, buildDownloadFilename, buildAssetsZipFilename());
     } catch (error) {
       console.error("❌ Failed to download assets as zip:", error);
     } finally {
       setIsDownloadingSelection(false);
     }
-  }, [buildDownloadFilename, buildZipFilename, isDownloadingSelection, selectedEntries]);
+  }, [isDownloadingSelection, selectedCount, selectedEntries]);
 
-  const selectedCount = selectedEntries.length;
-  const selectedWorkflowIds = React.useMemo(
-    () => selectedEntries.map((entry) => entry?.workflow?.id).filter(Boolean),
-    [selectedEntries]
-  );
   const allSelectedAreLiked =
-    selectedEntries.length > 0 && selectedEntries.every((entry) => !!entry?.workflow?.favorited);
+    selectedCount > 0 && selectedEntries.every((entry) => !!entry?.workflow?.favorited);
 
   const handleFavoriteSelected = React.useCallback(async () => {
-    if (isFavoritingSelection || isDeletingSelection || selectedEntries.length === 0) return;
+    if (isFavoritingSelection || isDeletingSelection || selectedCount === 0) return;
 
     setIsFavoritingSelection(true);
     try {
@@ -204,13 +111,13 @@ export default function AssetsPageClient() {
     allSelectedAreLiked,
     isDeletingSelection,
     isFavoritingSelection,
-    selectedEntries.length,
+    selectedCount,
     selectedWorkflowIds,
     toggleWorkflowLike,
   ]);
 
   const handleDeleteSelected = React.useCallback(async () => {
-    if (isDeletingSelection || isFavoritingSelection || selectedWorkflowIds.length === 0) return;
+    if (isDeletingSelection || isFavoritingSelection || selectedCount === 0) return;
 
     setIsDeletingSelection(true);
     try {
@@ -224,6 +131,7 @@ export default function AssetsPageClient() {
     isDeletingSelection,
     isFavoritingSelection,
     removeWorkflow,
+    selectedCount,
     selectedWorkflowIds,
   ]);
 
@@ -290,3 +198,5 @@ export default function AssetsPageClient() {
     </div>
   );
 }
+
+export default AssetsLibraryPage;

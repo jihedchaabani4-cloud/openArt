@@ -3,11 +3,7 @@
 import { motion } from "framer-motion";
 import { FolderOpen, ImageIcon, Search, Video, X } from "lucide-react";
 
-import {
-  CATEGORY_FILTERS,
-  MEDIA_FILTERS,
-  useAssetsFilters,
-} from "../AssetsFiltersContext";
+import { CATEGORY_FILTERS, MEDIA_FILTERS, useAssetsFilters } from "../model/assetsFilters";
 import { Input } from "@/shared/ui/input";
 import { SidebarDropdownButton, SidebarFilterButton } from "./SidebarFilterButton";
 

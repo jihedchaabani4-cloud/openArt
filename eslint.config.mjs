@@ -60,6 +60,9 @@ export default [
     ignores: [
       ".next/**",
       "out/**",
+      "dist/**",
+      "build/**",
+      "coverage/**",
       "node_modules/**",
       "public/**",
       "*.config.js",

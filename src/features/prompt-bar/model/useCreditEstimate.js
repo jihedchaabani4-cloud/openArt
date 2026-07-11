@@ -21,7 +21,7 @@ import { useMemo } from "react";
  */
 export function useCreditEstimate({
     selectedModel,
-    generationMode = "image",
+    generationMode: _generationMode = "image",
     duration = "5s",
     videoResolution = "720p",
     quality = "standard",
@@ -107,7 +107,7 @@ export function useCreditEstimate({
 
         console.warn(`[useCreditEstimate] No price found for ${op}.${qualKey} in table`, table);
         return { credits: null, label: "" };
-    }, [selectedModel, generationMode, duration, videoResolution, quality, operation, count]);
+    }, [selectedModel, duration, videoResolution, quality, operation, count]);
 
     return result;
 }

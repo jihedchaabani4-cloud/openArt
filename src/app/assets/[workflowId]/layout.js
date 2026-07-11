@@ -1,4 +1,4 @@
-import AssetDetailNavbar from "./AssetDetailNavbar";
+import AssetDetailNavbar from "@/features/assets/ui/AssetDetailNavbar";
 
 export default async function AssetDetailLayout({ children, params }) {
   const { workflowId } = await params;

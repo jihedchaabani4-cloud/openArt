@@ -12,6 +12,15 @@ import { useModelSync } from "./useModelSync";
 import { useMediaUpload } from "./useMediaUpload";
 import { useMediaLibrary } from "@/features/media/model/useMediaLibrary";
 import { getItemMetadata } from "@/shared/lib/displayUtils";
+import {
+  extractMinDuration,
+  extractSupportOptions,
+  extractSupportValue,
+} from "./core/promptBarSelectors";
+import {
+  getGenerationSection,
+  resolveGenerationReferenceRole,
+} from "./core/promptBarRules";
 
 export function usePromptBar({ isNewProject = false } = {}) {
   // ─── Global store (Project context) ─────────────────────────────────────────
@@ -125,21 +134,6 @@ export function usePromptBar({ isNewProject = false } = {}) {
     const modelChanged = prevModelKeyRef.current !== selectedModel?.key;
     prevModelKeyRef.current = selectedModel?.key;
 
-    // Helper to extract min/first duration
-    const extractMinDuration = (raw) => {
-      if (!raw) return "5s";
-      if (typeof raw === 'object' && 'min' in raw) {
-        const unit = raw.unit ?? "s";
-        return `${raw.min}${unit}`;
-      }
-      if (Array.isArray(raw)) {
-        const first = raw[0];
-        const val = (first && typeof first === 'object') ? first.value : first;
-        return val ?? "5s";
-      }
-      return "5s";
-    };
-
     if (modelChanged) {
       const defDuration = extractMinDuration(support.duration);
       if (defDuration !== duration) {
@@ -156,36 +150,13 @@ export function usePromptBar({ isNewProject = false } = {}) {
       setReferenceImages([...slottedRefs, ...normalRefs.slice(0, maxRefs)]);
     }
 
-    // 2. Sync ratio and resolution
-    const extractVal = (raw) => {
-      if (Array.isArray(raw)) {
-        const first = raw[0];
-        return (first && typeof first === 'object') ? first.value : first;
-      }
-      return raw?.default ?? null;
-    };
+    const defRatio = extractSupportValue(support.ratio, "1:1");
+    const defQual  = extractSupportValue(support.quality, "2K");
+    const defVid   = extractSupportValue(support.resolution, "1080p");
 
-    const extractOptions = (raw) => {
-      if (!raw) return [];
-      if (Array.isArray(raw)) {
-        return raw.map((item) => (typeof item === "object" ? item.value : item)).filter(Boolean);
-      }
-      if (Array.isArray(raw.items)) {
-        return raw.items.map((item) => (typeof item === "object" ? item.value : item)).filter(Boolean);
-      }
-      if (Array.isArray(raw.options)) {
-        return raw.options.map((item) => (typeof item === "object" ? item.value : item)).filter(Boolean);
-      }
-      return [];
-    };
-
-    const defRatio = extractVal(support.ratio) ?? "1:1";
-    const defQual  = extractVal(support.quality) ?? "2K";
-    const defVid   = extractVal(support.resolution) ?? "1080p";
-
-    const ratioOptions = extractOptions(support.ratio);
-    const qualityOptions = extractOptions(support.quality);
-    const videoResolutionOptions = extractOptions(support.resolution);
+    const ratioOptions = extractSupportOptions(support.ratio);
+    const qualityOptions = extractSupportOptions(support.quality);
+    const videoResolutionOptions = extractSupportOptions(support.resolution);
 
     const nextRatio = ratioOptions.includes(ratio) ? ratio : defRatio;
     const nextResolution = qualityOptions.includes(resolution) ? resolution : defQual;
@@ -263,7 +234,7 @@ export function usePromptBar({ isNewProject = false } = {}) {
         num_images:       count,
         duration,
         video_resolution: videoResolution,
-        section:          (generationMode === "motion" || generationMode === "motion-control") ? "motion" : (isVideo ? "video_studio" : "image_generator"),
+        section:          getGenerationSection(generationMode),
         project_id:       isNewProject ? null : projectId,
         session_id:       isNewProject ? null : activeSessionId,
         reference_media_ids: referenceImages.map(r => r.asset_id || r.id || r.ref_media_id).filter(Boolean),
@@ -331,22 +302,17 @@ export function usePromptBar({ isNewProject = false } = {}) {
     referenceImages,
     handleAddReference:   (asset, role = "normal") => {
       const metadata = getItemMetadata(asset);
-      const isVideo = metadata.isVideo;
-      
-      let finalRole = role;
-      if (finalRole === "normal") {
-        if (generationMode === "motion-control") {
-          finalRole = isVideo ? "mc_video" : "mc_image";
-        } else if (generationMode === "keyframe") {
-          const hasStart = referenceImages.some(r => r.role === 'start');
-          finalRole = hasStart ? "end" : "start";
-        }
-      }
+      const { nextRole } = resolveGenerationReferenceRole({
+        generationMode,
+        referenceImages,
+        role,
+        asset: metadata,
+      });
 
       const normalizedAsset = {
         ...asset,
         url: metadata.url,
-        is_video: isVideo,
+        is_video: metadata.isVideo,
         asset_id: asset.asset_id || asset.name || asset.id
       };
 
@@ -355,7 +321,7 @@ export function usePromptBar({ isNewProject = false } = {}) {
         return;
       }
 
-      return addReference(normalizedAsset, finalRole, maxRefs);
+      return addReference(normalizedAsset, nextRole, maxRefs);
     },
     handleRemoveReference: removeReference,
     handleUpdateReferenceRole: updateReferenceRole,

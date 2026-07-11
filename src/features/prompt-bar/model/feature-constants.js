@@ -1,3 +1,111 @@
+export function createEmptyFeatures() {
+  return {
+    era: null,
+    renderingStyle: null,
+    identity: {
+      characterType: null,
+      gender: null,
+      race: null,
+      age: null,
+      build: null,
+      height: null,
+    },
+    head: {
+      hairStyle: null,
+      hairTexture: null,
+      hairColor: null,
+    },
+    details: {
+      eyeColor: null,
+      skinCondition: null,
+      rightArm: null,
+      leftArm: null,
+      rightLeg: null,
+      leftLeg: null,
+    },
+    outfit: null,
+  };
+}
+
+export function clearFeatureSelection(features, featureInfo) {
+  if (!featureInfo?.section) return features;
+
+  if (["outfit", "era", "renderingStyle"].includes(featureInfo.section)) {
+    return {
+      ...features,
+      [featureInfo.section]: null,
+    };
+  }
+
+  if (!featureInfo.key) return features;
+
+  return {
+    ...features,
+    [featureInfo.section]: {
+      ...features[featureInfo.section],
+      [featureInfo.key]: null,
+    },
+  };
+}
+
+export function applyFeatureSelection(features, featureInfo) {
+  if (!featureInfo?.section) return features;
+
+  if (["outfit", "era", "renderingStyle"].includes(featureInfo.section)) {
+    return {
+      ...features,
+      [featureInfo.section]: featureInfo.value,
+    };
+  }
+
+  if (!featureInfo.key) return features;
+
+  return {
+    ...features,
+    [featureInfo.section]: {
+      ...features[featureInfo.section],
+      [featureInfo.key]: featureInfo.value,
+    },
+  };
+}
+
+export function mergeElementFeatures(features) {
+  const base = createEmptyFeatures();
+  if (!features) return base;
+
+  return {
+    ...base,
+    ...features,
+    identity: {
+      ...base.identity,
+      ...features.identity,
+    },
+    head: {
+      ...base.head,
+      ...features.head,
+    },
+    details: {
+      ...base.details,
+      ...features.details,
+    },
+  };
+}
+
+export function resolveFeatureEditorSelection(featureInfo) {
+  if (!featureInfo?.section) {
+    return { activeTab: "identity", activeSubTab: "characterType" };
+  }
+
+  if (["era", "renderingStyle", "outfit"].includes(featureInfo.section)) {
+    return { activeTab: featureInfo.section, activeSubTab: null };
+  }
+
+  return {
+    activeTab: featureInfo.section,
+    activeSubTab: featureInfo.key || null,
+  };
+}
+
 // ==========================================
 // 1. MAIN TABS (El Menu lkbir)
 // ==========================================

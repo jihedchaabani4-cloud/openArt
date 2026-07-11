@@ -188,7 +188,11 @@ export function useGenerateMutation({ onError } = {}) {
     onSuccess: (res, { payload }) => {
       const { project_id: projectId } = payload || {};
       if (projectId) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.projectData.byProject(projectId) });
+        // Small delay to ensure the placeholder row is visible in DB before refetch.
+        // The backend responds with 202 immediately, but the DB write may lag slightly.
+        setTimeout(() => {
+          queryClient.invalidateQueries({ queryKey: queryKeys.projectData.byProject(projectId) });
+        }, 500);
       }
     },
   });
