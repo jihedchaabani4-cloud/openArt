@@ -710,3 +710,87 @@ export function useElementSheetWorkflows(projectId) {
 
   return { workflows: filteredElements, isLoading, isError };
 }
+
+export function useDeleteMediaItem() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ mediaId }) => {
+      const res = await api.delete(`/workflows/media/${mediaId}`);
+      return res;
+    },
+    onSuccess: (data, variables) => {
+      if (variables?.projectId) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.projectData.byProject(variables.projectId) });
+      } else {
+        queryClient.invalidateQueries({ queryKey: ['projectData'] });
+      }
+    },
+  });
+}
+
+export function useUpdateElementMetadata() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ workflowId, projectId, guidelines, keywords, elementType, element_type }) => {
+      const payload = {};
+      if (guidelines !== undefined) payload.guidelines = guidelines;
+      if (keywords !== undefined) payload.keywords = keywords;
+      if (elementType !== undefined || element_type !== undefined) payload.element_type = elementType || element_type;
+
+      const res = await api.patch(`/v2/elements/${workflowId}`, payload);
+      return res;
+    },
+    onSuccess: (data, variables) => {
+      if (variables?.projectId) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.projectData.byProject(variables.projectId) });
+      }
+    },
+  });
+}
+
+export function useAddImageToElement() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ elementId, imageUrl, projectId }) => {
+      const res = await api.post(`/v2/elements/${elementId}/images`, { imageUrl, projectId });
+      return res;
+    },
+    onSuccess: (data, variables) => {
+      if (variables?.projectId) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.projectData.byProject(variables.projectId) });
+      }
+    },
+  });
+}
+
+export function useAnalyzeElementVision() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ projectId, workflowId, imageUrls }) => {
+      const res = await api.post(`/api/elements/analyze`, { projectId, workflowId, imageUrls });
+      return res;
+    },
+    onSuccess: (data, variables) => {
+      if (variables?.projectId) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.projectData.byProject(variables.projectId) });
+      }
+    },
+  });
+}
+
+export function useCharacterWorkflows(projectId) {
+  const { data, isLoading, isError } = useProjectData(projectId);
+  const workflows = data?.projectContents?.workflows ?? [];
+  const media = data?.projectContents?.media ?? [];
+
+  const characters = workflows
+    .filter((w) => w.workflow_type === "CHARACTER" || w.workflow_type === "CHARACTER_SHEET" || w.metadata?.isCharacter || w.type === "character")
+    .map((w) => {
+      const items = media.filter((m) => m.workflowId === w.name || m.workflowId === w.id);
+      return { ...w, items, isMultiMedia: items.length > 1 };
+    });
+
+  return { workflows: characters, isLoading, isError };
+}
+
+

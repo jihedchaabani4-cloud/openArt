@@ -7,6 +7,13 @@ const ELEMENT_MODE_BY_DNA_TYPE = {
   PRODUCT: "product",
 };
 
+export const ELEMENT_TYPES = [
+  { id: "object", label: "Object", googleIcon: "directions_car" },
+  { id: "style", label: "Style", googleIcon: "palette" },
+  { id: "font", label: "Font", googleIcon: "font_download" },
+  { id: "logo", label: "Logo", googleIcon: "diamond" },
+];
+
 export const ELEMENT_SHEET_CONFIGS = {
   character: {
     type: "character",
