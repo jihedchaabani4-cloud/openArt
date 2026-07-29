@@ -435,7 +435,7 @@ export default function CharacterDetailPage() {
                         <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
                             <div className="flex items-center gap-3">
                                 <span className="text-sm font-semibold text-white">
-                                    {sheetPhotos.length} Image{sheetPhotos.length !== 1 ? "s" : ""}
+                                    Character Sheet
                                 </span>
                             </div>
                         </div>
@@ -500,7 +500,7 @@ export default function CharacterDetailPage() {
                     <div className="flex flex-col gap-4 pt-10 mt-2 border-t border-white/10">
                         <div className="flex flex-wrap items-center justify-between gap-3">
                             <p className="text-xs font-medium text-white uppercase tracking-wider">
-                                Add your generated media
+                                Character Details
                             </p>
                             <div className="flex items-center gap-2">
                                 <input
