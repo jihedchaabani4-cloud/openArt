@@ -11,6 +11,7 @@ import { useFilteredWorkflows as useFilteredGenerations } from "@/features/workf
 import { StudioNavbarLeft } from "./ui/StudioNavbarLeft"
 import { StudioNavbarCenter } from "./ui/StudioNavbarCenter"
 import { StudioNavbarRight } from "./ui/StudioNavbarRight"
+import { UserDropdown } from "./ui/UserDropdown"
 import { CreateSessionDialog } from "./ui/CreateSessionDialog"
 import { ActiveFilterTags } from "@/features/workflows/ui/ActiveFilterTags"
 
@@ -36,6 +37,8 @@ export function StudioNavbar() {
     const setFilter = useGenerationsStore(s => s.setFilter);
     const activeStudioTab = useGenerationsStore(s => s.activeStudioTab);
     const isNavbarHidden = useGenerationsStore(s => s.isNavbarHidden);
+
+    const isCleanNavbarTab = activeStudioTab === 'elements' || activeStudioTab === 'characters';
 
     const { data: projects = [] } = useProjects()
     const { mutateAsync: updateProject } = useUpdateProject()
@@ -110,33 +113,41 @@ export function StudioNavbar() {
                     setIsCreateSessionOpen={setIsCreateSessionOpen}
                 />
 
-                <StudioNavbarCenter
-                    searchExpanded={searchExpanded}
-                    availableModels={availableModels}
-                    filteredCount={filteredCount}
-                    total={total}
-                    searchInputRef={searchInputRef}
-                    handleCloseSearch={handleCloseSearch}
-                    handleOpenSearch={handleOpenSearch}
-                    filters={filters}
-                    setFilter={setFilter}
-                />
+                {!isCleanNavbarTab ? (
+                    <>
+                        <StudioNavbarCenter
+                            searchExpanded={searchExpanded}
+                            availableModels={availableModels}
+                            filteredCount={filteredCount}
+                            total={total}
+                            searchInputRef={searchInputRef}
+                            handleCloseSearch={handleCloseSearch}
+                            handleOpenSearch={handleOpenSearch}
+                            filters={filters}
+                            setFilter={setFilter}
+                        />
 
-                <StudioNavbarRight
-                    searchExpanded={searchExpanded}
-                    gridSize={gridSize}
-                    setGridSize={setGridSize}
-                    soundOnHover={soundOnHover}
-                    setSoundOnHover={setSoundOnHover}
-                    showTileDetails={showTileDetails}
-                    setShowTileDetails={setShowTileDetails}
-                    showDetails={showDetails}
-                    setShowDetails={setShowDetails}
-                    clearPromptOnSubmit={clearPromptOnSubmit}
-                    setClearPromptOnSubmit={setClearPromptOnSubmit}
-                    showUploadedMedia={showUploadedMedia}
-                    setShowUploadedMedia={setShowUploadedMedia}
-                />
+                        <StudioNavbarRight
+                            searchExpanded={searchExpanded}
+                            gridSize={gridSize}
+                            setGridSize={setGridSize}
+                            soundOnHover={soundOnHover}
+                            setSoundOnHover={setSoundOnHover}
+                            showTileDetails={showTileDetails}
+                            setShowTileDetails={setShowTileDetails}
+                            showDetails={showDetails}
+                            setShowDetails={setShowDetails}
+                            clearPromptOnSubmit={clearPromptOnSubmit}
+                            setClearPromptOnSubmit={setClearPromptOnSubmit}
+                            showUploadedMedia={showUploadedMedia}
+                            setShowUploadedMedia={setShowUploadedMedia}
+                        />
+                    </>
+                ) : (
+                    <div className="ml-auto flex items-center gap-2 z-50">
+                        <UserDropdown />
+                    </div>
+                )}
             </div>
 
             <ActiveFilterTags />

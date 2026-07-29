@@ -8,9 +8,12 @@ import { useCreateElementSheetMutation } from "@/features/workflows/api/workflow
 import { useWorkflowsStore } from "@/features/workflows";
 import { getElementSheetConfig, isElementSheetMode } from "@/features/workflows/model/elementSheetConfig";
 import { buildReferencesPayload } from "@/shared/lib/referenceUtils";
+import { useRouter, useParams } from "next/navigation";
 import { queryKeys } from "@/shared/api/queryKeys";
 
 export function useElementPrompt() {
+    const router = useRouter();
+    const params = useParams();
     const s = usePromptBar({ isNewProject: false });
     const [variationsOpen, setVariationsOpen] = React.useState(false);
     const [dialogOpen, setDialogOpen] = React.useState(false);
@@ -19,7 +22,8 @@ export function useElementPrompt() {
     const [mentionCallback, setMentionCallback] = React.useState(null);
     const queryClient = useQueryClient();
 
-    const { selectedProjectId: projectId } = useWorkflowsStore();
+    const { selectedProjectId: storeProjectId } = useWorkflowsStore();
+    const projectId = params?.projectId || storeProjectId;
     const { mutateAsync: runCreateElementSheet, isPending: creatingSheet } = useCreateElementSheetMutation();
 
     const {
@@ -130,11 +134,18 @@ export function useElementPrompt() {
             };
 
             try {
-                await runCreateElementSheet({ payload });
+                const res = await runCreateElementSheet({ payload });
                 if (projectId) {
                     queryClient.invalidateQueries({ queryKey: queryKeys.projectData.byProject(projectId) });
+                    queryClient.refetchQueries({ queryKey: queryKeys.projectData.byProject(projectId) });
                 }
+                const elementId = res?.workflow?.id || res?.workflows?.[0]?.id || res?.workflow?.name || res?.element?.workflow_id || res?.v1WorkflowId || res?.workflowId || res?.id;
                 resetCurrentDraft();
+
+                if (projectId) {
+                    const targetSubpath = elementMode === "character" ? "characters" : "elements";
+                    router.push(`/cinema-studio/${projectId}/${targetSubpath}`);
+                }
                 return;
             } catch (err) {
                 console.error(`Failed to create ${elementMode} sheet:`, err);
@@ -167,7 +178,7 @@ export function useElementPrompt() {
         handleAddClick,
         handleSelectMedia,
         openDialog,
-        generating: creatingSheet || s.generating,
+        generating: creatingSheet || s.generating || useElementStore.getState().isGeneratingDescription,
         handleAddReference: (asset, role = "normal") => {
             if (!asset?.url) return;
             return addReference(asset, role, maxRefs);

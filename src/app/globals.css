@@ -282,7 +282,52 @@ img {
   100% { filter: brightness(0.9) contrast(0.95); }
 }
 
-@keyframes skeletonShimmer {
-  0% { transform: translateX(0%); }
-  100% { transform: translateX(300%); }
+@keyframes scanShimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-shimmer {
+  animation: scanShimmer 1.5s infinite cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+}
+
+/* ── Custom Theme Input Variables & Textarea Utility ── */
+:root {
+  -webkit-text-size-adjust: 100%;
+  tab-size: 4;
+  font-family: var(--default-font-family, ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji");
+  font-feature-settings: var(--default-font-feature-settings, normal);
+  font-variation-settings: var(--default-font-variation-settings, normal);
+  -webkit-tap-highlight-color: transparent;
+  --font-sans: "Suisse Intl", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  --font-mono: "Suisse Intl Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --color-red-50: oklch(97.1% .013 17.38);
+  --color-red-500: oklch(63.7% .237 25.331);
+  --color-orange-500: oklch(70.5% .213 47.604);
+  --color-amber-500: oklch(76.9% .188 70.08);
+  --color-yellow-500: oklch(79.5% .184 86.047);
+  --color-lime-500: oklch(76.8% .233 130.85);
+  --color-green-500: oklch(72.3% .219 149.579);
+  --color-emerald-500: oklch(69.6% .17 162.48);
+  --color-teal-500: oklch(70.4% .14 182.503);
+  --color-cyan-500: oklch(71.5% .143 215.221);
+  --color-sky-500: oklch(68.5% .169 237.323);
+  --color-blue-500: oklch(62.3% .214 259.815);
+  --color-indigo-500: oklch(58.5% .233 277.117);
+  --color-violet-500: oklch(60.6% .25 292.717);
+  --color-purple-500: oklch(62.7% .265 303.9);
+  --color-fuchsia-500: oklch(66.7% .295 322.15);
+  --color-pink-500: oklch(65.6% .241 354.308);
+  --color-rose-500: oklch(64.5% .246 16.439);
+  --color-slate-500: oklch(55.4% .046 257.417);
+  --color-gray-500: oklch(55.1% .027 264.364);
+  --color-zinc-500: oklch(55.2% .016 285.938);
+  --color-neutral-500: oklch(55.6% 0 0);
+  --color-stone-500: oklch(55.3% .013 58.071);
 }

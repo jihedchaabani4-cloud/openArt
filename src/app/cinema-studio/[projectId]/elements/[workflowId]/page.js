@@ -57,23 +57,26 @@ export default function ElementWorkflowEditPage() {
     const workflow = React.useMemo(() => {
         const rawWorkflows = projectData?.projectContents?.workflows ?? [];
         const rawMedia     = projectData?.projectContents?.media ?? [];
-        const found = rawWorkflows.find((w) => (w.id || w.name) === workflowId);
+        const found = rawWorkflows.find((w) => (w.id || w.name) === workflowId || w.id === workflowId || w.name === workflowId);
         if (!found) return null;
+        const targetWfId = found.id || found.name;
+        const targetWfName = found.name || found.id;
         const items = rawMedia
-            .filter((m) => m.workflowId === found.name)
+            .filter((m) => m.workflowId === targetWfId || m.workflowId === targetWfName || m.workflow_id === targetWfId || m.workflow_id === targetWfName)
             .map((m) => ({ ...m, asset_id: m.name || m.id, workflowStepId: m.workflowStepId || m.asset_type || "generation" }));
-        return { ...found, id: found.name, items };
+        return { ...found, id: found.id || found.name, items };
     }, [projectData, workflowId]);
 
     const serverType = workflow?.element_type || workflow?.element?.element_type || workflow?.metadata?.elementType || (workflow?.tags || []).find(t => ["object", "style", "font", "logo"].includes(t)) || "object";
     const currentTypeConfig = ELEMENT_TYPES.find((t) => t.id === serverType) || ELEMENT_TYPES[0];
 
     const serverKeywords = React.useMemo(() => {
-        return workflow?.keywords || workflow?.metadata?.keywords || [];
+        const kw = workflow?.keywords || workflow?.element?.keywords || workflow?.metadata?.keywords || [];
+        return Array.isArray(kw) ? kw : [];
     }, [workflow]);
 
     const serverGuidelines = React.useMemo(() => {
-        const raw = workflow?.guidelines ?? workflow?.metadata?.guidelines ?? "";
+        const raw = workflow?.guidelines ?? workflow?.element?.guidelines ?? workflow?.metadata?.guidelines ?? "";
         let str = "";
         if (Array.isArray(raw)) {
             str = raw.map(g => String(g).trim()).filter(g => Boolean(g) && g !== "[]").join("\n");
@@ -123,7 +126,7 @@ export default function ElementWorkflowEditPage() {
         const rawWorkflows = projectData?.projectContents?.workflows || [];
         const rawMedia = projectData?.projectContents?.media || [];
 
-        return rawWorkflows
+        const workflowPhotos = rawWorkflows
             .filter((wf) => wf.workflow_type !== "ELEMENT_SHEET")
             .reduce((acc, wf, i) => {
                 const items = rawMedia
@@ -158,6 +161,31 @@ export default function ElementWorkflowEditPage() {
                 });
                 return acc;
             }, []);
+
+        const mediaPhotos = rawMedia
+            .filter((m) => (m.url || m.file_url || m.src) && m.workflow_type !== "ELEMENT_SHEET")
+            .map((m, i) => {
+                const url = m.url || m.file_url || m.src;
+                return {
+                    src: url,
+                    width: 1200,
+                    height: 900,
+                    key: m.id || m.name || `media-${i}`,
+                    workflow: { id: m.workflowId || m.id, items: [m] },
+                    thumbUrl: url,
+                    label: m.name || "Media Item",
+                };
+            });
+
+        const combined = [...workflowPhotos];
+        const seen = new Set(combined.map((p) => p.src));
+        for (const p of mediaPhotos) {
+            if (!seen.has(p.src)) {
+                seen.add(p.src);
+                combined.push(p);
+            }
+        }
+        return combined;
     }, [projectData]);
 
     // Draft data (references + taste profile)
@@ -420,7 +448,7 @@ export default function ElementWorkflowEditPage() {
     const analyzeVisionMutation = useAnalyzeElementVision();
 
     const serverDescription = React.useMemo(() => {
-        return workflow?.description || workflow?.metadata?.description || draft?.dna?.description || "";
+        return workflow?.description || workflow?.element?.description || workflow?.metadata?.description || draft?.dna?.description || "";
     }, [workflow, draft]);
 
     const activeTasteProfile = analyzedTasteProfile || serverDescription || null;
@@ -523,10 +551,11 @@ export default function ElementWorkflowEditPage() {
 
             {/* ── SCROLLABLE BODY ── */}
             <div className="flex-1 overflow-y-auto overflow-x-hidden pt-[70px] pb-16 custom-scrollbar">
-                <div className="px-4 sm:px-6 flex flex-col gap-6 pt-4">
+                <div className="px-[45px] flex flex-col gap-6 pt-4">
 
-                    {/* ── 1. THREE-COLUMN METADATA HEADER (Taste Profile | Keywords | Guidelines) ── */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full border-b border-white/10 pb-6 mb-2">
+                    {/* ── 1. THREE-COLUMN METADATA HEADER (Taste Profile | Keywords | Guidelines) — Shown only when data exists or analysis is running ── */}
+                    {(analyzeVisionMutation.isPending || !!activeTasteProfile || (Array.isArray(keywords) && keywords.length > 0) || !!guidelines) && (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full pb-6 mb-2">
                         {/* Column 1: Taste Profile */}
                         <div className="flex flex-col gap-2.5">
                             <div className="flex items-center justify-between">
@@ -547,7 +576,7 @@ export default function ElementWorkflowEditPage() {
                                 </p>
                             ) : (
                                 <p className="text-white/35 text-xs leading-relaxed font-normal italic">
-                                    No vision profile generated yet. Click "Analyze Taste Profile" in the top bar.
+                                    No vision profile generated yet.
                                 </p>
                             )}
                         </div>
@@ -574,30 +603,30 @@ export default function ElementWorkflowEditPage() {
                                 </div>
                             </div>
 
-                            <div className="flex flex-wrap items-center gap-1.5">
+                            <div className="flex flex-wrap gap-1.5">
                                 {analyzeVisionMutation.isPending ? (
                                     <div className="flex flex-wrap items-center gap-1.5 w-full animate-pulse">
-                                        <div className="h-6 w-20 bg-white/10 rounded-full" />
-                                        <div className="h-6 w-28 bg-white/10 rounded-full" />
-                                        <div className="h-6 w-24 bg-white/10 rounded-full" />
-                                        <div className="h-6 w-16 bg-white/10 rounded-full" />
-                                        <div className="h-6 w-24 bg-white/10 rounded-full" />
-                                        <div className="h-6 w-18 bg-white/10 rounded-full" />
-                                        <div className="h-6 w-28 bg-white/10 rounded-full" />
+                                        <div className="h-6 w-20 bg-white/10 rounded-md" />
+                                        <div className="h-6 w-28 bg-white/10 rounded-md" />
+                                        <div className="h-6 w-24 bg-white/10 rounded-md" />
+                                        <div className="h-6 w-16 bg-white/10 rounded-md" />
+                                        <div className="h-6 w-24 bg-white/10 rounded-md" />
+                                        <div className="h-6 w-18 bg-white/10 rounded-md" />
+                                        <div className="h-6 w-28 bg-white/10 rounded-md" />
                                     </div>
                                 ) : keywords.length > 0 ? (
                                     keywords.map((kw) => (
-                                        <Badge
+                                        <span
                                             key={kw}
-                                            variant="secondary"
-                                            className="bg-white/10 text-white/80 border-white/10 hover:bg-white/15 px-2.5 py-1 text-xs font-normal"
+                                            data-slot="badge"
+                                            className="focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden whitespace-nowrap rounded-md border border-white/10 px-2 py-0.5 text-xs font-book transition-[color,box-shadow] focus-visible:ring-[3px] [&>svg]:pointer-events-none [&>svg]:size-3 [a&]:hover:bg-accent [a&]:hover:text-accent-foreground backdrop-blur-md bg-white/5 text-white/80 hover:text-white cursor-pointer hover:bg-white/10"
                                         >
                                             {kw}
-                                        </Badge>
+                                        </span>
                                     ))
                                 ) : (
                                     <p className="text-white/35 text-xs leading-relaxed font-normal italic">
-                                        No keywords extracted yet. Click "Analyze Taste Profile" in top bar.
+                                        No keywords extracted yet.
                                     </p>
                                 )}
                             </div>
@@ -625,35 +654,19 @@ export default function ElementWorkflowEditPage() {
                             </div>
 
                             {isEditingGuidelines ? (
-                                <div className="flex flex-col gap-2">
-                                    <Textarea
+                                <div className="group relative w-full min-w-0 p-[0.5px]">
+                                    <textarea
                                         autoFocus
-                                        rows={4}
+                                        data-slot="textarea"
                                         value={guidelineDraftText}
                                         onChange={(e) => setGuidelineDraftText(e.target.value)}
+                                        onBlur={() => handleSaveGuidelinesText(guidelineDraftText)}
+                                        maxLength={10049}
+                                        rows={2}
                                         placeholder="Add instructions and keywords that guide the generation process when using this element. For example: 'Use a warm color palette, add film grain'."
-                                        className="bg-black/50 border-white/20 text-xs p-2.5"
+                                        aria-label="Element guidelines"
+                                        className="border-input focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 flex field-sizing-content rounded-md border bg-transparent py-1.5 shadow-xs outline-none disabled:opacity-50 text-xs md:text-xs font-normal text-white/60 placeholder:text-foreground/45 ring-ring/50! min-h-[2lh] max-h-[5lh] overflow-y-auto custom-scrollbar w-full resize-none border-none px-1.5 py-0.5! text-xs leading-relaxed ring-0 transition-all focus-visible:ring-[0.5px] disabled:cursor-wait"
                                     />
-                                    <div className="flex items-center justify-end gap-2">
-                                        <Button
-                                            type="button"
-                                            variant="ghost"
-                                            size="xs"
-                                            onClick={() => setIsEditingGuidelines(false)}
-                                            className="text-xs text-white/40 hover:text-white"
-                                        >
-                                            Cancel
-                                        </Button>
-                                        <Button
-                                            type="button"
-                                            size="xs"
-                                            variant="user-menu-filled"
-                                            onClick={() => handleSaveGuidelinesText(guidelineDraftText)}
-                                            className="text-xs h-6 px-3"
-                                        >
-                                            Save
-                                        </Button>
-                                    </div>
                                 </div>
                             ) : guidelines ? (
                                 <p className="text-white/60 text-xs leading-relaxed font-normal whitespace-pre-wrap">
@@ -675,6 +688,7 @@ export default function ElementWorkflowEditPage() {
                             )}
                         </div>
                     </div>
+                    )}
 
                     {/* ── 2. IMAGES GALLERY ── */}
                     <div>
@@ -719,33 +733,41 @@ export default function ElementWorkflowEditPage() {
                                             const isAddingThis = pendingAddingUrls.includes(photo.src);
                                             const isLoadingThis = isDeletingThis || isAddingThis;
 
+                                            const isAnalyzing = analyzeVisionMutation.isPending;
+
                                             return (
                                                 <div
                                                     key={photo.key}
                                                     style={{ width, height }}
-                                                    className="relative group overflow-hidden bg-zinc-900"
+                                                    className="group/card relative overflow-hidden cursor-zoom-in bg-zinc-900"
                                                 >
                                                     {photo.isVid ? (
                                                         <video
                                                             src={photo.src}
-                                                            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                                            className="w-full h-full object-cover transition-transform duration-300 group-hover/card:scale-105"
                                                             muted playsInline
                                                         />
                                                     ) : (
                                                         <img
                                                             src={photo.src}
                                                             alt={`ref-${photo.key}`}
-                                                            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                                            className="w-full h-full object-cover transition-transform duration-300 group-hover/card:scale-105"
                                                         />
                                                     )}
-                                                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-200" />
 
-                                                    {/* Delete button (White circle with dark X) - hidden while loading */}
-                                                    {!isLoadingThis && (
+                                                    {/* Scanning Shimmer Overlay during Vision AI Analysis */}
+                                                    {isAnalyzing && (
+                                                        <div className="animate-shimmer pointer-events-none absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent z-10" />
+                                                    )}
+
+                                                    <div className="absolute inset-0 bg-black/0 group-hover/card:bg-black/20 transition-colors duration-200" />
+
+                                                    {/* Delete button (White circle with dark X) - hidden while loading or analyzing */}
+                                                    {!isLoadingThis && !isAnalyzing && (
                                                         <button
                                                             type="button"
                                                             onClick={(e) => handleDeleteReferenceMedia(e, photo)}
-                                                            className="absolute top-2 right-2 z-20 size-6 rounded-full bg-white text-black hover:bg-white/90 shadow-md flex items-center justify-center cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                                                            className="absolute top-2 right-2 z-20 size-6 rounded-full bg-white text-black hover:bg-white/90 shadow-md flex items-center justify-center cursor-pointer opacity-0 group-hover/card:opacity-100 transition-opacity duration-200"
                                                             title={referencePhotos.length <= 1 ? "Delete element" : "Remove image"}
                                                         >
                                                             <X className="size-3.5 stroke-[2.5]" />
@@ -775,8 +797,8 @@ export default function ElementWorkflowEditPage() {
 
                     {/* ── 3. PROJECT GENERATIONS GALLERY ── */}
                     {photos.length > 0 && (
-                        <div className="flex flex-col gap-4 pt-4">
-                            <p className="text-xs font-medium text-white/40 uppercase tracking-wider">Generations</p>
+                        <div className="flex flex-col gap-4 pt-10 mt-6 border-t border-white/10">
+                            <p className="text-xs font-medium text-white uppercase tracking-wider">Add your generated media</p>
                             <motion.div
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}

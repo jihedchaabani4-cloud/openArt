@@ -5,10 +5,10 @@ import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 
 const CATEGORY_TABS = [
   { id: "all", label: "All", googleIcon: "grid_view" },
-  { id: "object", label: "Objects", googleIcon: "directions_car" },
+  { id: "object", label: "Objects", googleIcon: "category" },
   { id: "style", label: "Styles", googleIcon: "palette" },
-  { id: "font", label: "Fonts", googleIcon: "font_download" },
-  { id: "logo", label: "Logos", googleIcon: "diamond" },
+  { id: "font", label: "Fonts", googleIcon: "match_case" },
+  { id: "logo", label: "Logos", googleIcon: "token" },
 ];
 
 export function ElementsKreaControls({

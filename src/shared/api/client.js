@@ -32,7 +32,8 @@ export async function apiRequest(endpoint, options = {}) {
         // Handle specific status codes if needed
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.error || errorData.message || `API error: ${response.status} ${response.statusText}`);
+            const errMsg = errorData.message || (typeof errorData.error === 'string' ? errorData.error : null) || `API error: ${response.status} ${response.statusText}`;
+            throw new Error(errMsg);
         }
 
         return await response.json();

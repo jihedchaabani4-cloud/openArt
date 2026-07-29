@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation"
 
 import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows"
 import { useElementSheetWorkflows } from "@/features/workflows/api/workflowsApi"
-import { ElementsPromptBar } from "@/features/prompt-bar/ui/elements/ElementsPromptBar"
 import { RowsPhotoAlbum } from 'react-photo-album'
 import 'react-photo-album/rows.css'
 import { ArrowUp } from "lucide-react"
@@ -16,6 +15,16 @@ import { usePromptStore } from "@/features/prompt-bar/model/usePromptStore";
 import { getPrimaryMedia } from "@/shared/lib/generationUtils";
 import { getItemMetadata as getDisplayMeta } from "@/shared/lib/displayUtils";
 import { LoadingScreen } from "@/shared/ui/LoadingScreen";
+
+import { ElementCardKrea } from "@/components/cinema-studio/elements/ElementCardKrea";
+import { NewElementCardKrea } from "@/components/cinema-studio/elements/NewElementCardKrea";
+import { ElementsKreaControls } from "@/components/cinema-studio/elements/ElementsKreaControls";
+import { ElementsHeroHeader } from "@/components/cinema-studio/elements/ElementsHeroHeader";
+import { ElementsKreaHero } from "@/components/cinema-studio/elements/ElementsKreaHero";
+import { HowToDrawer } from "@/components/cinema-studio/elements/HowToDrawer";
+import { useWorkflowDelete } from "@/features/workflows";
+import { ConfirmDeleteDialog } from "@/widgets/dialogs/ConfirmDeleteDialog";
+
 
 const PAGE_SIZE = 30;
 
@@ -70,11 +79,24 @@ export default function ElementsPage({ params }) {
         [existingSheets, visibleCount]
     );
 
+    const [selectedCategory, setSelectedCategory] = React.useState("all");
+    const [isHowToOpen, setIsHowToOpen] = React.useState(false);
+    const { isDeleteDialogOpen, setIsDeleteDialogOpen, promptDelete, confirmDelete, isDeleting } = useWorkflowDelete();
+
+    // Filter element sheets by category
+    const filteredSheets = React.useMemo(() => {
+        if (selectedCategory === "all") return visibleSheets;
+        return visibleSheets.filter((w) => {
+            const type = w.element_type || w.metadata?.elementType || (w.tags || []).find(t => ["object", "style", "font", "logo"].includes(t)) || "object";
+            return type === selectedCategory;
+        });
+    }, [visibleSheets, selectedCategory]);
+
     // Navigate to the Edit Page for this workflow
     const handleWorkflowClick = (workflow) => {
         const workflowId = workflow.id || workflow.name;
         if (!workflowId || !projectId) return;
-        router.push(`/cinema-studio/${projectId}/elements/edit/${workflowId}`);
+        router.push(`/cinema-studio/${projectId}/elements/${workflowId}`);
     };
 
     const scrollRef = React.useRef(null);
@@ -197,7 +219,14 @@ export default function ElementsPage({ params }) {
     }, [visibleSheets]);
 
 
-    if (isLoading && existingSheets.length === 0) {
+    // Auto-redirect to new element page if project has no existing elements
+    React.useEffect(() => {
+        if (!isLoading && existingSheets.length === 0 && projectId) {
+            router.replace(`/cinema-studio/${projectId}/elements/new`);
+        }
+    }, [isLoading, existingSheets.length, projectId, router]);
+
+    if (isLoading || existingSheets.length === 0) {
         return <LoadingScreen message="Loading elements" />
     }
 
@@ -221,71 +250,51 @@ export default function ElementsPage({ params }) {
                 <div 
                     ref={scrollRef}
                     onScroll={handleScroll}
-                    className="flex-1 overflow-y-auto pt-[80px] overflow-x-hidden p-5 custom-scrollbar"
+                    className="flex-1 overflow-y-auto pt-[80px] overflow-x-hidden px-4 py-6 custom-scrollbar w-full"
                 >
-                    <AnimatePresence mode="wait">
-                        {existingSheets.length > 0 ? (
-                            <motion.div 
-                                key="feed"
-                                initial={{ opacity: 0, y: 16 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -16 }}
-                                transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
-                                className="flex flex-col gap-6 w-full pb-32 transition-opacity duration-200"
-                                style={{ opacity: isGridResizing ? 0.9 : 1 }}
-                            >
-                                <RowsPhotoAlbum
-                                    photos={photos}
-                                    targetRowHeight={targetRowHeight}
-                                    spacing={16}
-                                    rowConstraints={{ singleRowMaxHeight: targetRowHeight * 1.6 }}
-                                    render={{
-                                        photo: (_, { photo, width, height }) => (
-                                            <div
-                                                key={photo.key}
-                                                className="react-photo-album--photo"
-                                                style={{
-                                                    width,
-                                                    height,
-                                                    "--react-photo-album--photo-width": width,
-                                                    "--react-photo-album--photo-height": height,
-                                                }}
-                                            >
-                                                <MediaGridItem
-                                                    key={photo.key}
-                                                    workflow={photo.workflow}
-                                                    onClick={() => handleWorkflowClick(photo.workflow)}
-                                                    className="rounded-2xl border-none shadow-xl w-full h-full"
-                                                    width={width}
-                                                    height={height}
-                                                    disableLayoutAnimation={isGridResizing}
-                                                />
-                                            </div>
-                                        ),
-                                    }}
-                                />
-                                {hasMore && (
-                                    <div className="flex justify-center pt-2 text-sm text-white/45">
-                                        Scroll down to load 30 more
-                                    </div>
-                                )}
-                            </motion.div>
-                        ) : (
-                            <motion.div 
-                                key="empty"
-                                initial={{ opacity: 0, scale: 0.95 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 1.05 }}
-                                className="w-full h-full flex items-center justify-center"
-                            >
-                                <EmptyState />
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
+                    {/* ── Krea Video Hero Banner ── */}
+                    <ElementsKreaHero
+                        projectName="Elements"
+                        onOpenCreateModal={() => router.push(`/cinema-studio/${projectId}/elements/new`)}
+                    />
+
+                    {/* ── Category Filter Controls ── */}
+                    <ElementsKreaControls
+                        selectedCategory={selectedCategory}
+                        onCategoryChange={setSelectedCategory}
+                    />
+
+                    {/* ── Elements Grid (Full Width 100%) ── */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 pb-32 w-full">
+                        {/* Always show + New Element Card */}
+                        <NewElementCardKrea
+                            onClick={() => router.push(`/cinema-studio/${projectId}/elements/new`)}
+                        />
+
+                        {filteredSheets.map((workflow) => (
+                            <ElementCardKrea
+                                key={workflow.id || workflow.name}
+                                element={workflow}
+                                onClick={handleWorkflowClick}
+                                onDelete={(elem) => promptDelete(elem)}
+                            />
+                        ))}
+                    </div>
                 </div>
 
-                {/* Dedicated Elements PromptBar */}
-                <ElementsPromptBar />
+                <HowToDrawer
+                    isOpen={isHowToOpen}
+                    onClose={() => setIsHowToOpen(false)}
+                />
+
+                <ConfirmDeleteDialog
+                    open={isDeleteDialogOpen}
+                    onOpenChange={setIsDeleteDialogOpen}
+                    title="Delete Element?"
+                    description="This action will permanently delete this element reference sheet."
+                    onConfirm={() => confirmDelete(projectId)}
+                    isDeleting={isDeleting}
+                />
 
                 <AnimatePresence>
                     {showTopBtn && (

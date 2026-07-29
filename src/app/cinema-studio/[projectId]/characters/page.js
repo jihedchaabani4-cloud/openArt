@@ -1,276 +1,252 @@
-"use client";
+"use client"
 
-import * as React from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { useRouter } from "next/navigation";
+import * as React from "react"
+import { motion, AnimatePresence } from "framer-motion"
+import { useRouter } from "next/navigation"
 
-import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows";
-import { useCharacterWorkflows } from "@/features/workflows/api/workflowsApi";
-import { ElementsPromptBar } from "@/features/prompt-bar/ui/elements/ElementsPromptBar";
-import { useElementStore } from "@/features/prompt-bar/model/useElementStore";
-import { RowsPhotoAlbum } from 'react-photo-album';
-import 'react-photo-album/rows.css';
-import { MediaGridItem } from "@/widgets/StudioLayout/GenerationsStudio/MediaGridItem";
-import { getPrimaryMedia } from "@/shared/lib/generationUtils";
-import { getItemMetadata as getDisplayMeta } from "@/shared/lib/displayUtils";
-import { LoadingScreen } from "@/shared/ui/LoadingScreen";
+import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows"
+import { useCharacterWorkflows } from "@/features/workflows/api/workflowsApi"
+import { ArrowUp } from "lucide-react"
+import { usePromptStore } from "@/features/prompt-bar/model/usePromptStore"
+import { getPrimaryMedia } from "@/shared/lib/generationUtils"
+import { getItemMetadata as getDisplayMeta } from "@/shared/lib/displayUtils"
+import { LoadingScreen } from "@/shared/ui/LoadingScreen"
 
-// ─── Character Archetypes ─────────────────────────────────────────────────────
-const CHARACTER_ARCHETYPES = [
-  {
-    id: "eccentric",
-    title: "The Eccentric",
-    description: "Unforgettable quirky humans. Magnetic scene-stealers with offbeat charm.",
-    prompt: "An eccentric character with wild red curly hair, bright quirky clothing, magnetic personality, unforgettable look, character reference sheet, 3-view front side back",
-    image: "https://www.gstatic.com/aitestkitchen/website/flow/flow_characters/the_eccentric.jpeg",
-  },
-  {
-    id: "professional",
-    title: "The Professional",
-    description: "Clean cut, well spoken, competent",
-    prompt: "A professional character, clean cut appearance, well dressed, competent and authoritative look, character reference sheet, 3-view front side back",
-    image: "https://www.gstatic.com/aitestkitchen/website/flow/flow_characters/the_professional.jpeg",
-  },
-  {
-    id: "wildcard",
-    title: "The Wildcard",
-    description: "Beyond human, anything can be a character, right?",
-    prompt: "A wildcard fantasy character, non-human creature, otherworldly appearance, fantastical being, character reference sheet, 3-view front side back",
-    image: "https://www.gstatic.com/aitestkitchen/website/flow/flow_characters/the_wildcard.jpeg",
-  },
-  {
-    id: "familiar",
-    title: "The Familiar",
-    description: "Grounded and authentic, a relatable anchor for your story",
-    prompt: "A familiar grounded character, authentic real-world look, relatable everyday person, natural appearance, character reference sheet, 3-view front side back",
-    image: "https://www.gstatic.com/aitestkitchen/website/flow/flow_characters/the_familiar.jpeg",
-  },
-  {
-    id: "wicked",
-    title: "The Wicked",
-    description: "Powerful antagonistic figures that command the screen",
-    prompt: "A wicked antagonist character, dark commanding presence, powerful villain look, dramatic and sinister, character reference sheet, 3-view front side back",
-    image: "https://www.gstatic.com/aitestkitchen/website/flow/flow_characters/the_wicked.jpeg",
-  },
-  {
-    id: "fantastical",
-    title: "The Fantastical",
-    description: "Ethereal, dreamlike beings fusing the human and the mythical",
-    prompt: "A fantastical ethereal character, dreamlike otherworldly being, mythical human fusion, glowing ethereal appearance, character reference sheet, 3-view front side back",
-    image: "https://www.gstatic.com/aitestkitchen/website/flow/flow_characters/the_fantastical.jpeg",
-  },
-];
+import { CharacterCardKrea } from "@/components/cinema-studio/characters/CharacterCardKrea"
+import { NewElementCardKrea } from "@/components/cinema-studio/elements/NewElementCardKrea"
+import { ElementsKreaControls } from "@/components/cinema-studio/elements/ElementsKreaControls"
+import { ElementsKreaHero } from "@/components/cinema-studio/elements/ElementsKreaHero"
+import { HowToDrawer } from "@/components/cinema-studio/elements/HowToDrawer"
+import { useWorkflowDelete } from "@/features/workflows"
+import { ConfirmDeleteDialog } from "@/widgets/dialogs/ConfirmDeleteDialog"
 
-// ─── Archetype Card ───────────────────────────────────────────────────────────
-function ArchetypeCard({ archetype, onClick, index }) {
-  return (
-    <motion.button
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.06, duration: 0.38, ease: [0.16, 1, 0.3, 1] }}
-      whileTap={{ scale: 0.98 }}
-      onClick={() => onClick(archetype)}
-      style={{
-        flex: "1 1 0px",
-        minWidth: 0,
-        height: "auto",
-        padding: "1.25rem",
-        borderRadius: "1.5rem",
-        display: "flex",
-        alignItems: "center",
-        gap: "1rem",
-        textAlign: "left",
-        backdropFilter: "blur(80px)",
-        backgroundColor: "rgba(218, 220, 224, 0.1)",
-        color: "rgb(255, 255, 255)",
-        border: "none",
-        cursor: "pointer",
-        transition: "box-shadow 0.2s, background-color 0.15s",
-        width: "100%",
-      }}
-      whileHover={{ backgroundColor: "rgba(218, 220, 224, 0.15)" }}
-    >
-      {/* Image */}
-      <img
-        src={archetype.image}
-        alt={archetype.title}
-        crossOrigin="anonymous"
-        style={{
-          width: 88,
-          height: 88,
-          borderRadius: "0.875rem",
-          objectFit: "cover",
-          flexShrink: 0,
-        }}
-      />
+const PAGE_SIZE = 30;
 
-      {/* Text */}
-      <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem", minWidth: 0 }}>
-        <span style={{ fontSize: "0.9375rem", fontWeight: 700, color: "#fff", lineHeight: "1.25rem" }}>
-          {archetype.title}
-        </span>
-        <span style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.5)", lineHeight: "1.1rem" }}>
-          {archetype.description}
-        </span>
-      </div>
-    </motion.button>
-  );
-}
-
-// ─── Page ─────────────────────────────────────────────────────────────────────
 export default function CharactersPage({ params }) {
-  const { projectId } = React.use(params);
-  const { setSelectedProjectId, setActiveStudioTab, gridSize } = useGenerationsStore();
-  const { setPrompt, setElementMode } = useElementStore();
-  const router = useRouter();
+    const { projectId } = React.use(params)
+    const { setSelectedProjectId, setActiveStudioTab } = useGenerationsStore()
 
-  React.useEffect(() => {
-    if (projectId) setSelectedProjectId(projectId);
-    setActiveStudioTab("characters");
-    setElementMode("character");
-  }, [projectId, setSelectedProjectId, setActiveStudioTab, setElementMode]);
+    // Setup active project state
+    React.useEffect(() => {
+        if (projectId) setSelectedProjectId(projectId)
+        setActiveStudioTab("characters")
+    }, [projectId, setSelectedProjectId, setActiveStudioTab])
 
-  // Fetch only character sheet workflows
-  const { workflows: characterSheets, isLoading } = useCharacterWorkflows(projectId);
+    const gridSize = useGenerationsStore(s => s.gridSize);
+    const setIsNavbarHidden = useGenerationsStore(s => s.setIsNavbarHidden);
+    const [isGridResizing, setIsGridResizing] = React.useState(false);
+    
+    const isDragging = usePromptStore(s => s.isDraggingGalleryItem);
+    const router = useRouter();
+    
+    // Natively fetch character sheet workflows
+    const { workflows: existingSheets, isLoading } = useCharacterWorkflows(projectId)
+    const sheetsListKey = React.useMemo(
+        () => existingSheets.map((workflow) => workflow.id || workflow.name).join("|"),
+        [existingSheets]
+    );
+    const [visibleCount, setVisibleCount] = React.useState(PAGE_SIZE);
+    const hasMore = visibleCount < existingSheets.length;
+    const visibleSheets = React.useMemo(
+        () => existingSheets.slice(0, visibleCount),
+        [existingSheets, visibleCount]
+    );
 
-  const targetRowHeight = gridSize === "lg" ? 380 : gridSize === "md" ? 280 : 200;
+    const [isHowToOpen, setIsHowToOpen] = React.useState(false);
+    const { isDeleteDialogOpen, setIsDeleteDialogOpen, promptDelete, confirmDelete, isDeleting } = useWorkflowDelete();
 
-  const photos = React.useMemo(() => {
-    return (characterSheets || []).reduce((acc, workflow, i) => {
-      const primaryItem = getPrimaryMedia(workflow);
-      if (!primaryItem) return acc;
+    // Navigate to the Edit Page for this character workflow
+    const handleWorkflowClick = (workflow) => {
+        const workflowId = workflow.id || workflow.name;
+        if (!workflowId || !projectId) return;
+        router.push(`/cinema-studio/${projectId}/characters/${workflowId}`);
+    };
 
-      const meta = getDisplayMeta(primaryItem, workflow);
-      const aspect = meta?.aspect ?? "3/4";
-      const [wStr, hStr] = aspect.split("/");
-      const wNum = parseFloat(wStr) || 3;
-      const hNum = parseFloat(hStr) || 4;
-      const BASE = 1200;
-      const width  = Math.round(BASE * (wNum / Math.max(wNum, hNum)));
-      const height = Math.round(BASE * (hNum / Math.max(wNum, hNum)));
-      const url = meta?.url || "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
+    const scrollRef = React.useRef(null);
+    const prevScrollTop = React.useRef(0);
+    const rafRef = React.useRef(null);
+    const [showTopBtn, setShowTopBtn] = React.useState(false);
 
-      acc.push({ src: url, width, height, key: workflow.id || workflow.name || String(i), workflow });
-      return acc;
+    const loadMore = React.useCallback(() => {
+        setVisibleCount((current) => Math.min(current + PAGE_SIZE, existingSheets.length));
+    }, [existingSheets.length]);
+
+    React.useEffect(() => {
+        setVisibleCount(PAGE_SIZE);
+        prevScrollTop.current = 0;
+    }, [projectId, sheetsListKey]);
+
+    const handleScroll = React.useCallback(() => {
+        if (rafRef.current) return; 
+
+        rafRef.current = requestAnimationFrame(() => {
+            rafRef.current = null;
+            if (!scrollRef.current) return;
+
+            const currentScrollTop = scrollRef.current.scrollTop;
+
+            setShowTopBtn(currentScrollTop > 400);
+
+            const isCurrentlyHidden = useGenerationsStore.getState().isNavbarHidden;
+            if (currentScrollTop > prevScrollTop.current && currentScrollTop > 80) {
+                if (!isCurrentlyHidden) setIsNavbarHidden(true);
+            } else if (currentScrollTop < prevScrollTop.current) {
+                if (isCurrentlyHidden) setIsNavbarHidden(false);
+            }
+
+            const remainingScroll =
+                scrollRef.current.scrollHeight - (currentScrollTop + scrollRef.current.clientHeight);
+            if (remainingScroll <= 240 && hasMore) {
+                loadMore();
+            }
+
+            prevScrollTop.current = currentScrollTop;
+        });
+    }, [hasMore, loadMore, setIsNavbarHidden]);
+
+    React.useEffect(() => {
+        return () => {
+            if (rafRef.current) cancelAnimationFrame(rafRef.current);
+        };
     }, []);
-  }, [characterSheets]);
 
-  // Handle archetype card click — inject prompt into PromptBar
-  const handleArchetypeClick = (archetype) => {
-    setElementMode("character");
-    setPrompt(archetype.prompt);
-    // Scroll/focus the textarea
-    setTimeout(() => {
-      const textarea = document.querySelector("textarea");
-      if (textarea) {
-        textarea.focus();
-        textarea.scrollIntoView({ behavior: "smooth", block: "end" });
-      }
-    }, 100);
-  };
+    React.useEffect(() => {
+        const el = scrollRef.current;
+        if (!el || !hasMore) return;
 
-  if (isLoading && characterSheets.length === 0) {
-    return <LoadingScreen message="Loading characters" />;
-  }
+        if (el.scrollHeight <= el.clientHeight + 120) {
+            loadMore();
+        }
+    }, [hasMore, loadMore, visibleSheets.length]);
 
-  const hasCharacters = characterSheets.length > 0;
+    const scrollToTop = React.useCallback(() => {
+        const el = scrollRef.current;
+        if (!el) return;
 
-  return (
-    <div className="flex h-full w-full overflow-hidden text-white bg-studio-dark relative">
-      <main className="flex-1 flex flex-col relative min-w-0 overflow-hidden z-10">
+        const start     = el.scrollTop;
+        const startTime = performance.now();
+        const duration  = 600; 
 
-        <div className="flex-1 flex flex-col overflow-y-auto overflow-x-hidden custom-scrollbar">
-          <AnimatePresence mode="wait">
-            {hasCharacters ? (
-              /* ── Gallery view ─────────────────────────────────── */
-              <motion.div
-                key="character-feed"
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="flex flex-col gap-6 w-full p-5 pt-[80px] pb-44"
-              >
-                <RowsPhotoAlbum
-                  photos={photos}
-                  targetRowHeight={targetRowHeight}
-                  spacing={16}
-                  render={{
-                    photo: (_, { photo, width, height }) => (
-                      <div
-                        key={photo.key}
-                        className="react-photo-album--photo"
-                        style={{
-                          width,
-                          height,
-                          "--react-photo-album--photo-width": width,
-                          "--react-photo-album--photo-height": height,
-                        }}
-                      >
-                        <MediaGridItem
-                          key={photo.key}
-                          workflow={photo.workflow}
-                          onClick={() => router.push(`/cinema-studio/${projectId}/elements/${photo.key}`)}
-                          className="rounded-2xl border-none shadow-xl w-full h-full"
-                          width={width}
-                          height={height}
+        const ease = (t) => (t === 1 ? 1 : 1 - Math.pow(2, -10 * t));
+
+        const animate = (now) => {
+            const elapsed  = now - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            el.scrollTop   = start * (1 - ease(progress));
+            if (progress < 1) requestAnimationFrame(animate);
+        };
+
+        requestAnimationFrame(animate);
+    }, []);
+
+    if (isLoading) {
+        return <LoadingScreen message="Loading characters..." />
+    }
+
+    return (
+        <div className="flex h-full w-full overflow-hidden text-white bg-background relative">
+            <main className="flex-1 flex flex-col relative min-w-0 overflow-hidden z-10">
+                <AnimatePresence>
+                    {isDragging && (
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="absolute inset-0 z-[25] bg-black/60 backdrop-blur-[4px] pointer-events-none"
                         />
-                      </div>
-                    ),
-                  }}
-                />
-              </motion.div>
-            ) : (
-              /* ── Empty / Hero state ─────────────────────────────── */
-              <motion.div
-                key="character-hero"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.5 }}
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "3rem",
-                  width: "100%",
-                  minHeight: "100%",
-                  paddingTop: "60px",
-                  paddingBottom: "140px",
-                }}
-              >
-                {/* h1 — matches .vONgs */}
-                <h1 style={{
-                  textAlign: "center",
-                  fontSize: "clamp(1.5rem, 2.5vw, 2rem)",
-                  fontWeight: 400,
-                  lineHeight: "1.6",
-                  color: "rgba(255,255,255,0.55)",
-                  maxWidth: "55rem",
-                  margin: 0,
-                }}>
-                  Build and reuse characters for consistent videos.<br />
-                  Use a sample prompt below, or create from scratch.
-                </h1>
+                    )}
+                </AnimatePresence>
 
-                {/* Grid — matches .hjcilJ (Responsive: 1 col on mobile, 2 on tablet, 3 on desktop) */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 w-full max-w-[55rem]">
-                  {CHARACTER_ARCHETYPES.map((archetype, index) => (
-                    <ArchetypeCard
-                      key={archetype.id}
-                      archetype={archetype}
-                      onClick={handleArchetypeClick}
-                      index={index}
+                <div 
+                    ref={scrollRef}
+                    onScroll={handleScroll}
+                    className="flex-1 overflow-y-auto pt-[80px] overflow-x-hidden px-4 py-6 custom-scrollbar w-full"
+                >
+                    {/* ── Krea Characters Hero Banner ── */}
+                    <ElementsKreaHero
+                        projectName="Characters"
+                        description="Create and save 3-view character references for consistent video generation across all your scenes."
+                        createLabel="Create new character"
+                        onOpenCreateModal={() => router.push(`/cinema-studio/${projectId}/characters/new`)}
                     />
-                  ))}
+
+                    {/* ── Characters Grid (Full Width 100%) ── */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 pb-32 w-full pt-4">
+                        {/* Always show + New Character Card */}
+                        <NewElementCardKrea
+                            onClick={() => router.push(`/cinema-studio/${projectId}/characters/new`)}
+                            label="New Character"
+                        />
+
+                        {visibleSheets.map((workflow) => (
+                            <CharacterCardKrea
+                                key={workflow.id || workflow.name}
+                                character={workflow}
+                                onClick={handleWorkflowClick}
+                                onDelete={(char) => promptDelete(char)}
+                            />
+                        ))}
+                    </div>
                 </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+
+                <HowToDrawer
+                    isOpen={isHowToOpen}
+                    onClose={() => setIsHowToOpen(false)}
+                />
+
+                <ConfirmDeleteDialog
+                    open={isDeleteDialogOpen}
+                    onOpenChange={setIsDeleteDialogOpen}
+                    title="Delete Character?"
+                    description="This action will permanently delete this character reference sheet."
+                    onConfirm={() => confirmDelete(projectId)}
+                    isDeleting={isDeleting}
+                />
+
+                <AnimatePresence>
+                    {showTopBtn && (
+                        <motion.button
+                            initial={{ opacity: 0, y: 30, scale: 0.8 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: 30, scale: 0.8 }}
+                            transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                            onClick={scrollToTop}
+                            className="absolute bottom-10 right-10 z-50 p-3 rounded-full bg-white/10 border border-white/10 hover:bg-white/20 text-white backdrop-blur-xl shadow-2xl transition-all cursor-pointer"
+                        >
+                            <ArrowUp className="w-5 h-5" />
+                        </motion.button>
+                    )}
+                </AnimatePresence>
+
+                <style jsx global>{`
+                    .custom-scrollbar::-webkit-scrollbar {
+                        width: 14px;
+                    }
+                    .custom-scrollbar::-webkit-scrollbar-track {
+                        background: transparent;
+                    }
+                    .custom-scrollbar::-webkit-scrollbar-thumb {
+                        background-color: rgba(255, 255, 255, 0.2);
+                        border-radius: 20px;
+                        border: 4px solid transparent;
+                        background-clip: padding-box;
+                        transition: background 0.2s ease;
+                    }
+                    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+                        background-color: rgba(255, 255, 255, 0.35);
+                    }
+                    .custom-scrollbar {
+                        -ms-overflow-style: auto;
+                        scrollbar-width: thin;
+                        scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+
+                        scroll-behavior: smooth;
+                        -webkit-overflow-scrolling: touch;
+                        overscroll-behavior-y: contain;
+                        will-change: scroll-position;
+                    }
+                `}</style>
+            </main>
         </div>
-
-        {/* Dedicated Character PromptBar (Bottom) */}
-        <ElementsPromptBar />
-
-      </main>
-    </div>
-  );
+    )
 }

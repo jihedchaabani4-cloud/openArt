@@ -7,6 +7,7 @@ import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { Button } from "@/shared/ui/button";
 import { EditableDisplayName } from "@/shared/ui/EditableDisplayName";
 import { useUpdateWorkflow } from "@/features/workflows/api/workflowsApi";
+import { UserDropdown } from "@/widgets/StudioNavbar/ui/UserDropdown";
 import { Sparkles, Loader2 } from "lucide-react";
 import {
     DropdownMenu,
@@ -127,6 +128,8 @@ export function ElementEditNavbar({
                 >
                     Done
                 </Button>
+
+                <UserDropdown />
             </div>
         </motion.nav>
     );

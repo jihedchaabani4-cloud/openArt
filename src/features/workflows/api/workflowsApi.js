@@ -45,10 +45,10 @@ export function useProjectData(projectId, sessionId = null) {
       }
     },
     enabled: !authLoading && !!user && !!projectId, // ⛔ Block until auth resolves
-    // 🎯 SaaS Settings
-    staleTime: 60_000, 
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
+    // 🎯 SaaS Settings - Fresh Realtime Sync
+    staleTime: 0, 
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
     retry: false, // Don't hang forever on bad IDs
     throwOnError: false, // Controlled handling
   });
@@ -201,11 +201,16 @@ export function useGenerateMutation({ onError } = {}) {
 export function useCreateElementSheetMutation({ onError } = {}) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ payload }) => {
-      const { type } = payload;
-      const endpoint = `/element-sheet/${type}`;
+    mutationFn: async (inputData) => {
+      const payload = inputData?.payload || inputData || {};
+      const type = (payload.type || payload.element_type || payload.elementType || "").toLowerCase();
+      
+      const endpoint = type === "character"
+        ? `/character-sheet/character`
+        : `/v2/elements`;
+
       const res = await api.post(endpoint, payload);
-      if (!res.ok) throw new Error(res.message || 'Element sheet creation failed');
+      if (res.error) throw new Error(res.message || 'Element creation failed');
       return res;
     },
     onMutate: async ({ payload }) => {
@@ -277,11 +282,62 @@ export function useCreateElementSheetMutation({ onError } = {}) {
       }
       if (typeof onError === 'function') onError(err);
     },
-    onSuccess: (res, { payload }) => {
-      const { project_id: projectId } = payload || {};
+    onSuccess: (res, inputData) => {
+      const payload = inputData?.payload || inputData || {};
+      const projectId = payload.projectId || payload.project_id || res?.workflow?.project_id || res?.element?.project_id;
       if (projectId) {
         queryClient.invalidateQueries({ queryKey: queryKeys.projectData.byProject(projectId) });
+        queryClient.refetchQueries({ queryKey: queryKeys.projectData.byProject(projectId) });
       }
+    },
+  });
+}
+
+export function useCreateCharacterMutation({ onError } = {}) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (inputData) => {
+      const payload = inputData?.payload || inputData || {};
+      const res = await api.post('/characters/create', payload);
+      if (res.error) throw new Error(res.message || 'Character creation failed');
+      return res;
+    },
+    onMutate: async (inputData) => {
+      useWorkflowsStore.getState().fireScrollToTop();
+      const payload = inputData?.payload || inputData || {};
+      const projectId = payload?.project_id;
+      if (!projectId) return {};
+      const projectKey = queryKeys.projectData.byProject(projectId);
+      await queryClient.cancelQueries({ queryKey: projectKey });
+      const previousData = queryClient.getQueryData(projectKey);
+      return { previousData, projectKey };
+    },
+    onError: (err, variables, context) => {
+      console.error('❌ Character creation failed:', err);
+      if (context?.previousData) {
+        queryClient.setQueryData(context.projectKey, context.previousData);
+      }
+      if (typeof onError === 'function') onError(err);
+    },
+    onSuccess: (res, inputData) => {
+      const payload = inputData?.payload || inputData || {};
+      const projectId = payload.projectId || payload.project_id || res?.workflow?.project_id || res?.project_id;
+      if (projectId) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.projectData.byProject(projectId) });
+        queryClient.refetchQueries({ queryKey: queryKeys.projectData.byProject(projectId) });
+      }
+    },
+  });
+}
+
+export const useCreateCharacterSheetMutation = useCreateCharacterMutation;
+
+export function useGenerateCharacterDescriptionMutation() {
+  return useMutation({
+    mutationFn: async ({ concept, archetype, style }) => {
+      const res = await api.post('/characters/generate-description', { concept, archetype, style });
+      if (res.error) throw new Error(res.message || 'Failed to generate character description');
+      return res;
     },
   });
 }
@@ -653,10 +709,16 @@ export function useElementSheetWorkflows(projectId) {
   const filters = useWorkflowsStore((s) => s._elementFilters);
 
   const allElements = workflows
-    .filter((w) => w.workflow_type === "ELEMENT_SHEET")
+    .filter((w) => {
+      // Elements MUST have a record in the element table
+      const hasElementRecord = Boolean(w.element && Object.keys(w.element).length > 0);
+      const elemType = String(w.element_type || w.metadata?.elementType || w.element?.element_type || "").toLowerCase();
+      return hasElementRecord && elemType !== "character";
+    })
     .map((w) => {
-      const items = media.filter((m) => m.workflowId === w.name);
-      return { ...w, items, isMultiMedia: items.length > 1 };
+      const items = media.filter((m) => m.workflowId === w.name || m.workflowId === w.id);
+      const status = items[0]?.status || w.status || (items[0]?.url ? "success" : "processing");
+      return { ...w, items, status, isMultiMedia: items.length > 1 };
     });
 
   const filteredElements = allElements
@@ -669,7 +731,7 @@ export function useElementSheetWorkflows(projectId) {
       // Element Type Filter
       if (filters?.elementTypes?.length > 0) {
         const dnaType = (config.dna?.type || '').toLowerCase();
-        let elementType = 'character';
+        let elementType = 'object';
         if (dnaType === 'product') elementType = 'product';
         if (dnaType === 'location') elementType = 'location';
         if (!filters.elementTypes.includes(elementType)) return false;
@@ -766,8 +828,8 @@ export function useAddImageToElement() {
 export function useAnalyzeElementVision() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ projectId, workflowId, imageUrls }) => {
-      const res = await api.post(`/api/elements/analyze`, { projectId, workflowId, imageUrls });
+    mutationFn: async ({ projectId, workflowId, imageUrls, elementName, elementType }) => {
+      const res = await api.post('/v2/elements/analyze', { projectId, workflowId, imageUrls, elementName, elementType });
       return res;
     },
     onSuccess: (data, variables) => {
@@ -784,13 +846,57 @@ export function useCharacterWorkflows(projectId) {
   const media = data?.projectContents?.media ?? [];
 
   const characters = workflows
-    .filter((w) => w.workflow_type === "CHARACTER" || w.workflow_type === "CHARACTER_SHEET" || w.metadata?.isCharacter || w.type === "character")
+    .filter((w) => {
+      const wType = String(w.workflow_type || "").toUpperCase();
+      const elemType = String(w.element_type || w.metadata?.elementType || w.element?.element_type || "").toLowerCase();
+      return (
+        wType === "CHARACTER" ||
+        wType === "CHARACTER_SHEET" ||
+        wType === "ELEMENT_SHEET" ||
+        elemType === "character" ||
+        w.metadata?.isCharacter ||
+        w.type === "character"
+      );
+    })
     .map((w) => {
       const items = media.filter((m) => m.workflowId === w.name || m.workflowId === w.id);
-      return { ...w, items, isMultiMedia: items.length > 1 };
+      const status = items[0]?.status || w.status || (items[0]?.url ? "success" : "processing");
+      return { ...w, items, status, isMultiMedia: items.length > 1 };
     });
 
   return { workflows: characters, isLoading, isError };
 }
 
+// ─── Character Media Mutations ────────────────────────────────────────────────
 
+export function useAddMediaToCharacter() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ characterId, imageUrl, projectId }) => {
+      const res = await api.post(`/characters/${characterId}/media`, { imageUrl, projectId });
+      return res;
+    },
+    onSuccess: (data, variables) => {
+      if (variables?.projectId) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.projectData.byProject(variables.projectId) });
+      }
+    },
+  });
+}
+
+export function useRemoveMediaFromCharacter() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ characterId, mediaId }) => {
+      const res = await api.delete(`/characters/${characterId}/media/${mediaId}`);
+      return res;
+    },
+    onSuccess: (data, variables) => {
+      if (variables?.projectId) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.projectData.byProject(variables.projectId) });
+      } else {
+        queryClient.invalidateQueries({ queryKey: ['projectData'] });
+      }
+    },
+  });
+}

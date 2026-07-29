@@ -1,4 +1,5 @@
 import React from 'react';
+import { Loader2 } from 'lucide-react';
 import { Button } from "@/shared/ui/button";
 import { cn } from "@/shared/lib/utils";
 import { GoogleIcon } from '@/shared/ui/GoogleIcon';
@@ -91,7 +92,7 @@ export function ActionButton({
       } : {}}
     >
       {generating ? (
-        <div className="w-[16px] h-[16px] rounded-md border-[2.5px] border-white/20 border-t-white animate-spin" />
+        <Loader2 className="w-4 h-4 text-white animate-spin" />
       ) : isLowBalance ? (
         <GoogleIcon iconName="info" className="text-[18px] text-black/80" />
       ) : (

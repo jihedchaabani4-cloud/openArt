@@ -11,6 +11,8 @@ import { Button } from "@/shared/ui/button";
  */
 export function ElementsKreaHero({
   projectName = "Elements",
+  description = "Upload reference images to save objects, styles, fonts, or logos. Recreate the exact look, feel, and visual aesthetic you want across all your generations.",
+  createLabel = "Create new element",
   onOpenCreateModal,
 }) {
   return (
@@ -48,7 +50,7 @@ export function ElementsKreaHero({
 
           {/* Description Text */}
           <p className="font-book max-w-md text-base text-white/90 leading-relaxed">
-            Upload reference images to save objects, styles, fonts, or logos. Recreate the exact look, feel, and visual aesthetic you want across all your generations.
+            {description}
           </p>
 
           {/* Primary CTA Button */}
@@ -59,7 +61,7 @@ export function ElementsKreaHero({
               className="inline-flex shrink-0 items-center justify-center gap-2 text-sm font-medium whitespace-nowrap transition-all bg-white text-black hover:bg-white/90 active:scale-98 h-10 px-8 rounded-full shadow-md cursor-pointer"
             >
               <Plus className="size-4 stroke-[2.2]" />
-              <span>Create new element</span>
+              <span>{createLabel}</span>
             </button>
           </div>
 

@@ -9,6 +9,7 @@ import { downloadFile } from "@/shared/lib/utils"
 import { getPrimaryMediaConfig } from "@/shared/lib/generationUtils"
 import { EditableDisplayName } from "@/shared/ui/EditableDisplayName"
 import { useUpdateWorkflow, useDeleteMedia } from "@/features/workflows/api/workflowsApi"
+import { UserDropdown } from "@/widgets/StudioNavbar/ui/UserDropdown"
 import { ConfirmDeleteDialog } from "@/widgets/dialogs/ConfirmDeleteDialog"
 import {
     DropdownMenu,
@@ -207,6 +208,8 @@ export function EditNavbar({
                 >
                     Done
                 </Button>
+
+                <UserDropdown />
             </div>
         </motion.nav>
     )

@@ -38,6 +38,7 @@ export function SessionSidebar() {
 
     const pathname = usePathname();
     const isElementsActive = pathname?.includes("/elements");
+    const isCharactersActive = pathname?.includes("/characters");
 
     // ── Data ─────────────────────────────────────────────────────────────────
     const { data: projectData, isLoading } = useProjectData(selectedProjectId);
@@ -229,13 +230,13 @@ export function SessionSidebar() {
                     href={`/cinema-studio/${selectedProjectId}/generations`}
                     className={cn(
                         "flex items-center justify-center w-10 h-10 rounded-xl transition-all",
-                        !isElementsActive
+                        !isElementsActive && !isCharactersActive
                             ? "bg-white/10 text-white " 
                             : "bg-transparent text-white hover:bg-white/5"
                     )}
                     title="Generations"
                 >
-                    <GoogleIcon iconName="dashboard" className="text-[20px]" />
+                    <GoogleIcon iconName="image" className="text-[20px]" />
                 </Link>
                 <Link 
                     href={`/cinema-studio/${selectedProjectId}/elements`}
@@ -247,12 +248,24 @@ export function SessionSidebar() {
                     )}
                     title="Elements Library"
                 >
-                    <GoogleIcon iconName="horizontal_split" className="text-[20px]" />
+                    <GoogleIcon iconName="alternate_email" className="text-[20px]" />
+                </Link>
+                <Link 
+                    href={`/cinema-studio/${selectedProjectId}/characters`}
+                    className={cn(
+                        "flex items-center justify-center w-10 h-10 rounded-xl transition-all",
+                        isCharactersActive
+                            ? "bg-white/10 text-white " 
+                            : "bg-transparent text-white hover:bg-white/5"
+                    )}
+                    title="Characters"
+                >
+                    <GoogleIcon iconName="accessibility_new" className="text-[20px]" />
                 </Link>
             </div>
 
             {/* Expanding wrapper (anchored right below the buttons) */}
-            {!isElementsActive && (
+            {!isElementsActive && !isCharactersActive && (
                 <div className="relative p-1 w-full flex-1 z-40">
                     <motion.div
                     className={cn(

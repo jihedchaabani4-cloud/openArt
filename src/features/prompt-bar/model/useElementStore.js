@@ -31,6 +31,9 @@ export const useElementStore = create((set) => ({
   elementMode: "character",
   setElementMode: (mode) => set({ elementMode: mode }),
 
+  isGeneratingDescription: false,
+  setIsGeneratingDescription: (loading) => set({ isGeneratingDescription: loading }),
+
   features: createEmptyFeatures(),
   featureEditor: {
     open: false,

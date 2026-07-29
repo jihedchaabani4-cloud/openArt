@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Star, Trash2, Images, Loader2 } from "lucide-react";
+import { Star, Trash2, Images, Loader2, AlertCircle } from "lucide-react";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 
 const ELEMENT_TYPE_GOOGLE_ICONS = {
@@ -134,6 +134,7 @@ export function ElementCardKrea({ element, onClick, onDelete }) {
 
   const imageCount = images.length;
   const isProcessing = element.status === "processing" || element.items?.[0]?.status === "processing";
+  const isFailed = element.status === "failed" || element.items?.[0]?.status === "failed";
   const elementType = element.element_type || element.type || "object";
   const colors = { bgGradient: "oklch(31% 0.005 260)" };
 
@@ -152,7 +153,7 @@ export function ElementCardKrea({ element, onClick, onDelete }) {
         className="relative flex aspect-[370/231] w-full items-center justify-center overflow-hidden rounded-[8px] transition-all duration-300 ease-out"
       >
         {/* Top-Left Category Type Badge (Google Icon) */}
-        {!isProcessing && (
+        {!isProcessing && !isFailed && (
           <span
             title={`Type: ${elementType}`}
             className="absolute left-2.5 top-2.5 z-20 flex items-center justify-center text-white/80 drop-shadow-sm group-hover:opacity-0 transition-opacity"
@@ -183,11 +184,19 @@ export function ElementCardKrea({ element, onClick, onDelete }) {
           </button>
         )}
 
-        {/* ── FAN-STACK IMAGES ── */}
+        {/* ── CARD STATES ── */}
         {isProcessing ? (
           <div className="w-full h-full flex flex-col items-center justify-center gap-3 bg-zinc-900/90 text-white/70">
             <Loader2 className="size-7 animate-spin text-white/80" />
-            <span className="text-xs font-medium">Creating element...</span>
+            <span className="text-xs font-medium">Processing character...</span>
+          </div>
+        ) : isFailed ? (
+          <div className="w-full h-full flex flex-col items-center justify-center gap-2 bg-red-950/60 text-red-200 p-3 text-center backdrop-blur-sm">
+            <AlertCircle className="size-6 text-red-400" />
+            <span className="text-xs font-semibold">Generation Failed</span>
+            <span className="text-[10px] text-red-300/70 truncate max-w-full px-2">
+              {element.items?.[0]?.error || "Provider error"}
+            </span>
           </div>
         ) : (
           <div className="pointer-events-none absolute inset-0 flex items-center justify-center">

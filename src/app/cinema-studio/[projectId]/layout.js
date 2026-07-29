@@ -69,8 +69,11 @@ export default function StudioLayout({ children }) {
 
     const isEditPage =
         pathname?.includes("/generations/edit/") ||
-        pathname?.includes("/elements/edit/") ||
-        pathname?.includes("/edit/")
+        pathname?.includes("/edit/") ||
+        pathname?.includes("/elements/new") ||
+        pathname?.includes("/characters/new") ||
+        (pathname?.includes("/elements/") && !pathname?.endsWith("/elements")) ||
+        (pathname?.includes("/characters/") && !pathname?.endsWith("/characters"));
 
     const clearProjectStudioState = useCallback(() => {
         const entryKey = `project-${projectId}-active`;

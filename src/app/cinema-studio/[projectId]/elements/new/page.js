@@ -8,7 +8,7 @@ import { Button } from "@/shared/ui/button";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { UserDropdown } from "@/widgets/StudioNavbar/ui/UserDropdown";
 import { ImportMediaDialog } from "@/widgets/ImportMediaDialog/ImportMediaDialog";
-import { useCreateElementSheetMutation, useProjectData } from "@/features/workflows/api/workflowsApi";
+import { useCreateElementSheetMutation, useElementSheetWorkflows, useProjectData } from "@/features/workflows/api/workflowsApi";
 import { useWorkflowsStore } from "@/features/workflows";
 import { getPrimaryMedia } from "@/shared/lib/generationUtils";
 import { getItemMetadata } from "@/shared/lib/displayUtils";
@@ -57,14 +57,23 @@ export default function NewElementPage() {
   const selectedProjectId = useWorkflowsStore((s) => s.selectedProjectId);
   const effectiveProjectId = projectId || selectedProjectId;
 
+  const { workflows: existingSheets } = useElementSheetWorkflows(effectiveProjectId);
   const { data: projectData, isLoading: isProjectLoading } = useProjectData(effectiveProjectId);
+
+  const goBack = () => {
+    if (existingSheets && existingSheets.length > 0) {
+      router.push('/cinema-studio/' + effectiveProjectId + '/elements');
+    } else {
+      router.push('/cinema-studio/' + effectiveProjectId + '/generations');
+    }
+  };
 
   // Photos formatted with actual aspect ratio for RowsPhotoAlbum (same as generations page)
   const photos = useMemo(() => {
     const rawWorkflows = projectData?.projectContents?.workflows || [];
     const rawMedia = projectData?.projectContents?.media || [];
 
-    return rawWorkflows
+    const workflowPhotos = rawWorkflows
       .filter((wf) => wf.workflow_type !== "ELEMENT_SHEET")
       .reduce((acc, wf, i) => {
         const items = rawMedia
@@ -99,23 +108,50 @@ export default function NewElementPage() {
         });
         return acc;
       }, []);
-  }, [projectData]);
 
-  const goBack = () => router.push('/cinema-studio/' + effectiveProjectId + '/elements');
+    const mediaPhotos = rawMedia
+      .filter((m) => (m.url || m.file_url || m.src) && m.workflow_type !== "ELEMENT_SHEET")
+      .map((m, i) => {
+        const url = m.url || m.file_url || m.src;
+        return {
+          src: url,
+          width: 1200,
+          height: 900,
+          key: m.id || m.name || `media-${i}`,
+          workflow: { id: m.workflowId || m.id, items: [m] },
+          thumbUrl: url,
+          label: m.name || "Media Item",
+        };
+      });
+
+    const combined = [...workflowPhotos];
+    const seen = new Set(combined.map((p) => p.src));
+    for (const p of mediaPhotos) {
+      if (!seen.has(p.src)) {
+        seen.add(p.src);
+        combined.push(p);
+      }
+    }
+    return combined;
+  }, [projectData]);
 
   const createAndRedirect = async (urls) => {
     if (!urls || !urls.length) return;
+    if (!effectiveProjectId) {
+      setError("Project ID is missing. Please select a valid project.");
+      return;
+    }
     setError(null);
     try {
       const elementName = name.trim() || generateDefaultElementName();
       const res = await runCreateElement({
         payload: { name: elementName, sourceImages: urls, projectId: effectiveProjectId, element_type: elementType },
       });
-      const elementId = res?.workflow?.id || res?.workflow?.name || res?.element?.workflow_id || res?.id || res?.name;
-      if (elementId) {
-        router.push('/cinema-studio/' + effectiveProjectId + '/elements/' + elementId);
+      const elementId = res?.workflow?.id || res?.workflow?.name || res?.element?.workflow_id || res?.element?.id || res?.id || res?.name || res?.result?.data?.json?.workflow?.id;
+      if (elementId && effectiveProjectId) {
+        window.location.href = `/cinema-studio/${effectiveProjectId}/elements/${elementId}`;
       } else {
-        router.push('/cinema-studio/' + effectiveProjectId + '/elements');
+        window.location.href = `/cinema-studio/${effectiveProjectId}/elements`;
       }
     } catch (err) {
       setError(err?.message || "Failed to create element.");
@@ -296,8 +332,8 @@ export default function NewElementPage() {
 
           {/* ── Workflow Gallery (RowsPhotoAlbum with exact aspect ratio like Generations page) ── */}
           {!isProjectLoading && photos.length > 0 && (
-            <div className="flex flex-col gap-4">
-              <p className="text-xs font-medium text-white/40 uppercase tracking-wider">Or pick from your generations</p>
+            <div className="flex flex-col gap-4 pt-6 w-full">
+              <p className="text-xs font-medium text-white uppercase tracking-wider">Add your generated media</p>
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}

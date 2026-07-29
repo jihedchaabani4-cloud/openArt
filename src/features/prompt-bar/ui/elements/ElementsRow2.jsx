@@ -48,19 +48,7 @@ export function ElementsRow2({ paramsProps, actionProps, onToggleVariations, var
           </Button>
         )}
 
-        <div className="flex justify-center group/select">
-            <BaseSelect 
-              value={elementMode}
-              displayLabel={currentItem?.label || "Select Type"}
-              groups={groups}
-              open={open}
-              panelStyle={panelStyle}
-              triggerRef={triggerRef}
-              panelRef={panelRef}
-              handleToggle={handleToggle}
-              handleSelect={handleSelect}
-            />
-        </div>
+        {/* BaseSelect dropdown removed as requested */}
       </div>
 
       {/* ── RIGHT SIDE ── */}
@@ -70,20 +58,18 @@ export function ElementsRow2({ paramsProps, actionProps, onToggleVariations, var
               ref={sparklesRef}
               onClick={() => setFeatureEditorOpen(!featureEditorOpen)}
               variant="ghost"
-              size="icon"
+              size="sm"
               className={cn(
-                "rounded-lg transition-all shrink-0 group w-9 h-9 relative overflow-hidden",
+                "rounded-lg transition-all shrink-0 gap-1.5 h-8 px-2.5 text-xs font-medium relative overflow-hidden",
                 featureEditorOpen 
                   ? "bg-white/10 text-white" 
                   : "text-neutral-400 hover:bg-white/5 hover:text-neutral-100"
               )}
-              title="Feature Editor"
+              title="Character Form Features"
               type="button"
             >
-              <Sparkles className={cn("w-4 h-4 transition-transform", featureEditorOpen && "scale-110")} />
-              {!featureEditorOpen && (
-                <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
-              )}
+              <UserCircle className="w-3.5 h-3.5 shrink-0" />
+              <span>Form</span>
             </Button>
         )}
 
