@@ -19,7 +19,7 @@ const buttonVariants = cva(
           "hover:text-accent-foreground ",
         groupBtn: " rounded-[20px] hover:bg-white/5",
         link: "text-primary underline-offset-4 hover:underline",
-        "studio-normal": "flex items-center justify-center gap-3 h-11 rounded-lg bg-white/3 border border-white/8 hover:bg-white/6  transition-all text-white/80 group",
+        "studio-normal": "flex items-center justify-center gap-3 h-11 rounded-lg bg-white/3 hover:bg-white/6 transition-all text-white/80 group",
         "studio-neon": "inline-flex items-center justify-center gap-2 h-12 px-6 rounded-xl bg-[#EFFE17] text-black text-sm font-semibold pb-0.5 transition-all hover:opacity-80 active:opacity-60 shadow-[inset_0px_-3px_rgba(0,0,0,0.25)] disabled:opacity-50",
         "studio-error": "flex items-center justify-center gap-3 h-11 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500 hover:bg-red-500/20 transition-all",
         "studio-white": " px-[12px] py-[8px] bg-white text-black hover:bg-white/90 transition-all  ",
@@ -27,9 +27,9 @@ const buttonVariants = cva(
         "user-menu-filled":
           "rounded-full bg-white/12  py-2 text-[15px] font-semibold text-white hover:bg-white/16",
         "user-menu-outline":
-          "rounded-full border border-white/14 bg-[#1b1b1b]  py-2 text-[15px] font-semibold text-white hover:bg-white/8",
+          "rounded-full bg-[#1b1b1b] py-2 text-[15px] font-semibold text-white hover:bg-white/8",
         "studio-overlay-icon":
-          "w-9 h-9 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center text-white/70 hover:text-white hover:bg-black/60 transition-all",
+          "w-9 h-9 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-white/70 hover:text-white hover:bg-black/60 transition-all",
         "studio-node-thumb":
           "relative shrink-0 w-12 h-12 rounded-lg overflow-hidden focus:outline-none transition-all duration-300 border-2 p-0",
         "studio-node-card":
@@ -54,12 +54,19 @@ const buttonVariants = cva(
           "flex-1 group relative mb-2 p-2 rounded-lg transition-all flex items-center gap-3 border focus:outline-none",
         "studio-heritage-node":
           "group relative w-14 h-14 rounded-lg overflow-hidden transition-all duration-300 border-2 p-0",
+        "flow-pill":
+          "bg-[#232325] text-white hover:bg-[#2c2c2f] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer",
+        "flow-pill-active":
+          "bg-[#cfd2d6] text-black shadow-md cursor-pointer hover:bg-[#d8dbdf]",
+        "flow-overlay-action":
+          "bg-black/40 backdrop-blur-md text-white/80 hover:text-white hover:bg-black/65 active:scale-95 transition-all shadow-md border border-white/10 rounded-xl cursor-pointer",
       },
       size: {
         default: "h-8 px-3.5 text-[12px] has-[>svg]:px-3",
         xs: "h-6 gap-1 rounded-md px-2 text-xs has-[>svg]:px-1.5 [&_svg:not([class*='size-'])]:size-3",
         sm: "h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5",
         lg: "h-10 rounded-md px-6 has-[>svg]:px-4",
+        flow: "h-11 pl-1.5 pr-4 py-1 rounded-[16px] gap-2.5 text-sm font-medium",
         icon: "size-9",
         "icon-xs": "size-6 rounded-md [&_svg:not([class*='size-'])]:size-3",
         "icon-sm": "size-8",

@@ -135,6 +135,34 @@ export default function NewElementPage() {
     return combined;
   }, [projectData]);
 
+  // Dynamic natural dimensions for generated media photos to preserve original aspect ratio
+  const [genDimensions, setGenDimensions] = React.useState({});
+
+  React.useEffect(() => {
+    photos.forEach((p) => {
+      if (!p.src || genDimensions[p.src]) return;
+      const img = new window.Image();
+      img.onload = () => {
+        setGenDimensions((prev) => ({
+          ...prev,
+          [p.src]: { width: img.naturalWidth || 1, height: img.naturalHeight || 1 },
+        }));
+      };
+      img.src = p.src;
+    });
+  }, [photos]);
+
+  const formattedPhotos = React.useMemo(() => {
+    return photos.map((p) => {
+      const dims = genDimensions[p.src];
+      return {
+        ...p,
+        width: dims?.width || p.width,
+        height: dims?.height || p.height,
+      };
+    });
+  }, [photos, genDimensions]);
+
   const createAndRedirect = async (urls) => {
     if (!urls || !urls.length) return;
     if (!effectiveProjectId) {
@@ -340,46 +368,39 @@ export default function NewElementPage() {
                 transition={{ duration: 0.4, delay: 0.1 }}
                 className="w-full"
               >
-                <RowsPhotoAlbum
-                  photos={photos}
-                  targetRowHeight={340}
-                  spacing={1}
-                  rowConstraints={{ singleRowMaxHeight: 500 }}
-                  render={{
-                    photo: (_, { photo, width, height }) => {
-                      const wf = photo.workflow;
-                      const isThisLoading = loadingWorkflowId === (wf.id || wf.name);
-                      return (
-                        <div
-                          key={photo.key}
-                          style={{ width, height }}
-                          className="relative group overflow-hidden bg-zinc-900 cursor-pointer"
-                          onClick={() => !isAnyLoading && createFromWorkflow(wf, photo.src)}
-                        >
-                          <img
-                            src={photo.src}
-                            alt={photo.label}
-                            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                          />
-                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors duration-200 flex items-center justify-center">
-                            {isThisLoading ? (
-                              <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                                <Loader2 className="w-5 h-5 text-white animate-spin" />
-                              </div>
-                            ) : (
-                              <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center">
-                                <Plus className="w-5 h-5 text-black" />
-                              </div>
-                            )}
-                          </div>
-                          <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                            <p className="text-xs text-white font-medium truncate">{photo.label}</p>
-                          </div>
+                <div className="flex flex-wrap gap-2.5 items-start w-full">
+                  {formattedPhotos.map((photo) => {
+                    const wf = photo.workflow;
+                    const isThisLoading = loadingWorkflowId === (wf.id || wf.name);
+                    return (
+                      <div
+                        key={photo.key}
+                        className="relative group overflow-hidden rounded-xl bg-zinc-900 border border-white/10 shrink-0 max-h-[220px] cursor-pointer"
+                        onClick={() => !isAnyLoading && createFromWorkflow(wf, photo.src)}
+                      >
+                        <img
+                          src={photo.src}
+                          alt={photo.label}
+                          className="w-auto h-auto max-h-[220px] max-w-full object-contain transition-transform duration-300 group-hover:scale-105 rounded-xl"
+                        />
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors duration-200 flex items-center justify-center">
+                          {isThisLoading ? (
+                            <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                              <Loader2 className="w-5 h-5 text-white animate-spin" />
+                            </div>
+                          ) : (
+                            <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center">
+                              <Plus className="w-5 h-5 text-black" />
+                            </div>
+                          )}
                         </div>
-                      );
-                    },
-                  }}
-                />
+                        <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                          <p className="text-xs text-white font-medium truncate">{photo.label}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </motion.div>
             </div>
           )}

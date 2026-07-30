@@ -188,6 +188,34 @@ export default function ElementWorkflowEditPage() {
         return combined;
     }, [projectData]);
 
+    // Dynamic natural dimensions for generated media photos to preserve original aspect ratio
+    const [genDimensions, setGenDimensions] = React.useState({});
+
+    React.useEffect(() => {
+        photos.forEach((p) => {
+            if (!p.src || genDimensions[p.src]) return;
+            const img = new window.Image();
+            img.onload = () => {
+                setGenDimensions((prev) => ({
+                    ...prev,
+                    [p.src]: { width: img.naturalWidth || 1, height: img.naturalHeight || 1 },
+                }));
+            };
+            img.src = p.src;
+        });
+    }, [photos]);
+
+    const formattedPhotos = React.useMemo(() => {
+        return photos.map((p) => {
+            const dims = genDimensions[p.src];
+            return {
+                ...p,
+                width: dims?.width || p.width,
+                height: dims?.height || p.height,
+            };
+        });
+    }, [photos, genDimensions]);
+
     // Draft data (references + taste profile)
     const draft = React.useMemo(() => {
         if (!workflow) return null;
@@ -797,7 +825,7 @@ export default function ElementWorkflowEditPage() {
 
                     {/* ── 3. PROJECT GENERATIONS GALLERY ── */}
                     {photos.length > 0 && (
-                        <div className="flex flex-col gap-4 pt-10 mt-6 border-t border-white/10">
+                        <div className="flex flex-col gap-4 pt-6 mt-2">
                             <p className="text-xs font-medium text-white uppercase tracking-wider">Add your generated media</p>
                             <motion.div
                                 initial={{ opacity: 0 }}
@@ -805,67 +833,60 @@ export default function ElementWorkflowEditPage() {
                                 transition={{ duration: 0.4 }}
                                 className="w-full"
                             >
-                                <RowsPhotoAlbum
-                                    photos={photos}
-                                    targetRowHeight={340}
-                                    spacing={1}
-                                    rowConstraints={{ singleRowMaxHeight: 500 }}
-                                    render={{
-                                        photo: (_, { photo, width, height }) => {
-                                            const wf = photo.workflow;
-                                            const isAdded = displayReferences.some(
-                                                (r) => (r.url || r.file_url || r.src) === photo.src
-                                            );
-                                            const isFull = displayReferences.length >= MAX_REFS;
-                                            const isDisabled = isAdded || isFull;
-                                            return (
-                                                <div
-                                                    key={photo.key}
-                                                    style={{ width, height }}
-                                                    className={`relative group overflow-hidden bg-zinc-900 ${
-                                                        isDisabled ? "cursor-default" : "cursor-pointer"
-                                                    }`}
-                                                    onClick={() => !isDisabled && handleAddMediaToElement(photo)}
-                                                >
-                                                    <img
-                                                        src={photo.src}
-                                                        alt={photo.label}
-                                                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                                                    />
+                                <div className="flex flex-wrap gap-2.5 items-start w-full">
+                                    {formattedPhotos.map((photo) => {
+                                        const wf = photo.workflow;
+                                        const isAdded = displayReferences.some(
+                                            (r) => (r.url || r.file_url || r.src) === photo.src
+                                        );
+                                        const isFull = displayReferences.length >= MAX_REFS;
+                                        const isDisabled = isAdded || isFull;
+                                        return (
+                                            <div
+                                                key={photo.key}
+                                                className={`relative group overflow-hidden rounded-xl bg-zinc-900 border border-white/10 shrink-0 max-h-[220px] ${
+                                                    isDisabled ? "cursor-default" : "cursor-pointer"
+                                                }`}
+                                                onClick={() => !isDisabled && handleAddMediaToElement(photo)}
+                                            >
+                                                <img
+                                                    src={photo.src}
+                                                    alt={photo.label}
+                                                    className="w-auto h-auto max-h-[220px] max-w-full object-contain transition-transform duration-300 group-hover:scale-105 rounded-xl"
+                                                />
 
-                                                    {isAdded ? (
-                                                        /* White pill: Added in center on hover */
-                                                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors duration-200 flex items-center justify-center">
-                                                            <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center gap-1.5 rounded-full bg-white px-3.5 py-1.5 text-xs font-semibold text-black shadow-lg">
-                                                                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-                                                                Added
-                                                            </div>
+                                                {isAdded ? (
+                                                    /* White pill: Added in center on hover */
+                                                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors duration-200 flex items-center justify-center">
+                                                        <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center gap-1.5 rounded-full bg-white px-3.5 py-1.5 text-xs font-semibold text-black shadow-lg">
+                                                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                                            Added
                                                         </div>
-                                                    ) : isFull ? (
-                                                        /* White pill: Max reached in center on hover */
-                                                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors duration-200 flex items-center justify-center">
-                                                            <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center gap-1.5 rounded-full bg-white px-3.5 py-1.5 text-xs font-semibold text-black shadow-lg">
-                                                                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-                                                                Max reached
-                                                            </div>
-                                                        </div>
-                                                    ) : (
-                                                        /* Hover "+" button */
-                                                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors duration-200 flex items-center justify-center">
-                                                            <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center">
-                                                                <Plus className="w-5 h-5 text-black" />
-                                                            </div>
-                                                        </div>
-                                                    )}
-
-                                                    <div className={`absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 via-black/40 to-transparent transition-opacity duration-200 ${isAdded ? "opacity-0" : "opacity-0 group-hover:opacity-100"}`}>
-                                                        <p className="text-xs text-white font-medium truncate">{photo.label}</p>
                                                     </div>
+                                                ) : isFull ? (
+                                                    /* White pill: Max reached in center on hover */
+                                                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors duration-200 flex items-center justify-center">
+                                                        <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center gap-1.5 rounded-full bg-white px-3.5 py-1.5 text-xs font-semibold text-black shadow-lg">
+                                                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                                                            Max reached
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    /* Hover "+" button */
+                                                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors duration-200 flex items-center justify-center">
+                                                        <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center">
+                                                            <Plus className="w-5 h-5 text-black" />
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                <div className={`absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 via-black/40 to-transparent transition-opacity duration-200 ${isAdded ? "opacity-0" : "opacity-0 group-hover:opacity-100"}`}>
+                                                    <p className="text-xs text-white font-medium truncate">{photo.label}</p>
                                                 </div>
-                                            );
-                                        },
-                                    }}
-                                />
+                                            </div>
+                                        );
+                                    })}
+                                </div>
                             </motion.div>
                         </div>
                     )}

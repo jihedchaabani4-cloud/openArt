@@ -12,91 +12,18 @@ import {
 import { useWorkflowDelete } from "@/features/workflows";
 import { LoadingScreen } from "@/shared/ui/LoadingScreen";
 import { ConfirmDeleteDialog } from "@/widgets/dialogs/ConfirmDeleteDialog";
-import { EditableDisplayName } from "@/shared/ui/EditableDisplayName";
-import { UserDropdown } from "@/widgets/StudioNavbar/ui/UserDropdown";
-import { GoogleIcon } from "@/shared/ui/GoogleIcon";
+import { ImportMediaDialog } from "@/widgets/ImportMediaDialog/ImportMediaDialog";
+import { CharacterEditNavbar } from "@/widgets/CharacterEditNavbar/CharacterEditNavbar";
 import { Button } from "@/shared/ui/button";
-import {
-    DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
-} from "@/shared/ui/dropdown-menu";
+import { Input } from "@/shared/ui/input";
+import { Textarea } from "@/shared/ui/textarea";
+import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import {
     Loader2, Trash2, Edit2, Check, Copy, ChevronLeft,
-    User, AlertCircle, Upload, X,
+    User, AlertCircle, Upload, X, FolderOpen, Volume2,
 } from "lucide-react";
 import { RowsPhotoAlbum } from "react-photo-album";
 import "react-photo-album/rows.css";
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Navbar
-// ─────────────────────────────────────────────────────────────────────────────
-function CharacterDetailNavbar({ workflow, onDeleteCharacter }) {
-    const { projectId } = useParams();
-    const router = useRouter();
-    const { mutateAsync: updateWorkflow } = useUpdateWorkflow();
-
-    const displayTitle = React.useMemo(() => (
-        workflow?.metadata?.displayName ||
-        workflow?.display_name ||
-        workflow?.name ||
-        "Untitled Character"
-    ), [workflow]);
-
-    const handleEditWorkflowName = async (nextName) => {
-        const workflowId = workflow?.id || workflow?.name;
-        if (!workflowId) return;
-        await updateWorkflow({ workflowId, workflowData: { display_name: nextName } });
-    };
-
-    return (
-        <motion.nav
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
-            className="fixed top-0 left-0 w-full z-50 flex items-center h-16 px-6 border-b border-white/5 bg-black/40 backdrop-blur-xl"
-        >
-            <div className="flex items-center gap-1">
-                <button
-                    onClick={() => router.push(`/cinema-studio/${projectId}/characters`)}
-                    className="flex items-center gap-1 text-white/50 hover:text-white transition-colors duration-200 mr-3 group"
-                >
-                    <ChevronLeft className="size-4 group-hover:-translate-x-0.5 transition-transform duration-150" />
-                    <span className="text-sm font-normal">Characters</span>
-                </button>
-                <span className="text-white/20 mx-1">/</span>
-                <div className="flex items-center gap-2">
-                    <span className="size-6 rounded-md bg-violet-500/20 border border-violet-500/30 flex items-center justify-center">
-                        <User className="size-3.5 text-violet-400" />
-                    </span>
-                    <EditableDisplayName
-                        value={displayTitle}
-                        onSave={handleEditWorkflowName}
-                        className="text-white text-sm font-medium max-w-[280px]"
-                    />
-                </div>
-            </div>
-
-            <div className="ml-auto flex items-center gap-3">
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon-xs" className="size-8 text-white/50 hover:text-white">
-                            <GoogleIcon name="more_vert" className="size-4" />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="min-w-[160px]">
-                        <DropdownMenuItem
-                            onClick={onDeleteCharacter}
-                            className="text-red-400 hover:text-red-300 focus:text-red-300"
-                        >
-                            <Trash2 className="size-3.5 mr-2" />
-                            Delete Character
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
-                <UserDropdown />
-            </div>
-        </motion.nav>
-    );
-}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Main Page Component
@@ -125,6 +52,72 @@ export default function CharacterDetailPage() {
         return { ...found, id: found.id || found.name, items };
     }, [projectData, workflowId]);
 
+    // ── Display Title & Realtime Editing ──
+    const displayTitle = React.useMemo(() => (
+        workflow?.metadata?.displayName || workflow?.display_name || workflow?.name || "Untitled Character"
+    ), [workflow]);
+
+    const [draftTitle, setDraftTitle] = React.useState(displayTitle);
+    const previousTitleRef = React.useRef(displayTitle);
+
+    React.useEffect(() => {
+        previousTitleRef.current = displayTitle;
+        setDraftTitle(displayTitle);
+    }, [displayTitle]);
+
+    const handleSaveTitle = async (text) => {
+        const wfId = workflow?.id || workflow?.name;
+        console.log("🚀 [Character Rename] Triggered handleSaveTitle:", { rawInput: text, wfId, currentWorkflow: workflow });
+
+        if (!wfId) {
+            console.warn("⚠️ [Character Rename] Missing workflow ID!");
+            return;
+        }
+
+        // Clean name (strip leading @ and trim whitespace)
+        const cleanName = (text || "").replace(/^@+/, "").trim();
+        const previousCleanName = (previousTitleRef.current || "").replace(/^@+/, "").trim();
+
+        console.log("📝 [Character Rename] Cleaned name comparison:", { cleanName, previousCleanName });
+
+        // 1. Revert if empty (never allow empty character name)
+        if (!cleanName) {
+            console.warn("⚠️ [Character Rename] Empty name rejected, reverting to:", previousTitleRef.current);
+            setDraftTitle(previousTitleRef.current);
+            return;
+        }
+
+        // 2. If name hasn't changed, restore formatted draft & exit
+        if (cleanName === previousCleanName) {
+            console.log("ℹ️ [Character Rename] Name unchanged, ignoring API call.");
+            setDraftTitle(previousTitleRef.current);
+            return;
+        }
+
+        const previousValue = previousTitleRef.current;
+
+        try {
+            console.log("📡 [Character Rename] Sending updateWorkflow payload to API:", {
+                workflowId: wfId,
+                workflowData: { display_name: cleanName },
+            });
+
+            const res = await updateWorkflow({
+                workflowId: wfId,
+                workflowData: {
+                    display_name: cleanName,
+                },
+            });
+
+            console.log("✅ [Character Rename] Server response received successfully:", res);
+            previousTitleRef.current = cleanName;
+        } catch (err) {
+            console.error("❌ [Character Rename] Failed to save character title:", err);
+            // Rollback to previous name if server API fails
+            setDraftTitle(previousValue);
+        }
+    };
+
     // ── Description (editable) ──
     const serverDescription = React.useMemo(() => (
         workflow?.metadata?.description || workflow?.description || ""
@@ -142,7 +135,9 @@ export default function CharacterDetailPage() {
         try {
             await updateWorkflow({
                 workflowId: wfId,
-                workflowData: { metadata: { ...workflow?.metadata, description: text.trim() } },
+                workflowData: {
+                    description: text.trim(),
+                },
             });
         } catch (err) {
             console.error("Failed to save description:", err);
@@ -196,6 +191,29 @@ export default function CharacterDetailPage() {
             .filter(Boolean);
     }, [workflow, imgDimensions]);
 
+    const [imageLoadError, setImageLoadError] = React.useState(false);
+    React.useEffect(() => { setImageLoadError(false); }, [workflow]);
+
+    const handleDownloadSheet = async () => {
+        const src = sheetPhotos[0]?.src;
+        if (!src) return;
+        try {
+            const response = await fetch(src);
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `${(displayTitle || "character").toLowerCase().replace(/\s+/g, "_")}_sheet.png`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        } catch (err) {
+            console.error("Failed to download image:", err);
+            window.open(src, "_blank");
+        }
+    };
+
     React.useEffect(() => {
         (workflow?.items || []).forEach((item) => {
             const src = item.url || item.file_url || item.asset?.file_url;
@@ -224,6 +242,50 @@ export default function CharacterDetailPage() {
     const [addedDetailImages, setAddedDetailImages] = React.useState([]);
     const [pendingUrls, setPendingUrls]             = React.useState([]);
     const [deletingMediaId, setDeletingMediaId]     = React.useState(null);
+    const [isAssetsOpen, setIsAssetsOpen]           = React.useState(false);
+    const [activeTab, setActiveTab]                 = React.useState("sheet"); // "sheet" | "details"
+
+    const handleSelectAssets = async (selectedItems) => {
+        if (!selectedItems || !selectedItems.length) return;
+        const remaining = MAX_DETAIL_IMAGES - displayDetailImages.length;
+        if (remaining <= 0) return;
+        const newRefs = selectedItems
+            .slice(0, remaining)
+            .map((item, idx) => {
+                const url = item.url || item.file_url || item.src;
+                return url ? { id: String(Date.now() + idx), url, file_url: url } : null;
+            })
+            .filter(Boolean);
+
+        if (!newRefs.length) return;
+        setAddedDetailImages((prev) => [...newRefs, ...prev]);
+
+        const characterId = workflow?.id;
+        const urlsToAdd = newRefs.map((r) => r.url);
+        if (isValidUUID(characterId)) {
+            setPendingUrls((prev) => [...prev, ...urlsToAdd]);
+            for (const item of newRefs) {
+                try {
+                    const res = await addMediaMutation.mutateAsync({ characterId, imageUrl: item.url, projectId });
+                    const uploadedUrl = res?.media?.url;
+                    if (uploadedUrl && uploadedUrl !== item.url) {
+                        setAddedDetailImages((prev) =>
+                            prev.map((r) =>
+                                (r.url === item.url || r.file_url === item.url)
+                                    ? { ...r, url: uploadedUrl, file_url: uploadedUrl }
+                                    : r
+                            )
+                        );
+                    }
+                } catch (err) {
+                    console.error("Failed to add selected asset to character:", err);
+                    setAddedDetailImages((prev) => prev.filter((r) => (r.url || r.file_url) !== item.url));
+                } finally {
+                    setPendingUrls((prev) => prev.filter((u) => u !== item.url));
+                }
+            }
+        }
+    };
 
     const serverDetailImages = React.useMemo(() => {
         return (workflow?.items || []).filter(
@@ -259,6 +321,7 @@ export default function CharacterDetailPage() {
         if (!validUrls.length) return;
         if (fileInputRef.current) fileInputRef.current.value = "";
 
+        // Optimistic: add images immediately so they appear in the gallery with a spinner
         const newRefs = validUrls.map((url, idx) => ({ id: String(Date.now() + idx), url, file_url: url }));
         setAddedDetailImages((prev) => [...newRefs, ...prev]);
 
@@ -267,10 +330,29 @@ export default function CharacterDetailPage() {
             setPendingUrls((prev) => [...prev, ...validUrls]);
             for (const url of validUrls) {
                 try {
-                    await addMediaMutation.mutateAsync({ characterId, imageUrl: url, projectId });
+                    const res = await addMediaMutation.mutateAsync({ characterId, imageUrl: url, projectId });
+                    // ✅ Swap the base64 URL to the real hosted URL so the image stays
+                    // visible without any flicker. Deduplication handles removing the
+                    // stale entry once serverDetailImages refreshes with the same URL.
+                    const uploadedUrl = res?.media?.url;
+                    if (uploadedUrl && uploadedUrl !== url) {
+                        setAddedDetailImages((prev) =>
+                            prev.map((r) =>
+                                (r.url === url || r.file_url === url)
+                                    ? { ...r, url: uploadedUrl, file_url: uploadedUrl }
+                                    : r
+                            )
+                        );
+                        // Also update pendingUrls key to the new URL so spinner stops
+                        setPendingUrls((prev) => prev.filter((u) => u !== url));
+                    } else {
+                        // Fallback: remove optimistic entry and let server refresh take over
+                        setAddedDetailImages((prev) => prev.filter((r) => (r.url || r.file_url) !== url));
+                    }
                 } catch (err) {
                     console.error("Failed to add character media:", err);
-                    setAddedDetailImages((prev) => prev.filter((r) => r.url !== url));
+                    // Rollback optimistic entry on error
+                    setAddedDetailImages((prev) => prev.filter((r) => (r.url || r.file_url) !== url));
                 } finally {
                     setPendingUrls((prev) => prev.filter((u) => u !== url));
                 }
@@ -326,7 +408,7 @@ export default function CharacterDetailPage() {
 
     return (
         <div className="flex flex-col h-full w-full bg-studio-dark text-white overflow-hidden">
-            <CharacterDetailNavbar
+            <CharacterEditNavbar
                 workflow={workflow}
                 onDeleteCharacter={() => promptDelete({
                     id: workflow.id || workflow.name,
@@ -337,249 +419,326 @@ export default function CharacterDetailPage() {
 
             {/* ── SCROLLABLE BODY ── */}
             <div className="flex-1 overflow-y-auto overflow-x-hidden pt-[70px] pb-16 custom-scrollbar">
-                <div className="px-[45px] flex flex-col gap-6 pt-4">
+                <div className="px-6 lg:px-[45px] pt-4">
 
-                    {/* ══ 1. THREE-COLUMN METADATA HEADER ══ */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full pb-6 mb-2">
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start w-full max-w-7xl mx-auto">
+                        
+                        {/* ══ LEFT SIDEBAR: TITLE, VOICE & CHARACTER INFO ══ */}
+                        <div className="lg:col-span-5 flex flex-col gap-5">
+                            
+                            {/* Editable Character Name Input */}
+                            <Input
+                                prefix="@"
+                                placeholder="Character Name"
+                                value={draftTitle}
+                                onChange={(e) => setDraftTitle(e.target.value)}
+                                onBlur={() => handleSaveTitle(draftTitle)}
+                                onKeyDown={(e) => {
+                                    if (e.key === "Enter") {
+                                        e.currentTarget.blur();
+                                    }
+                                }}
+                                className="text-[2rem] leading-[2.5rem] font-normal text-white"
+                                containerClassName="w-full"
+                            />
 
-                        {/* Col 1: Description */}
-                        <div className="flex flex-col gap-2.5">
-                            <div className="flex items-center justify-between">
-                                <span className="text-sm font-bold text-white">Description</span>
-                            </div>
-                            {isEditingDesc ? (
-                                <div className="group relative w-full min-w-0 p-[0.5px]">
-                                    <textarea
-                                        autoFocus
-                                        value={draftDesc}
-                                        onChange={(e) => setDraftDesc(e.target.value)}
-                                        onBlur={() => handleSaveDescription(draftDesc)}
-                                        rows={2}
-                                        placeholder="Describe your character's personality, backstory, and appearance…"
-                                        className="border-input focus-visible:border-ring focus-visible:ring-ring/50 dark:bg-input/30 flex field-sizing-content rounded-md border bg-transparent py-1.5 shadow-xs outline-none disabled:opacity-50 text-xs font-normal text-white/60 placeholder:text-foreground/45 ring-ring/50! min-h-[2lh] max-h-[5lh] overflow-y-auto custom-scrollbar w-full resize-none border-none px-1.5 py-0.5! leading-relaxed ring-0 transition-all focus-visible:ring-[0.5px] disabled:cursor-wait"
-                                    />
-                                </div>
-                            ) : serverDescription ? (
-                                <p
-                                    className="text-white/60 text-xs leading-relaxed font-normal cursor-text hover:text-white/70 transition-colors"
-                                    onClick={() => { setDraftDesc(serverDescription); setIsEditingDesc(true); }}
-                                >
-                                    {serverDescription}
-                                </p>
-                            ) : (
-                                <p
-                                    className="text-white/35 text-xs leading-relaxed font-normal italic cursor-pointer hover:text-white/50 transition-colors"
-                                    onClick={() => { setDraftDesc(""); setIsEditingDesc(true); }}
-                                >
-                                    Click to add a character description…
-                                </p>
-                            )}
-                        </div>
+                            {/* Character Info Box */}
+                            <Textarea
+                                label="Character Info"
+                                labelExtra="(optional)"
+                                placeholder="Describe how your character acts..."
+                                value={draftDesc}
+                                onChange={(e) => setDraftDesc(e.target.value)}
+                                onBlur={() => handleSaveDescription(draftDesc)}
+                                minHeight={160}
+                                maxHeight={300}
+                                hint="The Flow agent can use this information to help craft scenes with your character."
+                                containerClassName="pt-1"
+                            />
 
-                        {/* Col 2: Features */}
-                        <div className="flex flex-col gap-2.5">
-                            <div className="flex items-center justify-between">
-                                <span className="text-sm font-bold text-white">Features</span>
-                            </div>
-                            <div className="flex flex-wrap gap-1.5">
-                                {Array.isArray(features) && features.length > 0 ? (
-                                    features.map((f, i) => (
-                                        <span
-                                            key={i}
-                                            data-slot="badge"
-                                            className="inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden whitespace-nowrap rounded-md border border-white/10 px-2 py-0.5 text-xs font-book backdrop-blur-md bg-white/5 text-white/80 hover:text-white cursor-pointer hover:bg-white/10 transition-colors"
-                                        >
-                                            {f}
-                                        </span>
-                                    ))
-                                ) : (
-                                    <p className="text-white/35 text-xs leading-relaxed font-normal italic">
-                                        No features specified.
-                                    </p>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Col 3: Prompt */}
-                        <div className="flex flex-col gap-2.5">
-                            <div className="flex items-center justify-between">
-                                <span className="text-sm font-bold text-white">Prompt</span>
-                                {prompt && (
-                                    <button
-                                        type="button"
-                                        onClick={handleCopyPrompt}
-                                        className="h-6 w-6 p-0 flex items-center justify-center text-white/40 hover:text-white transition-colors rounded"
-                                        title="Copy prompt"
-                                    >
-                                        {promptCopied
-                                            ? <Check className="size-3.5 text-emerald-400" />
-                                            : <Copy className="size-3.5" />
-                                        }
-                                    </button>
-                                )}
-                            </div>
-                            {prompt ? (
-                                <p className="text-white/60 text-xs leading-relaxed font-normal">
-                                    {prompt}
-                                </p>
-                            ) : (
-                                <p className="text-white/35 text-xs leading-relaxed font-normal italic">
-                                    No prompt available.
-                                </p>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* ══ 2. SHEET IMAGES GALLERY ══ */}
-                    <div>
-                        <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
-                            <div className="flex items-center gap-3">
-                                <span className="text-sm font-semibold text-white">
-                                    Character Sheet
-                                </span>
-                            </div>
-                        </div>
-
-                        {/* Processing */}
-                        {isProcessing && sheetPhotos.length === 0 && (
-                            <div className="relative flex items-center justify-center h-[260px] w-full border border-dashed border-white/10 rounded-xl bg-white/[0.02] overflow-hidden">
-                                <div className="absolute inset-0 bg-gradient-to-br from-violet-950/15 via-transparent to-indigo-950/15" />
-                                <div className="relative z-10 flex flex-col items-center gap-3">
-                                    <Loader2 className="size-6 text-violet-400 animate-spin" />
-                                    <p className="text-white/50 text-sm">Generating character sheet…</p>
-                                    <p className="text-white/25 text-xs">3-view turnaround in progress</p>
-                                </div>
-                                <div className="absolute bottom-0 left-0 right-0 h-[2px] overflow-hidden">
-                                    <motion.div
-                                        className="h-full bg-gradient-to-r from-transparent via-violet-500/70 to-transparent w-1/4"
-                                        animate={{ x: ["-100%", "500%"] }}
-                                        transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
-                                    />
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Failed */}
-                        {isFailed && sheetPhotos.length === 0 && (
-                            <div className="flex items-center justify-center gap-3 h-[160px] w-full border border-dashed border-red-500/20 rounded-xl bg-red-950/10">
-                                <AlertCircle className="size-5 text-red-400/60" />
-                                <p className="text-white/40 text-sm">Generation failed</p>
-                            </div>
-                        )}
-
-                        {/* Images gallery — same RowsPhotoAlbum as Element page */}
-                        {sheetPhotos.length > 0 && (
-                            <div className="w-full">
-                                <RowsPhotoAlbum
-                                    photos={sheetPhotos}
-                                    targetRowHeight={200}
-                                    spacing={1}
-                                    rowConstraints={{ singleRowMaxHeight: 420 }}
-                                    render={{
-                                        photo: (_, { photo, width, height }) => (
-                                            <div
-                                                key={photo.key}
-                                                style={{ width, height }}
-                                                className="group/card relative overflow-hidden cursor-zoom-in bg-zinc-900"
-                                            >
-                                                <img
-                                                    src={photo.src}
-                                                    alt="Character sheet view"
-                                                    className="w-full h-full object-cover transition-transform duration-300 group-hover/card:scale-105"
-                                                />
-                                                <div className="absolute inset-0 bg-black/0 group-hover/card:bg-black/20 transition-colors duration-200" />
+                            {/* Additional metadata tags (Features / Prompt) if available */}
+                            {(features.length > 0 || prompt) && (
+                                <div className="flex flex-col gap-3 pt-3 mt-1">
+                                    {features.length > 0 && (
+                                        <div className="flex flex-col gap-1.5">
+                                            <span className="text-xs font-semibold text-white/70">Features</span>
+                                            <div className="flex flex-wrap gap-1.5">
+                                                {features.map((f, i) => (
+                                                    <span key={i} className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs bg-white/5 text-white/80">
+                                                        {f}
+                                                    </span>
+                                                ))}
                                             </div>
-                                        ),
-                                    }}
-                                />
-                            </div>
-                        )}
-                    </div>
+                                        </div>
+                                    )}
+                                    {prompt && (
+                                        <div className="flex flex-col gap-1">
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-xs font-semibold text-white/70">Prompt</span>
+                                                <Button
+                                                    type="button"
+                                                    variant="ghost"
+                                                    size="icon-xs"
+                                                    onClick={handleCopyPrompt}
+                                                    className="text-white/40 hover:text-white"
+                                                >
+                                                    {promptCopied ? <Check className="size-3.5 text-emerald-400" /> : <Copy className="size-3.5" />}
+                                                </Button>
+                                            </div>
+                                            <p className="text-xs text-white/50 leading-relaxed line-clamp-3">{prompt}</p>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
 
-                    {/* ══ 3. ADD MEDIA DETAILS SECTION (Bottom Gallery 1-5) ══ */}
-                    <div className="flex flex-col gap-4 pt-10 mt-2 border-t border-white/10">
-                        <div className="flex flex-wrap items-center justify-between gap-3">
-                            <p className="text-xs font-medium text-white uppercase tracking-wider">
-                                Character Details
-                            </p>
-                            <div className="flex items-center gap-2">
-                                <input
-                                    ref={fileInputRef}
-                                    type="file"
-                                    accept="image/*"
-                                    multiple
-                                    className="hidden"
-                                    onChange={handleFileUpload}
-                                />
+                        {/* ══ RIGHT SIDE: MEDIA VIEWER WITH FLOATING TABS (SHEET / DETAILS) ══ */}
+                        <div className="lg:col-span-7 flex flex-col gap-3 relative">
+                            <div className="relative w-full rounded-2xl overflow-hidden bg-black/60 min-h-[460px] max-h-[580px] flex items-center justify-center p-4">
+
+                                {/* View A: Character Sheet */}
+                                {activeTab === "sheet" && (
+                                    <div className="w-full h-full flex items-center justify-center">
+                                        {isProcessing && sheetPhotos.length === 0 ? (
+                                            <div className="flex flex-col items-center gap-3 py-16">
+                                                <Loader2 className="size-8 text-violet-400 animate-spin" />
+                                                <p className="text-white/50 text-sm">Generating character sheet…</p>
+                                                <p className="text-white/25 text-xs">3-view turnaround in progress</p>
+                                            </div>
+                                        ) : isFailed && sheetPhotos.length === 0 ? (
+                                            <div className="flex items-center justify-center gap-3 py-16 text-red-400">
+                                                <AlertCircle className="size-5 text-red-400/60" />
+                                                <p className="text-white/40 text-sm">Generation failed</p>
+                                            </div>
+                                        ) : sheetPhotos.length > 0 && !imageLoadError ? (
+                                            <div className="w-full h-full flex items-center justify-center">
+                                                <div className="relative inline-flex max-w-full max-h-[520px] rounded-xl overflow-hidden group/sheet">
+                                                    <img
+                                                        src={sheetPhotos[0].src}
+                                                        alt="Character Sheet 3-View Turnaround"
+                                                        onError={() => setImageLoadError(true)}
+                                                        className="w-auto h-auto max-h-[520px] max-w-full object-contain rounded-xl"
+                                                    />
+
+                                                    {/* Top-Right Floating Overlay Action Buttons anchored to image (visible on hover) */}
+                                                    <div className="absolute top-3 right-3 flex items-center gap-2 z-30 opacity-0 group-hover/sheet:opacity-100 transition-opacity duration-200">
+                                                        <Button
+                                                            type="button"
+                                                            variant="flow-overlay-action"
+                                                            size="icon"
+                                                            onClick={handleDownloadSheet}
+                                                            title="Download character sheet"
+                                                        >
+                                                            <GoogleIcon iconName="download" className="text-[1.25rem]" />
+                                                        </Button>
+                                                        <Button
+                                                            type="button"
+                                                            variant="flow-overlay-action"
+                                                            size="icon"
+                                                            onClick={() => promptDelete({
+                                                                id: workflow.id || workflow.name,
+                                                                projectId,
+                                                                workflowType: "CHARACTER",
+                                                            })}
+                                                            title="Delete character"
+                                                        >
+                                                            <GoogleIcon iconName="delete" className="text-[1.25rem]" />
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div className="flex flex-col items-center justify-center gap-2 py-16 text-white/40">
+                                                <AlertCircle className="size-8 text-white/30" />
+                                                <p className="text-sm italic">No sheet image available</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                {/* View B: Character Details Gallery */}
+                                {activeTab === "details" && (
+                                    <div className="w-full h-full flex flex-col gap-3 overflow-y-auto custom-scrollbar p-1 max-h-[540px]">
+                                        <input
+                                            ref={fileInputRef}
+                                            type="file"
+                                            accept="image/*"
+                                            multiple
+                                            className="hidden"
+                                            onChange={handleFileUpload}
+                                        />
+                                        
+                                        {/* Sticky Header with Action Buttons & Count */}
+                                        <div className="sticky top-0 z-20 flex items-center justify-between gap-2 p-2.5 rounded-xl bg-black/70 backdrop-blur-xl border border-white/10 shrink-0">
+                                            <span className="text-xs font-medium text-white/70 pl-1">
+                                                Detail Images <span className="text-white/40 font-normal">({displayDetailImages.length}/{MAX_DETAIL_IMAGES})</span>
+                                            </span>
+                                            <div className="flex items-center gap-2">
+                                                <Button
+                                                    onClick={() => displayDetailImages.length < MAX_DETAIL_IMAGES && setIsAssetsOpen(true)}
+                                                    variant="user-menu-filled"
+                                                    size="sm"
+                                                    disabled={displayDetailImages.length >= MAX_DETAIL_IMAGES}
+                                                    title={displayDetailImages.length >= MAX_DETAIL_IMAGES ? `Maximum ${MAX_DETAIL_IMAGES} detail images reached` : "Select from assets"}
+                                                    className="h-8 text-xs px-3"
+                                                >
+                                                    <FolderOpen className="size-3.5" /> Assets
+                                                </Button>
+                                                <Button
+                                                    onClick={() => displayDetailImages.length < MAX_DETAIL_IMAGES && fileInputRef.current?.click()}
+                                                    variant="user-menu-filled"
+                                                    size="sm"
+                                                    disabled={displayDetailImages.length >= MAX_DETAIL_IMAGES}
+                                                    title={displayDetailImages.length >= MAX_DETAIL_IMAGES ? `Maximum ${MAX_DETAIL_IMAGES} detail images reached` : "Upload image"}
+                                                    className="h-8 text-xs px-3"
+                                                >
+                                                    <Upload className="size-3.5" /> Upload
+                                                </Button>
+                                            </div>
+                                        </div>
+
+                                        {detailPhotos.length > 0 ? (
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 w-full p-1 overflow-y-auto custom-scrollbar">
+                                                {detailPhotos.map((photo) => {
+                                                    const mediaId = photo.ref?.id;
+                                                    const isDeletingThis = deletingMediaId === mediaId;
+                                                    const isAddingThis   = pendingUrls.includes(photo.src);
+                                                    const isLoadingThis  = isDeletingThis || isAddingThis;
+                                                    return (
+                                                        <div
+                                                            key={photo.key}
+                                                            className="group/card relative overflow-hidden rounded-xl bg-zinc-900 border border-white/10 w-full aspect-[4/3] flex items-center justify-center shrink-0"
+                                                        >
+                                                            <img
+                                                                src={photo.src}
+                                                                alt="Character detail"
+                                                                className="w-full h-full object-cover transition-transform duration-300 group-hover/card:scale-105 rounded-xl"
+                                                            />
+                                                            <div className="absolute inset-0 bg-black/0 group-hover/card:bg-black/25 transition-colors duration-200" />
+
+                                                            {!isLoadingThis && (
+                                                                <Button
+                                                                    type="button"
+                                                                    variant="studio-overlay-icon"
+                                                                    size="icon-xs"
+                                                                    onClick={() => handleDeleteDetailImage(photo.ref)}
+                                                                    className="absolute top-2 right-2 z-20 opacity-0 group-hover/card:opacity-100 transition-opacity"
+                                                                    title="Remove image"
+                                                                >
+                                                                    <X className="size-3.5 stroke-[2.5]" />
+                                                                </Button>
+                                                            )}
+                                                            {isLoadingThis && (
+                                                                <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] z-30 flex items-center justify-center">
+                                                                    <Loader2 className="size-6 text-white animate-spin" />
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        ) : (
+                                            <div className="relative w-full h-[360px] overflow-hidden rounded-2xl bg-[oklch(26.9%_0_0)] px-6 flex items-center justify-center group">
+                                                <div className="flex flex-col items-center gap-4 text-center">
+                                                    <div className="relative h-20 w-16">
+                                                        {[
+                                                            "https://www.krea.ai/_app/2ef422f246a7f9e2/immutable/assets/face_3.BsghTrki.webp",
+                                                            "https://www.krea.ai/_app/2ef422f246a7f9e2/immutable/assets/face_2.D1RW4rY-.webp",
+                                                            "https://www.krea.ai/_app/2ef422f246a7f9e2/immutable/assets/face_1.Cndx8lVo.webp"
+                                                        ].map((src, i) => {
+                                                            const transforms = ["-translate-x-10 -translate-y-2 -rotate-12", "translate-x-10 -translate-y-1 rotate-12", ""];
+                                                            return (
+                                                                <div key={i} style={{ zIndex: i }} className={`absolute top-0 h-20 w-16 overflow-hidden rounded-xl border-2 border-white bg-black/25 shadow-lg backdrop-blur-md transition-transform duration-500 ease-out group-hover:scale-105 ${transforms[i]}`}>
+                                                                    <div className="h-full w-full bg-cover bg-center" style={{ backgroundImage: `url("${src}")` }} />
+                                                                </div>
+                                                            );
+                                                        })}
+                                                    </div>
+
+                                                    <div className="flex max-w-xs flex-col items-center gap-1">
+                                                        <h3 className="text-base font-medium tracking-tight text-white">Add detail images to this character</h3>
+                                                        <p className="text-white/45 text-xs leading-relaxed">Upload multiple images from different angles for better results.</p>
+                                                    </div>
+
+                                                    <div className="flex items-center justify-center gap-2 flex-wrap">
+                                                        <Button
+                                                            type="button"
+                                                            variant="studio-white"
+                                                            size="sm"
+                                                            onClick={() => displayDetailImages.length < MAX_DETAIL_IMAGES && fileInputRef.current?.click()}
+                                                            className="rounded-full text-xs font-semibold px-5"
+                                                        >
+                                                            <Upload className="w-3.5 h-3.5" />
+                                                            Upload
+                                                        </Button>
+                                                        <Button
+                                                            type="button"
+                                                            variant="user-menu-outline"
+                                                            size="sm"
+                                                            onClick={() => displayDetailImages.length < MAX_DETAIL_IMAGES && setIsAssetsOpen(true)}
+                                                            className="rounded-full text-xs font-semibold px-5"
+                                                        >
+                                                            <FolderOpen className="w-3.5 h-3.5" />
+                                                            Select from assets
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                            </div>
+
+                            {/* ── FLOATING BUTTONS (Google Flow Style) ── */}
+                            <div className="flex gap-2.5 justify-center items-center pt-3">
+                                {/* Button 1: Body Sheet */}
                                 <Button
-                                    onClick={() => displayDetailImages.length < MAX_DETAIL_IMAGES && fileInputRef.current?.click()}
-                                    variant="user-menu-filled"
-                                    size="sm"
-                                    disabled={displayDetailImages.length >= MAX_DETAIL_IMAGES}
-                                    title={displayDetailImages.length >= MAX_DETAIL_IMAGES ? `Maximum ${MAX_DETAIL_IMAGES} detail images reached` : "Upload image"}
+                                    type="button"
+                                    variant={activeTab === "sheet" ? "flow-pill-active" : "flow-pill"}
+                                    size="flow"
+                                    onClick={() => setActiveTab("sheet")}
+                                    aria-label="Body Sheet"
                                 >
-                                    <Upload className="size-3.5" /> Upload
+                                    <div className={`size-8 rounded-md overflow-hidden shrink-0 flex items-center justify-center ${
+                                        activeTab === "sheet" ? "bg-white" : "bg-[#38383c]"
+                                    }`}>
+                                        {sheetPhotos[0]?.src && !imageLoadError ? (
+                                            <img
+                                                src={sheetPhotos[0].src}
+                                                alt="Body Sheet"
+                                                onError={() => setImageLoadError(true)}
+                                                className="w-full h-full object-cover"
+                                            />
+                                        ) : (
+                                            <GoogleIcon iconName="portrait" className={`text-[1.2rem] ${activeTab === "sheet" ? "text-black" : "text-white"}`} />
+                                        )}
+                                    </div>
+                                    <span className="font-medium pr-1">Body Sheet</span>
+                                </Button>
+
+                                {/* Button 2: More Details */}
+                                <Button
+                                    type="button"
+                                    variant={activeTab === "details" ? "flow-pill-active" : "flow-pill"}
+                                    size="flow"
+                                    onClick={() => setActiveTab("details")}
+                                    aria-label="More Details"
+                                >
+                                    <div className={`size-8 rounded-md overflow-hidden shrink-0 flex items-center justify-center ${
+                                        activeTab === "details" ? "bg-white text-black" : "bg-[#38383c] text-white"
+                                    }`}>
+                                        {detailPhotos[0]?.src ? (
+                                            <img src={detailPhotos[0].src} alt="More Details" className="w-full h-full object-cover" />
+                                        ) : (
+                                            <GoogleIcon iconName="accessibility_new" className="text-[1.2rem]" />
+                                        )}
+                                    </div>
+                                    <span className="font-medium pr-1">More Details</span>
                                 </Button>
                             </div>
                         </div>
 
-                        {detailPhotos.length > 0 ? (
-                            <div className="w-full">
-                                <RowsPhotoAlbum
-                                    photos={detailPhotos}
-                                    targetRowHeight={200}
-                                    spacing={1}
-                                    rowConstraints={{ singleRowMaxHeight: 380 }}
-                                    render={{
-                                        photo: (_, { photo, width, height }) => {
-                                            const mediaId = photo.ref?.id;
-                                            const isDeletingThis = deletingMediaId === mediaId;
-                                            const isAddingThis   = pendingUrls.includes(photo.src);
-                                            const isLoadingThis  = isDeletingThis || isAddingThis;
-                                            return (
-                                                <div
-                                                    key={photo.key}
-                                                    style={{ width, height }}
-                                                    className="group/card relative overflow-hidden bg-zinc-900"
-                                                >
-                                                    <img
-                                                        src={photo.src}
-                                                        alt="Character detail"
-                                                        className="w-full h-full object-cover transition-transform duration-300 group-hover/card:scale-105"
-                                                    />
-                                                    <div className="absolute inset-0 bg-black/0 group-hover/card:bg-black/20 transition-colors duration-200" />
-
-                                                    {/* Delete button */}
-                                                    {!isLoadingThis && (
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => handleDeleteDetailImage(photo.ref)}
-                                                            className="absolute top-2 right-2 z-20 size-6 rounded-full bg-white text-black hover:bg-white/90 shadow-md flex items-center justify-center cursor-pointer opacity-0 group-hover/card:opacity-100 transition-opacity duration-200"
-                                                            title="Remove image"
-                                                        >
-                                                            <X className="size-3.5 stroke-[2.5]" />
-                                                        </button>
-                                                    )}
-                                                    {/* Loading spinner */}
-                                                    {isLoadingThis && (
-                                                        <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] z-30 flex items-center justify-center">
-                                                            <Loader2 className="size-6 text-white animate-spin" />
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            );
-                                        },
-                                    }}
-                                />
-                            </div>
-                        ) : (
-                            <div
-                                onClick={() => fileInputRef.current?.click()}
-                                className="flex items-center justify-center gap-2 h-[120px] w-full border border-dashed border-white/15 text-white/30 text-sm cursor-pointer hover:border-white/25 hover:text-white/50 transition-all duration-200 rounded-lg"
-                            >
-                                <Upload className="size-4" /> Upload detail images
-                            </div>
-                        )}
                     </div>
 
                 </div>
@@ -598,6 +757,16 @@ export default function CharacterDetailPage() {
                     await confirmDelete(projectId);
                     router.push(`/cinema-studio/${projectId}/characters`);
                 }}
+            />
+
+            {/* Assets Import Dialog */}
+            <ImportMediaDialog
+                open={isAssetsOpen}
+                onOpenChange={setIsAssetsOpen}
+                onSelect={handleSelectAssets}
+                library={projectData?.projectContents?.media || []}
+                mode="image"
+                maxAllowed={MAX_DETAIL_IMAGES}
             />
         </div>
     );

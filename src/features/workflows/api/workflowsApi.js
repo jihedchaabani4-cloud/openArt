@@ -27,7 +27,13 @@ export function useProjectData(projectId, sessionId = null) {
       if (sessionId) url += `?session_id=${sessionId}`;
       
       try {
-        const res = await api.get(url);
+        const res = await api.get(url, {
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+          },
+          cache: 'no-store',
+        });
         console.log("DEBUG: Raw API Response from /project-data:", res);
         
         // Comprehensive check for all possible backend response structures
@@ -231,7 +237,7 @@ export function useCreateElementSheetMutation({ onError } = {}) {
           projectId: projectId,
           workflow_type: 'ELEMENT_SHEET',
           metadata: {
-            displayName: payload.prompt || "Element Sheet",
+            displayName: payload.name || payload.prompt || (payload.type === "character" || payload.element_type === "character" ? "Untitled Character" : "Untitled Element"),
             createTime: new Date().toISOString(),
             sessionId: payload.session_id,
             favorited: false,
@@ -573,12 +579,68 @@ export function useUpdateWorkflow() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ workflowId, workflowData }) => {
-      const res = await api.patch(`/workflows/workflows/${workflowId}`, workflowData);
-      if (!res.ok) throw new Error(res.message || "Failed to update workflow");
-      return res;
+      const cleanId = String(workflowId || '').replace(/^workflows\//, '');
+      console.log(`📡 [useUpdateWorkflow] Attempting patch for workflowId: "${workflowId}" (cleanId: "${cleanId}")`, workflowData);
+
+      // 1. Try /workflows/workflows/${cleanId}
+      try {
+        const res = await api.patch(`/workflows/workflows/${cleanId}`, workflowData);
+        console.log(`✅ [useUpdateWorkflow] Success via /workflows/workflows/${cleanId}:`, res);
+        if (res && res.ok !== false) return res;
+      } catch (err) {
+        console.warn(`⚠️ [useUpdateWorkflow] /workflows/workflows/${cleanId} endpoint failed:`, err.message);
+      }
+
+      // 2. Fallback to /characters/${cleanId}
+      try {
+        console.log(`📡 [useUpdateWorkflow] Fallback attempting /characters/${cleanId}`, workflowData);
+        const res = await api.patch(`/characters/${cleanId}`, workflowData);
+        console.log(`✅ [useUpdateWorkflow] Success via /characters/${cleanId}:`, res);
+        if (res && res.ok === false) throw new Error(res.message || "Failed to update workflow");
+        return res;
+      } catch (fallbackErr) {
+        console.error(`❌ [useUpdateWorkflow] All patch endpoints failed for ID "${cleanId}":`, fallbackErr);
+        throw fallbackErr;
+      }
     },
-    onSuccess: () => {
+    onSuccess: (data, variables) => {
+      const { workflowId, workflowData } = variables || {};
+      const cleanId = String(workflowId || '').replace(/^workflows\//, '');
+
+      // 1. Immediately update query cache across all projectData queries
+      if (cleanId && workflowData) {
+        const newName = workflowData.display_name || workflowData.name;
+        queryClient.setQueriesData({ queryKey: ['projectData'] }, (oldData) => {
+          if (!oldData?.projectContents?.workflows) return oldData;
+          const updatedWorkflows = oldData.projectContents.workflows.map((w) => {
+            const wCleanId = String(w.id || w.name || '').replace(/^workflows\//, '');
+            if (wCleanId === cleanId) {
+              return {
+                ...w,
+                ...workflowData,
+                display_name: newName || w.display_name,
+                name: newName || w.name,
+                metadata: {
+                  ...w.metadata,
+                  displayName: newName || w.metadata?.displayName,
+                },
+              };
+            }
+            return w;
+          });
+          return {
+            ...oldData,
+            projectContents: {
+              ...oldData.projectContents,
+              workflows: updatedWorkflows,
+            },
+          };
+        });
+      }
+
+      // 2. Invalidate queries for background refetch
       queryClient.invalidateQueries({ queryKey: ['projectData'] });
+      queryClient.invalidateQueries({ queryKey: ['workflows'] });
     },
   });
 }
