@@ -39,8 +39,16 @@ export function CharacterCardKrea({ character, onClick, onDelete }) {
   const [isStarred, setIsStarred] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
-  const name = character.name || character.display_name || character.metadata?.displayName || "Untitled Character";
-  const description = character.description || character.metadata?.description || "";
+  const isUUID = (str) => typeof str === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str.trim());
+  const name = [
+    character.character?.name,
+    character.character?.title,
+    character.title,
+    character.display_name,
+    character.metadata?.displayName,
+    character.name,
+  ].find(n => n && typeof n === "string" && n.trim() && !isUUID(n.trim())) || "Untitled Character";
+  const description = character.character_info || character.character?.character_info || character.character?.description || character.description || character.metadata?.description || "";
   const rawItems = character.items || character.reference_images || [];
 
   const images = Array.isArray(rawItems) && rawItems.length > 0

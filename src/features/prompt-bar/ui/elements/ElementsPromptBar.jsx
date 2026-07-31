@@ -19,88 +19,90 @@ export function ElementsPromptBar({ hideBackground = false }) {
     const setFeatureEditorOpen = useElementStore((state) => state.setFeatureEditorOpen);
 
     return (
-        <PromptBarShell
-            variant="elements"
-            hideBackground={hideBackground}
-            isDragging={s.isDraggingGalleryItem}
-            dragOverlay={
-                <DragDropOverlay mode={s.generationMode} onDrop={s.handleGalleryDrop} error={s.dragError} maxRefs={s.maxRefs} />
-            }
-            popover={
-                <>
-                    <ImportMediaPopover
-                        open={s.dialogOpen}
-                        onOpenChange={s.setDialogOpen}
-                        anchorRef={paperclipRef}
-                        onSelect={s.handleSelectMedia}
-                        library={s.library}
-                        loading={s.libraryLoading}
-                        mode={s.internalMode}
-                    />
+        <>
+            <PromptBarShell
+                variant="elements"
+                hideBackground={hideBackground}
+                isDragging={s.isDraggingGalleryItem}
+                dragOverlay={
+                    <DragDropOverlay mode={s.generationMode} onDrop={s.handleGalleryDrop} error={s.dragError} maxRefs={s.maxRefs} />
+                }
+                popover={
                     <ElementFeatureEditor
                         open={featureEditorOpen}
                         onOpenChange={setFeatureEditorOpen}
                         anchorRef={sparklesRef}
                     />
-                </>
-            }
-        >
-            <AnimatePresence>
-                {s.referenceImages.length > 0 && (
-                    <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        className="w-full overflow-hidden p-2"
-                    >
-                        <Row1
-                            referenceImages={s.referenceImages}
-                            generationMode={s.generationMode}
-                            onRemoveReference={s.handleRemoveReference}
-                            openDialog={s.openDialog}
-                            showAddButton={false}
-                            maxRefs={s.maxRefs}
-                            selectedModel={s.selectedModel}
-                        />
-                    </motion.div>
-                )}
-            </AnimatePresence>
+                }
+            >
+                <AnimatePresence>
+                    {s.referenceImages.length > 0 && (
+                        <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: "auto", opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            className="w-full overflow-hidden p-2"
+                        >
+                            <Row1
+                                referenceImages={s.referenceImages}
+                                generationMode={s.generationMode}
+                                onRemoveReference={s.handleRemoveReference}
+                                openDialog={s.openDialog}
+                                showAddButton={false}
+                                maxRefs={s.maxRefs}
+                                selectedModel={s.selectedModel}
+                            />
+                        </motion.div>
+                    )}
+                </AnimatePresence>
 
-            <PromptBarBase s={s} className="p-3 gap-1.5">
-                <div className="flex flex-col w-full gap-1.5">
-                    <PromptTextarea
-                        value={s.prompt}
-                        onChange={s.setPrompt}
-                        onSubmit={s.handleGenerate}
-                        textareaRef={s.textareaRef}
-                        referenceImages={s.referenceImages}
-                        placeholder={s.placeholder}
-                        onTriggerMentionDialog={s.maxRefs > 0 ? (cb) => s.openDialog("image", "normal", cb) : undefined}
-                    />
-                    <ElementsRow2
-                        paramsProps={{
-                            elementMode: s.elementMode,
-                            setElementMode: s.setElementMode,
-                            featureEditorOpen,
-                            setFeatureEditorOpen,
-                            sparklesRef,
-                        }}
-                        actionProps={{
-                            generating: s.generating,
-                            onSubmit: s.handleGenerate,
-                            appOverride: `${s.elementMode}_sheet`,
-                            generationMode: s.generationMode,
-                            hasContent: (s.prompt || "").trim().length > 0,
-                        }}
-                        onToggleVariations={s.toggleVariations}
-                        variationsOpen={s.variationsOpen}
-                        onAddClick={s.handleAddClick}
-                        mediaOpen={s.dialogOpen}
-                        paperclipRef={paperclipRef}
-                        showPaperclip={s.maxRefs > 0}
-                    />
-                </div>
-            </PromptBarBase>
-        </PromptBarShell>
+                <PromptBarBase s={s} className="p-3 gap-1.5">
+                    <div className="flex flex-col w-full gap-1.5">
+                        <PromptTextarea
+                            value={s.prompt}
+                            onChange={s.setPrompt}
+                            onSubmit={s.handleGenerate}
+                            textareaRef={s.textareaRef}
+                            referenceImages={s.referenceImages}
+                            placeholder={s.placeholder}
+                            onTriggerMentionDialog={s.maxRefs > 0 ? (cb) => s.openDialog("image", "normal", cb) : undefined}
+                        />
+                        <ElementsRow2
+                            paramsProps={{
+                                elementMode: s.elementMode,
+                                setElementMode: s.setElementMode,
+                                featureEditorOpen,
+                                setFeatureEditorOpen,
+                                sparklesRef,
+                            }}
+                            actionProps={{
+                                generating: s.generating,
+                                onSubmit: s.handleGenerate,
+                                appOverride: `${s.elementMode}_sheet`,
+                                generationMode: s.generationMode,
+                                hasContent: (s.prompt || "").trim().length > 0,
+                            }}
+                            onToggleVariations={s.toggleVariations}
+                            variationsOpen={s.variationsOpen}
+                            onAddClick={s.handleAddClick}
+                            mediaOpen={s.dialogOpen}
+                            paperclipRef={paperclipRef}
+                            showPaperclip={s.maxRefs > 0}
+                        />
+                    </div>
+                </PromptBarBase>
+
+                <ImportMediaPopover
+                    open={s.dialogOpen}
+                    onOpenChange={s.setDialogOpen}
+                    anchorRef={paperclipRef}
+                    onSelect={s.handleSelectMedia}
+                    library={s.library}
+                    loading={s.libraryLoading}
+                    variant="asset-select"
+                    mode={s.internalMode}
+                />
+            </PromptBarShell>
+        </>
     );
 }

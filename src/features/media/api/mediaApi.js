@@ -240,7 +240,7 @@ export function useBatchUploadAssets() {
         optimisticWorkflows.push({
           name:          optimisticId,
           projectId:     projectId,
-          workflow_type: 'GENERATION',
+          workflow_type: 'UPLOAD',
           metadata: {
             displayName:    isVideo ? 'Vidéo importée' : 'Image importée',
             createTime:     new Date().toISOString(),
@@ -301,7 +301,10 @@ export function useBatchUploadAssets() {
     },
 
     onSettled: (_data, _err, variables, context) => {
-      context?.localUrls?.forEach(url => URL.revokeObjectURL(url));
+      // Delay blob URL revocation to avoid image flicker while real server data loads
+      setTimeout(() => {
+        context?.localUrls?.forEach(url => URL.revokeObjectURL(url));
+      }, 2000);
       queryClient.invalidateQueries({ queryKey: queryKeys.assets.byProject(variables.projectId) });
       queryClient.invalidateQueries({ queryKey: queryKeys.generations.byProject(variables.projectId, variables.sessionId) });
       queryClient.invalidateQueries({ queryKey: queryKeys.projectData.byProject(variables.projectId) });

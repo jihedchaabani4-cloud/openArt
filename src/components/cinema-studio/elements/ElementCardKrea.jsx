@@ -122,7 +122,14 @@ export function ElementCardKrea({ element, onClick, onDelete }) {
   const [isStarred, setIsStarred] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
-  const name = element.name || element.display_name || element.metadata?.displayName || "Untitled Element";
+  const isUUID = (str) => typeof str === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str.trim());
+  const name = [
+    element.element?.name,
+    element.title,
+    element.display_name,
+    element.metadata?.displayName,
+    element.name,
+  ].find(n => n && typeof n === "string" && n.trim() && !isUUID(n.trim())) || "Untitled Element";
   const rawItems = element.items || element.reference_images || [];
 
   const images = Array.isArray(rawItems) && rawItems.length > 0
@@ -188,7 +195,7 @@ export function ElementCardKrea({ element, onClick, onDelete }) {
         {isProcessing ? (
           <div className="w-full h-full flex flex-col items-center justify-center gap-3 bg-zinc-900/90 text-white/70">
             <Loader2 className="size-7 animate-spin text-white/80" />
-            <span className="text-xs font-medium">Processing character...</span>
+            <span className="text-xs font-medium">Processing element...</span>
           </div>
         ) : isFailed ? (
           <div className="w-full h-full flex flex-col items-center justify-center gap-2 bg-red-950/60 text-red-200 p-3 text-center backdrop-blur-sm">

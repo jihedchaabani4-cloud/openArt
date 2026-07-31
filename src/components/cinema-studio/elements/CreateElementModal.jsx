@@ -135,7 +135,7 @@ export function CreateElementModal({ isOpen, onClose, projectId, onCreated }) {
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
-          <span>Create Character Element</span>
+          <span>Create Element</span>
         </DialogTitle>
 
         {/* Modal Body */}

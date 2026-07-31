@@ -14,7 +14,6 @@ import { LoadingScreen } from "@/shared/ui/LoadingScreen"
 
 import { CharacterCardKrea } from "@/components/cinema-studio/characters/CharacterCardKrea"
 import { NewElementCardKrea } from "@/components/cinema-studio/elements/NewElementCardKrea"
-import { ElementsKreaControls } from "@/components/cinema-studio/elements/ElementsKreaControls"
 import { ElementsKreaHero } from "@/components/cinema-studio/elements/ElementsKreaHero"
 import { HowToDrawer } from "@/components/cinema-studio/elements/HowToDrawer"
 import { useWorkflowDelete } from "@/features/workflows"

@@ -12,7 +12,7 @@ import {
 import { useWorkflowDelete } from "@/features/workflows";
 import { LoadingScreen } from "@/shared/ui/LoadingScreen";
 import { ConfirmDeleteDialog } from "@/widgets/dialogs/ConfirmDeleteDialog";
-import { ImportMediaDialog } from "@/widgets/ImportMediaDialog/ImportMediaDialog";
+import { ImportMediaPopover } from "@/widgets/ImportMediaDialog/ImportMediaPopover";
 import { CharacterEditNavbar } from "@/widgets/CharacterEditNavbar/CharacterEditNavbar";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
@@ -118,9 +118,8 @@ export default function CharacterDetailPage() {
         }
     };
 
-    // ── Description (editable) ──
     const serverDescription = React.useMemo(() => (
-        workflow?.metadata?.description || workflow?.description || ""
+        workflow?.character_info || workflow?.character?.character_info || workflow?.character?.description || workflow?.description || workflow?.metadata?.description || ""
     ), [workflow]);
 
     const [isEditingDesc, setIsEditingDesc] = React.useState(false);
@@ -131,16 +130,24 @@ export default function CharacterDetailPage() {
     const handleSaveDescription = async (text) => {
         setIsEditingDesc(false);
         const wfId = workflow?.id || workflow?.name;
+        console.log("📝 [Character Info Save] Triggered handleSaveDescription:", { text, wfId });
         if (!wfId) return;
+
         try {
-            await updateWorkflow({
+            console.log("📡 [Character Info Save] Sending updateWorkflow payload to API:", {
+                workflowId: wfId,
+                workflowData: { description: text.trim(), character_info: text.trim() },
+            });
+            const res = await updateWorkflow({
                 workflowId: wfId,
                 workflowData: {
                     description: text.trim(),
+                    character_info: text.trim(),
                 },
             });
+            console.log("✅ [Character Info Save] Server response received:", res);
         } catch (err) {
-            console.error("Failed to save description:", err);
+            console.error("❌ [Character Info Save] Failed to save description/character_info:", err);
         }
     };
 
@@ -238,6 +245,7 @@ export default function CharacterDetailPage() {
     const addMediaMutation    = useAddMediaToCharacter();
     const removeMediaMutation = useRemoveMediaFromCharacter();
     const fileInputRef        = React.useRef(null);
+    const assetsBtnRef        = React.useRef(null);
 
     const [addedDetailImages, setAddedDetailImages] = React.useState([]);
     const [pendingUrls, setPendingUrls]             = React.useState([]);
@@ -249,40 +257,25 @@ export default function CharacterDetailPage() {
         if (!selectedItems || !selectedItems.length) return;
         const remaining = MAX_DETAIL_IMAGES - displayDetailImages.length;
         if (remaining <= 0) return;
-        const newRefs = selectedItems
-            .slice(0, remaining)
-            .map((item, idx) => {
-                const url = item.url || item.file_url || item.src;
-                return url ? { id: String(Date.now() + idx), url, file_url: url } : null;
-            })
-            .filter(Boolean);
 
-        if (!newRefs.length) return;
-        setAddedDetailImages((prev) => [...newRefs, ...prev]);
-
+        const itemsToAdd = selectedItems.slice(0, remaining);
         const characterId = workflow?.id;
-        const urlsToAdd = newRefs.map((r) => r.url);
-        if (isValidUUID(characterId)) {
-            setPendingUrls((prev) => [...prev, ...urlsToAdd]);
-            for (const item of newRefs) {
-                try {
-                    const res = await addMediaMutation.mutateAsync({ characterId, imageUrl: item.url, projectId });
-                    const uploadedUrl = res?.media?.url;
-                    if (uploadedUrl && uploadedUrl !== item.url) {
-                        setAddedDetailImages((prev) =>
-                            prev.map((r) =>
-                                (r.url === item.url || r.file_url === item.url)
-                                    ? { ...r, url: uploadedUrl, file_url: uploadedUrl }
-                                    : r
-                            )
-                        );
-                    }
-                } catch (err) {
-                    console.error("Failed to add selected asset to character:", err);
-                    setAddedDetailImages((prev) => prev.filter((r) => (r.url || r.file_url) !== item.url));
-                } finally {
-                    setPendingUrls((prev) => prev.filter((u) => u !== item.url));
+
+        for (const item of itemsToAdd) {
+            const mediaId = item.id;
+            const fallbackUrl = item.url || item.file_url || item.src;
+            if (!mediaId && !fallbackUrl) continue;
+
+            try {
+                const payload = mediaId ? { characterId, mediaId, projectId } : { characterId, imageUrl: fallbackUrl, projectId };
+                console.log("📡 [Detail Media Add] Sending mediaId payload to API:", payload);
+                const res = await addMediaMutation.mutateAsync(payload);
+                const createdMedia = res?.media;
+                if (createdMedia) {
+                    setAddedDetailImages((prev) => [createdMedia, ...prev]);
                 }
+            } catch (err) {
+                console.error("❌ [Detail Media Add] Failed to add media asset by mediaId:", err);
             }
         }
     };
@@ -568,34 +561,37 @@ export default function CharacterDetailPage() {
                                             onChange={handleFileUpload}
                                         />
                                         
-                                        {/* Sticky Header with Action Buttons & Count */}
-                                        <div className="sticky top-0 z-20 flex items-center justify-between gap-2 p-2.5 rounded-xl bg-black/70 backdrop-blur-xl border border-white/10 shrink-0">
-                                            <span className="text-xs font-medium text-white/70 pl-1">
-                                                Detail Images <span className="text-white/40 font-normal">({displayDetailImages.length}/{MAX_DETAIL_IMAGES})</span>
-                                            </span>
-                                            <div className="flex items-center gap-2">
-                                                <Button
-                                                    onClick={() => displayDetailImages.length < MAX_DETAIL_IMAGES && setIsAssetsOpen(true)}
-                                                    variant="user-menu-filled"
-                                                    size="sm"
-                                                    disabled={displayDetailImages.length >= MAX_DETAIL_IMAGES}
-                                                    title={displayDetailImages.length >= MAX_DETAIL_IMAGES ? `Maximum ${MAX_DETAIL_IMAGES} detail images reached` : "Select from assets"}
-                                                    className="h-8 text-xs px-3"
-                                                >
-                                                    <FolderOpen className="size-3.5" /> Assets
-                                                </Button>
-                                                <Button
-                                                    onClick={() => displayDetailImages.length < MAX_DETAIL_IMAGES && fileInputRef.current?.click()}
-                                                    variant="user-menu-filled"
-                                                    size="sm"
-                                                    disabled={displayDetailImages.length >= MAX_DETAIL_IMAGES}
-                                                    title={displayDetailImages.length >= MAX_DETAIL_IMAGES ? `Maximum ${MAX_DETAIL_IMAGES} detail images reached` : "Upload image"}
-                                                    className="h-8 text-xs px-3"
-                                                >
-                                                    <Upload className="size-3.5" /> Upload
-                                                </Button>
+                                        {/* Sticky Header with Action Buttons & Count — Only visible when detail media exists */}
+                                        {displayDetailImages.length > 0 && (
+                                            <div className="sticky top-0 z-20 flex items-center justify-between gap-2 p-2.5 rounded-xl bg-black/70 backdrop-blur-xl border border-white/10 shrink-0">
+                                                <span className="text-xs font-medium text-white/70 pl-1">
+                                                    Detail Images <span className="text-white/40 font-normal">({displayDetailImages.length}/{MAX_DETAIL_IMAGES})</span>
+                                                </span>
+                                                <div className="flex items-center gap-2">
+                                                    <Button
+                                                        ref={assetsBtnRef}
+                                                        onClick={() => displayDetailImages.length < MAX_DETAIL_IMAGES && setIsAssetsOpen((prev) => !prev)}
+                                                        variant="user-menu-filled"
+                                                        size="sm"
+                                                        disabled={displayDetailImages.length >= MAX_DETAIL_IMAGES}
+                                                        title={displayDetailImages.length >= MAX_DETAIL_IMAGES ? `Maximum ${MAX_DETAIL_IMAGES} detail images reached` : "Select from assets"}
+                                                        className="h-8 text-xs px-3"
+                                                    >
+                                                        <FolderOpen className="size-3.5" /> Assets
+                                                    </Button>
+                                                    <Button
+                                                        onClick={() => displayDetailImages.length < MAX_DETAIL_IMAGES && fileInputRef.current?.click()}
+                                                        variant="user-menu-filled"
+                                                        size="sm"
+                                                        disabled={displayDetailImages.length >= MAX_DETAIL_IMAGES}
+                                                        title={displayDetailImages.length >= MAX_DETAIL_IMAGES ? `Maximum ${MAX_DETAIL_IMAGES} detail images reached` : "Upload image"}
+                                                        className="h-8 text-xs px-3"
+                                                    >
+                                                        <Upload className="size-3.5" /> Upload
+                                                    </Button>
+                                                </div>
                                             </div>
-                                        </div>
+                                        )}
 
                                         {detailPhotos.length > 0 ? (
                                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 w-full p-1 overflow-y-auto custom-scrollbar">
@@ -759,14 +755,16 @@ export default function CharacterDetailPage() {
                 }}
             />
 
-            {/* Assets Import Dialog */}
-            <ImportMediaDialog
+            {/* Assets Import Popover (Same component used in Prompt Bar) */}
+            <ImportMediaPopover
                 open={isAssetsOpen}
                 onOpenChange={setIsAssetsOpen}
                 onSelect={handleSelectAssets}
                 library={projectData?.projectContents?.media || []}
+                variant="asset-select"
                 mode="image"
-                maxAllowed={MAX_DETAIL_IMAGES}
+                maxAllowed={Math.max(1, MAX_DETAIL_IMAGES - displayDetailImages.length)}
+                anchorRef={assetsBtnRef}
             />
         </div>
     );

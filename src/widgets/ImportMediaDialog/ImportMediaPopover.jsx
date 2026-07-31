@@ -4,6 +4,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useParams } from "next/navigation";
 import { useLibraryFilter } from "@/features/prompt-bar/model/useLibraryFilter";
 import { useProjectData } from "@/features/workflows/api/workflowsApi";
+import { resolveMediaUrl } from "@/shared/lib/displayUtils";
+import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import {
@@ -16,6 +18,15 @@ import {
 import { RowsPhotoAlbum } from 'react-photo-album';
 import 'react-photo-album/rows.css';
 import { cn } from "@/shared/lib/utils";
+
+const CATEGORIES = [
+  { id: "all",       label: "All",        googleIcon: "dashboard" },
+  { id: "image",     label: "Images",     googleIcon: "image" },
+  { id: "video",     label: "Videos",     googleIcon: "voice_selection" },
+  { id: "character", label: "Characters", googleIcon: "accessibility_new" },
+  { id: "element",   label: "Avatar",     googleIcon: "face" },
+  { id: "upload",    label: "Uploads",    googleIcon: "drive_folder_upload" },
+];
 
 /**
  * ImportMediaPopover
@@ -49,15 +60,34 @@ export function ImportMediaPopover({
     return map;
   }, [projectData]);
 
+  const effectiveLibrary = React.useMemo(() => {
+    const raw = (library && library.length > 0) 
+      ? library 
+      : (projectData?.projectContents?.media ?? []);
+      
+    return raw.map(m => {
+      const url = resolveMediaUrl(m) || m.url || m.image?.url || m.video?.url || m.file_url || null;
+      const isVid = m.type === "video" || m.is_video || !!m.video || (url && /\.(mp4|webm|mov)$/i.test(url));
+      return {
+        ...m,
+        id: m.id || m.name,
+        url,
+        type: isVid ? "video" : "image",
+        is_video: isVid,
+      };
+    });
+  }, [library, projectData]);
+
   const {
     search,          setSearch,
     selectedSession, setSelectedSession,
+    selectedCategory, setSelectedCategory,
     visibleItems,
-  } = useLibraryFilter(library, mode);
+  } = useLibraryFilter(effectiveLibrary, mode);
 
   // Extract unique sessions from the library using the session ID and create time
   const sessions = React.useMemo(() => {
-    const flatItems = library.flatMap(i => i.items ?? i);
+    const flatItems = effectiveLibrary.flatMap(i => i.items ?? i);
     const unique = new Map();
 
     flatItems.forEach(item => {
@@ -97,7 +127,7 @@ export function ImportMediaPopover({
     });
 
     return Array.from(unique.values()).sort((a, b) => b.id.localeCompare(a.id));
-  }, [library, sessionNameMap]);
+  }, [effectiveLibrary, sessionNameMap]);
   const activeSessionName = sessions.find(s => s.id === selectedSession)?.name || "All Sessions";
 
   const [selectedItems, setSelectedItems] = React.useState([]);
@@ -117,7 +147,7 @@ export function ImportMediaPopover({
         event.target.closest('[data-radix-popper-content-wrapper]') ||
         event.target.closest('[role="menu"]') ||
         event.target.closest('[data-radix-menu-content]') ||
-        event.target.closest('.radix-themes'); // common in some radix setups
+        event.target.closest('.radix-[#18181b]'); // common in some radix setups
 
       if (isPortalClick) return;
 
@@ -200,7 +230,7 @@ export function ImportMediaPopover({
   const photos = React.useMemo(() => {
     const BASE = 1200;
     return visibleItems.map((item, i) => {
-      const itemUrl = item.url ?? item.image?.url ?? item.video?.url ?? item.file_url ?? null;
+      const itemUrl = resolveMediaUrl(item) ?? item.url ?? item.image?.url ?? item.video?.url ?? item.file_url ?? null;
       if (!itemUrl) return null;   // skip items with no resolved URL
 
       const isVideo  = item.type === "video" || item.is_video || !!item.video;
@@ -234,10 +264,9 @@ export function ImportMediaPopover({
           exit={{ opacity: 0, y: 10, scale: 0.95 }}
           transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
           className={cn(
-            "absolute bottom-full left-1/2 -translate-x-1/2 mb-4 z-50",
-            "bg-(--color-imagine-grey-2) backdrop-blur-[80px]   rounded-3xl flex flex-col overflow-hidden",
+            "fixed bottom-24 left-1/2 -translate-x-1/2 z-[9999]",
+            "bg-[#121214]/95 backdrop-blur-2xl border border-white/10 shadow-2xl rounded-3xl flex flex-col overflow-hidden text-white",
             "h-[500px] max-w-[750px] w-full",
-            
           )}
         >
           {/* Hidden file input */}
@@ -250,7 +279,7 @@ export function ImportMediaPopover({
             onChange={handleFileChange}
           />
           {/* Search & Filters Bar */}
-          <div className="px-4 py-3 flex items-center gap-2 shrink-0 ">
+          <div className="px-4 py-3 flex items-center gap-2 shrink-0 border-b border-white/5">
             {/* Session Selector */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -259,7 +288,7 @@ export function ImportMediaPopover({
                   <ChevronDown className="size-4 opacity-40" />
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-56 bg-(--color-imagine-grey-2) backdrop-blur-[80px] border-white/10 rounded-xl">
+              <DropdownMenuContent align="start" className="w-56 bg-[#18181b] backdrop-blur-xl border border-white/10 rounded-xl z-[60] text-white">
                 <DropdownMenuItem onClick={() => setSelectedSession("all_sessions")} className="text-sm">All Sessions</DropdownMenuItem>
                 <DropdownMenuSeparator className="bg-white/5" />
                 <div className="max-h-[200px] overflow-y-auto custom-scrollbar">
@@ -298,6 +327,28 @@ export function ImportMediaPopover({
             >
               <Upload size={18} />
             </button>
+          </div>
+
+          {/* Category Tabs Bar */}
+          <div className="px-4 py-2 flex items-center gap-1.5 overflow-x-auto scrollbar-hide border-b border-white/5 shrink-0">
+            {CATEGORIES.map((cat) => {
+              const isActive = (selectedCategory || "all") === cat.id;
+              return (
+                <button
+                  key={cat.id}
+                  onClick={() => setSelectedCategory(cat.id)}
+                  className={cn(
+                    "flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-medium transition-all shrink-0",
+                    isActive
+                      ? "bg-white text-black shadow-md font-semibold"
+                      : "bg-white/5 hover:bg-white/10 text-white/60 hover:text-white border border-white/5"
+                  )}
+                >
+                  <GoogleIcon name={cat.googleIcon} className={cn("size-3.5", isActive ? "text-black" : "text-white/60")} />
+                  <span>{cat.label}</span>
+                </button>
+              );
+            })}
           </div>
 
           {/* Grid Area - Scrollable */}

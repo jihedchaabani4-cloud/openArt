@@ -197,16 +197,25 @@ export function intrinsicSizeToCssAspect(width, height) {
  * @returns {Object|null} - The primary media item
  */
 export function getPrimaryMedia(workflow) {
-  if (!workflow?.items || workflow.items.length === 0) return null;
+  if (!workflow) return null;
   
-  const primaryId = workflow.metadata?.primaryMediaId;
-  if (primaryId) {
-    const target = workflow.items.find(i => (i.id === primaryId || i.name === primaryId) && i.status !== 'deleted');
-    if (target) return target;
+  if (workflow.items && workflow.items.length > 0) {
+    const primaryId = workflow.metadata?.primaryMediaId;
+    if (primaryId) {
+      const target = workflow.items.find(i => (i.id === primaryId || i.name === primaryId) && i.status !== 'deleted');
+      if (target) return target;
+    }
+    
+    const firstValid = workflow.items.find(i => i.status !== 'deleted') || workflow.items[0];
+    if (firstValid) return firstValid;
   }
-  
-  // Fallback: Just return the first non-deleted media piece
-  return workflow.items.find(i => i.status !== 'deleted') || workflow.items[0] || null;
+
+  // Fallback for workflows without attached items: return dummy primary item so card renders in grid
+  return {
+    id: workflow.id || workflow.name,
+    status: workflow.status || 'processing',
+    url: null,
+  };
 }
 
 /**
@@ -218,4 +227,47 @@ export function getPrimaryMedia(workflow) {
 export function getPrimaryMediaConfig(workflow) {
   const primary = getPrimaryMedia(workflow);
   return primary?.generationConfig || null;
+}
+
+// ─── Canonical Media Utilities ───────────────────────────────────────────────
+// Single source of truth for URL resolution and video detection.
+// Use these instead of repeating the long ?? chain in every component.
+
+/**
+ * Resolves the display URL from any media item shape the backend may return.
+ * Handles all known field variants (new schema, legacy schema, upload schema).
+ *
+ * @param {Object|null} item - A media item from projectContents.media or library
+ * @returns {string|null} - The resolved URL, or null if not found
+ */
+export function resolveMediaUrl(item) {
+  if (!item) return null;
+  return (
+    item.url                              ??
+    item.image?.generatedImage?.url       ??
+    item.image?.url                       ??
+    item.video?.generatedVideo?.uri       ??
+    item.video?.generatedVideo?.url       ??
+    item.video?.url                       ??
+    item.file_url                         ??
+    item.asset?.file_url                  ??
+    null
+  );
+}
+
+/**
+ * Determines whether a media item is a video.
+ * Handles all known field variants.
+ *
+ * @param {Object|null} item - A media item
+ * @returns {boolean}
+ */
+export function isMediaVideo(item) {
+  if (!item) return false;
+  return (
+    item.type === "video"      ||
+    item.is_video === true     ||
+    !!item.video               ||
+    item.asset_type === "video"
+  );
 }

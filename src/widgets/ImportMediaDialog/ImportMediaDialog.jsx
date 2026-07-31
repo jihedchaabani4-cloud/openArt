@@ -32,10 +32,11 @@ export function ImportMediaDialog({
   const toggleSelection = (item) => {
     const itemUrl = item.url ?? item.image?.url ?? item.video?.url ?? item.file_url;
     const isVideo = item.type === "video" || item.is_video || !!item.video;
-    const asset   = { url: itemUrl, asset_id: item.id, is_video: isVideo };
+    const assetId = item.id || item.name || item._item?.id;
+    const asset   = { id: assetId, asset_id: assetId, url: itemUrl, is_video: isVideo };
     setSelectedItems((prev) => {
-      const exists = prev.find(p => p.asset_id === asset.asset_id || p.url === asset.url);
-      if (exists) return prev.filter(p => p.asset_id !== asset.asset_id && p.url !== asset.url);
+      const exists = prev.find(p => (p.id && p.id === asset.id) || (p.url && p.url === asset.url));
+      if (exists) return prev.filter(p => p.id !== asset.id && p.url !== asset.url);
       if (prev.length >= maxAllowed) return prev;
       return [...prev, asset];
     });

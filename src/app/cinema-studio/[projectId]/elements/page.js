@@ -6,20 +6,14 @@ import { useRouter } from "next/navigation"
 
 import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows"
 import { useElementSheetWorkflows } from "@/features/workflows/api/workflowsApi"
-import { RowsPhotoAlbum } from 'react-photo-album'
-import 'react-photo-album/rows.css'
 import { ArrowUp } from "lucide-react"
-import { MediaGridItem } from "@/widgets/StudioLayout/GenerationsStudio/MediaGridItem"
 
 import { usePromptStore } from "@/features/prompt-bar/model/usePromptStore";
-import { getPrimaryMedia } from "@/shared/lib/generationUtils";
-import { getItemMetadata as getDisplayMeta } from "@/shared/lib/displayUtils";
 import { LoadingScreen } from "@/shared/ui/LoadingScreen";
 
 import { ElementCardKrea } from "@/components/cinema-studio/elements/ElementCardKrea";
 import { NewElementCardKrea } from "@/components/cinema-studio/elements/NewElementCardKrea";
 import { ElementsKreaControls } from "@/components/cinema-studio/elements/ElementsKreaControls";
-import { ElementsHeroHeader } from "@/components/cinema-studio/elements/ElementsHeroHeader";
 import { ElementsKreaHero } from "@/components/cinema-studio/elements/ElementsKreaHero";
 import { HowToDrawer } from "@/components/cinema-studio/elements/HowToDrawer";
 import { useWorkflowDelete } from "@/features/workflows";
@@ -190,43 +184,7 @@ export default function ElementsPage({ params }) {
     // Target row height driven by gridSize
     const targetRowHeight = gridSize === "lg" ? 380 : gridSize === "md" ? 280 : 200;
 
-    // Build the photo descriptors
-    const photos = React.useMemo(() => {
-        return visibleSheets.reduce((acc, workflow, i) => {
-            const primaryItem = getPrimaryMedia(workflow);
-            if (!primaryItem) return acc;
-
-            const meta = getDisplayMeta(primaryItem, workflow);
-            const aspect = meta?.aspect ?? "3/4";
-            const [wStr, hStr] = aspect.split("/");
-            const wNum = parseFloat(wStr) || 3;
-            const hNum = parseFloat(hStr) || 4;
-            const BASE = 1200;
-            const width  = Math.round(BASE * (wNum / Math.max(wNum, hNum)));
-            const height = Math.round(BASE * (hNum / Math.max(wNum, hNum)));
-
-            const url = meta?.url || "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
-
-            acc.push({
-                src:      url,
-                width,
-                height,
-                key:      workflow.id || workflow.name || String(i),
-                workflow,
-            });
-            return acc;
-        }, []);
-    }, [visibleSheets]);
-
-
-    // Auto-redirect to new element page if project has no existing elements
-    React.useEffect(() => {
-        if (!isLoading && existingSheets.length === 0 && projectId) {
-            router.replace(`/cinema-studio/${projectId}/elements/new`);
-        }
-    }, [isLoading, existingSheets.length, projectId, router]);
-
-    if (isLoading || existingSheets.length === 0) {
+    if (isLoading) {
         return <LoadingScreen message="Loading elements" />
     }
 

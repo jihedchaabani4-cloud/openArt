@@ -59,14 +59,19 @@ export default function GenerationsPage({ params }) {
     const projectSessions = useProjectSessions(projectId)
     const sessions = React.useMemo(() => projectSessions || [], [projectSessions])
 
-    // Auto-select the most recent session if none is active
+    // Auto-select the most recent session if none is active or active is invalid for current project
     React.useEffect(() => {
-        if (sessions.length > 0 && !activeSessionId) {
-            // Sort by createTime descending to get the LATEST one first
-            const sorted = [...sessions].sort((a, b) => 
-                new Date(b.metadata?.createTime || 0) - new Date(a.metadata?.createTime || 0)
-            );
-            setActiveSessionId(sorted[0].session_id);
+        if (sessions.length > 0) {
+            const sessionExists = sessions.some(s => s.session_id === activeSessionId);
+            if (!activeSessionId || !sessionExists) {
+                // Sort by createTime descending to get the LATEST one first
+                const sorted = [...sessions].sort((a, b) => 
+                    new Date(b.metadata?.createTime || 0) - new Date(a.metadata?.createTime || 0)
+                );
+                if (sorted[0]?.session_id) {
+                    setActiveSessionId(sorted[0].session_id);
+                }
+            }
         }
     }, [sessions, activeSessionId, setActiveSessionId]);
 

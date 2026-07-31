@@ -8,7 +8,7 @@ import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { UserDropdown } from "@/widgets/StudioNavbar/ui/UserDropdown";
 import { useCharacterWorkflows, useGenerateCharacterDescriptionMutation } from "@/features/workflows/api/workflowsApi";
 import { useWorkflowsStore } from "@/features/workflows";
-import { ElementsPromptBar } from "@/features/prompt-bar/ui/elements/ElementsPromptBar";
+import { CharacterPromptBar } from "@/features/prompt-bar/ui/character/CharacterPromptBar";
 import { useElementStore } from "@/features/prompt-bar/model/useElementStore";
 
 const CHARACTER_ARCHETYPES = [
@@ -231,7 +231,7 @@ export default function NewCharacterPage() {
         </div>
       </main>
 
-      <ElementsPromptBar />
+      <CharacterPromptBar />
     </div>
   );
 }

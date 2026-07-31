@@ -25,8 +25,11 @@ function indexBy(arr, key) {
 function groupMediaByWorkflow(media) {
   const map = {};
   for (const m of media) {
-    if (!m.workflowId) continue;
-    (map[m.workflowId] ??= []).push(m);
+    const wfId = m.workflowId || m.workflow_id || m.workflowName;
+    if (!wfId) continue;
+    (map[wfId] ??= []).push(m);
+    const cleanId = String(wfId).replace(/^workflows\//, '');
+    if (cleanId !== wfId) (map[cleanId] ??= []).push(m);
   }
   return map;
 }
@@ -89,6 +92,7 @@ export function useFilteredWorkflows(projectId, sessionId) {
   // Always fetch the FULL project data (cached heavily) so switching sessions doesn't trigger a refetch
   const queryResult           = useProjectData(projectId);
   const { _generationFilters: filters, showUploadedMedia } = useWorkflowsStore();
+  const showUploaded          = showUploadedMedia !== false;
 
   const rawWorkflows = queryResult.data?.projectContents?.workflows ?? [];
   const rawMedia     = queryResult.data?.projectContents?.media     ?? [];
@@ -118,7 +122,12 @@ export function useFilteredWorkflows(projectId, sessionId) {
       // Hide Element Sheets from normal workspace/timeline:
       if (wf.workflow_type === "ELEMENT_SHEET") return false;
 
-      const wfMedia = mediaByWorkflow[wf.name] ?? [];
+      const cleanWfId = String(wf.name || wf.id || '').replace(/^workflows\//, '');
+      const wfMedia = (wf.items?.length > 0 ? wf.items : (wf.media?.length > 0 ? wf.media : null)) 
+        ?? mediaByWorkflow[wf.name] 
+        ?? mediaByWorkflow[wf.id] 
+        ?? mediaByWorkflow[cleanWfId] 
+        ?? [];
       const { config, model, isUpload } = resolveConfig(wfMedia);
       
       // A workflow explicitly typed as GENERATION should never be hidden as an upload
@@ -130,10 +139,11 @@ export function useFilteredWorkflows(projectId, sessionId) {
       if (filters.liked && !wf.metadata?.favorited) return false;
 
       // Filter uploads if needed
-      if (!showUploadedMedia && type === 'upload') return false;
+      if (!showUploaded && type === 'upload') return false;
 
       // فلتر session
-      if (sessionId && wf.metadata?.sessionId !== sessionId) return false;
+      const wfSessionId = wf.metadata?.sessionId ?? wf.session_id ?? wf.sessionId;
+      if (sessionId && wfSessionId && wfSessionId !== sessionId) return false;
 
       // فلتر نوع الميديا (صورة / فيديو)
       if (filters.types?.length > 0) {
@@ -167,7 +177,12 @@ export function useFilteredWorkflows(projectId, sessionId) {
 
     // 3. Flatten and attach metadata
     return filtered.map(wf => {
-      const wfItems = mediaByWorkflow[wf.name] ?? [];
+      const cleanWfId = String(wf.name || wf.id || '').replace(/^workflows\//, '');
+      const wfItems = (wf.items?.length > 0 ? wf.items : (wf.media?.length > 0 ? wf.media : null)) 
+        ?? mediaByWorkflow[wf.name] 
+        ?? mediaByWorkflow[wf.id] 
+        ?? mediaByWorkflow[cleanWfId] 
+        ?? [];
       const { config, model, isUpload } = resolveConfig(wfItems);
 
       return {
@@ -191,6 +206,7 @@ export function useFilteredWorkflows(projectId, sessionId) {
     modelLookup,
     filters,
     showUploadedMedia,
+    showUploaded,
     sessionId,
   ]);
 

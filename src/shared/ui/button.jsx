@@ -60,6 +60,10 @@ const buttonVariants = cva(
           "bg-[#cfd2d6] text-black shadow-md cursor-pointer hover:bg-[#d8dbdf]",
         "flow-overlay-action":
           "bg-black/40 backdrop-blur-md text-white/80 hover:text-white hover:bg-black/65 active:scale-95 transition-all shadow-md border border-white/10 rounded-xl cursor-pointer",
+        "nav-tab":
+          "font-['Google_Sans_Text',sans-serif] text-sm font-medium flex items-center justify-start gap-3 h-10 px-3.5 rounded-[14px] transition-all duration-200 text-white/70 hover:text-[rgba(218,220,224,0.9)] hover:bg-[rgba(218,220,224,0.05)] active:bg-[rgba(218,220,224,0.25)] active:shadow-[0px_4px_32px_-8px_rgba(0,0,0,0.2)] active:blur-[1.5px] active:backdrop-blur-[25px] outline-none select-none cursor-pointer transform-none",
+        "nav-tab-active":
+          "font-['Google_Sans_Text',sans-serif] text-sm font-medium flex items-center justify-start gap-3 h-10 px-3.5 rounded-[14px] transition-all duration-200 bg-[rgba(218,220,224,0.25)] text-white shadow-[0px_4px_32px_-8px_rgba(0,0,0,0.2)] backdrop-blur-[25px] active:blur-[1.5px] outline-none select-none cursor-pointer transform-none",
       },
       size: {
         default: "h-8 px-3.5 text-[12px] has-[>svg]:px-3",

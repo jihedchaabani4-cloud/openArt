@@ -11,6 +11,7 @@ export function useLibraryFilter(library = [], mode = "all") {
   const [search,          setSearch]          = useState("");
   const [selectedProject, setSelectedProject] = useState("all_projects");
   const [selectedSession, setSelectedSession] = useState("all_sessions");
+  const [selectedCategory, setSelectedCategory] = useState(mode || "all");
 
   const visibleItems = useMemo(() => {
     // 1. Flatten items
@@ -45,11 +46,38 @@ export function useLibraryFilter(library = [], mode = "all") {
       );
     }
 
-    // 5. Media type filter
-    if (mode === "image") {
-      items = items.filter((g) => !g.is_video);
-    } else if (mode === "video") {
-      items = items.filter((g) => g.is_video);
+    // 5. Category / Media type filter
+    const activeCategory = selectedCategory !== "all" ? selectedCategory : (mode !== "all" ? mode : "all");
+    
+    if (activeCategory === "image") {
+      items = items.filter((g) => !g.is_video && g.type !== "video" && g.type !== "voice");
+    } else if (activeCategory === "video") {
+      items = items.filter((g) => g.is_video || g.type === "video" || !!g.video);
+    } else if (activeCategory === "character") {
+      items = items.filter((g) => 
+        g.type === "character" || 
+        g.is_character || 
+        g.category === "character" || 
+        g.role === "character" || 
+        g.mediaType === "character"
+      );
+    } else if (activeCategory === "element") {
+      items = items.filter((g) => 
+        g.type === "element" || 
+        g.is_element || 
+        g.category === "element" || 
+        g.role === "element" || 
+        g.mediaType === "element"
+      );
+    } else if (activeCategory === "upload") {
+      items = items.filter((g) => 
+        g.is_upload || 
+        g.source === "upload" || 
+        g.isUploaded || 
+        g.origin === "pc" || 
+        g.origin === "upload" || 
+        g.type === "upload"
+      );
     }
 
     // 6. Sort & Favorites
@@ -69,13 +97,14 @@ export function useLibraryFilter(library = [], mode = "all") {
           return dateB - dateA;
       }
     });
-  }, [library, sort, search, mode, selectedProject, selectedSession]);
+  }, [library, sort, search, mode, selectedCategory, selectedProject, selectedSession]);
 
   return {
     sort,            setSort,
     search,          setSearch,
     selectedProject, setSelectedProject,
     selectedSession, setSelectedSession,
+    selectedCategory, setSelectedCategory,
     visibleItems,
   };
 }
