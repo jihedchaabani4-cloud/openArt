@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import { Upload, Search, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -30,7 +32,7 @@ const CATEGORIES = [
 
 /**
  * ImportMediaPopover
- * A floating popover for importing/uploading media.
+ * A floating popover for importing/uploading media with a left sidebar category layout.
  */
 export function ImportMediaPopover({
   open,
@@ -41,16 +43,19 @@ export function ImportMediaPopover({
   hasMore    = false,
   onLoadMore,
   mode       = "all",
+  variant    = "default",
   maxAllowed = 1,
   onUploadFromPC,
   anchorRef,
 }) {
+  const isAssetSelect = variant === "asset-select" || mode === "asset-select";
+  const effectiveMode = isAssetSelect ? "image" : mode;
+
   const params = useParams();
   const projectId = params?.projectId;
   const { data: projectData } = useProjectData(projectId);
 
   // Build session name lookup from project data
-  // Backend schema: { name: UUID, metadata: { displayName: "human name" } }
   const sessionNameMap = React.useMemo(() => {
     const raw = projectData?.projectContents?.sessions ?? [];
     const map = {};
@@ -83,7 +88,7 @@ export function ImportMediaPopover({
     selectedSession, setSelectedSession,
     selectedCategory, setSelectedCategory,
     visibleItems,
-  } = useLibraryFilter(effectiveLibrary, mode);
+  } = useLibraryFilter(effectiveLibrary, effectiveMode);
 
   // Extract unique sessions from the library using the session ID and create time
   const sessions = React.useMemo(() => {
@@ -101,10 +106,7 @@ export function ImportMediaPopover({
 
       if (!sId || unique.has(sId)) return;
 
-      // Look up display name from project sessions
       const displayName = sessionNameMap[sId];
-
-      // Fallback: format the create_time of this item as the session label
       const time =
         item.mediaMetadata?.createTime ||
         item.created_at ||
@@ -128,26 +130,25 @@ export function ImportMediaPopover({
 
     return Array.from(unique.values()).sort((a, b) => b.id.localeCompare(a.id));
   }, [effectiveLibrary, sessionNameMap]);
+
   const activeSessionName = sessions.find(s => s.id === selectedSession)?.name || "All Sessions";
 
   const [selectedItems, setSelectedItems] = React.useState([]);
   const fileInputRef = React.useRef(null);
   const popoverRef = React.useRef(null);
 
-  // ─── Click Outside Logic ──────────────────────────────────────────────────
+  // Click Outside Logic
   React.useEffect(() => {
     if (!open) return;
 
     const handleClickOutside = (event) => {
-      // Ignore clicks on the anchor/trigger button — it handles its own toggle
       if (anchorRef?.current && anchorRef.current.contains(event.target)) return;
       
-      // IMPORTANT: Ignore clicks if the target is inside a Radix UI Portal or Menu
       const isPortalClick = 
         event.target.closest('[data-radix-popper-content-wrapper]') ||
         event.target.closest('[role="menu"]') ||
         event.target.closest('[data-radix-menu-content]') ||
-        event.target.closest('.radix-[#18181b]'); // common in some radix setups
+        event.target.closest('.radix-themes');
 
       if (isPortalClick) return;
 
@@ -156,12 +157,10 @@ export function ImportMediaPopover({
       }
     };
 
-    // Use capture phase to ensure we catch clicks before other handlers
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [open, onOpenChange]);
 
-  // ─── Selection Logic ──────────────────────────────────────────────────────
   const toggleSelection = (item) => {
     const itemUrl = item.url ?? item.image?.url ?? item.video?.url ?? item.file_url;
     const isVideo = item.type === "video" || item.is_video || !!item.video;
@@ -177,24 +176,22 @@ export function ImportMediaPopover({
       if (exists) {
         return prev.filter(p => p.asset_id !== asset.asset_id && p.url !== asset.url);
       }
-      if (prev.length >= maxAllowed) return prev; // block if max reached
+      if (prev.length >= maxAllowed) return prev;
       return [...prev, asset];
     });
   };
 
   const handleImport = () => {
     if (selectedItems.length === 0) return;
-    onSelect(selectedItems); // Pass array to parent
-    setSelectedItems([]);    // Reset
+    onSelect(selectedItems);
+    setSelectedItems([]);
     onOpenChange(false);
   };
 
-  // Reset selection when dialog closes/opens
   React.useEffect(() => {
     if (!open) setSelectedItems([]);
   }, [open]);
 
-  // ─── File picker ──────────────────────────────────────────────────────────
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files ?? []).slice(0, maxAllowed);
     
@@ -226,16 +223,14 @@ export function ImportMediaPopover({
     : mode === "video"
     ? "video/mp4,video/webm"
     : "image/*,video/mp4,video/webm";
-  // ─── Photo descriptors for RowsPhotoAlbum ────────────────────────────────
+
   const photos = React.useMemo(() => {
     const BASE = 1200;
     return visibleItems.map((item, i) => {
       const itemUrl = resolveMediaUrl(item) ?? item.url ?? item.image?.url ?? item.video?.url ?? item.file_url ?? null;
-      if (!itemUrl) return null;   // skip items with no resolved URL
+      if (!itemUrl) return null;
 
       const isVideo  = item.type === "video" || item.is_video || !!item.video;
-
-      // Derive aspect from metadata or fallback by media type
       const w = item.width  ?? item.image?.dimensions?.width  ?? item.video?.dimensions?.width  ?? null;
       const h = item.height ?? item.image?.dimensions?.height ?? item.video?.dimensions?.height ?? null;
       const wNum = w ? parseFloat(w) : (isVideo ? 16 : 3);
@@ -265,8 +260,8 @@ export function ImportMediaPopover({
           transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
           className={cn(
             "fixed bottom-24 left-1/2 -translate-x-1/2 z-[9999]",
-            "bg-[#121214]/95 backdrop-blur-2xl border border-white/10 shadow-2xl rounded-3xl flex flex-col overflow-hidden text-white",
-            "h-[500px] max-w-[750px] w-full",
+            "bg-[#121214]/95 backdrop-blur-2xl border border-white/10 shadow-2xl rounded-3xl flex flex-row overflow-hidden text-white",
+            "h-[560px] max-w-[880px] w-full font-['Google_Sans_Text',sans-serif]"
           )}
         >
           {/* Hidden file input */}
@@ -278,178 +273,191 @@ export function ImportMediaPopover({
             accept={uploadAccept}
             onChange={handleFileChange}
           />
-          {/* Search & Filters Bar */}
-          <div className="px-4 py-3 flex items-center gap-2 shrink-0 border-b border-white/5">
-            {/* Session Selector */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="flex items-center gap-2 px-3 py-2 bg-white/5 hover:bg-white/10 rounded-xl text-sm font-medium text-white/70 hover:text-white transition-all min-w-[140px] justify-between border border-white/5">
-                  <span className="truncate">{activeSessionName}</span>
-                  <ChevronDown className="size-4 opacity-40" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-56 bg-[#18181b] backdrop-blur-xl border border-white/10 rounded-xl z-[60] text-white">
-                <DropdownMenuItem onClick={() => setSelectedSession("all_sessions")} className="text-sm">All Sessions</DropdownMenuItem>
-                <DropdownMenuSeparator className="bg-white/5" />
-                <div className="max-h-[200px] overflow-y-auto custom-scrollbar">
-                   {sessions.map(s => (
-                     <DropdownMenuItem 
-                       key={s.id} 
-                       onClick={() => setSelectedSession(s.id)}
-                       className={cn("text-sm", selectedSession === s.id && "bg-white/10 text-white")}
-                     >
-                       {s.name}
-                     </DropdownMenuItem>
-                   ))}
-                   {sessions.length === 0 && (
-                     <DropdownMenuItem className="text-xs text-white/40 pointer-events-none italic">No sessions found</DropdownMenuItem>
-                   )}
-                </div>
-              </DropdownMenuContent>
-            </DropdownMenu>
 
-            {/* Search Input */}
-            <div className="relative flex-1 group">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-white/20 group-focus-within:text-white/50 transition-colors" />
-              <Input
-                type="search"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search for Assets"
-                className="w-full pl-9 bg-white/5 border-none focus-visible:ring-1 focus-visible:ring-white/20 rounded-xl h-10 text-sm placeholder:text-white/20 transition-all"
-              />
+          {/* ── Left Category Sidebar ── */}
+          <div className="w-[190px] p-3 flex flex-col gap-2 shrink-0 select-none border-r border-white/5 bg-white/[0.02]">
+            <div className="px-3 pt-2 pb-1 text-[11px] font-semibold text-white/30 uppercase tracking-wider font-['Google_Sans_Text',sans-serif]">
+              Categories
             </div>
-            {/* Upload Button */}
-            <button
-               onClick={() => fileInputRef.current?.click()}
-               className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/40 hover:text-white transition-all border border-white/5 shrink-0"
-               title="Upload from computer"
-            >
-              <Upload size={18} />
-            </button>
-          </div>
+            
+            <nav role="tablist" className="flex flex-col gap-1 flex-1">
+              {CATEGORIES.map((cat) => {
+                const isActive = (selectedCategory || "all") === cat.id;
+                return (
+                  <button
+                    key={cat.id}
+                    onClick={() => setSelectedCategory(cat.id)}
+                    className={cn(
+                      "flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium transition-all text-left w-full cursor-pointer",
+                      isActive
+                        ? "bg-white/10 text-white font-semibold shadow-sm border border-white/10"
+                        : "hover:bg-white/5 text-white/60 hover:text-white border border-transparent"
+                    )}
+                  >
+                    <GoogleIcon name={cat.googleIcon} className={cn("size-4 shrink-0", isActive ? "text-white" : "text-white/50")} />
+                    <span className="truncate">{cat.label}</span>
+                  </button>
+                );
+              })}
+            </nav>
 
-          {/* Category Tabs Bar */}
-          <div className="px-4 py-2 flex items-center gap-1.5 overflow-x-auto scrollbar-hide border-b border-white/5 shrink-0">
-            {CATEGORIES.map((cat) => {
-              const isActive = (selectedCategory || "all") === cat.id;
-              return (
-                <button
-                  key={cat.id}
-                  onClick={() => setSelectedCategory(cat.id)}
-                  className={cn(
-                    "flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-medium transition-all shrink-0",
-                    isActive
-                      ? "bg-white text-black shadow-md font-semibold"
-                      : "bg-white/5 hover:bg-white/10 text-white/60 hover:text-white border border-white/5"
-                  )}
-                >
-                  <GoogleIcon name={cat.googleIcon} className={cn("size-3.5", isActive ? "text-black" : "text-white/60")} />
-                  <span>{cat.label}</span>
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Grid Area - Scrollable */}
-          <div className="flex-1 overflow-y-auto p-4 scrollbar-hide min-h-0">
-            {loading && visibleItems.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-full gap-3 opacity-20">
-                <div className="w-5 h-5 rounded-full border-2 border-white/10 border-t-white animate-spin" />
-                <span className="text-xs font-medium uppercase tracking-widest">Loading...</span>
-              </div>
-            ) : visibleItems.length === 0 ? (
-              <div className="flex items-center justify-center h-full text-white/20 text-xs uppercase tracking-widest">
-                No assets found
-              </div>
-            ) : (
-              <RowsPhotoAlbum
-                photos={photos}
-                targetRowHeight={160}
-                spacing={10}
-                rowConstraints={{ singleRowMaxHeight: 260 }}
-                render={{
-                  photo: (_, { photo, width, height }) => {
-                    const { item, itemUrl, isVideo } = photo;
-                    const isSelected  = selectedItems.some(p => p.asset_id === item.id || p.url === itemUrl);
-                    const isMaxReached = selectedItems.length >= maxAllowed;
-                    const isDisabled  = isMaxReached && !isSelected;
-
-                    return (
-                      <button
-                        key={photo.key}
-                        onClick={() => toggleSelection(item)}
-                        style={{ width, height }}
-                        className={cn(
-                          "group relative rounded-xl overflow-hidden bg-white/5 transition-all duration-300",
-                          isSelected   ? "ring-2 ring-white"          : "hover:ring-2 hover:ring-white/20",
-                          isDisabled   ? "opacity-20 cursor-not-allowed" : "cursor-pointer"
-                        )}
-                      >
-                        {isVideo ? (
-                          <video src={itemUrl} style={{ width, height, objectFit: "cover" }} muted />
-                        ) : (
-                          <img   src={itemUrl} alt="" style={{ width, height, objectFit: "cover" }} />
-                        )}
-
-                        {isSelected && (
-                          <div className="absolute inset-0 bg-white/10 flex items-center justify-center">
-                            <div className="w-6 h-6 bg-white text-black rounded-full flex items-center justify-center shadow-xl">
-                              <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
-                                <path d="M13.485 3.485a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0l-3.25-3.25a.75.75 0 1 1 1.06-1.06L5.75 10.19l6.72-6.705a.75.75 0 0 1 1.015 0z" />
-                              </svg>
-                            </div>
-                          </div>
-                        )}
-                      </button>
-                    );
-                  },
-                }}
-              />
-            )}
-
-            {(hasMore || loading) && visibleItems.length > 0 && (
-              <div 
-                className="h-10 w-full flex items-center justify-center"
-                ref={(el) => {
-                  if (!el) return;
-                  const observer = new IntersectionObserver(
-                    ([entry]) => {
-                      if (entry.isIntersecting && !loading && hasMore) {
-                        onLoadMore();
-                      }
-                    },
-                    { rootMargin: "100px" }
-                  );
-                  observer.observe(el);
-                  return () => observer.disconnect();
-                }}
+            {/* Upload Button at bottom of sidebar */}
+            <div className="mt-auto pt-2 border-t border-white/5">
+              <Button
+                onClick={() => fileInputRef.current?.click()}
+                className="w-full justify-center gap-2 h-9 px-3 rounded-xl text-xs font-medium bg-white/5 hover:bg-white/10 text-white/80 hover:text-white border border-white/5 transition-all cursor-pointer"
               >
-                {loading && (
-                   <div className="w-4 h-4 rounded-full border-2 border-white/10 border-t-white/40 animate-spin" />
-                )}
-              </div>
-            )}
+                <Upload size={14} className="shrink-0" />
+                <span>Upload Media</span>
+              </Button>
+            </div>
           </div>
 
-          {/* Footer - Import Button */}
-          <div className="p-3 shrink-0 flex justify-end">
-            <Button 
-              onClick={handleImport}
-              disabled={selectedItems.length === 0}
-              className={cn(
-                selectedItems.length > 0 
-                  ? "bg-white text-black hover:bg-white/90 active:scale-[0.95]" 
-                  : "bg-white/5 text-white/20 cursor-not-allowed"
+          {/* ── Right Content Area ── */}
+          <div className="flex-1 flex flex-col min-w-0">
+            {/* Search & Session Header Bar */}
+            <div className="px-4 py-3 flex items-center gap-2 shrink-0 border-b border-white/5">
+              {/* Session Selector Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="flex items-center gap-2 px-3 py-2 bg-white/5 hover:bg-white/10 rounded-xl text-sm font-medium text-white/70 hover:text-white transition-all min-w-[140px] justify-between border border-white/5 cursor-pointer">
+                    <span className="truncate">{activeSessionName}</span>
+                    <ChevronDown className="size-4 opacity-40" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-56 bg-[#18181b] backdrop-blur-xl border border-white/10 rounded-xl z-[10000] text-white">
+                  <DropdownMenuItem onClick={() => setSelectedSession("all_sessions")} className="text-sm cursor-pointer">All Sessions</DropdownMenuItem>
+                  <DropdownMenuSeparator className="bg-white/5" />
+                  <div className="max-h-[200px] overflow-y-auto custom-scrollbar">
+                    {sessions.map(s => (
+                      <DropdownMenuItem 
+                        key={s.id} 
+                        onClick={() => setSelectedSession(s.id)}
+                        className={cn("text-sm cursor-pointer", selectedSession === s.id && "bg-white/10 text-white")}
+                      >
+                        {s.name}
+                      </DropdownMenuItem>
+                    ))}
+                    {sessions.length === 0 && (
+                      <DropdownMenuItem className="text-xs text-white/40 pointer-events-none italic">No sessions found</DropdownMenuItem>
+                    )}
+                  </div>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              {/* Search Bar Input */}
+              <div className="relative flex-1 group">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-white/20 group-focus-within:text-white/50 transition-colors" />
+                <Input
+                  type="search"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Search for Assets"
+                  className="w-full pl-9 bg-white/5 border-none focus-visible:ring-1 focus-visible:ring-white/20 rounded-xl h-10 text-sm placeholder:text-white/20 transition-all"
+                />
+              </div>
+            </div>
+
+            {/* Grid Area - Scrollable */}
+            <div className="flex-1 overflow-y-auto p-4 scrollbar-hide min-h-0">
+              {loading && visibleItems.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-full gap-3 opacity-20">
+                  <div className="w-5 h-5 rounded-full border-2 border-white/10 border-t-white animate-spin" />
+                  <span className="text-xs font-medium uppercase tracking-widest">Loading...</span>
+                </div>
+              ) : visibleItems.length === 0 ? (
+                <div className="flex items-center justify-center h-full text-white/20 text-xs uppercase tracking-widest">
+                  No assets found
+                </div>
+              ) : (
+                <RowsPhotoAlbum
+                  photos={photos}
+                  targetRowHeight={160}
+                  spacing={10}
+                  rowConstraints={{ singleRowMaxHeight: 260 }}
+                  render={{
+                    photo: (_, { photo, width, height }) => {
+                      const { item, itemUrl, isVideo } = photo;
+                      const isSelected  = selectedItems.some(p => p.asset_id === item.id || p.url === itemUrl);
+                      const isMaxReached = selectedItems.length >= maxAllowed;
+                      const isDisabled  = isMaxReached && !isSelected;
+
+                      return (
+                        <button
+                          key={photo.key}
+                          onClick={() => toggleSelection(item)}
+                          style={{ width, height }}
+                          className={cn(
+                            "group relative rounded-xl overflow-hidden bg-white/5 transition-all duration-300",
+                            isSelected   ? "ring-2 ring-white"          : "hover:ring-2 hover:ring-white/20",
+                            isDisabled   ? "opacity-20 cursor-not-allowed" : "cursor-pointer"
+                          )}
+                        >
+                          {isVideo ? (
+                            <video src={itemUrl} style={{ width, height, objectFit: "cover" }} muted />
+                          ) : (
+                            <img src={itemUrl} alt="" style={{ width, height, objectFit: "cover" }} />
+                          )}
+
+                          {isSelected && (
+                            <div className="absolute inset-0 bg-white/10 flex items-center justify-center">
+                              <div className="w-6 h-6 bg-white text-black rounded-full flex items-center justify-center shadow-xl">
+                                <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
+                                  <path d="M13.485 3.485a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0l-3.25-3.25a.75.75 0 1 1 1.06-1.06L5.75 10.19l6.72-6.705a.75.75 0 0 1 1.015 0z" />
+                                </svg>
+                              </div>
+                            </div>
+                          )}
+                        </button>
+                      );
+                    },
+                  }}
+                />
               )}
-            >
-              {selectedItems.length > 0 
-                ? `Import ${selectedItems.length} ${selectedItems.length === 1 ? 'Asset' : 'Assets'}`
-                : "Select Assets"
-              }
-            </Button>
+
+              {(hasMore || loading) && visibleItems.length > 0 && (
+                <div 
+                  className="h-10 w-full flex items-center justify-center"
+                  ref={(el) => {
+                    if (!el) return;
+                    const observer = new IntersectionObserver(
+                      ([entry]) => {
+                        if (entry.isIntersecting && !loading && hasMore) {
+                          onLoadMore();
+                        }
+                      },
+                      { rootMargin: "100px" }
+                    );
+                    observer.observe(el);
+                    return () => observer.disconnect();
+                  }}
+                >
+                  {loading && (
+                    <div className="w-4 h-4 rounded-full border-2 border-white/10 border-t-white/40 animate-spin" />
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Footer - Import Button */}
+            <div className="p-3 shrink-0 flex justify-end border-t border-white/5 bg-white/[0.01]">
+              <Button 
+                onClick={handleImport}
+                disabled={selectedItems.length === 0}
+                className={cn(
+                  selectedItems.length > 0 
+                    ? "bg-white text-black hover:bg-white/90 active:scale-[0.95]" 
+                    : "bg-white/5 text-white/20 cursor-not-allowed"
+                )}
+              >
+                {selectedItems.length > 0 
+                  ? `Import ${selectedItems.length} ${selectedItems.length === 1 ? 'Asset' : 'Assets'}`
+                  : "Select Assets"
+                }
+              </Button>
+            </div>
           </div>
-          
+
           <style jsx>{`
             .scrollbar-hide::-webkit-scrollbar { display: none; }
             .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
