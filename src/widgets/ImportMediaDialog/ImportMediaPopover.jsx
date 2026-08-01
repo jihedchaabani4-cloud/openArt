@@ -297,19 +297,17 @@ export function ImportMediaPopover({
                 {CATEGORIES.map((cat) => {
                   const isActive = (selectedCategory || "all") === cat.id;
                   return (
-                    <button
+                    <Button
                       key={cat.id}
+                      role="tab"
+                      aria-selected={isActive}
+                      variant={isActive ? "nav-tab-active" : "nav-tab"}
                       onClick={() => setSelectedCategory(cat.id)}
-                      className={cn(
-                        "flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium transition-all text-left w-full cursor-pointer",
-                        isActive
-                          ? "bg-white/10 text-white font-semibold shadow-sm border border-white/10"
-                          : "hover:bg-white/5 text-white/60 hover:text-white border border-transparent"
-                      )}
+                      className="w-full justify-start h-9 text-xs cursor-pointer"
                     >
-                      <GoogleIcon name={cat.googleIcon} className={cn("size-4 shrink-0", isActive ? "text-white" : "text-white/50")} />
+                      <GoogleIcon name={cat.googleIcon} className={cn("size-4 shrink-0", isActive ? "text-white" : "text-white/60")} />
                       <span className="truncate">{cat.label}</span>
-                    </button>
+                    </Button>
                   );
                 })}
               </nav>
@@ -317,8 +315,9 @@ export function ImportMediaPopover({
               {/* Upload Button at bottom of sidebar */}
               <div className="mt-auto pt-2 border-t border-white/5">
                 <Button
+                  variant="nav-tab"
                   onClick={() => fileInputRef.current?.click()}
-                  className="w-full justify-center gap-2 h-9 px-3 rounded-xl text-xs font-medium bg-white/5 hover:bg-white/10 text-white/80 hover:text-white border border-white/5 transition-all cursor-pointer"
+                  className="w-full justify-center h-9 text-xs gap-2 cursor-pointer"
                 >
                   <Upload size={14} className="shrink-0" />
                   <span>Upload Media</span>
