@@ -317,6 +317,18 @@ export function ImportMediaPopover({
           <div className="flex-1 flex flex-col min-w-0">
             {/* Search & Session Header Bar */}
             <div className="px-4 py-3 flex items-center gap-2 shrink-0 border-b border-white/5">
+              {/* Search Bar Input */}
+              <div className="relative flex-1 group">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-white/20 group-focus-within:text-white/50 transition-colors" />
+                <Input
+                  type="search"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Search for Assets"
+                  className="w-full pl-9 bg-white/5 border-none focus-visible:ring-1 focus-visible:ring-white/20 rounded-xl h-10 text-sm placeholder:text-white/20 transition-all"
+                />
+              </div>
+
               {/* Session Selector Dropdown */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -325,7 +337,7 @@ export function ImportMediaPopover({
                     <ChevronDown className="size-4 opacity-40" />
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="w-56 bg-[#18181b] backdrop-blur-xl border border-white/10 rounded-xl z-[10000] text-white">
+                <DropdownMenuContent align="end" className="w-56 bg-[#18181b] backdrop-blur-xl border border-white/10 rounded-xl z-[10000] text-white">
                   <DropdownMenuItem onClick={() => setSelectedSession("all_sessions")} className="text-sm cursor-pointer">All Sessions</DropdownMenuItem>
                   <DropdownMenuSeparator className="bg-white/5" />
                   <div className="max-h-[200px] overflow-y-auto custom-scrollbar">
@@ -344,18 +356,6 @@ export function ImportMediaPopover({
                   </div>
                 </DropdownMenuContent>
               </DropdownMenu>
-
-              {/* Search Bar Input */}
-              <div className="relative flex-1 group">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-white/20 group-focus-within:text-white/50 transition-colors" />
-                <Input
-                  type="search"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search for Assets"
-                  className="w-full pl-9 bg-white/5 border-none focus-visible:ring-1 focus-visible:ring-white/20 rounded-xl h-10 text-sm placeholder:text-white/20 transition-all"
-                />
-              </div>
             </div>
 
             {/* Grid Area - Scrollable */}
