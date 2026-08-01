@@ -288,8 +288,8 @@ export function ImportMediaPopover({
 
           {/* ── Left Category Sidebar (Shown in standard mode only) ── */}
           {!isAssetSelect && (
-            <div className="w-[190px] p-3 flex flex-col gap-2 shrink-0 select-none bg-transparent">
-              <div className="px-3 pt-2 pb-1 text-[11px] font-semibold text-white/30 uppercase tracking-wider font-['Google_Sans_Text',sans-serif]">
+            <div className="w-[150px] p-2.5 flex flex-col gap-2 shrink-0 select-none bg-transparent">
+              <div className="px-2 pt-1 pb-1 text-[11px] font-semibold text-white/30 uppercase tracking-wider font-['Google_Sans_Text',sans-serif]">
                 Categories
               </div>
               
