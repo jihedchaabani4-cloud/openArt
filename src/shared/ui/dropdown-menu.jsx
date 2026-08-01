@@ -27,6 +27,7 @@ function DropdownMenuTrigger({
 function DropdownMenuContent({
   className,
   sideOffset = 4,
+  style,
   ...props
 }) {
   return (
@@ -34,11 +35,18 @@ function DropdownMenuContent({
       <DropdownMenuPrimitive.Content
         data-slot="dropdown-menu-content"
         sideOffset={sideOffset}
+        style={{
+          backgroundColor: "rgba(22, 23, 24, 0.95)",
+          backdropFilter: "blur(40px)",
+          WebkitBackdropFilter: "blur(40px)",
+          boxShadow: "rgba(0, 0, 0, 0.2) 0px 4px 32px -8px",
+          ...style,
+        }}
         className={cn(
           // Layout & shape
-          "z-50 max-h-(--radix-dropdown-menu-content-available-height) min-w-[8rem] origin-(--radix-dropdown-menu-content-transform-origin) overflow-x-hidden overflow-y-auto rounded-xl p-2",
+          "z-50 max-h-(--radix-dropdown-menu-content-available-height) min-w-[var(--radix-dropdown-menu-trigger-width)] w-[var(--radix-dropdown-menu-trigger-width)] origin-(--radix-dropdown-menu-content-transform-origin) overflow-x-hidden overflow-y-auto rounded-[16px] p-3 border-none flex flex-col gap-0.5 font-['Google_Sans_Text',sans-serif]",
           // Dark theme defaults
-          "bg-(--color-imagine-grey-2) backdrop-blur-[80px]   text-white shadow-2xl",
+          "text-white shadow-2xl",
           // Animations
           "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
           className
@@ -67,11 +75,11 @@ function DropdownMenuItem({
       data-variant={variant}
       className={cn(
         // Layout
-        "relative flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-[12px] font-medium outline-hidden select-none",
-        // Dark theme defaults: white text, white/10 hover & focus
-        "text-white hover:bg-white/10 focus:bg-white/10 focus:text-white transition-colors duration-200",
+        "relative flex cursor-pointer items-center gap-2.5 rounded-[12px] p-2.5 text-xs font-medium outline-hidden select-none font-['Google_Sans_Text',sans-serif]",
+        // Dark theme defaults: white text, white/10 hover & focus, active click blur
+        "text-white/80 hover:text-white hover:bg-white/10 focus:bg-white/10 focus:text-white active:bg-[rgba(218,220,224,0.25)] active:blur-[1.5px] active:backdrop-blur-[25px] transition-all duration-200",
         // Icon defaults: white
-        "[&_svg:not([class*='text-'])]:text-white [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4.5",
+        "[&_svg:not([class*='text-'])]:text-white [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         // Disabled & inset
         "data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[inset]:pl-8",
         className

@@ -46,13 +46,19 @@ export function useLibraryFilter(library = [], mode = "all") {
       );
     }
 
+    // Helper to check if an item is an upload
+    const checkIsUpload = (g) => 
+      g.workflow_type === "UPLOAD" || g.workflowType === "UPLOAD" || g.type === "upload" || Boolean(g.is_upload);
+
     // 5. Category / Media type filter
     const activeCategory = selectedCategory !== "all" ? selectedCategory : (mode !== "all" ? mode : "all");
     
     if (activeCategory === "image") {
-      items = items.filter((g) => !g.is_video && g.type !== "video" && g.type !== "voice");
+      // Generated Images only (not uploads)
+      items = items.filter((g) => (!g.is_video && g.type !== "video" && g.type !== "voice") && !checkIsUpload(g));
     } else if (activeCategory === "video") {
-      items = items.filter((g) => g.is_video || g.type === "video" || !!g.video);
+      // Generated Videos only (not uploads)
+      items = items.filter((g) => (g.is_video || g.type === "video" || !!g.video) && !checkIsUpload(g));
     } else if (activeCategory === "character") {
       items = items.filter((g) => 
         g.type === "character" || 
@@ -70,14 +76,8 @@ export function useLibraryFilter(library = [], mode = "all") {
         g.mediaType === "element"
       );
     } else if (activeCategory === "upload") {
-      items = items.filter((g) => 
-        g.is_upload || 
-        g.source === "upload" || 
-        g.isUploaded || 
-        g.origin === "pc" || 
-        g.origin === "upload" || 
-        g.type === "upload"
-      );
+      // All user uploads
+      items = items.filter((g) => checkIsUpload(g));
     }
 
     // 6. Sort & Favorites

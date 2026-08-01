@@ -116,9 +116,10 @@ export function SessionSidebar() {
 
     // ── Session handlers ──────────────────────────────────────────────────────
     const handleCreateSession = async () => {
+        const nextIndex = (sessions || []).length + 1;
         const newSession = await createSession({
             project_id: selectedProjectId,
-            session_name: "Untitled",
+            session_name: `Session ${nextIndex}`,
         });
         if (newSession?.id || newSession?.session_id) {
             setActiveSessionId(newSession.id || newSession.session_id);

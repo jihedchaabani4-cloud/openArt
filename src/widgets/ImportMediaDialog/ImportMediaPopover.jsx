@@ -14,7 +14,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/shared/ui/dropdown-menu";
 import { RowsPhotoAlbum } from 'react-photo-album';
@@ -25,9 +24,8 @@ const CATEGORIES = [
   { id: "all",       label: "All",        googleIcon: "dashboard" },
   { id: "image",     label: "Images",     googleIcon: "image" },
   { id: "video",     label: "Videos",     googleIcon: "videocam" },
-  { id: "voice",     label: "Voices",     googleIcon: "voice_selection" },
   { id: "character", label: "Characters", googleIcon: "accessibility_new" },
-  { id: "element",   label: "Avatar",     googleIcon: "face" },
+  { id: "element",   label: "Elements",   googleIcon: "face" },
   { id: "upload",    label: "Uploads",    googleIcon: "drive_folder_upload" },
 ];
 
@@ -67,27 +65,87 @@ export function ImportMediaPopover({
   }, [projectData]);
 
   const effectiveLibrary = React.useMemo(() => {
-    const raw = (library && library.length > 0) 
-      ? library 
+    const rawWorkflows = projectData?.projectContents?.workflows ?? [];
+    const rawMedia     = (library && library.length > 0)
+      ? library
       : (projectData?.projectContents?.media ?? []);
-      
-    let mapped = raw.map(m => {
-      const url = resolveMediaUrl(m) || m.url || m.image?.url || m.video?.url || m.file_url || null;
-      const isVid = m.type === "video" || m.is_video || !!m.video || (url && /\.(mp4|webm|mov)$/i.test(url));
-      return {
-        ...m,
-        id: m.id || m.name,
-        url,
-        type: isVid ? "video" : "image",
-        is_video: isVid,
-      };
-    });
 
-    if (isAssetSelect) {
-      mapped = mapped.filter(item => !item.is_video && item.type !== "video");
+    const workflowItems = [];
+    const seenUrls = new Set();
+    const seenWorkflowIds = new Set();
+
+    if (rawWorkflows.length > 0) {
+      // Map workflow ID -> first/main media item
+      const workflowMediaMap = new Map();
+      rawMedia.forEach(m => {
+        const wId = m.workflowId || m.workflow_id;
+        if (wId && !workflowMediaMap.has(wId)) {
+          workflowMediaMap.set(wId, m);
+        }
+      });
+
+      rawWorkflows.forEach(w => {
+        const wId = w.name || w.id;
+        if (!wId || seenWorkflowIds.has(wId)) return;
+
+        const mainMedia = w.main_media || w.mainMedia || w.output_media || w.result_media || workflowMediaMap.get(wId) || rawMedia.find(m => m.workflowId === wId || m.workflow_id === wId);
+        
+        if (mainMedia) {
+          const url = resolveMediaUrl(mainMedia) || mainMedia.url || mainMedia.image?.url || mainMedia.video?.url || mainMedia.file_url || resolveMediaUrl(w) || w.url || null;
+          if (url && !seenUrls.has(url)) {
+            seenUrls.add(url);
+            seenWorkflowIds.add(wId);
+
+            const isVid = mainMedia.type === "video" || mainMedia.is_video || !!mainMedia.video || (url && /\.(mp4|webm|mov)$/i.test(url));
+            const isUploadItem = 
+              w.workflow_type === "UPLOAD" || 
+              w.workflowType === "UPLOAD" || 
+              w.type === "upload" || 
+              Boolean(w.is_upload || mainMedia.is_upload || mainMedia.workflow_type === "UPLOAD");
+
+            workflowItems.push({
+              ...mainMedia,
+              id: mainMedia.id || mainMedia.name || wId,
+              url,
+              type: isUploadItem ? "upload" : (isVid ? "video" : "image"),
+              is_video: isVid,
+              session_id: mainMedia.session_id || mainMedia.sessionId || w.session_id || w.metadata?.sessionId,
+              workflow_id: wId,
+              workflow_type: isUploadItem ? "UPLOAD" : (w.workflow_type || w.workflowType || mainMedia.workflow_type || "GENERATED"),
+              is_upload: isUploadItem,
+            });
+          }
+        }
+      });
     }
 
-    return mapped;
+    // Fallback if workflows yield no media items
+    let finalItems = workflowItems.length > 0 ? workflowItems : [];
+    if (finalItems.length === 0) {
+      rawMedia.forEach(m => {
+        const url = resolveMediaUrl(m) || m.url || m.image?.url || m.video?.url || m.file_url || null;
+        if (url && !seenUrls.has(url)) {
+          seenUrls.add(url);
+          const isVid = m.type === "video" || m.is_video || !!m.video || (url && /\.(mp4|webm|mov)$/i.test(url));
+          finalItems.push({
+            ...m,
+            id: m.id || m.name,
+            url,
+            type: isVid ? "video" : "image",
+            is_video: isVid,
+          });
+        }
+      });
+    }
+
+    if (isAssetSelect) {
+      finalItems = finalItems.filter(item => !item.is_video && item.type !== "video");
+    }
+
+    console.log("🔍 [POPOVER DEBUG] Raw Workflows from ProjectData:", rawWorkflows);
+    console.log("🔍 [POPOVER DEBUG] Mapped Library Items:", finalItems.map(i => ({ id: i.id, type: i.type, workflow_type: i.workflow_type, is_upload: i.is_upload, url: i.url })));
+
+    return finalItems;
   }, [library, projectData, isAssetSelect]);
 
   const {
@@ -348,20 +406,40 @@ export function ImportMediaPopover({
               {/* Session Selector Dropdown */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="flex items-center gap-2 px-3 py-2 bg-white/5 hover:bg-white/10 rounded-xl text-sm font-medium text-white/70 hover:text-white transition-all min-w-[140px] justify-between border-none cursor-pointer">
+                  <button 
+                    className="flex items-center gap-2 px-3.5 h-9 rounded-[12px] text-xs font-medium text-white/80 hover:text-white hover:bg-white/10 active:bg-[rgba(218,220,224,0.25)] active:blur-[1.5px] transition-all min-w-[140px] justify-between border-none cursor-pointer font-['Google_Sans_Text',sans-serif] outline-none select-none"
+                    style={{
+                      backgroundColor: "rgba(218, 220, 224, 0.1)",
+                      backdropFilter: "blur(80px)",
+                      WebkitBackdropFilter: "blur(80px)",
+                    }}
+                  >
                     <span className="truncate">{activeSessionName}</span>
-                    <ChevronDown className="size-4 opacity-40" />
+                    <ChevronDown className="size-3.5 opacity-60 shrink-0" />
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56 bg-[#18181b] backdrop-blur-xl border border-white/10 rounded-xl z-[10000] text-white">
-                  <DropdownMenuItem onClick={() => setSelectedSession("all_sessions")} className="text-sm cursor-pointer">All Sessions</DropdownMenuItem>
-                  <DropdownMenuSeparator className="bg-white/5" />
-                  <div className="max-h-[200px] overflow-y-auto custom-scrollbar">
+                <DropdownMenuContent 
+                  align="end" 
+                  className="w-[var(--radix-dropdown-menu-trigger-width)] min-w-[var(--radix-dropdown-menu-trigger-width)] border-none rounded-[16px] z-[10000] text-white p-3 font-['Google_Sans_Text',sans-serif]"
+                  style={{
+                    backgroundColor: "rgba(22, 23, 24, 0.95)",
+                    backdropFilter: "blur(40px)",
+                    WebkitBackdropFilter: "blur(40px)",
+                    boxShadow: "rgba(0, 0, 0, 0.2) 0px 4px 32px -8px",
+                  }}
+                >
+                  <DropdownMenuItem 
+                    onClick={() => setSelectedSession("all_sessions")} 
+                    className={cn("text-xs font-medium rounded-[10px] p-2.5 cursor-pointer transition-colors", selectedSession === "all_sessions" ? "bg-white/15 text-white font-semibold" : "text-white/80 hover:text-white hover:bg-white/10")}
+                  >
+                    All Sessions
+                  </DropdownMenuItem>
+                  <div className="max-h-[200px] overflow-y-auto custom-scrollbar flex flex-col gap-0.5 mt-0.5">
                     {sessions.map(s => (
                       <DropdownMenuItem 
                         key={s.id} 
                         onClick={() => setSelectedSession(s.id)}
-                        className={cn("text-sm cursor-pointer", selectedSession === s.id && "bg-white/10 text-white")}
+                        className={cn("text-xs font-medium rounded-[10px] p-2.5 cursor-pointer transition-colors", selectedSession === s.id ? "bg-white/15 text-white font-semibold" : "text-white/80 hover:text-white hover:bg-white/10")}
                       >
                         {s.name}
                       </DropdownMenuItem>

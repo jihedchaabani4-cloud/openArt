@@ -44,7 +44,15 @@ export function useProjectData(projectId, sessionId = null) {
           res?.json || 
           res?.data;
 
-        if (data && (data.projectContents || data.projectName)) return data;
+        if (data && (data.projectContents || data.projectName)) {
+          if (data.projectContents?.workflows) {
+            data.projectContents.workflows = data.projectContents.workflows.map(wf => {
+              const isUploadWf = wf.workflow_type === 'UPLOAD' || wf.workflowType === 'UPLOAD' || wf.type === 'upload' || Boolean(wf.is_upload);
+              return isUploadWf ? { ...wf, workflow_type: 'UPLOAD', workflowType: 'UPLOAD', is_upload: true, type: 'upload' } : wf;
+            });
+          }
+          return data;
+        }
         throw new Error('Project data structure invalid or not found');
       } catch (err) {
         throw err;
@@ -68,9 +76,9 @@ export function useProjectSessions(projectId) {
   const { data } = useProjectData(projectId);
   const rawSessions = data?.projectContents?.sessions ?? [];
   // Backend schema: { name: "uuid", metadata: { displayName: "human name" } }
-  return rawSessions.map(s => ({
+  return rawSessions.map((s, idx) => ({
     session_id:   s.name,                                          // UUID stored in "name"
-    session_name: s.metadata?.displayName || s.name || "Untitled Session",
+    session_name: s.metadata?.displayName || s.name || `Session ${idx + 1}`,
   }));
 }
 

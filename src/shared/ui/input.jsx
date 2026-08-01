@@ -11,6 +11,7 @@ const Input = React.forwardRef(({
   type = "text",
   label,
   icon: Icon,
+  googleIcon,
   onClear,
   clearIcon: ClearIcon,
   showEditButton,
@@ -62,7 +63,7 @@ const Input = React.forwardRef(({
   };
 
   const isBlurInput = variant === "blurinput";
-  const hasWrapper = isBlurInput || !!Icon || !!onClear || showEditButton || !!rightElement || !!label || hasPrefix;
+  const hasWrapper = isBlurInput || !!Icon || !!googleIcon || !!onClear || showEditButton || !!rightElement || !!label || hasPrefix;
 
   const textClasses = React.useMemo(() => {
     if (!className) return "";
@@ -93,14 +94,23 @@ const Input = React.forwardRef(({
         )}
         <div 
           className={cn(
-            "relative flex items-center justify-between w-full transition-all border-none outline-none",
+            "relative flex items-center justify-between w-full transition-all border-none outline-none font-['Google_Sans_Text',sans-serif]",
             isBlurInput
-              ? "h-9 min-h-[36px] rounded-[12px] px-3.5 py-0.5 bg-[rgba(218,220,224,0.1)] backdrop-blur-[80px] gap-2 text-sm font-medium text-white"
+              ? "h-9 min-h-[36px] rounded-[12px] py-[2px] pr-[10px] pl-[14px] gap-2 text-sm font-medium text-white flex-row"
               : "min-h-[52px] rounded-md px-3 py-2 bg-transparent hover:bg-white/5 focus-within:bg-[oklch(20%_0_0)]"
           )}
+          style={isBlurInput ? {
+            backgroundColor: "rgba(218, 220, 224, 0.1)",
+            backdropFilter: "blur(80px)",
+            WebkitBackdropFilter: "blur(80px)",
+          } : undefined}
         >
-          {Icon && (
-            <Icon className={cn("size-4 shrink-0 text-white/60", isBlurInput ? "mr-1 text-[1.1rem]" : "mr-2.5")} strokeWidth={2.5} />
+          {googleIcon && (
+            <GoogleIcon iconName={googleIcon} name={googleIcon} className="text-[1.1rem] shrink-0 text-white/60 select-none" />
+          )}
+
+          {Icon && !googleIcon && (
+            <Icon className={cn("size-4 shrink-0 text-white/60", isBlurInput ? "mr-0.5 text-[1.1rem]" : "mr-2.5")} strokeWidth={2.5} />
           )}
 
           {hasPrefix && (

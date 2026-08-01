@@ -130,11 +130,14 @@ export function useFilteredWorkflows(projectId, sessionId) {
         ?? [];
       const { config, model, isUpload } = resolveConfig(wfMedia);
       
-      // A workflow explicitly typed as GENERATION should never be hidden as an upload
-      // even if its media list is temporarily empty (e.g. while placeholder is being saved).
-      const type = (wf.workflow_type === 'GENERATION' && wfMedia.length === 0) 
-        ? 'generation' 
-        : (isUpload ? 'upload' : 'generation');
+      const isWfUpload = 
+        wf.workflow_type === "UPLOAD" ||
+        wf.workflowType === "UPLOAD" ||
+        wf.type === "upload" ||
+        wf.is_upload ||
+        isUpload;
+      
+      const type = isWfUpload ? "upload" : "generation";
 
       if (filters.liked && !wf.metadata?.favorited) return false;
 

@@ -171,14 +171,35 @@ export function useBatchUploadAssets() {
         // Since we already calculated metadata in onMutate, we can pass it here or re-calculate.
         // To keep it simple and parallel, we re-calculate if needed, or better, pass a metadata map.
         const metadata = await getMediaMetadata(file); 
+        const fullMetadata = {
+          ...metadata,
+          workflow_type: "UPLOAD",
+          workflowType: "UPLOAD",
+          source: "upload",
+          is_upload: true,
+        };
         const formData = new FormData();
         formData.append("file", file);
         formData.append("project_id", projectId);
         formData.append("session_id", sessionId || "");
-        if (metadata) formData.append("metadata", JSON.stringify(metadata));
-        return api.postForm("/assets/upload", formData);
+        formData.append("workflow_type", "UPLOAD");
+        formData.append("workflowType", "UPLOAD");
+        formData.append("type", "upload");
+        formData.append("source", "upload");
+        console.log("📤 [UPLOAD API] Sending /assets/upload:", {
+          fileName: file.name,
+          fileType: file.type,
+          projectId,
+          sessionId,
+          workflow_type: "UPLOAD",
+          fullMetadata
+        });
+        const res = await api.postForm("/assets/upload", formData);
+        console.log("📥 [UPLOAD API RESPONSE] Server response:", res);
+        return res;
       }));
       
+      console.log("✅ [UPLOAD BATCH SUCCESS] All upload requests finished:", results);
       return results;
     },
 
@@ -241,12 +262,17 @@ export function useBatchUploadAssets() {
           name:          optimisticId,
           projectId:     projectId,
           workflow_type: 'UPLOAD',
+          workflowType:  'UPLOAD',
+          is_upload:     true,
+          type:          'upload',
           metadata: {
             displayName:    isVideo ? 'Vidéo importée' : 'Image importée',
             createTime:     new Date().toISOString(),
             primaryMediaId: `${optimisticId}-item`,
             sessionId:      sessionId,
             favorited:      false,
+            source:         'upload',
+            isUpload:       true,
           },
         });
 
@@ -258,6 +284,11 @@ export function useBatchUploadAssets() {
           projectId:      projectId,
           workflowId:     optimisticId,
           workflowStepId: 'upload',
+          workflow_type:  'UPLOAD',
+          workflowType:   'UPLOAD',
+          is_upload:      true,
+          type:           'upload',
+          source:         'upload',
           mediaMetadata: {
             createTime: new Date().toISOString(),
             visibility: 'PRIVATE',
@@ -331,13 +362,29 @@ export function useRemoveAsset() {
       if (previousData) {
         queryClient.setQueryData(projectKey, (old) => {
           if (!old) return old;
+          const targetMedia = (old.projectContents?.media || []).find(m => m.id === assetId || m.name === assetId);
+          const targetWfId = targetMedia?.workflowId || targetMedia?.workflow_id;
+
+          const updatedMedia = (old.projectContents?.media || []).filter(
+            m => m.id !== assetId && m.name !== assetId
+          );
+
+          const hasRemainingMedia = targetWfId 
+            ? updatedMedia.some(m => (m.workflowId || m.workflow_id) === targetWfId) 
+            : true;
+
+          const updatedWorkflows = (old.projectContents?.workflows || []).filter(wf => {
+            if (!targetWfId) return true;
+            const wfId = wf.name || wf.id;
+            return wfId !== targetWfId || hasRemainingMedia;
+          });
+
           return {
             ...old,
             projectContents: {
               ...old.projectContents,
-              media: (old.projectContents?.media || []).filter(
-                m => m.id !== assetId && m.name !== assetId
-              )
+              media: updatedMedia,
+              workflows: updatedWorkflows,
             }
           };
         });
