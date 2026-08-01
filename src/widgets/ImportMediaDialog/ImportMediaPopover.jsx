@@ -304,9 +304,9 @@ export function ImportMediaPopover({
                       aria-selected={isActive}
                       variant={isActive ? "nav-tab-active" : "nav-tab"}
                       onClick={() => setSelectedCategory(cat.id)}
-                      className="w-full justify-start h-9 text-xs cursor-pointer"
+                      className="w-full justify-start h-9 text-xs cursor-pointer group"
                     >
-                      <GoogleIcon iconName={cat.googleIcon} name={cat.googleIcon} className={cn("size-4 shrink-0", isActive ? "text-white" : "text-white/60")} />
+                      <GoogleIcon iconName={cat.googleIcon} name={cat.googleIcon} className={cn("size-4 shrink-0 transition-colors", isActive ? "text-white" : "text-white/60 group-hover:text-white")} />
                       <span className="truncate">{cat.label}</span>
                     </Button>
                   );
