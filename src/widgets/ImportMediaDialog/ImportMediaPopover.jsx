@@ -306,7 +306,7 @@ export function ImportMediaPopover({
                       onClick={() => setSelectedCategory(cat.id)}
                       className="w-full justify-start h-9 text-xs cursor-pointer"
                     >
-                      <GoogleIcon name={cat.googleIcon} className={cn("size-4 shrink-0", isActive ? "text-white" : "text-white/60")} />
+                      <GoogleIcon iconName={cat.googleIcon} name={cat.googleIcon} className={cn("size-4 shrink-0", isActive ? "text-white" : "text-white/60")} />
                       <span className="truncate">{cat.label}</span>
                     </Button>
                   );
