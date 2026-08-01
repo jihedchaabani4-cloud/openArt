@@ -24,7 +24,8 @@ import { cn } from "@/shared/lib/utils";
 const CATEGORIES = [
   { id: "all",       label: "All",        googleIcon: "dashboard" },
   { id: "image",     label: "Images",     googleIcon: "image" },
-  { id: "video",     label: "Videos",     googleIcon: "voice_selection" },
+  { id: "video",     label: "Videos",     googleIcon: "videocam" },
+  { id: "voice",     label: "Voices",     googleIcon: "voice_selection" },
   { id: "character", label: "Characters", googleIcon: "accessibility_new" },
   { id: "element",   label: "Avatar",     googleIcon: "face" },
   { id: "upload",    label: "Uploads",    googleIcon: "drive_folder_upload" },
