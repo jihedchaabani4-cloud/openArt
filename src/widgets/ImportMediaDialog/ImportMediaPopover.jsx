@@ -272,7 +272,7 @@ export function ImportMediaPopover({
           }}
           className={cn(
             "fixed bottom-24 left-1/2 -translate-x-1/2 z-[9999]",
-            "border border-white/10 rounded-3xl flex flex-row overflow-hidden text-white",
+            "border-none rounded-3xl flex flex-row overflow-hidden text-white",
             isAssetSelect ? "h-[500px] max-w-[680px] w-full font-['Google_Sans_Text',sans-serif]" : "h-[560px] max-w-[880px] w-full font-['Google_Sans_Text',sans-serif]"
           )}
         >
@@ -288,7 +288,7 @@ export function ImportMediaPopover({
 
           {/* ── Left Category Sidebar (Shown in standard mode only) ── */}
           {!isAssetSelect && (
-            <div className="w-[190px] p-3 flex flex-col gap-2 shrink-0 select-none border-r border-white/5 bg-white/[0.02]">
+            <div className="w-[190px] p-3 flex flex-col gap-2 shrink-0 select-none bg-transparent">
               <div className="px-3 pt-2 pb-1 text-[11px] font-semibold text-white/30 uppercase tracking-wider font-['Google_Sans_Text',sans-serif]">
                 Categories
               </div>
@@ -313,7 +313,7 @@ export function ImportMediaPopover({
               </nav>
 
               {/* Upload Button at bottom of sidebar */}
-              <div className="mt-auto pt-2 border-t border-white/5">
+              <div className="mt-auto pt-2">
                 <Button
                   variant="nav-tab"
                   onClick={() => fileInputRef.current?.click()}
@@ -329,7 +329,7 @@ export function ImportMediaPopover({
           {/* ── Right Content Area ── */}
           <div className="flex-1 flex flex-col min-w-0">
             {/* Search & Session Header Bar */}
-            <div className="px-4 py-3 flex items-center gap-2 shrink-0 border-b border-white/5">
+            <div className="px-4 py-3 flex items-center gap-2 shrink-0">
               {/* Search Bar Input */}
               <div className="flex-1">
                 <Input
@@ -347,7 +347,7 @@ export function ImportMediaPopover({
               {/* Session Selector Dropdown */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="flex items-center gap-2 px-3 py-2 bg-white/5 hover:bg-white/10 rounded-xl text-sm font-medium text-white/70 hover:text-white transition-all min-w-[140px] justify-between border border-white/5 cursor-pointer">
+                  <button className="flex items-center gap-2 px-3 py-2 bg-white/5 hover:bg-white/10 rounded-xl text-sm font-medium text-white/70 hover:text-white transition-all min-w-[140px] justify-between border-none cursor-pointer">
                     <span className="truncate">{activeSessionName}</span>
                     <ChevronDown className="size-4 opacity-40" />
                   </button>
@@ -455,7 +455,7 @@ export function ImportMediaPopover({
             </div>
 
             {/* Footer - Import Button */}
-            <div className="p-3 shrink-0 flex justify-end border-t border-white/5 bg-white/[0.01]">
+            <div className="p-3 shrink-0 flex justify-end bg-transparent">
               <Button 
                 onClick={handleImport}
                 disabled={selectedItems.length === 0}
