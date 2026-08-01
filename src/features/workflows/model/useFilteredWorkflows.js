@@ -119,8 +119,9 @@ export function useFilteredWorkflows(projectId, sessionId) {
 
     // 1. فلترة
     const filtered = rawWorkflows.filter(wf => {
-      // Hide Element Sheets from normal workspace/timeline:
-      if (wf.workflow_type === "ELEMENT_SHEET") return false;
+      // Hide Element Sheets and Characters from normal workspace/timeline:
+      const wType = String(wf.workflow_type || wf.workflowType || "").toUpperCase();
+      if (wType === "ELEMENT_SHEET" || wType === "ELEMENT" || wType === "CHARACTER" || wType === "CHARACTER_SHEET") return false;
 
       const cleanWfId = String(wf.name || wf.id || '').replace(/^workflows\//, '');
       const wfMedia = (wf.items?.length > 0 ? wf.items : (wf.media?.length > 0 ? wf.media : null)) 
@@ -228,7 +229,10 @@ export function useFilteredWorkflows(projectId, sessionId) {
     ...queryResult,
     availableModels,
     filteredCount: filteredWorkflows.length,
-    total: rawWorkflows.filter(wf => wf.workflow_type !== "ELEMENT_SHEET").length,
+    total: rawWorkflows.filter(wf => {
+      const wType = String(wf.workflow_type || wf.workflowType || "").toUpperCase();
+      return wType !== "ELEMENT_SHEET" && wType !== "ELEMENT" && wType !== "CHARACTER" && wType !== "CHARACTER_SHEET";
+    }).length,
     data: {
       ...queryResult.data,
       filteredWorkflows,

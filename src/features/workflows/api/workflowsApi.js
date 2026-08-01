@@ -588,28 +588,10 @@ export function useUpdateWorkflow() {
   return useMutation({
     mutationFn: async ({ workflowId, workflowData }) => {
       const cleanId = String(workflowId || '').replace(/^workflows\//, '');
-      console.log(`📡 [useUpdateWorkflow] Attempting patch for workflowId: "${workflowId}" (cleanId: "${cleanId}")`, workflowData);
-
-      // 1. Try /workflows/workflows/${cleanId}
-      try {
-        const res = await api.patch(`/workflows/workflows/${cleanId}`, workflowData);
-        console.log(`✅ [useUpdateWorkflow] Success via /workflows/workflows/${cleanId}:`, res);
-        if (res && res.ok !== false) return res;
-      } catch (err) {
-        console.warn(`⚠️ [useUpdateWorkflow] /workflows/workflows/${cleanId} endpoint failed:`, err.message);
-      }
-
-      // 2. Fallback to /characters/${cleanId}
-      try {
-        console.log(`📡 [useUpdateWorkflow] Fallback attempting /characters/${cleanId}`, workflowData);
-        const res = await api.patch(`/characters/${cleanId}`, workflowData);
-        console.log(`✅ [useUpdateWorkflow] Success via /characters/${cleanId}:`, res);
-        if (res && res.ok === false) throw new Error(res.message || "Failed to update workflow");
-        return res;
-      } catch (fallbackErr) {
-        console.error(`❌ [useUpdateWorkflow] All patch endpoints failed for ID "${cleanId}":`, fallbackErr);
-        throw fallbackErr;
-      }
+      console.log(`📡 [useUpdateWorkflow] Patching workflow "${cleanId}"`, workflowData);
+      const res = await api.patch(`/workflows/workflows/${cleanId}`, workflowData);
+      if (res && res.ok === false) throw new Error(res.message || "Failed to update workflow");
+      return res;
     },
     onSuccess: (data, variables) => {
       const { workflowId, workflowData } = variables || {};
@@ -776,19 +758,35 @@ export function useElementSheetWorkflows(projectId) {
   const { data, isLoading, isError } = useProjectData(projectId);
   const workflows = data?.projectContents?.workflows ?? [];
   const media = data?.projectContents?.media ?? [];
+  const elements = data?.projectContents?.elements ?? [];
   const filters = useWorkflowsStore((s) => s._elementFilters);
+
+  const elementMap = new Map();
+  elements.forEach((e) => {
+    if (e.workflow_id) elementMap.set(e.workflow_id, e);
+    if (e.id) elementMap.set(e.id, e);
+  });
 
   const allElements = workflows
     .filter((w) => {
-      // Elements MUST have a record in the element table
-      const hasElementRecord = Boolean(w.element && Object.keys(w.element).length > 0);
-      const elemType = String(w.element_type || w.metadata?.elementType || w.element?.element_type || "").toLowerCase();
-      return hasElementRecord && elemType !== "character";
+      const type = String(w.workflow_type || "").toUpperCase();
+      return type === "ELEMENT_SHEET" || type === "ELEMENT";
     })
     .map((w) => {
+      const elem = elementMap.get(w.id) || elementMap.get(w.name) || w.element || {};
       const items = media.filter((m) => m.workflowId === w.name || m.workflowId === w.id);
       const status = items[0]?.status || w.status || (items[0]?.url ? "success" : "processing");
-      return { ...w, items, status, isMultiMedia: items.length > 1 };
+      return {
+        ...w,
+        element: elem,
+        element_type: elem.element_type || "object",
+        description: elem.description || "",
+        keywords: elem.keywords || [],
+        guidelines: elem.guidelines || [],
+        items,
+        status,
+        isMultiMedia: items.length > 1,
+      };
     });
 
   const filteredElements = allElements
@@ -798,36 +796,6 @@ export function useElementSheetWorkflows(projectId) {
       const config = w.items?.[0]?.generationConfig || {};
       const wPrompt = (config.prompt || '').toLowerCase();
       
-      // Element Type Filter
-      if (filters?.elementTypes?.length > 0) {
-        const dnaType = (config.dna?.type || '').toLowerCase();
-        let elementType = 'object';
-        if (dnaType === 'product') elementType = 'product';
-        if (dnaType === 'location') elementType = 'location';
-        if (!filters.elementTypes.includes(elementType)) return false;
-      }
-
-      // Gender Filter
-      if (filters?.gender?.length > 0) {
-        const isMale = wPrompt.includes('<trait: male>') || wPrompt.includes('<trait: boy>') || wPrompt.includes('<trait: man>') || wPrompt.includes('<trait: homme>');
-        const isFemale = wPrompt.includes('<trait: female>') || wPrompt.includes('<trait: girl>') || wPrompt.includes('<trait: woman>') || wPrompt.includes('<trait: femme>');
-        
-        if (filters.gender.includes('male') && filters.gender.includes('female')) {
-           // Both selected, show if it matches either
-           if (!isMale && !isFemale) return false;
-        } else if (filters.gender.includes('male')) {
-           if (!isMale && isFemale) return false; 
-        } else if (filters.gender.includes('female')) {
-           if (!isFemale && isMale) return false;
-        }
-      }
-
-      // Rendering Style Filter
-      if (filters?.renderingStyles?.length > 0) {
-        const hasMatchingStyle = filters.renderingStyles.some(style => wPrompt.includes(`<trait: ${style.toLowerCase()}>`) || wPrompt.includes(style.toLowerCase().replace('-', ' ')));
-        if (!hasMatchingStyle) return false;
-      }
-
       if (filters?.prompt?.trim()) {
         const q = filters.prompt.toLowerCase();
         if (!(w.name || '').toLowerCase().includes(q) && !(w.metadata?.displayName || '').toLowerCase().includes(q) && !wPrompt.includes(q)) return false;
@@ -915,18 +883,10 @@ export function useCharacterWorkflows(projectId) {
   const workflows = data?.projectContents?.workflows ?? [];
   const media = data?.projectContents?.media ?? [];
 
-  const characters = workflows
+  const characterWorkflows = workflows
     .filter((w) => {
-      const wType = String(w.workflow_type || "").toUpperCase();
-      const elemType = String(w.element_type || w.metadata?.elementType || w.element?.element_type || "").toLowerCase();
-      return (
-        wType === "CHARACTER" ||
-        wType === "CHARACTER_SHEET" ||
-        wType === "ELEMENT_SHEET" ||
-        elemType === "character" ||
-        w.metadata?.isCharacter ||
-        w.type === "character"
-      );
+      const type = String(w.workflow_type || "").toUpperCase();
+      return type === "CHARACTER" || type === "CHARACTER_SHEET";
     })
     .map((w) => {
       const items = media.filter((m) => m.workflowId === w.name || m.workflowId === w.id);
@@ -934,7 +894,7 @@ export function useCharacterWorkflows(projectId) {
       return { ...w, items, status, isMultiMedia: items.length > 1 };
     });
 
-  return { workflows: characters, isLoading, isError };
+  return { workflows: characterWorkflows, isLoading, isError };
 }
 
 // ─── Character Media Mutations ────────────────────────────────────────────────

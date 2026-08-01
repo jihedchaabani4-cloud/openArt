@@ -38,18 +38,20 @@ export default function CharacterDetailPage() {
 
     // ── Resolve workflow ──
     const workflow = React.useMemo(() => {
-        const rawWorkflows = projectData?.projectContents?.workflows ?? [];
-        const rawMedia     = projectData?.projectContents?.media ?? [];
+        const rawWorkflows  = projectData?.projectContents?.workflows ?? [];
+        const rawMedia      = projectData?.projectContents?.media ?? [];
+        const rawCharacters = projectData?.projectContents?.characters ?? [];
         const found = rawWorkflows.find(
             (w) => w.id === workflowId || w.name === workflowId || (w.id || w.name) === workflowId
         );
         if (!found) return null;
         const targetId   = found.id || found.name;
         const targetName = found.name || found.id;
+        const char = rawCharacters.find((c) => c.workflow_id === targetId || c.workflow_id === targetName || c.id === targetId) || found.character || {};
         const items = rawMedia
             .filter((m) => m.workflowId === targetId || m.workflowId === targetName || m.workflow_id === targetId)
             .map((m) => ({ ...m, id: m.id || m.name }));
-        return { ...found, id: found.id || found.name, items };
+        return { ...found, id: found.id || found.name, character: char, character_info: char.character_info || char.description || found.character_info, items };
     }, [projectData, workflowId]);
 
     // ── Display Title & Realtime Editing ──

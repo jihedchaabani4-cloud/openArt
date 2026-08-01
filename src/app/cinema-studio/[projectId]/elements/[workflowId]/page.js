@@ -57,26 +57,28 @@ export default function ElementWorkflowEditPage() {
     const workflow = React.useMemo(() => {
         const rawWorkflows = projectData?.projectContents?.workflows ?? [];
         const rawMedia     = projectData?.projectContents?.media ?? [];
+        const rawElements  = projectData?.projectContents?.elements ?? [];
         const found = rawWorkflows.find((w) => (w.id || w.name) === workflowId || w.id === workflowId || w.name === workflowId);
         if (!found) return null;
         const targetWfId = found.id || found.name;
         const targetWfName = found.name || found.id;
+        const elem = rawElements.find((e) => e.workflow_id === targetWfId || e.workflow_id === targetWfName || e.id === targetWfId) || found.element || {};
         const items = rawMedia
             .filter((m) => m.workflowId === targetWfId || m.workflowId === targetWfName || m.workflow_id === targetWfId || m.workflow_id === targetWfName)
             .map((m) => ({ ...m, asset_id: m.name || m.id, workflowStepId: m.workflowStepId || m.asset_type || "generation" }));
-        return { ...found, id: found.id || found.name, items };
+        return { ...found, id: found.id || found.name, element: elem, items };
     }, [projectData, workflowId]);
 
-    const serverType = workflow?.element_type || workflow?.element?.element_type || workflow?.metadata?.elementType || (workflow?.tags || []).find(t => ["object", "style", "font", "logo"].includes(t)) || "object";
+    const serverType = workflow?.element?.element_type || workflow?.element_type || workflow?.metadata?.elementType || (workflow?.tags || []).find(t => ["object", "style", "font", "logo"].includes(t)) || "object";
     const currentTypeConfig = ELEMENT_TYPES.find((t) => t.id === serverType) || ELEMENT_TYPES[0];
 
     const serverKeywords = React.useMemo(() => {
-        const kw = workflow?.keywords || workflow?.element?.keywords || workflow?.metadata?.keywords || [];
+        const kw = workflow?.element?.keywords || workflow?.keywords || workflow?.metadata?.keywords || [];
         return Array.isArray(kw) ? kw : [];
     }, [workflow]);
 
     const serverGuidelines = React.useMemo(() => {
-        const raw = workflow?.guidelines ?? workflow?.element?.guidelines ?? workflow?.metadata?.guidelines ?? "";
+        const raw = workflow?.element?.guidelines ?? workflow?.guidelines ?? workflow?.metadata?.guidelines ?? "";
         let str = "";
         if (Array.isArray(raw)) {
             str = raw.map(g => String(g).trim()).filter(g => Boolean(g) && g !== "[]").join("\n");

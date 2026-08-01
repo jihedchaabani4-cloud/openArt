@@ -23,11 +23,9 @@ export function useWorkflowDelete() {
 
   // Mutation with instant Optimistic UI removal
   const deleteMutation = useMutation({
-    mutationFn: async ({ workflowId, workflowType }) => {
-      const endpoint = (workflowType === "ELEMENT_SHEET" || workflowType === "ELEMENT")
-        ? `/v2/elements/${workflowId}`
-        : `/v2/elements/${workflowId}`;
-      return await api.delete(endpoint);
+    mutationFn: async ({ workflowId }) => {
+      const cleanId = String(workflowId || '').replace(/^workflows\//, '');
+      return await api.delete(`/workflows/workflows/${cleanId}`);
     },
 
     onMutate: async ({ workflowId, projectId }) => {

@@ -54,29 +54,28 @@ export function useLibraryFilter(library = [], mode = "all") {
     const activeCategory = selectedCategory !== "all" ? selectedCategory : (mode !== "all" ? mode : "all");
     
     if (activeCategory === "image") {
-      // Generated Images only (not uploads)
-      items = items.filter((g) => (!g.is_video && g.type !== "video" && g.type !== "voice") && !checkIsUpload(g));
+      // Generated Images only
+      items = items.filter((g) => {
+        const wType = String(g.workflow_type || "").toUpperCase();
+        return (!g.is_video && g.type !== "video" && g.type !== "voice") && !checkIsUpload(g) && wType !== "CHARACTER" && wType !== "CHARACTER_SHEET" && wType !== "ELEMENT_SHEET" && wType !== "ELEMENT";
+      });
     } else if (activeCategory === "video") {
-      // Generated Videos only (not uploads)
-      items = items.filter((g) => (g.is_video || g.type === "video" || !!g.video) && !checkIsUpload(g));
+      // Generated Videos only
+      items = items.filter((g) => {
+        const wType = String(g.workflow_type || "").toUpperCase();
+        return (g.is_video || g.type === "video" || !!g.video) && !checkIsUpload(g) && wType !== "CHARACTER" && wType !== "CHARACTER_SHEET" && wType !== "ELEMENT_SHEET" && wType !== "ELEMENT";
+      });
     } else if (activeCategory === "character") {
-      items = items.filter((g) => 
-        g.type === "character" || 
-        g.is_character || 
-        g.category === "character" || 
-        g.role === "character" || 
-        g.mediaType === "character"
-      );
+      items = items.filter((g) => {
+        const wType = String(g.workflow_type || "").toUpperCase();
+        return wType === "CHARACTER" || wType === "CHARACTER_SHEET" || g.type === "character";
+      });
     } else if (activeCategory === "element") {
-      items = items.filter((g) => 
-        g.type === "element" || 
-        g.is_element || 
-        g.category === "element" || 
-        g.role === "element" || 
-        g.mediaType === "element"
-      );
+      items = items.filter((g) => {
+        const wType = String(g.workflow_type || "").toUpperCase();
+        return wType === "ELEMENT_SHEET" || wType === "ELEMENT" || g.type === "element";
+      });
     } else if (activeCategory === "upload") {
-      // All user uploads
       items = items.filter((g) => checkIsUpload(g));
     }
 

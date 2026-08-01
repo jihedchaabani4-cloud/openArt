@@ -70,6 +70,16 @@ export function ImportMediaPopover({
       ? library
       : (projectData?.projectContents?.media ?? []);
 
+    /**
+     * Derive the semantic category for a workflow purely from workflow_type.
+     */
+    const resolveCategory = (w) => {
+      const wType = String(w.workflow_type || "").toUpperCase();
+      if (wType === "CHARACTER" || wType === "CHARACTER_SHEET") return "character";
+      if (wType === "ELEMENT_SHEET" || wType === "ELEMENT") return "element";
+      return null;
+    };
+
     const workflowItems = [];
     const seenUrls = new Set();
     const seenWorkflowIds = new Set();
@@ -103,16 +113,29 @@ export function ImportMediaPopover({
               w.type === "upload" || 
               Boolean(w.is_upload || mainMedia.is_upload || mainMedia.workflow_type === "UPLOAD");
 
+            const semanticCategory = isUploadItem ? null : resolveCategory(w);
+
+            // Determine `type` field: prefer semantic category, then fall back to media type
+            let itemType;
+            if (isUploadItem)          itemType = "upload";
+            else if (semanticCategory) itemType = semanticCategory; // "character" | "element"
+            else if (isVid)            itemType = "video";
+            else                       itemType = "image";
+
             workflowItems.push({
               ...mainMedia,
               id: mainMedia.id || mainMedia.name || wId,
               url,
-              type: isUploadItem ? "upload" : (isVid ? "video" : "image"),
+              type: itemType,
               is_video: isVid,
+              is_character: semanticCategory === "character",
+              is_element:   semanticCategory === "element",
               session_id: mainMedia.session_id || mainMedia.sessionId || w.session_id || w.metadata?.sessionId,
               workflow_id: wId,
               workflow_type: isUploadItem ? "UPLOAD" : (w.workflow_type || w.workflowType || mainMedia.workflow_type || "GENERATED"),
               is_upload: isUploadItem,
+              // Pass through the display name for labels in the grid
+              display_name: w.metadata?.displayName || w.display_name || w.name,
             });
           }
         }
@@ -143,7 +166,7 @@ export function ImportMediaPopover({
     }
 
     console.log("🔍 [POPOVER DEBUG] Raw Workflows from ProjectData:", rawWorkflows);
-    console.log("🔍 [POPOVER DEBUG] Mapped Library Items:", finalItems.map(i => ({ id: i.id, type: i.type, workflow_type: i.workflow_type, is_upload: i.is_upload, url: i.url })));
+    console.log("🔍 [POPOVER DEBUG] Mapped Library Items:", finalItems.map(i => ({ id: i.id, type: i.type, workflow_type: i.workflow_type, is_upload: i.is_upload, is_character: i.is_character, is_element: i.is_element, url: i.url })));
 
     return finalItems;
   }, [library, projectData, isAssetSelect]);
@@ -491,6 +514,15 @@ export function ImportMediaPopover({
                             <video src={itemUrl} style={{ width, height, objectFit: "cover" }} muted />
                           ) : (
                             <img src={itemUrl} alt="" style={{ width, height, objectFit: "cover" }} />
+                          )}
+
+                          {/* Name label for characters & elements */}
+                          {(item.is_character || item.is_element || item.type === "character" || item.type === "element") && item.display_name && (
+                            <div className="absolute bottom-0 left-0 right-0 px-2 py-1.5 bg-gradient-to-t from-black/80 to-transparent">
+                              <span className="text-[10px] font-medium text-white/90 truncate block leading-tight font-['Google_Sans_Text',sans-serif]">
+                                {item.display_name}
+                              </span>
+                            </div>
                           )}
 
                           {isSelected && (
