@@ -331,14 +331,16 @@ export function ImportMediaPopover({
             {/* Search & Session Header Bar */}
             <div className="px-4 py-3 flex items-center gap-2 shrink-0 border-b border-white/5">
               {/* Search Bar Input */}
-              <div className="relative flex-1 group">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-white/20 group-focus-within:text-white/50 transition-colors" />
+              <div className="flex-1">
                 <Input
+                  variant="blurinput"
+                  icon={Search}
                   type="search"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search for Assets"
-                  className="w-full pl-9 bg-white/5 border-none focus-visible:ring-1 focus-visible:ring-white/20 rounded-xl h-10 text-sm placeholder:text-white/20 transition-all"
+                  placeholder="Search assets"
+                  aria-label="Search assets"
+                  className="w-full text-sm"
                 />
               </div>
 
