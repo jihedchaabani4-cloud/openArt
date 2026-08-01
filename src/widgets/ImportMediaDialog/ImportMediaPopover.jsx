@@ -70,7 +70,7 @@ export function ImportMediaPopover({
       ? library 
       : (projectData?.projectContents?.media ?? []);
       
-    return raw.map(m => {
+    let mapped = raw.map(m => {
       const url = resolveMediaUrl(m) || m.url || m.image?.url || m.video?.url || m.file_url || null;
       const isVid = m.type === "video" || m.is_video || !!m.video || (url && /\.(mp4|webm|mov)$/i.test(url));
       return {
@@ -81,7 +81,13 @@ export function ImportMediaPopover({
         is_video: isVid,
       };
     });
-  }, [library, projectData]);
+
+    if (isAssetSelect) {
+      mapped = mapped.filter(item => !item.is_video && item.type !== "video");
+    }
+
+    return mapped;
+  }, [library, projectData, isAssetSelect]);
 
   const {
     search,          setSearch,
@@ -258,10 +264,16 @@ export function ImportMediaPopover({
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 10, scale: 0.95 }}
           transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
+          style={{
+            backgroundColor: "rgba(22, 23, 24, 0.9)",
+            backdropFilter: "blur(40px)",
+            WebkitBackdropFilter: "blur(40px)",
+            boxShadow: "rgba(0, 0, 0, 0.2) 0px 4px 32px -8px",
+          }}
           className={cn(
             "fixed bottom-24 left-1/2 -translate-x-1/2 z-[9999]",
-            "bg-[#121214]/95 backdrop-blur-2xl border border-white/10 shadow-2xl rounded-3xl flex flex-row overflow-hidden text-white",
-            "h-[560px] max-w-[880px] w-full font-['Google_Sans_Text',sans-serif]"
+            "border border-white/10 rounded-3xl flex flex-row overflow-hidden text-white",
+            isAssetSelect ? "h-[500px] max-w-[680px] w-full font-['Google_Sans_Text',sans-serif]" : "h-[560px] max-w-[880px] w-full font-['Google_Sans_Text',sans-serif]"
           )}
         >
           {/* Hidden file input */}
@@ -274,44 +286,46 @@ export function ImportMediaPopover({
             onChange={handleFileChange}
           />
 
-          {/* ── Left Category Sidebar ── */}
-          <div className="w-[190px] p-3 flex flex-col gap-2 shrink-0 select-none border-r border-white/5 bg-white/[0.02]">
-            <div className="px-3 pt-2 pb-1 text-[11px] font-semibold text-white/30 uppercase tracking-wider font-['Google_Sans_Text',sans-serif]">
-              Categories
-            </div>
-            
-            <nav role="tablist" className="flex flex-col gap-1 flex-1">
-              {CATEGORIES.map((cat) => {
-                const isActive = (selectedCategory || "all") === cat.id;
-                return (
-                  <button
-                    key={cat.id}
-                    onClick={() => setSelectedCategory(cat.id)}
-                    className={cn(
-                      "flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium transition-all text-left w-full cursor-pointer",
-                      isActive
-                        ? "bg-white/10 text-white font-semibold shadow-sm border border-white/10"
-                        : "hover:bg-white/5 text-white/60 hover:text-white border border-transparent"
-                    )}
-                  >
-                    <GoogleIcon name={cat.googleIcon} className={cn("size-4 shrink-0", isActive ? "text-white" : "text-white/50")} />
-                    <span className="truncate">{cat.label}</span>
-                  </button>
-                );
-              })}
-            </nav>
+          {/* ── Left Category Sidebar (Shown in standard mode only) ── */}
+          {!isAssetSelect && (
+            <div className="w-[190px] p-3 flex flex-col gap-2 shrink-0 select-none border-r border-white/5 bg-white/[0.02]">
+              <div className="px-3 pt-2 pb-1 text-[11px] font-semibold text-white/30 uppercase tracking-wider font-['Google_Sans_Text',sans-serif]">
+                Categories
+              </div>
+              
+              <nav role="tablist" className="flex flex-col gap-1 flex-1">
+                {CATEGORIES.map((cat) => {
+                  const isActive = (selectedCategory || "all") === cat.id;
+                  return (
+                    <button
+                      key={cat.id}
+                      onClick={() => setSelectedCategory(cat.id)}
+                      className={cn(
+                        "flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium transition-all text-left w-full cursor-pointer",
+                        isActive
+                          ? "bg-white/10 text-white font-semibold shadow-sm border border-white/10"
+                          : "hover:bg-white/5 text-white/60 hover:text-white border border-transparent"
+                      )}
+                    >
+                      <GoogleIcon name={cat.googleIcon} className={cn("size-4 shrink-0", isActive ? "text-white" : "text-white/50")} />
+                      <span className="truncate">{cat.label}</span>
+                    </button>
+                  );
+                })}
+              </nav>
 
-            {/* Upload Button at bottom of sidebar */}
-            <div className="mt-auto pt-2 border-t border-white/5">
-              <Button
-                onClick={() => fileInputRef.current?.click()}
-                className="w-full justify-center gap-2 h-9 px-3 rounded-xl text-xs font-medium bg-white/5 hover:bg-white/10 text-white/80 hover:text-white border border-white/5 transition-all cursor-pointer"
-              >
-                <Upload size={14} className="shrink-0" />
-                <span>Upload Media</span>
-              </Button>
+              {/* Upload Button at bottom of sidebar */}
+              <div className="mt-auto pt-2 border-t border-white/5">
+                <Button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-full justify-center gap-2 h-9 px-3 rounded-xl text-xs font-medium bg-white/5 hover:bg-white/10 text-white/80 hover:text-white border border-white/5 transition-all cursor-pointer"
+                >
+                  <Upload size={14} className="shrink-0" />
+                  <span>Upload Media</span>
+                </Button>
+              </div>
             </div>
-          </div>
+          )}
 
           {/* ── Right Content Area ── */}
           <div className="flex-1 flex flex-col min-w-0">
