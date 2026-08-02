@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogTitle } from "@/shared/ui/dialog";
 import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";
 import { useCreateElementSheetMutation } from "@/features/workflows/api/workflowsApi";
+import { elementService } from "@/features/elements/services/elementService";
 import { useWorkflowsStore } from "@/features/workflows";
 import { useBatchUploadAssets } from "@/features/media/api/mediaApi";
 
@@ -100,13 +101,13 @@ export function CreateElementModal({ isOpen, onClose, projectId, onCreated }) {
     setError(null);
 
     try {
-      const result = await runCreateElement({
-        payload: {
-          name: name.trim(),
-          sourceImages,
-          projectId: effectiveProjectId,
-        }
+      const payload = elementService.buildCreatePayload({
+        name: name.trim(),
+        sourceImages,
+        projectId: effectiveProjectId,
       });
+
+      const result = await runCreateElement({ payload });
 
       if (onCreated) onCreated(result);
 

@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/shared/api/client';
 import { queryKeys } from '@/shared/api/queryKeys';
 import { useWorkflowsStore } from '../model/useWorkflowsStore';
+import { normalizeProjectData } from '../model/domainNormalizer';
 import { useAuthSession } from '@/shared/api/auth';
 
 // ── Project Data (Unified Hook) ───────────────────────────────────────────────
@@ -220,7 +221,7 @@ export function useCreateElementSheetMutation({ onError } = {}) {
       const type = (payload.type || payload.element_type || payload.elementType || "").toLowerCase();
       
       const endpoint = type === "character"
-        ? `/character-sheet/character`
+        ? `/characters/create`
         : `/v2/elements`;
 
       const res = await api.post(endpoint, payload);
@@ -240,10 +241,11 @@ export function useCreateElementSheetMutation({ onError } = {}) {
       if (previousData) {
         const optimisticId = `optimistic-element-${Date.now()}`;
         
+        const isCharacterType = payload.type === "character" || payload.element_type === "character" || payload.elementType === "character";
         const optimisticWorkflow = {
           name: optimisticId,
           projectId: projectId,
-          workflow_type: 'ELEMENT_SHEET',
+          workflow_type: isCharacterType ? 'CHARACTER' : 'ELEMENT_SHEET',
           metadata: {
             displayName: payload.name || payload.prompt || (payload.type === "character" || payload.element_type === "character" ? "Untitled Character" : "Untitled Element"),
             createTime: new Date().toISOString(),

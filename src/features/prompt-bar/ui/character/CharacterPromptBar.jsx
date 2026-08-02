@@ -8,13 +8,13 @@ import { PromptTextarea } from "../common/PromptTextarea";
 import { PromptBarShell } from "../common/PromptBarShell";
 import { ElementsRow2 } from "../elements/ElementsRow2";
 import { ImportMediaPopover } from "@/widgets/ImportMediaDialog/ImportMediaPopover";
-import { useElementPrompt } from "../../model/useElementPrompt";
+import { useCharacterPrompt } from "../../model/useCharacterPrompt";
 import { DragDropOverlay } from "../generation/DragDropOverlay";
 import { ElementFeatureEditor } from "../elements/ElementFeatureEditor";
 import { useElementStore } from "../../model/useElementStore";
 
 export function CharacterPromptBar({ hideBackground = false }) {
-    const s = useElementPrompt();
+    const s = useCharacterPrompt();
     const paperclipRef = React.useRef(null);
     const sparklesRef = React.useRef(null);
     const featureEditorOpen = useElementStore((state) => state.featureEditor.open);

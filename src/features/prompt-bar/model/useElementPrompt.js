@@ -7,8 +7,9 @@ import { extractFeaturesFromPrompt } from "./feature-constants";
 import { useCreateElementSheetMutation } from "@/features/workflows/api/workflowsApi";
 import { useWorkflowsStore } from "@/features/workflows";
 import { getElementSheetConfig, isElementSheetMode } from "@/features/workflows/model/elementSheetConfig";
-import { buildReferencesPayload } from "@/shared/lib/referenceUtils";
 import { useRouter, useParams } from "next/navigation";
+import { buildReferencesPayload } from "@/shared/lib/referenceUtils";
+import { elementService } from "@/features/elements/services/elementService";
 import { queryKeys } from "@/shared/api/queryKeys";
 
 export function useElementPrompt() {
@@ -123,30 +124,27 @@ export function useElementPrompt() {
         if (!prompt.trim() || creatingSheet || s.generating) return;
 
         if (isElementSheetMode(elementMode)) {
-            const payload = {
-                type: elementMode,
-                prompt,
-                features: elementMode === "character"
-                    ? (hasPromptFeatures ? normalizedFeatures : features)
-                    : {},
-                references: buildReferencesPayload(referenceImages),
-                project_id: projectId,
-            };
-
             try {
+                const sourceImages = buildReferencesPayload(referenceImages);
+                const payload = elementService.buildCreatePayload({
+                    name: prompt.slice(0, 40) || "Untitled Element",
+                    sourceImages: sourceImages.length > 0 ? sourceImages : ["placeholder-ref"],
+                    description: prompt,
+                    elementType: elementMode,
+                    projectId,
+                });
+
                 const res = await runCreateElementSheet({ payload });
                 if (projectId) {
                     queryClient.invalidateQueries({ queryKey: queryKeys.projectData.byProject(projectId) });
-                    queryClient.refetchQueries({ queryKey: queryKeys.projectData.byProject(projectId) });
                 }
-                const elementId = res?.workflow?.id || res?.workflows?.[0]?.id || res?.workflow?.name || res?.element?.workflow_id || res?.v1WorkflowId || res?.workflowId || res?.id;
                 resetCurrentDraft();
 
                 if (projectId) {
                     const targetSubpath = elementMode === "character" ? "characters" : "elements";
                     router.push(`/cinema-studio/${projectId}/${targetSubpath}`);
                 }
-                return;
+                return res;
             } catch (err) {
                 console.error(`Failed to create ${elementMode} sheet:`, err);
                 return;

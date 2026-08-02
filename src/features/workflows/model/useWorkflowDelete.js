@@ -23,8 +23,15 @@ export function useWorkflowDelete() {
 
   // Mutation with instant Optimistic UI removal
   const deleteMutation = useMutation({
-    mutationFn: async ({ workflowId }) => {
+    mutationFn: async ({ workflowId, workflowType }) => {
       const cleanId = String(workflowId || '').replace(/^workflows\//, '');
+      const type = String(workflowType || '').toUpperCase();
+      if (type === "CHARACTER" || type === "CHARACTER_SHEET") {
+        return await api.delete(`/characters/${cleanId}`);
+      }
+      if (type === "ELEMENT_SHEET" || type === "ELEMENT") {
+        return await api.delete(`/v2/elements/${cleanId}`);
+      }
       return await api.delete(`/workflows/workflows/${cleanId}`);
     },
 
