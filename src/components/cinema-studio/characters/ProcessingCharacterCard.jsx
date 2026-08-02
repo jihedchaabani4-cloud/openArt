@@ -18,18 +18,17 @@ import React from "react";
 export function ProcessingCharacterCard({ aspectRatio = "370/240" }) {
   return (
     <div
-      className="relative flex w-full flex-col justify-between overflow-hidden rounded-2xl p-0.5 select-none outline-none bg-black/40 backdrop-blur-xl border border-white/10 shadow-2xl transition-all duration-500"
+      className="relative flex w-full flex-col justify-between overflow-hidden rounded-2xl select-none outline-none bg-transparent transition-all duration-500"
       style={{
         textRendering: "optimizeSpeed",
         fontFamily: '"Google Sans Text", system-ui, -apple-system, sans-serif',
       }}
     >
-      {/* ── CARD FRAME WITH CONTAINER ASPECT RATIO & GLASS BORDER ── */}
+      {/* ── CARD FRAME WITH CONTAINER ASPECT RATIO (NO BORDER) ── */}
       <div
-        className="relative flex w-full items-center justify-center overflow-hidden rounded-xl border border-white/15 bg-gradient-to-br from-zinc-950 via-zinc-900 to-black shadow-inner"
+        className="relative flex w-full items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-zinc-950 via-zinc-900 to-black"
         style={{
           aspectRatio: aspectRatio,
-          boxShadow: "rgba(218, 220, 224, 0.15) 0px 0px 0px 1px",
           borderRadius: "1rem",
         }}
       >
