@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Star, Trash2, Loader2, AlertCircle, User, Sparkles } from "lucide-react";
+import { ProcessingCharacterCard } from "./ProcessingCharacterCard";
 
 /**
  * Pre-calculated stack offset definitions for character 3-view sheets.
@@ -110,11 +111,7 @@ export function CharacterCardKrea({ character, onClick, onDelete }) {
 
         {/* ── CARD STATES ── */}
         {isProcessing ? (
-          <div className="w-full h-full flex flex-col items-center justify-center gap-2.5 bg-zinc-950/90 text-white/80 backdrop-blur-md p-4 text-center">
-            <Loader2 className="size-7 animate-spin text-amber-400" />
-            <span className="text-xs font-semibold tracking-wide">Creating character...</span>
-            <span className="text-[10px] text-white/50">LLM Prompt & Turnaround Generation</span>
-          </div>
+          <ProcessingCharacterCard name={name} stepLabel={description || "Creating 3-view turnaround sheet..."} />
         ) : isFailed ? (
           <div className="w-full h-full flex flex-col items-center justify-center gap-2 bg-rose-950/80 text-rose-200 p-3 text-center backdrop-blur-md">
             <AlertCircle className="size-6 text-rose-400" />
