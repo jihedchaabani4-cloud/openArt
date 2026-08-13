@@ -14,7 +14,6 @@ import { LoadingScreen } from "@/shared/ui/LoadingScreen";
 import { ElementCardKrea } from "@/components/cinema-studio/elements/ElementCardKrea";
 import { NewElementCardKrea } from "@/components/cinema-studio/elements/NewElementCardKrea";
 import { ElementsKreaControls } from "@/components/cinema-studio/elements/ElementsKreaControls";
-import { ElementsKreaHero } from "@/components/cinema-studio/elements/ElementsKreaHero";
 import { HowToDrawer } from "@/components/cinema-studio/elements/HowToDrawer";
 import { useWorkflowDelete } from "@/features/workflows";
 import { ConfirmDeleteDialog } from "@/widgets/dialogs/ConfirmDeleteDialog";
@@ -210,12 +209,6 @@ export default function ElementsPage({ params }) {
                     onScroll={handleScroll}
                     className="flex-1 overflow-y-auto pt-[80px] overflow-x-hidden px-4 py-6 custom-scrollbar w-full"
                 >
-                    {/* ── Krea Video Hero Banner ── */}
-                    <ElementsKreaHero
-                        projectName="Elements"
-                        onOpenCreateModal={() => router.push(`/cinema-studio/${projectId}/elements/new`)}
-                    />
-
                     {/* ── Category Filter Controls ── */}
                     <ElementsKreaControls
                         selectedCategory={selectedCategory}

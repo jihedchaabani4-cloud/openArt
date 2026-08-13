@@ -228,10 +228,11 @@ export function useCreateElementSheetMutation({ onError } = {}) {
       if (res.error) throw new Error(res.message || 'Element creation failed');
       return res;
     },
-    onMutate: async ({ payload }) => {
+    onMutate: async (inputData) => {
       useWorkflowsStore.getState().fireScrollToTop();
+      const payload = inputData?.payload || inputData || {};
       
-      const projectId = payload.project_id;
+      const projectId = payload.projectId || payload.project_id;
       if (!projectId) return {};
 
       const projectKey = queryKeys.projectData.byProject(projectId);
@@ -321,7 +322,7 @@ export function useCreateCharacterMutation({ onError } = {}) {
     onMutate: async (inputData) => {
       useWorkflowsStore.getState().fireScrollToTop();
       const payload = inputData?.payload || inputData || {};
-      const projectId = payload?.project_id;
+      const projectId = payload.projectId || payload.project_id;
       if (!projectId) return {};
       const projectKey = queryKeys.projectData.byProject(projectId);
       await queryClient.cancelQueries({ queryKey: projectKey });

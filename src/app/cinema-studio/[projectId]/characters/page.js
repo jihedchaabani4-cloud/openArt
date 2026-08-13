@@ -14,7 +14,6 @@ import { LoadingScreen } from "@/shared/ui/LoadingScreen"
 
 import { CharacterCardKrea } from "@/components/cinema-studio/characters/CharacterCardKrea"
 import { NewElementCardKrea } from "@/components/cinema-studio/elements/NewElementCardKrea"
-import { ElementsKreaHero } from "@/components/cinema-studio/elements/ElementsKreaHero"
 import { HowToDrawer } from "@/components/cinema-studio/elements/HowToDrawer"
 import { useWorkflowDelete } from "@/features/workflows"
 import { ConfirmDeleteDialog } from "@/widgets/dialogs/ConfirmDeleteDialog"
@@ -161,14 +160,6 @@ export default function CharactersPage({ params }) {
                     onScroll={handleScroll}
                     className="flex-1 overflow-y-auto pt-[80px] overflow-x-hidden px-4 py-6 custom-scrollbar w-full"
                 >
-                    {/* ── Krea Characters Hero Banner ── */}
-                    <ElementsKreaHero
-                        projectName="Characters"
-                        description="Create and save 3-view character references for consistent video generation across all your scenes."
-                        createLabel="Create new character"
-                        onOpenCreateModal={() => router.push(`/cinema-studio/${projectId}/characters/new`)}
-                    />
-
                     {/* ── Characters Grid (Full Width 100%) ── */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 pb-32 w-full pt-4">
                         {/* Always show + New Character Card */}

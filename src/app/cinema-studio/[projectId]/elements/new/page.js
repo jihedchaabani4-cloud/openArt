@@ -3,7 +3,7 @@
 import React, { useState, useMemo, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowUp, FolderOpen, Plus, Loader2 } from "lucide-react";
+import { ArrowUp, Plus, Loader2 } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { UserDropdown } from "@/widgets/StudioNavbar/ui/UserDropdown";
@@ -12,9 +12,9 @@ import { useCreateElementSheetMutation, useElementSheetWorkflows, useProjectData
 import { useWorkflowsStore } from "@/features/workflows";
 import { getPrimaryMedia } from "@/shared/lib/generationUtils";
 import { getItemMetadata } from "@/shared/lib/displayUtils";
+import { getWorkflowDomainType, DOMAIN_TYPES } from "@/features/workflows/model/domainNormalizer";
 import { ELEMENT_TYPES } from "@/features/workflows/model/elementSheetConfig";
-import { RowsPhotoAlbum } from "react-photo-album";
-import "react-photo-album/rows.css";
+
 
 const SAMPLE_FACES = [
   "https://www.krea.ai/_app/2ef422f246a7f9e2/immutable/assets/face_3.BsghTrki.webp",
@@ -68,13 +68,16 @@ export default function NewElementPage() {
     }
   };
 
-  // Photos formatted with actual aspect ratio for RowsPhotoAlbum (same as generations page)
+  // Photos: only GENERATION + UPLOAD workflows, one card per workflow showing its primary media
   const photos = useMemo(() => {
     const rawWorkflows = projectData?.projectContents?.workflows || [];
     const rawMedia = projectData?.projectContents?.media || [];
 
-    const workflowPhotos = rawWorkflows
-      .filter((wf) => wf.workflow_type !== "ELEMENT_SHEET")
+    return rawWorkflows
+      .filter((wf) => {
+        const domainType = getWorkflowDomainType(wf);
+        return domainType === DOMAIN_TYPES.GENERATION || domainType === DOMAIN_TYPES.UPLOAD;
+      })
       .reduce((acc, wf, i) => {
         const items = rawMedia
           .filter((m) => m.workflowId === wf.name || m.workflowId === wf.id)
@@ -84,84 +87,23 @@ export default function NewElementPage() {
         if (!primary) return acc;
 
         const meta = getItemMetadata(primary, withItems);
-        const aspect = meta?.aspect || "3/4";
-        const [wStr, hStr] = aspect.split("/");
-        const wNum = parseFloat(wStr) || 3;
-        const hNum = parseFloat(hStr) || 4;
-        const BASE = 1200;
-        const width = Math.round(BASE * (wNum / Math.max(wNum, hNum)));
-        const height = Math.round(BASE * (hNum / Math.max(wNum, hNum)));
-
-        const url = meta?.url || primary.url || primary.file_url || primary.asset?.file_url;
-        if (!url) return acc;
+        const primaryUrl = meta?.url || primary.url || primary.file_url || primary.asset?.file_url;
+        if (!primaryUrl) return acc;
 
         const label = wf.metadata?.displayName || wf.display_name || wf.name || "Untitled";
+        const domainType = getWorkflowDomainType(wf);
 
         acc.push({
-          src: url,
-          width,
-          height,
+          src: primaryUrl,
           key: wf.id || wf.name || String(i),
           workflow: withItems,
-          thumbUrl: url,
+          primaryMediaUrl: primaryUrl,
           label,
+          domainType,
         });
         return acc;
       }, []);
-
-    const mediaPhotos = rawMedia
-      .filter((m) => (m.url || m.file_url || m.src) && m.workflow_type !== "ELEMENT_SHEET")
-      .map((m, i) => {
-        const url = m.url || m.file_url || m.src;
-        return {
-          src: url,
-          width: 1200,
-          height: 900,
-          key: m.id || m.name || `media-${i}`,
-          workflow: { id: m.workflowId || m.id, items: [m] },
-          thumbUrl: url,
-          label: m.name || "Media Item",
-        };
-      });
-
-    const combined = [...workflowPhotos];
-    const seen = new Set(combined.map((p) => p.src));
-    for (const p of mediaPhotos) {
-      if (!seen.has(p.src)) {
-        seen.add(p.src);
-        combined.push(p);
-      }
-    }
-    return combined;
   }, [projectData]);
-
-  // Dynamic natural dimensions for generated media photos to preserve original aspect ratio
-  const [genDimensions, setGenDimensions] = React.useState({});
-
-  React.useEffect(() => {
-    photos.forEach((p) => {
-      if (!p.src || genDimensions[p.src]) return;
-      const img = new window.Image();
-      img.onload = () => {
-        setGenDimensions((prev) => ({
-          ...prev,
-          [p.src]: { width: img.naturalWidth || 1, height: img.naturalHeight || 1 },
-        }));
-      };
-      img.src = p.src;
-    });
-  }, [photos]);
-
-  const formattedPhotos = React.useMemo(() => {
-    return photos.map((p) => {
-      const dims = genDimensions[p.src];
-      return {
-        ...p,
-        width: dims?.width || p.width,
-        height: dims?.height || p.height,
-      };
-    });
-  }, [photos, genDimensions]);
 
   const createAndRedirect = async (urls) => {
     if (!urls || !urls.length) return;
@@ -369,17 +311,17 @@ export default function NewElementPage() {
                 className="w-full"
               >
                 <div className="flex flex-wrap gap-2.5 items-start w-full">
-                  {formattedPhotos.map((photo) => {
+                  {photos.map((photo) => {
                     const wf = photo.workflow;
                     const isThisLoading = loadingWorkflowId === (wf.id || wf.name);
                     return (
                       <div
                         key={photo.key}
                         className="relative group overflow-hidden rounded-xl bg-zinc-900 border border-white/10 shrink-0 max-h-[220px] cursor-pointer"
-                        onClick={() => !isAnyLoading && createFromWorkflow(wf, photo.src)}
+                        onClick={() => !isAnyLoading && createFromWorkflow(wf, photo.primaryMediaUrl)}
                       >
                         <img
-                          src={photo.src}
+                          src={photo.primaryMediaUrl}
                           alt={photo.label}
                           className="w-auto h-auto max-h-[220px] max-w-full object-contain transition-transform duration-300 group-hover:scale-105 rounded-xl"
                         />

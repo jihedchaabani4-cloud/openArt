@@ -20,24 +20,100 @@ export function useCharacterPrompt() {
   const queryClient = useQueryClient();
   const s = usePromptBar({ isNewProject: false });
 
+  const [dialogOpen, setDialogOpen] = React.useState(false);
+  const [internalMode, setInternalMode] = React.useState("image");
+  const [targetRole, setTargetRole] = React.useState("normal");
+  const [mentionCallback, setMentionCallback] = React.useState(null);
+
   const { selectedProjectId: storeProjectId } = useWorkflowsStore();
   const projectId = params?.projectId || storeProjectId;
 
   const { mutateAsync: createCharacter, isPending: isCreating } = useCreateCharacterMutation();
-  const { prompts, setPrompt, references, clearReferences, elementMode, setElementMode } = useElementStore();
+  const {
+    prompts,
+    setPrompt,
+    references: elementReferences,
+    addReference: addElementReference,
+    clearReferences: clearElementReferences,
+    elementMode,
+    setElementMode,
+  } = useElementStore();
 
   const prompt = prompts.character || s.prompt || "";
-  const referenceImages = references.character || [];
+  const maxRefs = s.maxRefs ?? 4;
+
+  // Combine reference images from both usePromptBar and useElementStore
+  const rawCombinedRefs = [
+    ...(elementReferences.character || []),
+    ...(s.referenceImages || [])
+  ];
+
+  // Deduplicate and normalize reference image objects
+  const referenceImages = Array.from(
+    new Map(
+      rawCombinedRefs.map((r) => {
+        const url = typeof r === "string" ? r : r?.url || r?.src || r?.assetId || "";
+        const item = typeof r === "string" 
+          ? { url, role: "character_reference" } 
+          : { ...r, url, role: r?.role || "character_reference" };
+        return [url, item];
+      })
+    ).values()
+  ).filter((r) => Boolean(r.url));
+
+  const openDialog = (mode = "image", role = "normal", callback = null) => {
+    setInternalMode(mode);
+    setTargetRole(role);
+    setMentionCallback(() => callback);
+    setDialogOpen(true);
+    if (s.handleOpenLibrary) {
+      s.handleOpenLibrary(mode);
+    }
+  };
+
+  const handleAddClick = () => {
+    if (dialogOpen) {
+      setDialogOpen(false);
+      return;
+    }
+    openDialog("image", "normal");
+  };
+
+  const handleSelectMedia = (assets) => {
+    const items = Array.isArray(assets) ? assets : [assets];
+    items.forEach((asset) => {
+      if (s.handleAddReference) {
+        s.handleAddReference(asset, targetRole);
+      }
+      addElementReference(asset, targetRole, maxRefs);
+    });
+    if (mentionCallback) mentionCallback(items);
+    setDialogOpen(false);
+    setMentionCallback(null);
+  };
+
+  const handleRemoveReference = (indexOrUrl) => {
+    if (s.handleRemoveReference) {
+      s.handleRemoveReference(indexOrUrl);
+    }
+    if (typeof indexOrUrl === "string") {
+      useElementStore.getState().removeReference("character", indexOrUrl);
+    }
+  };
 
   const handleGenerateCharacter = async (e) => {
     if (e) e.preventDefault();
     if (!prompt.trim() || isCreating || s.generating) return;
 
     try {
+      const refUrls = referenceImages
+        .map((r) => (typeof r === "string" ? r : r.url || r.src))
+        .filter(Boolean);
+
       const payload = characterService.buildCreatePayload({
         name: prompt.slice(0, 45),
         prompt,
-        references: referenceImages.map((r) => (typeof r === "string" ? r : r.url || r.src)).filter(Boolean),
+        references: refUrls,
         projectId,
       });
 
@@ -49,7 +125,8 @@ export function useCharacterPrompt() {
       }
 
       setPrompt("");
-      clearReferences();
+      if (s.clearReferences) s.clearReferences();
+      if (clearElementReferences) clearElementReferences();
       return res;
     } catch (err) {
       console.error("Failed to create character via prompt bar:", err);
@@ -60,8 +137,19 @@ export function useCharacterPrompt() {
   return {
     ...s,
     prompt,
-    setPrompt: (val) => setPrompt(val),
+    setPrompt: (val) => {
+      setPrompt(val);
+      if (s.setPrompt) s.setPrompt(val);
+    },
     referenceImages,
+    maxRefs,
+    dialogOpen,
+    setDialogOpen,
+    internalMode,
+    openDialog,
+    handleAddClick,
+    handleSelectMedia,
+    handleRemoveReference,
     elementMode: "character",
     setElementMode,
     isCreating,
