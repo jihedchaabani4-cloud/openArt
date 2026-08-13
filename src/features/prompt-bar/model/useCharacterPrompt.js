@@ -5,6 +5,7 @@ import { useCreateCharacterMutation } from "@/features/workflows/api/workflowsAp
 import { characterService } from "@/features/characters/services/characterService";
 import { useWorkflowsStore } from "@/features/workflows/model/useWorkflowsStore";
 import { queryKeys } from "@/shared/api/queryKeys";
+import { buildReferencesPayload } from "@/shared/lib/referenceUtils";
 import { usePromptBar } from "./usePromptBar";
 import { useElementStore } from "./useElementStore";
 
@@ -106,14 +107,23 @@ export function useCharacterPrompt() {
     if (!prompt.trim() || isCreating || s.generating) return;
 
     try {
-      const refUrls = referenceImages
-        .map((r) => (typeof r === "string" ? r : r.url || r.src))
-        .filter(Boolean);
+      const formattedReferences = referenceImages.map((r) => {
+        if (typeof r === "string") {
+          return { url: r, role: "character_reference" };
+        }
+        return {
+          id: r.asset_id || r.id || r.ref_media_id || r.workflow_id || null,
+          workflow_id: r.workflow_id || r.workflowId || null,
+          url: r.url || r.src || null,
+          role: r.role || "character_reference",
+          type: r.type || "image",
+        };
+      }).filter((r) => Boolean(r.url));
 
       const payload = characterService.buildCreatePayload({
         name: prompt.slice(0, 45),
         prompt,
-        references: refUrls,
+        references: formattedReferences,
         projectId,
       });
 
