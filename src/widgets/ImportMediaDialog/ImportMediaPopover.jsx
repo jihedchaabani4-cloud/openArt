@@ -66,9 +66,16 @@ export function ImportMediaPopover({
 
   const effectiveLibrary = React.useMemo(() => {
     const rawWorkflows = projectData?.projectContents?.workflows ?? [];
-    const rawMedia     = (library && library.length > 0)
-      ? library
-      : (projectData?.projectContents?.media ?? []);
+    
+    // Combine library items and projectData media
+    const combinedMediaMap = new Map();
+    (library || []).concat(projectData?.projectContents?.media || []).forEach(m => {
+      const id = m.id || m.name;
+      if (id && !combinedMediaMap.has(id)) {
+        combinedMediaMap.set(id, m);
+      }
+    });
+    const rawMedia = Array.from(combinedMediaMap.values());
 
     /**
      * Derive the semantic category for a workflow purely from workflow_type.
@@ -80,7 +87,7 @@ export function ImportMediaPopover({
       return null;
     };
 
-    const workflowItems = [];
+    const finalItems = [];
     const seenUrls = new Set();
     const seenWorkflowIds = new Set();
 
@@ -115,14 +122,13 @@ export function ImportMediaPopover({
 
             const semanticCategory = isUploadItem ? null : resolveCategory(w);
 
-            // Determine `type` field: prefer semantic category, then fall back to media type
             let itemType;
             if (isUploadItem)          itemType = "upload";
             else if (semanticCategory) itemType = semanticCategory; // "character" | "element"
             else if (isVid)            itemType = "video";
             else                       itemType = "image";
 
-            workflowItems.push({
+            finalItems.push({
               ...mainMedia,
               id: mainMedia.id || mainMedia.name || wId,
               url,
@@ -134,7 +140,6 @@ export function ImportMediaPopover({
               workflow_id: wId,
               workflow_type: isUploadItem ? "UPLOAD" : (w.workflow_type || w.workflowType || mainMedia.workflow_type || "GENERATED"),
               is_upload: isUploadItem,
-              // Pass through the display name for labels in the grid
               display_name: w.metadata?.displayName || w.display_name || w.name,
             });
           }
@@ -142,33 +147,34 @@ export function ImportMediaPopover({
       });
     }
 
-    // Fallback if workflows yield no media items
-    let finalItems = workflowItems.length > 0 ? workflowItems : [];
-    if (finalItems.length === 0) {
-      rawMedia.forEach(m => {
-        const url = resolveMediaUrl(m) || m.url || m.image?.url || m.video?.url || m.file_url || null;
-        if (url && !seenUrls.has(url)) {
-          seenUrls.add(url);
-          const isVid = m.type === "video" || m.is_video || !!m.video || (url && /\.(mp4|webm|mov)$/i.test(url));
-          finalItems.push({
-            ...m,
-            id: m.id || m.name,
-            url,
-            type: isVid ? "video" : "image",
-            is_video: isVid,
-          });
-        }
-      });
-    }
+    // Always append standalone raw media items (like uploaded photos or loose media)
+    rawMedia.forEach(m => {
+      const url = resolveMediaUrl(m) || m.url || m.image?.url || m.video?.url || m.file_url || null;
+      if (url && !seenUrls.has(url)) {
+        seenUrls.add(url);
+        const isVid = m.type === "video" || m.is_video || !!m.video || (url && /\.(mp4|webm|mov)$/i.test(url));
+        const isUploadItem = m.workflow_type === "UPLOAD" || m.is_upload || m.workflowStepId === "UPLOAD" || !m.workflowId;
+        finalItems.push({
+          ...m,
+          id: m.id || m.name,
+          url,
+          type: isUploadItem ? "upload" : (isVid ? "video" : "image"),
+          is_video: isVid,
+          is_upload: isUploadItem,
+          display_name: m.mediaMetadata?.displayName || m.name || "Uploaded Media",
+        });
+      }
+    });
 
+    let resultItems = finalItems;
     if (isAssetSelect) {
-      finalItems = finalItems.filter(item => !item.is_video && item.type !== "video");
+      resultItems = resultItems.filter(item => !item.is_video && item.type !== "video");
     }
 
     console.log("🔍 [POPOVER DEBUG] Raw Workflows from ProjectData:", rawWorkflows);
-    console.log("🔍 [POPOVER DEBUG] Mapped Library Items:", finalItems.map(i => ({ id: i.id, type: i.type, workflow_type: i.workflow_type, is_upload: i.is_upload, is_character: i.is_character, is_element: i.is_element, url: i.url })));
+    console.log("🔍 [POPOVER DEBUG] Mapped Library Items:", resultItems.map(i => ({ id: i.id, type: i.type, workflow_type: i.workflow_type, is_upload: i.is_upload, is_character: i.is_character, is_element: i.is_element, url: i.url })));
 
-    return finalItems;
+    return resultItems;
   }, [library, projectData, isAssetSelect]);
 
   const {

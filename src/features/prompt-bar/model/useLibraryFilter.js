@@ -4,14 +4,14 @@ import { useState, useMemo } from "react";
 /**
  * Encapsulates all filter/sort state for the media library dialog.
  * @param {Array}  library - Raw library array
- * @param {string} mode    - "image" | "video" | "all"
+ * @param {string} mode    - "image" | "video" | "all" | "asset-select"
  */
 export function useLibraryFilter(library = [], mode = "all") {
   const [sort,            setSort]            = useState("recent");
   const [search,          setSearch]          = useState("");
   const [selectedProject, setSelectedProject] = useState("all_projects");
   const [selectedSession, setSelectedSession] = useState("all_sessions");
-  const [selectedCategory, setSelectedCategory] = useState(mode || "all");
+  const [selectedCategory, setSelectedCategory] = useState("all");
 
   const visibleItems = useMemo(() => {
     // 1. Flatten items
@@ -41,6 +41,7 @@ export function useLibraryFilter(library = [], mode = "all") {
       const q = search.toLowerCase();
       items = items.filter((g) => 
         (g.prompt?.toLowerCase().includes(q)) || 
+        (g.display_name?.toLowerCase().includes(q)) ||
         (g.asset_id?.toLowerCase().includes(q)) ||
         (g.id?.toLowerCase().includes(q))
       );
@@ -51,29 +52,28 @@ export function useLibraryFilter(library = [], mode = "all") {
       g.workflow_type === "UPLOAD" || g.workflowType === "UPLOAD" || g.type === "upload" || Boolean(g.is_upload);
 
     // 5. Category / Media type filter
-    const activeCategory = selectedCategory !== "all" ? selectedCategory : (mode !== "all" ? mode : "all");
+    const activeCategory = selectedCategory !== "all" ? selectedCategory : (mode !== "all" && mode !== "asset-select" ? mode : "all");
     
     if (activeCategory === "image") {
-      // Generated Images only
+      // All Images (includes uploaded images and generated images)
       items = items.filter((g) => {
-        const wType = String(g.workflow_type || "").toUpperCase();
-        return (!g.is_video && g.type !== "video" && g.type !== "voice") && !checkIsUpload(g) && wType !== "CHARACTER" && wType !== "CHARACTER_SHEET" && wType !== "ELEMENT_SHEET" && wType !== "ELEMENT";
+        const isVid = g.is_video || g.type === "video" || !!g.video;
+        return !isVid && g.type !== "voice";
       });
     } else if (activeCategory === "video") {
-      // Generated Videos only
+      // All Videos (includes uploaded videos and generated videos)
       items = items.filter((g) => {
-        const wType = String(g.workflow_type || "").toUpperCase();
-        return (g.is_video || g.type === "video" || !!g.video) && !checkIsUpload(g) && wType !== "CHARACTER" && wType !== "CHARACTER_SHEET" && wType !== "ELEMENT_SHEET" && wType !== "ELEMENT";
+        return g.is_video || g.type === "video" || !!g.video;
       });
     } else if (activeCategory === "character") {
       items = items.filter((g) => {
         const wType = String(g.workflow_type || "").toUpperCase();
-        return wType === "CHARACTER" || wType === "CHARACTER_SHEET" || g.type === "character";
+        return wType === "CHARACTER" || wType === "CHARACTER_SHEET" || g.type === "character" || g.is_character;
       });
     } else if (activeCategory === "element") {
       items = items.filter((g) => {
         const wType = String(g.workflow_type || "").toUpperCase();
-        return wType === "ELEMENT_SHEET" || wType === "ELEMENT" || g.type === "element";
+        return wType === "ELEMENT_SHEET" || wType === "ELEMENT" || g.type === "element" || g.is_element;
       });
     } else if (activeCategory === "upload") {
       items = items.filter((g) => checkIsUpload(g));
@@ -85,8 +85,8 @@ export function useLibraryFilter(library = [], mode = "all") {
     }
 
     return items.sort((a, b) => {
-      const dateA = new Date(a.mediaMetadata?.createTime || a.created_at || 0);
-      const dateB = new Date(b.mediaMetadata?.createTime || b.created_at || 0);
+      const dateA = new Date(a.mediaMetadata?.createTime || a.created_at || a.create_time || 0);
+      const dateB = new Date(b.mediaMetadata?.createTime || b.created_at || b.create_time || 0);
 
       switch (sort) {
         case "oldest":
