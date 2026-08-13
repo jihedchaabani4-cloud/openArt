@@ -99,8 +99,10 @@ export function CharacterPromptBar({ hideBackground = false }) {
                     onOpenChange={s.setDialogOpen}
                     anchorRef={paperclipRef}
                     onSelect={s.handleSelectMedia}
+                    onUploadFromPC={s.handleUploadFromPC}
                     library={s.library}
                     loading={s.libraryLoading}
+                    maxAllowed={s.maxRefs ?? 4}
                     variant="asset-select"
                     mode={s.internalMode}
                 />
