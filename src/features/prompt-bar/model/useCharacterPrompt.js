@@ -5,7 +5,7 @@ import { useCreateCharacterMutation } from "@/features/workflows/api/workflowsAp
 import { characterService } from "@/features/characters/services/characterService";
 import { useWorkflowsStore } from "@/features/workflows/model/useWorkflowsStore";
 import { queryKeys } from "@/shared/api/queryKeys";
-import { buildReferencesPayload } from "@/shared/lib/referenceUtils";
+import { getItemMetadata } from "@/shared/lib/displayUtils";
 import { usePromptBar } from "./usePromptBar";
 import { useElementStore } from "./useElementStore";
 
@@ -49,18 +49,20 @@ export function useCharacterPrompt() {
     ...(s.referenceImages || [])
   ];
 
-  // Deduplicate and normalize reference image objects
+  // Deduplicate and normalize reference image objects safely
   const referenceImages = Array.from(
     new Map(
       rawCombinedRefs.map((r) => {
-        const url = typeof r === "string" ? r : r?.url || r?.src || r?.assetId || "";
+        const metadata = typeof r === "object" ? getItemMetadata(r) : {};
+        const url = typeof r === "string" ? r : r?.url || r?.src || metadata.url || "";
         const item = typeof r === "string" 
           ? { url, role: "character_reference" } 
-          : { ...r, url, role: r?.role || "character_reference" };
-        return [url, item];
+          : { ...r, url: url || r?.url, role: r?.role || "character_reference" };
+        const key = url || r?.workflow_id || r?.workflowId || r?.id || r?.asset_id || Math.random();
+        return [key, item];
       })
     ).values()
-  ).filter((r) => Boolean(r.url));
+  ).filter((r) => Boolean(r.url || r.workflow_id || r.workflowId || r.id || r.asset_id));
 
   const openDialog = (mode = "image", role = "normal", callback = null) => {
     setInternalMode(mode);
@@ -107,18 +109,26 @@ export function useCharacterPrompt() {
     if (!prompt.trim() || isCreating || s.generating) return;
 
     try {
+      // Pass clean references formatted with workflow_id, asset_id, and url
       const formattedReferences = referenceImages.map((r) => {
         if (typeof r === "string") {
           return { url: r, role: "character_reference" };
         }
+        const refMetadata = getItemMetadata(r);
+        const refUrl = r.url || r.src || refMetadata.url || null;
+        const refWorkflowId = r.workflow_id || r.workflowId || null;
+        const refAssetId = r.asset_id || r.id || null;
+
         return {
-          id: r.asset_id || r.id || r.ref_media_id || r.workflow_id || null,
-          workflow_id: r.workflow_id || r.workflowId || null,
-          url: r.url || r.src || null,
+          id: refAssetId || refWorkflowId || null,
+          workflow_id: refWorkflowId,
+          url: refUrl,
           role: r.role || "character_reference",
           type: r.type || "image",
         };
-      }).filter((r) => Boolean(r.url));
+      }).filter((r) => Boolean(r.url || r.workflow_id || r.id));
+
+      console.log("🚀 [useCharacterPrompt] Submitting character create payload with references:", formattedReferences);
 
       const payload = characterService.buildCreatePayload({
         name: prompt.slice(0, 45),
