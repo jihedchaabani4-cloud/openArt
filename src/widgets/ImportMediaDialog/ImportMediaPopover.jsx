@@ -66,10 +66,11 @@ export function ImportMediaPopover({
 
   const effectiveLibrary = React.useMemo(() => {
     const rawWorkflows = projectData?.projectContents?.workflows ?? [];
+    const libraryItems = Array.isArray(library) ? library : (library?.items || []);
     
     // Combine library items and projectData media
     const combinedMediaMap = new Map();
-    (library || []).concat(projectData?.projectContents?.media || []).forEach(m => {
+    libraryItems.concat(projectData?.projectContents?.media || []).forEach(m => {
       const id = m.id || m.name;
       if (id && !combinedMediaMap.has(id)) {
         combinedMediaMap.set(id, m);
