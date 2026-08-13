@@ -56,10 +56,11 @@ export function CharacterCardKrea({ character, onClick, onDelete }) {
     ? rawItems.map(item => (typeof item === "string" ? item : item.url || item.src)).filter(Boolean)
     : [character.primary_media_url || character.url].filter(Boolean);
 
-  const primaryImage = images[0] || "";
+  const primaryImage = images[0] || character.primary_media_url || character.url || "";
   const cardBgColor = extractFallbackColor(primaryImage, name);
 
-  const isProcessing = character.status === "processing" || character.items?.[0]?.status === "processing";
+  const hasMediaUrl = Boolean(primaryImage && typeof primaryImage === "string" && primaryImage.trim().startsWith("http"));
+  const isProcessing = !hasMediaUrl && (character.status === "processing" || character.status === "pending" || character.items?.[0]?.status === "processing");
   const isFailed = character.status === "failed" || character.items?.[0]?.status === "failed";
   const errorMessage = character.items?.[0]?.error || character.error || "Generation error";
 

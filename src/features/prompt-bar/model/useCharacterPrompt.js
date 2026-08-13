@@ -5,15 +5,14 @@ import { useCreateCharacterMutation } from "@/features/workflows/api/workflowsAp
 import { characterService } from "@/features/characters/services/characterService";
 import { useWorkflowsStore } from "@/features/workflows/model/useWorkflowsStore";
 import { queryKeys } from "@/shared/api/queryKeys";
-import { getItemMetadata } from "@/shared/lib/displayUtils";
 import { usePromptBar } from "./usePromptBar";
 import { useElementStore } from "./useElementStore";
 
 /**
  * [Prompt Bar Feature - Character Domain Hook]
  * Dedicated prompt bar hook for Character Creation.
- * Inherits base prompt bar behavior (textarea, paperclip, popovers)
- * while delegating creation strictly to characterService.
+ * Sends ONLY workflow_id / asset_id references to backend.
+ * All media URLs and metadata are resolved strictly on the Backend.
  */
 export function useCharacterPrompt() {
   const router = useRouter();
@@ -49,20 +48,18 @@ export function useCharacterPrompt() {
     ...(s.referenceImages || [])
   ];
 
-  // Deduplicate and normalize reference image objects safely
+  // Deduplicate and normalize reference image objects
   const referenceImages = Array.from(
     new Map(
       rawCombinedRefs.map((r) => {
-        const metadata = typeof r === "object" ? getItemMetadata(r) : {};
-        const url = typeof r === "string" ? r : r?.url || r?.src || metadata.url || "";
+        const id = typeof r === "string" ? r : r?.workflow_id || r?.workflowId || r?.asset_id || r?.id || r?.url || "";
         const item = typeof r === "string" 
-          ? { url, role: "character_reference" } 
-          : { ...r, url: url || r?.url, role: r?.role || "character_reference" };
-        const key = url || r?.workflow_id || r?.workflowId || r?.id || r?.asset_id || Math.random();
-        return [key, item];
+          ? { id: r, url: r } 
+          : { ...r };
+        return [id, item];
       })
     ).values()
-  ).filter((r) => Boolean(r.url || r.workflow_id || r.workflowId || r.id || r.asset_id));
+  ).filter((r) => Boolean(r.id || r.url || r.workflow_id));
 
   const openDialog = (mode = "image", role = "normal", callback = null) => {
     setInternalMode(mode);
@@ -109,31 +106,18 @@ export function useCharacterPrompt() {
     if (!prompt.trim() || isCreating || s.generating) return;
 
     try {
-      // Pass clean references formatted with workflow_id, asset_id, and url
-      const formattedReferences = referenceImages.map((r) => {
-        if (typeof r === "string") {
-          return { url: r, role: "character_reference" };
-        }
-        const refMetadata = getItemMetadata(r);
-        const refUrl = r.url || r.src || refMetadata.url || null;
-        const refWorkflowId = r.workflow_id || r.workflowId || null;
-        const refAssetId = r.asset_id || r.id || null;
+      // Send ONLY workflow_ids (or asset_ids) to backend. NO URLs FROM FRONTEND!
+      const referenceWorkflowIds = referenceImages.map((r) => {
+        if (typeof r === "string") return r;
+        return r.workflow_id || r.workflowId || r.asset_id || r.id;
+      }).filter(Boolean);
 
-        return {
-          id: refAssetId || refWorkflowId || null,
-          workflow_id: refWorkflowId,
-          url: refUrl,
-          role: r.role || "character_reference",
-          type: r.type || "image",
-        };
-      }).filter((r) => Boolean(r.url || r.workflow_id || r.id));
-
-      console.log("🚀 [useCharacterPrompt] Submitting character create payload with references:", formattedReferences);
+      console.log("🚀 [useCharacterPrompt] Submitting character create payload with workflow IDs ONLY:", referenceWorkflowIds);
 
       const payload = characterService.buildCreatePayload({
         name: prompt.slice(0, 45),
         prompt,
-        references: formattedReferences,
+        references: referenceWorkflowIds,
         projectId,
       });
 

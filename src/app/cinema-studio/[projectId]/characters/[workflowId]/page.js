@@ -236,7 +236,8 @@ export default function CharacterDetailPage() {
         });
     }, [workflow]);
 
-    const isProcessing = workflow?.status === "processing" || workflow?.status === "pending" || workflow?.status === "queued" || (sheetPhotos.length === 0 && !isLoading);
+    const hasPhotos = sheetPhotos && sheetPhotos.length > 0;
+    const isProcessing = !hasPhotos && (workflow?.status === "processing" || workflow?.status === "pending" || workflow?.status === "queued" || (!hasPhotos && !isLoading));
     const isFailed     = workflow?.status === "failed" || workflow?.status === "error";
 
     // ── Add Media to Character (Detail Images 1-5) ──

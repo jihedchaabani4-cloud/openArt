@@ -892,8 +892,10 @@ export function useCharacterWorkflows(projectId) {
       return type === "CHARACTER" || type === "CHARACTER_SHEET";
     })
     .map((w) => {
-      const items = media.filter((m) => m.workflowId === w.name || m.workflowId === w.id);
-      const status = items[0]?.status || w.status || (items[0]?.url ? "success" : "processing");
+      const items = media.filter((m) => m.workflowId === w.name || m.workflowId === w.id || m.workflow_id === w.id);
+      const firstUrl = items[0]?.url || items[0]?.file_url || w.main_media?.url || w.url;
+      const rawStatus = w.status || items[0]?.status || "processing";
+      const status = firstUrl ? (rawStatus === "failed" ? "failed" : "completed") : rawStatus;
       return { ...w, items, status, isMultiMedia: items.length > 1 };
     });
 
