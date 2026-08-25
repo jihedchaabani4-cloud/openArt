@@ -80,17 +80,64 @@ export function validateReference(asset, role, currentRefs, maxRefs, generationM
   return { ok: true };
 }
 
-export function buildReferencesPayload(referenceImages) {
-  return referenceImages.map((r) => ({
-    id: r.asset_id || r.id || r.ref_media_id || null,
-    media_id: r.asset_id || r.id || r.ref_media_id || null,
-    workflow_id: r.workflowId || r.workflow_id || null,
-    role: r.role ?? "normal",
-    type: r.type ?? "image",
-    label: r.label ?? "unnamed",
-    dna: r.dna ?? null,
-  }));
+export function cleanMediaAssetTags(prompt = "", assetIds = []) {
+  let nextPrompt = String(prompt ?? "");
+  assetIds.filter(Boolean).forEach((assetId) => {
+    // Clean all three tag types for this asset ID
+    nextPrompt = nextPrompt
+      .replace(new RegExp(`<MediaAsset:\\s*${assetId}>`, "gi"), "")
+      .replace(new RegExp(`<character:\\s*${assetId}>`, "gi"), "")
+      .replace(new RegExp(`<element:\\s*${assetId}>`, "gi"), "");
+  });
+  return nextPrompt.replace(/\s\s+/g, " ").trim();
 }
+
+export function cleanAllMediaAssetTags(prompt = "") {
+  return String(prompt ?? "")
+    .replace(/<MediaAsset:\s*[a-f0-9-]+>/gi, "")
+    .replace(/<character:\s*[a-f0-9-]+>/gi, "")
+    .replace(/<element:\s*[a-f0-9-]+>/gi, "")
+    .replace(/\s\s+/g, " ")
+    .trim();
+}
+
+/**
+ * Builds the references payload for the API request.
+ *
+ * SECURITY CONTRACT:
+ *   Frontend sends ONLY { workflow_id } per reference.
+ *   The backend is the sole authority on:
+ *     - entity type (character / element / media)
+ *     - description, traits, visual images
+ *     - access permissions / tenant ownership
+ *
+ *   Do NOT add entity_type, role, type, label, or any metadata here.
+ *   The backend determines reality from the DB. Not from the frontend.
+ *
+ * For direct HTTP URLs (uploaded images without a workflow_id), the URL
+ * itself acts as the identifier and the backend's media resolver handles it.
+ */
+export function buildReferencesPayload(referenceImages) {
+  return referenceImages
+    .map((r) => {
+      // Prioritize the workflow_id as the canonical identifier
+      const workflowId =
+        r.workflow_id ||
+        r.workflowId  ||
+        r.workflow?.id ||
+        r.asset_id    ||
+        r.id          ||
+        r.ref_media_id ||
+        r.url          || // fallback: direct HTTP URL for uploaded images
+        null;
+
+      if (!workflowId) return null; // skip invalid refs
+
+      return { workflow_id: workflowId };
+    })
+    .filter(Boolean);
+}
+
 
 function inferReferenceRole(ref = {}) {
   const inputType = ref.input_type || ref.inputType || "";

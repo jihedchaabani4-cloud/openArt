@@ -11,14 +11,14 @@ import { ImportMediaPopover } from "@/widgets/ImportMediaDialog/ImportMediaPopov
 import { useCharacterPrompt } from "../../model/useCharacterPrompt";
 import { DragDropOverlay } from "../generation/DragDropOverlay";
 import { ElementFeatureEditor } from "../elements/ElementFeatureEditor";
-import { useElementStore } from "../../model/useElementStore";
+import { useCharacterStore } from "../../model/useCharacterStore";
 
 export function CharacterPromptBar({ hideBackground = false }) {
     const s = useCharacterPrompt();
     const paperclipRef = React.useRef(null);
     const sparklesRef = React.useRef(null);
-    const featureEditorOpen = useElementStore((state) => state.featureEditor.open);
-    const setFeatureEditorOpen = useElementStore((state) => state.setFeatureEditorOpen);
+    const featureEditorOpen = useCharacterStore((state) => state.featureEditor.open);
+    const setFeatureEditorOpen = useCharacterStore((state) => state.setFeatureEditorOpen);
 
     return (
         <>
@@ -71,8 +71,6 @@ export function CharacterPromptBar({ hideBackground = false }) {
                         />
                         <ElementsRow2
                             paramsProps={{
-                                elementMode: s.elementMode,
-                                setElementMode: s.setElementMode,
                                 featureEditorOpen,
                                 setFeatureEditorOpen,
                                 sparklesRef,

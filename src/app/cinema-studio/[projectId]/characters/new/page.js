@@ -9,7 +9,7 @@ import { UserDropdown } from "@/widgets/StudioNavbar/ui/UserDropdown";
 import { useCharacterWorkflows, useGenerateCharacterDescriptionMutation } from "@/features/workflows/api/workflowsApi";
 import { useWorkflowsStore } from "@/features/workflows";
 import { CharacterPromptBar } from "@/features/prompt-bar/ui/character/CharacterPromptBar";
-import { useElementStore } from "@/features/prompt-bar/model/useElementStore";
+import { useCharacterStore } from "@/features/prompt-bar/model/useCharacterStore";
 
 const CHARACTER_ARCHETYPES = [
   {
@@ -121,17 +121,13 @@ export default function NewCharacterPage() {
   const [error, setError] = useState(null);
   const [generatingDescriptionId, setGeneratingDescriptionId] = useState(null);
 
-  const { setPrompt, setElementMode, setIsGeneratingDescription } = useElementStore();
+  const { setPrompt, setIsGeneratingDescription } = useCharacterStore();
   const generateDescriptionMutation = useGenerateCharacterDescriptionMutation();
 
   const selectedProjectId = useWorkflowsStore((s) => s.selectedProjectId);
   const effectiveProjectId = projectId || selectedProjectId;
 
   const { workflows: existingSheets } = useCharacterWorkflows(effectiveProjectId);
-
-  React.useEffect(() => {
-    setElementMode("character");
-  }, [setElementMode]);
 
   const goBack = () => {
     if (existingSheets && existingSheets.length > 0) {
@@ -142,7 +138,6 @@ export default function NewCharacterPage() {
   };
 
   const handleArchetypeClick = async (archetype) => {
-    setElementMode("character");
     setGeneratingDescriptionId(archetype.id);
     setIsGeneratingDescription(true);
 

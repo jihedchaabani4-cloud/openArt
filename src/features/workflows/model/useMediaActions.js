@@ -210,9 +210,12 @@ export function useWorkflowActions(workflow, item = null) {
       const promptStore = usePromptStore.getState();
       promptStore.setGenerationMode("keyframe");
       promptStore.clearReferences();
+      const workflowId = workflow?.id || targetItem?.workflow_id || targetItem?.workflowId || null;
       promptStore.addReference({
         url,
-        asset_id: assetId,
+        workflow_id: workflowId,
+        asset_id: workflowId || assetId,
+        id: workflowId || assetId,
         is_video: false
       }, "start");
     }
@@ -220,10 +223,13 @@ export function useWorkflowActions(workflow, item = null) {
 
   const handleAddToPrompt = () => {
     if (!canUseAsInput) return;
+    const workflowId = workflow?.id || targetItem?.workflow_id || targetItem?.workflowId || null;
     const assetId = targetItem?.asset_id || targetItem?.name || targetItem?.id || "";
     const asset = { 
-      url, 
-      asset_id: assetId, 
+      url,
+      workflow_id: workflowId,
+      asset_id: workflowId || assetId,
+      id: workflowId || assetId,
       is_video: isVideo,
       workflow_type: workflow?.workflow_type
     };

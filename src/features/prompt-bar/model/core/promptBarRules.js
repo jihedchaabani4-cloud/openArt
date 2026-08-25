@@ -32,14 +32,22 @@ export function getReferenceAssetKey(asset) {
 export function cleanMediaAssetTags(prompt = "", assetIds = []) {
   let nextPrompt = String(prompt ?? "");
   assetIds.filter(Boolean).forEach((assetId) => {
-    const tagRegex = new RegExp(`<MediaAsset:\\s*${assetId}>`, "gi");
-    nextPrompt = nextPrompt.replace(tagRegex, "");
+    // Clean all tag types for this asset ID
+    nextPrompt = nextPrompt
+      .replace(new RegExp(`<MediaAsset:\\s*${assetId}>`, "gi"), "")
+      .replace(new RegExp(`<character:\\s*${assetId}>`, "gi"), "")
+      .replace(new RegExp(`<element:\\s*${assetId}>`, "gi"), "");
   });
   return nextPrompt.replace(/\s\s+/g, " ").trim();
 }
 
 export function cleanAllMediaAssetTags(prompt = "") {
-  return String(prompt ?? "").replace(/<MediaAsset:\s*[a-f0-9-]+>/gi, "").replace(/\s\s+/g, " ").trim();
+  return String(prompt ?? "")
+    .replace(/<MediaAsset:\s*[a-f0-9-]+>/gi, "")
+    .replace(/<character:\s*[a-f0-9-]+>/gi, "")
+    .replace(/<element:\s*[a-f0-9-]+>/gi, "")
+    .replace(/\s\s+/g, " ")
+    .trim();
 }
 
 export function getGenerationSection(generationMode) {

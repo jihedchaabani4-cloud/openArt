@@ -2,13 +2,13 @@ import { useEffect, useRef } from "react";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { $getRoot, $createParagraphNode } from "lexical";
 import { $createFeatureNode, $isFeatureNode } from "../FeatureNode";
-import { useElementStore } from "../../../../model/useElementStore";
+import { useCharacterStore } from "../../../../model/useCharacterStore";
 import { getFeatureInfo } from "../../../../model/feature-constants";
 
 export function SyncFeaturesPlugin() {
   const [editor] = useLexicalComposerContext();
-  const features = useElementStore((state) => state.features);
-  const updateFeature = useElementStore((state) => state.updateFeature);
+  const features = useCharacterStore((state) => state.features);
+  const updateFeature = useCharacterStore((state) => state.updateFeature);
 
   const featuresRef = useRef(features);
   useEffect(() => {

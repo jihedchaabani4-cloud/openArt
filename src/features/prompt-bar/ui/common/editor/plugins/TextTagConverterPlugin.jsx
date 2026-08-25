@@ -4,7 +4,7 @@ import { TextNode, $createTextNode, $getRoot } from "lexical";
 import { $createFeatureNode } from "../FeatureNode";
 import { $createMentionNode } from "../MentionNode";
 import { getFeatureInfoFromLabel } from "../../../../model/feature-constants";
-import { useElementStore } from "../../../../model/useElementStore";
+import { useCharacterStore } from "../../../../model/useCharacterStore";
 
 /**
  * TextTagConverterPlugin
@@ -17,7 +17,7 @@ import { useElementStore } from "../../../../model/useElementStore";
  */
 export function TextTagConverterPlugin({ referenceImages = [] }) {
   const [editor] = useLexicalComposerContext();
-  const updateFeature = useElementStore((s) => s.updateFeature);
+  const updateFeature = useCharacterStore((s) => s.updateFeature);
 
   useEffect(() => {
     return editor.registerNodeTransform(TextNode, (textNode) => {
@@ -60,30 +60,33 @@ export function TextTagConverterPlugin({ referenceImages = [] }) {
         }
       }
 
-      // 2. Match Media Tags: <MediaAsset: 752de845-...>
-      const MEDIA_REGEX = /<MediaAsset:\s*([a-f0-9-]+)>/i;
-      const mediaMatch = MEDIA_REGEX.exec(text);
+      // 2. Match Media, Character, and Element Tags: <MediaAsset: uuid>, <character: uuid>, <element: uuid>
+      const ASSET_REGEX = /<(MediaAsset|media|character|element):\s*([a-f0-9-]+)>/i;
+      const assetMatch = ASSET_REGEX.exec(text);
 
-      if (mediaMatch) {
-        const fullMatch = mediaMatch[0];
-        const assetId = mediaMatch[1].trim();
-        const startIdx = mediaMatch.index;
+      if (assetMatch) {
+        const fullMatch = assetMatch[0];
+        const tagType = assetMatch[1].toLowerCase();
+        const assetId = assetMatch[2].trim();
+        const startIdx = assetMatch.index;
         const endIdx = startIdx + fullMatch.length;
 
         // Resolve metadata from current references
-        const asset = referenceImages.find(img => img.asset_id === assetId);
+        const asset = referenceImages.find(img => (img.asset_id === assetId || img.id === assetId || img.workflow_id === assetId));
         
-        if (asset) {
-          const chip = $createMentionNode(
-            asset.url, 
-            0, 
-            asset.displayName || asset.name || "Ref", 
-            asset.asset_id
-          );
-          
-          replaceWithNode(textNode, text, startIdx, endIdx, chip);
-          return; 
-        }
+        const displayName = asset?.displayName || asset?.name || (tagType === "character" ? "Character" : (tagType === "element" ? "Element" : "Ref"));
+        const url = asset?.url || asset?.avatar_url || asset?.image_url || "";
+
+        const chip = $createMentionNode(
+          url, 
+          0, 
+          displayName, 
+          assetId,
+          tagType
+        );
+        
+        replaceWithNode(textNode, text, startIdx, endIdx, chip);
+        return; 
       }
     });
   }, [editor, updateFeature, referenceImages]);

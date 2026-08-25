@@ -3,7 +3,7 @@
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Paperclip } from "lucide-react";
-import { useElementPrompt } from "../../model/useElementPrompt";
+import { useCharacterPrompt } from "../../model/useCharacterPrompt";
 import { PromptBarShell } from "../common/PromptBarShell";
 import { PromptBarBase } from "../generation/PromptBarBase";
 import { Row1 } from "../generation/Row1";
@@ -13,13 +13,13 @@ import { Button } from "@/shared/ui/button";
 import { cn } from "@/shared/lib/utils";
 import { ActionButton } from "../common/ActionButton";
 import { ElementFeatureEditor } from "../elements/ElementFeatureEditor";
-import { useElementStore } from "../../model/useElementStore";
+import { useCharacterStore } from "../../model/useCharacterStore";
 
 export function EditElementPromptBar({ className }) {
-  const s = useElementPrompt();
+  const s = useCharacterPrompt();
   const paperclipRef = React.useRef(null);
-  const featureEditorOpen = useElementStore((state) => state.featureEditor.open);
-  const setFeatureEditorOpen = useElementStore((state) => state.setFeatureEditorOpen);
+  const featureEditorOpen = useCharacterStore((state) => state.featureEditor.open);
+  const setFeatureEditorOpen = useCharacterStore((state) => state.setFeatureEditorOpen);
 
   return (
     <PromptBarShell

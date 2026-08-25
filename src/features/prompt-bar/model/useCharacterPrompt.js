@@ -5,7 +5,7 @@ import { useCreateCharacterMutation } from "@/features/workflows/api/workflowsAp
 import { characterService } from "@/features/characters/services/characterService";
 import { useWorkflowsStore } from "@/features/workflows/model/useWorkflowsStore";
 import { queryKeys } from "@/shared/api/queryKeys";
-import { useElementStore } from "./useElementStore";
+import { useCharacterStore } from "./useCharacterStore";
 import { useMediaLibrary } from "@/features/media/model/useMediaLibrary";
 import { useMediaUpload } from "./useMediaUpload";
 
@@ -31,19 +31,15 @@ export function useCharacterPrompt() {
   const { mutateAsync: createCharacter, isPending: isCreating } = useCreateCharacterMutation();
 
   const {
-    prompts,
+    prompt,
     setPrompt,
-    references: elementReferences,
-    addReference: addElementReference,
-    removeReference: removeElementReference,
-    clearReferences: clearElementReferences,
-    elementMode,
-    setElementMode,
-  } = useElementStore();
+    references: referenceImages,
+    addReference: addCharacterReference,
+    removeReference: removeCharacterReference,
+    clearReferences: clearCharacterReferences,
+  } = useCharacterStore();
 
-  const prompt = prompts.character || "";
   const maxRefs = 4;
-  const referenceImages = useMemo(() => elementReferences.character || [], [elementReferences.character]);
 
   // Media Library for the ImportMediaPopover
   const library = useMediaLibrary(projectId);
@@ -57,7 +53,7 @@ export function useCharacterPrompt() {
   } = useMediaUpload({
     projectId,
     activeSessionId,
-    addReference: (asset, role, max) => addElementReference(asset, role, max),
+    addReference: (asset, role, max) => addCharacterReference(asset, role, max),
     referenceImages,
     maxRefs,
     allowedType: "image",
@@ -82,31 +78,31 @@ export function useCharacterPrompt() {
   const handleSelectMedia = useCallback((assets) => {
     const items = Array.isArray(assets) ? assets : [assets];
     items.forEach((asset) => {
-      addElementReference(asset, targetRole, maxRefs);
+      addCharacterReference(asset, targetRole, maxRefs);
     });
     if (mentionCallback) mentionCallback(items);
     setDialogOpen(false);
     setMentionCallback(null);
-  }, [addElementReference, targetRole, maxRefs, mentionCallback]);
+  }, [addCharacterReference, targetRole, maxRefs, mentionCallback]);
 
   const handleRemoveReference = useCallback((indexOrAssetId) => {
     if (typeof indexOrAssetId === "string") {
-      removeElementReference(indexOrAssetId);
+      removeCharacterReference(indexOrAssetId);
     } else if (typeof indexOrAssetId === "number" && referenceImages[indexOrAssetId]) {
       const target = referenceImages[indexOrAssetId];
       const assetId = target.asset_id || target.id || target.workflow_id;
-      if (assetId) removeElementReference(assetId);
+      if (assetId) removeCharacterReference(assetId);
     }
-  }, [removeElementReference, referenceImages]);
+  }, [removeCharacterReference, referenceImages]);
 
   const handleGenerateCharacter = async (e) => {
     if (e?.preventDefault) e.preventDefault();
     if (!prompt.trim() || isCreating) return;
 
     try {
-      // Extract ONLY workflow_ids / asset_ids to send to the backend
+      // Extract ONLY workflow_ids to send to the backend
       const referenceWorkflowIds = referenceImages
-        .map((r) => (typeof r === "string" ? r : r?.workflow_id || r?.workflowId || r?.asset_id || r?.id))
+        .map((r) => (typeof r === "string" ? r : r?.workflow_id || r?.workflowId || r?.workflow?.id || r?.id || r?.asset_id))
         .filter(Boolean);
 
       console.log("🚀 [useCharacterPrompt] Submitting character create payload with workflow IDs ONLY:", referenceWorkflowIds);
@@ -126,7 +122,7 @@ export function useCharacterPrompt() {
       }
 
       setPrompt("");
-      if (clearElementReferences) clearElementReferences();
+      if (clearCharacterReferences) clearCharacterReferences();
       return res;
     } catch (err) {
       console.error("Failed to create character via prompt bar:", err);
@@ -150,8 +146,6 @@ export function useCharacterPrompt() {
     handleGalleryDrop,
     isDraggingGalleryItem,
     dragError,
-    elementMode: "character",
-    setElementMode,
     isCreating,
     generating: isCreating,
     handleGenerate: handleGenerateCharacter,

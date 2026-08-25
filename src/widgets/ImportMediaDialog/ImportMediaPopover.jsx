@@ -155,14 +155,23 @@ export function ImportMediaPopover({
         seenUrls.add(url);
         const isVid = m.type === "video" || m.is_video || !!m.video || (url && /\.(mp4|webm|mov)$/i.test(url));
         const isUploadItem = m.workflow_type === "UPLOAD" || m.is_upload || m.workflowStepId === "UPLOAD" || !m.workflowId;
+        const mWorkflowId = m.workflowId || m.workflow_id || null;
+        const parentWf = mWorkflowId ? rawWorkflows.find(w => (w.name || w.id) === mWorkflowId) : null;
+        const semanticCategory = isUploadItem ? null : (parentWf ? resolveCategory(parentWf) : null);
+        const canonicalWorkflowId = parentWf ? (parentWf.name || parentWf.id) : mWorkflowId;
+
         finalItems.push({
           ...m,
           id: m.id || m.name,
           url,
-          type: isUploadItem ? "upload" : (isVid ? "video" : "image"),
+          type: isUploadItem ? "upload" : (semanticCategory || (isVid ? "video" : "image")),
+          is_character: semanticCategory === "character",
+          is_element:   semanticCategory === "element",
+          workflow_id: canonicalWorkflowId,
+          workflow_type: isUploadItem ? "UPLOAD" : (parentWf?.workflow_type || m.workflow_type || "GENERATED"),
           is_video: isVid,
           is_upload: isUploadItem,
-          display_name: m.mediaMetadata?.displayName || m.name || "Uploaded Media",
+          display_name: parentWf?.metadata?.displayName || parentWf?.display_name || m.mediaMetadata?.displayName || m.name || "Uploaded Media",
         });
       }
     });
@@ -259,17 +268,27 @@ export function ImportMediaPopover({
   const toggleSelection = (item) => {
     const itemUrl = item.url ?? item.image?.url ?? item.video?.url ?? item.file_url;
     const isVideo = item.type === "video" || item.is_video || !!item.video;
+    const canonicalWorkflowId = item.workflow_id || item.workflowId || item.workflow?.id || null;
     
     const asset = {
-      url:      itemUrl,
-      asset_id: item.id,
-      is_video: isVideo,
+      ...item,
+      url:           itemUrl,
+      workflow_id:   canonicalWorkflowId,
+      workflowId:    canonicalWorkflowId,
+      asset_id:      canonicalWorkflowId || item.id,
+      id:            canonicalWorkflowId || item.id,
+      is_video:      isVideo,
+      type:          item.type || (item.is_character ? "character" : (item.is_element ? "element" : "media")),
+      workflow_type: item.workflow_type || (item.is_character ? "CHARACTER_SHEET" : (item.is_element ? "ELEMENT_SHEET" : "GENERATED")),
+      displayName:   item.display_name || item.name || "Ref",
+      name:          item.display_name || item.name || "Ref",
     };
 
     setSelectedItems((prev) => {
-      const exists = prev.find(p => p.asset_id === asset.asset_id || p.url === asset.url);
+      const assetKey = asset.workflow_id || asset.asset_id || asset.url;
+      const exists = prev.find(p => (p.workflow_id || p.asset_id) === assetKey || p.url === asset.url);
       if (exists) {
-        return prev.filter(p => p.asset_id !== asset.asset_id && p.url !== asset.url);
+        return prev.filter(p => (p.workflow_id || p.asset_id) !== assetKey && p.url !== asset.url);
       }
       if (prev.length >= maxAllowed) return prev;
       return [...prev, asset];

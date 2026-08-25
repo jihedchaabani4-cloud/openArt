@@ -1,30 +1,11 @@
 import React from 'react';
-import { Paperclip, UserCircle, Mountain, Sparkles, Package } from 'lucide-react';
+import { Paperclip, UserCircle } from 'lucide-react';
 import { ActionButton } from '../common/ActionButton';
-import { useElementStore } from '../../model/useElementStore';
-import { BaseSelect, useSelectLogic } from '../common/selectors/DropdownEngine';
 import { cn } from '@/shared/lib/utils';
 import { Button } from '@/shared/ui/button';
-export function ElementsRow2({ paramsProps, actionProps, onToggleVariations, variationsOpen, onAddClick, mediaOpen, paperclipRef, showPaperclip = true }) {
-  const { elementMode, setElementMode, featureEditorOpen, setFeatureEditorOpen, sparklesRef } = paramsProps;
 
-  const { open, panelStyle, triggerRef, panelRef, handleToggle, handleSelect } = useSelectLogic(
-    elementMode,
-    setElementMode
-  );
-
-  const groups = [
-    {
-      label: "Element Type",
-      items: [
-        { label: "Character", value: "character" },
-        { label: "Location", value: "location" },
-        { label: "Product", value: "product" },
-      ]
-    }
-  ];
-
-  const currentItem = groups[0].items.find(i => i.value === elementMode);
+export function ElementsRow2({ paramsProps, actionProps, onAddClick, mediaOpen, paperclipRef, showPaperclip = true }) {
+  const { featureEditorOpen, setFeatureEditorOpen, sparklesRef } = paramsProps;
 
   return (
     <div className="flex items-center justify-between gap-1 w-full relative">
@@ -53,25 +34,23 @@ export function ElementsRow2({ paramsProps, actionProps, onToggleVariations, var
 
       {/* ── RIGHT SIDE ── */}
       <div className="flex items-center gap-2 shrink-0">
-        {elementMode === 'character' && (
-            <Button
-              ref={sparklesRef}
-              onClick={() => setFeatureEditorOpen(!featureEditorOpen)}
-              variant="ghost"
-              size="sm"
-              className={cn(
-                "rounded-lg transition-all shrink-0 gap-1.5 h-8 px-2.5 text-xs font-medium relative overflow-hidden",
-                featureEditorOpen 
-                  ? "bg-white/10 text-white" 
-                  : "text-neutral-400 hover:bg-white/5 hover:text-neutral-100"
-              )}
-              title="Character Form Features"
-              type="button"
-            >
-              <UserCircle className="w-3.5 h-3.5 shrink-0" />
-              <span>Form</span>
-            </Button>
-        )}
+        <Button
+          ref={sparklesRef}
+          onClick={() => setFeatureEditorOpen(!featureEditorOpen)}
+          variant="ghost"
+          size="sm"
+          className={cn(
+            "rounded-lg transition-all shrink-0 gap-1.5 h-8 px-2.5 text-xs font-medium relative overflow-hidden",
+            featureEditorOpen 
+              ? "bg-white/10 text-white" 
+              : "text-neutral-400 hover:bg-white/5 hover:text-neutral-100"
+          )}
+          title="Character Form Features"
+          type="button"
+        >
+          <UserCircle className="w-3.5 h-3.5 shrink-0" />
+          <span>Form</span>
+        </Button>
 
         <ActionButton {...actionProps} />
       </div>

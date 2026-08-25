@@ -236,9 +236,12 @@ export default function CharacterDetailPage() {
         });
     }, [workflow]);
 
-    const hasPhotos = sheetPhotos && sheetPhotos.length > 0;
-    const isProcessing = !hasPhotos && (workflow?.status === "processing" || workflow?.status === "pending" || workflow?.status === "queued" || (!hasPhotos && !isLoading));
-    const isFailed     = workflow?.status === "failed" || workflow?.status === "error";
+    const hasPhotos    = sheetPhotos.length > 0;
+    const mainMedia    = React.useMemo(() => {
+        return (workflow?.items || []).find((m) => m.step_id !== "character_detail") || workflow?.items?.[0] || null;
+    }, [workflow]);
+    const isFailed     = mainMedia?.status === "failed" || mainMedia?.status === "error" || workflow?.status === "failed";
+    const isProcessing = !hasPhotos && !isFailed && (mainMedia?.status === "processing" || mainMedia?.status === "pending" || !mainMedia?.url);
 
     // ── Add Media to Character (Detail Images 1-5) ──
     const MAX_DETAIL_IMAGES = 5;

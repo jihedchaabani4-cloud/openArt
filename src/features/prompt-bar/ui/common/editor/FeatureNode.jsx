@@ -1,11 +1,11 @@
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { $getNodeByKey, DecoratorNode } from "lexical";
 import { MentionTag } from "./MentionTag";
-import { useElementStore } from "../../../model/useElementStore";
+import { useCharacterStore } from "../../../model/useCharacterStore";
 
 function FeatureComponent({ nodeKey, section, traitKey, value, label, mediaLink }) {
   const [editor] = useLexicalComposerContext();
-  const openFeatureEditorForLabel = useElementStore((state) => state.openFeatureEditorForLabel);
+  const openFeatureEditorForLabel = useCharacterStore((state) => state.openFeatureEditorForLabel);
 
   const handleRemove = () => {
     editor.update(() => {

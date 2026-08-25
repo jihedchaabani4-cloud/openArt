@@ -15,9 +15,8 @@ import {
 import { BaseSelector } from "../common/selectors/BaseSelector";
 import { SelectorCard } from "@/shared/ui/selector-card";
 import { SelectorSlide } from "@/shared/ui/selector-slide";
-import { useElementPrompt } from "../../model/useElementPrompt";
 import { cn } from "@/shared/lib/utils";
-import { useElementStore } from "../../model/useElementStore";
+import { useCharacterStore } from "../../model/useCharacterStore";
 
 import { 
   TABS, 
@@ -35,11 +34,9 @@ import {
   RENDERING_STYLE_OPTIONS
 } from "../../model/feature-constants";
 
-const SELECT_GROUPS = []; // No longer needed for BaseSelector
-
 export function ElementFeatureEditor({ open, onOpenChange, anchorRef }) {
-  const featureEditor = useElementStore((state) => state.featureEditor);
-  const setFeatureEditorView = useElementStore((state) => state.setFeatureEditorView);
+  const featureEditor = useCharacterStore((state) => state.featureEditor);
+  const setFeatureEditorView = useCharacterStore((state) => state.setFeatureEditorView);
   const [activeTab, setActiveTab] = React.useState(featureEditor.activeTab || 'identity');
   const editorRef = React.useRef(null);
 
@@ -107,16 +104,15 @@ export function ElementFeatureEditor({ open, onOpenChange, anchorRef }) {
                   transition={{ duration: 0.2 }}
                   className="flex-1 flex flex-col"
                 >
-                   {activeTab === 'era' && <EraSection />}
+                  {activeTab === 'era' && <EraSection />}
                   {activeTab === 'renderingStyle' && <RenderingStyleSection />}
-                   {activeTab === 'identity' && <IdentitySection />}
+                  {activeTab === 'identity' && <IdentitySection />}
                   {activeTab === 'head' && <HeadSection />}
                   {activeTab === 'details' && <DetailsSection />}
                   {activeTab === 'outfit' && <OutfitSection />}
                 </motion.div>
              </AnimatePresence>
           </div>
-
 
           <style jsx>{`
             .scrollbar-hide::-webkit-scrollbar { display: none; }
@@ -129,8 +125,7 @@ export function ElementFeatureEditor({ open, onOpenChange, anchorRef }) {
 }
 
 function EraSection() {
-  const s = useElementPrompt();
-  const { prompt, toggleTagInPrompt } = s;
+  const { prompt, toggleTagInPrompt } = useCharacterStore();
 
   const currentSelection = React.useMemo(() => {
     const match = ERA_STEPS.find(step => prompt.includes(`<Trait: ${step.label}>`));
@@ -154,11 +149,10 @@ function EraSection() {
 }
 
 function IdentitySection() {
-  const s = useElementPrompt();
-  const featureEditor = useElementStore((state) => state.featureEditor);
-  const setFeatureEditorView = useElementStore((state) => state.setFeatureEditorView);
+  const { prompt, toggleTagInPrompt } = useCharacterStore();
+  const featureEditor = useCharacterStore((state) => state.featureEditor);
+  const setFeatureEditorView = useCharacterStore((state) => state.setFeatureEditorView);
   const [activeSubTab, setActiveSubTab] = React.useState(featureEditor.activeSubTab || 'characterType');
-  const { prompt, toggleTagInPrompt } = s;
 
   React.useEffect(() => {
     if (featureEditor.activeTab === 'identity' && featureEditor.activeSubTab) {
@@ -166,29 +160,24 @@ function IdentitySection() {
     }
   }, [featureEditor.activeTab, featureEditor.activeSubTab]);
 
-  // Derive selection state from the prompt string
   const currentSelections = React.useMemo(() => {
     const results = {};
-    // Age
-    const ageMatch = AGE_STEPS.find(step => prompt.includes(`<Trait: ${step.label}>`));
-    results.age = ageMatch ? ageMatch.value : null;
-
-    // Height
-    const heightMatch = HEIGHT_STEPS.find(step => prompt.includes(`<Trait: ${step.label}>`));
-    results.height = heightMatch ? heightMatch.value : null;
-
-    // Character Type
-    const charTypeMatch = CHARACTER_TYPE_OPTIONS.find(opt => prompt.includes(`<Trait: ${opt.label}>`));
-    results.characterType = charTypeMatch ? charTypeMatch.value : null;
-
-    // Other Identity Options (Gender, Race, Build)
-    Object.keys(IDENTITY_OPTIONS).forEach((key) => {
-      const match = IDENTITY_OPTIONS[key].find(opt => prompt.includes(`<Trait: ${opt.label}>`));
-      results[key] = match ? match.value : null;
-    });
-
+    if (activeSubTab === 'characterType') {
+      const match = CHARACTER_TYPE_OPTIONS.find(opt => prompt.includes(`<Trait: ${opt.label}>`));
+      results.characterType = match ? match.value : null;
+    } else if (activeSubTab === 'age') {
+      const match = AGE_STEPS.find(step => prompt.includes(`<Trait: ${step.label}>`));
+      results.age = match ? match.value : null;
+    } else if (activeSubTab === 'height') {
+      const match = HEIGHT_STEPS.find(step => prompt.includes(`<Trait: ${step.label}>`));
+      results.height = match ? match.value : null;
+    } else {
+      const options = IDENTITY_OPTIONS[activeSubTab] || [];
+      const match = options.find(opt => prompt.includes(`<Trait: ${opt.label}>`));
+      results[activeSubTab] = match ? match.value : null;
+    }
     return results;
-  }, [prompt]);
+  }, [prompt, activeSubTab]);
 
   return (
     <div className="flex rounded-xl overflow-hidden h-full">
@@ -217,58 +206,57 @@ function IdentitySection() {
       </div>
 
       {/* Right Content */}
-      <div className="flex-1 p-4 flex flex-col">
-        {activeSubTab === 'age' ? (
-          <div className="w-full flex flex-col">
-             <SelectorSlide
-              title="Select age of your character"
-              steps={AGE_STEPS}
-              value={currentSelections.age}
-              onChange={(val) => {
-                const label = AGE_STEPS.find(a => a.value === val)?.label;
-                if (label) toggleTagInPrompt(label, { section: 'identity', key: 'age' });
-              }}
-              accentColor="#a3e635"
-            />
-          </div>
-        ) : activeSubTab === 'height' ? (
-          <div className="w-full flex flex-col">
-             <SelectorSlide
-              title="Select height of your character"
-              steps={HEIGHT_STEPS}
-              value={currentSelections.height}
-              onChange={(val) => {
-                const label = HEIGHT_STEPS.find(h => h.value === val)?.label;
-                if (label) toggleTagInPrompt(label, { section: 'identity', key: 'height' });
-              }}
-              accentColor="#a3e635"
-            />
-          </div>
-        ) : activeSubTab === 'characterType' ? (
+      <div className="flex-1 p-4 flex flex-col h-full overflow-y-auto scrollbar-hide">
+        {activeSubTab === 'characterType' && (
           <SelectorCard
             items={CHARACTER_TYPE_OPTIONS}
             value={currentSelections.characterType}
             onChange={(val) => {
-              const opt = CHARACTER_TYPE_OPTIONS.find(o => o.value === val);
-              if (opt) toggleTagInPrompt(opt.label, { section: 'identity', key: 'characterType' });
+                const opt = CHARACTER_TYPE_OPTIONS.find(o => o.value === val);
+                if (opt) toggleTagInPrompt(opt.label, { section: 'identity', key: 'characterType' });
             }}
           />
-        ) : (
-        <SelectorCard
-          items={
-            activeSubTab === 'race'
-              ? IDENTITY_OPTIONS.race.map(opt => ({
-                  ...opt,
-                  mediaLink: currentSelections.gender === 'female' ? opt.mediaLinkFemale : opt.mediaLinkMale,
-                }))
-              : IDENTITY_OPTIONS[activeSubTab]
-          }
-          value={currentSelections[activeSubTab]}
-          onChange={(val) => {
-              const opt = IDENTITY_OPTIONS[activeSubTab].find(o => o.value === val);
-              if (opt) toggleTagInPrompt(opt.label, { section: 'identity', key: activeSubTab });
-          }}
-        />
+        )}
+
+        {activeSubTab === 'age' && (
+          <div className="flex-1 p-6 flex flex-col justify-center">
+            <SelectorSlide
+              title="Select Character Age"
+              steps={AGE_STEPS}
+              value={currentSelections.age}
+              onChange={(val) => {
+                  const label = AGE_STEPS.find(a => a.value === val)?.label;
+                  if (label) toggleTagInPrompt(label, { section: 'identity', key: 'age' });
+              }}
+              accentColor="#60a5fa"
+            />
+          </div>
+        )}
+
+        {activeSubTab === 'height' && (
+          <div className="flex-1 p-6 flex flex-col justify-center">
+            <SelectorSlide
+              title="Select Character Height"
+              steps={HEIGHT_STEPS}
+              value={currentSelections.height}
+              onChange={(val) => {
+                  const label = HEIGHT_STEPS.find(h => h.value === val)?.label;
+                  if (label) toggleTagInPrompt(label, { section: 'identity', key: 'height' });
+              }}
+              accentColor="#34d399"
+            />
+          </div>
+        )}
+
+        {activeSubTab !== 'characterType' && activeSubTab !== 'age' && activeSubTab !== 'height' && (
+          <SelectorCard
+            items={IDENTITY_OPTIONS[activeSubTab] || []}
+            value={currentSelections[activeSubTab]}
+            onChange={(val) => {
+                const opt = (IDENTITY_OPTIONS[activeSubTab] || []).find(o => o.value === val);
+                if (opt) toggleTagInPrompt(opt.label, { section: 'identity', key: activeSubTab });
+            }}
+          />
         )}
       </div>
     </div>
@@ -276,11 +264,10 @@ function IdentitySection() {
 }
 
 function HeadSection() {
-  const s = useElementPrompt();
-  const featureEditor = useElementStore((state) => state.featureEditor);
-  const setFeatureEditorView = useElementStore((state) => state.setFeatureEditorView);
+  const { prompt, toggleTagInPrompt } = useCharacterStore();
+  const featureEditor = useCharacterStore((state) => state.featureEditor);
+  const setFeatureEditorView = useCharacterStore((state) => state.setFeatureEditorView);
   const [activeSubTab, setActiveSubTab] = React.useState(featureEditor.activeSubTab || 'hairStyle');
-  const { prompt, toggleTagInPrompt } = s;
 
   React.useEffect(() => {
     if (featureEditor.activeTab === 'head' && featureEditor.activeSubTab) {
@@ -338,11 +325,10 @@ function HeadSection() {
 }
 
 function DetailsSection() {
-  const s = useElementPrompt();
-  const featureEditor = useElementStore((state) => state.featureEditor);
-  const setFeatureEditorView = useElementStore((state) => state.setFeatureEditorView);
+  const { prompt, toggleTagInPrompt } = useCharacterStore();
+  const featureEditor = useCharacterStore((state) => state.featureEditor);
+  const setFeatureEditorView = useCharacterStore((state) => state.setFeatureEditorView);
   const [activeSubTab, setActiveSubTab] = React.useState(featureEditor.activeSubTab || 'eyeColor');
-  const { prompt, toggleTagInPrompt } = s;
 
   React.useEffect(() => {
     if (featureEditor.activeTab === 'details' && featureEditor.activeSubTab) {
@@ -400,8 +386,7 @@ function DetailsSection() {
 }
 
 function OutfitSection() {
-  const s = useElementPrompt();
-  const { prompt, toggleTagInPrompt } = s;
+  const { prompt, toggleTagInPrompt } = useCharacterStore();
   
   // Need to know gender to show correct preview
   const currentGender = React.useMemo(() => {
@@ -432,8 +417,7 @@ function OutfitSection() {
 }
 
 function RenderingStyleSection() {
-  const s = useElementPrompt();
-  const { prompt, toggleTagInPrompt } = s;
+  const { prompt, toggleTagInPrompt } = useCharacterStore();
   const currentSelectedValue = React.useMemo(() => {
     const match = RENDERING_STYLE_OPTIONS.find(opt => prompt.includes(`<Trait: ${opt.label}>`));
     return match ? match.value : null;
@@ -448,39 +432,6 @@ function RenderingStyleSection() {
             const opt = RENDERING_STYLE_OPTIONS.find(o => o.value === val);
             if (opt) toggleTagInPrompt(opt.label, { section: 'renderingStyle', key: null });
         }}
-      />
-    </div>
-  );
-}
-
-function SectionTitle({ icon: Icon, title }) {
-  return (
-    <div className="flex items-center gap-2 text-white/70">
-      <Icon size={16} />
-      <h3 className="text-sm font-semibold tracking-tight">{title}</h3>
-    </div>
-  );
-}
-
-function FeatureInput({ label, ...props }) {
-  return (
-    <div className="flex flex-col gap-1.5">
-      <label className="text-[10px] text-white/40 uppercase font-bold tracking-wider ml-1">{label}</label>
-      <input 
-        className="bg-white/5 border border-white/5 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-white/20 transition-all placeholder:text-white/10"
-        {...props}
-      />
-    </div>
-  );
-}
-
-function FeatureTextarea({ label, ...props }) {
-  return (
-    <div className="flex flex-col gap-1.5">
-      <label className="text-[10px] text-white/40 uppercase font-bold tracking-wider ml-1">{label}</label>
-      <textarea 
-        className="bg-white/5 border border-white/5 rounded-2xl px-3 py-2.5 text-xs text-white outline-none focus:border-white/20 transition-all placeholder:text-white/10 resize-none min-h-[80px]"
-        {...props}
       />
     </div>
   );

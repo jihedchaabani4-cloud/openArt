@@ -97,11 +97,14 @@ function AtShortcutPlugin({ onTriggerMentionDialog }) {
             if (!$isRangeSelection(selection)) return;
 
             assets.forEach((asset, idx) => {
+              const assetType = asset.type || asset.workflow_type || (asset.characterId ? "character" : (asset.elementId ? "element" : "media"));
+              const canonicalId = asset.workflow_id || asset.workflowId || asset.workflow?.id || asset.id || asset.asset_id;
               const mentionNode = $createMentionNode(
-                asset.url,
+                asset.url || asset.avatar_url || asset.image_url,
                 idx,
                 asset.displayName || asset.name || "Ref",
-                asset.asset_id
+                canonicalId,
+                assetType
               );
               // Insert chip + trailing space at the cursor
               selection.insertNodes([mentionNode, $createTextNode(" ")]);

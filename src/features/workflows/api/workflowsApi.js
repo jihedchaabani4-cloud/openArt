@@ -347,7 +347,31 @@ export function useCreateCharacterMutation({ onError } = {}) {
   });
 }
 
-export const useCreateCharacterSheetMutation = useCreateCharacterMutation;
+export function useGenerateCharacterSheetMutation({ onError } = {}) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ characterId, prompt, references, projectId }) => {
+      const res = await api.post(`/characters/${characterId}/generate-sheet`, {
+        prompt,
+        references,
+        project_id: projectId,
+      });
+      if (res.error) throw new Error(res.message || 'Sheet generation failed');
+      return res;
+    },
+    onSuccess: (res, variables) => {
+      const projectId = variables?.projectId || variables?.project_id || res?.project_id;
+      if (projectId) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.projectData.byProject(projectId) });
+        queryClient.refetchQueries({ queryKey: queryKeys.projectData.byProject(projectId) });
+      }
+    },
+    onError: (err) => {
+      console.error('❌ Sheet generation failed:', err);
+      if (typeof onError === 'function') onError(err);
+    }
+  });
+}
 
 export function useGenerateCharacterDescriptionMutation() {
   return useMutation({
@@ -892,11 +916,34 @@ export function useCharacterWorkflows(projectId) {
       return type === "CHARACTER" || type === "CHARACTER_SHEET";
     })
     .map((w) => {
-      const items = media.filter((m) => m.workflowId === w.name || m.workflowId === w.id || m.workflow_id === w.id);
-      const firstUrl = items[0]?.url || items[0]?.file_url || w.main_media?.url || w.url;
-      const rawStatus = w.status || items[0]?.status || "processing";
-      const status = firstUrl ? (rawStatus === "failed" ? "failed" : "completed") : rawStatus;
-      return { ...w, items, status, isMultiMedia: items.length > 1 };
+      const wId = w.name || w.id;
+      const items = media.filter((m) => m.workflowId === wId || m.workflow_id === wId);
+      
+      // Locate the main character turnaround sheet media
+      const mainMedia = items.find(m => m.step_id === "character_sheet" || m.stepId === "character_sheet") || items[0] || w.main_media || null;
+      
+      // Determine status purely from the media item
+      let status = "processing";
+      if (mainMedia) {
+        if (mainMedia.status === "failed" || mainMedia.status === "error") {
+          status = "failed";
+        } else if (mainMedia.status === "success" || mainMedia.status === "completed" || Boolean(mainMedia.url)) {
+          status = "completed";
+        } else if (mainMedia.status === "processing" || mainMedia.status === "pending") {
+          status = "processing";
+        }
+      }
+
+      const primaryUrl = mainMedia?.url || mainMedia?.file_url || w.url || null;
+
+      return {
+        ...w,
+        items,
+        mainMedia,
+        primary_media_url: primaryUrl,
+        status,
+        isMultiMedia: items.length > 1,
+      };
     });
 
   return { workflows: characterWorkflows, isLoading, isError };

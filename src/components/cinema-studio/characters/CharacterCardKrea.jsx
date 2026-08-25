@@ -60,9 +60,10 @@ export function CharacterCardKrea({ character, onClick, onDelete }) {
   const cardBgColor = extractFallbackColor(primaryImage, name);
 
   const hasMediaUrl = Boolean(primaryImage && typeof primaryImage === "string" && primaryImage.trim().startsWith("http"));
-  const isProcessing = !hasMediaUrl && (character.status === "processing" || character.status === "pending" || character.items?.[0]?.status === "processing");
-  const isFailed = character.status === "failed" || character.items?.[0]?.status === "failed";
-  const errorMessage = character.items?.[0]?.error || character.error || "Generation error";
+  const mainMedia = character.mainMedia || character.items?.[0] || null;
+  const isFailed = character.status === "failed" || mainMedia?.status === "failed" || mainMedia?.status === "error";
+  const isProcessing = !isFailed && (character.status === "processing" || mainMedia?.status === "processing" || !hasMediaUrl);
+  const errorMessage = mainMedia?.error || character.error || "Generation error";
 
   return (
     <div

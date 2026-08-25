@@ -309,11 +309,13 @@ export function usePromptBar({ isNewProject = false } = {}) {
         asset: metadata,
       });
 
+      const canonicalWfId = asset.workflow_id || asset.workflowId || asset.workflow?.id || null;
       const normalizedAsset = {
         ...asset,
         url: metadata.url,
         is_video: metadata.isVideo,
-        asset_id: asset.asset_id || asset.name || asset.id
+        workflow_id: canonicalWfId || asset.asset_id || asset.id,
+        asset_id: canonicalWfId || asset.asset_id || asset.id || asset.name
       };
 
       if (!normalizedAsset.url) {
