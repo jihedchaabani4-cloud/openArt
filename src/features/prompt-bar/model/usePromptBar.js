@@ -226,19 +226,19 @@ export function usePromptBar({ isNewProject = false } = {}) {
       const isVideo = generationMode !== "image";
 
       const payload = {
-        prompt,
-        model:            model?.id ?? "nanobana_pro",
-        model_name:       model?.id ?? "nanobana_pro",
+        prompt:           prompt.trim(),
+        model:            model?.id ?? "gpt-image-2",
         quality:          resolution,
         ratio,
-        num_images:       count,
-        duration,
-        video_resolution: videoResolution,
-        section:          getGenerationSection(generationMode),
+        count,
         project_id:       isNewProject ? null : projectId,
         session_id:       isNewProject ? null : activeSessionId,
-        reference_media_ids: referenceImages.map(r => r.asset_id || r.id || r.ref_media_id).filter(Boolean),
         references:       buildReferencesPayload(referenceImages),
+        ...(isVideo ? {
+          duration,
+          video_resolution: videoResolution,
+          section:          getGenerationSection(generationMode),
+        } : {}),
       };
 
       try {

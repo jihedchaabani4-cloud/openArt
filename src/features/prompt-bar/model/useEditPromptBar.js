@@ -204,22 +204,24 @@ export function useEditPromptBar() {
 
       const payload = {
         prompt,
-        model:            model?.id ?? "nanobana_pro",
-        model_name:       model?.id ?? "nanobana_pro",
-        quality:          resolution,
+        model:               model?.id ?? "nanobana_pro",
+        model_name:          model?.id ?? "nanobana_pro",
+        quality:             resolution,
         ratio,
-        num_images:       1,
-        edit_type:        "edit",
-        section:          "image_generator",
-        project_id:       projectId,
-        session_id:       activeSessionId || editTarget?.session_id,
-        workflow_id:      editTarget?.workflow_id,
-        video_workflow_id: editTarget?.workflow_id,
-        reference_media_ids: referenceImages.map(r => r.asset_id || r.id || r.ref_media_id).filter(Boolean),
-        mask_selection:   selection,
-        activeTab:        activeTab,
-        upscaleScale:     upscaleScale,
+        edit_type:           "edit",
+        section:             "image_generator",
+        project_id:          projectId,
+        session_id:          activeSessionId || editTarget?.session_id,
+        // ── Edit target (MAIN image to edit — sent as workflow ID, URL resolved server-side) ──
+        source_workflow_id:  editTarget?.workflow_id,
+        // ── Additional references (characters, elements, style inspiration) ──
+        references:          referenceImages.map(r => r.asset_id || r.id || r.ref_media_id).filter(Boolean),
+        // Legacy / other fields
+        mask_selection:      selection,
+        activeTab:           activeTab,
+        upscaleScale:        upscaleScale,
       };
+
 
       try {
         const res = await runGenerate({ payload, isVideo: !!editTarget?.isVideo });
