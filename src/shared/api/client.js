@@ -9,7 +9,7 @@ export async function apiRequest(endpoint, options = {}) {
         return Promise.reject(new Error("API URL is not defined"));
     }
 
-    console.log("API Request using NEXT_PUBLIC_API_URL:", process.env.NEXT_PUBLIC_API_URL);
+
 
     const url = `${BASE_URL}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
     
@@ -20,10 +20,25 @@ export async function apiRequest(endpoint, options = {}) {
         headers["Content-Type"] = headers["Content-Type"] || "application/json";
     }
 
+    const timeoutMs = options.timeout ?? 15000;
+    let signal = options.signal;
+    let timeoutId = null;
+
+    if (!signal) {
+        if (typeof AbortSignal !== "undefined" && typeof AbortSignal.timeout === "function") {
+            signal = AbortSignal.timeout(timeoutMs);
+        } else {
+            const controller = new AbortController();
+            signal = controller.signal;
+            timeoutId = setTimeout(() => controller.abort(new Error(`Timeout after ${timeoutMs}ms`)), timeoutMs);
+        }
+    }
+
     const config = {
         credentials: "include", // Required to send HttpOnly cookies
         ...options,
         headers,
+        signal,
     };
 
     try {
@@ -38,17 +53,36 @@ export async function apiRequest(endpoint, options = {}) {
 
         return await response.json();
     } catch (error) {
+        if (error.name === 'TimeoutError' || error.name === 'AbortError') {
+            console.error(`🔌 API Request Timed Out [${url}] after ${timeoutMs}ms`);
+            throw new Error(`Request timed out after ${Math.round(timeoutMs / 1000)}s. Please check your connection or refresh.`);
+        }
         console.error(`🔌 API Request Failed [${url}]:`, error.message);
         throw error;
+    } finally {
+        if (timeoutId) clearTimeout(timeoutId);
     }
 }
 
+
 export const api = {
     get: (endpoint, options) => apiRequest(endpoint, { ...options, method: "GET" }),
-    post: (endpoint, body, options) => apiRequest(endpoint, { ...options, method: "POST", body: JSON.stringify(body) }),
+    post: (endpoint, body, options) => apiRequest(endpoint, {
+        ...options,
+        method: "POST",
+        body: (typeof FormData !== "undefined" && body instanceof FormData) ? body : JSON.stringify(body)
+    }),
     postForm: (endpoint, formData, options) => apiRequest(endpoint, { ...options, method: "POST", body: formData }),
-    patch: (endpoint, body, options) => apiRequest(endpoint, { ...options, method: "PATCH", body: JSON.stringify(body) }),
-    put: (endpoint, body, options) => apiRequest(endpoint, { ...options, method: "PUT", body: JSON.stringify(body) }),
+    patch: (endpoint, body, options) => apiRequest(endpoint, {
+        ...options,
+        method: "PATCH",
+        body: (typeof FormData !== "undefined" && body instanceof FormData) ? body : JSON.stringify(body)
+    }),
+    put: (endpoint, body, options) => apiRequest(endpoint, {
+        ...options,
+        method: "PUT",
+        body: (typeof FormData !== "undefined" && body instanceof FormData) ? body : JSON.stringify(body)
+    }),
     delete: (endpoint, options) => apiRequest(endpoint, { ...options, method: "DELETE" }),
     getBlob: async (url, options = {}) => {
         const config = {

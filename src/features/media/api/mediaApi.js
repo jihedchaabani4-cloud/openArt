@@ -4,6 +4,7 @@ import { useInfiniteQuery, useQuery, useMutation, useQueryClient } from '@tansta
 import { api} from '@/shared/api/client';
 import { queryKeys } from '@/shared/api/queryKeys';
 import { downloadBlob } from '@/shared/lib/utils';
+import { intrinsicSizeToRatioLabel, setCachedImageDimensions } from '@/shared/lib/displayUtils';
 
 const LIMIT = 30;
 
@@ -21,9 +22,8 @@ function getMediaMetadata(file) {
       video.preload = 'metadata';
       video.onloadedmetadata = () => {
         const { videoWidth: w, videoHeight: h } = video;
-        const gcd = (a, b) => b === 0 ? a : gcd(b, a % b);
-        const d = gcd(w, h);
-        cleanup({ width: w, height: h, ratio: `${w/d}:${h/d}`, size: `${w}x${h}` });
+        const ratio = intrinsicSizeToRatioLabel(w, h);
+        cleanup({ width: w, height: h, ratio, size: `${w}x${h}` });
       };
       video.onerror = () => cleanup(null);
       video.src = url;
@@ -31,9 +31,8 @@ function getMediaMetadata(file) {
       const img = new Image();
       img.onload = () => {
         const { naturalWidth: w, naturalHeight: h } = img;
-        const gcd = (a, b) => b === 0 ? a : gcd(b, a % b);
-        const d = gcd(w, h);
-        cleanup({ width: w, height: h, ratio: `${w/d}:${h/d}`, size: `${w}x${h}` });
+        const ratio = intrinsicSizeToRatioLabel(w, h);
+        cleanup({ width: w, height: h, ratio, size: `${w}x${h}` });
       };
       img.onerror = () => cleanup(null);
       img.src = url;
@@ -171,13 +170,6 @@ export function useBatchUploadAssets() {
         // Since we already calculated metadata in onMutate, we can pass it here or re-calculate.
         // To keep it simple and parallel, we re-calculate if needed, or better, pass a metadata map.
         const metadata = await getMediaMetadata(file); 
-        const fullMetadata = {
-          ...metadata,
-          workflow_type: "UPLOAD",
-          workflowType: "UPLOAD",
-          source: "upload",
-          is_upload: true,
-        };
         const formData = new FormData();
         formData.append("file", file);
         formData.append("project_id", projectId);
@@ -186,20 +178,22 @@ export function useBatchUploadAssets() {
         formData.append("workflowType", "UPLOAD");
         formData.append("type", "upload");
         formData.append("source", "upload");
-        console.log("📤 [UPLOAD API] Sending /assets/upload:", {
-          fileName: file.name,
-          fileType: file.type,
-          projectId,
-          sessionId,
-          workflow_type: "UPLOAD",
-          fullMetadata
-        });
+        if (metadata?.width && metadata?.height) {
+          formData.append("width", String(metadata.width));
+          formData.append("height", String(metadata.height));
+          formData.append("ratio", metadata.ratio || "");
+        }
         const res = await api.postForm("/assets/upload", formData);
-        console.log("📥 [UPLOAD API RESPONSE] Server response:", res);
+        if (res?.url && (res?.width || metadata?.width) && (res?.height || metadata?.height)) {
+          setCachedImageDimensions(
+            res.url,
+            res.width || metadata.width,
+            res.height || metadata.height
+          );
+        }
         return res;
       }));
       
-      console.log("✅ [UPLOAD BATCH SUCCESS] All upload requests finished:", results);
       return results;
     },
 
@@ -228,6 +222,14 @@ export function useBatchUploadAssets() {
         const localUrl = URL.createObjectURL(file);
         localUrls.push(localUrl);
 
+        if (metadata?.width && metadata?.height) {
+          setCachedImageDimensions(localUrl, metadata.width, metadata.height);
+        }
+
+        const resolvedRatio = metadata?.ratio || (isVideo ? "16:9" : "1:1");
+        const resolvedWidth = metadata?.width || (isVideo ? 1280 : 1024);
+        const resolvedHeight = metadata?.height || (isVideo ? 720 : 1024);
+
         // Timeline format
         optimisticEntries.push({
           feed_type:       'upload',
@@ -237,7 +239,7 @@ export function useBatchUploadAssets() {
           model:           null,
           model_label:     'Upload',
           model_icon_url:  null,
-          params:          { prompt: isVideo ? 'Vidéo importée' : 'Image importée' },
+          params:          { prompt: isVideo ? 'Vidéo importée' : 'Image importée', ratio: resolvedRatio },
           session_id:      sessionId,
           created_at:      new Date().toISOString(),
           items: [{
@@ -289,12 +291,25 @@ export function useBatchUploadAssets() {
           is_upload:      true,
           type:           'upload',
           source:         'upload',
+          width:          resolvedWidth,
+          height:         resolvedHeight,
+          ratio:          resolvedRatio,
+          aspectRatio:    resolvedRatio,
+          params: {
+            ratio:        resolvedRatio,
+            aspectRatio:  resolvedRatio,
+            width:        resolvedWidth,
+            height:       resolvedHeight,
+          },
           mediaMetadata: {
             createTime: new Date().toISOString(),
             visibility: 'PRIVATE',
           },
           [isVideo ? 'video' : 'image']: {
-            dimensions: metadata ? { width: metadata.width, height: metadata.height } : { width: 1024, height: 1024 },
+            dimensions: { width: resolvedWidth, height: resolvedHeight },
+            userUploadedImage: {
+              aspectRatio: resolvedRatio,
+            },
             [isVideo ? 'generatedVideo' : 'generatedImage']: null,
           }
         });

@@ -1,390 +1,418 @@
 "use client";
 
 import React from "react";
+import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
-import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { cn } from "@/shared/lib/utils";
 import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows";
-import { usePromptStore } from "@/features/prompt-bar/model/usePromptStore";
+import { usePromptStore } from "@/features/studio";
 import { useProjectData, useMoveWorkflow } from "@/features/workflows/api/workflowsApi";
 import { useCreateSession, useUpdateSession, useDeleteSession } from "@/features/projects/api/createSessionApi";
 import { ConfirmDeleteDialog } from "@/widgets/dialogs/ConfirmDeleteDialog";
+import { GoogleIcon } from "@/shared/ui/GoogleIcon";
+import { InlineRenamePill } from "@/shared/ui/InlineRenamePill";
 
-import { SPRING } from "./constants";
-
-// Sidebar open/close spring — tuned for 144 Hz screens
-const SIDEBAR_SPRING = {
-    type: "spring",
-    stiffness: 900,
-    damping: 40,
-    mass: 0.35,
-};
 import { NewSessionButton } from "./NewSessionButton";
 import { SessionItem } from "./SessionItem";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+// Ultra-responsive snappy transition — instantaneous response on hover with zero delay
+const SIDEBAR_TRANSITION = {
+  type: "tween",
+  duration: 0.16,
+  ease: [0.16, 1, 0.3, 1],
+};
 
-// ─────────────────────────────────────────────────────────────────────────────
-// SessionSidebar — collapsible sidebar that lists sessions for the active project.
-// Expands on hover / drag-enter, collapses on mouse-leave / drag-end.
-// ─────────────────────────────────────────────────────────────────────────────
+/**
+ * SessionSidebar — Dedicated floating right-hand session navigation rail for the Generations page.
+ * Strictly adheres to Krea AI's UI specification:
+ * - Collapsed: 58px wide floating pill showing only the 1:1 right square cells (New + thumbnails).
+ * - Expanded: Smoothly expands leftwards to 280px on hover/drag, revealing labels, timestamps, and 3-dots menus.
+ */
 export function SessionSidebar() {
-    const { 
-        selectedProjectId, 
-        activeSessionId, 
-        setActiveSessionId,
-    } = useGenerationsStore();
+  const { selectedProjectId, activeSessionId, setActiveSessionId } = useGenerationsStore();
 
-    const pathname = usePathname();
-    const isElementsActive = pathname?.includes("/elements");
-    const isCharactersActive = pathname?.includes("/characters");
+  // ── Data ─────────────────────────────────────────────────────────────────
+  const { data: projectData, isLoading } = useProjectData(selectedProjectId);
+  const sessions = React.useMemo(() => projectData?.projectContents?.sessions ?? [], [projectData]);
+  const workflows = React.useMemo(() => projectData?.projectContents?.workflows ?? [], [projectData]);
+  const allMedia = React.useMemo(() => projectData?.projectContents?.media ?? [], [projectData]);
 
-    // ── Data ─────────────────────────────────────────────────────────────────
-    const { data: projectData, isLoading } = useProjectData(selectedProjectId);
-    const sessions  = projectData?.projectContents?.sessions  ?? [];
-    const workflows = projectData?.projectContents?.workflows ?? [];
-    const allMedia  = projectData?.projectContents?.media     ?? [];
+  // ── Mutations ─────────────────────────────────────────────────────────────
+  const { mutateAsync: createSession } = useCreateSession();
+  const { mutateAsync: updateSession } = useUpdateSession();
+  const { mutateAsync: deleteSession } = useDeleteSession();
+  const { mutate: moveWorkflow } = useMoveWorkflow();
 
-    // ── Mutations ─────────────────────────────────────────────────────────────
-    const { mutateAsync: createSession } = useCreateSession();
-    const { mutateAsync: updateSession } = useUpdateSession();
-    const { mutateAsync: deleteSession } = useDeleteSession();
-    const { mutate: moveWorkflow }       = useMoveWorkflow();
-    const isNavbarHidden = useGenerationsStore((s) => s.isNavbarHidden);
+  // ── Local state ───────────────────────────────────────────────────────────
+  const [isHovered, setIsHovered] = React.useState(false);
+  const [openDropdownId, setOpenDropdownId] = React.useState(null);
+  const [openContextMenuId, setOpenContextMenuId] = React.useState(null);
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = React.useState(false);
+  const [sessionToDelete, setSessionToDelete] = React.useState(null);
+  const [editingSessionId, setEditingSessionId] = React.useState(null);
+  const [editingName, setEditingName] = React.useState("");
+  const [editingSessionRect, setEditingSessionRect] = React.useState(null);
+  const canDismissRef = React.useRef(false);
+  const [dragOverSessionId, setDragOverSessionId] = React.useState(null);
+  const [isDraggingOver, setIsDraggingOver] = React.useState(false);
+  const [isDragOverNew, setIsDragOverNew] = React.useState(false);
 
-    // ── Local state ───────────────────────────────────────────────────────────
-    const [isHovered,          setIsHovered]          = React.useState(false);
-    const [openDropdownId,     setOpenDropdownId]     = React.useState(null);
-    const [openContextMenuId,  setOpenContextMenuId]  = React.useState(null);
-    const [isDeleteConfirmOpen,setIsDeleteConfirmOpen]= React.useState(false);
-    const [sessionToDelete,    setSessionToDelete]    = React.useState(null);
-    const [editingSessionId,   setEditingSessionId]   = React.useState(null);
-    const [editingName,        setEditingName]        = React.useState("");
-    const [dragOverSessionId,  setDragOverSessionId]  = React.useState(null);
-    const [isDraggingOver,     setIsDraggingOver]     = React.useState(false);
-    const [isDragOverNew,      setIsDragOverNew]      = React.useState(false);
+  const isDraggingGalleryItem = usePromptStore((s) => s.isDraggingGalleryItem);
 
-    // ── Derived data ──────────────────────────────────────────────────────────
-    /** Map: sessionId → sorted media array (newest first) */
-    const sessionMediaMap = React.useMemo(() => {
-        const map = {};
-        const wfToSession = {};
-        workflows.forEach((w) => {
-            wfToSession[w.name || w.id] = w.session_id || w.metadata?.sessionId;
-        });
-        allMedia.forEach((m) => {
-            const sid = wfToSession[m.workflowId];
-            if (sid) {
-                if (!map[sid]) map[sid] = [];
-                map[sid].push(m);
-            }
-        });
-        Object.values(map).forEach((arr) =>
-            arr.sort(
-                (a, b) =>
-                    new Date(b.mediaMetadata?.createTime || b.create_time || 0) -
-                    new Date(a.mediaMetadata?.createTime || a.create_time || 0)
-            )
-        );
-        return map;
-    }, [workflows, allMedia]);
+  // ── Derived data ──────────────────────────────────────────────────────────
+  /** Map: sessionId → sorted media array (newest first) */
+  const sessionMediaMap = React.useMemo(() => {
+    const map = {};
+    const wfToSession = {};
+    workflows.forEach((w) => {
+      const sId = w.session_id || w.metadata?.sessionId;
+      if (sId) {
+        wfToSession[w.name || w.id] = sId;
+        const short = sId.split("/").pop();
+        if (short !== sId) wfToSession[w.name || w.id] = sId;
+      }
+    });
 
-    /** Newest sessions first */
-    const sortedSessions = React.useMemo(
-        () =>
-            [...sessions].sort(
-                (a, b) =>
-                    new Date(b.metadata?.createTime || 0) -
-                    new Date(a.metadata?.createTime || 0)
-            ),
-        [sessions]
+    allMedia.forEach((m) => {
+      const sid = wfToSession[m.workflowId];
+      if (sid) {
+        if (!map[sid]) map[sid] = [];
+        map[sid].push(m);
+        const short = sid.split("/").pop();
+        if (short !== sid) {
+          if (!map[short]) map[short] = [];
+          map[short].push(m);
+        }
+      }
+    });
+
+    Object.values(map).forEach((arr) =>
+      arr.sort(
+        (a, b) =>
+          new Date(b.mediaMetadata?.createTime || b.create_time || 0) -
+          new Date(a.mediaMetadata?.createTime || a.create_time || 0)
+      )
     );
+    return map;
+  }, [workflows, allMedia]);
 
-    const isDraggingGalleryItem = usePromptStore((s) => s.isDraggingGalleryItem);
+  /** Newest sessions first */
+  const sortedSessions = React.useMemo(
+    () =>
+      [...sessions].sort(
+        (a, b) =>
+          new Date(b.metadata?.createTime || 0) -
+          new Date(a.metadata?.createTime || 0)
+      ),
+    [sessions]
+  );
 
-    const isExpanded =
-        isHovered ||
-        isDraggingOver ||
-        isDraggingGalleryItem ||
-        openDropdownId     !== null ||
-        openContextMenuId  !== null ||
-        editingSessionId   !== null;
+  const isExpanded =
+    isHovered ||
+    isDraggingOver ||
+    isDraggingGalleryItem ||
+    openDropdownId !== null ||
+    openContextMenuId !== null ||
+    editingSessionId !== null;
 
-    // ── Guard ─────────────────────────────────────────────────────────────────
-    if (!selectedProjectId) return null;
+  // Dynamically update rename pill position if the session list scrolls or window resizes
+  React.useEffect(() => {
+    if (!editingSessionId) {
+      setEditingSessionRect(null);
+      return;
+    }
 
-    // ── Session handlers ──────────────────────────────────────────────────────
-    const handleCreateSession = async () => {
-        const nextIndex = (sessions || []).length + 1;
-        const newSession = await createSession({
-            project_id: selectedProjectId,
-            session_name: `Session ${nextIndex}`,
-        });
-        if (newSession?.id || newSession?.session_id) {
-            setActiveSessionId(newSession.id || newSession.session_id);
-        }
+    const updateRect = () => {
+      const el = document.querySelector(`[data-session-id="${editingSessionId}"]`);
+      if (el) {
+        setEditingSessionRect(el.getBoundingClientRect());
+      }
     };
 
-    const handleRename = (sessionId, currentName) => {
-        setEditingSessionId(sessionId);
-        setEditingName(currentName || "Untitled");
-        setOpenDropdownId(null);
+    updateRect();
+    window.addEventListener("scroll", updateRect, true);
+    window.addEventListener("resize", updateRect);
+    return () => {
+      window.removeEventListener("scroll", updateRect, true);
+      window.removeEventListener("resize", updateRect);
     };
+  }, [editingSessionId]);
 
-    const handleSaveRename = async () => {
-        const targetId   = editingSessionId;
-        const targetName = editingName.trim();
-        if (targetId) {
-            setEditingSessionId(null);
-            if (targetName) {
-                updateSession({
-                    sessionId: targetId,
-                    sessionData: { session_name: targetName },
-                    projectId: selectedProjectId,
-                });
-            }
-        }
+  if (!selectedProjectId) {
+    return null;
+  }
+
+  // ── Handlers ──────────────────────────────────────────────────────────────
+  const handleCreateSession = async () => {
+    const nextIndex = (sessions || []).length + 1;
+    const newSession = await createSession({
+      project_id: selectedProjectId,
+      session_name: `Session ${nextIndex}`,
+    });
+    if (newSession?.id || newSession?.session_id) {
+      setActiveSessionId(newSession.id || newSession.session_id);
+    }
+  };
+
+  const handleRename = (sessionId, currentName, rect) => {
+    canDismissRef.current = false;
+    setEditingSessionId(sessionId);
+    setEditingName(currentName || "Untitled");
+    setEditingSessionRect(rect || null);
+    setOpenDropdownId(null);
+    setOpenContextMenuId(null);
+    setTimeout(() => {
+      canDismissRef.current = true;
+    }, 150);
+  };
+
+  const handleSaveRename = async (newName) => {
+    const targetId = editingSessionId;
+    const targetName = (newName ?? editingName).trim();
+    if (targetId && targetName) {
+      await updateSession({
+        sessionId: targetId,
+        sessionData: { session_name: targetName },
+        projectId: selectedProjectId,
+      });
+    }
+    setEditingSessionId(null);
+    setEditingSessionRect(null);
+  };
+
+  const handleCancelRename = () => {
+    setEditingSessionId(null);
+    setEditingSessionRect(null);
+  };
+
+  const getPillPosition = () => {
+    if (!editingSessionRect || typeof window === "undefined") {
+      return { top: "50%", right: "320px", transform: "translateY(-50%)" };
+    }
+    const PILL_HEIGHT = 56;
+    const top = Math.max(
+      16,
+      Math.min(
+        window.innerHeight - PILL_HEIGHT - 16,
+        editingSessionRect.top + (editingSessionRect.height - PILL_HEIGHT) / 2
+      )
+    );
+    // Align pill to 14px to the left of the session rail
+    const right = Math.max(16, window.innerWidth - editingSessionRect.left + 14);
+    return {
+      top: `${top}px`,
+      right: `${right}px`,
     };
+  };
 
-    const handleKeyDown = (e) => {
-        e.stopPropagation(); // prevent studio-wide hotkeys
-        if (e.key === "Enter")  handleSaveRename();
-        if (e.key === "Escape") setEditingSessionId(null);
-    };
+  const handleDelete = (sessionId) => {
+    setSessionToDelete(sessionId);
+    setIsDeleteConfirmOpen(true);
+  };
 
-    const handleDelete = (sessionId) => {
-        setSessionToDelete(sessionId);
-        setIsDeleteConfirmOpen(true);
-    };
+  const confirmDelete = async () => {
+    if (sessionToDelete) {
+      await deleteSession({ sessionId: sessionToDelete, projectId: selectedProjectId });
+      if (activeSessionId === sessionToDelete) setActiveSessionId(null);
+      setSessionToDelete(null);
+    }
+  };
 
-    const confirmDelete = async () => {
-        if (sessionToDelete) {
-            await deleteSession({ sessionId: sessionToDelete, projectId: selectedProjectId });
-            if (activeSessionId === sessionToDelete) setActiveSessionId(null);
-            setSessionToDelete(null);
-        }
-    };
+  // ── Drag & drop handlers ──────────────────────────────────────────────────
+  const handleDragOver = (e, sessionId) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "copy";
+    if (dragOverSessionId !== sessionId) {
+      setDragOverSessionId(sessionId);
+      setIsDragOverNew(false);
+    }
+    setIsDraggingOver(true);
+  };
 
-    // ── Drag handlers ─────────────────────────────────────────────────────────
-    const handleDragOver = (e, sessionId) => {
-        e.preventDefault();
-        e.dataTransfer.dropEffect = "copy";
-        if (dragOverSessionId !== sessionId) {
-            setDragOverSessionId(sessionId);
+  const handleDrop = (e, targetSessionId) => {
+    e.preventDefault();
+    setDragOverSessionId(null);
+    setIsDraggingOver(false);
+    const workflowId = e.dataTransfer.getData("workflowId");
+    if (!workflowId || !targetSessionId) return;
+    moveWorkflow({ workflowId, sessionId: targetSessionId, projectId: selectedProjectId });
+  };
+
+  const handleDropNewSession = (e) => {
+    e.preventDefault();
+    setIsDragOverNew(false);
+    setIsDraggingOver(false);
+    const workflowId = e.dataTransfer.getData("workflowId");
+    if (!workflowId) return;
+    moveWorkflow({
+      workflowId,
+      newsession: true,
+      projectId: selectedProjectId,
+      sessionName: "New Session",
+    });
+  };
+
+  return (
+    <aside
+      role="navigation"
+      aria-label="Generation space navigation"
+      className="nVZd1Tjd w-[64px] shrink-0 h-full relative z-30 flex flex-col justify-center select-none pointer-events-auto"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <motion.div
+        tabIndex={0}
+        role="navigation"
+        aria-label="Generation space navigation"
+        className={cn(
+          "L2toal1p i-P5XMop absolute right-0 top-1/2 -translate-y-1/2 flex flex-col items-end rounded-2xl overflow-hidden p-1.5 gap-1 outline-none transition-colors duration-100",
+          isExpanded
+            ? "bg-[#0d0e0e]/95 backdrop-blur-[24px] shadow-2xl shadow-black/80"
+            : "bg-transparent backdrop-blur-none shadow-none"
+        )}
+        animate={{
+          width: isExpanded ? 292 : 64,
+        }}
+        transition={SIDEBAR_TRANSITION}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        onDragEnter={() => setIsDraggingOver(true)}
+        onDragOver={(e) => {
+          e.preventDefault();
+          if (!isDraggingOver) setIsDraggingOver(true);
+        }}
+        onDragLeave={(e) => {
+          if (!e.currentTarget.contains(e.relatedTarget)) {
+            setIsDraggingOver(false);
+            setDragOverSessionId(null);
             setIsDragOverNew(false);
-        }
-        setIsDraggingOver(true);
-    };
-    // Note: individual item onDragLeave removed to prevent flicker.
-    // Global cleanup is handled by the sidebar container's onDragLeave below.
+          }
+        }}
+        onDrop={() => setIsDraggingOver(false)}
+      >
+        {/* ── Top Row: New Session action / drop target ── */}
+        <NewSessionButton
+          isExpanded={isExpanded}
+          isDraggingOver={isDraggingOver}
+          isDragOverNew={isDragOverNew}
+          onCreate={handleCreateSession}
+          onDragOver={(e) => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = "copy";
+            setIsDragOverNew(true);
+            setIsDraggingOver(true);
+            setDragOverSessionId(null);
+          }}
+          onDrop={handleDropNewSession}
+        />
 
-    const handleDrop = (e, targetSessionId) => {
-        e.preventDefault();
-        setDragOverSessionId(null);
-        setIsDraggingOver(false);
-        const workflowId = e.dataTransfer.getData("workflowId");
-        if (!workflowId || !targetSessionId) return;
-        moveWorkflow({ workflowId, sessionId: targetSessionId, projectId: selectedProjectId });
-    };
-
-    const handleDropNewSession = (e) => {
-        e.preventDefault();
-        setIsDragOverNew(false);
-        setIsDraggingOver(false);
-        const workflowId = e.dataTransfer.getData("workflowId");
-        if (!workflowId) return;
-        moveWorkflow({
-            workflowId,
-            newsession: true,
-            projectId: selectedProjectId,
-            sessionName: "New Session",
-        });
-    };
-
-    // ── Render ────────────────────────────────────────────────────────────────
-    return (
-        <div className="w-[60px] h-full shrink-0 relative z-40 bg-transparent flex flex-col">
-            {/* Top Buttons */}
-            <motion.div 
-                className="flex flex-col items-center justify-start  relative z-50 overflow-hidden w-full"
-                initial={false}
-                animate={{
-                    height: isNavbarHidden ? 0 : 76, // 76px exactly matches the Navbar total bounds
-                    opacity: isNavbarHidden ? 0 : 1,
-                    y: isNavbarHidden ? "-100%" : 0,
-                    paddingTop: isNavbarHidden ? 0 : 18, // explicitly push it down to align precisely
-                }}
-                transition={{ duration: 0.85, ease: [0.16, 1, 0.3, 1] }}
-            >
-                <Link 
-                    href="/cinema-studio"
-                    className="flex items-center justify-center w-10 h-10 rounded-xl bg-white/5 hover:bg-white/10 text-white/90 hover:text-white transition-colors"
-                >
-                    <GoogleIcon iconName="arrow_back" className="text-[20px]" />
-                </Link>
-            </motion.div>
-
-            {/* Tabs for Studio Views */}
-            <div className="flex flex-col items-center gap-2 pt-2 relative z-50 w-full">
-                <Link 
-                    href={`/cinema-studio/${selectedProjectId}/generations`}
-                    className={cn(
-                        "flex items-center justify-center w-10 h-10 rounded-xl transition-all",
-                        !isElementsActive && !isCharactersActive
-                            ? "bg-white/10 text-white " 
-                            : "bg-transparent text-white hover:bg-white/5"
-                    )}
-                    title="Generations"
-                >
-                    <GoogleIcon iconName="image" className="text-[20px]" />
-                </Link>
-                <Link 
-                    href={`/cinema-studio/${selectedProjectId}/elements`}
-                    className={cn(
-                        "flex items-center justify-center w-10 h-10 rounded-xl transition-all",
-                        isElementsActive
-                            ? "bg-white/10 text-white " 
-                            : "bg-transparent text-white hover:bg-white/5"
-                    )}
-                    title="Elements Library"
-                >
-                    <GoogleIcon iconName="alternate_email" className="text-[20px]" />
-                </Link>
-                <Link 
-                    href={`/cinema-studio/${selectedProjectId}/characters`}
-                    className={cn(
-                        "flex items-center justify-center w-10 h-10 rounded-xl transition-all",
-                        isCharactersActive
-                            ? "bg-white/10 text-white " 
-                            : "bg-transparent text-white hover:bg-white/5"
-                    )}
-                    title="Characters"
-                >
-                    <GoogleIcon iconName="accessibility_new" className="text-[20px]" />
-                </Link>
+        {/* ── Sessions List Container ── */}
+        <div className="hMbd1cHn w-[276px] max-h-[calc(65vh-70px)] overflow-y-auto overflow-x-hidden flex flex-col gap-1 pr-0.5 custom-session-scrollbar">
+          {isLoading ? (
+            <div className="w-full flex justify-center py-4">
+              <GoogleIcon
+                iconName="progress_activity"
+                className="text-[18px] animate-spin text-white/30"
+              />
             </div>
+          ) : (
+            sortedSessions.map((session, index) => {
+              const sid = session.name || session.id || session.session_id;
+              const mediaList =
+                sessionMediaMap[sid] ||
+                sessionMediaMap[session.name] ||
+                sessionMediaMap[session.id] ||
+                [];
 
-            {/* Expanding wrapper (anchored right below the buttons) */}
-            {!isElementsActive && !isCharactersActive && (
-                <div className="relative p-1 w-full flex-1 z-40">
-                    <motion.div
-                    className={cn(
-                        "absolute left-0 top-0 max-h-[calc(100vh-120px)] pl-2.5 h-fit flex flex-col items-start overflow-hidden py-2 rounded-2xl border transition-colors",
-                    )}
-                animate={{
-                    backgroundColor: isExpanded ? "var(--background-base-pri)" : "rgba(0,0,0,0)",
-                    backdropFilter: isExpanded ? "blur(80px)" : "blur(0px)",
-                    width: isExpanded ? 260 : 60,
-                    boxShadow: isExpanded
-                        ? "0 25px 50px -12px rgba(0,0,0,0.5)"
-                        : "0 0px 0px 0px rgba(0,0,0,0)",
-                    borderColor: isDraggingGalleryItem
-                        ? "rgba(255,255,255,0.4)"
-                        : isExpanded
-                            ? "rgba(255,255,255,0.05)"
-                            : "rgba(255,255,255,0)",
-                }}
-                transition={SIDEBAR_SPRING}
-                onMouseEnter={() => setIsHovered(true)}
-                onMouseLeave={() => setIsHovered(false)}
-                onDragEnter={() => setIsDraggingOver(true)}
-                onDragOver={(e) => {
-                    e.preventDefault();
-                    if (!isDraggingOver) setIsDraggingOver(true);
-                }}
-                onDragLeave={(e) => {
-                    // Only collapse when drag fully exits the sidebar container
-                    if (!e.currentTarget.contains(e.relatedTarget)) {
-                        setIsDraggingOver(false);
-                        setDragOverSessionId(null);
-                        setIsDragOverNew(false);
+              return (
+                <SessionItem
+                  key={sid || index}
+                  session={session}
+                  index={index}
+                  isActive={
+                    activeSessionId === sid ||
+                    activeSessionId === session.name ||
+                    activeSessionId === session.id
+                  }
+                  isExpanded={isExpanded}
+                  isDraggingOver={isDraggingOver}
+                  dragOverSessionId={dragOverSessionId}
+                  mediaList={mediaList}
+                  editingSessionId={editingSessionId}
+                  openDropdownId={openDropdownId}
+                  openContextMenuId={openContextMenuId}
+                  onSelect={setActiveSessionId}
+                  onRename={handleRename}
+                  onDelete={handleDelete}
+                  onDropdownOpenChange={(open, id) => {
+                    setOpenDropdownId(open ? id : null);
+                    if (open) setOpenContextMenuId(null);
+                  }}
+                  onContextMenuOpenChange={(open, id) => {
+                    if (open) {
+                      setOpenContextMenuId(id);
+                      setOpenDropdownId(null);
+                    } else {
+                      setOpenContextMenuId(null);
                     }
-                }}
-                onDrop={() => setIsDraggingOver(false)}
-            >
-                {/* Fixed-width inner wrapper to prevent reflow during animation */}
-                <div className="w-[260px] gap-1 flex flex-col h-fit shrink-0">
-
-                    {/* ── New Session button ── */}
-                    <NewSessionButton
-                        isExpanded={isExpanded}
-                        isDraggingOver={isDraggingOver}
-                        isDragOverNew={isDragOverNew}
-                        onCreate={handleCreateSession}
-                        onDragOver={(e) => {
-                            e.preventDefault();
-                            e.dataTransfer.dropEffect = "copy";
-                            setIsDragOverNew(true);
-                            setIsDraggingOver(true);
-                            setDragOverSessionId(null);
-                        }}
-                        onDrop={handleDropNewSession}
-                    />
-
-                    {/* ── Sessions list ── */}
-                    <div className="w-[260px] max-h-[60vh] gap-3 overflow-y-auto overflow-x-hidden hide-scrollbar flex flex-col  pb-1 shrink">
-                        {isLoading ? (
-                            <div className="w-full flex justify-end pr-5">
-                                <GoogleIcon iconName="progress_activity" className="text-[14px] animate-spin text-white/30" />
-                            </div>
-                        ) : (
-                            sortedSessions.map((session, index) => (
-                                <SessionItem
-                                    key={session.name}
-                                    session={session}
-                                    index={index}
-                                    isActive={activeSessionId === session.name}
-                                    isExpanded={isExpanded}
-                                    isDraggingOver={isDraggingOver}
-                                    dragOverSessionId={dragOverSessionId}
-                                    mediaList={sessionMediaMap[session.name] || []}
-                                    editingSessionId={editingSessionId}
-                                    editingName={editingName}
-                                    openDropdownId={openDropdownId}
-                                    openContextMenuId={openContextMenuId}
-                                    onSelect={setActiveSessionId}
-                                    onRename={handleRename}
-                                    onSaveRename={handleSaveRename}
-                                    onDelete={handleDelete}
-                                    onKeyDown={handleKeyDown}
-                                    onEditingNameChange={setEditingName}
-                                    onDropdownOpenChange={(open, id) => {
-                                        setOpenDropdownId(open ? id : null);
-                                        if (open) setOpenContextMenuId(null);
-                                    }}
-                                    onContextMenuOpenChange={(open, id) => {
-                                        if (open) {
-                                            setOpenContextMenuId(id);
-                                            setOpenDropdownId(null);
-                                        } else {
-                                            setOpenContextMenuId(null);
-                                        }
-                                    }}
-                                    onDragOver={handleDragOver}
-                                    onDrop={handleDrop}
-                                />
-                            ))
-                        )}
-                    </div>
-                </div>
-            </motion.div>
-                </div>
-            )}
-
-            {/* ── Delete confirmation dialog ── */}
-            <ConfirmDeleteDialog
-                open={isDeleteConfirmOpen}
-                onOpenChange={setIsDeleteConfirmOpen}
-                title="Supprimer la session ?"
-                description="Tous les contenus de cette session seront définitivement supprimés."
-                onConfirm={confirmDelete}
-            />
-
-            <style jsx>{`
-                .hide-scrollbar::-webkit-scrollbar { display: none; }
-                .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-            `}</style>
+                  }}
+                  onDragOver={handleDragOver}
+                  onDrop={handleDrop}
+                />
+              );
+            })
+          )}
         </div>
-    );
+      </motion.div>
+
+      {/* ── Dialog-like Rename Portal (Pill next to session + full-screen dismissal backdrop) ── */}
+      {editingSessionId && typeof window !== "undefined" && createPortal(
+        <div className="fixed inset-0 z-[99999]">
+          {/* Layer 1 — Full-screen backdrop: blocks clicks to any other card, closes on click */}
+          <div
+            className="fixed inset-0 bg-black/40 backdrop-blur-[1px] cursor-default"
+            onPointerDown={(e) => {
+              e.stopPropagation();
+              if (canDismissRef.current) {
+                handleCancelRename();
+              }
+            }}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (canDismissRef.current) {
+                handleCancelRename();
+              }
+            }}
+          />
+
+          {/* Layer 2 — Floating Pill positioned directly to the left of the session row */}
+          <div
+            className="fixed z-[100000] pointer-events-auto"
+            style={getPillPosition()}
+            onClick={(e) => e.stopPropagation()}
+            onMouseDown={(e) => e.stopPropagation()}
+            onPointerDown={(e) => e.stopPropagation()}
+          >
+            <InlineRenamePill
+              initialName={editingName || ""}
+              onSave={handleSaveRename}
+              onCancel={handleCancelRename}
+            />
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* ── Delete confirmation dialog ── */}
+      <ConfirmDeleteDialog
+        open={isDeleteConfirmOpen}
+        onOpenChange={setIsDeleteConfirmOpen}
+        title="Supprimer la session ?"
+        description="Tous les contenus de cette session seront définitivement supprimés."
+        onConfirm={confirmDelete}
+      />
+
+
+    </aside>
+  );
 }

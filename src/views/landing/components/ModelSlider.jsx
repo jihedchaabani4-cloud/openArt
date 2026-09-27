@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from "react";
+import { Button } from "@/shared/ui/button";
 
 const levelSlides = [
   {
@@ -104,25 +105,31 @@ export function ModelSlider() {
 
           {/* Navigation Controls */}
           <div className="absolute bottom-8 right-8 z-20 flex gap-3">
-            <button
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
               onClick={() => setActiveSlide((prev) => (prev - 1 + levelSlides.length) % levelSlides.length)}
-              className="w-12 h-12 rounded-full border border-white/10 bg-black/40 backdrop-blur-md flex items-center justify-center text-white hover:bg-white hover:text-black transition-all duration-300 active:scale-95 shadow-lg"
+              className="w-12 h-12 rounded-full border border-white/10 bg-black/40 backdrop-blur-md flex items-center justify-center text-white hover:bg-white hover:text-black transition-all duration-300 active:scale-95 shadow-lg p-0"
               aria-label="Previous slide"
             >
               <svg viewBox="0 0 10 17" fill="none" className="w-2.5 h-4 -translate-x-0.5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M8.5 1.5L1.5 8.5L8.5 15.5" />
               </svg>
-            </button>
+            </Button>
 
-            <button
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
               onClick={() => setActiveSlide((prev) => (prev + 1) % levelSlides.length)}
-              className="w-12 h-12 rounded-full border border-white/10 bg-black/40 backdrop-blur-md flex items-center justify-center text-white hover:bg-white hover:text-black transition-all duration-300 active:scale-95 shadow-lg"
+              className="w-12 h-12 rounded-full border border-white/10 bg-black/40 backdrop-blur-md flex items-center justify-center text-white hover:bg-white hover:text-black transition-all duration-300 active:scale-95 shadow-lg p-0"
               aria-label="Next slide"
             >
               <svg viewBox="0 0 10 17" fill="none" className="w-2.5 h-4 translate-x-0.5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M1.5 1.5L8.5 8.5L1.5 15.5" />
               </svg>
-            </button>
+            </Button>
           </div>
         </div>
       </div>

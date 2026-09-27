@@ -1,23 +1,20 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
-import { motion, useMotionValue, useTransform } from "framer-motion";
+import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-motion";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { cn } from "@/shared/lib/utils";
 import { ImageStatusView } from "@/features/workflows/ui/ImageStatusView";
 import { ButtonGroup } from "@/shared/ui/button-group";
-import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem,
-  DropdownMenuSeparator, DropdownMenuTrigger,
-} from "@/shared/ui/dropdown-menu";
-import {
-  ContextMenu, ContextMenuContent, ContextMenuItem,
-  ContextMenuSeparator, ContextMenuTrigger,
-} from "@/shared/ui/context-menu";
+import { ContextMenu, ContextMenuTrigger } from "@/shared/ui/context-menu";
 import { ConfirmDeleteDialog } from "@/widgets/dialogs/ConfirmDeleteDialog";
+import { InlineRenamePill } from "@/shared/ui/InlineRenamePill";
 import { useWorkflowActions } from "@/features/workflows/model/useMediaActions";
-import { usePromptStore } from "@/features/prompt-bar/model/usePromptStore";
+import { useUpdateWorkflow } from "@/features/workflows/api/workflowsApi";
+import { usePromptStore } from "@/features/studio";
 import { useWorkflowsStore } from "@/features/workflows/model/useWorkflowsStore";
 import { ActionBtn } from "./ActionBtn";
+import { StudioItemDropdownMenu, StudioContextMenuContent } from "./StudioItemMenu";
+import { getStudioMenuItems, getWorkflowEntityType } from "./studioMenuConfig";
 import { springGentle, iconCls } from "./constants";
 
 const EMPTY_IMG = typeof window !== 'undefined' ? (() => {
@@ -26,16 +23,17 @@ const EMPTY_IMG = typeof window !== 'undefined' ? (() => {
   return img;
 })() : null;
 
-export function MediaGridItem({
+export const MediaGridItem = React.memo(function MediaGridItem({
   workflow,
   item: propItem = null,
+  aspect: propAspect = null,
   className,
   onClick    = () => {},
   onDragStart = () => {},
   onDragEnd   = () => {},
   width:  albumWidth  = null,
   height: albumHeight = null,
-  disableLayoutAnimation = false,
+  menuItems: propMenuItems = null,
 }) {
   // ─────────────────────────────────────────────────────────────────────────
   // ALL HOOKS UNCONDITIONALLY AT THE TOP — React Rules of Hooks §1
@@ -44,16 +42,18 @@ export function MediaGridItem({
 
   const {
     handleLike, handleDelete, handleDownload,
-    handleReuseSettings, handleEdit, handleAnimate, handleAddToPrompt,
-    handleSetParameters,
-    isVideo, url, isLiked, status, aspect, prompt, item, canDelete, canReuseSettings,
+    handleReuseSettings, handleAnimate, handleAddToPrompt,
+    isVideo, url, isLiked, status, aspect, prompt, item, canDelete, canReuseSettings, canAddToPrompt,
   } = useWorkflowActions(workflow, propItem);
 
   // ── State ──────────────────────────────────────────────────────────────
   const [isDropdownOpen,      setIsDropdownOpen]      = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  const [isRenaming,          setIsRenaming]          = useState(false);
   const [isDragging,          setIsDragging]          = useState(false);
+  const [cardRect,            setCardRect]            = useState(null);
   
+  const { mutateAsync: updateWorkflow } = useUpdateWorkflow();
   const showTileDetails = useWorkflowsStore(s => s.showTileDetails);
   const setShowTileDetails = useWorkflowsStore(s => s.setShowTileDetails);
   
@@ -67,22 +67,11 @@ export function MediaGridItem({
   const progressWidth = useTransform(progress, (v) => `${v}%`);
 
   // ── Refs ───────────────────────────────────────────────────────────────
-  const videoRef = useRef(null);
-  const rafRef   = useRef(null);
-  const lastPos  = useRef({ x: -500, y: -500 });
-
-  // ── Video scrub rAF loop ───────────────────────────────────────────────
-  useEffect(() => {
-    let frame;
-    const tick = () => {
-      const v = videoRef.current;
-      if (v && !v.paused && v.duration)
-        progress.set((v.currentTime / v.duration) * 100);
-      frame = requestAnimationFrame(tick);
-    };
-    frame = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(frame);
-  }, [progress]);
+  const videoRef  = useRef(null);
+  const rafRef    = useRef(null);
+  const lastPos   = useRef({ x: -500, y: -500 });
+  const cardRef   = useRef(null);
+  const canDismissRef = useRef(false);
 
   // ── Cleanup on unmount ─────────────────────────────────────────────────
   useEffect(() => () => {
@@ -114,6 +103,57 @@ export function MediaGridItem({
     });
   }, [mouseX, mouseY]);
 
+  // ── Dynamically track card position while rename is open ─────────────
+  useEffect(() => {
+    if (!isRenaming) {
+      setCardRect(null);
+      return;
+    }
+
+    const updateRect = () => {
+      if (cardRef.current) {
+        const r = cardRef.current.getBoundingClientRect();
+        setCardRect({
+          top: r.top,
+          left: r.left,
+          width: r.width,
+          height: r.height,
+          bottom: r.bottom,
+          right: r.right,
+        });
+      }
+    };
+
+    updateRect();
+    window.addEventListener("scroll", updateRect, true);
+    window.addEventListener("resize", updateRect);
+    return () => {
+      window.removeEventListener("scroll", updateRect, true);
+      window.removeEventListener("resize", updateRect);
+    };
+  }, [isRenaming]);
+
+  const startRename = useCallback(() => {
+    if (cardRef.current) {
+      const r = cardRef.current.getBoundingClientRect();
+      setCardRect({
+        top: r.top,
+        left: r.left,
+        width: r.width,
+        height: r.height,
+        bottom: r.bottom,
+        right: r.right,
+      });
+    }
+    canDismissRef.current = false;
+    setIsRenaming(true);
+    setTimeout(() => {
+      canDismissRef.current = true;
+    }, 150);
+  }, []);
+
+  const entityType = getWorkflowEntityType(workflow);
+
   // ─────────────────────────────────────────────────────────────────────────
   // SAFE EARLY RETURN — all hooks have already been called above
   // ─────────────────────────────────────────────────────────────────────────
@@ -123,37 +163,91 @@ export function MediaGridItem({
   const isDone   = status === "completed" && !!url;
   const isError  = ["rejected", "failed", "error"].includes(status);
   
-  // Stricter check for generated content: must have generation config and not be an upload type
+  const isCharacter = entityType === "character";
+  const isElement = entityType === "element";
+  const isUploadType = entityType === "upload";
+  const isGeneratedMedia = entityType === "generation";
+
+  // Stricter check for generated content: must have generation config and strictly be generated media
   const hasConfig = !!(item?.generationConfig || workflow?.metadata?.generationConfig);
-  const isUploadType = workflow?.workflow_type === "UPLOAD" || workflow?.feed_type === "upload";
-  const canReuse = hasConfig && !isUploadType;
-  const isElementSheet = workflow?.workflow_type === "ELEMENT_SHEET";
-  const isDraggable = isDone && !isElementSheet;
+  const canReuse = hasConfig && isGeneratedMedia;
+  const isElementSheet = isElement;
+  const isDraggable = isDone && !isElementSheet && !isCharacter;
 
-  const displayName = workflow?.metadata?.displayName || null;
+  const displayName = workflow?.display_name
+                   || workflow?.metadata?.displayName
+                   || workflow?.character?.name
+                   || workflow?.character?.title
+                   || workflow?.element?.name
+                   || workflow?.title
+                   || null;
 
-  let menuItems = [
-    { key: "add",      icon: "add",     label: "Add to prompt",            onClick: handleAddToPrompt },
-    { key: "like",     icon: "favorite",    label: isLiked ? "Unlike" : "Like", iconClassName: cn(isLiked && "fill-white"), onClick: handleLike },
-    ...(canReuse ? [
-      { key: "reuse",  icon: "history",    label: "Reuse Settings",           onClick: handleReuseSettings },
-    ] : []),
-    { key: "download", icon: "download", label: "Download",                  onClick: handleDownload },
-    { key: "separator" },
-    { key: "tileDetails", icon: showTileDetails ? "visibility_off" : "visibility", label: showTileDetails ? "Hide tile details" : "Show tile details", onClick: toggleTileDetails },
-    { key: "delete",   icon: "delete",   label: "Delete", disabled: !canDelete, onClick: () => setIsDeleteConfirmOpen(true) },
-  ];
+  const handleRename = async (newName) => {
+    const wfId = workflow?.name || workflow?.id || item?.workflow_id || item?.workflowId || item?.name || item?.id;
+    if (!wfId) return;
+    await updateWorkflow({
+      workflowId: wfId,
+      workflowData: { display_name: newName },
+    });
+  };
 
-  if (isElementSheet) {
-    menuItems = [
-      { key: "reuse", icon: "history", label: "Reuse Settings", onClick: handleSetParameters },
-      { key: "like",     icon: "favorite",    label: isLiked ? "Unlike" : "Like", iconClassName: cn(isLiked && "fill-white"), onClick: handleLike },
-      { key: "download", icon: "download", label: "Download",                  onClick: handleDownload },
-      { key: "separator" },
-      { key: "tileDetails", icon: showTileDetails ? "visibility_off" : "visibility", label: showTileDetails ? "Hide tile details" : "Show tile details", onClick: toggleTileDetails },
-      { key: "delete",   icon: "delete",   label: "Delete", disabled: !canDelete, onClick: () => setIsDeleteConfirmOpen(true) },
-    ];
-  }
+  const getPillPosition = () => {
+    if (!cardRect || typeof window === "undefined" || !cardRect.width) {
+      return { bottom: "32px", left: "50%", transform: "translateX(-50%)" };
+    }
+    const PADDING = 10;
+    const PILL_HEIGHT = 56;
+    const spaceBelow = window.innerHeight - cardRect.bottom;
+    
+    // Position directly UNDER the media card
+    let top = cardRect.bottom + PADDING;
+    if (spaceBelow < PILL_HEIGHT + 20) {
+      // If close to bottom of screen, position inside bottom of card
+      top = Math.max(12, cardRect.bottom - PILL_HEIGHT - PADDING);
+    }
+    
+    // Align with left of the card, preventing offscreen overflow
+    const left = Math.max(12, Math.min(cardRect.left, window.innerWidth - 580));
+    return { top: `${top}px`, left: `${left}px` };
+  };
+
+  const menuItems = propMenuItems || getStudioMenuItems({
+    type: entityType,
+    workflow,
+    item,
+    actions: {
+      handleAddToPrompt,
+      handleAnimate,
+      handleLike,
+      handleReuseSettings,
+      handleDownload,
+      handleCopy: () => {
+        if (url && typeof navigator !== "undefined") {
+          navigator.clipboard?.writeText?.(url);
+        }
+      },
+      handleShare: () => {
+        if (typeof navigator !== "undefined") {
+          if (navigator.share && url) {
+            navigator.share({ title: prompt || "Media", url }).catch(() => {});
+          } else if (url) {
+            navigator.clipboard?.writeText?.(url);
+          }
+        }
+      },
+      onDelete: () => setIsDeleteConfirmOpen(true),
+      toggleTileDetails,
+      onRename: startRename,
+    },
+    state: {
+      isLiked,
+      isVideo,
+      showTileDetails,
+      canDelete,
+      canReuse,
+      canAddToPrompt,
+    },
+  });
 
   const handleDragStart = (e) => {
     e.dataTransfer.setData("imageUrl",   url);
@@ -188,16 +282,16 @@ export function MediaGridItem({
     <>
       <ContextMenu>
         <ContextMenuTrigger asChild>
-          <motion.div
-            draggable={isDraggable}
-            onDragStart={isDraggable ? handleDragStart : undefined}
-            onDrag={isDraggable ? handleDrag : undefined}
-            onDragEnd={isDraggable ? handleDragEnd : undefined}
-            onClick={canNavigate ? onClick : undefined}
+          <div
+            draggable={isDraggable && !isRenaming}
+            onDragStart={isDraggable && !isRenaming ? handleDragStart : undefined}
+            onDrag={isDraggable && !isRenaming ? handleDrag : undefined}
+            onDragEnd={isDraggable && !isRenaming ? handleDragEnd : undefined}
+            onClick={canNavigate && !isRenaming ? (e) => onClick(workflow, e) : undefined}
             className={cn(
               "group relative overflow-hidden bg-[#0a0a0a] rounded-2xl",
               "outline-2 outline-transparent",
-              canNavigate
+              canNavigate && !isRenaming
                 ? (isElementSheet ? "cursor-pointer shadow-lg hover:shadow-2xl" : "cursor-grab active:cursor-grabbing shadow-lg hover:shadow-2xl")
                 : "cursor-default",
               className
@@ -207,21 +301,28 @@ export function MediaGridItem({
                 ? {
                     width: albumWidth,
                     height: albumHeight,
-                    willChange: "auto",
+                    transform: "translateZ(0)",
+                    contain: "paint layout",
+                    contentVisibility: "auto",
+                    containIntrinsicSize: `${Math.round(albumWidth)}px ${Math.round(albumHeight)}px`,
                   }
                 : {
                     width: "100%",
-                    aspectRatio: aspect,
-                    willChange: "auto",
+                    aspectRatio: propAspect || aspect,
+                    transform: "translateZ(0)",
+                    contain: "paint layout",
+                    contentVisibility: "auto",
                   }
             }
           >
+            {/* ── Stable DOM measurement anchor for card ── */}
+            <div ref={cardRef} className="absolute inset-0 pointer-events-none -z-10" />
             {/* ── Media ── */}
             <ImageStatusView
               status={status}
               src={url}
               alt={prompt}
-              aspect={aspect}
+              aspect={propAspect || (albumWidth && albumHeight ? `${albumWidth}/${albumHeight}` : aspect)}
               error={item.error}
               showOverlay
               className="w-full h-full object-cover relative z-0"
@@ -231,13 +332,20 @@ export function MediaGridItem({
                   ref={videoRef}
                   src={url}
                   className="w-full h-full object-cover"
+                  onTimeUpdate={(e) => {
+                    const v = e.currentTarget;
+                    if (v.duration) progress.set((v.currentTime / v.duration) * 100);
+                  }}
                   onMouseEnter={(e) => e.currentTarget.play().catch(() => {})}
                   onMouseLeave={(e) => {
                     e.currentTarget.pause();
                     e.currentTarget.currentTime = 0;
                     progress.set(0);
                   }}
-                  muted loop
+                  muted
+                  loop
+                  playsInline
+                  preload="metadata"
                 />
               )}
             </ImageStatusView>
@@ -262,49 +370,21 @@ export function MediaGridItem({
                   <ButtonGroup className="bg-white/60 backdrop-blur-md rounded-lg">
                     <ActionBtn onClick={(e) => { e.stopPropagation(); handleLike(); }}>
                       <GoogleIcon 
-                        iconName={isLiked ? "favorite" : "favorite"} 
+                        iconName="favorite" 
                         fill={isLiked}
-                        className={cn("text-[13px]", isLiked ? "text-[#303031]" : "text-[#303031]")} 
+                        className="text-[13px] text-[#303031]" 
                       />
                     </ActionBtn>
-                    {canReuse && !isElementSheet && (
+                    {canReuse && (
                       <ActionBtn onClick={(e) => { e.stopPropagation(); handleReuseSettings(); }}>
                         <GoogleIcon iconName="history" className="text-[13px] text-[#303031]" />
                       </ActionBtn>
                     )}
-                    <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
-                      <DropdownMenuTrigger asChild>
-                        <ActionBtn onClick={(e) => e.stopPropagation()}>
-                          <GoogleIcon iconName="more_vert" className="text-[13px] text-[#303031]" />
-                        </ActionBtn>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-44">
-                        {menuItems.map((m, i) =>
-                          m.key === "separator"
-                            ? <DropdownMenuSeparator key={i} />
-                            : (
-                              <DropdownMenuItem
-                                key={m.key}
-                                variant={m.variant}
-                                disabled={m.disabled}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  if (m.disabled) return;
-                                  setIsDropdownOpen(false);
-                                  m.onClick();
-                                }}
-                              >
-                                <GoogleIcon 
-                                    iconName={m.icon} 
-                                    className={cn("text-[13px] mr-2", m.iconClassName)} 
-                                    fill={m.key === "like" && isLiked}
-                                /> 
-                                {m.label}
-                              </DropdownMenuItem>
-                            )
-                        )}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    <StudioItemDropdownMenu
+                      open={isDropdownOpen}
+                      onOpenChange={setIsDropdownOpen}
+                      items={menuItems}
+                    />
                   </ButtonGroup>
                 </div>
               </div>
@@ -330,72 +410,103 @@ export function MediaGridItem({
               </div>
             )}
 
-            {/* ── Corner badges ── */}
-            {isDone && (isLiked || isVideo || workflow.isMultiMedia) && (
-              <div className="absolute top-3 left-3 z-20 flex items-center gap-2 pointer-events-none drop-shadow-md">
-                {workflow.isMultiMedia && (
-                  <GoogleIcon iconName="layers" className="text-[12px] text-white" />
-                )}
-                {isLiked && (
-                  <GoogleIcon iconName="favorite" fill className="text-[12px] text-white" />
-                )}
-                {isVideo && (
-                  <GoogleIcon iconName="play_arrow" fill className="text-[12px] text-white" />
-                )}
+            {/* ── Entity Type Corner Badge (Character / Element) ── */}
+            {isDone && (isCharacter || isElement) && (
+              <div
+                className="absolute bottom-2.5 right-2.5 z-20 flex items-center justify-center w-7 h-7 rounded-[7px] bg-white text-black shadow-lg shadow-black/40 pointer-events-none transition-all duration-200 group-hover:scale-105"
+                title={isCharacter ? "Character" : "Element"}
+              >
+                <GoogleIcon
+                  iconName={isCharacter ? "accessibility_new" : "widgets"}
+                  fill
+                  weight={600}
+                  className="text-[16px] text-black"
+                />
               </div>
             )}
 
             {/* ── Display name label ── */}
-            {displayName && (
+            {displayName && !isRenaming && (
               <div className={cn(
                 "absolute bottom-0 left-0 right-0 z-20 pointer-events-none transition-opacity duration-200",
                 showTileDetails ? "opacity-100" : "opacity-0 group-hover:opacity-100",
               )}>
-                <div className="px-2 py-1.5 flex items-center gap-1.5">
-                  {isElementSheet
-                    ? <GoogleIcon iconName="layers" className="text-[12px] text-white shrink-0" />
-                    : isVideo
-                      ? <GoogleIcon iconName="play_arrow" fill className="text-[12px] text-white shrink-0" />
-                      : <GoogleIcon iconName="image" className="text-[12px] text-white shrink-0" />
-                  }
+                <div className="px-2.5 py-2 flex items-center gap-1.5">
                   <span
-                    className="text-white/90 truncate text-[12px] font-semibold max-w-[80%]"
+                    title="Double-click to rename"
+                    onDoubleClick={(e) => {
+                      e.stopPropagation();
+                      startRename();
+                    }}
+                    className="text-white/90 truncate text-[12px] font-semibold max-w-[80%] pointer-events-auto cursor-text select-none"
                   >
                     {displayName}
                   </span>
                 </div>
               </div>
             )}
-          </motion.div>
+
+          </div>
         </ContextMenuTrigger>
 
         {isDone && (
-          <ContextMenuContent className="w-48">
-            {menuItems.map((m, i) =>
-              m.key === "separator"
-                ? <ContextMenuSeparator key={i} />
-                : (
-                  <ContextMenuItem key={m.key} variant={m.variant} onClick={(e) => { e.stopPropagation(); m.onClick(); }}>
-                    <GoogleIcon 
-                        iconName={m.icon} 
-                        className={cn("text-[14px] mr-2", m.iconClassName)} 
-                        fill={m.key === "like" && isLiked}
-                    /> 
-                    {m.label}
-                  </ContextMenuItem>
-                )
-            )}
-          </ContextMenuContent>
+          <StudioContextMenuContent items={menuItems} />
         )}
       </ContextMenu>
 
       <ConfirmDeleteDialog
         open={isDeleteConfirmOpen}
         onOpenChange={setIsDeleteConfirmOpen}
-        title={isVideo ? "Supprimer la vidéo ?" : "Supprimer l'image ?"}
-        description="Cette action est irréversible."
+        title={
+          entityType === "character"
+            ? "Delete Character?"
+            : entityType === "element"
+              ? "Delete Element?"
+              : isVideo
+                ? "Delete video?"
+                : "Delete image?"
+        }
+        description="This action cannot be undone."
         onConfirm={handleDelete}
       />
+
+      {/* ── Dialog-like Rename Portal (Pill directly under media + full-screen dismissal backdrop) ── */}
+      {isRenaming && typeof window !== "undefined" && createPortal(
+        <div className="fixed inset-0 z-[99999]">
+          {/* Layer 1 — Full-screen backdrop: blocks clicks to any other card, closes on click */}
+          <div
+            className="fixed inset-0 bg-black/40 backdrop-blur-[1px] cursor-default"
+            onPointerDown={(e) => {
+              e.stopPropagation();
+              if (canDismissRef.current) {
+                setIsRenaming(false);
+              }
+            }}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (canDismissRef.current) {
+                setIsRenaming(false);
+              }
+            }}
+          />
+
+          {/* Layer 2 — Floating Pill positioned directly under the media card */}
+          <div
+            className="fixed z-[100000] pointer-events-auto"
+            style={getPillPosition()}
+            onClick={(e) => e.stopPropagation()}
+            onMouseDown={(e) => e.stopPropagation()}
+            onPointerDown={(e) => e.stopPropagation()}
+          >
+            <InlineRenamePill
+              initialName={displayName || ""}
+              onSave={handleRename}
+              onCancel={() => setIsRenaming(false)}
+            />
+          </div>
+        </div>,
+        document.body
+      )}
 
       {/* ── Drag ghost portal ── */}
       {isDragging && createPortal(
@@ -432,4 +543,4 @@ export function MediaGridItem({
       )}
     </>
   );
-}
+});

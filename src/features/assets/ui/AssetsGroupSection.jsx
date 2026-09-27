@@ -4,6 +4,7 @@ import { Check, Minus } from "lucide-react";
 import { RowsPhotoAlbum } from "react-photo-album";
 
 import { LibraryMediaGridItem } from "./LibraryMediaGridItem";
+import { Button } from "@/shared/ui/button";
 
 export function AssetsGroupSection({
   group,
@@ -18,13 +19,15 @@ export function AssetsGroupSection({
   return (
     <section className="space-y-4">
       <div className="flex items-center gap-3">
-        <button
+        <Button
           type="button"
+          variant="ghost"
+          size="icon-xs"
           onClick={() => onToggleGroupSelection(group.photos)}
           className={`
-            flex h-6 w-6 items-center justify-center rounded-md border transition
+            flex h-6 w-6 items-center justify-center rounded-md border transition p-0
             ${selectedCount > 0
-              ? "border-white bg-white text-[#050505]"
+              ? "border-white bg-white text-[#050505] hover:bg-white/90"
               : "border-white/12 bg-white/[0.03] text-white/32 hover:border-white/24 hover:text-white/72"}
           `}
           aria-label={`Select ${group.label}`}
@@ -34,7 +37,7 @@ export function AssetsGroupSection({
           ) : isPartiallySelected ? (
             <Minus className="h-3.5 w-3.5" strokeWidth={3} />
           ) : null}
-        </button>
+        </Button>
         <h2 className="text-[28px] font-semibold tracking-tight text-white">
           {group.label}
         </h2>

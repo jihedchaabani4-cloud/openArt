@@ -25,7 +25,7 @@ export default function AssetsLayout({ children }) {
 
   return (
     <AssetsFiltersProvider>
-      <div className="min-h-screen bg-[#050505]">
+      <div className="min-h-screen bg-background">
         <div className="mx-auto flex min-h-screen w-full max-w-[1720px] flex-col">
           {!isAssetDetailPage ? <AssetsNavbar hidden={hidden} /> : null}
           <div className="flex flex-1 space-x-4">

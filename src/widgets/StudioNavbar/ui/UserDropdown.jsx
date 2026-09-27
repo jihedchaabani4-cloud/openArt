@@ -38,17 +38,12 @@ function getDisplayName(user) {
 
 function UserMenuButton({ iconName, label, onClick, variant = "filled", isLoading = false, className }) {
   return (
-    <button
+    <Button
       type="button"
+      variant={variant === "filled" ? "user-menu-filled" : "user-menu-outline"}
       onClick={onClick}
       disabled={isLoading}
-      className={cn(
-        "flex h-[42px] w-full items-center justify-center gap-2.5 rounded-full border transition-colors disabled:opacity-60 disabled:cursor-not-allowed",
-        variant === "filled"
-          ? "border-transparent bg-white/10 text-white hover:bg-white/20"
-          : "border-white/10 bg-transparent text-white hover:bg-white/5",
-        className
-      )}
+      className={cn("flex w-full items-center justify-center gap-2.5", className)}
     >
       {isLoading ? (
         <Loader2 size={16} className="animate-spin text-white/70" />
@@ -60,7 +55,7 @@ function UserMenuButton({ iconName, label, onClick, variant = "filled", isLoadin
         <GoogleIcon iconName={iconName} className="text-[18px] text-white/80" />
       ) : null}
       <span className="text-[14px] font-medium">{label}</span>
-    </button>
+    </Button>
   )
 }
 
@@ -115,12 +110,11 @@ export function UserDropdown({ className }) {
     <>
       <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen} modal={false}>
         <DropdownMenuTrigger asChild>
-        <button
+        <Button
           type="button"
-          className={cn(
-            "flex size-9 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-linear-to-br from-white/10 to-white/5 transition-colors hover:bg-white/10",
-            className
-          )}
+          variant="user-avatar"
+          size="avatar"
+          className={cn("size-9 min-w-9 min-h-9 p-0", className)}
           aria-label="Open user menu"
         >
           <Avatar className="size-full rounded-xl bg-transparent">
@@ -129,55 +123,56 @@ export function UserDropdown({ className }) {
               {initials}
             </AvatarFallback>
           </Avatar>
-        </button>
+        </Button>
       </DropdownMenuTrigger>
 
       <DropdownMenuContent
         align="end"
         sideOffset={10}
-        className="w-[360px] rounded-[32px] border border-white/8 bg-(--color-imagine-grey-2) backdrop-blur-[80px] p-4 shadow-[0_22px_80px_rgba(0,0,0,0.45)]"
+        className="w-[360px] rounded-[var(--mat-sys-corner-extra-large,28px)] border border-[var(--mat-sys-outline-variant,rgba(255,255,255,0.08))] bg-[var(--mat-menu-container-color,var(--background-state-90))] backdrop-blur-[80px] p-4 shadow-[var(--mat-dialog-container-elevation-shadow)]"
       >
 
 
         <div className="mb-4 mt-2 flex items-center gap-3 px-2">
           <Avatar className="size-11 rounded-full bg-transparent">
             <AvatarImage src={avatarUrl} alt={displayName} />
-            <AvatarFallback className="rounded-full bg-[#ff5722] text-[18px] font-semibold text-white">
+            <AvatarFallback className="rounded-full bg-[var(--mat-sys-primary,#a8c7fa)] text-[18px] font-semibold text-[var(--mat-sys-on-primary,#062e6f)]">
               {initials.slice(0, 1)}
             </AvatarFallback>
           </Avatar>
 
           <div className="min-w-0">
-            <p className="truncate text-[15px] font-semibold leading-tight text-white">
+            <p className="truncate text-[15px] font-semibold leading-tight text-[var(--mat-sys-on-surface,#e3e3e3)]">
               {displayName}
             </p>
-            <p className="truncate pt-1 text-[13px] text-white/60">
+            <p className="truncate pt-1 text-[13px] text-[var(--mat-sys-on-surface-variant,#8e918f)]">
               {email}
             </p>
           </div>
         </div>
 
-        <div className="rounded-[24px] bg-white/[0.06] p-5">
+        <div className="rounded-[var(--mat-dialog-container-shape,24px)] bg-[var(--foreground-state-05)] border border-[var(--mat-sys-outline-variant,rgba(255,255,255,0.08))] p-5">
           <div className="flex items-center gap-2">
-            <GoogleIcon iconName="stars" className="text-[18px] text-white" />
-            <span className="text-[15px] font-medium text-white underline decoration-white/30 underline-offset-4">
+            <GoogleIcon iconName="stars" className="text-[18px] text-[var(--mat-sys-on-surface,#e3e3e3)]" />
+            <span className="text-[15px] font-medium text-[var(--mat-sys-on-surface,#e3e3e3)] underline decoration-white/30 underline-offset-4">
               {walletBalance} Crédits IA
             </span>
           </div>
-          <p className="mt-1.5 text-[12px] font-normal text-white/60">
+          <p className="mt-1.5 text-[12px] font-normal text-[var(--mat-sys-on-surface-variant,#8e918f)]">
             Les crédits sont actualisés quotidiennement
           </p>
-          <button 
+          <Button 
             type="button"
+            variant="default"
             onClick={(e) => {
               e.preventDefault();
               setDropdownOpen(false);
               setTimeout(() => setIsPricingOpen(true), 150);
             }}
-            className="mt-4 flex h-10 w-full items-center justify-center rounded-full bg-[#f1f1f1] text-[14px] font-medium text-[#111111] transition-colors hover:bg-[#e4e4e4]"
+            className="mt-4 flex h-10 w-full items-center justify-center rounded-full bg-[var(--mat-sys-primary,#a8c7fa)] text-[14px] font-medium text-[var(--mat-sys-on-primary,#062e6f)] transition-colors hover:brightness-110 cursor-pointer"
           >
             Update Credit
-          </button>
+          </Button>
         </div>
 
         <div className="space-y-2 pt-3">

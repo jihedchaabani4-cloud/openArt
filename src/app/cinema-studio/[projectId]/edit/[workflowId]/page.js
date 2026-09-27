@@ -23,7 +23,7 @@ export default function LegacyWorkflowEditRedirectPage() {
     }, [projectData, projectId, router, workflowId]);
 
     return (
-        <div className="flex h-screen w-full items-center justify-center bg-[#050505]">
+        <div className="flex h-screen w-full items-center justify-center bg-background">
             <div className="animate-pulse text-white/20">Redirecting...</div>
         </div>
     );

@@ -2,6 +2,8 @@
 
 import React from "react";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
+import { Button } from "@/shared/ui/button";
+import { cn } from "@/shared/lib/utils";
 
 const CATEGORY_TABS = [
   { id: "all", label: "All", googleIcon: "grid_view" },
@@ -27,22 +29,19 @@ export function ElementsKreaControls({
         {CATEGORY_TABS.map((tab) => {
           const isSelected = selectedCategory === tab.id;
           return (
-            <button
+            <Button
               key={tab.id}
               type="button"
+              variant={isSelected ? "primary" : "ghost"}
               role="tab"
               aria-selected={isSelected}
               data-state={isSelected ? "active" : "inactive"}
               onClick={() => onCategoryChange && onCategoryChange(tab.id)}
-              className={`flow_tab_slider_trigger inline-flex items-center gap-1.5 h-full px-3 rounded-md text-xs font-medium transition-all whitespace-nowrap cursor-pointer outline-none ${
-                isSelected
-                  ? "bg-white text-black font-semibold shadow-xs"
-                  : "text-white/60 hover:text-white hover:bg-white/5"
-              }`}
+              className="gap-1.5 h-full rounded-md"
             >
               <GoogleIcon iconName={tab.googleIcon} className="text-[1rem]" />
               <span>{tab.label}</span>
-            </button>
+            </Button>
           );
         })}
       </div>

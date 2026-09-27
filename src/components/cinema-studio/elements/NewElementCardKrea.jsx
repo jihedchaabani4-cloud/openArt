@@ -2,6 +2,7 @@
 
 import React from "react";
 import { Plus } from "lucide-react";
+import { Button } from "@/shared/ui/button";
 
 export function NewElementCardKrea({ onClick, label = "New element" }) {
   return (
@@ -12,14 +13,15 @@ export function NewElementCardKrea({ onClick, label = "New element" }) {
     >
       <div className="bg-[oklch(26.9%_0_0)] relative aspect-[370/231] w-full overflow-hidden rounded-md transition-transform group-active:scale-99 flex items-center justify-center">
         <div className="flex h-full items-center justify-center">
-          <button
-            data-slot="button"
-            className="inline-flex shrink-0 items-center justify-center gap-2 text-sm font-normal whitespace-nowrap transition-all outline-none size-9 rounded-full bg-white text-black opacity-100 shadow-xs hover:bg-white/90"
+          <Button
             type="button"
+            variant="primary"
+            size="icon"
+            className="rounded-full"
             aria-label={label}
           >
             <Plus className="size-4 stroke-[2.2]" />
-          </button>
+          </Button>
         </div>
       </div>
       <div className="text-white flex h-6 items-center justify-between gap-1 px-0.5">

@@ -5,7 +5,7 @@ import { useEffect, useState, useCallback } from "react"
 import { AnimatePresence, motion } from "framer-motion"
 import { useQueryClient } from "@tanstack/react-query"
 
-import { SessionSidebar } from "@/widgets/StudioLayout/SessionSidebar/SessionSidebar"
+import { LeftNavigationRail } from "@/widgets/StudioLayout/LeftNavigationRail"
 import { StudioNavbar } from "@/widgets/StudioNavbar"
 import { useWorkflowsStore } from "@/features/workflows"
 import { useProjectData } from "@/features/workflows/api/workflowsApi"
@@ -26,13 +26,11 @@ export default function StudioLayout({ children }) {
     const pathname = usePathname()
     const { projectId } = useParams()
     const queryClient = useQueryClient()
-    const { 
-        selectedProjectId, 
-        setSelectedProjectId, 
-        activeSessionId, 
-        setActiveSessionId,
-        setIsNavbarHidden
-    } = useWorkflowsStore();
+    const selectedProjectId = useWorkflowsStore(s => s.selectedProjectId);
+    const setSelectedProjectId = useWorkflowsStore(s => s.setSelectedProjectId);
+    const activeSessionId = useWorkflowsStore(s => s.activeSessionId);
+    const setActiveSessionId = useWorkflowsStore(s => s.setActiveSessionId);
+    const setIsNavbarHidden = useWorkflowsStore(s => s.setIsNavbarHidden);
     
     // 🔹 Data Layer (Pure Hook, controlled error)
     const { data: projectData, isLoading, isError, refetch } = useProjectData(projectId)
@@ -144,11 +142,13 @@ export default function StudioLayout({ children }) {
                         className="flex-1 flex flex-col overflow-hidden"
                     >
                         {!isEditPage ? (
-                            <div className="flex-1 min-h-0 flex overflow-hidden">
-                                <SessionSidebar />
-                                <div className="flex-1 min-w-0 flex flex-col relative overflow-hidden">
-                                    <StudioNavbar />
-                                    {children}
+                            <div className="flex-1 min-h-0 flex flex-col relative overflow-hidden">
+                                <StudioNavbar />
+                                <div className="flex-1 min-h-0 flex overflow-hidden relative">
+                                    <LeftNavigationRail />
+                                    <div className="flex-1 min-w-0 flex flex-col relative overflow-hidden">
+                                        {children}
+                                    </div>
                                 </div>
                             </div>
                         ) : (

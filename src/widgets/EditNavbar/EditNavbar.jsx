@@ -10,6 +10,7 @@ import { getPrimaryMediaConfig } from "@/shared/lib/generationUtils"
 import { EditableDisplayName } from "@/shared/ui/EditableDisplayName"
 import { useUpdateWorkflow, useDeleteMedia } from "@/features/workflows/api/workflowsApi"
 import { UserDropdown } from "@/widgets/StudioNavbar/ui/UserDropdown"
+import { NavbarCore, NavbarAction } from "@/widgets/NavbarCore"
 import { ConfirmDeleteDialog } from "@/widgets/dialogs/ConfirmDeleteDialog"
 import {
     DropdownMenu,
@@ -27,6 +28,7 @@ function toTitleCase(value) {
 function buildCleanWorkflowTitle(workflow) {
     const primaryConfig = getPrimaryMediaConfig(workflow) || {}
     const rawTitle =
+        workflow?.display_name ||
         workflow?.metadata?.displayName ||
         primaryConfig?.prompt ||
         workflow?.name ||
@@ -127,90 +129,74 @@ export function EditNavbar({
     }
 
     return (
-        <motion.nav
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
-            className="fixed top-0 left-0 w-full z-50 flex items-center h-16 px-6 border-b border-white/5 bg-black/40 backdrop-blur-xl"
-        >
-            <div className="flex items-center gap-1">
-                <Button
-                    variant="studio-ghost"
-                    size="icon"
-                    className="h-10 w-10 rounded-xl"
-                    onClick={() => router.push(`/cinema-studio/${projectId}/generations`)}
-                >
-                    <GoogleIcon iconName="arrow_back" className="text-[20px]" />
-                </Button>
+        <NavbarCore
+            onBack={() => router.push(`/cinema-studio/${projectId}/generations`)}
+            backLabel="Back to generations"
+            left={
+                <>
+                    <EditableDisplayName
+                        ref={nameRef}
+                        displayName={workflow?.display_name || workflow?.metadata?.displayName || displayTitle}
+                        placeholder="Untitled Workflow"
+                        onSave={handleEditWorkflowName}
+                        inputClassName="text-md font-medium tracking-tight max-w-[260px] focus:text-white"
+                    />
 
-                <EditableDisplayName
-                    ref={nameRef}
-                    displayName={workflow?.metadata?.displayName || displayTitle}
-                    placeholder="Untitled Workflow"
-                    onSave={handleEditWorkflowName}
-                    inputClassName="text-md font-medium tracking-tight max-w-[260px] focus:text-white"
-                />
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button
+                                variant="studio-ghost"
+                                size="icon"
+                            >
+                                <GoogleIcon iconName="more_vert" className="text-[13px]" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="start" className="min-w-[180px] p-2">
+                            <DropdownMenuItem onClick={() => nameRef.current?.startEditing()}>
+                                <GoogleIcon iconName="edit" className="text-[20px]" />
+                                Renommer
+                            </DropdownMenuItem>
+                            <DropdownMenuItem 
+                                variant="destructive"
+                                onClick={() => setIsDeleteDialogOpen(true)}
+                            >
+                                <GoogleIcon iconName="delete" className="text-[20px]" />
+                                Placer dans la corbeille
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
 
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button
-                            variant="studio-ghost"
-                            size="icon"
-                        >
-                            <GoogleIcon iconName="more_vert" className="text-[13px]" />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start" className="min-w-[140px]">
-                        <DropdownMenuItem onClick={() => nameRef.current?.startEditing()}>
-                            <GoogleIcon iconName="edit" className="text-[13px]" />
-                            Rename
-                        </DropdownMenuItem>
-                        <DropdownMenuItem 
-                            onClick={() => setIsDeleteDialogOpen(true)}
-                        >
-                            <GoogleIcon iconName="delete" className="text-[13px]" />
-                            Delete
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
+                    <ConfirmDeleteDialog
+                        open={isDeleteDialogOpen}
+                        onOpenChange={setIsDeleteDialogOpen}
+                        description="Are you sure you want to delete this specific generation?"
+                        confirmLabel="Delete"
+                        cancelLabel="Cancel"
+                        onConfirm={handleDeleteMedia}
+                    />
+                </>
+            }
+            right={
+                <>
+                    <NavbarAction
+                        variant="ghost"
+                        label="Download"
+                        onClick={handleDownloadAll}
+                    />
 
-                <ConfirmDeleteDialog
-                    open={isDeleteDialogOpen}
-                    onOpenChange={setIsDeleteDialogOpen}
-                    description="Are you sure you want to delete this specific generation?"
-                    confirmLabel="Delete"
-                    cancelLabel="Cancel"
-                    onConfirm={handleDeleteMedia}
-                />
-            </div>
+                    <NavbarAction
+                        variant="ghost"
+                        label={showHistory ? "Hide history" : "Show history"}
+                        onClick={onToggleHistory}
+                    />
 
-            <div className="ml-auto flex items-center gap-1">
-
-                <Button
-                    variant="studio-ghost"
-                    onClick={handleDownloadAll}
-                >
-                    Download
-                </Button>
-
-   
-
-                <Button
-                    variant="studio-ghost"
-                    onClick={onToggleHistory}
-                >
-                    {showHistory ? "Hide history" : "Show history"}
-                </Button>
-
-                <Button
-                    variant="studio-white"
-                    onClick={() => router.push(`/cinema-studio/${projectId}/generations`)}
-                >
-                    Done
-                </Button>
-
-                <UserDropdown />
-            </div>
-        </motion.nav>
+                    <NavbarAction
+                        variant="primary"
+                        label="Done"
+                        onClick={() => router.push(`/cinema-studio/${projectId}/generations`)}
+                    />
+                </>
+            }
+        />
     )
 }

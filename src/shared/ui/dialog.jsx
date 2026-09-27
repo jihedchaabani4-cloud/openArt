@@ -58,7 +58,7 @@ function DialogContent({
         className={cn(
           // FULL SCREEN
           variant === "full" &&
-            "fixed inset-0 z-50 w-screen h-screen outline-none bg-(--color-imagine-grey-2) backdrop-blur-[80px]",
+            "fixed inset-0 z-50 w-screen h-screen outline-none bg-[var(--mat-dialog-container-color,var(--background-state-90))] backdrop-blur-[80px]",
 
           // FLOATING (فوق prompt bar)
           variant === "floating" &&
@@ -68,7 +68,7 @@ function DialogContent({
             translate-x-[-50%] translate-y-0 
             w-[300px] max-w-[95%]
             h-auto max-h-[60vh]
-            rounded-3xl bg-(--color-imagine-grey-2) backdrop-blur-[80px] shadow-[0px_16px_32px_-8px_rgba(0,0,0,0.4)] overflow-hidden
+            rounded-[var(--mat-dialog-container-shape,24px)] bg-[var(--mat-dialog-container-color,var(--background-state-90))] backdrop-blur-[80px] shadow-[var(--mat-dialog-container-elevation-shadow)] border border-[var(--mat-sys-outline-variant,rgba(255,255,255,0.08))] overflow-hidden
             flex flex-col
             data-[state=open]:animate-in
             data-[state=closed]:animate-out
@@ -81,23 +81,23 @@ function DialogContent({
           // DEFAULT (centered)
           variant === "default" &&
             `
-            z-50 bg-background
+            z-50 bg-[var(--mat-dialog-container-color,var(--background-state-90))]
             fixed top-[50%] left-[50%]
             translate-x-[-50%] translate-y-[-50%]
             w-full max-w-[calc(100%-2rem)]
             sm:max-w-6xl
-            rounded-lg border p-6 shadow-lg
+            rounded-[var(--mat-dialog-container-shape,24px)] border border-[var(--mat-sys-outline-variant,rgba(255,255,255,0.08))] p-6 shadow-[var(--mat-dialog-container-elevation-shadow)]
             data-[state=open]:animate-in
             data-[state=closed]:animate-out
 
           `,
           variant === "small" &&
             `
-            z-50 bg-background
+            z-50 bg-[var(--mat-dialog-container-color,var(--background-state-90))]
             fixed top-[50%] left-[50%]
             translate-x-[-50%] translate-y-[-50%]
             w-full max-w-[250px] max-h-[200px]
-            rounded-lg border p-2 shadow-lg
+            rounded-[var(--mat-sys-corner-large,16px)] border border-[var(--mat-sys-outline-variant,rgba(255,255,255,0.08))] p-2 shadow-[var(--mat-dialog-container-elevation-shadow)]
             data-[state=open]:animate-in
             data-[state=closed]:animate-out
           `,
@@ -109,7 +109,7 @@ function DialogContent({
 
         {showCloseButton && (
           <DialogPrimitive.Close
-            className="absolute top-4 right-4 text-white/40 hover:text-white transition flex items-center justify-center"
+            className="absolute top-4 right-4 text-[var(--mat-sys-on-surface-variant,#8e918f)] hover:text-[var(--mat-sys-on-surface,#e3e3e3)] transition flex items-center justify-center"
           >
             <GoogleIcon iconName="close" className="text-[20px]" />
             <span className="sr-only">Close</span>

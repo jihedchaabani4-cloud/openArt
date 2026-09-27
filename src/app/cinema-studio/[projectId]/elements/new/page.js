@@ -1,20 +1,14 @@
 "use client";
 
-import React, { useState, useMemo, useRef } from "react";
-import { useParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowUp, Plus, Loader2 } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
-import { UserDropdown } from "@/widgets/StudioNavbar/ui/UserDropdown";
-import { ImportMediaDialog } from "@/widgets/ImportMediaDialog/ImportMediaDialog";
-import { useCreateElementSheetMutation, useElementSheetWorkflows, useProjectData } from "@/features/workflows/api/workflowsApi";
-import { useWorkflowsStore } from "@/features/workflows";
-import { getPrimaryMedia } from "@/shared/lib/generationUtils";
-import { getItemMetadata } from "@/shared/lib/displayUtils";
-import { getWorkflowDomainType, DOMAIN_TYPES } from "@/features/workflows/model/domainNormalizer";
+import { NavbarCore, NavbarInput } from "@/widgets/NavbarCore";
+import { useNewElement } from "@/features/elements";
 import { ELEMENT_TYPES } from "@/features/workflows/model/elementSheetConfig";
-
+import { ImportMediaDialog } from "@/widgets/ImportMediaDialog/ImportMediaDialog";
+import { cn } from "@/shared/lib/utils";
 
 const SAMPLE_FACES = [
   "https://www.krea.ai/_app/2ef422f246a7f9e2/immutable/assets/face_3.BsghTrki.webp",
@@ -22,226 +16,117 @@ const SAMPLE_FACES = [
   "https://www.krea.ai/_app/2ef422f246a7f9e2/immutable/assets/face_1.Cndx8lVo.webp",
 ];
 
-function StackedPhotos({ images }) {
+function StackedPhotos({ images = [] }) {
   const frames = images.length > 0 ? images.slice(0, 3) : SAMPLE_FACES;
-  const transforms = ["-translate-x-14 -translate-y-3 -rotate-12", "translate-x-16 -translate-y-2 rotate-12", ""];
+  const transforms = [
+    "-translate-x-14 -translate-y-3 -rotate-12",
+    "translate-x-16 -translate-y-2 rotate-12",
+    "",
+  ];
   return (
     <div className="relative h-28 w-20">
       {frames.map((src, i) => (
-        <div key={i} style={{ zIndex: i }} className={"absolute top-0 h-28 w-20 overflow-hidden rounded-2xl border-4 border-white bg-black/25 shadow-xl backdrop-blur-md transition-transform duration-500 ease-out " + transforms[i]}>
-          <div className="h-full w-full bg-cover bg-center opacity-100" style={{ backgroundImage: 'url("' + src + '")' }} />
+        <div
+          key={i}
+          style={{ zIndex: i }}
+          className={cn(
+            "absolute top-0 h-28 w-20 overflow-hidden rounded-2xl border-4 border-white bg-black/25 shadow-xl backdrop-blur-md transition-transform duration-500 ease-out",
+            transforms[i]
+          )}
+        >
+          <div
+            className="h-full w-full bg-cover bg-center opacity-100"
+            style={{ backgroundImage: `url("${src}")` }}
+          />
         </div>
       ))}
     </div>
   );
 }
 
-const generateDefaultElementName = () => "element" + Math.floor(100 + Math.random() * 900);
-
+/**
+ * NewElementPage
+ * Presentational page for creating a new Element.
+ * All logic (drag-and-drop, photo reading, state, upload) lives in useNewElement.
+ */
 export default function NewElementPage() {
-  const { projectId } = useParams();
-  const router = useRouter();
-  const [name, setName] = useState("");
-  const [elementType, setElementType] = useState("object");
-  const [error, setError] = useState(null);
-  const [loadingWorkflowId, setLoadingWorkflowId] = useState(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
-  const [isAssetsOpen, setIsAssetsOpen] = useState(false);
-  const [previewImages, setPreviewImages] = useState([]);
-  const fileInputRef = useRef(null);
-
-  const { mutateAsync: runCreateElement } = useCreateElementSheetMutation({
-    onError: (err) => setError(err.message || "Failed to create element"),
-  });
-  const selectedProjectId = useWorkflowsStore((s) => s.selectedProjectId);
-  const effectiveProjectId = projectId || selectedProjectId;
-
-  const { workflows: existingSheets } = useElementSheetWorkflows(effectiveProjectId);
-  const { data: projectData, isLoading: isProjectLoading } = useProjectData(effectiveProjectId);
-
-  const goBack = () => {
-    if (existingSheets && existingSheets.length > 0) {
-      router.push('/cinema-studio/' + effectiveProjectId + '/elements');
-    } else {
-      router.push('/cinema-studio/' + effectiveProjectId + '/generations');
-    }
-  };
-
-  // Photos: only GENERATION + UPLOAD workflows, one card per workflow showing its primary media
-  const photos = useMemo(() => {
-    const rawWorkflows = projectData?.projectContents?.workflows || [];
-    const rawMedia = projectData?.projectContents?.media || [];
-
-    return rawWorkflows
-      .filter((wf) => {
-        const domainType = getWorkflowDomainType(wf);
-        return domainType === DOMAIN_TYPES.GENERATION || domainType === DOMAIN_TYPES.UPLOAD;
-      })
-      .reduce((acc, wf, i) => {
-        const items = rawMedia
-          .filter((m) => m.workflowId === wf.name || m.workflowId === wf.id)
-          .map((m) => ({ ...m, id: m.id || m.name }));
-        const withItems = { ...wf, items };
-        const primary = getPrimaryMedia(withItems);
-        if (!primary) return acc;
-
-        const meta = getItemMetadata(primary, withItems);
-        const primaryUrl = meta?.url || primary.url || primary.file_url || primary.asset?.file_url;
-        if (!primaryUrl) return acc;
-
-        const label = wf.metadata?.displayName || wf.display_name || wf.name || "Untitled";
-        const domainType = getWorkflowDomainType(wf);
-
-        acc.push({
-          src: primaryUrl,
-          key: wf.id || wf.name || String(i),
-          workflow: withItems,
-          primaryMediaUrl: primaryUrl,
-          label,
-          domainType,
-        });
-        return acc;
-      }, []);
-  }, [projectData]);
-
-  const createAndRedirect = async (urls) => {
-    if (!urls || !urls.length) return;
-    if (!effectiveProjectId) {
-      setError("Project ID is missing. Please select a valid project.");
-      return;
-    }
-    setError(null);
-    try {
-      const elementName = name.trim() || generateDefaultElementName();
-      const res = await runCreateElement({
-        payload: { name: elementName, sourceImages: urls, projectId: effectiveProjectId, element_type: elementType },
-      });
-      const elementId = res?.workflow?.id || res?.workflow?.name || res?.element?.workflow_id || res?.element?.id || res?.id || res?.name || res?.result?.data?.json?.workflow?.id;
-      if (elementId && effectiveProjectId) {
-        window.location.href = `/cinema-studio/${effectiveProjectId}/elements/${elementId}`;
-      } else {
-        window.location.href = `/cinema-studio/${effectiveProjectId}/elements`;
-      }
-    } catch (err) {
-      setError(err?.message || "Failed to create element.");
-    }
-  };
-
-  const uploadFiles = async (files) => {
-    if (!files || !files.length) return;
-    setError(null);
-    setIsUploading(true);
-    try {
-      const dataUrls = await Promise.all(
-        files.map((f) => new Promise((resolve) => {
-          const reader = new FileReader();
-          reader.onloadend = () => resolve(reader.result);
-          reader.onerror = () => resolve(null);
-          reader.readAsDataURL(f);
-        }))
-      );
-      const valid = dataUrls.filter(Boolean);
-      if (!valid.length) { setError("Failed to read image file(s)."); return; }
-      setPreviewImages((p) => [...p, ...valid]);
-      await createAndRedirect(valid);
-    } catch (err) {
-      setError(err?.message || "Failed to create element.");
-    } finally {
-      setIsUploading(false);
-    }
-  };
-
-  const createFromWorkflow = async (workflow, thumbUrl) => {
-    if (!thumbUrl || loadingWorkflowId) return;
-    setLoadingWorkflowId(workflow.id || workflow.name);
-    setError(null);
-    try {
-      await createAndRedirect([thumbUrl]);
-    } catch (err) {
-      setError(err?.message || "Failed to create element.");
-    } finally {
-      setLoadingWorkflowId(null);
-    }
-  };
-
-  const handleSelectAssets = async (selectedItems) => {
-    if (!selectedItems || !selectedItems.length) return;
-    const urls = selectedItems.map((i) => i.url || i.file_url || i.src).filter(Boolean);
-    if (!urls.length) return;
-    setIsUploading(true);
-    try {
-      await createAndRedirect(urls);
-    } catch (err) {
-      setError(err?.message || "Failed to create element.");
-    } finally {
-      setIsUploading(false);
-    }
-  };
-
-  const handleFileChange = async (e) => {
-    const files = Array.from(e.target.files || []);
-    if (files.length) await uploadFiles(files);
-    e.target.value = "";
-  };
-
-  const handleDragOver = (e) => { e.preventDefault(); setIsDragging(true); };
-  const handleDragLeave = () => setIsDragging(false);
-  const handleDrop = async (e) => {
-    e.preventDefault();
-    setIsDragging(false);
-    const files = Array.from(e.dataTransfer.files || []).filter((f) => f.type.startsWith("image/"));
-    if (files.length) await uploadFiles(files);
-  };
-
-  const isAnyLoading = !!loadingWorkflowId || isUploading;
+  const {
+    name,
+    setName,
+    elementType,
+    setElementType,
+    error,
+    setError,
+    loadingWorkflowId,
+    isDragging,
+    isUploading,
+    isAnyLoading,
+    isAssetsOpen,
+    setIsAssetsOpen,
+    previewImages,
+    fileInputRef,
+    photos,
+    isProjectLoading,
+    projectData,
+    existingSheets,
+    goBack,
+    createFromWorkflow,
+    handleSelectAssets,
+    handleFileChange,
+    handleDragOver,
+    handleDragLeave,
+    handleDrop,
+  } = useNewElement();
 
   return (
     <div className="flex flex-col h-full w-full bg-studio-dark text-white overflow-hidden">
-
       {/* ── Navbar ── */}
-      <motion.nav
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
-        className="fixed top-0 left-0 w-full z-50 flex items-center h-16 px-6 border-b border-white/5 bg-black/40 backdrop-blur-xl"
-      >
-        <div className="flex items-center gap-1">
-          <Button variant="studio-ghost" size="icon" className="h-10 w-10 rounded-xl" onClick={goBack}>
-            <GoogleIcon iconName="arrow_back" className="text-[20px]" />
-          </Button>
-          <input
+      <NavbarCore
+        onBack={goBack}
+        backLabel={existingSheets && existingSheets.length > 0 ? "Back to elements" : "Back to studio"}
+        left={
+          <NavbarInput
             value={name}
-            onChange={(e) => { setName(e.target.value); if (error) setError(null); }}
+            onChange={(e) => {
+              setName(e.target.value);
+              if (error) setError(null);
+            }}
             placeholder="New element"
-            className="bg-transparent border-none outline-none text-md font-medium tracking-tight text-white placeholder-white/40 max-w-[260px] focus:text-white focus:ring-0"
           />
-        </div>
-        <div className="ml-auto flex items-center gap-2">
-          <UserDropdown />
-        </div>
-      </motion.nav>
+        }
+      />
 
       {/* ── Body ── */}
       <main
-        className="flex-1 overflow-y-auto overflow-x-hidden pt-16 custom-scrollbar"
+        className="flex-1 overflow-y-auto overflow-x-hidden pt-[80px] custom-scrollbar"
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
       >
         <div className="w-full px-4 sm:px-8 py-8 flex flex-col gap-8">
-
-          {/* Error */}
+          {/* Error Banner */}
           <AnimatePresence>
             {error && (
-              <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} className="text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3">
+              <motion.div
+                initial={{ opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                className="text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3"
+              >
                 {error}
               </motion.div>
             )}
           </AnimatePresence>
 
-          {/* ── Upload Card (original design) ── */}
-          <input ref={fileInputRef} type="file" multiple accept="image/*" className="hidden" onChange={handleFileChange} />
+          {/* ── Upload Card ── */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            accept="image/*"
+            className="hidden"
+            onChange={handleFileChange}
+          />
 
           <motion.div
             initial={{ opacity: 0, y: 16 }}
@@ -252,8 +137,12 @@ export default function NewElementPage() {
             <div className="flex flex-col items-center gap-6 text-center">
               <StackedPhotos images={previewImages} />
               <div className="flex max-w-sm flex-col items-center gap-2">
-                <h1 className="text-2xl font-medium tracking-tight text-white">Add images to this element</h1>
-                <p className="text-white/45 text-sm leading-5">Upload multiple images from different angles for better results.</p>
+                <h1 className="text-2xl font-medium tracking-tight text-white">
+                  Add images to this element
+                </h1>
+                <p className="text-white/45 text-sm leading-5">
+                  Upload multiple images from different angles for better results.
+                </p>
               </div>
 
               {/* ── Category Type Selector ── */}
@@ -261,49 +150,60 @@ export default function NewElementPage() {
                 {ELEMENT_TYPES.map((t) => {
                   const isSelected = elementType === t.id;
                   return (
-                    <button
+                    <Button
                       key={t.id}
                       type="button"
+                      variant={isSelected ? "pill-active" : "pill"}
                       onClick={() => setElementType(t.id)}
-                      className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-medium transition-all ${
-                        isSelected
-                          ? "bg-white text-black font-semibold shadow-sm"
-                          : "text-white/60 hover:text-white hover:bg-white/10"
-                      }`}
+                      className="gap-1.5"
                     >
                       <GoogleIcon iconName={t.googleIcon} className="text-[15px]" />
                       <span>{t.label}</span>
-                    </button>
+                    </Button>
                   );
                 })}
               </div>
+
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3 flex-wrap">
-                <button
+                <Button
                   type="button"
+                  variant="primary"
+                  size="lg"
                   onClick={() => fileInputRef.current?.click()}
                   disabled={isAnyLoading}
-                  className="inline-flex items-center justify-center gap-2 rounded-full bg-white text-black font-medium text-sm px-10 h-10 w-52 hover:bg-white/90 active:scale-[0.98] transition-all disabled:opacity-50 cursor-pointer"
+                  className="w-52 rounded-full"
                 >
-                  {isUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowUp className="w-4 h-4" />}
-                  {isUploading ? "Creating..." : "Upload"}
-                </button>
+                  {isUploading ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <ArrowUp className="w-4 h-4" />
+                  )}
+                  <span>{isUploading ? "Creating..." : "Upload"}</span>
+                </Button>
               </div>
             </div>
 
             {/* Drag overlay inside card */}
             <AnimatePresence>
               {isDragging && (
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 rounded-2xl border-2 border-blue-500 bg-blue-500/10 flex items-center justify-center pointer-events-none z-10">
-                  <span className="text-blue-400 text-sm font-medium">Drop images here</span>
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="absolute inset-0 rounded-2xl border-2 border-white/40 bg-white/10 flex items-center justify-center pointer-events-none z-10 backdrop-blur-sm"
+                >
+                  <span className="text-white text-sm font-medium">Drop images here</span>
                 </motion.div>
               )}
             </AnimatePresence>
           </motion.div>
 
-          {/* ── Workflow Gallery (RowsPhotoAlbum with exact aspect ratio like Generations page) ── */}
+          {/* ── Workflow Gallery ── */}
           {!isProjectLoading && photos.length > 0 && (
             <div className="flex flex-col gap-4 pt-6 w-full">
-              <p className="text-xs font-medium text-white uppercase tracking-wider">Add your generated media</p>
+              <p className="text-xs font-medium text-white uppercase tracking-wider">
+                Add your generated media
+              </p>
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -318,7 +218,9 @@ export default function NewElementPage() {
                       <div
                         key={photo.key}
                         className="relative group overflow-hidden rounded-xl bg-zinc-900 border border-white/10 shrink-0 max-h-[220px] cursor-pointer"
-                        onClick={() => !isAnyLoading && createFromWorkflow(wf, photo.primaryMediaUrl)}
+                        onClick={() =>
+                          !isAnyLoading && createFromWorkflow(wf, photo.primaryMediaUrl)
+                        }
                       >
                         <img
                           src={photo.primaryMediaUrl}
@@ -355,10 +257,25 @@ export default function NewElementPage() {
         onSelect={handleSelectAssets}
         library={projectData?.projectContents?.media || []}
         mode="image"
-        maxAllowed={10}
+        maxAllowed={6}
+        selectedItems={previewImages}
       />
 
-      <style jsx global>{'.custom-scrollbar::-webkit-scrollbar{width:6px}.custom-scrollbar::-webkit-scrollbar-track{background:transparent}.custom-scrollbar::-webkit-scrollbar-thumb{background-color:rgba(255,255,255,.12);border-radius:20px}.custom-scrollbar::-webkit-scrollbar-thumb:hover{background-color:rgba(255,255,255,.25)}'}</style>
+      <style jsx global>{`
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background-color: rgba(255, 255, 255, 0.12);
+          border-radius: 20px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background-color: rgba(255, 255, 255, 0.25);
+        }
+      `}</style>
     </div>
   );
 }

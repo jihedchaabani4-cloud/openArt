@@ -1,214 +1,293 @@
 "use client";
 
 import React from "react";
-import { motion } from "framer-motion";
-import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { cn } from "@/shared/lib/utils";
 import {
-    DropdownMenu,
-    DropdownMenuTrigger,
-    DropdownMenuContent,
-    DropdownMenuItem,
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
 } from "@/shared/ui/dropdown-menu";
 import {
-    ContextMenu,
-    ContextMenuTrigger,
-    ContextMenuContent,
-    ContextMenuItem,
+  ContextMenu,
+  ContextMenuTrigger,
+  ContextMenuContent,
+  ContextMenuItem,
 } from "@/shared/ui/context-menu";
-import { SPRING_FAST } from "./constants";
 import { formatRelativeTime } from "./utils";
-import { Button } from "@/shared/ui/button";
+import { resolveMediaUrl, isMediaVideo } from "@/shared/lib/displayUtils";
+import { GoogleIcon } from "@/shared/ui/GoogleIcon";
+
 /**
- * SessionItem — a single session row inside the sidebar.
+ * SessionItem — exact Krea AI structure and division ("ta9sima").
+ * Structure: nkUyELME > QRN5ax9i _0c0YtLDn [YxWsR2DP] > _4wLIjhiw (zone 1) + rbL9332z (zone 2) + _6-KYYdj5 (zone 3)
  */
 export function SessionItem({
-    session,
-    index,
-    isActive,
-    isExpanded,
-    isDraggingOver,
-    dragOverSessionId,
-    mediaList,
-    editingSessionId,
-    editingName,
-    openDropdownId,
-    openContextMenuId,
-    onSelect,
-    onRename,
-    onSaveRename,
-    onDelete,
-    onKeyDown,
-    onEditingNameChange,
-    onDropdownOpenChange,
-    onContextMenuOpenChange,
-    onDragOver,
-    onDrop,
+  session,
+  isActive,
+  isExpanded,
+  isDraggingOver,
+  dragOverSessionId,
+  mediaList = [],
+  editingSessionId,
+  openDropdownId,
+  openContextMenuId,
+  onSelect,
+  onRename,
+  onDelete,
+  onDropdownOpenChange,
+  onContextMenuOpenChange,
+  onDragOver,
+  onDrop,
 }) {
-    const sessionId    = session.name;
-    const displayName  = session.metadata?.displayName || "Untitled";
-    const thumbUrl     = mediaList[0]?.url || null;
-    const isVideoThumb = thumbUrl && /\.(mp4|webm|mov)$/i.test(thumbUrl);
+  const itemRef = React.useRef(null);
+  const sessionId = session.name || session.id || session.session_id;
+  const displayName = session.metadata?.displayName || session.session_name || "Untitled";
+  const mediaCount = mediaList.length;
 
-    return (
-        <div
+  const firstMedia = mediaList[0];
+  const thumbUrl = firstMedia ? resolveMediaUrl(firstMedia) : null;
+  const isVideo = firstMedia ? (isMediaVideo(firstMedia) || (thumbUrl && /\.(mp4|webm|mov)$/i.test(thumbUrl))) : false;
+
+  const isDragTarget = dragOverSessionId === sessionId;
+
+  return (
+    <div
+      ref={itemRef}
+      data-session-id={sessionId}
+      className={cn(
+        "rt-Flex rt-r-fd-column rt-r-gap-0 nkUyELME w-full transition-all duration-150 select-none",
+        isDragTarget && "outline outline-2 outline-white/40 -outline-offset-2 rounded-xl bg-white/10"
+      )}
+      onDragOver={(e) => onDragOver?.(e, sessionId)}
+      onDrop={(e) => onDrop?.(e, sessionId)}
+    >
+      <ContextMenu
+        onOpenChange={(open) => onContextMenuOpenChange?.(open, sessionId)}
+      >
+        <ContextMenuTrigger asChild>
+          <div
+            role="button"
+            tabIndex={0}
+            onClick={() => onSelect?.(sessionId)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                onSelect?.(sessionId);
+              }
+            }}
+            data-state="enabled"
+            data-type="session"
+            data-testid="asset-item-session"
             className={cn(
-                "w-[230px] rounded-md transition-all duration-0",
-                dragOverSessionId === sessionId
-                    ? "outline outline-2 outline-white/10 -outline-offset-2 bg-white/10"
-                    : ""
+              "QRN5ax9i _0c0YtLDn w-[276px] h-[56px] shrink-0 flex items-center justify-between px-1.5 rounded-xl transition-colors duration-150 cursor-pointer group outline-none",
+              isActive && "YxWsR2DP",
+              isExpanded
+                ? (isActive
+                    ? "bg-white/[0.08] hover:bg-white/[0.1]"
+                    : "hover:bg-white/[0.04]")
+                : "bg-transparent"
             )}
-            onDragOver={(e) => onDragOver(e, sessionId)}
-            onDrop={(e) => onDrop(e, sessionId)}
-        >
-            <ContextMenu
-                onOpenChange={(open) => onContextMenuOpenChange(open, sessionId)}
+            title={`Session: ${displayName}`}
+          >
+            {/* ── Zone 1: Text column (_4wLIjhiw) ── */}
+            <div
+              className={cn(
+                "_4wLIjhiw flex-1 min-w-0 pr-1.5 flex flex-col justify-center transition-opacity duration-100",
+                isExpanded ? "opacity-100" : "opacity-0 pointer-events-none"
+              )}
             >
-                <ContextMenuTrigger asChild>
-                    <motion.div
-                        className="relative w-full flex items-center justify-start rounded-md group/item p-0 cursor-pointer transition-all duration-0"
-                        onClick={() => onSelect(sessionId)}
-                        initial={{ opacity: 0, x: -8, backgroundColor: "rgba(0,0,0,0)" }}
-                        animate={{
-                            opacity: 1,
-                            x: 0,
-                            backgroundColor: isActive && isExpanded ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0)",
-                            pointerEvents: isDraggingOver ? "none" : "auto",
-                        }}
-                        transition={{ ...SPRING_FAST, delay: index * 0.03 }}
-                        whileHover={{
-                            backgroundColor: isActive && isExpanded
-                                ? "rgba(255,255,255,0.05)"
-                                : "rgba(255,255,255,0.05)",
-                        }}
+              <div className="pBV7IFtu">
+                <div
+                  className="rt-Flex rt-r-fd-column rt-r-ai-start rt-r-jc-center rt-r-gap rt-r-w flex flex-col items-start justify-center gap-1 w-full"
+                  style={{ "--gap": "4px", "--width": "100%" }}
+                >
+                  <div
+                    flex="1"
+                    className="rt-Flex rt-r-ai-center rt-r-gap flex items-center gap-1 w-full"
+                    style={{ "--gap": "4px" }}
+                  >
+                    <p
+                      className="M62SzGkP YVr5CyLZ hMtyerta JLHNaI5D text-[13px] font-medium text-white/95 truncate w-full select-none cursor-pointer"
+                      title="Double-click to rename"
+                      onDoubleClick={(e) => {
+                        e.stopPropagation();
+                        const r = itemRef.current?.getBoundingClientRect();
+                        onRename?.(sessionId, displayName, r);
+                      }}
                     >
-                        {/* ── Text panel (revealed on expand) ── */}
-                        <motion.div
-                            className="absolute right-4 left-[52px] flex flex-col justify-center pointer-events-none"
-                            animate={{
-                                opacity: isExpanded ? 1 : 0,
-                                x: isExpanded ? 0 : -8,
-                            }}
-                            transition={SPRING_FAST}
-                            style={{ pointerEvents: isExpanded ? "auto" : "none" }}
-                        >
-                            <div className="flex items-center justify-between w-full gap-1">
-                                <div className="flex flex-col min-w-0">
-                                    {editingSessionId === sessionId ? (
-                                        <div className="flex items-center gap-1 min-w-0">
-                                            <input
-                                                type="text"
-                                                value={editingName}
-                                                onChange={(e) => onEditingNameChange(e.target.value)}
-                                                onBlur={(e) => {
-                                                    if (!e.relatedTarget?.closest(".save-edit-btn")) {
-                                                        onEditingNameChange(""); // reset
-                                                    }
-                                                }}
-                                                onKeyDown={onKeyDown}
-                                                autoFocus
-                                                onFocus={(e) => e.target.select()}
-                                                className="font-bold text-[13px] text-white bg-white/10 border border-white/20 rounded w-full px-1 py-0.5 min-w-0 outline-none focus:border-white/40 focus:ring-1 focus:ring-white/40 placeholder:text-white/30"
-                                                onClick={(e) => e.stopPropagation()}
-                                                placeholder="Session Name"
-                                            />
-                                            <button
-                                                className="save-edit-btn p-1 rounded hover:bg-white/10 text-white/70 hover:text-white transition-colors shrink-0"
-                                                onMouseDown={(e) => {
-                                                    e.preventDefault();
-                                                    e.stopPropagation();
-                                                    onSaveRename();
-                                                }}
-                                                title="Save"
-                                            >
-                                                <GoogleIcon iconName="check" className="text-[13px]" />
-                                            </button>
-                                        </div>
-                                    ) : (
-                                        <span className="font-bold text-[13px] text-white truncate max-w-[160px]">
-                                            {displayName}
-                                        </span>
-                                    )}
+                      {displayName}
+                    </p>
+                  </div>
+                  <div className="bXQHM8vj">
+                    <p
+                      className="bwb-ytSs bfYBxxY6 ANaoSOqf vlTtiXYR _0-TArdMK MpYFP8Fq text-[11px] text-white/40 -mt-0.5 truncate"
+                      data-variant="body"
+                      data-truncate="true"
+                      data-size="xs"
+                      style={{ WebkitLineClamp: 1 }}
+                    >
+                      {formatRelativeTime(session.metadata?.createTime || session.create_time)}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
 
-                                    <span className="text-[10px] font-medium text-white/40 -mt-0.5">
-                                        {formatRelativeTime(session.metadata?.createTime)}
-                                    </span>
-                                </div>
+            {/* ── Zone 2: Middle actions button (rbL9332z) ── */}
+            <div
+              className={cn(
+                "rbL9332z shrink-0 transition-opacity duration-100 mr-1.5",
+                isExpanded ? "opacity-100" : "opacity-0 pointer-events-none"
+              )}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <DropdownMenu
+                open={openDropdownId === sessionId}
+                onOpenChange={(open) => onDropdownOpenChange?.(open, sessionId)}
+              >
+                <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    className="czT9T-Z0 rX9iw-2j x-X6WsHP CwvQCQAW CZfA-iwz size-7 flex items-center justify-center rounded-md text-white/0 group-hover:text-white/50 hover:!text-white hover:bg-white/10 transition-all outline-none"
+                    data-testid="delete-button"
+                    aria-label="More actions"
+                    aria-haspopup="menu"
+                    aria-expanded={openDropdownId === sessionId}
+                    data-state="enabled"
+                    data-button-size="md"
+                    data-icon-only="true"
+                  >
+                    <div className="PDK3Zwgj flex items-center justify-center">
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 16 16"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M5.14265 7.99979C5.14265 8.63097 4.63097 9.14265 3.99979 9.14265C3.36861 9.14265 2.85693 8.63097 2.85693 7.99979C2.85693 7.36861 3.36861 6.85693 3.99979 6.85693C4.63097 6.85693 5.14265 7.36861 5.14265 7.99979Z"
+                          fill="currentColor"
+                        />
+                        <path
+                          d="M9.14265 7.99979C9.14265 8.63097 8.63097 9.14265 7.99979 9.14265C7.36861 9.14265 6.85693 8.63097 6.85693 7.99979C6.85693 7.36861 7.36861 6.85693 7.99979 6.85693C8.63097 6.85693 9.14265 7.36861 9.14265 7.99979Z"
+                          fill="currentColor"
+                        />
+                        <path
+                          d="M11.9998 9.14265C12.631 9.14265 13.1426 8.63097 13.1426 7.99979C13.1426 7.36861 12.631 6.85693 11.9998 6.85693C11.3686 6.85693 10.8569 7.36861 10.8569 7.99979C10.8569 8.63097 11.3686 9.14265 11.9998 9.14265Z"
+                          fill="currentColor"
+                        />
+                      </svg>
+                    </div>
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-36 p-1 bg-[#151617] border-white/10 text-white shadow-xl">
+                  <DropdownMenuItem
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const r = itemRef.current?.getBoundingClientRect();
+                      onRename?.(sessionId, displayName, r);
+                    }}
+                    className="text-[12px] cursor-pointer hover:bg-white/10 rounded-md"
+                  >
+                    Edit title
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    variant="destructive"
+                    onClick={() => onDelete?.(sessionId)}
+                    className="text-[12px] cursor-pointer text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-md"
+                  >
+                    Delete session
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
 
-                                <DropdownMenu
-                                    open={openDropdownId === sessionId}
-                                    onOpenChange={(open) => onDropdownOpenChange(open, sessionId)}
-                                >
-                                    <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                                        <button className="shrink-0 p-1 rounded-lg text-white/0 group-hover/item:text-white/50 hover:!text-white hover:bg-white/10 transition-all duration-150 outline-none flex items-center justify-center">
-                                            <GoogleIcon iconName="more_horiz" className="text-[13px]" />
-                                        </button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end" className="min-w-[140px]">
-                                        <DropdownMenuItem
-                                            onClick={(e) => { e.stopPropagation(); onRename(sessionId, displayName); }}
-                                        >
-                                            Edit title
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem
-                                            onClick={(e) => { e.stopPropagation(); onDelete(sessionId); }}
-                                        >
-                                            Delete
-                                        </DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                </DropdownMenu>
-                            </div>
-                        </motion.div>
+            {/* ── Zone 3: Right cell (_6-KYYdj5) ── */}
+            <div
+              className={cn(
+                "_6-KYYdj5 bHGXKATD w-[52px] h-[52px] shrink-0 rounded-[13px] overflow-hidden flex items-center justify-center relative transition-all duration-200 ease-out origin-center transform-gpu",
+                isActive
+                  ? "scale-[1.15] z-20 shadow-xl shadow-black/80"
+                  : "scale-100 group-hover:scale-[1.15] hover:scale-[1.15] group-hover:z-10 hover:z-10 group-hover:shadow-lg",
+                thumbUrl ? (
+                  isActive
+                    ? "bg-black/40"
+                    : "bg-black/40"
+                ) : (
+                  isActive
+                    ? "bg-[#25262a]"
+                    : "bg-[#1d1e20] group-hover:bg-[#25262a]"
+                )
+              )}
+              data-state="enabled"
+              data-cell-type={thumbUrl ? "thumbnail" : "empty"}
+              aria-label={thumbUrl ? `thumbnail with ${mediaCount} items` : "empty"}
+            >
+              {thumbUrl ? (
+                <div className="nu12nnSD w-full h-full relative">
+                  <div className="AT8bHpoz _7il3pN4l w-full h-full rounded-[14px] overflow-hidden" data-size="lg" data-ratio="1:1">
+                    {isVideo ? (
+                      <video
+                        src={thumbUrl}
+                        className="qvB3HBZk w-full h-full object-cover"
+                        muted
+                        loop
+                        playsInline
+                        onMouseEnter={(e) => e.currentTarget.play().catch(() => {})}
+                        onMouseLeave={(e) => e.currentTarget.pause()}
+                      />
+                    ) : (
+                      <img
+                        src={thumbUrl}
+                        alt=""
+                        data-testid="thumbnail-1:1-lg"
+                        className="qvB3HBZk w-full h-full object-cover"
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    )}
+                  </div>
+                  {mediaCount > 0 && (
+                    <div className="U6VFMyDk absolute bottom-1 right-1 px-1.5 min-w-[18px] h-[18px] rounded-full bg-black/60 backdrop-blur-sm flex items-center justify-center pointer-events-none border border-white/15 shadow-sm">
+                      <p
+                        className="_8yb3AdNg vlTtiXYR _0-TArdMK text-[11px] font-bold text-white leading-none"
+                        data-variant="labelCaps"
+                        data-size="sm"
+                      >
+                        {mediaCount}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="UFyLjQxp w-full h-full bg-[#1d1e20]" aria-label="Empty Item" />
+              )}
+            </div>
+          </div>
+        </ContextMenuTrigger>
 
-                        {/* ── Thumbnail ── */}
-                        <motion.div
-                            className={cn(
-                                "w-10 h-10 shrink-0 rounded-md overflow-hidden flex items-center justify-center relative z-10 transition-all",
-                                thumbUrl
-                                    ? "bg-white/20"
-                                    : (isActive
-                                        ? "bg-black/95 bg-[linear-gradient(0deg,rgba(255,255,255,0.1),rgba(255,255,255,0.1))]"
-                                        : "bg-black/25 bg-[linear-gradient(0deg,rgba(255,255,255,0.1),rgba(255,255,255,0.1))]")
-                            )}
-                            whileHover={{ scale: 1.06 }}
-                            whileTap={{ scale: 0.95 }}
-                            transition={SPRING_FAST}
-                        >
-                            {thumbUrl && (
-                                isVideoThumb ? (
-                                    <video
-                                        src={thumbUrl}
-                                        className="w-full h-full object-cover"
-                                        muted
-                                        loop
-                                        onMouseEnter={(e) => e.currentTarget.play()}
-                                        onMouseLeave={(e) => e.currentTarget.pause()}
-                                    />
-                                ) : (
-                                    <img src={thumbUrl} alt="Thumbnail" className="w-full h-full object-cover" />
-                                )
-                            )}
-                            <div className="absolute inset-0 ring-1 ring-inset ring-black/10 pointer-events-none rounded-md" />
-                        </motion.div>
-                    </motion.div>
-                </ContextMenuTrigger>
-
-                {/* Context menu (right-click) */}
-                {openContextMenuId === sessionId && (
-                    <ContextMenuContent className="min-w-[140px]">
-                        <ContextMenuItem
-                            onClick={(e) => { e.stopPropagation(); onRename(sessionId, displayName); }}
-                        >
-                            Edit title
-                        </ContextMenuItem>
-                        <ContextMenuItem
-                            onClick={(e) => { e.stopPropagation(); onDelete(sessionId); }}
-                        >
-                            Delete session
-                        </ContextMenuItem>
-                    </ContextMenuContent>
-                )}
-            </ContextMenu>
-        </div>
-    );
+        <ContextMenuContent className="w-36 p-1 bg-[#151617] border-white/10 text-white shadow-xl">
+          <ContextMenuItem
+            onClick={(e) => {
+              e.stopPropagation();
+              const r = itemRef.current?.getBoundingClientRect();
+              onRename?.(sessionId, displayName, r);
+            }}
+            className="text-[12px] cursor-pointer hover:bg-white/10 rounded-md"
+          >
+            Edit title
+          </ContextMenuItem>
+          <ContextMenuItem
+            variant="destructive"
+            onClick={() => onDelete?.(sessionId)}
+            className="text-[12px] cursor-pointer text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-md"
+          >
+            Delete session
+          </ContextMenuItem>
+        </ContextMenuContent>
+      </ContextMenu>
+    </div>
+  );
 }

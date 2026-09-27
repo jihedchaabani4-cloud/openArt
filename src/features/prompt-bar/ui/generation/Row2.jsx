@@ -9,26 +9,28 @@ export function Row2({ paramsProps, actionProps, onToggleVariations, variationsO
     studioModelsLoading,
     setModel,
     generationMode,
-    setGenerationMode,
   } = paramsProps;
 
   return (
-    <div className="flex items-center gap-1.5 flex-wrap">
-      {showPaperclip && (
-        <button
-          ref={paperclipRef}
-          onClick={onAddClick}
-          className={`p-2 rounded-lg transition-colors flex items-center justify-center ${
-            mediaOpen ? 'bg-white/10 text-white' : 'text-neutral-400 hover:bg-white/5 hover:text-neutral-100'
-          }`}
-          title="Add Reference Images"
-          type="button"
-        >
-          <GoogleIcon iconName="attachment" className="text-[13px] rotate-[-45deg]" />
-        </button>
-      )}
+    <div className="flex items-center justify-between gap-1.5 w-full">
+      <div className="flex items-center gap-1.5 min-w-[36px]">
+        {showPaperclip && (
+          <button
+            ref={paperclipRef}
+            onClick={onAddClick}
+            className={`p-2 rounded-lg transition-colors flex items-center justify-center ${
+              mediaOpen ? 'bg-white/10 text-white' : 'text-neutral-400 hover:bg-white/5 hover:text-neutral-100'
+            }`}
+            title="Add Reference Images"
+            type="button"
+          >
+            <GoogleIcon iconName="attachment" className="text-[13px] rotate-[-45deg]" />
+          </button>
+        )}
+      </div>
 
-      <div className="ml-auto flex items-center gap-2">
+      {/* Center: Model Selector in the middle of prompt bar */}
+      <div className="flex-1 flex items-center justify-center">
         <ModelSelector
           type={generationMode}
           onChange={setModel}
@@ -36,6 +38,9 @@ export function Row2({ paramsProps, actionProps, onToggleVariations, variationsO
           dynamicModels={studioModels}
           loading={studioModelsLoading}
         />
+      </div>
+
+      <div className="flex items-center gap-2 shrink-0">
         <button
           onClick={(e) => { e.preventDefault(); e.stopPropagation(); onToggleVariations(); }}
           className={`p-2 rounded-lg transition-colors flex items-center justify-center ${

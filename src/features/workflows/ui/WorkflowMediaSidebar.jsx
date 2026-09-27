@@ -2,6 +2,7 @@ import React from "react";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { cn } from "@/shared/lib/utils";
 import { getItemMetadata } from "@/shared/lib/generationUtils";
+import { Button } from "@/shared/ui/button";
 
 /**
  * A standalone sidebar component that displays a list of workflow media as thumbnails.
@@ -35,14 +36,17 @@ export function WorkflowMediaSidebar({
         const iVideo = meta.isVideo;
         
         return (
-          <button
+          <Button
+            type="button"
+            variant="ghost"
+            size="tile"
             key={item.id || item.name}
             onClick={(e) => {
               e.stopPropagation();
               onSelect(item);
             }}
             className={cn(
-              "relative aspect-square rounded-xl overflow-hidden border transition-all duration-300",
+              "relative aspect-square rounded-xl overflow-hidden border transition-all duration-300 p-0 h-auto",
               "shrink-0 group transform active:scale-95 hover:scale-[1.03]",
               isGrid ? "w-full" : "w-full max-w-[200px]",
               isActive ? "border-[#D4FF00] ring-1 ring-[#D4FF00]/30 shadow-lg scale-[1.03]" : "border-white/10 opacity-70 hover:opacity-100 hover:border-white/30"
@@ -68,7 +72,7 @@ export function WorkflowMediaSidebar({
               "absolute inset-0 bg-[#D4FF00]/10 transition-opacity duration-300 pointer-events-none",
               isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"
             )} />
-          </button>
+          </Button>
         );
       })}
     </div>

@@ -1,15 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Button } from "@/shared/ui/button";
-import { GoogleIcon } from "@/shared/ui/GoogleIcon";
-import { UserDropdown } from "@/widgets/StudioNavbar/ui/UserDropdown";
-import { useCharacterWorkflows, useGenerateCharacterDescriptionMutation } from "@/features/workflows/api/workflowsApi";
+import { NavbarCore, NavbarTitle } from "@/widgets/NavbarCore";
+import { useCharacterWorkflows, useGenerateCharacterDescriptionMutation } from "@/features/characters";
 import { useWorkflowsStore } from "@/features/workflows";
-import { CharacterPromptBar } from "@/features/prompt-bar/ui/character/CharacterPromptBar";
-import { useCharacterStore } from "@/features/prompt-bar/model/useCharacterStore";
+import { useCharacterStore } from "@/features/studio";
 
 const CHARACTER_ARCHETYPES = [
   {
@@ -118,28 +115,27 @@ function ArchetypeCard({ archetype, onClick, index, isGenerating, isDisabled }) 
 export default function NewCharacterPage() {
   const { projectId } = useParams();
   const router = useRouter();
-  const [error, setError] = useState(null);
+  const [error] = useState(null);
   const [generatingDescriptionId, setGeneratingDescriptionId] = useState(null);
-
-  const { setPrompt, setIsGeneratingDescription } = useCharacterStore();
-  const generateDescriptionMutation = useGenerateCharacterDescriptionMutation();
 
   const selectedProjectId = useWorkflowsStore((s) => s.selectedProjectId);
   const effectiveProjectId = projectId || selectedProjectId;
+
+  const setPrompt = useCharacterStore((state) => state.setPrompt);
+  const generateDescriptionMutation = useGenerateCharacterDescriptionMutation();
 
   const { workflows: existingSheets } = useCharacterWorkflows(effectiveProjectId);
 
   const goBack = () => {
     if (existingSheets && existingSheets.length > 0) {
-      router.push('/cinema-studio/' + effectiveProjectId + '/characters');
+      router.push(`/cinema-studio/${effectiveProjectId}/characters`);
     } else {
-      router.push('/cinema-studio/' + effectiveProjectId + '/generations');
+      router.push(`/cinema-studio/${effectiveProjectId}/generations`);
     }
   };
 
   const handleArchetypeClick = async (archetype) => {
     setGeneratingDescriptionId(archetype.id);
-    setIsGeneratingDescription(true);
 
     try {
       const res = await generateDescriptionMutation.mutateAsync({
@@ -160,32 +156,20 @@ export default function NewCharacterPage() {
       console.warn("Character description generation error:", err.message);
     } finally {
       setGeneratingDescriptionId(null);
-      setIsGeneratingDescription(false);
     }
   };
 
   return (
     <div className="flex flex-col h-full w-full bg-studio-dark text-white overflow-hidden relative">
       {/* Navbar */}
-      <motion.nav
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
-        className="fixed top-0 left-0 w-full z-50 flex items-center h-16 px-6 border-b border-white/5 bg-black/40 backdrop-blur-xl"
-      >
-        <div className="flex items-center gap-1">
-          <Button variant="studio-ghost" size="icon" className="h-10 w-10 rounded-xl" onClick={goBack}>
-            <GoogleIcon iconName="arrow_back" className="text-[20px]" />
-          </Button>
-          <span className="text-md font-medium tracking-tight text-white ml-2">New character</span>
-        </div>
-        <div className="ml-auto flex items-center gap-2">
-          <UserDropdown />
-        </div>
-      </motion.nav>
+      <NavbarCore
+        onBack={goBack}
+        backLabel={existingSheets && existingSheets.length > 0 ? "Back to characters" : "Back to studio"}
+        left={<NavbarTitle>New character</NavbarTitle>}
+      />
 
       {/* Body - Centered Layout */}
-      <main className="flex-1 overflow-y-auto overflow-x-hidden pt-16 pb-44 custom-scrollbar flex flex-col items-center justify-center">
+      <main className="flex-1 overflow-y-auto overflow-x-hidden pt-[80px] pb-44 custom-scrollbar flex flex-col items-center justify-center">
         <div className="w-full px-4 sm:px-8 py-8 flex flex-col gap-8 items-center justify-center min-h-[calc(100vh-240px)]">
           <AnimatePresence>
             {error && (
@@ -226,7 +210,8 @@ export default function NewCharacterPage() {
         </div>
       </main>
 
-      <CharacterPromptBar />
+      {/* CharacterPromptBar removed - TODO: add v2 */}
+      <div className="h-16" />
     </div>
   );
 }

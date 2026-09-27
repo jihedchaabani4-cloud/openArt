@@ -193,6 +193,7 @@ export function useFilteredWorkflows(projectId, sessionId) {
         ...wf,
         id:             wf.name,
         name:           wf.name,
+        display_name:   wf.display_name || wf.metadata?.displayName || 'Untitled Workflow',
         type:           isUpload ? 'upload' : 'generation',
         items:          wfItems.map(item => ({
           ...item,

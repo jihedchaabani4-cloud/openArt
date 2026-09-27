@@ -108,7 +108,7 @@ export function AssetDetailPage({ workflowId }) {
   }
 
   return (
-    <div className="flex min-h-[calc(100vh-75px)] w-full items-center justify-center bg-[#050505] px-4 py-4 text-white xl:px-6">
+    <div className="flex min-h-[calc(100vh-75px)] w-full items-center justify-center bg-background px-4 py-4 text-white xl:px-6">
       <div className="flex max-w-full justify-center">
         <div className="inline-flex max-w-full items-center justify-center overflow-hidden rounded-[28px] border border-white/10 bg-black shadow-[0_24px_90px_rgba(0,0,0,0.45)]">
           <MediaViewer media={media} alt={viewerAlt} isVideo={isVideo} />

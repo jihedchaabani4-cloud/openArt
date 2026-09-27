@@ -2,6 +2,7 @@
 
 import React from "react"
 import { cn } from "@/shared/lib/utils"
+import { Button } from "@/shared/ui/button"
 
 /**
  * SelectorCard
@@ -36,10 +37,13 @@ export function SelectorCard({ items = [], value, onChange, className }) {
 
 function CardItem({ label, image, isSelected, onClick }) {
   return (
-    <button
+    <Button
+      type="button"
+      variant="ghost"
+      size="tile"
       onClick={onClick}
       className={cn(
-        "group relative flex flex-col gap-2 transition-all duration-300"
+        "group relative flex flex-col gap-2 transition-all duration-300 p-0 h-auto items-start text-left"
       )}
     >
       <div className={cn(
@@ -63,6 +67,6 @@ function CardItem({ label, image, isSelected, onClick }) {
           {label}
         </span>
       )}
-    </button>
+    </Button>
   )
 }

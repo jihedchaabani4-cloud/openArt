@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { Loader2, X } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@/shared/ui/dialog";
+import { Button } from "@/shared/ui/button";
+import { cn } from "@/shared/lib/utils";
 
 function GoogleIcon() {
   return (
@@ -38,20 +40,28 @@ function MicrosoftIcon() {
 
 function AuthButton({ icon, children, onClick, inverted = false, isLoading = false }) {
   return (
-    <button
+    <Button
       type="button"
+      variant={inverted ? "primary" : "secondary"}
+      size="lg"
       onClick={onClick}
       disabled={isLoading}
-      className={[
-        "flex h-12 w-full items-center justify-center gap-2 rounded-full px-4 text-[15px] font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed",
-        inverted
-          ? "bg-white text-black hover:bg-zinc-100"
-          : "bg-zinc-800 text-white hover:bg-zinc-700",
-      ].join(" ")}
+      className={cn(
+        "w-full rounded-full gap-2 text-[15px]",
+        !inverted && "bg-zinc-800 hover:bg-zinc-700 text-white"
+      )}
     >
-      {isLoading ? <Loader2 className="size-5 animate-spin" /> : icon}
+      {isLoading ? (
+        <Loader2 className="size-5 animate-spin" />
+      ) : React.isValidElement(icon) ? (
+        icon
+      ) : typeof icon === "function" || (typeof icon === "object" && icon !== null && ("$$typeof" in icon || "render" in icon)) ? (
+        React.createElement(icon, { className: "size-5" })
+      ) : (
+        icon
+      )}
       <span>{children}</span>
-    </button>
+    </Button>
   );
 }
 
@@ -224,14 +234,16 @@ export function LoginDialog({ open, onClose }) {
           <DialogTitle>Authentication</DialogTitle>
         </span>
 
-        <button
+        <Button
           type="button"
+          variant="ghost"
+          size="icon"
           onClick={onClose}
-          className="absolute right-3 top-3 z-20 flex size-9 items-center justify-center rounded-full text-white/70 transition-colors hover:bg-white/8 hover:text-white"
+          className="absolute right-3 top-3 z-20 rounded-full"
           aria-label="Close login dialog"
         >
           <X className="size-5" />
-        </button>
+        </Button>
 
         <div className="flex h-full w-full items-stretch justify-center p-3">
           <LeftPanel open={open} />

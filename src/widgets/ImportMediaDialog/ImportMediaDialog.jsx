@@ -3,7 +3,7 @@ import { Upload } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@/shared/ui/dialog";
 import { useProjects } from "@/features/projects/api/projectsApi";
 import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows";
-import { useLibraryFilter } from "@/features/prompt-bar/model/useLibraryFilter";
+import { useLibraryFilter } from "@/features/studio";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import PhotoAlbum from "react-photo-album";
@@ -12,10 +12,23 @@ export function ImportMediaDialog({
   open, onOpenChange, onSelect,
   library = [], loading = false, hasMore = false, onLoadMore,
   mode = "all", maxAllowed = 1, onUploadFromPC,
+  selectedItems: propSelectedItems = [],
+  selectedReferences = [],
+  selectedIds = [],
+  excludedIds = [],
+  excludedItems = [],
 }) {
   const { data: projects = [] } = useProjects();
   const { selectedProjectId: activeProjectId } = useGenerationsStore();
-  const { search, setSearch, visibleItems } = useLibraryFilter(library, mode);
+  const { search, setSearch, visibleItems } = useLibraryFilter(library, mode, "all", {
+    selectedItems: [
+      ...(Array.isArray(propSelectedItems) ? propSelectedItems : [propSelectedItems]),
+      ...(Array.isArray(selectedReferences) ? selectedReferences : [selectedReferences]),
+      ...(Array.isArray(selectedIds) ? selectedIds : [selectedIds]),
+      ...(Array.isArray(excludedIds) ? excludedIds : [excludedIds]),
+      ...(Array.isArray(excludedItems) ? excludedItems : [excludedItems]),
+    ],
+  });
   const [selectedItems, setSelectedItems] = React.useState([]);
   const fileInputRef = React.useRef(null);
 
@@ -80,13 +93,18 @@ export function ImportMediaDialog({
     const isDisabled = selectedItems.length >= maxAllowed && !isSelected;
 
     return (
-      <button
+      <Button
+        type="button"
+        variant="ghost"
+        size="tile"
         onClick={() => toggleSelection(item)}
+        disabled={isDisabled}
         style={{ ...style, padding: 0, border: 'none', background: 'transparent' }}
-        className={`group relative rounded-lg overflow-hidden bg-white/5 transition-all
-          ${isSelected ? "ring-2 ring-[#3b82f6]" : "hover:ring-2 hover:ring-white/30"}
-          ${isDisabled ? "opacity-20 cursor-not-allowed" : "cursor-pointer"}
-        `}
+        className={cn(
+          "group relative rounded-lg overflow-hidden bg-white/5 transition-all p-0 h-auto",
+          isSelected ? "ring-2 ring-[#3b82f6]" : "hover:ring-2 hover:ring-white/30",
+          isDisabled ? "opacity-20 cursor-not-allowed" : "cursor-pointer"
+        )}
       >
         {photo._isVideo ? (
           <video src={photo.src} style={{ width: '100%', height: '100%', objectFit: 'cover' }} muted />
@@ -100,7 +118,7 @@ export function ImportMediaDialog({
             </svg>
           </div>
         )}
-      </button>
+      </Button>
     );
   };
 
@@ -108,7 +126,7 @@ export function ImportMediaDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent variant="floating" className="overflow-hidden">
         <DialogTitle className="sr-only">Import Media</DialogTitle>
-        <Input ref={fileInputRef} type="file" className="hidden" multiple accept={uploadAccept} onChange={handleFileChange} />
+        <input ref={fileInputRef} type="file" className="hidden" multiple accept={uploadAccept} onChange={handleFileChange} />
 
         <div className="flex items-center gap-3 px-5 py-3">
           <div className="flex-1 relative">
@@ -116,7 +134,7 @@ export function ImportMediaDialog({
               placeholder="Search for Assets" className="rounded-lg border-none bg-[#DADCE019]" />
             <Button onClick={() => fileInputRef.current?.click()}
               className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-white/40 hover:text-white transition-colors">
-              <Upload size={16} />
+              <Upload size={16} strokeWidth={1.5} />
             </Button>
           </div>
         </div>

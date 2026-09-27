@@ -9,6 +9,7 @@ import {
     DialogTitle
 } from "@/shared/ui/dialog"
 import { GoogleIcon } from "@/shared/ui/GoogleIcon"
+import { Button } from "@/shared/ui/button"
 import { cn } from "@/shared/lib/utils"
 
 import { ImageInfoSidebar } from "./ImageInfoSidebar"
@@ -64,9 +65,14 @@ export function ImageViewerDialog({ children, item, group, src, title, showSideb
                 {!item && (
                     <div className=" top-6 right-6 z-50">
                         <DialogClose asChild>
-                            <button className="p-3 rounded-full bg-white/5 hover:bg-white/10 text-white transition-all duration-300 border border-white/10 group backdrop-blur-md flex items-center justify-center">
+                            <Button 
+                                type="button"
+                                variant="ghost"
+                                size="icon-lg"
+                                className="rounded-full bg-white/5 hover:bg-white/10 text-white border border-white/10 group backdrop-blur-md"
+                            >
                                 <GoogleIcon iconName="close" className="text-[24px] opacity-40 group-hover:opacity-100" />
-                            </button>
+                            </Button>
                         </DialogClose>
                     </div>
                 )}

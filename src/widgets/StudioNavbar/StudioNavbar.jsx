@@ -3,36 +3,22 @@
 import * as React from "react"
 import { motion } from "framer-motion"
 import { useProjects, useUpdateProject } from "@/features/projects/api/projectsApi"
-import { useProjectSessions, useElementSheetWorkflows } from "@/features/workflows/api/workflowsApi"
+import { useProjectSessions } from "@/features/workflows/api/workflowsApi"
 import { useCreateSession } from "@/features/projects/api/createSessionApi"
 import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows"
-import { useFilteredWorkflows as useFilteredGenerations } from "@/features/workflows/model/useFilteredWorkflows"
 
 import { StudioNavbarLeft } from "./ui/StudioNavbarLeft"
 import { StudioNavbarCenter } from "./ui/StudioNavbarCenter"
 import { StudioNavbarRight } from "./ui/StudioNavbarRight"
 import { UserDropdown } from "./ui/UserDropdown"
 import { CreateSessionDialog } from "./ui/CreateSessionDialog"
-import { ActiveFilterTags } from "@/features/workflows/ui/ActiveFilterTags"
 
 import { useNavbarSearch } from "./hooks/useNavbarSearch"
 
 export function StudioNavbar() {
-    const gridSize = useGenerationsStore(s => s.gridSize);
-    const setGridSize = useGenerationsStore(s => s.setGridSize);
-    const soundOnHover = useGenerationsStore(s => s.soundOnHover);
-    const setSoundOnHover = useGenerationsStore(s => s.setSoundOnHover);
-    const showTileDetails = useGenerationsStore(s => s.showTileDetails);
-    const setShowTileDetails = useGenerationsStore(s => s.setShowTileDetails);
-    const showDetails = useGenerationsStore(s => s.showDetails);
-    const setShowDetails = useGenerationsStore(s => s.setShowDetails);
-    const clearPromptOnSubmit = useGenerationsStore(s => s.clearPromptOnSubmit);
-    const setClearPromptOnSubmit = useGenerationsStore(s => s.setClearPromptOnSubmit);
     const activeSessionId = useGenerationsStore(s => s.activeSessionId);
     const setActiveSessionId = useGenerationsStore(s => s.setActiveSessionId);
     const activeProjectId = useGenerationsStore(s => s.selectedProjectId);
-    const showUploadedMedia = useGenerationsStore(s => s.showUploadedMedia);
-    const setShowUploadedMedia = useGenerationsStore(s => s.setShowUploadedMedia);
     const filters = useGenerationsStore(s => s.filters);
     const setFilter = useGenerationsStore(s => s.setFilter);
     const activeStudioTab = useGenerationsStore(s => s.activeStudioTab);
@@ -40,20 +26,23 @@ export function StudioNavbar() {
 
     const isCleanNavbarTab = activeStudioTab === 'elements' || activeStudioTab === 'characters';
 
-    const { data: projects = [] } = useProjects()
-    const { mutateAsync: updateProject } = useUpdateProject()
-    const projectSessions = useProjectSessions(activeProjectId) || []
-    const createSessionMutation = useCreateSession()
-    const { availableModels, filteredCount: genFilteredCount, total: genTotal } = useFilteredGenerations(activeProjectId, activeSessionId)
-    const { filteredCount: elemFilteredCount, total: elemTotal } = useElementSheetWorkflows(activeProjectId)
+    const { data: projects = [] } = useProjects();
+    const { mutateAsync: updateProject } = useUpdateProject();
+    const rawSessions = useProjectSessions(activeProjectId);
+    const projectSessions = React.useMemo(() => rawSessions || [], [rawSessions]);
+    const createSessionMutation = useCreateSession();
 
-    const filteredCount = activeStudioTab === 'elements' ? elemFilteredCount : genFilteredCount;
-    const total = activeStudioTab === 'elements' ? elemTotal : genTotal;
+    const activeProject = React.useMemo(
+        () => projects.find(p => p.project_id === activeProjectId),
+        [projects, activeProjectId]
+    );
+    const selectedProjectName = activeProject?.project_name || "Select Project";
 
-    const activeProject = projects.find(p => p.project_id === activeProjectId)
-    const selectedProjectName = activeProject?.project_name || "Select Project"
-    const activeSession = projectSessions.find(s => s.session_id === activeSessionId)
-    const selectedSessionName = activeSession?.session_name || null
+    const activeSession = React.useMemo(
+        () => projectSessions.find(s => s.session_id === activeSessionId),
+        [projectSessions, activeSessionId]
+    );
+    const selectedSessionName = activeSession?.session_name || null;
 
     const {
         searchExpanded,
@@ -97,10 +86,10 @@ export function StudioNavbar() {
                 hidden: { y: "-100%" },
             }}
             animate={isNavbarHidden ? "hidden" : "visible"}
-            transition={{ duration: 0.85, ease: [0.16, 1, 0.3, 1] }}
-            className="absolute top-0 left-0 pl-[5px] pr-8 py-2 w-full z-50 flex flex-col bg-transparent min-h-[60px]"
+            transition={{ duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
+            className="absolute top-0 left-0 pl-2.5 pr-8 h-16 w-full z-50 flex flex-col justify-center bg-transparent"
         >
-            <div className="flex  items-stretch min-h-[60px] w-full">
+            <div className="flex items-center h-16 w-full">
                 <StudioNavbarLeft
                     searchExpanded={searchExpanded}
                     selectedProjectName={selectedProjectName}
@@ -117,9 +106,6 @@ export function StudioNavbar() {
                     <>
                         <StudioNavbarCenter
                             searchExpanded={searchExpanded}
-                            availableModels={availableModels}
-                            filteredCount={filteredCount}
-                            total={total}
                             searchInputRef={searchInputRef}
                             handleCloseSearch={handleCloseSearch}
                             handleOpenSearch={handleOpenSearch}
@@ -127,21 +113,7 @@ export function StudioNavbar() {
                             setFilter={setFilter}
                         />
 
-                        <StudioNavbarRight
-                            searchExpanded={searchExpanded}
-                            gridSize={gridSize}
-                            setGridSize={setGridSize}
-                            soundOnHover={soundOnHover}
-                            setSoundOnHover={setSoundOnHover}
-                            showTileDetails={showTileDetails}
-                            setShowTileDetails={setShowTileDetails}
-                            showDetails={showDetails}
-                            setShowDetails={setShowDetails}
-                            clearPromptOnSubmit={clearPromptOnSubmit}
-                            setClearPromptOnSubmit={setClearPromptOnSubmit}
-                            showUploadedMedia={showUploadedMedia}
-                            setShowUploadedMedia={setShowUploadedMedia}
-                        />
+                        <StudioNavbarRight searchExpanded={searchExpanded} />
                     </>
                 ) : (
                     <div className="ml-auto flex items-center gap-2 z-50">
@@ -149,8 +121,6 @@ export function StudioNavbar() {
                     </div>
                 )}
             </div>
-
-            <ActiveFilterTags />
 
             <CreateSessionDialog
                 isOpen={isCreateSessionOpen}

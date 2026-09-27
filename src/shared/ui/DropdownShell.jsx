@@ -1,7 +1,6 @@
 "use client"
 
 import * as React from "react"
-import { Volume2, Eye, Eraser } from "lucide-react"
 import { GoogleIcon } from "@/shared/ui/GoogleIcon"
 import { cn } from "@/shared/lib/utils"
 import {
@@ -10,6 +9,25 @@ import {
   DropdownMenuTrigger,
 } from "@/shared/ui/dropdown-menu"
 import { Button } from "@/shared/ui/button"
+
+function renderIconNode(IconCandidate, props = {}) {
+  if (!IconCandidate) return null;
+  if (React.isValidElement(IconCandidate)) {
+    return IconCandidate;
+  }
+  if (
+    typeof IconCandidate === "function" ||
+    (typeof IconCandidate === "object" && IconCandidate !== null && ("$$typeof" in IconCandidate || "render" in IconCandidate))
+  ) {
+    const Component = IconCandidate;
+    return <Component {...props} />;
+  }
+  if (typeof IconCandidate === "string" || typeof IconCandidate === "number") {
+    return IconCandidate;
+  }
+  return null;
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // DropdownShell — base template for all studio dropdowns (filter, settings…)
 // ─────────────────────────────────────────────────────────────────────────────
@@ -28,17 +46,19 @@ export function DropdownShell({
     <DropdownMenu open={open} onOpenChange={onOpenChange}>
       {/* ── Trigger ── */}
       <DropdownMenuTrigger asChild>
-        <button
+        <Button
           type="button"
+          variant="ghost"
+          size="icon"
           className={cn(
-            "size-9 rounded-2xl flex items-center justify-center transition-all ",
+            "size-9 rounded-[var(--mat-sys-corner-medium,12px)] flex items-center justify-center transition-all p-0",
             isActive
-              ? "bg-transparent text-white/80 "
-              : " text-white hover:bg-white/10 hover:text-white "
+              ? "bg-transparent text-[var(--mat-sys-on-surface,#e3e3e3)]"
+              : "text-[var(--mat-sys-on-surface,#e3e3e3)] hover:bg-[var(--foreground-state-10)] hover:text-white"
           )}
         >
           {trigger}
-        </button>
+        </Button>
       </DropdownMenuTrigger>
 
       {/* ── Panel ── */}
@@ -48,7 +68,7 @@ export function DropdownShell({
         onCloseAutoFocus={(e) => e.preventDefault()}
         className={cn(
           panelWidth,
-          "backdrop-blur-xl bg-[#141516]  rounded-2xl p-3 z-50",
+          "backdrop-blur-[100px] bg-[var(--mat-menu-container-color,rgba(22,23,24,0.85))] border-none rounded-[var(--mat-menu-container-shape,24px)] p-1.5 z-50 shadow-[var(--mat-menu-container-elevation-shadow)]",
           className
         )}
       >
@@ -66,7 +86,7 @@ export function DropdownSection({ label, action, className, children }) {
   return (
     <div className={cn("mb-4", className)}>
       <div className="flex items-center justify-between mb-2">
-        <p className="text-xs font-medium text-white">
+        <p className="text-xs font-medium text-[var(--mat-sys-on-surface,#e3e3e3)]">
           {label}
         </p>
         {action}
@@ -80,7 +100,7 @@ export function DropdownSection({ label, action, className, children }) {
 // DropdownSegmented — pill-style segmented control
 // ─────────────────────────────────────────────────────────────────────────────
 
-export const DropdownSegmented = React.memo(({ value, onChange, options, className, variant = "default" }) => {
+export const DropdownSegmented = React.memo(({ value, onChange, options, className, variant = "default", compact = false, visibleCount = null }) => {
   const containerRef = React.useRef(null);
   const [isDragging, setIsDragging] = React.useState(false);
 
@@ -140,40 +160,63 @@ export const DropdownSegmented = React.memo(({ value, onChange, options, classNa
     };
   }, []);
 
+  // When visibleCount is set: each item is exactly 1/N of visible area
+  // container has p-1 (4px each side = 8px) and gap-1 (4px) between items
+  const itemStyle = visibleCount
+    ? { flexShrink: 0, flexGrow: 0, width: `calc((100% - 8px - ${(visibleCount - 1) * 4}px) / ${visibleCount})` }
+    : {};
+
   return (
     <div
-      ref={containerRef}
       className={cn(
-        "flex gap-1 p-1.5 bg-white/5 rounded-xl overflow-x-auto scrollbar-hide min-w-0 w-full cursor-grab active:cursor-grabbing select-none",
+        "mat-button-toggle-group toggle-group flex items-center gap-1 p-1 bg-[rgba(218,220,224,0.05)] rounded-[14px] min-w-0 w-full select-none",
         className
       )}
+      role="radiogroup"
     >
+      <div
+        ref={containerRef}
+        className="flex gap-1 w-full overflow-x-auto scrollbar-hide cursor-grab active:cursor-grabbing select-none"
+      >
       {options.map((opt) => {
         const isSelected = value === opt.value && !opt.disabled;
-        
+        const activeVariant = variant === "white" ? "flow-toggle-white" : "flow-toggle-active";
+
         return (
           <Button
             key={opt.value}
+            type="button"
+            role="radio"
+            aria-checked={isSelected}
+            variant={isSelected ? activeVariant : "flow-toggle"}
             onClick={() => {
               if (isDragging) return;
               if (!opt.disabled) onChange(opt.value);
             }}
             disabled={opt.disabled}
+            style={itemStyle}
             className={cn(
-              "flex-1 min-w-fit px-3 py-1.5 rounded-lg text-[13px] transition-all flex flex-row items-center justify-center gap-2 relative whitespace-nowrap",
+              "mat-button-toggle toggle flex-toggle rounded-[10px] h-8 min-h-[32px] text-[13px] font-medium transition-all flex items-center justify-center relative",
+              compact ? "p-1.5 size-12 shrink-0 [&_svg]:size-full" : "flex-row gap-1.5 px-3 py-1 flex-1 min-w-fit",
+              visibleCount ? "flex-none" : !compact ? "flex-1 min-w-fit" : "",
               isDragging && "pointer-events-none",
-              isSelected
-                ? (variant === "white" ? "bg-white text-black" : "bg-white/10 text-white")
-                : opt.disabled
-                ? "opacity-30 cursor-not-allowed"
-                : "text-white hover:text-white hover:bg-[#363637]"
+              opt.disabled && "opacity-30 cursor-not-allowed pointer-events-none"
             )}
           >
-            {opt.icon && <span className="">{opt.icon}</span>}
-            {opt.label}
+            {opt.icon && (
+              <span className={cn(
+                "flex items-center justify-center text-[16px]",
+                isSelected && variant === "white" && "text-black",
+                compact && "size-full"
+              )}>
+                {renderIconNode(opt.icon)}
+              </span>
+            )}
+            <span className="truncate">{opt.label}</span>
           </Button>
         );
       })}
+      </div>
     </div>
   )
 })
@@ -183,14 +226,16 @@ export const DropdownSegmented = React.memo(({ value, onChange, options, classNa
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const DropdownSegmentedWithLabel = React.memo(({ label, value, onChange, options, className, variant = "default", transparent = false }) => {
+  const activeVariant = variant === "white" ? "flow-toggle-white" : "flow-toggle-active";
+
   return (
     <div className={cn(
-      "flex items-center gap-3 p-1.5 rounded-xl overflow-hidden",
-      !transparent && "bg-(--color-imagine-grey-2)",
+      "flex items-center gap-2 p-1 rounded-[14px] overflow-hidden",
+      !transparent && "bg-[rgba(218,220,224,0.05)]",
       className
     )}>
       {label && (
-        <span className="text-[14px] font-semibold text-foreground/90 whitespace-nowrap pl-2 shrink-0">
+        <span className="text-[13px] font-medium text-[rgba(218,220,224,0.75)] whitespace-nowrap pl-2 shrink-0">
           {label}
         </span>
       )}
@@ -198,24 +243,26 @@ export const DropdownSegmentedWithLabel = React.memo(({ label, value, onChange, 
         {options.map((opt) => {
           const isSelected = value === opt.value && !opt.disabled;
           return (
-            <button
+            <Button
               key={opt.value}
+              type="button"
+              role="radio"
+              aria-checked={isSelected}
+              variant={isSelected ? activeVariant : "flow-toggle"}
               onClick={() => !opt.disabled && onChange(opt.value)}
               disabled={opt.disabled}
-              className={cn(
-                "flex-1 min-w-fit px-3 font-semibold py-2 rounded-lg text-[14px] transition-all flex flex-row items-center justify-center gap-2 relative whitespace-nowrap",
-                isSelected
-                  ? (variant === "white" ? "bg-white/80 text-black" : transparent ? "bg-white/10 text-foreground" : "bg-white/10 text-foreground")
-                  : opt.disabled
-                  ? "opacity-30 cursor-not-allowed"
-                  : transparent
-                  ? "text-foreground/70 hover:text-foreground hover:bg-white/10"
-                  : "text-foreground hover:text-foreground hover:bg-white/5"
-              )}
+              className="h-8 min-h-[32px] rounded-[10px] text-[13px] font-medium px-3 flex-1 min-w-fit"
             >
-              {opt.icon && <span>{opt.icon}</span>}
-              {opt.label}
-            </button>
+              {opt.icon && (
+                <span className={cn(
+                  "mr-1.5 flex items-center justify-center text-[16px]",
+                  isSelected && variant === "white" && "text-black"
+                )}>
+                  {renderIconNode(opt.icon)}
+                </span>
+              )}
+              <span className="truncate">{opt.label}</span>
+            </Button>
           );
         })}
       </div>
@@ -234,18 +281,21 @@ export function DropdownChips({ options, selected, onToggle, accent = "lime" }) 
       {options.map((opt) => {
         const isSelected = selected.includes(opt)
         return (
-          <button
+          <Button
             key={opt}
+            type="button"
+            variant="ghost"
+            size="xs"
             onClick={() => onToggle(opt)}
             className={cn(
-              "px-2.5 py-1.5 rounded-lg text-xs  transition-all font-medium",
+              "px-2.5 py-1.5 rounded-lg text-xs transition-all font-medium h-auto",
               isSelected
-                ? "bg-[#505153]  text-white"
-                : "bg-white/2  text-white hover:text-white hover:bg-white/10"
+                ? "bg-[#505153] text-white hover:bg-[#505153]"
+                : "bg-white/2 text-white hover:text-white hover:bg-white/10"
             )}
           >
             {opt}
-          </button>
+          </Button>
         )
       })}
     </div>
@@ -309,9 +359,15 @@ export function DropdownReset({ onReset, label = "Reset", className }) {
 
 export function DropdownClearAction({ onClick, label = "Clear" }) {
   return (
-    <button onClick={onClick} className="text-[10px] text-white font-medium hover:underline">
+    <Button
+      type="button"
+      variant="link"
+      size="xs"
+      onClick={onClick}
+      className="text-[10px] text-white font-medium hover:underline p-0 h-auto"
+    >
       {label}
-    </button>
+    </Button>
   )
 }
 
@@ -322,24 +378,30 @@ export function DropdownClearAction({ onClick, label = "Clear" }) {
 export const DropdownToggle = React.memo(({ value, onChange }) => {
   return (
     <div className="flex gap-0.5 bg-white/5 p-0.5 rounded-lg">
-      <button
+      <Button
+        type="button"
+        variant="ghost"
+        size="xs"
         onClick={() => onChange(false)}
         className={cn(
-          "px-3 py-1 rounded-md text-xs font-medium transition-all",
-          !value ? "bg-[#505153] text-white" : "text-white hover:text-white/50"
+          "px-3 py-1 rounded-md text-xs font-medium transition-all h-auto",
+          !value ? "bg-[#505153] text-white hover:bg-[#505153]" : "text-white hover:text-white/50"
         )}
       >
         Off
-      </button>
-      <button
+      </Button>
+      <Button
+        type="button"
+        variant="ghost"
+        size="xs"
         onClick={() => onChange(true)}
         className={cn(
-          "px-3 py-1 rounded-md text-xs font-medium transition-all",
-          value ? "bg-[#505153] text-white" : "text-white hover:text-white/50"
+          "px-3 py-1 rounded-md text-xs font-medium transition-all h-auto",
+          value ? "bg-[#505153] text-white hover:bg-[#505153]" : "text-white hover:text-white/50"
         )}
       >
         On
-      </button>
+      </Button>
     </div>
   )
 })
@@ -353,7 +415,7 @@ export function DropdownRow({ icon, label, children, className }) {
     <div className={cn("flex items-center justify-between py-2", className)}>
       <div className="flex items-center gap-3 text-white/50">
         <span className="size-4 flex items-center justify-center [&>svg]:size-4">
-          {icon}
+          {renderIconNode(icon)}
         </span>
         <span className="text-sm text-white">{label}</span>
       </div>

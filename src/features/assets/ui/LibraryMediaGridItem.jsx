@@ -8,6 +8,7 @@ import { useRemoveWorkflow, useToggleWorkflowLike } from "@/features/workflows/a
 import { ImageStatusView } from "@/features/workflows/ui/ImageStatusView";
 import { cn } from "@/shared/lib/utils";
 import { ButtonGroup } from "@/shared/ui/button-group";
+import { Button } from "@/shared/ui/button";
 import { ConfirmDeleteDialog } from "@/widgets/dialogs/ConfirmDeleteDialog";
 import { ActionBtn } from "@/widgets/StudioLayout/GenerationsStudio/MediaGridItem/ActionBtn";
 
@@ -73,22 +74,24 @@ export function LibraryMediaGridItem({
         style={style}
       >
         <div className="relative h-full w-full">
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="icon-xs"
             onClick={(e) => {
               e.stopPropagation();
               onToggleSelect?.();
             }}
             className={cn(
-              "absolute left-3 top-3 z-30 flex h-6 w-6 items-center justify-center rounded-md border transition",
+              "absolute left-3 top-3 z-30 flex h-6 w-6 items-center justify-center rounded-md border transition p-0",
               isSelected
-                ? "border-white bg-white text-[#050505]"
+                ? "border-white bg-white text-[#050505] hover:bg-white/90"
                 : "border-white/16 bg-black/40 text-transparent backdrop-blur-md hover:border-white/28 hover:text-white/70"
             )}
             aria-label="Select media"
           >
             <Check className="h-3.5 w-3.5" strokeWidth={3} />
-          </button>
+          </Button>
 
             <div className="absolute bottom-3 left-3 z-30 flex  items-center ">
             {isVideo && (

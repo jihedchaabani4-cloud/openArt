@@ -3,8 +3,23 @@
 import * as React from "react"
 import { AlertCircle, AlertTriangle } from "lucide-react"
 import { cn } from "@/shared/lib/utils"
+import { setCachedImageDimensions } from "@/shared/lib/displayUtils"
 
-export function ImageStatusView({
+// Module-level cache: src → true once the image has loaded once.
+// Survives component remounts (e.g. grid resize), so images never re-flash.
+const MAX_LOADED_CACHE = 800;
+const _loadedSrcCache = new Map();
+
+function markSrcLoaded(src) {
+  if (!src) return;
+  if (_loadedSrcCache.size >= MAX_LOADED_CACHE) {
+    const firstKey = _loadedSrcCache.keys().next().value;
+    _loadedSrcCache.delete(firstKey);
+  }
+  _loadedSrcCache.set(src, true);
+}
+
+export const ImageStatusView = React.memo(function ImageStatusView({
   status,
   src,
   alt = "",
@@ -14,31 +29,17 @@ export function ImageStatusView({
   error,
   children,
 }) {
-  const [isMediaLoaded, setIsMediaLoaded] = React.useState(false)
-  const [isInView, setIsInView] = React.useState(false)
-  const containerRef = React.useRef(null)
+  // Initialize immediately from cache so grid-resize remounts skip the fade-in
+  const [isMediaLoaded, setIsMediaLoaded] = React.useState(
+    () => !!(src && _loadedSrcCache.get(src))
+  )
 
   React.useEffect(() => {
-    setIsMediaLoaded(false)
-    setIsInView(false)
-  }, [src])
-
-  React.useEffect(() => {
-    const el = containerRef.current
-    if (!el) return
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsInView(true)
-          observer.disconnect() // Only need to trigger once
-        }
-      },
-      { rootMargin: "200px" } // Pre-load 200px before entering viewport
-    )
-
-    observer.observe(el)
-    return () => observer.disconnect()
+    if (src && _loadedSrcCache.get(src)) {
+      setIsMediaLoaded(true)
+    } else {
+      setIsMediaLoaded(false)
+    }
   }, [src])
 
   const isCompleted = status === "completed"
@@ -53,9 +54,8 @@ export function ImageStatusView({
 
   return (
     <div
-      ref={containerRef}
       className={cn(
-        "relative overflow-hidden  transition-all duration-300",
+        "relative overflow-hidden bg-white/[0.02]",
         rounded,
         className
       )}
@@ -77,46 +77,69 @@ export function ImageStatusView({
           50% { opacity: 0.4; }
           100% { opacity: 0.22; }
         }
+        @keyframes skeletonShimmer {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(100%); }
+        }
+        @keyframes skeletonPulse {
+          0%, 100% { opacity: 0.9; }
+          50% { opacity: 0.55; }
+        }
       `}</style>
 
       {isCompleted && src ? (
         <div className="w-full h-full relative flex items-center justify-center">
-          {(!isInView || !isMediaLoaded) && (
-            <div className="absolute inset-0 z-0 bg-white/5 animate-pulse flex items-center justify-center">
-              {isInView && (
-                <div className="w-1/3 aspect-square rounded-full border-2 border-white/5 border-t-white/20 animate-spin" />
-              )}
+          {!isMediaLoaded && (
+            <div className="absolute inset-0 z-0 bg-[#15161a] overflow-hidden pointer-events-none">
+              <div 
+                className="absolute inset-0 bg-[#1e2026]"
+                style={{ animation: "skeletonPulse 2s ease-in-out infinite" }}
+              />
+              <div
+                className="absolute inset-0 w-full h-full pointer-events-none"
+                style={{
+                  background:
+                    "linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.04) 30%, rgba(255, 255, 255, 0.10) 50%, rgba(255, 255, 255, 0.04) 70%, transparent 100%)",
+                  animation: "skeletonShimmer 1.8s cubic-bezier(0.4, 0, 0.2, 1) infinite",
+                }}
+              />
             </div>
           )}
 
-          {isInView && (
-            <div className={cn(
-              "w-full h-full transition-opacity duration-500 relative flex items-center justify-center",
-              isMediaLoaded ? "opacity-100" : "opacity-0"
-            )}>
-              {children ? (
-                // Clone children to inject loading handlers for videos/etc
-                React.Children.map(children, child => {
-                  if (React.isValidElement(child)) {
-                    return React.cloneElement(child, {
-                      onLoadedData: () => setIsMediaLoaded(true),
-                      onLoad: () => setIsMediaLoaded(true),
-                      onError: () => setIsMediaLoaded(true),
-                    });
+          <div className={cn(
+            "w-full h-full transition-opacity duration-300 relative flex items-center justify-center",
+            isMediaLoaded ? "opacity-100" : "opacity-0"
+          )}>
+            {children ? (
+              // Clone children to inject loading handlers for videos/etc
+              React.Children.map(children, child => {
+                if (React.isValidElement(child)) {
+                  return React.cloneElement(child, {
+                    onLoadedData: () => { markSrcLoaded(src); setIsMediaLoaded(true); },
+                    onLoad: () => { markSrcLoaded(src); setIsMediaLoaded(true); },
+                    onError: () => { markSrcLoaded(src); setIsMediaLoaded(true); },
+                  });
+                }
+                return child;
+              })
+            ) : (
+              <img
+                src={src}
+                alt={alt}
+                loading="lazy"
+                decoding="async"
+                onLoad={(e) => {
+                  markSrcLoaded(src);
+                  setIsMediaLoaded(true);
+                  if (e.currentTarget?.naturalWidth && e.currentTarget?.naturalHeight && src) {
+                    setCachedImageDimensions(src, e.currentTarget.naturalWidth, e.currentTarget.naturalHeight);
                   }
-                  return child;
-                })
-              ) : (
-                <img
-                  src={src}
-                  alt={alt}
-                  onLoad={() => setIsMediaLoaded(true)}
-                  onError={() => setIsMediaLoaded(true)}
-                  className="w-full h-full object-cover"
-                />
-              )}
-            </div>
-          )}
+                }}
+                onError={() => { markSrcLoaded(src); setIsMediaLoaded(true); }}
+                className="w-full h-full object-cover"
+              />
+            )}
+          </div>
         </div>
       ) : isProcessing ? (
         <div className="w-full h-full relative overflow-hidden bg-[#0f1012]">
@@ -199,4 +222,4 @@ export function ImageStatusView({
       )}
     </div>
   )
-}
+})

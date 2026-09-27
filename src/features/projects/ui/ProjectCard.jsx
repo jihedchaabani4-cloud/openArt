@@ -108,9 +108,9 @@ export function ProjectCard({ project, onDelete, onRename }) {
                         onConfirm={() => onDelete(project.project_id)}
                         trigger={
                             <Button
-                                variant="ghost"
+                                variant="ghost-destructive"
                                 size="icon-xs"
-                                className="h-auto w-auto p-0 transition-all duration-300 opacity-0 group-hover:opacity-100 text-white"
+                                className="h-auto w-auto p-0 transition-all duration-300 opacity-0 group-hover:opacity-100"
                                 aria-label={`Delete ${project.project_name}`}
                                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
                             >

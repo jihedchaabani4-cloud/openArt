@@ -28,14 +28,9 @@ export const RangeSlider = memo(function RangeSlider({
 
   return (
     <div
-      className="relative overflow-hidden flex items-center rounded-lg h-9 px-3 transition-colors border border-white/10"
+      className="relative overflow-hidden flex items-center rounded-[var(--mat-sys-corner-medium,12px)] h-9 px-3 transition-colors border border-[var(--mat-sys-outline-variant,rgba(255,255,255,0.08))]"
       style={{
-        borderColor: disabled
-          ? "rgb(46,48,49)"
-          : isDragging
-          ? "rgba(255,255,255,0.4)"
-          : "rgb(60,62,63)",
-        backgroundColor: "rgba(0,0,0,0.2)",
+        backgroundColor: "var(--foreground-state-05, rgba(218, 220, 224, 0.05))",
       }}
     >
       {/* Fill track */}

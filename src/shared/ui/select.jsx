@@ -6,6 +6,24 @@ import * as SelectPrimitive from "@radix-ui/react-select"
 
 import { cn } from "@/shared/lib/utils"
 
+function renderIconNode(IconCandidate, props = {}) {
+  if (!IconCandidate) return null;
+  if (React.isValidElement(IconCandidate)) {
+    return IconCandidate;
+  }
+  if (
+    typeof IconCandidate === "function" ||
+    (typeof IconCandidate === "object" && IconCandidate !== null && ("$$typeof" in IconCandidate || "render" in IconCandidate))
+  ) {
+    const Component = IconCandidate;
+    return <Component {...props} />;
+  }
+  if (typeof IconCandidate === "string" || typeof IconCandidate === "number") {
+    return IconCandidate;
+  }
+  return null;
+}
+
 // ─── Design Tokens ────────────────────────────────────────────────────────────
 // bg-panel         → #292929
 // border-subtle    → rgba(255,255,255,0.05)   (white/5)
@@ -58,12 +76,12 @@ function SelectTrigger({ className, size = "default", asChild = false, children,
         // Layout
         "flex w-auto max-w-fit items-center",
         // Shape
-        "rounded-lg",
+        "rounded-[var(--mat-sys-corner-medium,12px)]",
         // Colors
         " bg-transparent",
         // Text
-        "px-3 py-2.5 text-sm text-[#f5f5f5]",
-        " hover:bg-white/10 hover:cursor-pointer",
+        "px-3 py-2.5 text-sm text-[var(--mat-sys-on-surface,#e3e3e3)]",
+        " hover:bg-[var(--foreground-state-10)] hover:cursor-pointer transition-colors",
 
         // Disabled
         "disabled:cursor-not-allowed disabled:opacity-50",
@@ -94,15 +112,15 @@ function SelectContent({
         data-slot="select-content"
         className={cn(
           // Layout
-          "relative z-[80] flex flex-col overflow-y-auto select-none",
+          "relative z-[80] flex flex-col overflow-y-auto select-none font-['Google_Sans_Text',sans-serif]",
           // Size
-          "min-w-[100px] max-h-[500px]",
+          "min-w-[120px] max-h-[500px]",
           // Shape
-          "rounded-[10px] px-1",
+          "rounded-[var(--mat-menu-container-shape,24px)] p-2",
           // Colors
-          "bg-[#232424] border border-white/5",
+          "bg-[var(--mat-menu-container-color,var(--background-state-90))] backdrop-blur-[80px] border border-[var(--mat-sys-outline-variant,rgba(255,255,255,0.08))]",
           // Shadow
-          "shadow-[0px_4px_4px_0px_rgba(0,0,0,0.05),_0px_20px_25px_-5px_rgba(0,0,0,0.05)]",
+          "shadow-[var(--mat-menu-container-elevation-shadow)]",
           // Animations — open
           "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95",
           // Animations — close
@@ -123,7 +141,7 @@ function SelectContent({
         <SelectScrollUpButton />
         <SelectPrimitive.Viewport
           className={cn(
-            "p-1",
+            "p-0.5",
             position === "popper" &&
               "h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)] scroll-my-1"
           )}
@@ -189,17 +207,9 @@ function SelectItem({ className, children, icon, subtitle, badge, iconVariant = 
       data-slot="select-item"
       className={cn(
         // Layout
-        "group flex items-center gap-2",
-        // Shape
-        "rounded-[7px]",
-        // Spacing
-        "px-2 py-1.5",
-        // Text color
-        "text-[#f5f5f5]",
-        // Interaction
-        "cursor-pointer outline-none select-none",
-        // Hover / focus / highlighted states
-        "hover:bg-white/5 focus:bg-white/5 data-[highlighted]:bg-white/5",
+        "group flex cursor-pointer items-center gap-3 min-h-[40px] px-3.5 py-2 rounded-[var(--mat-sys-corner-medium,12px)] outline-none select-none font-['Google_Sans_Text',sans-serif] transition-all duration-150",
+        // Text & State layers
+        "text-[var(--mat-menu-item-label-text-color,var(--foreground-neutral-000,#fff))] hover:bg-[var(--mat-menu-item-hover-state-layer-color,var(--foreground-state-10))] focus:bg-[var(--mat-menu-item-focus-state-layer-color,var(--foreground-state-15))] data-[highlighted]:bg-[var(--mat-menu-item-hover-state-layer-color,var(--foreground-state-10))] data-[highlighted]:text-white",
         // Disabled
         "data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
         className
@@ -207,44 +217,39 @@ function SelectItem({ className, children, icon, subtitle, badge, iconVariant = 
       {...props}
     >
       {/* ── Icon slot ─────────────────────────────────────────────────────── */}
-      {/* color: #737373 by default, transitions to #f5f5f5 on group hover   */}
       {icon && (
         <span 
           className={cn(
-            "flex-shrink-0 flex items-center justify-center transition-colors duration-150 group-hover:text-[#f5f5f5]",
+            "shrink-0 flex items-center justify-center text-[20px] transition-colors duration-150 text-[var(--mat-menu-item-icon-color,var(--foreground-neutral-000,#fff))]",
             iconVariant === "square" && "aspect-square h-[48px] -ml-2 -my-1.5 bg-[#171717] rounded-md border-r border-white/5"
           )}
         >
-          {icon}
+          {renderIconNode(icon)}
         </span>
       )}
 
       {/* ── Label + subtitle block ─────────────────────────────────────────── */}
-      {/* flex-1 so the checkmark stays pinned to the right                   */}
-      <div className="flex-1 flex flex-col  overflow-hidden">
-        {/* Primary label + Badge (Badge is outside ItemText but inside this flex row) */}
+      <div className="flex-1 flex flex-col overflow-hidden">
         <div className="flex items-center gap-1.5 pt-0.5">
           <SelectPrimitive.ItemText>
-            <span className="text-[0.875rem] font-medium leading-[18px] capitalize truncate">
+            <span className="text-[14px] font-medium leading-5 capitalize truncate">
               {children}
             </span>
           </SelectPrimitive.ItemText>
           {badge && <div className="shrink-0">{badge}</div>}
         </div>
 
-        {/* Subtitle: 0.7rem / weight 400 / color #737373 / leading-[14px]   */}
         {subtitle && (
-          <span className="text-[0.7rem] font-normal leading-[14px] text-white/60 truncate">
+          <span className="text-[12px] font-normal leading-4 text-white/60 truncate">
             {subtitle}
           </span>
         )}
       </div>
 
       {/* ── Checkmark ─────────────────────────────────────────────────────── */}
-      {/* size-3.5 (14px), color #737373, only visible when item is selected  */}
-      <span className="flex-shrink-0 flex size-3.5 items-center justify-center text-[#737373]">
+      <span className="shrink-0 flex size-4 items-center justify-center text-white/80">
         <SelectPrimitive.ItemIndicator>
-          <GoogleIcon iconName="check" className="text-[12px]" />
+          <GoogleIcon iconName="check" className="text-[14px]" />
         </SelectPrimitive.ItemIndicator>
       </span>
     </SelectPrimitive.Item>
@@ -253,14 +258,13 @@ function SelectItem({ className, children, icon, subtitle, badge, iconVariant = 
 
 /**
  * SelectSeparator — thin divider between groups
- * Token: border rgba(255,255,255,0.05) / white/5
  */
 function SelectSeparator({ className, ...props }) {
   return (
     <SelectPrimitive.Separator
       data-slot="select-separator"
       className={cn(
-        "pointer-events-none -mx-1 my-1 h-px bg-white/5",
+        "pointer-events-none -mx-1 my-1.5 h-px bg-[var(--mat-menu-divider-color,var(--foreground-state-15))]",
         className
       )}
       {...props}

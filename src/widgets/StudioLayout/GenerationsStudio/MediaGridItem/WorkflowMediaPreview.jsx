@@ -10,8 +10,9 @@ import {
 } from "@/shared/lib/generationUtils";
 import dynamic from "next/dynamic";
 const WorkflowMediaCanvas = dynamic(() => import("@/features/workflows/ui/WorkflowMediaCanvas").then(mod => mod.WorkflowMediaCanvas), { ssr: false });
-import { useEditStore } from "@/features/prompt-bar/model/useEditStore";
+import { useEditStore } from "@/features/studio";
 import { useBatchUploadAssets } from "@/features/media/api/mediaApi";
+import { Button } from "@/shared/ui/button";
 
 export function WorkflowMediaPreview({
   workflow,
@@ -290,14 +291,17 @@ export function WorkflowMediaPreview({
 
                   {/* Top-right: extract frame button */}
                   <div className="absolute top-3 right-3 z-30 flex items-center gap-2 opacity-0 group-hover/video:opacity-100 transition-all">
-                    <button
+                    <Button
+                      type="button"
+                      variant="flow-overlay-action"
+                      size="icon-sm"
                       onClick={handleExtractFrame}
                       disabled={isExtracting}
                       title="Extract current frame as reference"
-                      className="p-2 rounded-xl bg-black/40 backdrop-blur-md border border-white/10 cursor-pointer hover:bg-black/60 transition-colors disabled:opacity-50"
+                      className="p-2 rounded-xl"
                     >
                       {isExtracting ? <Loader2 className="size-4 animate-spin text-white" /> : <Camera className="size-4 text-white" />}
-                    </button>
+                    </Button>
                   </div>
 
                   {/* Bottom: video controls bar — overlaid on video */}
@@ -305,8 +309,11 @@ export function WorkflowMediaPreview({
                     className="absolute bottom-3 inset-x-3 z-30 flex items-center gap-3 p-1.5 px-3 backdrop-blur-[1px] rounded-xl opacity-0 group-hover/video:opacity-100 transition-opacity duration-300"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <button
-                      className="w-7 h-7 flex items-center justify-center shrink-0 rounded-full hover:bg-white/10 text-white transition-colors"
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon-xs"
+                      className="w-7 h-7 flex items-center justify-center shrink-0 rounded-full hover:bg-white/10 text-white transition-colors p-0"
                       onClick={() => {
                         if (videoRef.current) {
                           if (videoRef.current.paused) videoRef.current.play();
@@ -315,7 +322,7 @@ export function WorkflowMediaPreview({
                       }}
                     >
                       {isPlaying ? <Pause className="size-3.5 fill-white" /> : <Play className="size-3.5 fill-white ml-0.5" />}
-                    </button>
+                    </Button>
 
                     <div
                       ref={progressRef}
@@ -350,24 +357,30 @@ export function WorkflowMediaPreview({
                       {formatTime(currentTime)} / {formatTime(duration)}
                     </div>
 
-                    <button
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon-xs"
                       onClick={() => setIsMuted(m => !m)}
-                      className="w-7 h-7 flex items-center justify-center shrink-0 rounded-full hover:bg-white/10 text-white transition-colors ml-1"
+                      className="w-7 h-7 flex items-center justify-center shrink-0 rounded-full hover:bg-white/10 text-white transition-colors ml-1 p-0"
                     >
                       {isMuted ? <VolumeX className="size-4" /> : <Volume2 className="size-4" />}
-                    </button>
+                    </Button>
 
-                    <button
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon-xs"
                       onClick={() => {
                         if (videoRef.current) {
                           if (videoRef.current.requestFullscreen) videoRef.current.requestFullscreen();
                           else if (videoRef.current.webkitRequestFullscreen) videoRef.current.webkitRequestFullscreen();
                         }
                       }}
-                      className="w-7 h-7 flex items-center justify-center shrink-0 rounded-full hover:bg-white/10 text-white transition-colors"
+                      className="w-7 h-7 flex items-center justify-center shrink-0 rounded-full hover:bg-white/10 text-white transition-colors p-0"
                     >
                       <Maximize className="size-4" />
-                    </button>
+                    </Button>
                   </div>
                 </div>
               ) : isDone && !isVideo ? (

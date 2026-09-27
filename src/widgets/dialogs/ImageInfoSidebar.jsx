@@ -4,6 +4,7 @@ import * as React from "react"
 import { GoogleIcon } from "@/shared/ui/GoogleIcon"
 import { cn } from "@/shared/lib/utils"
 import { DialogClose } from "@/shared/ui/dialog"
+import { Button } from "@/shared/ui/button"
 import { useRemoveWorkflow as useRemoveGeneration, useToggleLike } from "@/features/workflows/api/workflowsApi"
 import { useRemoveAsset, downloadMediaItem } from "@/features/media/api/mediaApi"
 import { ConfirmDeleteDialog } from "./ConfirmDeleteDialog"
@@ -107,29 +108,36 @@ export function ImageInfoSidebar({ item, group, onClose }) {
                         </div>
                         <div className="flex items-center gap-2">
                             {!isUpload && (
-                                <button 
+                                <Button 
+                                    type="button"
+                                    variant={copied ? "primary" : "secondary"}
+                                    size="xs"
                                     onClick={copyToClipboard}
-                                    className={cn(
-                                        "px-3 py-1.5 rounded-md text-[10px] font-bold transition-all duration-300 border",
-                                        copied 
-                                            ? "bg-white text-black border-white" 
-                                            : "bg-white/5 hover:bg-white/10 border-white/10 text-white"
-                                    )}
+                                    className="text-[10px] font-bold"
                                 >
                                     {copied ? "Copied!" : "Copy Prompt"}
-                                </button>
+                                </Button>
                             )}
                             {onClose ? (
-                                <button 
+                                <Button 
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon-sm"
                                     onClick={onClose}
-                                    className="p-1.5 rounded-md bg-transparent text-white transition-all duration-300 border border-white/10 group backdrop-blur-md flex items-center justify-center">
+                                    className="border border-white/10 group backdrop-blur-md"
+                                >
                                     <GoogleIcon iconName="close" className="text-[13px] opacity-40 group-hover:opacity-100" />
-                                </button>
+                                </Button>
                             ) : (
                                 <DialogClose asChild>
-                                    <button className="p-1.5 rounded-md bg-transparent text-white transition-all duration-300 border border-white/10 group backdrop-blur-md flex items-center justify-center">
+                                    <Button 
+                                        type="button"
+                                        variant="ghost"
+                                        size="icon-sm"
+                                        className="border border-white/10 group backdrop-blur-md"
+                                    >
                                         <GoogleIcon iconName="close" className="text-[13px] opacity-40 group-hover:opacity-100" />
-                                    </button>
+                                    </Button>
                                 </DialogClose>
                             )}
                         </div>
@@ -140,11 +148,14 @@ export function ImageInfoSidebar({ item, group, onClose }) {
                         {TABS.map((tab) => {
                             const isActive = activeTab === tab.id;
                             return (
-                                <button
+                                <Button
                                     key={tab.id}
+                                    type="button"
+                                    variant={isActive ? "secondary" : "ghost"}
+                                    size="sm"
                                     onClick={() => setActiveTab(tab.id)}
                                     className={cn(
-                                        "flex-1 flex items-center justify-center gap-1.5 px-2 py-2 rounded-lg text-[11px] font-medium transition-all duration-200 whitespace-nowrap",
+                                        "flex-1 flex items-center justify-center gap-1.5 px-2 py-2 rounded-lg text-[11px] font-medium whitespace-nowrap",
                                         isActive
                                             ? "bg-[#2a2a2a] text-white shadow-sm"
                                             : "text-white/40 hover:text-white/70"
@@ -152,7 +163,7 @@ export function ImageInfoSidebar({ item, group, onClose }) {
                                 >
                                     <GoogleIcon iconName={tab.iconName} className="text-[12px] shrink-0" />
                                     <span className="hidden xl:inline">{tab.label}</span>
-                                </button>
+                                </Button>
                             );
                         })}
                     </div>
@@ -207,13 +218,16 @@ export function ImageInfoSidebar({ item, group, onClose }) {
                                                 {prompt}
                                             </div>
                                             {isPromptLong && (
-                                                <button 
+                                                <Button 
+                                                    type="button"
+                                                    variant="ghost"
+                                                    size="xs"
                                                     onClick={() => setShowFullPrompt(!showFullPrompt)}
-                                                    className="w-full py-2 px-4 flex items-center justify-between border-t border-white/5 text-[10px] font-bold text-white/40 hover:text-white transition-colors"
+                                                    className="w-full py-2 px-4 flex items-center justify-between border-t border-white/5 text-[10px] font-bold text-white/40 hover:text-white"
                                                 >
                                                     <span>{showFullPrompt ? "See less" : "See all"}</span>
                                                     {showFullPrompt ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-                                                </button>
+                                                </Button>
                                             )}
                                         </div>
                                     </section>
@@ -244,16 +258,18 @@ export function ImageInfoSidebar({ item, group, onClose }) {
 
                                     {/* ── Additional Info ── */}
                                     <div className="flex flex-col gap-2">
-                                        <button 
+                                        <Button 
+                                            type="button"
+                                            variant="secondary"
                                             onClick={() => setShowFullInfo(!showFullInfo)}
-                                            className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all text-white/60 hover:text-white"
+                                            className="flex items-center justify-between p-3 rounded-xl border border-white/5 hover:bg-white/10 text-white/60 hover:text-white w-full h-auto"
                                         >
                                             <span className="text-[10px] font-bold uppercase tracking-widest">More Info</span>
                                             <GoogleIcon 
                                                 iconName={showFullInfo ? "keyboard_arrow_up" : "keyboard_arrow_down"} 
                                                 className="text-[13px]" 
                                             />
-                                        </button>
+                                        </Button>
 
                                             {showFullInfo && (
                                                 <div className="flex flex-col gap-2 p-1">
@@ -284,44 +300,44 @@ export function ImageInfoSidebar({ item, group, onClose }) {
             {/* ── Footer Actions ── */}
             <div className="p-6 pt-4 border-t border-white/5 bg-[#0F1113] grid grid-cols-5 gap-2">
                 {!isUpload && (
-                    <button 
+                    <Button 
+                        type="button"
+                        variant={isLiked ? "danger" : "secondary"}
                         onClick={() => toggleLike({ 
                             itemId: item.id, 
                             projectId: item.projectId || item.project_id || group?.projectId || group?.project_id 
                         })}
-                        className={cn(
-                            "button button-md h-12 flex items-center justify-center rounded-xl transition-all duration-200 border col-span-1",
-                            isLiked 
-                                ? "bg-red-500/10 border-red-500/20 text-red-500" 
-                                : "bg-white/5 hover:bg-white/10 border-white/10 text-white/40 hover:text-white"
-                        )}
+                        className="h-12 col-span-1 rounded-xl"
                     >
                         <GoogleIcon iconName="favorite" className={cn("text-[13px]", isLiked && "text-red-500")} />
-                    </button>
+                    </Button>
                 )}
 
-                <button 
+                <Button 
                     type="button" 
+                    variant="secondary"
                     onClick={handleDownload}
                     className={cn(
-                        "button button-md button-secondary-reverted border-white/10 border hover:bg-white/10 transition-colors duration-200 h-12 flex items-center justify-center gap-2 text-white text-[12px] font-bold uppercase tracking-wider rounded-xl",
+                        "border-white/10 border h-12 flex items-center justify-center gap-2 text-white text-[12px] font-bold uppercase tracking-wider rounded-xl",
                         isUpload ? "col-span-4" : "col-span-3"
                     )}
                 >
                     <GoogleIcon iconName="download" className="text-[13px]" />
                     Download
-                </button>
+                </Button>
 
                 <ConfirmDeleteDialog 
                     onConfirm={handleDelete} 
                     title={`Delete ${isUpload ? 'media' : (item.asset?.asset_type || "item")}?`}
                     description="This action cannot be undone. It will be permanently removed."
                 >
-                    <button 
-                        className="button button-md h-12 flex items-center justify-center rounded-xl transition-all duration-200 border border-white/10 bg-white/5 hover:bg-red-500/10 hover:border-red-500/20 text-white/40 hover:text-red-500 col-span-1"
+                    <Button 
+                        type="button"
+                        variant="ghost-destructive"
+                        className="h-12 col-span-1 rounded-xl"
                     >
                         <GoogleIcon iconName="delete" className="text-[13px]" />
-                    </button>
+                    </Button>
                 </ConfirmDeleteDialog>
             </div>
             

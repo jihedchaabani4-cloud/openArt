@@ -9,11 +9,16 @@ export function ReactQueryProvider({ children }) {
         defaultOptions: {
             queries: {
                 staleTime: 5 * 60 * 1000,   // 5 min — don't refetch unless explicitly invalidated
-                gcTime:    10 * 60 * 1000,  // 10 min — keep in memory
+                gcTime:    process.env.NODE_ENV === 'development'
+                    ? 60 * 1000             // 1 min in dev — prevent RAM from piling up
+                    : 10 * 60 * 1000,       // 10 min in prod
                 refetchOnWindowFocus:    false,
                 refetchOnReconnect:      false,
                 refetchOnMount:          false,
                 retry: 1,
+            },
+            mutations: {
+                retry: false, // ⛔ NEVER automatically retry mutations (prevents accidental double-billing / duplicate jobs)
             },
         },
     }));

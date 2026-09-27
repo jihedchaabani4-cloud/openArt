@@ -1,13 +1,5 @@
 import { useState, useMemo, useCallback } from "react";
-import { useBatchUploadAssets } from "../api/mediaApi";
-import { useProjectData } from "@/features/workflows/api/workflowsApi";
-
-/**
- * [FSD Layer: features/media]
- * A shared hook for managing the Media Library state, 
- * using cached project data instead of independent fetching.
-import { useState, useMemo, useCallback } from "react";
-import { useBatchUploadAssets } from "../api/mediaApi";
+import { useUploadMedia } from "./useUploadMedia";
 import { useProjectData } from "@/features/workflows/api/workflowsApi";
 
 /**
@@ -24,7 +16,7 @@ export function useMediaLibrary(projectId, initialMode = "all") {
   // We only enable this fetch if the library is actually being used
   const { data: projectData, isFetching: loading } = useProjectData(projectId, null, false, { enabled });
 
-  const { mutateAsync: uploadBatchToServer } = useBatchUploadAssets();
+  const { uploadMedia } = useUploadMedia(projectId);
 
   const items = useMemo(() => {
     if (!projectData?.projectContents?.media) return [];
@@ -106,20 +98,14 @@ export function useMediaLibrary(projectId, initialMode = "all") {
     // Pagination is mostly handled by caching the entire project now
   }, []);
 
-  const handleUpload = useCallback(async (filesOrFile, sessionId = "") => {
-    const files = Array.isArray(filesOrFile) ? filesOrFile : [filesOrFile];
+  const handleUpload = useCallback(async (filesOrFile) => {
     try {
-      const results = await uploadBatchToServer({ 
-        files, 
-        projectId: projectId ?? "", 
-        sessionId 
-      });
-      return Array.isArray(filesOrFile) ? results : results[0];
+      return await uploadMedia(filesOrFile);
     } catch (err) {
       console.error("❌ Media Library Upload Error:", err);
       throw err;
     }
-  }, [projectId, uploadBatchToServer]);
+  }, [uploadMedia]);
 
   return {
     items,

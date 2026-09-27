@@ -91,7 +91,7 @@ export default function WorkflowEditPage() {
     if (!workflow) return null; // Let the redirect handle it
 
     return (
-        <div className="flex flex-col h-full w-full text-white overflow-hidden" style={{ background: "radial-gradient(ellipse 80% 60% at 50% 0%, #111116 0%, #050505 70%)" }}>
+        <div className="flex flex-col h-full w-full text-white overflow-hidden bg-background" style={{ background: "radial-gradient(ellipse 80% 60% at 50% 0%, #111116 0%, #000000 70%)" }}>
             <EditNavbar 
                 workflow={workflow} 
                 activeItem={activeItem}

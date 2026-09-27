@@ -2,7 +2,8 @@
 
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Sparkles, Layers, Image as ImageIcon, CheckCircle2 } from "lucide-react";
+import { X, Sparkles } from "lucide-react";
+import { Button } from "@/shared/ui/button";
 
 /**
  * HowToDrawer Component
@@ -35,23 +36,25 @@ export function HowToDrawer({ isOpen, onClose }) {
             {/* Header */}
             <div className="flex items-center justify-between pb-6 border-b border-white/10">
               <div className="flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-blue-400" />
+                <Sparkles className="w-5 h-5 text-white/80" />
                 <h2 className="text-lg font-bold text-white">How AI Elements Work</h2>
               </div>
-              <button
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
                 onClick={onClose}
-                className="p-2 text-white/50 hover:text-white rounded-full hover:bg-white/10 transition-colors"
+                className="p-2 text-white/50 hover:text-white rounded-full hover:bg-white/10 transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5" />
-              </button>
+              </Button>
             </div>
 
             {/* Content Steps */}
             <div className="flex flex-col gap-6 pt-6">
-              
               {/* Step 1 */}
               <div className="flex gap-4 items-start">
-                <div className="w-8 h-8 rounded-full bg-blue-500/20 border border-blue-500/40 text-blue-400 flex items-center justify-center text-xs font-bold shrink-0">
+                <div className="w-8 h-8 rounded-full bg-white/10 border border-white/15 text-white flex items-center justify-center text-xs font-bold shrink-0">
                   1
                 </div>
                 <div>
@@ -64,43 +67,44 @@ export function HowToDrawer({ isOpen, onClose }) {
 
               {/* Step 2 */}
               <div className="flex gap-4 items-start">
-                <div className="w-8 h-8 rounded-full bg-blue-500/20 border border-blue-500/40 text-blue-400 flex items-center justify-center text-xs font-bold shrink-0">
+                <div className="w-8 h-8 rounded-full bg-white/10 border border-white/15 text-white flex items-center justify-center text-xs font-bold shrink-0">
                   2
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold text-white">AI Vision Analysis & 3-View Sheet</h3>
+                  <h3 className="text-sm font-semibold text-white">AI Vision Analysis</h3>
                   <p className="text-xs text-white/60 mt-1 leading-relaxed">
-                    Our AI Vision extracts invariant identity traits and generates a unified 3-view studio reference sheet with <code className="text-blue-300">gpt-image-2</code>.
+                    Our AI Vision extracts identity traits, materials, aesthetics, and optimal generation directives.
                   </p>
                 </div>
               </div>
 
               {/* Step 3 */}
               <div className="flex gap-4 items-start">
-                <div className="w-8 h-8 rounded-full bg-blue-500/20 border border-blue-500/40 text-blue-400 flex items-center justify-center text-xs font-bold shrink-0">
+                <div className="w-8 h-8 rounded-full bg-white/10 border border-white/15 text-white flex items-center justify-center text-xs font-bold shrink-0">
                   3
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold text-white">Reuse Throughout Your Project</h3>
+                  <h3 className="text-sm font-semibold text-white">Reuse in Studio Prompts</h3>
                   <p className="text-xs text-white/60 mt-1 leading-relaxed">
-                    Select your saved Element when generating new scenes. The AI preserves consistency across all angles and lighting.
+                    Type <code className="px-1.5 py-0.5 rounded bg-white/10 text-white font-mono text-[11px]">@Element</code> in the prompt bar to integrate it consistently across any scene.
                   </p>
                 </div>
               </div>
-
             </div>
           </div>
 
           {/* Footer Action */}
           <div className="pt-6 border-t border-white/10">
-            <button
+            <Button
+              type="button"
+              variant="secondary"
+              size="lg"
               onClick={onClose}
-              className="w-full py-2.5 bg-white/10 hover:bg-white/15 text-white text-sm font-medium rounded-xl transition-all"
+              className="w-full"
             >
               Got it
-            </button>
+            </Button>
           </div>
-
         </motion.div>
       </div>
     </AnimatePresence>

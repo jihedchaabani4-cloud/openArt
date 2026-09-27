@@ -293,11 +293,12 @@ export function PackageSelectionDialog({
                                 const creditsLabel = estimateCreditsLabel(pkg);
 
                                 return (
-                                    <button
+                                    <Button
                                         key={pkg.id}
                                         type="button"
+                                        variant="ghost"
                                         onClick={() => setSelectedPackageId(pkg.id)}
-                                        className="w-full rounded-[16px] border px-3 py-3 text-left transition-all duration-200 sm:px-4"
+                                        className="w-full h-auto p-3 sm:p-4 rounded-[16px] border text-left transition-all duration-200 block justify-start"
                                         style={{
                                             borderColor: isSelected ? "rgba(255,255,255,0.88)" : SURFACE_BORDER,
                                             background: isSelected ? SURFACE_PANEL : "transparent",
@@ -359,7 +360,7 @@ export function PackageSelectionDialog({
                                                 )}
                                             </div>
                                         </div>
-                                    </button>
+                                    </Button>
                                 );
                             })}
                         </div>

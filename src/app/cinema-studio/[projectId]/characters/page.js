@@ -5,40 +5,55 @@ import { motion, AnimatePresence } from "framer-motion"
 import { useRouter } from "next/navigation"
 
 import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows"
-import { useCharacterWorkflows } from "@/features/workflows/api/workflowsApi"
-import { ArrowUp } from "lucide-react"
-import { usePromptStore } from "@/features/prompt-bar/model/usePromptStore"
+import { useCharacterWorkflows } from "@/features/characters"
+import { Plus } from "lucide-react"
+import { usePromptStore } from "@/features/studio";
 import { getPrimaryMedia } from "@/shared/lib/generationUtils"
-import { getItemMetadata as getDisplayMeta } from "@/shared/lib/displayUtils"
+import { getItemMetadata as getDisplayMeta, getStudioGridDensity, getCachedImageDimensions, setCachedImageDimensions } from "@/shared/lib/displayUtils"
 import { LoadingScreen } from "@/shared/ui/LoadingScreen"
 
-import { CharacterCardKrea } from "@/components/cinema-studio/characters/CharacterCardKrea"
-import { NewElementCardKrea } from "@/components/cinema-studio/elements/NewElementCardKrea"
+import { RowsPhotoAlbum } from 'react-photo-album'
+import 'react-photo-album/rows.css'
+import { MediaGridItem } from "@/widgets/StudioLayout/GenerationsStudio/MediaGridItem"
 import { HowToDrawer } from "@/components/cinema-studio/elements/HowToDrawer"
 import { useWorkflowDelete } from "@/features/workflows"
 import { ConfirmDeleteDialog } from "@/widgets/dialogs/ConfirmDeleteDialog"
+import { Button } from "@/shared/ui/button"
 
 const PAGE_SIZE = 30;
 
 export default function CharactersPage({ params }) {
     const { projectId } = React.use(params)
-    const { setSelectedProjectId, setActiveStudioTab } = useGenerationsStore()
+    const setSelectedProjectId = useGenerationsStore(s => s.setSelectedProjectId);
+    const setActiveStudioTab = useGenerationsStore(s => s.setActiveStudioTab);
+    const setIsNavbarHidden = useGenerationsStore(s => s.setIsNavbarHidden);
 
-    // Setup active project state
+    // Setup active project state without re-render cascades
     React.useEffect(() => {
-        if (projectId) setSelectedProjectId(projectId)
-        setActiveStudioTab("characters")
+        if (projectId && useGenerationsStore.getState().selectedProjectId !== projectId) {
+            setSelectedProjectId(projectId);
+        }
+        if (useGenerationsStore.getState().activeStudioTab !== "characters") {
+            setActiveStudioTab("characters");
+        }
     }, [projectId, setSelectedProjectId, setActiveStudioTab])
 
     const gridSize = useGenerationsStore(s => s.gridSize);
-    const setIsNavbarHidden = useGenerationsStore(s => s.setIsNavbarHidden);
-    const [isGridResizing, setIsGridResizing] = React.useState(false);
+    const density  = getStudioGridDensity(gridSize);
     
     const isDragging = usePromptStore(s => s.isDraggingGalleryItem);
     const router = useRouter();
     
     // Natively fetch character sheet workflows
     const { workflows: existingSheets, isLoading } = useCharacterWorkflows(projectId)
+
+    // Redirect to /characters/new if project has 0 characters
+    React.useEffect(() => {
+        if (!isLoading && existingSheets.length === 0 && projectId) {
+            router.replace(`/cinema-studio/${projectId}/characters/new`);
+        }
+    }, [isLoading, existingSheets.length, projectId, router]);
+
     const sheetsListKey = React.useMemo(
         () => existingSheets.map((workflow) => workflow.id || workflow.name).join("|"),
         [existingSheets]
@@ -50,20 +65,99 @@ export default function CharactersPage({ params }) {
         [existingSheets, visibleCount]
     );
 
+    const [dimensionsVersion, setDimensionsVersion] = React.useState(0);
+
+    // Probe and cache authentic natural dimensions for character images
+    React.useEffect(() => {
+        visibleSheets.forEach((workflow) => {
+            const primaryItem = getPrimaryMedia(workflow);
+            if (!primaryItem) return;
+            const meta = getDisplayMeta(primaryItem, workflow);
+            const url = meta?.url || primaryItem?.url || primaryItem?.file_url;
+            if (!url || url.startsWith("data:image/gif")) return;
+
+            if (getCachedImageDimensions(url)) return;
+
+            const img = new window.Image();
+            img.onload = () => {
+                if (img.naturalWidth && img.naturalHeight) {
+                    setCachedImageDimensions(url, img.naturalWidth, img.naturalHeight);
+                    setDimensionsVersion((v) => v + 1);
+                }
+            };
+            img.src = url;
+            if (img.complete && img.naturalWidth && img.naturalHeight) {
+                setCachedImageDimensions(url, img.naturalWidth, img.naturalHeight);
+            }
+        });
+    }, [visibleSheets]);
+
+    const photos = React.useMemo(() => {
+        void dimensionsVersion;
+        return visibleSheets.reduce((acc, workflow, i) => {
+            const primaryItem = getPrimaryMedia(workflow);
+            if (!primaryItem) return acc;
+
+            const meta = getDisplayMeta(primaryItem, workflow);
+            const url = meta?.url || "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
+
+            // 1. Highest priority: verified authentic image dimensions
+            let natural = getCachedImageDimensions(url);
+
+            let aspect = natural?.aspect;
+            let wNum = natural?.width;
+            let hNum = natural?.height;
+
+            // 2. Second priority: If natural dimensions not yet available, use metadata aspect
+            if (!wNum || !hNum) {
+                const rawAspect = meta?.aspect;
+                if (rawAspect && rawAspect !== "auto") {
+                    const [wStr, hStr] = String(rawAspect).split("/");
+                    const pw = parseFloat(wStr);
+                    const ph = parseFloat(hStr);
+                    if (pw && ph && !isNaN(pw) && !isNaN(ph)) {
+                        wNum = pw;
+                        hNum = ph;
+                        aspect = rawAspect;
+                    }
+                }
+            }
+
+            // 3. Fallback: clean 1/1 square instead of forcing 16:9
+            if (!wNum || !hNum || isNaN(wNum) || isNaN(hNum)) {
+                wNum = 1;
+                hNum = 1;
+                aspect = "1/1";
+            }
+
+            const BASE = 1200;
+            const width  = Math.round(BASE * (wNum / Math.max(wNum, hNum)));
+            const height = Math.round(BASE * (hNum / Math.max(wNum, hNum)));
+
+            acc.push({
+                src:      url,
+                width,
+                height,
+                aspect,
+                key:      workflow.id || workflow.name || String(i),
+                workflow,
+            });
+            return acc;
+        }, []);
+    }, [visibleSheets, dimensionsVersion]);
+
     const [isHowToOpen, setIsHowToOpen] = React.useState(false);
-    const { isDeleteDialogOpen, setIsDeleteDialogOpen, promptDelete, confirmDelete, isDeleting } = useWorkflowDelete();
+    const { isDeleteDialogOpen, setIsDeleteDialogOpen, confirmDelete, isDeleting } = useWorkflowDelete();
 
     // Navigate to the Edit Page for this character workflow
-    const handleWorkflowClick = (workflow) => {
-        const workflowId = workflow.id || workflow.name;
+    const handleWorkflowClick = React.useCallback((workflow) => {
+        const workflowId = workflow?.id || workflow?.name;
         if (!workflowId || !projectId) return;
         router.push(`/cinema-studio/${projectId}/characters/${workflowId}`);
-    };
+    }, [projectId, router]);
 
     const scrollRef = React.useRef(null);
     const prevScrollTop = React.useRef(0);
-    const rafRef = React.useRef(null);
-    const [showTopBtn, setShowTopBtn] = React.useState(false);
 
     const loadMore = React.useCallback(() => {
         setVisibleCount((current) => Math.min(current + PAGE_SIZE, existingSheets.length));
@@ -72,41 +166,32 @@ export default function CharactersPage({ params }) {
     React.useEffect(() => {
         setVisibleCount(PAGE_SIZE);
         prevScrollTop.current = 0;
-    }, [projectId, sheetsListKey]);
+        setIsNavbarHidden(false);
+    }, [projectId, sheetsListKey, setIsNavbarHidden]);
 
+    // ─── 144Hz responsive navbar toggle & scroll handler ─────
     const handleScroll = React.useCallback(() => {
-        if (rafRef.current) return; 
+        const el = scrollRef.current;
+        if (!el) return;
 
-        rafRef.current = requestAnimationFrame(() => {
-            rafRef.current = null;
-            if (!scrollRef.current) return;
+        const currentScrollTop = el.scrollTop;
 
-            const currentScrollTop = scrollRef.current.scrollTop;
+        // Navbar auto-hide on scroll down (> 80px), reveal on scroll up
+        const isCurrentlyHidden = useGenerationsStore.getState().isNavbarHidden;
+        if (currentScrollTop > prevScrollTop.current && currentScrollTop > 80) {
+            if (!isCurrentlyHidden) setIsNavbarHidden(true);
+        } else if (currentScrollTop < prevScrollTop.current) {
+            if (isCurrentlyHidden) setIsNavbarHidden(false);
+        }
+        prevScrollTop.current = currentScrollTop;
 
-            setShowTopBtn(currentScrollTop > 400);
-
-            const isCurrentlyHidden = useGenerationsStore.getState().isNavbarHidden;
-            if (currentScrollTop > prevScrollTop.current && currentScrollTop > 80) {
-                if (!isCurrentlyHidden) setIsNavbarHidden(true);
-            } else if (currentScrollTop < prevScrollTop.current) {
-                if (isCurrentlyHidden) setIsNavbarHidden(false);
-            }
-
-            const remainingScroll =
-                scrollRef.current.scrollHeight - (currentScrollTop + scrollRef.current.clientHeight);
-            if (remainingScroll <= 240 && hasMore) {
+        if (hasMore) {
+            const remainingScroll = el.scrollHeight - (currentScrollTop + el.clientHeight);
+            if (remainingScroll <= 300) {
                 loadMore();
             }
-
-            prevScrollTop.current = currentScrollTop;
-        });
+        }
     }, [hasMore, loadMore, setIsNavbarHidden]);
-
-    React.useEffect(() => {
-        return () => {
-            if (rafRef.current) cancelAnimationFrame(rafRef.current);
-        };
-    }, []);
 
     React.useEffect(() => {
         const el = scrollRef.current;
@@ -117,27 +202,26 @@ export default function CharactersPage({ params }) {
         }
     }, [hasMore, loadMore, visibleSheets.length]);
 
-    const scrollToTop = React.useCallback(() => {
-        const el = scrollRef.current;
-        if (!el) return;
+    const renderPhoto = React.useCallback(
+        (_, { photo, width, height }) => (
+            <MediaGridItem
+                key={photo.key}
+                workflow={photo.workflow}
+                onClick={handleWorkflowClick}
+                className="rounded-2xl border-none shadow-xl"
+                width={width}
+                height={height}
+                aspect={photo.aspect}
+            />
+        ),
+        [handleWorkflowClick]
+    );
 
-        const start     = el.scrollTop;
-        const startTime = performance.now();
-        const duration  = 600; 
+    const albumRender = React.useMemo(() => ({
+        photo: renderPhoto,
+    }), [renderPhoto]);
 
-        const ease = (t) => (t === 1 ? 1 : 1 - Math.pow(2, -10 * t));
-
-        const animate = (now) => {
-            const elapsed  = now - startTime;
-            const progress = Math.min(elapsed / duration, 1);
-            el.scrollTop   = start * (1 - ease(progress));
-            if (progress < 1) requestAnimationFrame(animate);
-        };
-
-        requestAnimationFrame(animate);
-    }, []);
-
-    if (isLoading) {
+    if (isLoading || existingSheets.length === 0) {
         return <LoadingScreen message="Loading characters..." />
     }
 
@@ -158,25 +242,45 @@ export default function CharactersPage({ params }) {
                 <div 
                     ref={scrollRef}
                     onScroll={handleScroll}
-                    className="flex-1 overflow-y-auto pt-[80px] overflow-x-hidden px-4 py-6 custom-scrollbar w-full"
+                    className="flex-1 overflow-y-auto pt-[72px] overflow-x-hidden px-3 py-3 custom-scrollbar w-full"
                 >
-                    {/* ── Characters Grid (Full Width 100%) ── */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 pb-32 w-full pt-4">
-                        {/* Always show + New Character Card */}
-                        <NewElementCardKrea
-                            onClick={() => router.push(`/cinema-studio/${projectId}/characters/new`)}
-                            label="New Character"
-                        />
-
-                        {visibleSheets.map((workflow) => (
-                            <CharacterCardKrea
-                                key={workflow.id || workflow.name}
-                                character={workflow}
-                                onClick={handleWorkflowClick}
-                                onDelete={(char) => promptDelete(char)}
+                    {visibleSheets.length === 0 ? (
+                        <div className="w-full flex flex-col items-center justify-center py-28 text-center">
+                            <p className="text-[18px] text-white/35 font-normal tracking-wide">
+                                No characters yet
+                            </p>
+                            <p className="text-[13px] text-white/20 mt-1">
+                                Click &quot;New character&quot; below to create your first character.
+                            </p>
+                        </div>
+                    ) : (
+                        <div className="flex flex-col gap-6 w-full pb-32 pt-4">
+                            <RowsPhotoAlbum
+                                photos={photos}
+                                targetRowHeight={density.targetRowHeight}
+                                spacing={density.spacing}
+                                rowConstraints={{ singleRowMaxHeight: density.targetRowHeight * density.maxRowHeightMultiplier }}
+                                render={albumRender}
                             />
-                        ))}
-                    </div>
+                            {hasMore && (
+                                <div className="flex justify-center pt-2 text-sm text-white/45">
+                                    Scroll down to load more
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
+
+                {/* Floating Action Button (New Character) */}
+                <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-40">
+                    <Button
+                        type="button"
+                        onClick={() => router.push(`/cinema-studio/${projectId}/characters/new`)}
+                        className="flex items-center gap-2 px-6 py-4 h-auto rounded-[24px] bg-[#4a4a4a] hover:bg-[#5a5a5a] text-[#d1d1d1] hover:text-white shadow-2xl shadow-black/50 transition-all active:scale-95 border border-white/5 backdrop-blur-md cursor-pointer"
+                    >
+                        <Plus className="size-5" />
+                        <span className="font-medium text-[15px]">New character</span>
+                    </Button>
                 </div>
 
                 <HowToDrawer
@@ -193,49 +297,8 @@ export default function CharactersPage({ params }) {
                     isDeleting={isDeleting}
                 />
 
-                <AnimatePresence>
-                    {showTopBtn && (
-                        <motion.button
-                            initial={{ opacity: 0, y: 30, scale: 0.8 }}
-                            animate={{ opacity: 1, y: 0, scale: 1 }}
-                            exit={{ opacity: 0, y: 30, scale: 0.8 }}
-                            transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                            onClick={scrollToTop}
-                            className="absolute bottom-10 right-10 z-50 p-3 rounded-full bg-white/10 border border-white/10 hover:bg-white/20 text-white backdrop-blur-xl shadow-2xl transition-all cursor-pointer"
-                        >
-                            <ArrowUp className="w-5 h-5" />
-                        </motion.button>
-                    )}
-                </AnimatePresence>
 
-                <style jsx global>{`
-                    .custom-scrollbar::-webkit-scrollbar {
-                        width: 14px;
-                    }
-                    .custom-scrollbar::-webkit-scrollbar-track {
-                        background: transparent;
-                    }
-                    .custom-scrollbar::-webkit-scrollbar-thumb {
-                        background-color: rgba(255, 255, 255, 0.2);
-                        border-radius: 20px;
-                        border: 4px solid transparent;
-                        background-clip: padding-box;
-                        transition: background 0.2s ease;
-                    }
-                    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-                        background-color: rgba(255, 255, 255, 0.35);
-                    }
-                    .custom-scrollbar {
-                        -ms-overflow-style: auto;
-                        scrollbar-width: thin;
-                        scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
 
-                        scroll-behavior: smooth;
-                        -webkit-overflow-scrolling: touch;
-                        overscroll-behavior-y: contain;
-                        will-change: scroll-position;
-                    }
-                `}</style>
             </main>
         </div>
     )

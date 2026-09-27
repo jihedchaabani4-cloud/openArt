@@ -49,7 +49,7 @@ export function ProjectsNavbar() {
                 }}
                 animate={hidden ? "hidden" : "visible"}
                 transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                className="fixed top-0 left-0 w-full z-[100] flex items-center justify-between px-8 h-[75px]"
+                className="fixed top-0 left-0 w-full z-[100] flex items-center justify-between px-8 h-16"
             >
                 {/* ── Left: Branding ── */}
                 <div className="flex items-center">

@@ -4,15 +4,9 @@ import * as React from "react"
 import { GoogleIcon } from "@/shared/ui/GoogleIcon"
 import { cn } from "@/shared/lib/utils"
 import { Input } from "@/shared/ui/input"
-import { WorkflowsFilterDropdown as GenerationsFilterDropdown } from "@/features/workflows/ui/WorkflowsFilterDropdown"
-import { useFilteredWorkflows as useFilteredGenerations } from "@/features/workflows/model/useFilteredWorkflows"
-import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows"
 
 export function StudioNavbarCenter({
     searchExpanded,
-    availableModels,
-    filteredCount,
-    total,
     searchInputRef,
     handleCloseSearch,
     handleOpenSearch,
@@ -25,20 +19,16 @@ export function StudioNavbarCenter({
             searchExpanded ? "basis-full" : "basis-[38%]"
         )}>
             <div className="flex items-center gap-4 w-full relative">
-                <GenerationsFilterDropdown 
-                    availableModels={availableModels}
-                    filteredCount={filteredCount}
-                    total={total}
-                />
                 <Input
                     ref={searchInputRef}
-                    icon={() => <GoogleIcon iconName="search" className="text-[20px]" />}
-                    onClear={searchExpanded ? handleCloseSearch : undefined}
-                    clearIcon={() => <GoogleIcon iconName="close" className="text-[20px]" />}
+                    variant="search"
+                    googleIcon="search"
+                    placeholder="Rechercher des médias..."
+                    onClear={filters.prompt ? () => { setFilter('prompt', ''); handleCloseSearch?.(); } : undefined}
                     type="search"
-                    value={filters.prompt}
+                    value={filters.prompt || ""}
                     onChange={(e) => setFilter('prompt', e.target.value)}
-                    onBlur={() => !filters.prompt && handleCloseSearch()}
+                    onBlur={() => !filters.prompt && handleCloseSearch?.()}
                     onFocus={handleOpenSearch}
                 />
             </div>

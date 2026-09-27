@@ -48,7 +48,7 @@ const Textarea = React.forwardRef(({
   const textareaElement = (
     <div 
       className={cn(
-        "relative w-full rounded-2xl bg-[oklch(20%_0_0)] p-4 transition-all border border-transparent hover:bg-white/[0.06] focus-within:bg-[oklch(22%_0_0)] focus-within:border-white/20 focus-within:ring-1 focus-within:ring-white/20"
+        "relative w-full rounded-[var(--mat-sys-corner-large,16px)] bg-[var(--foreground-state-05)] p-4 transition-all border border-[var(--mat-sys-outline-variant,rgba(255,255,255,0.08))] hover:bg-[var(--foreground-state-10)] focus-within:bg-[var(--foreground-state-15)] focus-within:border-[var(--mat-sys-primary,#a8c7fa)]"
       )}
     >
       <textarea
@@ -58,7 +58,7 @@ const Textarea = React.forwardRef(({
         rows={rows}
         placeholder={placeholder}
         className={cn(
-          "w-full bg-transparent text-xs sm:text-sm text-white/90 placeholder-white/30 resize-none outline-none custom-scrollbar leading-relaxed font-sans transition-[height] duration-150 ease-out",
+          "w-full bg-transparent text-xs sm:text-sm text-[var(--mat-sys-on-surface,#e3e3e3)] placeholder:[var(--mat-sys-on-surface-variant,#8e918f)] resize-none outline-none custom-scrollbar leading-relaxed font-sans transition-[height] duration-150 ease-out",
           isOverflowing ? "overflow-y-auto" : "overflow-hidden",
           className
         )}
@@ -75,15 +75,15 @@ const Textarea = React.forwardRef(({
     return (
       <div className={cn("flex flex-col gap-2 w-full", containerClassName)}>
         {label && (
-          <label className="text-xs font-semibold text-white/80 flex items-center justify-between">
-            <span>{label} {labelExtra && <span className="font-normal text-white/40">{labelExtra}</span>}</span>
+          <label className="text-xs font-semibold text-[var(--mat-sys-on-surface,#e3e3e3)] flex items-center justify-between">
+            <span>{label} {labelExtra && <span className="font-normal text-[var(--mat-sys-on-surface-variant,#8e918f)]">{labelExtra}</span>}</span>
           </label>
         )}
 
         {textareaElement}
 
         {hint && (
-          <p className="text-[11px] text-white/40 leading-relaxed pt-0.5">
+          <p className="text-[11px] text-[var(--mat-sys-on-surface-variant,#8e918f)] leading-relaxed pt-0.5">
             {hint}
           </p>
         )}

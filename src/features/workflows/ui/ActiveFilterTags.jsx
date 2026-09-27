@@ -3,6 +3,7 @@
 import * as React from "react"
 import { ChevronDown, X } from "lucide-react"
 import { cn } from "@/shared/lib/utils"
+import { Button } from "@/shared/ui/button"
 import { useWorkflowsStore } from "../model/useWorkflowsStore"
 
 /**
@@ -10,11 +11,13 @@ import { useWorkflowsStore } from "../model/useWorkflowsStore"
  */
 function FilterTag({ label, onRemove, icon: Icon, isDropdown }) {
     return (
-        <button
+        <Button
             type="button"
+            variant="ghost"
+            size="sm"
             onClick={onRemove}
             className={cn(
-                "flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white transition-all text-[13px] font-medium whitespace-nowrap border border-white/5",
+                "flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white transition-all text-[13px] font-medium whitespace-nowrap border border-white/5 h-auto",
                 isDropdown && "hover:border-white/20"
             )}
         >
@@ -25,7 +28,7 @@ function FilterTag({ label, onRemove, icon: Icon, isDropdown }) {
                 <X className="size-3.5 text-white/50 hover:text-white" />
             ) : null}
             {Icon && <Icon className="size-3.5 text-white/50" />}
-        </button>
+        </Button>
     )
 }
 

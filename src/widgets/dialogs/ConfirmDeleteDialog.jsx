@@ -11,6 +11,7 @@ import {
   DialogTrigger,
 } from "@/shared/ui/dialog";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
+import { Button } from "@/shared/ui/button";
 
 /**
  * Generic delete confirmation dialog. Use it anywhere you need a simple "Are you sure?" delete flow.
@@ -42,42 +43,41 @@ export function ConfirmDeleteDialog({
       {children && <DialogTrigger asChild>{children}</DialogTrigger>}
       <DialogContent
         variant="small"
-        className="bg-[#121212c9] border border-white/5 text-white rounded-[28px] max-w-[250px] p-2 "
+        className="bg-[var(--mat-dialog-container-color,var(--background-state-90))] border border-[var(--mat-sys-outline-variant,rgba(255,255,255,0.08))] text-[var(--mat-sys-on-surface,#e3e3e3)] rounded-[var(--mat-dialog-container-shape,24px)] max-w-[250px] p-4 shadow-[var(--mat-dialog-container-elevation-shadow)]"
         showCloseButton={false}
       >
         <div className="flex flex-col items-center text-center">
           <div className="mb-3">
-            <GoogleIcon iconName="warning" className="text-[32px] text-white" />
+            <GoogleIcon iconName="warning" className="text-[32px] text-[var(--mat-sys-error,#f2b8b5)]" />
           </div>
           
           <DialogHeader className="space-y-1">
             <DialogTitle className="sr-only">Confirm Deletion</DialogTitle>
-            <DialogDescription className="text-white/90 text-[14px] font-medium text-center leading-snug">
+            <DialogDescription className="text-[var(--mat-sys-on-surface,#e3e3e3)] text-[14px] font-medium text-center leading-snug">
               {description}
             </DialogDescription>
           </DialogHeader>
 
           <div className="mt-2 flex gap-2.5 w-full">
             <DialogClose asChild>
-              <button
+              <Button
                 type="button"
+                variant="secondary"
                 disabled={loading}
-                className="flex-1 h-10 rounded-xl bg-[#2A2A2A] hover:bg-[#333333] text-white font-semibold text-[10px] transition-all active:scale-95"
+                className="flex-1"
               >
                 {cancelLabel}
-              </button>
+              </Button>
             </DialogClose>
-            <button
+            <Button
               type="button"
+              variant="destructive"
               onClick={handleConfirm}
               disabled={loading}
-              className="flex-1 h-10 rounded-xl bg-white hover:bg-white/90 text-black font-semibold text-[10px] transition-all active:scale-95 flex items-center justify-center gap-2"
+              className="flex-1"
             >
-              {loading && (
-                <span className="size-2.5 rounded-full " />
-              )}
               {confirmLabel}
-            </button>
+            </Button>
           </div>
         </div>
       </DialogContent>

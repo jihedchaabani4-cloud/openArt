@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { motion } from "framer-motion";
 import { useQueryClient } from "@tanstack/react-query";
+import { Button } from "@/shared/ui/button";
 
 /**
  * [FSD Layer: shared/ui]
@@ -43,7 +44,7 @@ export function ProjectError({ error, reset, onRetry }) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="w-full h-screen flex flex-col items-center justify-center text-white bg-[#050505]"
+      className="w-full h-screen flex flex-col items-center justify-center text-white bg-background"
     >
       <h2 className="mb-6 text-2xl font-medium tracking-tight text-white/90">
         Un problème est survenu.
@@ -51,21 +52,25 @@ export function ProjectError({ error, reset, onRetry }) {
       
       <div className="flex gap-4">
         {onRetry && (
-          <button
+          <Button
+            type="button"
+            variant="primary"
             onClick={onRetry}
-            className="flex items-center gap-2 rounded-full bg-white px-6 py-2.5 text-sm font-medium text-black transition hover:bg-white/90 shadow-lg"
+            className="rounded-full px-6 py-2.5 shadow-lg h-auto"
           >
             Réessayer
-          </button>
+          </Button>
         )}
         
-        <button
+        <Button
+          type="button"
+          variant="outline"
           onClick={handleBack}
-          className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-6 py-2.5 text-sm font-medium text-white transition hover:bg-white/10 shadow-lg"
+          className="rounded-full px-6 py-2.5 shadow-lg h-auto"
         >
           <ArrowLeft className="h-4 w-4" />
           Retour aux projets
-        </button>
+        </Button>
       </div>
     </motion.div>
   );

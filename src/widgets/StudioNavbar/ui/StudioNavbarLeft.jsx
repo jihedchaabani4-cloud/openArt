@@ -13,6 +13,7 @@ import {
     DropdownMenuTrigger,
 } from "@/shared/ui/dropdown-menu"
 import { Button } from "@/shared/ui/button"
+import { NavbarBackButton } from "@/widgets/NavbarCore/ui/NavbarBackButton"
 import { ConfirmDeleteDialog } from "@/widgets/dialogs/ConfirmDeleteDialog"
 
 export function StudioNavbarLeft({
@@ -56,9 +57,11 @@ export function StudioNavbarLeft({
 
     return (
         <div className={cn(
-            "flex items-center gap-1 transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] overflow-hidden",
+            "flex items-center gap-2.5 transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] overflow-hidden",
             searchExpanded ? "basis-0 w-0 opacity-0 pointer-events-none" : "basis-[30%] shrink-0 opacity-100"
         )}>
+            <NavbarBackButton href="/cinema-studio" label="Accueil" iconName="home" />
+
             <EditableDisplayName
                 ref={nameRef}
                 displayName={selectedProjectName}
@@ -79,6 +82,7 @@ export function StudioNavbarLeft({
                       Rename
                     </DropdownMenuItem>
                     <DropdownMenuItem 
+                        variant="destructive"
                         onClick={() => setIsDeleteDialogOpen(true)}
                     >
                         <GoogleIcon iconName="delete" className="text-[13px]" />

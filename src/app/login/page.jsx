@@ -6,6 +6,7 @@ import { Mail, Lock, Chrome, ArrowRight, Sparkles, Laptop } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { LoadingScreen } from "@/shared/ui/LoadingScreen";
+import { Input } from "@/shared/ui/input";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 const DOMAIN_SERVER = process.env.NEXT_PUBLIC_DOMAIN_SERVER;
@@ -107,11 +108,11 @@ export default function LoginPage() {
                     <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
                       <Mail className="h-5 w-5 text-white/40 group-focus-within:text-purple-400 transition-colors" />
                     </div>
-                    <input
+                    <Input
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full pl-11 pr-4 py-3 bg-black/40 border border-white/10 rounded-xl text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all"
+                      className="w-full pl-11 pr-4 py-3 bg-black/40 border border-white/10 rounded-xl text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all text-sm min-h-0"
                       placeholder="name@example.com"
                       required
                     />
@@ -128,11 +129,11 @@ export default function LoginPage() {
                     <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
                       <Lock className="h-5 w-5 text-white/40 group-focus-within:text-purple-400 transition-colors" />
                     </div>
-                    <input
+                    <Input
                       type="password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="w-full pl-11 pr-4 py-3 bg-black/40 border border-white/10 rounded-xl text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all"
+                      className="w-full pl-11 pr-4 py-3 bg-black/40 border border-white/10 rounded-xl text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all text-sm min-h-0"
                       placeholder="••••••••"
                       required
                     />

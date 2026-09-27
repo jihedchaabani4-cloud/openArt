@@ -13,4 +13,6 @@ export {
   getPrimaryMediaConfig,
   intrinsicSizeToCssAspect,
   intrinsicSizeToRatioLabel,
+  getCachedImageDimensions,
+  setCachedImageDimensions,
 } from "./displayUtils";

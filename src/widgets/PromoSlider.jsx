@@ -2,8 +2,7 @@
 
 import { useState, useEffect, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Button } from "@/shared/ui/button"
-import { Progress } from "@/shared/ui/progress"
+
 
 // Helper to get an image URL from a video URL (Cloudinary specific)
 const getPosterUrl = (videoUrl, imgUrl) => {
@@ -118,38 +117,16 @@ const ITEMS = [
 // ─── Single View Slider ─────────────────────────────────────────────────────
 function SingleViewSlider({ items, isEmpty }) {
   const [currentIndex, setCurrentIndex] = useState(0)
-  const [progressValue, setProgressValue] = useState(0)
 
-  // Auto-play logic
+  // Auto-play logic — smooth 5s interval, no 60fps re-render overhead
   useEffect(() => {
     if (items.length <= 1) return;
-    
-    setProgressValue(0);
     const duration = 5000;
-    const start = Date.now();
-    let animationFrameId;
-
-    const tick = () => {
-      const elapsed = Date.now() - start;
-      const newProgress = Math.min((elapsed / duration) * 100, 100);
-      setProgressValue(newProgress);
-      
-      if (elapsed < duration) {
-        animationFrameId = requestAnimationFrame(tick);
-      }
-    };
-    
-    animationFrameId = requestAnimationFrame(tick);
-
     const interval = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % items.length);
     }, duration);
-    
-    return () => {
-      clearInterval(interval);
-      cancelAnimationFrame(animationFrameId);
-    };
-  }, [currentIndex, items.length]);
+    return () => clearInterval(interval);
+  }, [items.length]);
 
   const activeItem = items[currentIndex];
   const cardHeight = isEmpty ? 600 : 400;

@@ -3,6 +3,8 @@
 import * as React from "react"
 import { Check, X } from "lucide-react"
 import { cn } from "@/shared/lib/utils"
+import { Button } from "@/shared/ui/button"
+import { Input } from "@/shared/ui/input"
 
 export const EditableDisplayName = React.forwardRef(({
   displayName,
@@ -63,9 +65,10 @@ export const EditableDisplayName = React.forwardRef(({
 
   return (
     <div className={cn("flex items-center gap-2 min-w-0", className)}>
-      <input
+      <Input
         ref={inputRef}
         type="text"
+        variant="inline"
         value={isEditing ? value : (displayName || placeholder)}
         onChange={(e) => setValue(e.target.value.slice(0, maxLength))}
         onFocus={handleStartEdit}
@@ -87,26 +90,32 @@ export const EditableDisplayName = React.forwardRef(({
 
       {isEditing && (
         <div className="flex items-center gap-1.5 shrink-0 animate-in fade-in zoom-in-95 duration-200">
-          <button
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-xs"
             onMouseDown={(e) => {
               e.preventDefault()
               handleSaveEdit()
             }}
-            className="p-1.5 text-white hover:bg-white/30 rounded-xl transition-all flex items-center justify-center"
+            className="p-1.5 text-white hover:bg-white/30 rounded-xl transition-all flex items-center justify-center h-auto"
             title="Save"
           >
             <Check className="size-5" strokeWidth={2.5} />
-          </button>
-          <button
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-xs"
             onMouseDown={(e) => {
               e.preventDefault()
               handleCancelEdit()
             }}
-            className="p-1.5 text-white hover:bg-white/30 rounded-xl transition-all flex items-center justify-center"
+            className="p-1.5 text-white hover:bg-white/30 rounded-xl transition-all flex items-center justify-center h-auto"
             title="Cancel"
           >
             <X className="size-5" strokeWidth={2.5} />
-          </button>
+          </Button>
         </div>
       )}
     </div>

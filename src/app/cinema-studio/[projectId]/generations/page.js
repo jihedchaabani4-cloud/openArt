@@ -6,17 +6,23 @@ import { useRouter } from "next/navigation"
 
 import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows"
 import { useFilteredWorkflows as useFilteredGenerations } from "@/features/workflows/model/useFilteredWorkflows"
-import { useProjectSessions } from "@/features/workflows/api/workflowsApi"
-import PromptBar from "@/features/prompt-bar"
-import { cn } from "@/shared/lib/utils"
+import { useQueryClient } from "@tanstack/react-query"
+import { useGenerateMutation } from "@/features/workflows/api/workflowsApi"
+import { queryKeys } from "@/shared/api/queryKeys"
+import {
+  PromptBarPlatform,
+  generatedMediaType,
+  generatedMediaConfig,
+  useRealBackendModels,
+} from "@/features/prompt-bar/index.platform"
 import { RowsPhotoAlbum } from 'react-photo-album'
 import 'react-photo-album/rows.css'
-import { ArrowUp } from "lucide-react"
 import { MediaGridItem } from "@/widgets/StudioLayout/GenerationsStudio/MediaGridItem"
+import { SessionSidebar } from "@/widgets/StudioLayout/SessionSidebar/SessionSidebar"
 
 import { usePromptStore } from "@/features/prompt-bar/model/usePromptStore";
 import { getPrimaryMedia } from "@/shared/lib/generationUtils";
-import { getItemMetadata as getDisplayMeta } from "@/shared/lib/displayUtils";
+import { getItemMetadata as getDisplayMeta, getStudioGridDensity } from "@/shared/lib/displayUtils";
 import { LoadingScreen } from "@/shared/ui/LoadingScreen";
 
 const PAGE_SIZE = 30;
@@ -44,39 +50,64 @@ const EmptyState = () => (
 
 export default function GenerationsPage({ params }) {
     const { projectId } = React.use(params)
-    const { setSelectedProjectId, activeSessionId, setActiveSessionId, setActiveStudioTab } = useGenerationsStore()
+    const setSelectedProjectId = useGenerationsStore(s => s.setSelectedProjectId);
+    const activeSessionId = useGenerationsStore(s => s.activeSessionId);
+    const setActiveStudioTab = useGenerationsStore(s => s.setActiveStudioTab);
     const gridSize          = useGenerationsStore(s => s.gridSize);
     const setIsNavbarHidden = useGenerationsStore(s => s.setIsNavbarHidden);
-    const [isGridResizing, setIsGridResizing] = React.useState(false);
 
-    // Set the active project on mount
+    // Set the active project on mount without re-render cascades
     React.useEffect(() => {
-        if (projectId) setSelectedProjectId(projectId)
-        setActiveStudioTab("generations")
+        if (projectId && useGenerationsStore.getState().selectedProjectId !== projectId) {
+            setSelectedProjectId(projectId);
+        }
+        if (useGenerationsStore.getState().activeStudioTab !== "generations") {
+            setActiveStudioTab("generations");
+        }
     }, [projectId, setSelectedProjectId, setActiveStudioTab])
 
-    // Fetch sessions for this project
-    const projectSessions = useProjectSessions(projectId)
-    const sessions = React.useMemo(() => projectSessions || [], [projectSessions])
 
-    // Auto-select the most recent session if none is active or active is invalid for current project
-    React.useEffect(() => {
-        if (sessions.length > 0) {
-            const sessionExists = sessions.some(s => s.session_id === activeSessionId);
-            if (!activeSessionId || !sessionExists) {
-                // Sort by createTime descending to get the LATEST one first
-                const sorted = [...sessions].sort((a, b) => 
-                    new Date(b.metadata?.createTime || 0) - new Date(a.metadata?.createTime || 0)
-                );
-                if (sorted[0]?.session_id) {
-                    setActiveSessionId(sorted[0].session_id);
-                }
-            }
-        }
-    }, [sessions, activeSessionId, setActiveSessionId]);
 
     const isDragging = usePromptStore(s => s.isDraggingGalleryItem);
     const router = useRouter();
+
+    const queryClient = useQueryClient();
+    const { data: backendData } = useRealBackendModels({ projectId });
+    const realModels = React.useMemo(() => backendData?.models || [], [backendData]);
+    const { mutateAsync: runGenerate, isPending: isGeneratingMutation } = useGenerateMutation();
+
+
+    const handleGenerate = React.useCallback(
+        async (request) => {
+            if (!request?.prompt?.trim()) return;
+            const chosenModel = realModels.find((m) => m.id === request.model);
+            const isVideo = chosenModel?.domain === "video";
+
+            const payload = {
+                model: request.model,
+                prompt: request.prompt,
+                project_id: projectId,
+                session_id: activeSessionId,
+                parameters: request.parameters || {},
+                references: request.references || [],
+                elements: request.elements || [],
+                characters: request.characters || [],
+            };
+
+            try {
+                const res = await runGenerate({ payload, isVideo });
+                const finalProj = res?.project_id ?? projectId;
+                const finalSess = res?.session_id ?? activeSessionId;
+                if (finalProj) {
+                    queryClient.invalidateQueries({ queryKey: queryKeys.assets.byProject(finalProj, finalSess) });
+                    queryClient.invalidateQueries({ queryKey: queryKeys.generations.byProject(finalProj, finalSess) });
+                }
+            } catch (err) {
+                console.error("Generation execution failed:", err);
+            }
+        },
+        [projectId, activeSessionId, realModels, runGenerate, queryClient]
+    );
     
     const { data: fetchResult, isLoading } = useFilteredGenerations(projectId, activeSessionId);
     const workflows = React.useMemo(
@@ -95,16 +126,14 @@ export default function GenerationsPage({ params }) {
     );
 
     // Navigate to the Edit Page for this workflow
-    const handleWorkflowClick = (workflow) => {
-        const workflowId = workflow.id || workflow.name;
+    const handleWorkflowClick = React.useCallback((workflow) => {
+        const workflowId = workflow?.id || workflow?.name;
         if (!workflowId || !projectId) return;
         router.push(`/cinema-studio/${projectId}/generations/edit/${workflowId}`);
-    };
+    }, [projectId, router]);
 
     const scrollRef = React.useRef(null);
     const prevScrollTop = React.useRef(0);
-    const rafRef = React.useRef(null);
-    const [showTopBtn, setShowTopBtn] = React.useState(false);
     
     const loadMore = React.useCallback(() => {
         setVisibleCount((current) => Math.min(current + PAGE_SIZE, workflows.length));
@@ -113,43 +142,32 @@ export default function GenerationsPage({ params }) {
     React.useEffect(() => {
         setVisibleCount(PAGE_SIZE);
         prevScrollTop.current = 0;
-    }, [projectId, activeSessionId, workflowListKey]);
+        setIsNavbarHidden(false);
+    }, [projectId, activeSessionId, workflowListKey, setIsNavbarHidden]);
 
-    // ─── 144fps scroll handler via requestAnimationFrame ─────────────────────
+    // ─── 144Hz responsive navbar toggle & scroll handler ─────
     const handleScroll = React.useCallback(() => {
-        if (rafRef.current) return;
+        const el = scrollRef.current;
+        if (!el) return;
 
-        rafRef.current = requestAnimationFrame(() => {
-            rafRef.current = null;
-            if (!scrollRef.current) return;
+        const currentScrollTop = el.scrollTop;
 
-            const currentScrollTop = scrollRef.current.scrollTop;
+        // Navbar auto-hide on scroll down (> 80px), reveal on scroll up
+        const isCurrentlyHidden = useGenerationsStore.getState().isNavbarHidden;
+        if (currentScrollTop > prevScrollTop.current && currentScrollTop > 80) {
+            if (!isCurrentlyHidden) setIsNavbarHidden(true);
+        } else if (currentScrollTop < prevScrollTop.current) {
+            if (isCurrentlyHidden) setIsNavbarHidden(false);
+        }
+        prevScrollTop.current = currentScrollTop;
 
-            setShowTopBtn(currentScrollTop > 400);
-
-            const isCurrentlyHidden = useGenerationsStore.getState().isNavbarHidden;
-            if (currentScrollTop > prevScrollTop.current && currentScrollTop > 80) {
-                if (!isCurrentlyHidden) setIsNavbarHidden(true);
-            } else if (currentScrollTop < prevScrollTop.current) {
-                if (isCurrentlyHidden) setIsNavbarHidden(false);
-            }
-
-            const remainingScroll =
-                scrollRef.current.scrollHeight - (currentScrollTop + scrollRef.current.clientHeight);
-            if (remainingScroll <= 240 && hasMore) {
+        if (hasMore) {
+            const remainingScroll = el.scrollHeight - (currentScrollTop + el.clientHeight);
+            if (remainingScroll <= 300) {
                 loadMore();
             }
-
-            prevScrollTop.current = currentScrollTop;
-        });
+        }
     }, [hasMore, loadMore, setIsNavbarHidden]);
-
-    // Cancel any pending rAF on unmount
-    React.useEffect(() => {
-        return () => {
-            if (rafRef.current) cancelAnimationFrame(rafRef.current);
-        };
-    }, []);
 
     React.useEffect(() => {
         const el = scrollRef.current;
@@ -160,33 +178,25 @@ export default function GenerationsPage({ params }) {
         }
     }, [hasMore, loadMore, visibleWorkflows.length]);
 
-    React.useEffect(() => {
-        setIsGridResizing(true);
-        const timeout = window.setTimeout(() => setIsGridResizing(false), 220);
-        return () => window.clearTimeout(timeout);
-    }, [gridSize]);
+    const density = getStudioGridDensity(gridSize);
 
-    const scrollToTop = React.useCallback(() => {
-        const el = scrollRef.current;
-        if (!el) return;
+    const renderPhoto = React.useCallback(
+        (_, { photo, width, height }) => (
+            <MediaGridItem
+                key={photo.key}
+                workflow={photo.workflow}
+                onClick={handleWorkflowClick}
+                className="rounded-2xl border-none shadow-xl"
+                width={width}
+                height={height}
+            />
+        ),
+        [handleWorkflowClick]
+    );
 
-        const start     = el.scrollTop;
-        const startTime = performance.now();
-        const duration  = 600;
-
-        const ease = (t) => (t === 1 ? 1 : 1 - Math.pow(2, -10 * t));
-
-        const animate = (now) => {
-            const elapsed  = now - startTime;
-            const progress = Math.min(elapsed / duration, 1);
-            el.scrollTop   = start * (1 - ease(progress));
-            if (progress < 1) requestAnimationFrame(animate);
-        };
-
-        requestAnimationFrame(animate);
-    }, []);
-
-    const targetRowHeight = gridSize === "lg" ? 380 : gridSize === "md" ? 280 : 200;
+    const albumRender = React.useMemo(() => ({
+        photo: renderPhoto,
+    }), [renderPhoto]);
 
     const photos = React.useMemo(() => {
         return visibleWorkflows.reduce((acc, workflow, i) => {
@@ -239,39 +249,24 @@ export default function GenerationsPage({ params }) {
                 <div 
                     ref={scrollRef}
                     onScroll={handleScroll}
-                    className="flex-1 overflow-y-auto pt-[80px] overflow-x-hidden p-5 custom-scrollbar"
+                    className="flex-1 overflow-y-auto pt-[72px] overflow-x-hidden px-3 py-3 custom-scrollbar"
                 >
                     <AnimatePresence mode="wait">
                         {workflows.length > 0 ? (
                             <motion.div 
                                 key="feed"
-                                initial={{ opacity: 0, y: 16 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -16 }}
-                                transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
-                                className={cn(
-                                    "flex flex-col gap-6 w-full pb-32 transition-opacity duration-200",
-                                    isGridResizing && "opacity-90"
-                                )}
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                transition={{ duration: 0.15 }}
+                                className="flex flex-col gap-6 w-full pb-32"
                             >
                                 <RowsPhotoAlbum
                                     photos={photos}
-                                    targetRowHeight={targetRowHeight}
-                                    spacing={16}
-                                    rowConstraints={{ singleRowMaxHeight: targetRowHeight * 1.6 }}
-                                    render={{
-                                        photo: (_, { photo, width, height }) => (
-                                            <MediaGridItem
-                                                key={photo.key}
-                                                workflow={photo.workflow}
-                                                onClick={() => handleWorkflowClick(photo.workflow)}
-                                                className="rounded-2xl border-none shadow-xl"
-                                                width={width}
-                                                height={height}
-                                                disableLayoutAnimation={isGridResizing}
-                                            />
-                                        ),
-                                    }}
+                                    targetRowHeight={density.targetRowHeight}
+                                    spacing={density.spacing}
+                                    rowConstraints={{ singleRowMaxHeight: density.targetRowHeight * density.maxRowHeightMultiplier }}
+                                    render={albumRender}
                                 />
                                 {hasMore && (
                                     <div className="flex justify-center pt-2 text-sm text-white/45">
@@ -293,54 +288,21 @@ export default function GenerationsPage({ params }) {
                     </AnimatePresence>
                 </div>
 
-                {/* Dedicated Generations PromptBar */}
-                <PromptBar />
+                {/* Dedicated Generations PromptBar (Platform Architecture) */}
+                <PromptBarPlatform
+                    type={generatedMediaType}
+                    featureConfig={generatedMediaConfig}
+                    models={realModels}
+                    onGenerate={handleGenerate}
+                    isGenerating={isGeneratingMutation}
+                />
 
-                <AnimatePresence>
-                    {showTopBtn && (
-                        <motion.button
-                            initial={{ opacity: 0, y: 30, scale: 0.8 }}
-                            animate={{ opacity: 1, y: 0, scale: 1 }}
-                            exit={{ opacity: 0, y: 30, scale: 0.8 }}
-                            transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                            onClick={scrollToTop}
-                            className="absolute bottom-10 right-10 z-50 p-3 rounded-full bg-white/10 border border-white/10 hover:bg-white/20 text-white backdrop-blur-xl shadow-2xl transition-all cursor-pointer"
-                        >
-                            <ArrowUp className="w-5 h-5" />
-                        </motion.button>
-                    )}
-                </AnimatePresence>
 
-                <style jsx global>{`
-                    .custom-scrollbar::-webkit-scrollbar {
-                        width: 14px;
-                    }
-                    .custom-scrollbar::-webkit-scrollbar-track {
-                        background: transparent;
-                    }
-                    .custom-scrollbar::-webkit-scrollbar-thumb {
-                        background-color: rgba(255, 255, 255, 0.2);
-                        border-radius: 20px;
-                        border: 4px solid transparent;
-                        background-clip: padding-box;
-                        transition: background 0.2s ease;
-                    }
-                    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-                        background-color: rgba(255, 255, 255, 0.35);
-                    }
-                    .custom-scrollbar {
-                        -ms-overflow-style: auto;
-                        scrollbar-width: thin;
-                        scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
 
-                        /* ✦ 144fps smooth scroll */
-                        scroll-behavior: smooth;
-                        -webkit-overflow-scrolling: touch;
-                        overscroll-behavior-y: contain;
-                        will-change: scroll-position;
-                    }
-                `}</style>
             </main>
+
+            {/* Dedicated Right Session Navigation Column (div.nVZd1Tjd) */}
+            <SessionSidebar />
         </div>
     )
 }

@@ -35,7 +35,7 @@ export function useProjectData(projectId, sessionId = null) {
           },
           cache: 'no-store',
         });
-        console.log("DEBUG: Raw API Response from /project-data:", res);
+
         
         // Comprehensive check for all possible backend response structures
         const data = 
@@ -60,12 +60,39 @@ export function useProjectData(projectId, sessionId = null) {
       }
     },
     enabled: !authLoading && !!user && !!projectId, // ⛔ Block until auth resolves
-    // 🎯 SaaS Settings - Fresh Realtime Sync
-    staleTime: 0, 
-    refetchOnMount: true,
-    refetchOnWindowFocus: true,
+    // 🎯 SaaS Settings - 144Hz Instant Tab Switching & Cache
+    staleTime: 30000, 
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchInterval: (query) => {
+      const media = query.state.data?.projectContents?.media || [];
+      const now = Date.now();
+      const MAX_PROCESSING_MS = 10 * 60 * 1000; // 10 minutes hard timeout failsafe
+
+      const hasPending = media.some((m) => {
+        const isProcessing = m.status === 'processing' || m.status === 'pending';
+        if (!isProcessing) return false;
+
+        const rawDate = m.create_time || m.createTime || m.created_at || m.mediaMetadata?.createTime || m.mediaMetadata?.create_time;
+        if (!rawDate) return false;
+
+        const createdMs = new Date(rawDate).getTime();
+        if (!createdMs || isNaN(createdMs)) return false;
+
+        // If elapsed time >= 10 minutes, stop polling (failsafe for stuck/abandoned backend jobs)
+        if ((now - createdMs) >= MAX_PROCESSING_MS) {
+          return false;
+        }
+
+        return true;
+      });
+
+      // 30s polling during generation; completely stops (false) when idle/finished
+      return hasPending ? 30000 : false;
+    },
     retry: false, // Don't hang forever on bad IDs
     throwOnError: false, // Controlled handling
+
   });
 }
 
@@ -105,30 +132,15 @@ export function useSessionWorkflows(projectId, sessionId) {
 export function useGenerateMutation({ onError } = {}) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ payload, isVideo, isCamera, isLighting, isUpscale }) => {
-      let endpoint = isVideo ? '/video/generated' : '/images/generated';
-      if (isCamera) {
-          endpoint = '/camera/change-angles';
-          if (isVideo) payload.media_type = "video";
-      }
-      if (isLighting) endpoint = '/lighting/change-lighting';
-      if (isUpscale) endpoint = '/media/upscale';
-      
-      if (!isVideo && !isCamera && !isLighting && !isUpscale) {
-        if (payload.edit_type === 'edit') endpoint = '/images/generated/edit/existing';
-        else if (payload.edit_type === 'img2img') endpoint = '/images/generated/edit/new';
-      } else if (isVideo && payload.edit_type === 'edit') {
-        endpoint = '/video/edit';
-      }
-      
-      if (payload.section === 'motion' || payload.edit_type === 'motion') {
-         endpoint = '/video/motion';
-      }
-      
-      const res = await api.post(endpoint, payload);
+    retry: false, // ⛔ NEVER retry generation calls — prevent double-billing on network hiccups
+    mutationFn: async ({ payload, isVideo }) => {
+      // Explicit domain routing: Generated Image vs Generated Video
+      const endpoint = isVideo ? '/video/generated' : '/images/generated';
+      const res = await api.post(endpoint, payload, { timeout: 15000 }); // 15s timeout
       if (!res.ok) throw new Error(res.message || 'Workflow execution failed');
       return res;
     },
+
     onMutate: async ({ payload, isVideo }) => {
       useWorkflowsStore.getState().fireScrollToTop();
       
@@ -213,201 +225,26 @@ export function useGenerateMutation({ onError } = {}) {
   });
 }
 
-export function useCreateElementSheetMutation({ onError } = {}) {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async (inputData) => {
-      const payload = inputData?.payload || inputData || {};
-      const type = (payload.type || payload.element_type || payload.elementType || "").toLowerCase();
-      
-      const endpoint = type === "character"
-        ? `/characters/create`
-        : `/v2/elements`;
-
-      const res = await api.post(endpoint, payload);
-      if (res.error) throw new Error(res.message || 'Element creation failed');
-      return res;
-    },
-    onMutate: async (inputData) => {
-      useWorkflowsStore.getState().fireScrollToTop();
-      const payload = inputData?.payload || inputData || {};
-      
-      const projectId = payload.projectId || payload.project_id;
-      if (!projectId) return {};
-
-      const projectKey = queryKeys.projectData.byProject(projectId);
-      await queryClient.cancelQueries({ queryKey: projectKey });
-      const previousData = queryClient.getQueryData(projectKey);
-
-      if (previousData) {
-        const optimisticId = `optimistic-element-${Date.now()}`;
-        
-        const isCharacterType = payload.type === "character" || payload.element_type === "character" || payload.elementType === "character";
-        const optimisticWorkflow = {
-          name: optimisticId,
-          projectId: projectId,
-          workflow_type: isCharacterType ? 'CHARACTER' : 'ELEMENT_SHEET',
-          metadata: {
-            displayName: payload.name || payload.prompt || (payload.type === "character" || payload.element_type === "character" ? "Untitled Character" : "Untitled Element"),
-            createTime: new Date().toISOString(),
-            sessionId: payload.session_id,
-            favorited: false,
-          }
-        };
-
-        const optimisticMedia = {
-          id: `${optimisticId}-item`,
-          name: `${optimisticId}-item`,
-          url: null,
-          status: 'pending',
-          projectId: projectId,
-          workflowId: optimisticId,
-          workflowStepId: 'CAE',
-          mediaMetadata: {
-            createTime: new Date().toISOString(),
-            visibility: 'PRIVATE',
-          },
-          generationConfig: {
-            prompt: payload.prompt,
-            model: payload.model_name || payload.model,
-          },
-          image: {
-            dimensions: { width: 1024, height: 1024 },
-            generatedImage: null,
-          }
-        };
-
-        queryClient.setQueryData(projectKey, (old) => {
-          if (!old) return old;
-          return {
-            ...old,
-            projectContents: {
-              ...old.projectContents,
-              workflows: [optimisticWorkflow, ...(old.projectContents?.workflows || [])],
-              media: [optimisticMedia, ...(old.projectContents?.media || [])]
-            }
-          };
-        });
-      }
-
-      return { previousData, projectKey };
-    },
-    onError: (err, variables, context) => {
-      console.error('❌ Element sheet creation failed:', err);
-      if (context?.previousData) {
-        queryClient.setQueryData(context.projectKey, context.previousData);
-      }
-      if (typeof onError === 'function') onError(err);
-    },
-    onSuccess: (res, inputData) => {
-      const payload = inputData?.payload || inputData || {};
-      const projectId = payload.projectId || payload.project_id || res?.workflow?.project_id || res?.element?.project_id;
-      if (projectId) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.projectData.byProject(projectId) });
-        queryClient.refetchQueries({ queryKey: queryKeys.projectData.byProject(projectId) });
-      }
-    },
-  });
-}
-
-export function useCreateCharacterMutation({ onError } = {}) {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async (inputData) => {
-      const payload = inputData?.payload || inputData || {};
-      const res = await api.post('/characters/create', payload);
-      if (res.error) throw new Error(res.message || 'Character creation failed');
-      return res;
-    },
-    onMutate: async (inputData) => {
-      useWorkflowsStore.getState().fireScrollToTop();
-      const payload = inputData?.payload || inputData || {};
-      const projectId = payload.projectId || payload.project_id;
-      if (!projectId) return {};
-      const projectKey = queryKeys.projectData.byProject(projectId);
-      await queryClient.cancelQueries({ queryKey: projectKey });
-      const previousData = queryClient.getQueryData(projectKey);
-      return { previousData, projectKey };
-    },
-    onError: (err, variables, context) => {
-      console.error('❌ Character creation failed:', err);
-      if (context?.previousData) {
-        queryClient.setQueryData(context.projectKey, context.previousData);
-      }
-      if (typeof onError === 'function') onError(err);
-    },
-    onSuccess: (res, inputData) => {
-      const payload = inputData?.payload || inputData || {};
-      const projectId = payload.projectId || payload.project_id || res?.workflow?.project_id || res?.project_id;
-      if (projectId) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.projectData.byProject(projectId) });
-        queryClient.refetchQueries({ queryKey: queryKeys.projectData.byProject(projectId) });
-      }
-    },
-  });
-}
-
-export function useGenerateCharacterSheetMutation({ onError } = {}) {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async ({ characterId, prompt, references, projectId }) => {
-      const res = await api.post(`/characters/${characterId}/generate-sheet`, {
-        prompt,
-        references,
-        project_id: projectId,
-      });
-      if (res.error) throw new Error(res.message || 'Sheet generation failed');
-      return res;
-    },
-    onSuccess: (res, variables) => {
-      const projectId = variables?.projectId || variables?.project_id || res?.project_id;
-      if (projectId) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.projectData.byProject(projectId) });
-        queryClient.refetchQueries({ queryKey: queryKeys.projectData.byProject(projectId) });
-      }
-    },
-    onError: (err) => {
-      console.error('❌ Sheet generation failed:', err);
-      if (typeof onError === 'function') onError(err);
-    }
-  });
-}
-
-export function useGenerateCharacterDescriptionMutation() {
-  return useMutation({
-    mutationFn: async ({ concept, archetype, style }) => {
-      const res = await api.post('/characters/generate-description', { concept, archetype, style });
-      if (res.error) throw new Error(res.message || 'Failed to generate character description');
-      return res;
-    },
-  });
-}
-
 export function useExtendVideoMutation({ onError } = {}) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ payload }) => {
       const endpoint = '/video/extend';
-      const res = await api.post(endpoint, payload);
+      const res = await api.post(endpoint, payload, { timeout: 15000 });
       if (!res.ok) throw new Error(res.message || 'Video extension failed');
       return res;
     },
     onMutate: async () => {
       useWorkflowsStore.getState().fireScrollToTop();
-      return {};
     },
     onError: (err) => {
-      console.error('❌ Video extension failed:', err);
-      if (typeof onError === 'function') onError(err);
-    },
-    onSuccess: (res, { payload }) => {
-      const { project_id: projectId } = payload || {};
-      if (projectId) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.projectData.byProject(projectId) });
-      }
+      console.error('❌ Video extend error:', err);
+      onError?.(err);
     },
   });
 }
+
+// Note: Character & Element domain mutations are exported from their dedicated domain modules at the bottom of this file.
 
 export function useRemoveWorkflow() {
   const queryClient = useQueryClient();
@@ -615,7 +452,6 @@ export function useUpdateWorkflow() {
   return useMutation({
     mutationFn: async ({ workflowId, workflowData }) => {
       const cleanId = String(workflowId || '').replace(/^workflows\//, '');
-      console.log(`📡 [useUpdateWorkflow] Patching workflow "${cleanId}"`, workflowData);
       const res = await api.patch(`/workflows/workflows/${cleanId}`, workflowData);
       if (res && res.ok === false) throw new Error(res.message || "Failed to update workflow");
       return res;
@@ -627,16 +463,18 @@ export function useUpdateWorkflow() {
       // 1. Immediately update query cache across all projectData queries
       if (cleanId && workflowData) {
         const newName = workflowData.display_name || workflowData.name;
+        const newDesc = workflowData.description || workflowData.character_info;
         queryClient.setQueriesData({ queryKey: ['projectData'] }, (oldData) => {
-          if (!oldData?.projectContents?.workflows) return oldData;
-          const updatedWorkflows = oldData.projectContents.workflows.map((w) => {
+          if (!oldData?.projectContents) return oldData;
+          const updatedWorkflows = (oldData.projectContents.workflows || []).map((w) => {
             const wCleanId = String(w.id || w.name || '').replace(/^workflows\//, '');
             if (wCleanId === cleanId) {
               return {
                 ...w,
                 ...workflowData,
                 display_name: newName || w.display_name,
-                name: newName || w.name,
+                description: newDesc !== undefined ? newDesc : w.description,
+                character_info: newDesc !== undefined ? newDesc : w.character_info,
                 metadata: {
                   ...w.metadata,
                   displayName: newName || w.metadata?.displayName,
@@ -645,11 +483,43 @@ export function useUpdateWorkflow() {
             }
             return w;
           });
+
+          const updatedCharacters = (oldData.projectContents.characters || []).map((c) => {
+            const cId = String(c.id || '').replace(/^workflows\//, '');
+            const cWfId = String(c.workflow_id || '').replace(/^workflows\//, '');
+            if (cId === cleanId || cWfId === cleanId) {
+              return {
+                ...c,
+                ...workflowData,
+                description: newDesc !== undefined ? newDesc : c.description,
+                character_info: newDesc !== undefined ? newDesc : c.character_info,
+                name: newName || c.name,
+                title: newName || c.title,
+              };
+            }
+            return c;
+          });
+
+          const updatedElements = (oldData.projectContents.elements || []).map((el) => {
+            const elId = String(el.id || '').replace(/^workflows\//, '');
+            const elWfId = String(el.workflow_id || '').replace(/^workflows\//, '');
+            if (elId === cleanId || elWfId === cleanId) {
+              return {
+                ...el,
+                ...workflowData,
+                name: newName || el.name,
+              };
+            }
+            return el;
+          });
+
           return {
             ...oldData,
             projectContents: {
               ...oldData.projectContents,
               workflows: updatedWorkflows,
+              characters: updatedCharacters,
+              elements: updatedElements,
             },
           };
         });
@@ -661,6 +531,8 @@ export function useUpdateWorkflow() {
     },
   });
 }
+
+
 
 export function useSetPrimaryMedia() {
   const queryClient = useQueryClient();
@@ -778,207 +650,27 @@ export function useDeleteMedia() {
   });
 }
 
-/**
- * useElementSheetWorkflows: Consumers only logic
- */
-export function useElementSheetWorkflows(projectId) {
-  const { data, isLoading, isError } = useProjectData(projectId);
-  const workflows = data?.projectContents?.workflows ?? [];
-  const media = data?.projectContents?.media ?? [];
-  const elements = data?.projectContents?.elements ?? [];
-  const filters = useWorkflowsStore((s) => s._elementFilters);
+// ─── Character & Element Domain Re-exports (Single Source of Truth) ───────────
+export {
+  useCharacter,
+  useCharacterWorkflows,
+  useCreateCharacterMutation,
+  useUpdateCharacter,
+  useGenerateCharacterSheetMutation,
+  useGenerateCharacterDescriptionMutation,
+  useAddMediaToCharacter,
+  useRemoveMediaFromCharacter,
+  useSetCharacterSheetMedia,
+} from '@/features/characters';
 
-  const elementMap = new Map();
-  elements.forEach((e) => {
-    if (e.workflow_id) elementMap.set(e.workflow_id, e);
-    if (e.id) elementMap.set(e.id, e);
-  });
+export {
+  useElement,
+  useElementSheetWorkflows,
+  useCreateElementSheetMutation,
+  useUpdateElementMetadata,
+  useAddImageToElement,
+  useDeleteMediaItem,
+  useAnalyzeElementVision,
+} from '@/features/elements';
 
-  const allElements = workflows
-    .filter((w) => {
-      const type = String(w.workflow_type || "").toUpperCase();
-      return type === "ELEMENT_SHEET" || type === "ELEMENT";
-    })
-    .map((w) => {
-      const elem = elementMap.get(w.id) || elementMap.get(w.name) || w.element || {};
-      const items = media.filter((m) => m.workflowId === w.name || m.workflowId === w.id);
-      const status = items[0]?.status || w.status || (items[0]?.url ? "success" : "processing");
-      return {
-        ...w,
-        element: elem,
-        element_type: elem.element_type || "object",
-        description: elem.description || "",
-        keywords: elem.keywords || [],
-        guidelines: elem.guidelines || [],
-        items,
-        status,
-        isMultiMedia: items.length > 1,
-      };
-    });
 
-  const filteredElements = allElements
-    .filter((w) => {
-      if (filters?.liked && !w.metadata?.favorited) return false;
-      
-      const config = w.items?.[0]?.generationConfig || {};
-      const wPrompt = (config.prompt || '').toLowerCase();
-      
-      if (filters?.prompt?.trim()) {
-        const q = filters.prompt.toLowerCase();
-        if (!(w.name || '').toLowerCase().includes(q) && !(w.metadata?.displayName || '').toLowerCase().includes(q) && !wPrompt.includes(q)) return false;
-      }
-      return true;
-    })
-    .sort((a, b) => {
-      const tA = new Date(a.metadata?.createTime || 0).getTime();
-      const tB = new Date(b.metadata?.createTime || 0).getTime();
-      return filters?.sort === 'oldest' ? tA - tB : tB - tA;
-    });
-
-  return { workflows: filteredElements, isLoading, isError };
-}
-
-export function useDeleteMediaItem() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async ({ mediaId }) => {
-      const res = await api.delete(`/workflows/media/${mediaId}`);
-      return res;
-    },
-    onSuccess: (data, variables) => {
-      if (variables?.projectId) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.projectData.byProject(variables.projectId) });
-      } else {
-        queryClient.invalidateQueries({ queryKey: ['projectData'] });
-      }
-    },
-  });
-}
-
-export function useUpdateElementMetadata() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async ({ workflowId, projectId, guidelines, keywords, elementType, element_type }) => {
-      const payload = {};
-      if (guidelines !== undefined) payload.guidelines = guidelines;
-      if (keywords !== undefined) payload.keywords = keywords;
-      if (elementType !== undefined || element_type !== undefined) payload.element_type = elementType || element_type;
-
-      const res = await api.patch(`/v2/elements/${workflowId}`, payload);
-      return res;
-    },
-    onSuccess: (data, variables) => {
-      if (variables?.projectId) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.projectData.byProject(variables.projectId) });
-      }
-    },
-  });
-}
-
-export function useAddImageToElement() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async ({ elementId, imageUrl, projectId }) => {
-      const res = await api.post(`/v2/elements/${elementId}/images`, { imageUrl, projectId });
-      return res;
-    },
-    onSuccess: (data, variables) => {
-      if (variables?.projectId) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.projectData.byProject(variables.projectId) });
-      }
-    },
-  });
-}
-
-export function useAnalyzeElementVision() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async ({ projectId, workflowId, imageUrls, elementName, elementType }) => {
-      const res = await api.post('/v2/elements/analyze', { projectId, workflowId, imageUrls, elementName, elementType });
-      return res;
-    },
-    onSuccess: (data, variables) => {
-      if (variables?.projectId) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.projectData.byProject(variables.projectId) });
-      }
-    },
-  });
-}
-
-export function useCharacterWorkflows(projectId) {
-  const { data, isLoading, isError } = useProjectData(projectId);
-  const workflows = data?.projectContents?.workflows ?? [];
-  const media = data?.projectContents?.media ?? [];
-
-  const characterWorkflows = workflows
-    .filter((w) => {
-      const type = String(w.workflow_type || "").toUpperCase();
-      return type === "CHARACTER" || type === "CHARACTER_SHEET";
-    })
-    .map((w) => {
-      const wId = w.name || w.id;
-      const items = media.filter((m) => m.workflowId === wId || m.workflow_id === wId);
-      
-      // Locate the main character turnaround sheet media
-      const mainMedia = items.find(m => m.step_id === "character_sheet" || m.stepId === "character_sheet") || items[0] || w.main_media || null;
-      
-      // Determine status purely from the media item
-      let status = "processing";
-      if (mainMedia) {
-        if (mainMedia.status === "failed" || mainMedia.status === "error") {
-          status = "failed";
-        } else if (mainMedia.status === "success" || mainMedia.status === "completed" || Boolean(mainMedia.url)) {
-          status = "completed";
-        } else if (mainMedia.status === "processing" || mainMedia.status === "pending") {
-          status = "processing";
-        }
-      }
-
-      const primaryUrl = mainMedia?.url || mainMedia?.file_url || w.url || null;
-
-      return {
-        ...w,
-        items,
-        mainMedia,
-        primary_media_url: primaryUrl,
-        status,
-        isMultiMedia: items.length > 1,
-      };
-    });
-
-  return { workflows: characterWorkflows, isLoading, isError };
-}
-
-// ─── Character Media Mutations ────────────────────────────────────────────────
-
-export function useAddMediaToCharacter() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async ({ characterId, imageUrl, projectId }) => {
-      const res = await api.post(`/characters/${characterId}/media`, { imageUrl, projectId });
-      return res;
-    },
-    onSuccess: (data, variables) => {
-      if (variables?.projectId) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.projectData.byProject(variables.projectId) });
-      }
-    },
-  });
-}
-
-export function useRemoveMediaFromCharacter() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async ({ characterId, mediaId }) => {
-      const res = await api.delete(`/characters/${characterId}/media/${mediaId}`);
-      return res;
-    },
-    onSuccess: (data, variables) => {
-      if (variables?.projectId) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.projectData.byProject(variables.projectId) });
-      } else {
-        queryClient.invalidateQueries({ queryKey: ['projectData'] });
-      }
-    },
-  });
-}

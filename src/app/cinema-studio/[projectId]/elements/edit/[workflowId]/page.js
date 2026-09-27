@@ -142,7 +142,7 @@ export default function ElementWorkflowEditPage() {
     if (!workflow) return null; // Let redirect handle it
 
     return (
-        <div className="flex flex-col h-full w-full bg-[#050505] text-white overflow-hidden">
+        <div className="flex flex-col h-full w-full bg-background text-white overflow-hidden">
             <EditNavbar
                 workflow={workflow}
                 showHistory={showHistory}

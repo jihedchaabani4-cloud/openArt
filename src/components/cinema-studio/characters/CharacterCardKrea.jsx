@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Star, Trash2, Loader2, AlertCircle, User, Sparkles } from "lucide-react";
+import { Button } from "@/shared/ui/button";
 import { ProcessingCharacterCard } from "./ProcessingCharacterCard";
 
 /**
@@ -90,25 +91,29 @@ export function CharacterCardKrea({ character, onClick, onDelete }) {
         )}
 
         {/* Top-Left Pin Star Button */}
-        <button
+        <Button
           type="button"
+          variant="ghost"
+          size="icon-xs"
           onClick={(e) => { e.stopPropagation(); setIsStarred(!isStarred); }}
-          className="absolute top-2 left-2 z-30 flex size-7 items-center justify-center rounded-lg text-white transition-all duration-200 bg-black/40 hover:bg-white/20 backdrop-blur-md border border-white/20 opacity-100 md:opacity-0 md:group-hover:opacity-100 cursor-pointer"
+          className="absolute top-2 left-2 z-30 flex size-7 items-center justify-center rounded-lg text-white transition-all duration-200 bg-black/40 hover:bg-white/20 backdrop-blur-md border border-white/20 opacity-100 md:opacity-0 md:group-hover:opacity-100 cursor-pointer p-0"
           aria-label="Pin Character"
         >
           <Star className={`size-3.5 transition-colors ${isStarred ? "text-amber-400 fill-amber-400" : "text-white hover:text-amber-300"}`} />
-        </button>
+        </Button>
 
         {/* Top-Right Delete Button */}
         {onDelete && (
-          <button
+          <Button
             type="button"
+            variant="ghost-destructive"
+            size="icon-xs"
             onClick={(e) => { e.stopPropagation(); onDelete(character.id || character.name); }}
-            className="absolute top-2 right-2 z-30 flex size-7 items-center justify-center rounded-lg text-white/80 hover:text-white transition-all duration-200 bg-black/40 hover:bg-rose-600/90 backdrop-blur-md border border-white/20 opacity-0 group-hover:opacity-100 cursor-pointer"
+            className="absolute top-2 right-2 z-30 flex size-7 items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer p-0"
             aria-label="Delete Character"
           >
             <Trash2 className="size-3.5" />
-          </button>
+          </Button>
         )}
 
         {/* ── CARD STATES ── */}
