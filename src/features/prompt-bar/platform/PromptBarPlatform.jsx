@@ -1125,7 +1125,7 @@ function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, class
             <Button
               ref={tuneButtonRef}
               type="button"
-              variant={drawerOpen ? "flow-trigger-active" : "flow-trigger"}
+              variant="blur"
               aria-label="Déclencheur des paramètres"
               title="Paramètres de génération et modèles"
               onClick={() => {
@@ -1139,10 +1139,10 @@ function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, class
                 });
               }}
               className={cn(
-                "settings-trigger-button flow-button-primary flow-button-small h-8 px-2.5 rounded-[12px] flex items-center gap-1.5 transition-all cursor-pointer border select-none text-[12px] font-medium text-white",
+                "settings-trigger-button h-8 px-2.5 rounded-xl flex items-center gap-1.5 transition-all cursor-pointer select-none text-[12px] font-medium text-white",
                 drawerOpen
-                  ? "bg-white/15 border-white/20 shadow-sm text-white"
-                  : "bg-white/5 hover:bg-white/10 border-transparent text-white/80 hover:text-white"
+                  ? "bg-white/15 border border-white/20 shadow-sm text-white"
+                  : "border-transparent text-white hover:text-white"
               )}
             >
               {currentModel && (
@@ -1161,9 +1161,9 @@ function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, class
               )}
               <GoogleIcon
                 iconName={currentRatioIcon}
-                className="text-[15px] leading-none shrink-0 text-white/60"
+                className="text-[15px] leading-none shrink-0 text-white"
               />
-              <span className="leading-none shrink-0 font-medium text-[12px] text-white/80">
+              <span className="leading-none shrink-0 font-medium text-[12px] text-white">
                 x{currentCount}
               </span>
             </Button>
