@@ -29,15 +29,6 @@ export * as tagsService                 from "./core/tagsService.js";
 export * as tagsResolver                from "./core/tagsResolver.js";
 export * as entityService               from "./core/entityService.js";
 
-// ── Controls ─────────────────────────────────────────────
-export { ParameterControl } from "./controls/ParameterControl.jsx";
-export { SelectControl }    from "./controls/SelectControl.jsx";
-export { NumberControl }    from "./controls/NumberControl.jsx";
-export { ToggleControl }    from "./controls/ToggleControl.jsx";
-export { TextControl }      from "./controls/TextControl.jsx";
-export { ImageControl }     from "./controls/ImageControl.jsx";
-export { VideoControl }     from "./controls/VideoControl.jsx";
-
 // ── Production Selectors (Reused) ─────────────────────────
 export { PromptBarShell } from "./ui/common/PromptBarShell.jsx";
 export { MediaInput } from "./ui/common/MediaInput.jsx";

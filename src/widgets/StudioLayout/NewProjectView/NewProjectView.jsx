@@ -1,14 +1,18 @@
 "use client"
 
-import * as React from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows"
-import PromptBar from "@/features/prompt-bar"
+import {
+  PromptBarPlatform,
+  generatedMediaType,
+  generatedMediaConfig,
+  useRealBackendModels,
+} from "@/features/prompt-bar/index.platform"
 
 
 // ─── Sub-Components ──────────────────────────────────────────────────────────
 
-const EmptyState = ({ message }) => (
+const EmptyState = () => (
     <div className="w-full h-full flex flex-col items-center justify-center">
         <motion.div 
             initial={{ opacity: 0 }}
@@ -24,6 +28,8 @@ const EmptyState = ({ message }) => (
 
 export function NewProjectView() {
     const { selectedProjectId: projectId } = useGenerationsStore()
+    const { data } = useRealBackendModels()
+    const models = data?.models ?? []
 
     return (
         <div className="flex h-full w-full overflow-hidden bg-background text-white p-4 gap-6">
@@ -50,14 +56,13 @@ export function NewProjectView() {
                     </AnimatePresence>
                 </div>
 
-                {/* ── Bottom Floating Prompt Bar ── */}
-                <div className="fixed bottom-8 inset-x-0 z-30 flex justify-center px-6 pointer-events-none">
-                    <div className="w-full max-w-[850px] pointer-events-auto">
-                        <div className="">
-                            <PromptBar hideBackground={true} isNewProject={true} />
-                        </div>
-                    </div>
-                </div>
+                {/* ── Bottom Floating Prompt Bar (v3) ── */}
+                <PromptBarPlatform
+                    type={generatedMediaType}
+                    featureConfig={generatedMediaConfig}
+                    models={models}
+                    onGenerate={() => {}}
+                />
 
                 {/* Ambient glow in background */}
                 <div className="absolute inset-0 pointer-events-none z-0">

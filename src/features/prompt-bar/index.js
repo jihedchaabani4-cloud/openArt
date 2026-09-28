@@ -1,6 +1,4 @@
 // [FSD Layer: features/prompt-bar] — Public API
-export { default } from "./ui/generation/PromptBar"
-export * from "./model/usePromptBar"
-
-// Re-exports for components used elsewhere
+// v3 platform is the current architecture — use index.platform.js
+// Re-exports for selector components used elsewhere
 export * from "./ui/common/selectors"
