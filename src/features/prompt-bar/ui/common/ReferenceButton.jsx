@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Film, Play, Image, ArrowLeftRight, Plus } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
+import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 
 const VARIANTS = {
   start:  { word: "Start",  HoverContent: () => <span className="text-[10px] uppercase tracking-[0.08em] text-[rgba(218,220,224,0.5)]">pick</span> },
@@ -104,9 +105,20 @@ export function ViewReference({
 
   if (!media) return null;
 
-  const isCharacter = media.type === "character" || media.workflow_type === "CHARACTER_SHEET";
-  const isElement = media.type === "element" || media.workflow_type === "ELEMENT_SHEET";
-  const isVideo = media.type === "video" || media.is_video;
+  const isCharacter =
+    media.type === "character" ||
+    media.workflow_type === "CHARACTER_SHEET" ||
+    Boolean(media.characterId) ||
+    media.entity_type === "character";
+
+  const isElement =
+    media.type === "element" ||
+    media.workflow_type === "ELEMENT_SHEET" ||
+    Boolean(media.elementId) ||
+    media.entity_type === "element";
+
+  const isVideo = media.type === "video" || media.is_video || media.isVideo;
+
   const src =
     media.url ||
     media.preview ||
@@ -119,7 +131,20 @@ export function ViewReference({
     media.rawValue?.url ||
     media.rawValue?.preview ||
     media.rawValue?.file_url;
-  const tooltipText = media.displayName || label || (isCharacter ? "Character" : isElement ? "Element" : "Reference");
+
+  const tooltipText =
+    media.displayName ||
+    media.name ||
+    label ||
+    (isCharacter ? "Ingrédient personnage" : isElement ? "Ingrédient élément" : "Ingrédient");
+
+  const badgeIcon = isCharacter
+    ? "accessibility_new"
+    : isElement
+    ? "widgets"
+    : isVideo
+    ? "videocam"
+    : null;
 
   return (
     <div
@@ -127,14 +152,20 @@ export function ViewReference({
       onMouseLeave={() => setIsHovered(false)}
       className={cn("group relative shrink-0 w-[50px] h-[50px]", className)}
     >
-      {/* 50x50 Thumbnail Box without border */}
-      <div className="relative w-full h-full rounded-[12px] overflow-hidden bg-white/[0.04]">
-        {/* Media — slides UP on hover */}
-        <div className="absolute inset-0 z-0 transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] group-hover:-translate-y-1.5">
+      {/* 50x50 Chip Container */}
+      <div
+        className="chip-container group w-full h-full relative rounded-[12px] overflow-hidden bg-white/[0.04] cursor-pointer flex items-center justify-center select-none"
+        aria-label={tooltipText}
+        onClick={(e) => {
+          e.stopPropagation();
+          onRemove?.();
+        }}
+      >
+        <div className="chip-image-wrapper absolute inset-0 w-full h-full flex items-center justify-center overflow-hidden">
           {isVideo ? (
             <video
               src={src}
-              className="w-full h-full object-cover"
+              className="chip-image w-full h-full object-cover select-none pointer-events-none"
               autoPlay
               loop
               muted
@@ -143,38 +174,37 @@ export function ViewReference({
           ) : (
             <img
               src={src}
-              alt=""
-              className="w-full h-full object-cover"
+              alt={tooltipText}
+              className="chip-image w-full h-full object-cover select-none pointer-events-none"
             />
           )}
         </div>
 
-        {/* Remove overlay — slides UP from bottom */}
+        {/* Hover overlay — cancel button */}
         <div
-          className="absolute overflow-hidden inset-0 z-20 flex items-center justify-center bg-[#202122]/90 backdrop-blur-sm translate-y-full group-hover:translate-y-0 transition-transform duration-200 cursor-pointer"
-          onClick={(e) => {
-            e.stopPropagation();
-            onRemove?.();
-          }}
-          title="Remove"
+          className="hover-icon-overlay absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10"
+          title={`Supprimer ${tooltipText}`}
         >
-          <X size={16} strokeWidth={2.5} className="text-white" />
+          <GoogleIcon
+            iconName="cancel"
+            fill
+            className="mat-icon notranslate hover-icon flow-icon-s google-symbols mat-icon-no-color text-white text-[20px]"
+            aria-hidden="true"
+          />
         </div>
 
-        {/* Type badge indicators */}
-        {isVideo && (
-          <div className="absolute top-1 left-1 z-10 bg-black/60 p-0.5 rounded backdrop-blur-[2px]">
-            <Film size={10} className="text-white" />
-          </div>
-        )}
-        {isCharacter && (
-          <div className="absolute bottom-1 left-1 z-10 bg-purple-950/80 px-1 py-0.5 rounded text-[8px] font-semibold text-purple-200 uppercase tracking-wider backdrop-blur-[2px]">
-            Char
-          </div>
-        )}
-        {isElement && (
-          <div className="absolute bottom-1 left-1 z-10 bg-emerald-950/80 px-1 py-0.5 rounded text-[8px] font-semibold text-emerald-200 uppercase tracking-wider backdrop-blur-[2px]">
-            Elem
+        {/* Type badge pinned to bottom-right corner */}
+        {badgeIcon && (
+          <div
+            className="type-badge"
+            aria-hidden="true"
+          >
+            <GoogleIcon
+              iconName={badgeIcon}
+              fill
+              weight={600}
+              className="mat-icon notranslate type-badge-icon google-symbols mat-icon-no-color"
+            />
           </div>
         )}
       </div>
