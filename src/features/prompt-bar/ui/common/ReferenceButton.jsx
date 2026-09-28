@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Film, Play, Image, ArrowLeftRight, Plus } from "lucide-react";
+import { Play, Image, ArrowLeftRight, Plus } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 
