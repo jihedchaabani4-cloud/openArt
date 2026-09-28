@@ -168,7 +168,27 @@ export function adaptBackendModel(rawModel = {}) {
     icon: resolveModelIcon(rawModel),
     pricing: rawModel.pricing || rawModel.retailPricing || null,
     tags: rawModel.tags || [],
-    capabilities: rawModel.capabilities || {},
+    capabilities: {
+      ...(rawModel.capabilities || {}),
+      input_image: Boolean(
+        rawModel.capabilities?.input_image ||
+        rawParams.input_image ||
+        rawParams.images ||
+        rawParams.reference_images ||
+        definitions.input_image
+      ),
+      last_frame: Boolean(
+        rawModel.capabilities?.last_frame ||
+        rawParams.last_frame ||
+        rawParams.end_frame ||
+        definitions.last_frame
+      ),
+      input_video: Boolean(
+        rawModel.capabilities?.input_video ||
+        rawParams.input_video ||
+        definitions.input_video
+      ),
+    },
     parameters: definitions,
     diagnostics,
   };

@@ -182,7 +182,7 @@ function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, class
   const availableModes = useMemo(() => {
     return ["image", "video"].filter((mode) => {
       if (!featureConfig?.filterEligibleModels) return true;
-      return featureConfig.filterEligibleModels(allModelsList, mode, "frames", {}).length > 0;
+      return featureConfig.filterEligibleModels(allModelsList, mode, null, {}).length > 0;
     });
   }, [featureConfig, allModelsList]);
 

@@ -94,7 +94,8 @@ export function FlowPromptBoxSettings({
       { value: "video", label: "Vidéo", icon: "videocam" },
     ];
     if (!availableModes || availableModes.length === 0) return all;
-    return all.filter((m) => availableModes.includes(m.value));
+    const filtered = all.filter((m) => availableModes.includes(m.value));
+    return filtered.length > 0 ? filtered : all;
   }, [availableModes]);
 
   // SubMode Options (Type de vidéo for Video)
@@ -201,7 +202,7 @@ export function FlowPromptBoxSettings({
     >
       <div className="settings-content flex flex-col gap-2">
         {/* ── 1. MODE TOGGLES (flow-toggles aria-label="Mode" class="variant-emphasized") ── */}
-        {hasModes && modeOptions.length > 1 && (
+        {hasModes && modeOptions.length > 0 && (
           <flow-toggles
             aria-label="Mode"
            
