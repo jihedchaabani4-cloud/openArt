@@ -809,12 +809,12 @@ flow-prompt-box-settings,
   box-sizing: border-box;
   width: var(--prompt-box-settings-width, 17.5rem);
   border-radius: var(--mat-menu-container-shape, 24px) !important;
-  background-color: var(--mat-menu-container-color, rgba(22, 23, 24, 0.85)) !important;
+  background-color: var(--mat-menu-container-color, rgba(22, 23, 24, 0.6)) !important;
   -webkit-backdrop-filter: blur(100px) saturate(190%) contrast(105%) !important;
   backdrop-filter: blur(100px) saturate(190%) contrast(105%) !important;
   border: none !important;
   box-shadow: var(--mat-menu-container-elevation-shadow, 0 16px 32px -8px rgba(0, 0, 0, 0.4)) !important;
-  padding: 0.375rem !important;
+  padding: 0.5rem !important;
   color-scheme: dark;
   pointer-events: auto;
   -webkit-font-smoothing: antialiased;
@@ -861,7 +861,7 @@ flow-credit-cost-label {
 .flow-model-picker-panel,
 .mat-mdc-menu-panel {
   border-radius: var(--mat-menu-container-shape, 24px) !important;
-  background-color: var(--mat-menu-container-color, rgba(22, 23, 24, 0.85)) !important;
+  background-color: var(--mat-menu-container-color, rgba(22, 23, 24, 0.6)) !important;
   backdrop-filter: blur(100px) saturate(190%) contrast(105%) !important;
   -webkit-backdrop-filter: blur(100px) saturate(190%) contrast(105%) !important;
   border: none !important;

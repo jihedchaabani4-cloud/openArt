@@ -210,7 +210,7 @@ export function FlowPromptBoxSettings({
             className="variant-emphasized block w-full"
           >
             <mat-button-toggle-group
-              className="mat-button-toggle-group toggle-group flex items-center gap-1 p-1 bg-[rgba(218,220,224,0.05)] rounded-[14px] w-full"
+              className="mat-button-toggle-group toggle-group flex items-center gap-1 p-1 bg-[rgba(218,220,224,0.05)] rounded-[12px] w-full"
               role="radiogroup"
             >
               {modeOptions.map((opt) => {
@@ -259,7 +259,7 @@ export function FlowPromptBoxSettings({
             className="variant-emphasized block w-full"
           >
             <mat-button-toggle-group
-              className="mat-button-toggle-group toggle-group mat-button-toggle-group-appearance-standard flex items-center gap-1 p-1 bg-[rgba(218,220,224,0.05)] rounded-[14px] w-full"
+              className="mat-button-toggle-group toggle-group mat-button-toggle-group-appearance-standard flex items-center gap-1 p-1 bg-[rgba(218,220,224,0.05)] rounded-[12px] w-full"
               role="radiogroup"
             >
               {subModeOptions.map((opt) => {
@@ -302,14 +302,13 @@ export function FlowPromptBoxSettings({
         )}
 
         {/* ── 2. FORMAT / ASPECT RATIO TOGGLES (flow-toggles aria-label="Format") ── */}
-        {/* ── 2. FORMAT / ASPECT RATIO TOGGLES (flow-toggles aria-label="Format") ── */}
         {ratioOptions.length > 0 && (
           <flow-toggles
             aria-label="Format"
             className="block w-full"
           >
             <mat-button-toggle-group
-              className="mat-button-toggle-group toggle-group content-layout-column flex flex-wrap items-center gap-1 p-0.5 bg-[rgba(218,220,224,0.05)] rounded-[12px] w-full"
+              className="mat-button-toggle-group toggle-group content-layout-column flex flex-wrap items-center gap-1 p-1 bg-[rgba(218,220,224,0.05)] rounded-[12px] w-full"
               role="radiogroup"
             >
               {ratioOptions.map((ratio) => {
@@ -358,7 +357,7 @@ export function FlowPromptBoxSettings({
 
         {/* ── 3. DYNAMIC PARAMETERS (Quality, Video Resolution, Duration, etc.) ── */}
         {otherParams.length > 0 && (
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-2">
             {otherParams.map(([key, def]) => {
               const val = paramValues[key];
 
@@ -371,7 +370,7 @@ export function FlowPromptBoxSettings({
                     className="block w-full"
                   >
                     <mat-button-toggle-group
-                      className="mat-button-toggle-group toggle-group flex items-center gap-0.5 p-0.5 bg-[rgba(218,220,224,0.05)] rounded-[12px] w-full"
+                      className="mat-button-toggle-group toggle-group flex items-center gap-1 p-1 bg-[rgba(218,220,224,0.05)] rounded-[12px] w-full"
                       role="radiogroup"
                     >
                       {def.values.map((item) => {
@@ -438,7 +437,7 @@ export function FlowPromptBoxSettings({
                     <span className="text-[12px] text-white font-medium">
                       {def.label || key}
                     </span>
-                    <div className="flex items-center gap-1 p-0.5 bg-[rgba(218,220,224,0.05)] rounded-[10px]">
+                    <div className="flex items-center gap-1 p-1 bg-[rgba(218,220,224,0.05)] rounded-[12px]">
                       <Button
                         type="button"
                         variant={!isChecked ? "flow-boolean-active" : "flow-boolean"}
@@ -468,7 +467,7 @@ export function FlowPromptBoxSettings({
                 const numVal = val !== undefined && val !== null ? Number(val) : (def.default ?? min);
 
                 return (
-                  <div key={key} className="flex flex-col gap-1 p-1 bg-[rgba(218,220,224,0.05)] rounded-[14px] px-2.5 py-2">
+                  <div key={key} className="flex flex-col gap-1 p-1 bg-[rgba(218,220,224,0.05)] rounded-[12px] px-2.5 py-2">
                     <div className="flex items-center justify-between text-[11px]">
                       <span className="text-white font-medium">{def.label || key}</span>
                       <span className="font-mono text-white font-semibold tabular-nums">{numVal}</span>
@@ -637,7 +636,7 @@ export function FlowPromptBoxSettings({
             className="block w-full"
           >
             <mat-button-toggle-group
-              className="mat-button-toggle-group toggle-group flex items-center gap-0.5 p-0.5 bg-[rgba(218,220,224,0.05)] rounded-[12px] w-full"
+              className="mat-button-toggle-group toggle-group flex items-center gap-1 p-1 bg-[rgba(218,220,224,0.05)] rounded-[12px] w-full"
               role="radiogroup"
             >
               {[1, 2, 3, 4].map((countVal) => {
@@ -679,7 +678,7 @@ export function FlowPromptBoxSettings({
         {/* ── 7. CREDIT COST LABEL (only when models exist) ── */}
         {models && models.length > 0 && currentModel && (
           <flow-credit-cost-label
-            className="settings-credit-cost block pt-0.5 text-center"
+            className="settings-credit-cost block text-center"
           >
             <span className="credit-cost-label block text-[11px] text-white">
               <span>
