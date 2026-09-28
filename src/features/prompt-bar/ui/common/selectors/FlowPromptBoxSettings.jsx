@@ -491,44 +491,38 @@ export function FlowPromptBoxSettings({
           </div>
         )}
 
-        {/* ── 4. DIVIDER & 5. MODEL SELECT TRIGGER (only when models exist) ── */}
+        {/* ── 4. MODEL SELECT TRIGGER (only when models exist) ── */}
         {models && models.length > 0 && currentModel && (
-          <>
-            <mat-divider
-              role="separator"
-              className="mat-divider mat-divider-horizontal block h-px bg-[rgba(218,220,224,0.15)] my-0.5 w-full"
-            />
-
-            <div className="relative w-full" ref={modelMenuRef}>
-              <Button
-                type="button"
-                variant="flow-select-trigger"
-                aria-label="Sélectionner une famille de modèles"
-                onClick={() => setModelMenuOpen((v) => !v)}
-                className="mdc-button mat-mdc-button-base mat-mdc-menu-trigger mdc-button--unelevated mat-mdc-unelevated-button mat-unthemed flow-button-primary flow-button-medium w-full h-9 px-3 rounded-[12px] bg-[rgba(218,220,224,0.06)] hover:bg-[rgba(218,220,224,0.12)] active:bg-[rgba(218,220,224,0.2)] text-white flex items-center justify-between transition-all cursor-pointer outline-none"
-              >
-                <span className="mdc-button__label flex items-center justify-between w-full">
-                  <span className="model-select-trigger-content flex items-center gap-2 text-[13px] font-medium truncate text-white">
-                    {currentModelIcon ? (
-                      <img
-                        src={currentModelIcon}
-                        alt=""
-                        className="size-4 rounded-[3px] object-contain brightness-0 invert shrink-0"
-                        onError={(e) => {
-                          e.currentTarget.style.display = "none";
-                        }}
-                      />
-                    ) : (
-                      <span className="text-[14px]">🍌</span>
-                    )}
-                    <span className="truncate text-white">{currentModel?.name || "Model"}</span>
-                  </span>
-                  <GoogleIcon
-                    iconName="arrow_drop_down"
-                    className={cn("text-[20px] text-white transition-transform", modelMenuOpen && "rotate-180")}
-                  />
+          <div className="relative w-full" ref={modelMenuRef}>
+            <Button
+              type="button"
+              variant="flow-select-trigger"
+              aria-label="Sélectionner une famille de modèles"
+              onClick={() => setModelMenuOpen((v) => !v)}
+              className="mdc-button mat-mdc-button-base mat-mdc-menu-trigger mdc-button--unelevated mat-mdc-unelevated-button mat-unthemed flow-button-primary flow-button-medium w-full h-8 px-2.5 rounded-[12px] bg-[rgba(218,220,224,0.05)] hover:bg-[rgba(218,220,224,0.1)] active:bg-[rgba(218,220,224,0.2)] text-white flex items-center justify-between transition-all cursor-pointer outline-none"
+            >
+              <span className="mdc-button__label flex items-center justify-between w-full">
+                <span className="model-select-trigger-content flex items-center gap-2 text-[12px] font-medium truncate text-white">
+                  {currentModelIcon ? (
+                    <img
+                      src={currentModelIcon}
+                      alt=""
+                      className="size-3.5 rounded-[3px] object-contain brightness-0 invert shrink-0"
+                      onError={(e) => {
+                        e.currentTarget.style.display = "none";
+                      }}
+                    />
+                  ) : (
+                    <span className="text-[14px]">🍌</span>
+                  )}
+                  <span className="truncate text-white">{currentModel?.name || "Model"}</span>
                 </span>
-              </Button>
+                <GoogleIcon
+                  iconName="arrow_drop_down"
+                  className={cn("text-[20px] text-white transition-transform", modelMenuOpen && "rotate-180")}
+                />
+              </span>
+            </Button>
 
               {/* Inline Model Dropdown Menu if toggled */}
               {modelMenuOpen && models.length > 0 && (
@@ -634,7 +628,6 @@ export function FlowPromptBoxSettings({
                 </div>
               )}
             </div>
-          </>
         )}
 
         {/* ── 6. OUTPUTS / VARIATIONS TOGGLES (only when models exist) ── */}
