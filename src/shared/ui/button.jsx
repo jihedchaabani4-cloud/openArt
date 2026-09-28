@@ -66,29 +66,29 @@ const buttonVariants = cva(
         "flow-pill-active":
           "bg-[#cfd2d6] text-black shadow-md cursor-pointer hover:bg-[#d8dbdf]",
         "flow-toggle":
-          "w-full flex-1 h-8 min-h-[32px] px-2 rounded-[10px] flex items-center justify-center gap-1.5 transition-all text-[13px] font-medium text-[rgba(218,220,224,0.75)] hover:bg-[rgba(218,220,224,0.08)] hover:text-white cursor-pointer",
+          "w-full flex-1 h-8 min-h-[32px] px-2 rounded-[10px] flex items-center justify-center gap-1.5 transition-all text-[13px] font-medium text-white hover:bg-[rgba(218,220,224,0.08)] hover:text-white cursor-pointer",
         "flow-toggle-active":
           "w-full flex-1 h-8 min-h-[32px] px-2 rounded-[10px] flex items-center justify-center gap-1.5 transition-all text-[13px] font-semibold bg-[rgba(218,220,224,0.25)] text-white shadow-sm cursor-pointer",
         "flow-toggle-white":
           "w-full flex-1 h-8 min-h-[32px] px-2 rounded-[10px] flex items-center justify-center gap-1.5 transition-all text-[13px] font-semibold bg-white text-black hover:bg-white hover:text-black shadow-sm cursor-pointer [&_svg]:text-black [&_mat-icon]:text-black [&_.google-symbols]:text-black",
         "flow-toggle-sm":
-          "w-full flex-1 h-8 min-h-[32px] px-2 rounded-[10px] flex items-center justify-center gap-1.5 transition-all text-[12px] font-medium text-[rgba(218,220,224,0.75)] hover:bg-[rgba(218,220,224,0.08)] hover:text-white cursor-pointer",
+          "w-full flex-1 h-8 min-h-[32px] px-2 rounded-[10px] flex items-center justify-center gap-1.5 transition-all text-[12px] font-medium text-white hover:bg-[rgba(218,220,224,0.08)] hover:text-white cursor-pointer",
         "flow-toggle-sm-active":
           "w-full flex-1 h-8 min-h-[32px] px-2 rounded-[10px] flex items-center justify-center gap-1.5 transition-all text-[12px] font-semibold bg-[rgba(218,220,224,0.25)] text-white shadow-sm cursor-pointer",
         "flow-toggle-sm-white":
           "w-full flex-1 h-8 min-h-[32px] px-2 rounded-[10px] flex items-center justify-center gap-1.5 transition-all text-[12px] font-semibold bg-white text-black hover:bg-white hover:text-black shadow-sm cursor-pointer [&_svg]:text-black [&_mat-icon]:text-black [&_.google-symbols]:text-black",
         "flow-trigger":
-          "h-8 px-3 rounded-[15px] inline-flex items-center justify-center gap-1.5 transition-all cursor-pointer outline-none border border-transparent select-none text-[12px] font-medium leading-none bg-[rgba(218,220,224,0.05)] hover:bg-[rgba(218,220,224,0.1)] text-[rgba(218,220,224,0.75)] hover:text-white shrink-0 w-auto",
+          "h-8 px-3 rounded-[15px] inline-flex items-center justify-center gap-1.5 transition-all cursor-pointer outline-none border border-transparent select-none text-[12px] font-medium leading-none bg-[rgba(218,220,224,0.05)] hover:bg-[rgba(218,220,224,0.1)] text-white hover:text-white shrink-0 w-auto",
         "flow-trigger-active":
           "h-8 px-3 rounded-[15px] inline-flex items-center justify-center gap-1.5 transition-all cursor-pointer outline-none border border-transparent select-none text-[12px] font-medium leading-none bg-[rgba(218,220,224,0.25)] text-white shadow-sm shrink-0 w-auto",
         "flow-generate":
           "h-8 px-3.5 rounded-full text-[13px] font-semibold transition-all flex items-center gap-1.5 bg-white text-black hover:bg-white/90 active:scale-95 shrink-0 shadow-sm cursor-pointer disabled:bg-white/10 disabled:text-white/30 disabled:cursor-not-allowed disabled:pointer-events-none disabled:opacity-100",
         "flow-ratio":
-          "w-full h-[54px] min-h-[54px] py-1 px-0.5 rounded-[10px] flex flex-col items-center justify-center gap-1 transition-all text-[rgba(218,220,224,0.75)] hover:bg-[rgba(218,220,224,0.08)] hover:text-white cursor-pointer",
+          "w-full h-[54px] min-h-[54px] py-1 px-0.5 rounded-[10px] flex flex-col items-center justify-center gap-1 transition-all text-white hover:bg-[rgba(218,220,224,0.08)] hover:text-white cursor-pointer",
         "flow-ratio-active":
           "w-full h-[54px] min-h-[54px] py-1 px-0.5 rounded-[10px] flex flex-col items-center justify-center gap-1 transition-all bg-[rgba(218,220,224,0.25)] text-white font-semibold shadow-sm cursor-pointer",
         "flow-boolean":
-          "px-2.5 py-0.5 rounded-[8px] text-[11px] font-medium text-[rgba(218,220,224,0.75)] hover:text-white transition-all cursor-pointer",
+          "px-2.5 py-0.5 rounded-[8px] text-[11px] font-medium text-white hover:text-white transition-all cursor-pointer",
         "flow-boolean-active":
           "px-2.5 py-0.5 rounded-[8px] text-[11px] font-semibold bg-[rgba(218,220,224,0.25)] text-white shadow-sm transition-all cursor-pointer",
         "flow-select-trigger":

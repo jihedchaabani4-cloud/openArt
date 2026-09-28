@@ -183,7 +183,7 @@ export function FlowPromptBoxSettings({
         "bg-[var(--mat-menu-container-color,rgba(22,23,24,0.85))] backdrop-blur-[100px]",
         "border-none",
         "shadow-[var(--mat-menu-container-elevation-shadow,var(--glass-raised-box-shadow))]",
-        "text-[var(--mat-sys-on-surface,#e3e3e3)] select-none font-['Google_Sans_Text',sans-serif]",
+        "text-white select-none font-['Google_Sans_Text',sans-serif]",
         className
       )}
       style={{
@@ -207,11 +207,9 @@ export function FlowPromptBoxSettings({
         {hasModes && modeOptions.length > 0 && (
           <flow-toggles
             aria-label="Mode"
-           
             className="variant-emphasized block w-full"
           >
             <mat-button-toggle-group
-             
               className="mat-button-toggle-group toggle-group flex items-center gap-1 p-1 bg-[rgba(218,220,224,0.05)] rounded-[14px] w-full"
               role="radiogroup"
             >
@@ -221,7 +219,6 @@ export function FlowPromptBoxSettings({
                   <mat-button-toggle
                     key={opt.value}
                     role="presentation"
-                   
                     className={cn(
                       "mat-button-toggle toggle flex-toggle flex-1 flex h-8 rounded-[10px] transition-all",
                       isChecked && "mat-button-toggle-checked"
@@ -229,22 +226,22 @@ export function FlowPromptBoxSettings({
                   >
                     <Button
                       type="button"
-                      variant={isChecked ? "flow-toggle-white" : "flow-toggle"}
+                      variant={isChecked ? "flow-toggle-active" : "flow-toggle"}
                       onClick={() => onModeChange?.(opt.value)}
                       role="radio"
                       aria-checked={isChecked}
-                      className="mat-button-toggle-button w-full h-8"
+                      className={cn(
+                        "mat-button-toggle-button w-full h-8 text-white",
+                        isChecked ? "font-semibold" : "font-medium"
+                      )}
                     >
                       <span className="mat-button-toggle-label-content flex items-center justify-center gap-1.5 w-full">
                         <span className="toggle-label flex items-center justify-center gap-1.5">
                           <GoogleIcon
                             iconName={opt.icon}
-                            className={cn(
-                              "text-[16px] leading-none transition-colors",
-                              isChecked ? "text-black" : "text-[rgba(218,220,224,0.75)]"
-                            )}
+                            className="text-[16px] leading-none text-white"
                           />
-                          <span className={cn("toggle-text leading-none", isChecked && "text-black font-semibold")}>{opt.label}</span>
+                          <span className={cn("toggle-text leading-none text-white", isChecked ? "font-semibold" : "font-medium")}>{opt.label}</span>
                         </span>
                       </span>
                     </Button>
@@ -262,7 +259,6 @@ export function FlowPromptBoxSettings({
             className="variant-emphasized block w-full"
           >
             <mat-button-toggle-group
-             
               className="mat-button-toggle-group toggle-group mat-button-toggle-group-appearance-standard flex items-center gap-1 p-1 bg-[rgba(218,220,224,0.05)] rounded-[14px] w-full"
               role="radiogroup"
             >
@@ -272,7 +268,6 @@ export function FlowPromptBoxSettings({
                   <mat-button-toggle
                     key={opt.value}
                     role="presentation"
-                   
                     className={cn(
                       "mat-button-toggle toggle flex-toggle mat-button-toggle-appearance-standard mat-button-toggle-animations-enabled flex-1 flex h-8 rounded-[10px] transition-all",
                       isChecked && "mat-button-toggle-checked"
@@ -280,22 +275,22 @@ export function FlowPromptBoxSettings({
                   >
                     <Button
                       type="button"
-                      variant={isChecked ? "flow-toggle-white" : "flow-toggle"}
+                      variant={isChecked ? "flow-toggle-active" : "flow-toggle"}
                       onClick={() => onSubModeChange?.(opt.value)}
                       role="radio"
                       aria-checked={isChecked}
-                      className="mat-button-toggle-button w-full h-8"
+                      className={cn(
+                        "mat-button-toggle-button w-full h-8 text-white",
+                        isChecked ? "font-semibold" : "font-medium"
+                      )}
                     >
                       <span className="mat-button-toggle-label-content flex items-center justify-center gap-1.5 w-full">
                         <span className="toggle-label flex items-center justify-center gap-1.5">
                           <GoogleIcon
                             iconName={opt.icon}
-                            className={cn(
-                              "text-[16px] leading-none transition-colors",
-                              isChecked ? "text-black" : "text-[rgba(218,220,224,0.75)]"
-                            )}
+                            className="text-[16px] leading-none text-white"
                           />
-                          <span className={cn("toggle-text leading-none", isChecked && "text-black font-semibold")}>{opt.label}</span>
+                          <span className={cn("toggle-text leading-none text-white", isChecked ? "font-semibold" : "font-medium")}>{opt.label}</span>
                         </span>
                       </span>
                     </Button>
@@ -307,14 +302,13 @@ export function FlowPromptBoxSettings({
         )}
 
         {/* ── 2. FORMAT / ASPECT RATIO TOGGLES (flow-toggles aria-label="Format") ── */}
+        {/* ── 2. FORMAT / ASPECT RATIO TOGGLES (flow-toggles aria-label="Format") ── */}
         {ratioOptions.length > 0 && (
           <flow-toggles
             aria-label="Format"
-           
             className="block w-full"
           >
             <mat-button-toggle-group
-             
               className="mat-button-toggle-group toggle-group content-layout-column flex flex-wrap items-center gap-1 p-0.5 bg-[rgba(218,220,224,0.05)] rounded-[12px] w-full"
               role="radiogroup"
             >
@@ -326,7 +320,6 @@ export function FlowPromptBoxSettings({
                   <mat-button-toggle
                     key={ratio}
                     role="presentation"
-                   
                     className={cn(
                       "mat-button-toggle toggle flex-toggle flex-1 min-w-[44px] h-[54px] rounded-[10px] transition-all",
                       isChecked && "mat-button-toggle-checked"
@@ -339,18 +332,18 @@ export function FlowPromptBoxSettings({
                       onClick={() => handleRatioClick(ratio)}
                       role="radio"
                       aria-checked={isChecked}
-                      className="mat-button-toggle-button w-full h-full"
+                      className={cn(
+                        "mat-button-toggle-button w-full h-full text-white",
+                        isChecked ? "font-semibold" : "font-medium"
+                      )}
                     >
                       <span className="mat-button-toggle-label-content flex flex-col items-center justify-center">
                         <span className="toggle-label flex flex-col items-center justify-center gap-1">
                           <GoogleIcon
                             iconName={iconName}
-                            className={cn(
-                              "text-[18px] leading-none transition-colors",
-                              isChecked ? "text-white" : "text-[rgba(218,220,224,0.75)]"
-                            )}
+                            className="text-[18px] leading-none text-white"
                           />
-                          <span className="toggle-text text-[11px] leading-tight font-medium">
+                          <span className={cn("toggle-text text-[11px] leading-tight text-white", isChecked ? "font-semibold" : "font-medium")}>
                             {ratio}
                           </span>
                         </span>
@@ -375,11 +368,9 @@ export function FlowPromptBoxSettings({
                   <flow-toggles
                     key={key}
                     aria-label={def.label || key}
-                   
                     className="block w-full"
                   >
                     <mat-button-toggle-group
-                     
                       className="mat-button-toggle-group toggle-group flex items-center gap-0.5 p-0.5 bg-[rgba(218,220,224,0.05)] rounded-[12px] w-full"
                       role="radiogroup"
                     >
@@ -400,7 +391,6 @@ export function FlowPromptBoxSettings({
                             key={String(itemVal)}
                             role="presentation"
                             aria-description={infoText || undefined}
-                           
                             className={cn(
                               "mat-button-toggle toggle flex-toggle mat-button-toggle-appearance-standard mat-button-toggle-animations-enabled flex-1 flex h-8 rounded-[10px] transition-all",
                               isChecked && "mat-button-toggle-checked"
@@ -412,18 +402,21 @@ export function FlowPromptBoxSettings({
                               onClick={() => onParamChange?.(key, itemVal)}
                               role="radio"
                               aria-checked={isChecked}
-                              className="mat-button-toggle-button w-full h-8"
+                              className={cn(
+                                "mat-button-toggle-button w-full h-8 text-white",
+                                isChecked ? "font-semibold" : "font-medium"
+                              )}
                             >
                               <span className="mat-button-toggle-label-content flex items-center justify-center gap-1 truncate w-full text-center">
                                 <span className="toggle-label flex items-center justify-center gap-1">
-                                  <span className="toggle-text truncate">{itemLabel}</span>
+                                  <span className="toggle-text truncate text-white">{itemLabel}</span>
                                   {hasInfo && (
                                     <GoogleIcon
                                       iconName="info"
                                       role="img"
                                       aria-hidden={false}
                                       aria-label={infoText}
-                                      className="mat-icon notranslate mat-mdc-tooltip-trigger flow-icon-m info-icon google-symbols mat-icon-no-color text-[14px] text-[rgba(218,220,224,0.65)] hover:text-white"
+                                      className="mat-icon notranslate mat-mdc-tooltip-trigger flow-icon-m info-icon google-symbols mat-icon-no-color text-[14px] text-white hover:text-white"
                                     />
                                   )}
                                 </span>
@@ -442,7 +435,7 @@ export function FlowPromptBoxSettings({
                 const isChecked = Boolean(val);
                 return (
                   <div key={key} className="flex items-center justify-between px-1">
-                    <span className="text-[12px] text-[rgba(218,220,224,0.75)] font-medium">
+                    <span className="text-[12px] text-white font-medium">
                       {def.label || key}
                     </span>
                     <div className="flex items-center gap-1 p-0.5 bg-[rgba(218,220,224,0.05)] rounded-[10px]">
@@ -450,6 +443,7 @@ export function FlowPromptBoxSettings({
                         type="button"
                         variant={!isChecked ? "flow-boolean-active" : "flow-boolean"}
                         onClick={() => onParamChange?.(key, false)}
+                        className="text-white hover:text-white"
                       >
                         Off
                       </Button>
@@ -457,6 +451,7 @@ export function FlowPromptBoxSettings({
                         type="button"
                         variant={isChecked ? "flow-boolean-active" : "flow-boolean"}
                         onClick={() => onParamChange?.(key, true)}
+                        className="text-white hover:text-white"
                       >
                         On
                       </Button>
@@ -475,7 +470,7 @@ export function FlowPromptBoxSettings({
                 return (
                   <div key={key} className="flex flex-col gap-1 p-1 bg-[rgba(218,220,224,0.05)] rounded-[14px] px-2.5 py-2">
                     <div className="flex items-center justify-between text-[11px]">
-                      <span className="text-[rgba(218,220,224,0.75)] font-medium">{def.label || key}</span>
+                      <span className="text-white font-medium">{def.label || key}</span>
                       <span className="font-mono text-white font-semibold tabular-nums">{numVal}</span>
                     </div>
                     <input
@@ -513,7 +508,7 @@ export function FlowPromptBoxSettings({
                 className="mdc-button mat-mdc-button-base mat-mdc-menu-trigger mdc-button--unelevated mat-mdc-unelevated-button mat-unthemed flow-button-primary flow-button-medium w-full h-9 px-3 rounded-[12px] bg-[rgba(218,220,224,0.06)] hover:bg-[rgba(218,220,224,0.12)] active:bg-[rgba(218,220,224,0.2)] text-white flex items-center justify-between transition-all cursor-pointer outline-none"
               >
                 <span className="mdc-button__label flex items-center justify-between w-full">
-                  <span className="model-select-trigger-content flex items-center gap-2 text-[13px] font-medium truncate">
+                  <span className="model-select-trigger-content flex items-center gap-2 text-[13px] font-medium truncate text-white">
                     {currentModelIcon ? (
                       <img
                         src={currentModelIcon}
@@ -526,11 +521,11 @@ export function FlowPromptBoxSettings({
                     ) : (
                       <span className="text-[14px]">🍌</span>
                     )}
-                    <span className="truncate">{currentModel?.name || "Model"}</span>
+                    <span className="truncate text-white">{currentModel?.name || "Model"}</span>
                   </span>
                   <GoogleIcon
                     iconName="arrow_drop_down"
-                    className={cn("text-[20px] text-[rgba(218,220,224,0.75)] transition-transform", modelMenuOpen && "rotate-180")}
+                    className={cn("text-[20px] text-white transition-transform", modelMenuOpen && "rotate-180")}
                   />
                 </span>
               </Button>
@@ -576,7 +571,7 @@ export function FlowPromptBoxSettings({
                               type="button"
                               mat-menu-item=""
                               className={cn(
-                                "mat-mdc-menu-item mat-focus-indicator mat-mdc-menu-trigger mat-mdc-tooltip-trigger flow-internal-menu-item w-full !h-[48px] !min-h-[48px]",
+                                "mat-mdc-menu-item mat-focus-indicator mat-mdc-menu-trigger mat-mdc-tooltip-trigger flow-internal-menu-item w-full !h-[48px] !min-h-[48px] text-white",
                                 isSelected && "selected"
                               )}
                               role="menuitem"
@@ -587,8 +582,8 @@ export function FlowPromptBoxSettings({
                                 setModelMenuOpen(false);
                               }}
                             >
-                              <span className="mat-mdc-menu-item-text">
-                                <span className="left-content">
+                              <span className="mat-mdc-menu-item-text text-white">
+                                <span className="left-content flex items-center gap-2">
                                   {isImgIcon ? (
                                     <img
                                       src={icon}
@@ -601,15 +596,15 @@ export function FlowPromptBoxSettings({
                                   ) : (
                                     <mat-icon
                                       role="img"
-                                      className="mat-icon notranslate google-symbols mat-icon-no-color"
+                                      className="mat-icon notranslate google-symbols mat-icon-no-color text-white"
                                       aria-hidden="true"
                                       data-mat-icon-type="font"
                                     >
                                       {icon || "volume_up"}
                                     </mat-icon>
                                   )}
-                                  <span className="item-text">
-                                    <span className="label">{m.name}</span>
+                                  <span className="item-text text-white">
+                                    <span className="label text-white">{m.name}</span>
                                   </span>
                                 </span>
                                 {isSelected && (
@@ -667,11 +662,14 @@ export function FlowPromptBoxSettings({
                       onClick={() => handleCountClick(countVal)}
                       role="radio"
                       aria-checked={isChecked}
-                      className="mat-button-toggle-button w-full h-8"
+                      className={cn(
+                        "mat-button-toggle-button w-full h-8 text-white",
+                        isChecked ? "font-semibold" : "font-medium"
+                      )}
                     >
                       <span className="mat-button-toggle-label-content flex items-center justify-center w-full">
                         <span className="toggle-label flex items-center justify-center">
-                          <span className="toggle-text font-semibold">x{countVal}</span>
+                          <span className="toggle-text font-semibold text-white">x{countVal}</span>
                         </span>
                       </span>
                     </Button>
@@ -687,7 +685,7 @@ export function FlowPromptBoxSettings({
           <flow-credit-cost-label
             className="settings-credit-cost block pt-0.5 text-center"
           >
-            <span className="credit-cost-label block text-[11px] text-[rgba(218,220,224,0.6)]">
+            <span className="credit-cost-label block text-[11px] text-white">
               <span>
                 La génération utilisera{" "}
                 <a
@@ -705,7 +703,7 @@ export function FlowPromptBoxSettings({
 
         {/* ── Empty notice if no models available for this mode ── */}
         {(!models || models.length === 0) && (
-          <div className="py-3 px-2 text-center text-[12px] text-[rgba(218,220,224,0.45)]">
+          <div className="py-3 px-2 text-center text-[12px] text-white">
             Aucun modèle disponible
           </div>
         )}
