@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useRef, useEffect, useCallback, useMemo, useContext } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/shared/lib/utils";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
@@ -89,7 +89,7 @@ export function PromptBarPlatform({ type, featureConfig, models = [], onGenerate
 
 /** Inner renderer — lives inside the store provider, has access to usePromptBarStore */
 function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, className, hideBackground = false, isGenerating: propIsGenerating = false, renderRightActions }) {
-
+  const store = useContext(PromptBarStoreContext);
   const [drawerOpen, setDrawerOpen] = useState(false); // Collapsed by default (FR-COMP-04)
   const containerRef = useRef(null);
   const textareaRef = useRef(null);
