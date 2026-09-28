@@ -118,13 +118,14 @@ export function FlowPromptBoxSettings({
   }, [parameters, currentModel]);
 
   const ratioOptions = useMemo(() => {
+    if (!currentModel || models.length === 0) return [];
     const def = ratioParamEntry ? ratioParamEntry[1] : (currentModel?.parameters?.aspect_ratio || currentModel?.parameters?.ratio);
     const rawValues = def?.values;
     if (Array.isArray(rawValues) && rawValues.length > 0) {
       return rawValues.map((v) => (typeof v === "object" ? v.value : String(v)));
     }
     return DEFAULT_RATIOS;
-  }, [ratioParamEntry, currentModel]);
+  }, [ratioParamEntry, currentModel, models.length]);
 
   const currentRatio = useMemo(() => {
     if (ratioParamEntry && paramValues[ratioParamEntry[0]]) {
@@ -149,8 +150,9 @@ export function FlowPromptBoxSettings({
 
   // Other non-ratio non-count parameters (Quality, Duration, Sliders, etc.)
   const otherParams = useMemo(() => {
+    if (!currentModel || models.length === 0) return [];
     return parameters.filter(([k]) => k !== "aspect_ratio" && k !== "ratio" && k !== "count" && k !== "variations");
-  }, [parameters]);
+  }, [parameters, currentModel, models.length]);
 
   // Current Model Icon
   const currentModelIcon = useMemo(() => {
@@ -494,213 +496,219 @@ export function FlowPromptBoxSettings({
           </div>
         )}
 
-        {/* ── 4. DIVIDER (mat-divider role="separator" class="mat-divider mat-divider-horizontal") ── */}
-        <mat-divider
-          role="separator"
-         
-          className="mat-divider mat-divider-horizontal block h-px bg-[rgba(218,220,224,0.15)] my-0.5 w-full"
-        />
+        {/* ── 4. DIVIDER & 5. MODEL SELECT TRIGGER (only when models exist) ── */}
+        {models && models.length > 0 && currentModel && (
+          <>
+            <mat-divider
+              role="separator"
+              className="mat-divider mat-divider-horizontal block h-px bg-[rgba(218,220,224,0.15)] my-0.5 w-full"
+            />
 
-        {/* ── 5. MODEL SELECT TRIGGER (button flow-button matbutton) ── */}
-        <div className="relative w-full" ref={modelMenuRef}>
-          <Button
-            type="button"
-            variant="flow-select-trigger"
-            aria-label="Sélectionner une famille de modèles"
-            onClick={() => setModelMenuOpen((v) => !v)}
-            className="mdc-button mat-mdc-button-base mat-mdc-menu-trigger mdc-button--unelevated mat-mdc-unelevated-button mat-unthemed flow-button-primary flow-button-medium w-full h-9 px-3 rounded-[12px] bg-[rgba(218,220,224,0.06)] hover:bg-[rgba(218,220,224,0.12)] active:bg-[rgba(218,220,224,0.2)] text-white flex items-center justify-between transition-all cursor-pointer outline-none"
-          >
-            <span className="mdc-button__label flex items-center justify-between w-full">
-              <span className="model-select-trigger-content flex items-center gap-2 text-[13px] font-medium truncate">
-                {currentModelIcon ? (
-                  <img
-                    src={currentModelIcon}
-                    alt=""
-                    className="size-4 rounded-[3px] object-contain brightness-0 invert shrink-0"
-                    onError={(e) => {
-                      e.currentTarget.style.display = "none";
-                    }}
+            <div className="relative w-full" ref={modelMenuRef}>
+              <Button
+                type="button"
+                variant="flow-select-trigger"
+                aria-label="Sélectionner une famille de modèles"
+                onClick={() => setModelMenuOpen((v) => !v)}
+                className="mdc-button mat-mdc-button-base mat-mdc-menu-trigger mdc-button--unelevated mat-mdc-unelevated-button mat-unthemed flow-button-primary flow-button-medium w-full h-9 px-3 rounded-[12px] bg-[rgba(218,220,224,0.06)] hover:bg-[rgba(218,220,224,0.12)] active:bg-[rgba(218,220,224,0.2)] text-white flex items-center justify-between transition-all cursor-pointer outline-none"
+              >
+                <span className="mdc-button__label flex items-center justify-between w-full">
+                  <span className="model-select-trigger-content flex items-center gap-2 text-[13px] font-medium truncate">
+                    {currentModelIcon ? (
+                      <img
+                        src={currentModelIcon}
+                        alt=""
+                        className="size-4 rounded-[3px] object-contain brightness-0 invert shrink-0"
+                        onError={(e) => {
+                          e.currentTarget.style.display = "none";
+                        }}
+                      />
+                    ) : (
+                      <span className="text-[14px]">🍌</span>
+                    )}
+                    <span className="truncate">{currentModel?.name || "Model"}</span>
+                  </span>
+                  <GoogleIcon
+                    iconName="arrow_drop_down"
+                    className={cn("text-[20px] text-[rgba(218,220,224,0.75)] transition-transform", modelMenuOpen && "rotate-180")}
                   />
-                ) : (
-                  <span className="text-[14px]">🍌</span>
-                )}
-                <span className="truncate">{currentModel?.name || "Model"}</span>
-              </span>
-              <GoogleIcon
-                iconName="arrow_drop_down"
-                className={cn("text-[20px] text-[rgba(218,220,224,0.75)] transition-transform", modelMenuOpen && "rotate-180")}
-              />
-            </span>
-          </Button>
+                </span>
+              </Button>
 
-          {/* Inline Model Dropdown Menu if toggled */}
-          {modelMenuOpen && models.length > 0 && (
-            <div
-              id="cdk-overlay-79"
-              className="cdk-overlay-pane absolute bottom-[calc(100%+8px)] left-0 w-full z-50 !max-h-none !h-auto"
-              style={{
-                position: "absolute",
-                bottom: "calc(100% + 8px)",
-                left: 0,
-                width: "100%",
-                zIndex: 1000,
-                maxHeight: "none",
-                height: "auto",
-              }}
-            >
-              <div
-                tabIndex={-1}
-                role="menu"
-                className="mat-mdc-menu-panel flow-menu-panel flow-model-picker-panel mat-menu-above mat-menu-after w-full !h-auto max-h-[320px] overflow-y-auto"
-                id="mat-menu-panel-158"
-                style={{
-                  transformOrigin: "left bottom",
-                  maxHeight: "320px",
-                  height: "auto",
-                }}
-              >
-                <div className="mat-mdc-menu-content">
-                  {models.map((m) => {
-                    const isSelected = m.id === currentModel?.id;
-                    const icon = resolveModelIcon(m);
-                    const isImgIcon = icon && (icon.startsWith("/") || icon.startsWith("http") || icon.includes("."));
-
-                    return (
-                      <flow-menu-item
-                        key={m.id}
-                        className={cn("block w-full !h-[48px] !min-h-[48px]", isSelected && "selected")}
-                      >
-                        <button
-                          type="button"
-                          mat-menu-item=""
-                          className={cn(
-                            "mat-mdc-menu-item mat-focus-indicator mat-mdc-menu-trigger mat-mdc-tooltip-trigger flow-internal-menu-item w-full !h-[48px] !min-h-[48px]",
-                            isSelected && "selected"
-                          )}
-                          role="menuitem"
-                          tabIndex={0}
-                          aria-expanded="false"
-                          onClick={() => {
-                            onSelectModel?.(m.id);
-                            setModelMenuOpen(false);
-                          }}
-                        >
-                          <span className="mat-mdc-menu-item-text">
-                            <span className="left-content">
-                              {isImgIcon ? (
-                                <img
-                                  src={icon}
-                                  alt=""
-                                  className="size-4 object-contain brightness-0 invert shrink-0"
-                                  onError={(e) => {
-                                    e.currentTarget.style.display = "none";
-                                  }}
-                                />
-                              ) : (
-                                <mat-icon
-                                  role="img"
-                                 
-                                  className="mat-icon notranslate google-symbols mat-icon-no-color"
-                                  aria-hidden="true"
-                                  data-mat-icon-type="font"
-                                >
-                                  {icon || "volume_up"}
-                                </mat-icon>
-                              )}
-                              <span className="item-text">
-                                <span className="label">{m.name}</span>
-                              </span>
-                            </span>
-                            {isSelected && (
-                              <mat-icon
-                                role="img"
-                               
-                                className="mat-icon notranslate google-symbols mat-icon-no-color text-[16px] text-white shrink-0 ml-1"
-                                aria-hidden="true"
-                                data-mat-icon-type="font"
-                              >
-                                check
-                              </mat-icon>
-                            )}
-                          </span>
-                          <div
-                            matripple=""
-                           
-                            className="mat-ripple mat-mdc-menu-ripple"
-                          />
-                        </button>
-                      </flow-menu-item>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* ── 6. OUTPUTS / VARIATIONS TOGGLES (flow-toggles aria-label="Nombre de sorties") ── */}
-        <flow-toggles
-          aria-label="Nombre de sorties"
-         
-          className="block w-full"
-        >
-          <mat-button-toggle-group
-           
-            className="mat-button-toggle-group toggle-group flex items-center gap-0.5 p-0.5 bg-[rgba(218,220,224,0.05)] rounded-[12px] w-full"
-            role="radiogroup"
-          >
-            {[1, 2, 3, 4].map((countVal) => {
-              const isChecked = currentCount === countVal;
-
-              return (
-                <mat-button-toggle
-                  key={countVal}
-                  role="presentation"
-                 
-                  className={cn(
-                    "mat-button-toggle toggle flex-toggle flex-1 flex h-8 rounded-[10px] transition-all",
-                    isChecked && "mat-button-toggle-checked"
-                  )}
+              {/* Inline Model Dropdown Menu if toggled */}
+              {modelMenuOpen && models.length > 0 && (
+                <div
+                  id="cdk-overlay-79"
+                  className="cdk-overlay-pane absolute bottom-[calc(100%+8px)] left-0 w-full z-50 !max-h-none !h-auto"
+                  style={{
+                    position: "absolute",
+                    bottom: "calc(100% + 8px)",
+                    left: 0,
+                    width: "100%",
+                    zIndex: 1000,
+                    maxHeight: "none",
+                    height: "auto",
+                  }}
                 >
-                  <Button
-                    type="button"
-                    variant={isChecked ? "flow-toggle-active" : "flow-toggle"}
-                    onClick={() => handleCountClick(countVal)}
-                    role="radio"
-                    aria-checked={isChecked}
-                    className="mat-button-toggle-button w-full h-8"
+                  <div
+                    tabIndex={-1}
+                    role="menu"
+                    className="mat-mdc-menu-panel flow-menu-panel flow-model-picker-panel mat-menu-above mat-menu-after w-full !h-auto max-h-[320px] overflow-y-auto"
+                    id="mat-menu-panel-158"
+                    style={{
+                      transformOrigin: "left bottom",
+                      maxHeight: "320px",
+                      height: "auto",
+                    }}
                   >
-                    <span className="mat-button-toggle-label-content flex items-center justify-center w-full">
-                      <span className="toggle-label flex items-center justify-center">
-                        <span className="toggle-text font-semibold">x{countVal}</span>
-                      </span>
-                    </span>
-                  </Button>
-                </mat-button-toggle>
-              );
-            })}
-          </mat-button-toggle-group>
-        </flow-toggles>
+                    <div className="mat-mdc-menu-content">
+                      {models.map((m) => {
+                        const isSelected = m.id === currentModel?.id;
+                        const icon = resolveModelIcon(m);
+                        const isImgIcon = icon && (icon.startsWith("/") || icon.startsWith("http") || icon.includes("."));
 
-        {/* ── 7. CREDIT COST LABEL (flow-credit-cost-label class="settings-credit-cost") ── */}
-        <flow-credit-cost-label
-         
-          className="settings-credit-cost block pt-0.5 text-center"
-        >
-          <span className="credit-cost-label block text-[11px] text-[rgba(218,220,224,0.6)]">
-            <span>
-              La génération utilisera{" "}
-              <a
-                target="_blank"
-                rel="noopener noreferrer"
-                className="credit-cost-link text-white underline underline-offset-2 hover:text-white/80 transition-colors font-medium"
-                href="https://support.google.com/googleone?p=g1_ai_credit_menu"
-              >
-                {creditCost || 0}&nbsp;crédits
-              </a>
+                        return (
+                          <flow-menu-item
+                            key={m.id}
+                            className={cn("block w-full !h-[48px] !min-h-[48px]", isSelected && "selected")}
+                          >
+                            <button
+                              type="button"
+                              mat-menu-item=""
+                              className={cn(
+                                "mat-mdc-menu-item mat-focus-indicator mat-mdc-menu-trigger mat-mdc-tooltip-trigger flow-internal-menu-item w-full !h-[48px] !min-h-[48px]",
+                                isSelected && "selected"
+                              )}
+                              role="menuitem"
+                              tabIndex={0}
+                              aria-expanded="false"
+                              onClick={() => {
+                                onSelectModel?.(m.id);
+                                setModelMenuOpen(false);
+                              }}
+                            >
+                              <span className="mat-mdc-menu-item-text">
+                                <span className="left-content">
+                                  {isImgIcon ? (
+                                    <img
+                                      src={icon}
+                                      alt=""
+                                      className="size-4 object-contain brightness-0 invert shrink-0"
+                                      onError={(e) => {
+                                        e.currentTarget.style.display = "none";
+                                      }}
+                                    />
+                                  ) : (
+                                    <mat-icon
+                                      role="img"
+                                      className="mat-icon notranslate google-symbols mat-icon-no-color"
+                                      aria-hidden="true"
+                                      data-mat-icon-type="font"
+                                    >
+                                      {icon || "volume_up"}
+                                    </mat-icon>
+                                  )}
+                                  <span className="item-text">
+                                    <span className="label">{m.name}</span>
+                                  </span>
+                                </span>
+                                {isSelected && (
+                                  <mat-icon
+                                    role="img"
+                                    className="mat-icon notranslate google-symbols mat-icon-no-color text-[16px] text-white shrink-0 ml-1"
+                                    aria-hidden="true"
+                                    data-mat-icon-type="font"
+                                  >
+                                    check
+                                  </mat-icon>
+                                )}
+                              </span>
+                              <div
+                                matripple=""
+                                className="mat-ripple mat-mdc-menu-ripple"
+                              />
+                            </button>
+                          </flow-menu-item>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </>
+        )}
+
+        {/* ── 6. OUTPUTS / VARIATIONS TOGGLES (only when models exist) ── */}
+        {models && models.length > 0 && currentModel && (
+          <flow-toggles
+            aria-label="Nombre de sorties"
+            className="block w-full"
+          >
+            <mat-button-toggle-group
+              className="mat-button-toggle-group toggle-group flex items-center gap-0.5 p-0.5 bg-[rgba(218,220,224,0.05)] rounded-[12px] w-full"
+              role="radiogroup"
+            >
+              {[1, 2, 3, 4].map((countVal) => {
+                const isChecked = currentCount === countVal;
+
+                return (
+                  <mat-button-toggle
+                    key={countVal}
+                    role="presentation"
+                    className={cn(
+                      "mat-button-toggle toggle flex-toggle flex-1 flex h-8 rounded-[10px] transition-all",
+                      isChecked && "mat-button-toggle-checked"
+                    )}
+                  >
+                    <Button
+                      type="button"
+                      variant={isChecked ? "flow-toggle-active" : "flow-toggle"}
+                      onClick={() => handleCountClick(countVal)}
+                      role="radio"
+                      aria-checked={isChecked}
+                      className="mat-button-toggle-button w-full h-8"
+                    >
+                      <span className="mat-button-toggle-label-content flex items-center justify-center w-full">
+                        <span className="toggle-label flex items-center justify-center">
+                          <span className="toggle-text font-semibold">x{countVal}</span>
+                        </span>
+                      </span>
+                    </Button>
+                  </mat-button-toggle>
+                );
+              })}
+            </mat-button-toggle-group>
+          </flow-toggles>
+        )}
+
+        {/* ── 7. CREDIT COST LABEL (only when models exist) ── */}
+        {models && models.length > 0 && currentModel && (
+          <flow-credit-cost-label
+            className="settings-credit-cost block pt-0.5 text-center"
+          >
+            <span className="credit-cost-label block text-[11px] text-[rgba(218,220,224,0.6)]">
+              <span>
+                La génération utilisera{" "}
+                <a
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="credit-cost-link text-white underline underline-offset-2 hover:text-white/80 transition-colors font-medium"
+                  href="https://support.google.com/googleone?p=g1_ai_credit_menu"
+                >
+                  {creditCost || 0}&nbsp;crédits
+                </a>
+              </span>
             </span>
-          </span>
-        </flow-credit-cost-label>
+          </flow-credit-cost-label>
+        )}
+
+        {/* ── Empty notice if no models available for this mode ── */}
+        {(!models || models.length === 0) && (
+          <div className="py-3 px-2 text-center text-[12px] text-[rgba(218,220,224,0.45)]">
+            Aucun modèle disponible
+          </div>
+        )}
       </div>
     </flow-prompt-box-settings>
   );

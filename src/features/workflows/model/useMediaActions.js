@@ -9,7 +9,13 @@ import { useEditStore } from "@/features/prompt-bar/model/useEditStore";
 import { useElementStore } from "@/features/prompt-bar/model/useElementStore";
 import { usePromptStore } from "@/features/prompt-bar/model/usePromptStore";
 import { buildElementSheetDraft } from "./elementSheetConfig";
-import { addMediaToPrompt, animateMedia } from "@/features/studio";
+import {
+  addMediaToPrompt,
+  animateMedia,
+  setPendingPromptAction,
+  canAnyModelAcceptEntity,
+} from "@/features/studio";
+import { useRealBackendModels } from "@/features/prompt-bar/core/useRealBackendModels";
 
 /**
  * useWorkflowActions
@@ -53,6 +59,14 @@ export function useWorkflowActions(workflow, item = null) {
   // only block while a job is in progress to avoid race/confusion.
   const canDelete = !isInProgress;
   const isElementSheet = workflow?.workflow_type === "ELEMENT_SHEET";
+  const isCharacter = workflow?.workflow_type === "CHARACTER_SHEET" || Boolean(workflow?.is_character) || workflow?.entity_type === "character";
+  const projectId = workflow?.projectId || workflow?.project_id;
+  const { data: modelsData } = useRealBackendModels({ projectId });
+  const models = modelsData?.models || [];
+
+  const isEntity = isElementSheet || isCharacter;
+  const canAcceptEntity = isEntity ? canAnyModelAcceptEntity(workflow || targetItem, models) : true;
+  const canAddToPrompt = canUseAsInput && canAcceptEntity;
 
   const prompt = targetItem?.params?.prompt 
                 || targetItem?.mediaMetadata?.requestData?.promptInputs?.[0]?.textInput 
@@ -205,6 +219,11 @@ export function useWorkflowActions(workflow, item = null) {
     const media = targetItem || workflow;
     const handled = animateMedia({ media });
     if (!handled) {
+      if (projectId && !pathname?.includes("/generations")) {
+        setPendingPromptAction({ type: "animate", media, projectId });
+        router.push(`/cinema-studio/${projectId}/generations`);
+        return;
+      }
       const assetId = targetItem?.asset_id || targetItem?.name || targetItem?.id || "";
       if (!isEditPage) {
         const promptStore = usePromptStore.getState();
@@ -223,10 +242,15 @@ export function useWorkflowActions(workflow, item = null) {
   };
 
   const handleAddToPrompt = () => {
-    if (!canUseAsInput) return;
+    if (!canAddToPrompt) return;
     const media = targetItem || workflow;
     const handled = addMediaToPrompt({ media });
     if (!handled) {
+      if (projectId && !pathname?.includes("/generations")) {
+        setPendingPromptAction({ type: "add_reference", media, projectId });
+        router.push(`/cinema-studio/${projectId}/generations`);
+        return;
+      }
       const workflowId = workflow?.id || targetItem?.workflow_id || targetItem?.workflowId || null;
       const assetId = targetItem?.asset_id || targetItem?.name || targetItem?.id || "";
       const asset = { 
@@ -258,6 +282,7 @@ export function useWorkflowActions(workflow, item = null) {
     handleSetParameters,
     canDelete,
     canReuseSettings,
+    canAddToPrompt,
     isVideo,
     url,
     aspect: metadata.aspect,

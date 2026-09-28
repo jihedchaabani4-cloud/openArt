@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 import { BaseSelect, useSelectLogic } from "../ui/common/selectors/DropdownEngine.jsx";
 import { Badge } from "@/shared/ui/badge";
 import { usePromptBarStore } from "../store/usePromptBarStore.js";
@@ -20,7 +20,7 @@ import { resolveModelIcon } from "../core/modelManagement.js";
  *   supportedDomains: string[] — domain filter (from composition type)
  *   disabled: boolean (optional)
  */
-export function ModelSelectorPlatform({ models: explicitModels, supportedDomains = [], disabled = false }) {
+export function ModelSelectorPlatform({ models: explicitModels, supportedDomains = [], _disabled = false }) {
   const modelsMap   = usePromptBarStore((s) => s.modelsMap);
   const selectedId  = usePromptBarStore((s) => s.selectedModelId);
   const selectModel = usePromptBarStore((s) => s.selectModel);
@@ -87,11 +87,7 @@ export function ModelSelectorPlatform({ models: explicitModels, supportedDomains
   const logic = useSelectLogic(selectedId, selectModel);
 
   if (models.length === 0) {
-    return (
-      <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-white/5 border border-white/10 text-white/40 text-[12px]">
-        <span>No models</span>
-      </div>
-    );
+    return null;
   }
 
   return (
