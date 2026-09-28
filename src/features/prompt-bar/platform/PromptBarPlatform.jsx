@@ -17,7 +17,6 @@ import { Button } from "@/shared/ui/button";
 // Platform Architecture
 import { PromptBarStoreProvider, PromptBarStoreContext } from "../store/PromptBarStoreContext.js";
 import { usePromptBarStore } from "../store/usePromptBarStore.js";
-import { ModelSelectorPlatform } from "./ModelSelectorPlatform.jsx";
 import {
   cleanTagsForAsset,
   getActiveReferences,
@@ -1116,12 +1115,8 @@ function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, class
         {/* Left side spacer */}
         <div className="flex items-center gap-1.5 min-w-[32px]" />
 
-        {/* Center: Model Selector in the MIDDLE of prompt bar */}
-        <div className="flex-1 flex items-center justify-center">
-          {layout.showModelSelector && eligibleModels && eligibleModels.length > 0 && (
-            <ModelSelectorPlatform models={eligibleModels} />
-          )}
-        </div>
+        {/* Center: Spacer (model selection is housed exclusively inside settings drawer) */}
+        <div className="flex-1" />
 
         {/* Right side: Parameter button + generate */}
         <div className="flex items-center gap-2 shrink-0">
@@ -1150,7 +1145,26 @@ function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, class
                   : "bg-white/5 hover:bg-white/10 text-white/70 hover:text-white"
               )}
             >
-              <GoogleIcon iconName="tune" className="text-[16px]" />
+              <GoogleIcon iconName="tune" className="text-[16px] shrink-0" />
+              {currentModel && (
+                <div className="flex items-center gap-1.5 max-w-[150px] truncate">
+                  {currentModel.icon && (
+                    <img
+                      src={currentModel.icon}
+                      alt=""
+                      className="size-3.5 rounded-sm object-contain shrink-0"
+                    />
+                  )}
+                  <span
+                    className={cn(
+                      "font-medium text-[12px] truncate",
+                      drawerOpen ? "text-black font-semibold" : "text-white/90"
+                    )}
+                  >
+                    {currentModel.name || currentModel.displayName || currentModel.id}
+                  </span>
+                </div>
+              )}
               <GoogleIcon
                 iconName={currentRatioIcon}
                 className={cn(
