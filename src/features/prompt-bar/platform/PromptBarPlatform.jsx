@@ -23,7 +23,7 @@ import {
   autoAssignReference,
   getAssetId,
 } from "../core/tagsService.js";
-import { getModelReferenceCapability } from "../core/modelManagement.js";
+import { getModelReferenceCapability, resolveModelIcon } from "../core/modelManagement.js";
 import {
   calculateUsedImages,
   getEntityImageCount,
@@ -193,6 +193,10 @@ function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, class
   );
   const currentModel = isCurrentEligible ? modelsMap[selectedId] : null;
   const parameters = useMemo(() => currentModel?.parameters || {}, [currentModel]);
+  const currentModelIcon = useMemo(() => {
+    if (!currentModel) return null;
+    return currentModel.icon || resolveModelIcon(currentModel);
+  }, [currentModel]);
 
   // 2. Auto-select first eligible model when current model does not satisfy mode/subMode parameter requirements
   useEffect(() => {
@@ -1147,11 +1151,14 @@ function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, class
             >
               {currentModel && (
                 <div className="flex items-center gap-1.5 max-w-[150px] truncate">
-                  {currentModel.icon && (
+                  {currentModelIcon && (
                     <img
-                      src={currentModel.icon}
+                      src={currentModelIcon}
                       alt=""
-                      className="size-3.5 rounded-sm object-contain shrink-0"
+                      className="size-3.5 rounded-sm object-contain brightness-0 invert shrink-0"
+                      onError={(e) => {
+                        e.currentTarget.style.display = "none";
+                      }}
                     />
                   )}
                   <span className="font-medium text-[12px] truncate text-white">
