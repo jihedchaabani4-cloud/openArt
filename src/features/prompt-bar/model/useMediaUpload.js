@@ -120,7 +120,9 @@ export function useMediaUpload({ projectId, activeSessionId, addReference, refer
            if (!data) return;
            addReference({
               url: data.url,
-              asset_id: data.asset_id,
+              workflow_id: data.workflow_id,
+              asset_id: data.workflow_id || data.asset_id,
+              id: data.workflow_id || data.asset_id,
               type: data.type,
               is_video: data.type === "video",
               width: data.width,

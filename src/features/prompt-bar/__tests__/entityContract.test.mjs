@@ -161,3 +161,47 @@ test("Store: reset resets elements and characters to empty arrays", () => {
   assert.deepEqual(store.getState().elements, []);
   assert.deepEqual(store.getState().characters, []);
 });
+
+test("Store: serialize extracts workflow IDs into parameters and references without raw URLs", () => {
+  const store = createPromptBarStore();
+  store.getState().setModels([
+    {
+      id: "seedance_2_5",
+      name: "ByteDance Seedance 2.5",
+      domain: "video",
+      parameters: {
+        prompt: { type: "text", required: true },
+        input_image: { type: "image", group: "media" },
+        last_frame: { type: "image", group: "media" },
+        duration: { type: "select", values: [{ value: "5" }, { value: "10" }] },
+      },
+    },
+  ]);
+  store.getState().selectModel("seedance_2_5");
+  store.getState().setPrompt("A cyber samurai walking in the rain");
+  store.getState().setParameter("duration", "5");
+  store.getState().setParameter("input_image", {
+    workflow_id: "wf_start_001",
+    url: "https://cdn.example.com/start.png",
+  });
+  store.getState().setParameter("last_frame", {
+    workflow_id: "wf_end_002",
+    url: "https://cdn.example.com/end.png",
+  });
+  store.getState().addElement({ workflow_id: "elem_sword", name: "Katana" });
+
+  const serialized = store.getState().serialize();
+
+  assert.equal(serialized.model, "seedance_2_5");
+  assert.equal(serialized.prompt, "A cyber samurai walking in the rain");
+  assert.equal(serialized.parameters.duration, "5");
+  assert.equal(serialized.parameters.input_image, "wf_start_001");
+  assert.equal(serialized.parameters.last_frame, "wf_end_002");
+  assert.deepEqual(serialized.elements, ["elem_sword"]);
+  assert.ok(Array.isArray(serialized.references));
+  assert.ok(serialized.references.includes("wf_start_001"));
+  assert.ok(serialized.references.includes("wf_end_002"));
+  assert.ok(serialized.references.includes("elem_sword"));
+  assert.ok(!serialized.references.some((r) => r.startsWith("http")));
+});
+

@@ -13,6 +13,67 @@
 
 import { validateParameter } from "./reconciliation.js";
 
+const MEDIA_PARAM_NAMES = new Set([
+  "images",
+  "reference_images",
+  "input_image",
+  "last_frame",
+  "input_video",
+  "start_frame",
+  "end_frame",
+]);
+
+/**
+ * Extracts a valid workflow ID from an item (object or string).
+ * Strictly rejects direct HTTP/HTTPS/blob URLs to adhere to backend validation.
+ *
+ * @param {any} item
+ * @returns {string|null}
+ */
+export function extractWorkflowId(item) {
+  if (!item) return null;
+  if (typeof item === "object") {
+    const id = item.workflow_id || item.workflowId || item.id || item.asset_id;
+    if (typeof id === "string" && id.trim()) {
+      const clean = id.trim();
+      if (!clean.startsWith("http://") && !clean.startsWith("https://") && !clean.startsWith("blob:")) {
+        return clean;
+      }
+    }
+    return null;
+  }
+  if (typeof item === "string") {
+    const clean = item.trim();
+    if (clean && !clean.startsWith("http://") && !clean.startsWith("https://") && !clean.startsWith("blob:")) {
+      return clean;
+    }
+  }
+  return null;
+}
+
+/**
+ * Normalizes a parameter value representing media into workflow IDs.
+ *
+ * @param {any} val
+ * @returns {any}
+ */
+function normalizeMediaParamValue(val) {
+  if (Array.isArray(val)) {
+    return val
+      .map((v) => {
+        if (typeof v === "object" && v !== null) {
+          return extractWorkflowId(v) || (typeof v.url === "string" && !v.url.startsWith("blob:") ? v.url : undefined);
+        }
+        return v;
+      })
+      .filter((v) => v !== undefined && v !== null && v !== "");
+  }
+  if (typeof val === "object" && val !== null) {
+    return extractWorkflowId(val) || (typeof val.url === "string" && !val.url.startsWith("blob:") ? val.url : undefined);
+  }
+  return val;
+}
+
 /**
  * Serializes the current PromptBar state into a clean API payload.
  *
@@ -20,8 +81,8 @@ import { validateParameter } from "./reconciliation.js";
  * @param {string}                 prompt      - Raw prompt text (will be trimmed)
  * @param {Record<string, object>} definitions - Active model parameter definitions
  * @param {Record<string, any>}    values      - Active parameter values
- * @param {object}                 [extra]     - Additional feature fields (e.g. elements, characters)
- * @returns {{ model: string, prompt: string, parameters: Record<string, any>, elements?: string[], characters?: string[] }}
+ * @param {object}                 [extra]     - Additional feature fields (e.g. elements, characters, references)
+ * @returns {{ model: string, prompt: string, parameters: Record<string, any>, references: string[], elements?: string[], characters?: string[] }}
  */
 export function serialize(modelId, prompt = "", definitions = {}, values = {}, extra = {}) {
   const parameters = {};
@@ -34,14 +95,24 @@ export function serialize(modelId, prompt = "", definitions = {}, values = {}, e
 
     const validation = validateParameter(def, val);
     if (validation.valid) {
-      if (Array.isArray(val)) {
+      const isMedia =
+        MEDIA_PARAM_NAMES.has(name) ||
+        def?.group === "media" ||
+        def?.type === "image" ||
+        def?.type === "image[]" ||
+        def?.type === "video" ||
+        def?.type === "video[]";
+
+      if (isMedia) {
+        parameters[name] = normalizeMediaParamValue(val);
+      } else if (Array.isArray(val)) {
         parameters[name] = val.map((v) =>
           typeof v === "object" && v !== null
-            ? (v.workflow_id || v.workflowId || v.id || v.asset_id || v.url || v)
+            ? (extractWorkflowId(v) || v.url || v)
             : v
         );
       } else if (typeof val === "object" && val !== null) {
-        parameters[name] = val.workflow_id || val.workflowId || val.id || val.asset_id || val.url || val;
+        parameters[name] = extractWorkflowId(val) || val.url || val;
       } else {
         parameters[name] = val;
       }
@@ -52,25 +123,51 @@ export function serialize(modelId, prompt = "", definitions = {}, values = {}, e
   for (const [name, val] of Object.entries(values)) {
     if (parameters[name] !== undefined) continue;
     if (val === undefined || val === null || val === "" || (Array.isArray(val) && val.length === 0)) continue;
-    if (name === "images" || name === "reference_images" || name === "input_image") {
-      if (Array.isArray(val)) {
-        parameters[name] = val.map((v) =>
-          typeof v === "object" && v !== null
-            ? (v.workflow_id || v.workflowId || v.id || v.asset_id || v.url || v)
-            : v
-        );
-      } else if (typeof val === "object" && val !== null) {
-        parameters[name] = val.workflow_id || val.workflowId || val.id || val.asset_id || val.url || val;
-      } else {
-        parameters[name] = val;
-      }
+    if (MEDIA_PARAM_NAMES.has(name)) {
+      parameters[name] = normalizeMediaParamValue(val);
     }
+  }
+
+  // Collect all active workflow IDs for root `references` field (required by backend contract)
+  const referenceIdSet = new Set();
+
+  function collectId(item) {
+    const id = extractWorkflowId(item);
+    if (id) {
+      referenceIdSet.add(id);
+    }
+  }
+
+  // 1. From media parameters in parameters / values
+  for (const k of MEDIA_PARAM_NAMES) {
+    const val = parameters[k] !== undefined ? parameters[k] : values[k];
+    if (Array.isArray(val)) {
+      val.forEach(collectId);
+    } else if (val) {
+      collectId(val);
+    }
+  }
+
+  // 2. From extra.elements
+  if (Array.isArray(extra.elements)) {
+    extra.elements.forEach(collectId);
+  }
+
+  // 3. From extra.characters
+  if (Array.isArray(extra.characters)) {
+    extra.characters.forEach(collectId);
+  }
+
+  // 4. From extra.references
+  if (Array.isArray(extra.references)) {
+    extra.references.forEach(collectId);
   }
 
   const result = {
     model: modelId,
     prompt: typeof prompt === "string" ? prompt.trim() : "",
     parameters,
+    references: Array.from(referenceIdSet),
   };
 
   if (extra.elements !== undefined) {
