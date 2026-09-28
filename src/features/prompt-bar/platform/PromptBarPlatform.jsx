@@ -1139,13 +1139,12 @@ function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, class
                 });
               }}
               className={cn(
-                "settings-trigger-button flow-button-primary flow-button-small h-8 px-2.5 rounded-[12px] flex items-center gap-1.5 transition-all cursor-pointer border border-transparent select-none text-[12px] font-medium",
+                "settings-trigger-button flow-button-primary flow-button-small h-8 px-2.5 rounded-[12px] flex items-center gap-1.5 transition-all cursor-pointer border select-none text-[12px] font-medium text-white",
                 drawerOpen
-                  ? "bg-white text-black shadow-sm"
-                  : "bg-white/5 hover:bg-white/10 text-white/70 hover:text-white"
+                  ? "bg-white/15 border-white/20 shadow-sm text-white"
+                  : "bg-white/5 hover:bg-white/10 border-transparent text-white/80 hover:text-white"
               )}
             >
-              <GoogleIcon iconName="tune" className="text-[16px] shrink-0" />
               {currentModel && (
                 <div className="flex items-center gap-1.5 max-w-[150px] truncate">
                   {currentModel.icon && (
@@ -1155,24 +1154,16 @@ function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, class
                       className="size-3.5 rounded-sm object-contain shrink-0"
                     />
                   )}
-                  <span
-                    className={cn(
-                      "font-medium text-[12px] truncate",
-                      drawerOpen ? "text-black font-semibold" : "text-white/90"
-                    )}
-                  >
+                  <span className="font-medium text-[12px] truncate text-white">
                     {currentModel.name || currentModel.displayName || currentModel.id}
                   </span>
                 </div>
               )}
               <GoogleIcon
                 iconName={currentRatioIcon}
-                className={cn(
-                  "text-[15px] leading-none shrink-0 transition-colors",
-                  drawerOpen ? "text-black" : "text-white/60"
-                )}
+                className="text-[15px] leading-none shrink-0 text-white/60"
               />
-              <span className="leading-none shrink-0 font-medium text-[12px]">
+              <span className="leading-none shrink-0 font-medium text-[12px] text-white/80">
                 x{currentCount}
               </span>
             </Button>
