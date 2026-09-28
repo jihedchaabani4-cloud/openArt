@@ -180,7 +180,7 @@ export function FlowPromptBoxSettings({
      
       className={cn(
         "settings-content-overlay flow-prompt-box-settings block w-[var(--prompt-box-settings-width,17.5rem)] rounded-[var(--mat-menu-container-shape,24px)] p-2",
-        "bg-[var(--mat-menu-container-color,rgba(22,23,24,0.85))] backdrop-blur-[100px]",
+        "bg-[rgba(22,23,24,0.6)] backdrop-blur-[100px]",
         "border-none",
         "shadow-[var(--mat-menu-container-elevation-shadow,var(--glass-raised-box-shadow))]",
         "text-white select-none font-['Google_Sans_Text',sans-serif]",
@@ -195,7 +195,7 @@ export function FlowPromptBoxSettings({
         boxShadow: "var(--mat-menu-container-elevation-shadow, 0 16px 32px -8px rgba(0, 0, 0, 0.4))",
         backdropFilter: "blur(100px) saturate(190%) contrast(105%)",
         WebkitBackdropFilter: "blur(100px) saturate(190%) contrast(105%)",
-        backgroundColor: "var(--mat-menu-container-color, var(--background-state-90, rgba(22, 23, 24, 0.85)))",
+        backgroundColor: "rgba(22, 23, 24, 0.6)",
         border: "none",
         colorScheme: "dark",
         pointerEvents: "auto",
@@ -554,6 +554,9 @@ export function FlowPromptBoxSettings({
                       transformOrigin: "left bottom",
                       maxHeight: "320px",
                       height: "auto",
+                      backgroundColor: "rgba(22, 23, 24, 0.6)",
+                      backdropFilter: "blur(100px)",
+                      WebkitBackdropFilter: "blur(100px)",
                     }}
                   >
                     <div className="mat-mdc-menu-content">
