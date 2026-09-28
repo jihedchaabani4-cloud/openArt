@@ -9,6 +9,7 @@ import { useEditStore } from "@/features/prompt-bar/model/useEditStore";
 import { useElementStore } from "@/features/prompt-bar/model/useElementStore";
 import { usePromptStore } from "@/features/prompt-bar/model/usePromptStore";
 import { buildElementSheetDraft } from "./elementSheetConfig";
+import { addMediaToPrompt, animateMedia } from "@/features/studio";
 
 /**
  * useWorkflowActions
@@ -201,41 +202,45 @@ export function useWorkflowActions(workflow, item = null) {
 
   const handleAnimate = () => {
     if (!canUseAsInput) return;
-    const assetId = targetItem?.asset_id || targetItem?.name || targetItem?.id || "";
-
-    if (isEditPage) {
-      // If we are in edit page, animate might not be directly supported in the edit bar,
-      // but we can add as reference if needed. For now, let's keep it consistent.
-    } else {
-      const promptStore = usePromptStore.getState();
-      promptStore.setGenerationMode("keyframe");
-      promptStore.clearReferences();
-      const workflowId = workflow?.id || targetItem?.workflow_id || targetItem?.workflowId || null;
-      promptStore.addReference({
-        url,
-        workflow_id: workflowId,
-        asset_id: workflowId || assetId,
-        id: workflowId || assetId,
-        is_video: false
-      }, "start");
+    const media = targetItem || workflow;
+    const handled = animateMedia({ media });
+    if (!handled) {
+      const assetId = targetItem?.asset_id || targetItem?.name || targetItem?.id || "";
+      if (!isEditPage) {
+        const promptStore = usePromptStore.getState();
+        promptStore.setGenerationMode("keyframe");
+        promptStore.clearReferences();
+        const workflowId = workflow?.id || targetItem?.workflow_id || targetItem?.workflowId || null;
+        promptStore.addReference({
+          url,
+          workflow_id: workflowId,
+          asset_id: workflowId || assetId,
+          id: workflowId || assetId,
+          is_video: false
+        }, "start");
+      }
     }
   };
 
   const handleAddToPrompt = () => {
     if (!canUseAsInput) return;
-    const workflowId = workflow?.id || targetItem?.workflow_id || targetItem?.workflowId || null;
-    const assetId = targetItem?.asset_id || targetItem?.name || targetItem?.id || "";
-    const asset = { 
-      url,
-      workflow_id: workflowId,
-      asset_id: workflowId || assetId,
-      id: workflowId || assetId,
-      is_video: isVideo,
-      workflow_type: workflow?.workflow_type
-    };
-    
-    const activeStore = isEditPage ? useEditStore.getState() : usePromptStore.getState();
-    activeStore.addReference(asset, "normal");
+    const media = targetItem || workflow;
+    const handled = addMediaToPrompt({ media });
+    if (!handled) {
+      const workflowId = workflow?.id || targetItem?.workflow_id || targetItem?.workflowId || null;
+      const assetId = targetItem?.asset_id || targetItem?.name || targetItem?.id || "";
+      const asset = { 
+        url,
+        workflow_id: workflowId,
+        asset_id: workflowId || assetId,
+        id: workflowId || assetId,
+        is_video: isVideo,
+        workflow_type: workflow?.workflow_type
+      };
+      
+      const activeStore = isEditPage ? useEditStore.getState() : usePromptStore.getState();
+      activeStore.addReference(asset, "normal");
+    }
   };
 
   const handleSetParameters = () => {

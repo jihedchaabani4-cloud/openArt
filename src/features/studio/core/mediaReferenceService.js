@@ -22,6 +22,7 @@ import { autoAssignReference, getAssetId, cleanTagsForAsset } from "./tagsServic
 import { getActivePromptBarStore } from "../PromptBarStoreContext.js";
 import { getEntityImageCount } from "./entityService.js";
 import { getModelReferenceCapability } from "./modelManagement.js";
+import * as defaultGeneratedMediaConfig from "@/features/prompt-bar/features/generated-media/generatedMedia.config.js";
 
 const PENDING_STORAGE_KEY = "openart_pending_prompt_action";
 
@@ -219,7 +220,7 @@ export function normalizeMediaAsset(media, defaultRole = "reference") {
 export function addMediaToPrompt({
   store = getActivePromptBarStore(),
   media,
-  featureConfig = null,
+  featureConfig = defaultGeneratedMediaConfig,
 } = {}) {
   if (!store || !media) return false;
 
@@ -388,7 +389,7 @@ export function addMediaToPrompt({
 export function animateMedia({
   store = getActivePromptBarStore(),
   media,
-  featureConfig = null,
+  featureConfig = defaultGeneratedMediaConfig,
 } = {}) {
   if (!store || !media) return false;
 

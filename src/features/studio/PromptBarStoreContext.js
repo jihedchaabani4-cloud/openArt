@@ -12,15 +12,12 @@ import React, { createContext, useContext, useRef } from "react";
 import { createPromptBarStore } from "./createPromptBarStore.js";
 import { initializeFromType } from "./core/initialization.js";
 
-let activePromptBarStoreInstance = null;
+import {
+  setActivePromptBarStore,
+  getActivePromptBarStore,
+} from "@/features/prompt-bar/store/PromptBarStoreContext.js";
 
-export function setActivePromptBarStore(store) {
-  activePromptBarStoreInstance = store;
-}
-
-export function getActivePromptBarStore() {
-  return activePromptBarStoreInstance;
-}
+export { setActivePromptBarStore, getActivePromptBarStore };
 
 export const PromptBarStoreContext = createContext(null);
 

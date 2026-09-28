@@ -94,10 +94,18 @@ function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, class
   // Feature Mode State (Image vs Video, Frames vs Reference)
   const { layout = {}, referenceSlots = [], supportedDomains = [] } = type || {};
   const hasModes = layout.showModeSelector !== false;
-  const [activeMode, setActiveMode] = useState("image"); // "image" | "video"
-  const [activeSubMode, setActiveSubMode] = useState("frames"); // "frames" | "reference"
 
   // Store subscriptions
+  const storeActiveMode    = usePromptBarStore((s) => s.activeMode);
+  const storeActiveSubMode = usePromptBarStore((s) => s.activeSubMode);
+  const storeSetActiveMode = usePromptBarStore((s) => s.setActiveMode);
+  const storeSetActiveSubMode = usePromptBarStore((s) => s.setActiveSubMode);
+
+  const activeMode    = storeActiveMode || "image";
+  const activeSubMode = storeActiveSubMode || "frames";
+  const setActiveMode = storeSetActiveMode || (() => {});
+  const setActiveSubMode = storeSetActiveSubMode || (() => {});
+
   const prompt         = usePromptBarStore((s) => s.prompt);
   const modelsMap      = usePromptBarStore((s) => s.modelsMap);
   const selectedId     = usePromptBarStore((s) => s.selectedModelId);

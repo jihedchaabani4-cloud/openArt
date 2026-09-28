@@ -12,6 +12,16 @@ import React, { createContext, useContext, useRef } from "react";
 import { createPromptBarStore } from "./createPromptBarStore.js";
 import { initializeFromType } from "../core/initialization.js";
 
+let activePromptBarStoreInstance = null;
+
+export function setActivePromptBarStore(store) {
+  activePromptBarStoreInstance = store;
+}
+
+export function getActivePromptBarStore() {
+  return activePromptBarStoreInstance;
+}
+
 export const PromptBarStoreContext = createContext(null);
 
 /**
@@ -38,6 +48,18 @@ export function PromptBarStoreProvider({ type, initialModels = [], children }) {
       parameterValues,
     });
   }
+
+  // Register active store instance
+  setActivePromptBarStore(storeRef.current);
+
+  React.useEffect(() => {
+    setActivePromptBarStore(storeRef.current);
+    return () => {
+      if (getActivePromptBarStore() === storeRef.current) {
+        setActivePromptBarStore(null);
+      }
+    };
+  }, []);
 
   return (
     <PromptBarStoreContext.Provider value={storeRef.current}>
