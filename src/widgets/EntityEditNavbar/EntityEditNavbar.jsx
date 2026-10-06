@@ -61,7 +61,7 @@ export function EntityEditNavbar({
           )}
 
           <NavbarAction
-            variant="primary"
+            variant="white"
             label={doneLabel}
             onClick={handleDone}
           />

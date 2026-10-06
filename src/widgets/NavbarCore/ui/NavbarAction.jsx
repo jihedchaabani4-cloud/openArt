@@ -37,16 +37,16 @@ export function NavbarAction({
 
   const renderedIcon = React.useMemo(() => {
     if (loading) {
-      return <Loader2 className="w-4 h-4 animate-spin shrink-0" />;
+      return <Loader2 className={size === "icon" ? "w-5 h-5 animate-spin shrink-0" : "w-4 h-4 animate-spin shrink-0"} />;
     }
     if (!icon) {
       if (variant === "danger") {
-        return <GoogleIcon iconName="delete" className="text-[16px] shrink-0" />;
+        return <GoogleIcon iconName="delete" className={size === "icon" ? "text-[20px] shrink-0" : "text-[16px] shrink-0"} />;
       }
       return null;
     }
     if (typeof icon === "string") {
-      return <GoogleIcon iconName={icon} className="text-[16px] shrink-0" />;
+      return <GoogleIcon iconName={icon} className={size === "icon" ? "text-[20px] shrink-0" : "text-[16px] shrink-0"} />;
     }
     if (React.isValidElement(icon)) {
       return icon;

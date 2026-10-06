@@ -11,6 +11,7 @@ const buttonVariants = cva(
       variant: {
         default: "px-3 py-1.5 rounded-[var(--mat-sys-corner-medium,12px)] transition-all duration-200 hover:bg-[var(--foreground-state-05)] text-[var(--mat-sys-on-surface,#e3e3e3)] focus-visible:bg-[var(--foreground-state-05)]",
         primary: "px-4 py-2 bg-[var(--mat-sys-primary,#a8c7fa)] text-[var(--mat-sys-on-primary,#062e6f)] hover:brightness-110 active:scale-[0.98] font-semibold rounded-[var(--mat-sys-corner-medium,12px)] shadow-xs transition-all",
+        white: "px-4 py-2 bg-white text-black hover:bg-white/90 active:scale-[0.98] font-semibold rounded-[var(--mat-sys-corner-medium,12px)] shadow-xs transition-all",
         danger: "px-3 py-1.5 bg-transparent text-[var(--foreground-color-danger,#fe6e6e)] hover:text-[var(--foreground-color-danger,#fe6e6e)] hover:bg-[var(--foreground-state-10,rgba(218,220,224,0.1))] active:bg-[var(--foreground-state-25)] rounded-[var(--mat-sys-corner-medium,12px)] transition-all [&_svg]:text-[var(--foreground-color-danger,#fe6e6e)] [&_mat-icon]:text-[var(--foreground-color-danger,#fe6e6e)] [&_.google-symbols]:text-[var(--foreground-color-danger,#fe6e6e)]",
         destructive: "px-3 py-1.5 bg-transparent text-[var(--foreground-color-danger,#fe6e6e)] hover:text-[var(--foreground-color-danger,#fe6e6e)] hover:bg-[var(--foreground-state-10,rgba(218,220,224,0.1))] active:bg-[var(--foreground-state-25)] rounded-[var(--mat-sys-corner-medium,12px)] transition-all [&_svg]:text-[var(--foreground-color-danger,#fe6e6e)] [&_mat-icon]:text-[var(--foreground-color-danger,#fe6e6e)] [&_.google-symbols]:text-[var(--foreground-color-danger,#fe6e6e)]",
         "ghost-destructive": "px-3 py-1.5 bg-transparent text-[var(--foreground-color-danger,#fe6e6e)] hover:text-[var(--foreground-color-danger,#fe6e6e)] hover:bg-[var(--foreground-state-10,rgba(218,220,224,0.1))] active:bg-[var(--foreground-state-25)] rounded-[var(--mat-sys-corner-medium,12px)] transition-all [&_svg]:text-[var(--foreground-color-danger,#fe6e6e)] [&_mat-icon]:text-[var(--foreground-color-danger,#fe6e6e)] [&_.google-symbols]:text-[var(--foreground-color-danger,#fe6e6e)]",
@@ -118,10 +119,10 @@ const buttonVariants = cva(
         sm: "h-8 rounded-[var(--mat-sys-corner-small,8px)] gap-1.5 px-3 has-[>svg]:px-2.5",
         lg: "h-10 rounded-[var(--mat-sys-corner-medium,12px)] px-6 has-[>svg]:px-4",
         flow: "h-11 pl-1.5 pr-4 py-1 rounded-[var(--mat-sys-corner-large,16px)] gap-2.5 text-sm font-medium",
-        icon: "size-9 rounded-[var(--mat-sys-corner-medium,12px)]",
-        "icon-xs": "size-6 rounded-[var(--mat-sys-corner-extra-small,4px)] [&_svg:not([class*='size-'])]:size-3",
-        "icon-sm": "size-8 rounded-[var(--mat-sys-corner-small,8px)]",
-        "icon-lg": "size-10 rounded-[var(--mat-sys-corner-medium,12px)]",
+        icon: "size-9 p-0 rounded-[var(--mat-sys-corner-medium,12px)]",
+        "icon-xs": "size-6 p-0 rounded-[var(--mat-sys-corner-extra-small,4px)] [&_svg:not([class*='size-'])]:size-3",
+        "icon-sm": "size-8 p-0 rounded-[var(--mat-sys-corner-small,8px)]",
+        "icon-lg": "size-10 p-0 rounded-[var(--mat-sys-corner-medium,12px)]",
         "studio": "h-[calc(var(--spacing,0.25rem)*12)] min-w-[calc(var(--spacing,0.25rem)*12)] w-auto gap-[calc(var(--spacing,0.25rem)*2)] rounded-[var(--mat-sys-corner-large,16px)] px-[calc(var(--spacing,0.25rem)*3)] text-[var(--text-md)] leading-[var(--tw-leading,var(--text-md--line-height))] tracking-[var(--tw-tracking,var(--text-md--letter-spacing))]",
         /** Use for image/card tiles so height is not forced — content (image + label) defines size */
         tile: "h-auto min-h-0 p-0 has-[>svg]:p-0",

@@ -90,6 +90,7 @@ export function EditNavbar({
     const router = useRouter()
     const nameRef = React.useRef(null)
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false)
+    const [isDownloading, setIsDownloading] = React.useState(false)
     const displayTitle = React.useMemo(() => buildCleanWorkflowTitle(workflow), [workflow])
     const { mutateAsync: updateWorkflow } = useUpdateWorkflow()
     const { mutateAsync: deleteMedia } = useDeleteMedia()
@@ -105,15 +106,20 @@ export function EditNavbar({
     }
 
     const handleDownloadAll = async () => {
-        if (!workflow?.items) return;
+        if (!workflow?.items || isDownloading) return;
 
-        for (const item of workflow.items) {
-            const url = item.url || item.image?.url || item.video?.url;
-            if (url) {
-                const filename = `generation-${item.id || item.name}.${url.split('.').pop()}`;
-                await downloadFile(url, filename);
-                await new Promise(r => setTimeout(r, 200));
+        setIsDownloading(true);
+        try {
+            for (const item of workflow.items) {
+                const url = item.url || item.image?.url || item.video?.url;
+                if (url) {
+                    const filename = `generation-${item.id || item.name}.${url.split('.').pop()}`;
+                    await downloadFile(url, filename);
+                    await new Promise(r => setTimeout(r, 200));
+                }
             }
+        } finally {
+            setIsDownloading(false);
         }
     }
 
@@ -180,7 +186,11 @@ export function EditNavbar({
                 <>
                     <NavbarAction
                         variant="ghost"
-                        label="Download"
+                        size="icon"
+                        icon="download"
+                        title="Download"
+                        aria-label="Download"
+                        loading={isDownloading}
                         onClick={handleDownloadAll}
                     />
 
@@ -191,7 +201,7 @@ export function EditNavbar({
                     />
 
                     <NavbarAction
-                        variant="primary"
+                        variant="white"
                         label="Done"
                         onClick={() => router.push(`/cinema-studio/${projectId}/generations`)}
                     />
