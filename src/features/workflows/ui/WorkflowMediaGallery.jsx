@@ -1,11 +1,12 @@
 "use client";
 
 import React, { useState } from "react";
-import { Play, ImageIcon } from "lucide-react";
+import { Play, ImageIcon, Scissors, Trash2 } from "lucide-react";
 import { useDeleteMedia, useDetachMedia } from "../api/workflowsApi";
 import { ActionBtn } from "@/widgets/StudioLayout/GenerationsStudio/MediaGridItem/ActionBtn";
 import { ButtonGroup } from "@/shared/ui/button-group";
-import { GoogleIcon } from "@/shared/ui/GoogleIcon";
+import { ContextMenu, ContextMenuTrigger } from "@/shared/ui/context-menu";
+import { StudioContextMenuContent } from "@/widgets/StudioLayout/GenerationsStudio/MediaGridItem/StudioItemMenu";
 import { cn } from "@/shared/lib/utils";
 import { getItemMetadata } from "@/shared/lib/generationUtils";
 import { CoreMediaItemView } from "@/widgets/CoreMediaItemView";
@@ -41,7 +42,7 @@ function tokenizePrompt(prompt = "") {
 /**
  * WorkflowMediaGalleryCard
  * Dedicated card component for each media item in the workflow gallery sidebar.
- * Integrates CoreMediaItemView with an options dropdown menu containing Detach & Delete.
+ * Integrates CoreMediaItemView with hover action buttons and right-click ContextMenu.
  */
 function WorkflowMediaGalleryCard({
   item,
@@ -89,6 +90,7 @@ function WorkflowMediaGalleryCard({
     : (isPortrait ? "auto" : "100%");
   const cardHeight = isPortrait ? "200px" : "auto";
 
+  // Menu items for right-click context menu
   const menuItems = [
     {
       key: "detach",
@@ -107,61 +109,85 @@ function WorkflowMediaGalleryCard({
 
   return (
     <div className="flex flex-col gap-3 group/item">
-      {/* Main Media Card powered by CoreMediaItemView */}
-      <CoreMediaItemView
-        item={item}
-        src={displayUrl}
-        isVideo={iVideo}
-        status={meta.status || "completed"}
-        aspect={meta.aspect && meta.aspect !== "auto" ? meta.aspect : "16/9"}
-        fit="cover"
-        playOnHover={true}
-        showMenu={true}
-        activeMenu={true}
-        menuItems={menuItems}
-        menuPosition="topRight"
-        menuTrigger={
-          <ButtonGroup className="bg-white/60 backdrop-blur-md rounded-lg scale-90 origin-top-right">
-            <ActionBtn onClick={(e) => e.stopPropagation()} title="Options">
-              <GoogleIcon iconName="more_vert" className="text-[14px] text-[#303031]" />
-            </ActionBtn>
-          </ButtonGroup>
-        }
-        showHoverOverlay={true}
-        onClick={(e) => {
-          e?.stopPropagation?.();
-          if (!isSelectable) return;
-          onSelect(item);
-        }}
-        className={cn(
-          "transition-all duration-300 self-start group",
-          isSelectable ? "cursor-pointer" : "opacity-50 pointer-events-none",
-          isPrimary 
-            ? "border-white border-2" 
-            : "border-white/5 opacity-80"
-        )}
-        style={{ 
-          maxWidth: "300px",
-          maxHeight: "200px",
-          width: cardWidth,
-          height: cardHeight,
-          aspectRatio: meta.aspect && meta.aspect !== "auto" ? meta.aspect : "16/9"
-        }}
-        overlay={
-          <>
-            {isActive && (
-              <div className="absolute inset-0 bg-white/5 pointer-events-none" />
+      {/* Right-click Context Menu */}
+      <ContextMenu>
+        <ContextMenuTrigger asChild>
+          <CoreMediaItemView
+            item={item}
+            src={displayUrl}
+            isVideo={iVideo}
+            status={meta.status || "completed"}
+            aspect={meta.aspect && meta.aspect !== "auto" ? meta.aspect : "16/9"}
+            fit="cover"
+            playOnHover={true}
+            showHoverOverlay={false}
+            onClick={(e) => {
+              e?.stopPropagation?.();
+              if (!isSelectable) return;
+              onSelect(item);
+            }}
+            className={cn(
+              "transition-all duration-300 self-start group",
+              isSelectable ? "cursor-pointer" : "opacity-50 pointer-events-none",
+              isPrimary 
+                ? "border-white border-2" 
+                : "border-white/5 opacity-80"
             )}
-            {iVideo && (
-              <div className="absolute top-2.5 left-2.5 p-1.5 bg-black/60 backdrop-blur-md rounded-lg border border-white/10 pointer-events-none z-10">
-                <Play className="size-3 fill-white text-white" />
+            style={{ 
+              maxWidth: "300px",
+              maxHeight: "200px",
+              width: cardWidth,
+              height: cardHeight,
+              aspectRatio: meta.aspect && meta.aspect !== "auto" ? meta.aspect : "16/9"
+            }}
+            topLeft={
+              <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                <ButtonGroup 
+                  className="bg-white/60 backdrop-blur-md rounded-lg scale-90 origin-top-left"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <ActionBtn 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setDetachOpen(true);
+                    }}
+                    title="Détacher vers un nouveau workflow"
+                  >
+                    <Scissors className="size-3.5" />
+                  </ActionBtn>
+                  
+                  <ActionBtn 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setDeleteOpen(true);
+                    }}
+                    title="Supprimer le média"
+                  >
+                    <Trash2 className="size-3.5" />
+                  </ActionBtn>
+                </ButtonGroup>
               </div>
-            )}
-          </>
-        }
-      />
+            }
+            topRight={
+              iVideo ? (
+                <div className="p-1.5 bg-black/60 backdrop-blur-md rounded-lg border border-white/10">
+                  <Play className="size-3 fill-white text-white" />
+                </div>
+              ) : null
+            }
+            overlay={
+              isActive ? (
+                <div className="absolute inset-0 bg-white/5 pointer-events-none" />
+              ) : null
+            }
+          />
+        </ContextMenuTrigger>
 
-      {/* Confirmation Dialogs triggered from Menu */}
+        {/* Right-click Context Menu Content */}
+        <StudioContextMenuContent items={menuItems} />
+      </ContextMenu>
+
+      {/* Confirmation Dialogs */}
       <ConfirmDeleteDialog
         open={detachOpen}
         onOpenChange={setDetachOpen}

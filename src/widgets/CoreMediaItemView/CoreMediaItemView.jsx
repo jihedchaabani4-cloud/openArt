@@ -80,6 +80,7 @@ export function CoreMediaItemView({
   showHoverOverlay = true,
   onRetry = null,
   onDelete = null,
+  ...props
 }) {
   // Use media core hook to resolve metadata, sizing, and media state
   const shouldAutoPlay = autoPlay && !playOnHover;
@@ -160,6 +161,7 @@ export function CoreMediaItemView({
         ...(!isContain || !isCompleted ? { aspectRatio: displayAspect } : {}),
         ...propStyle,
       }}
+      {...props}
     >
       {/* ── 1. The Media Layer ── */}
       <div className={cn("relative flex items-center justify-center overflow-hidden", isContain ? "max-w-full max-h-full" : "w-full h-full")}>
