@@ -5,8 +5,6 @@ import { Play, ImageIcon, Scissors, Trash2 } from "lucide-react";
 import { useDeleteMedia, useDetachMedia } from "../api/workflowsApi";
 import { ActionBtn } from "@/widgets/StudioLayout/GenerationsStudio/MediaGridItem/ActionBtn";
 import { ButtonGroup } from "@/shared/ui/button-group";
-import { ContextMenu, ContextMenuTrigger } from "@/shared/ui/context-menu";
-import { StudioContextMenuContent } from "@/widgets/StudioLayout/GenerationsStudio/MediaGridItem/StudioItemMenu";
 import { cn } from "@/shared/lib/utils";
 import { getItemMetadata } from "@/shared/lib/generationUtils";
 import { CoreMediaItemView } from "@/widgets/CoreMediaItemView";
@@ -109,83 +107,77 @@ function WorkflowMediaGalleryCard({
 
   return (
     <div className="flex flex-col gap-3 group/item">
-      {/* Right-click Context Menu */}
-      <ContextMenu>
-        <ContextMenuTrigger asChild>
-          <CoreMediaItemView
-            item={item}
-            src={displayUrl}
-            isVideo={iVideo}
-            status={meta.status || "completed"}
-            aspect={meta.aspect && meta.aspect !== "auto" ? meta.aspect : "16/9"}
-            fit="cover"
-            playOnHover={true}
-            showHoverOverlay={false}
-            onClick={(e) => {
-              e?.stopPropagation?.();
-              if (!isSelectable) return;
-              onSelect(item);
-            }}
-            className={cn(
-              "transition-all duration-300 self-start group",
-              isSelectable ? "cursor-pointer" : "opacity-50 pointer-events-none",
-              isPrimary 
-                ? "border-white border-2" 
-                : "border-white/5 opacity-80"
-            )}
-            style={{ 
-              maxWidth: "300px",
-              maxHeight: "200px",
-              width: cardWidth,
-              height: cardHeight,
-              aspectRatio: meta.aspect && meta.aspect !== "auto" ? meta.aspect : "16/9"
-            }}
-            topLeft={
-              <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                <ButtonGroup 
-                  className="bg-white/60 backdrop-blur-md rounded-lg scale-90 origin-top-left"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <ActionBtn 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setDetachOpen(true);
-                    }}
-                    title="Détacher vers un nouveau workflow"
-                  >
-                    <Scissors className="size-3.5" />
-                  </ActionBtn>
-                  
-                  <ActionBtn 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setDeleteOpen(true);
-                    }}
-                    title="Supprimer le média"
-                  >
-                    <Trash2 className="size-3.5" />
-                  </ActionBtn>
-                </ButtonGroup>
-              </div>
-            }
-            topRight={
-              iVideo ? (
-                <div className="p-1.5 bg-black/60 backdrop-blur-md rounded-lg border border-white/10">
-                  <Play className="size-3 fill-white text-white" />
-                </div>
-              ) : null
-            }
-            overlay={
-              isActive ? (
-                <div className="absolute inset-0 bg-white/5 pointer-events-none" />
-              ) : null
-            }
-          />
-        </ContextMenuTrigger>
-
-        {/* Right-click Context Menu Content */}
-        <StudioContextMenuContent items={menuItems} />
-      </ContextMenu>
+      {/* Main Media Card powered by CoreMediaItemView with integrated right-click context menu */}
+      <CoreMediaItemView
+        item={item}
+        src={displayUrl}
+        isVideo={iVideo}
+        status={meta.status || "completed"}
+        aspect={meta.aspect && meta.aspect !== "auto" ? meta.aspect : "16/9"}
+        fit="cover"
+        playOnHover={true}
+        showHoverOverlay={false}
+        contextMenuItems={menuItems}
+        onClick={(e) => {
+          e?.stopPropagation?.();
+          if (!isSelectable) return;
+          onSelect(item);
+        }}
+        className={cn(
+          "transition-all duration-300 self-start group",
+          isSelectable ? "cursor-pointer" : "opacity-50 pointer-events-none",
+          isPrimary 
+            ? "border-white border-2" 
+            : "border-white/5 opacity-80"
+        )}
+        style={{ 
+          maxWidth: "300px",
+          maxHeight: "200px",
+          width: cardWidth,
+          height: cardHeight,
+          aspectRatio: meta.aspect && meta.aspect !== "auto" ? meta.aspect : "16/9"
+        }}
+        topLeft={
+          <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+            <ButtonGroup 
+              className="bg-white/60 backdrop-blur-md rounded-lg scale-90 origin-top-left"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <ActionBtn 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setDetachOpen(true);
+                }}
+                title="Détacher vers un nouveau workflow"
+              >
+                <Scissors className="size-3.5" />
+              </ActionBtn>
+              
+              <ActionBtn 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setDeleteOpen(true);
+                }}
+                title="Supprimer le média"
+              >
+                <Trash2 className="size-3.5" />
+              </ActionBtn>
+            </ButtonGroup>
+          </div>
+        }
+        topRight={
+          iVideo ? (
+            <div className="p-1.5 bg-black/60 backdrop-blur-md rounded-lg border border-white/10">
+              <Play className="size-3 fill-white text-white" />
+            </div>
+          ) : null
+        }
+        overlay={
+          isActive ? (
+            <div className="absolute inset-0 bg-white/5 pointer-events-none" />
+          ) : null
+        }
+      />
 
       {/* Confirmation Dialogs */}
       <ConfirmDeleteDialog

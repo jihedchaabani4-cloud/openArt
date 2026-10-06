@@ -5,7 +5,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/shared/lib/utils";
 import { ProcessingCard } from "@/shared/ui/ProcessingCard";
 import { FlowErrorTile } from "@/shared/ui/FlowErrorTile";
-import { StudioItemDropdownMenu } from "@/widgets/StudioLayout/GenerationsStudio/MediaGridItem/StudioItemMenu";
+import { StudioItemDropdownMenu, StudioContextMenuContent } from "@/widgets/StudioLayout/GenerationsStudio/MediaGridItem/StudioItemMenu";
+import { ContextMenu, ContextMenuTrigger } from "@/shared/ui/context-menu";
 import { useMediaViewerCore } from "@/features/workflows/core/useMediaViewerCore";
 
 /**
@@ -69,6 +70,10 @@ export function CoreMediaItemView({
   menuPosition = "topRight",
   isMenuOpen: controlledMenuOpen,
   onMenuOpenChange: controlledOnMenuOpenChange,
+
+  // Context Menu (Right-click menu)
+  contextMenuItems = null,
+  contextMenuContent = null,
 
   // Video options & callbacks
   autoPlay = true,
@@ -142,8 +147,9 @@ export function CoreMediaItemView({
   }, [onClick, workflow, core.targetItem, url]);
 
   const isContain = fit === "contain";
+  const hasContextMenu = Boolean((contextMenuItems && contextMenuItems.length > 0) || contextMenuContent);
 
-  return (
+  const cardElement = (
     <div
       className={cn(
         "group relative select-none items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-black/40 shadow-2xl",
@@ -323,6 +329,21 @@ export function CoreMediaItemView({
       )}
     </div>
   );
+
+  if (hasContextMenu) {
+    return (
+      <ContextMenu>
+        <ContextMenuTrigger asChild>
+          {cardElement}
+        </ContextMenuTrigger>
+        {contextMenuContent || (
+          <StudioContextMenuContent items={contextMenuItems} />
+        )}
+      </ContextMenu>
+    );
+  }
+
+  return cardElement;
 }
 
 export default CoreMediaItemView;
