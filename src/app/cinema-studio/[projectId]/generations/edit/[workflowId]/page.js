@@ -4,7 +4,7 @@ import * as React from "react"
 import { useParams, useRouter } from "next/navigation"
 import { useWorkflowsStore } from "@/features/workflows"
 import { useFilteredWorkflows } from "@/features/workflows/model/useFilteredWorkflows"
-import { MediaGridItem } from "@/widgets/StudioLayout/GenerationsStudio/MediaGridItem"
+import { EditMediaView } from "@/widgets/EditMediaView"
 import { WorkflowMediaGallery } from "@/features/workflows/ui/WorkflowMediaGallery"
 import { EditNavbar } from "@/widgets/EditNavbar/EditNavbar"
 import { getPrimaryMedia, getItemMetadata } from "@/shared/lib/generationUtils"
@@ -67,23 +67,11 @@ export default function WorkflowEditPage() {
                 <main className="flex-1 flex overflow-hidden relative">
                     
                     {/* Left Side - Preview (Flexible Width) */}
-                    {/* Left Side - Preview (Flexible Width) */}
-                    <div className="flex-1 relative overflow-hidden flex items-center justify-center p-6 h-full">
-                        <div
-                            className="relative max-h-full max-w-full flex items-center justify-center"
-                            style={{
-                                aspectRatio: getItemMetadata(activeItem || getPrimaryMedia(workflow))?.aspect || "1/1",
-                                height: "100%",
-                                maxHeight: "100%",
-                            }}
-                        >
-                            <MediaGridItem
-                                workflow={workflow}
-                                item={activeItem}
-                                aspect={getItemMetadata(activeItem || getPrimaryMedia(workflow))?.aspect || "1/1"}
-                                className="w-full h-full rounded-2xl shadow-2xl border border-white/10"
-                            />
-                        </div>
+                    <div className="flex-1 flex items-center justify-center relative h-full overflow-hidden">
+                        <EditMediaView
+                            workflow={workflow}
+                            item={activeItem}
+                        />
                     </div>
 
                     {/* Right Side - Gallery Sidebar */}
