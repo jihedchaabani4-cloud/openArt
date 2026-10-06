@@ -112,7 +112,7 @@ export default function ElementWorkflowEditPage() {
     if (!workflow) return null; // Let redirect handle it
 
     return (
-        <div className="flex flex-col h-full w-full bg-background text-white overflow-hidden">
+        <div className="flex flex-col h-full w-full bg-black text-white overflow-hidden">
             <EditNavbar
                 workflow={workflow}
                 showHistory={showHistory}
@@ -120,7 +120,7 @@ export default function ElementWorkflowEditPage() {
             />
 
             <div className="flex-1 flex flex-col overflow-hidden p-4 pt-20">
-                <main className="flex-1 flex overflow-hidden relative rounded-2xl border border-white/5 bg-black/20">
+                <main className="flex-1 flex overflow-hidden relative">
                     <div className="flex-1 flex items-center justify-center relative h-full overflow-hidden">
                         <EditMediaView
                             workflow={workflow}

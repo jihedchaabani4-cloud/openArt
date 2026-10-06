@@ -6,7 +6,7 @@ import { EditNavbar } from "@/widgets/EditNavbar/EditNavbar"
  */
 export default function EditLayout({ children }) {
     return (
-        <div className="flex flex-col h-screen overflow-hidden bg-background">
+        <div className="flex flex-col h-screen overflow-hidden bg-black">
             {children}
         </div>
     )

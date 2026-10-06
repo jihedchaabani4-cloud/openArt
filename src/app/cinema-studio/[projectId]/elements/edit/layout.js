@@ -3,7 +3,7 @@
  */
 export default function ElementsEditLayout({ children }) {
     return (
-        <div className="flex flex-col h-screen overflow-hidden bg-background">
+        <div className="flex flex-col h-screen overflow-hidden bg-black">
             {children}
         </div>
     );
