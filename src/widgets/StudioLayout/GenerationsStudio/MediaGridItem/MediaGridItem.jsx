@@ -51,6 +51,7 @@ export const MediaGridItem = React.memo(function MediaGridItem({
   const [isRenaming,          setIsRenaming]          = useState(false);
   const [isDragging,          setIsDragging]          = useState(false);
   const [cardRect,            setCardRect]            = useState(null);
+  const [measuredWidth,       setMeasuredWidth]       = useState(albumWidth || 0);
   
   const { mutateAsync: updateWorkflow } = useUpdateWorkflow();
   const showTileDetails = useWorkflowsStore(s => s.showTileDetails);
@@ -132,6 +133,23 @@ export const MediaGridItem = React.memo(function MediaGridItem({
     };
   }, [isRenaming]);
 
+  // ── Track card width dynamically for responsive text truncation ──────
+  useEffect(() => {
+    if (albumWidth) {
+      setMeasuredWidth(albumWidth);
+      return;
+    }
+    if (!cardRef.current || typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const w = entry.contentRect?.width;
+        if (w) setMeasuredWidth(w);
+      }
+    });
+    observer.observe(cardRef.current);
+    return () => observer.disconnect();
+  }, [albumWidth]);
+
   const startRename = useCallback(() => {
     if (cardRef.current) {
       const r = cardRef.current.getBoundingClientRect();
@@ -180,6 +198,26 @@ export const MediaGridItem = React.memo(function MediaGridItem({
                    || workflow?.element?.name
                    || workflow?.title
                    || null;
+
+  const effectiveWidth = albumWidth || measuredWidth;
+
+  // Responsively scale down text max length as the card gets smaller
+  const maxChars = (() => {
+    if (!effectiveWidth) return 20;
+    if (effectiveWidth < 160) return 10;
+    if (effectiveWidth < 200) return 14;
+    if (effectiveWidth < 250) return 18;
+    if (effectiveWidth < 300) return 24;
+    if (effectiveWidth < 380) return 32;
+    if (effectiveWidth < 460) return 42;
+    return 55;
+  })();
+
+  const truncatedDisplayName = (() => {
+    if (!displayName) return null;
+    if (displayName.length <= maxChars) return displayName;
+    return displayName.slice(0, maxChars).trimEnd() + "...";
+  })();
 
   const handleRename = async (newName) => {
     const wfId = workflow?.name || workflow?.id || item?.workflow_id || item?.workflowId || item?.name || item?.id;
@@ -377,18 +415,19 @@ export const MediaGridItem = React.memo(function MediaGridItem({
         bottomLeft={
           displayName && !isRenaming && (
             <div className={cn(
-              "transition-opacity duration-200 pointer-events-auto max-w-[80%]",
+              "transition-opacity duration-200 pointer-events-auto",
+              isError ? "max-w-[calc(100%-80px)]" : "max-w-[calc(100%-40px)]",
               showTileDetails ? "opacity-100" : "opacity-0 group-hover:opacity-100"
             )}>
               <span
-                title="Double-click to rename"
+                title={displayName}
                 onDoubleClick={(e) => {
                   e.stopPropagation();
                   startRename();
                 }}
-                className="text-white/90 truncate text-[12px] font-semibold cursor-text select-none block"
+                className="text-white/90 truncate text-[11px] sm:text-[12px] font-semibold cursor-text select-none block"
               >
-                {displayName}
+                {truncatedDisplayName}
               </span>
             </div>
           )
