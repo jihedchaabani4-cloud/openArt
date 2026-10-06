@@ -2,18 +2,13 @@
 
 import * as React from "react"
 import { useParams, useRouter } from "next/navigation"
-import { ChevronLeft, Share2, MoreVertical, LayoutGrid, Layers, Trash2, Heart } from "lucide-react"
 import { useWorkflowsStore } from "@/features/workflows"
 import { useFilteredWorkflows } from "@/features/workflows/model/useFilteredWorkflows"
 import { WorkflowMediaPreview } from "@/widgets/StudioLayout/GenerationsStudio/MediaGridItem/WorkflowMediaPreview"
 import { WorkflowMediaGallery } from "@/features/workflows/ui/WorkflowMediaGallery"
 import { EditNavbar } from "@/widgets/EditNavbar/EditNavbar"
-import { EditPromptBarImage } from "@/features/prompt-bar/ui/edit/EditPromptBarImage"
-import { EditPromptBarVideo } from "@/features/prompt-bar/ui/edit/EditPromptBarVideo"
 import { useEditStore } from "@/features/prompt-bar/model/useEditStore"
-import { cn } from "@/shared/lib/utils"
 import { getPrimaryMedia, getItemMetadata } from "@/shared/lib/generationUtils"
-import { Button } from "@/shared/ui/button"
 import { useSetPrimaryMedia } from "@/features/workflows/api/workflowsApi"
 import { LoadingScreen } from "@/shared/ui/LoadingScreen"
 
@@ -116,16 +111,7 @@ export default function WorkflowEditPage() {
                                 />
                    
 
-                        {/* Floating Edit Prompt Bar — image or video */}
-                        <div className="bottom-8 inset-x-0 z-30 flex justify-center px-6 pointer-events-none">
-                            <div className="w-full max-w-[600px] pointer-events-auto">
-                                {isVideoItem ? (
-                                    <EditPromptBarVideo />
-                                ) : (
-                                    <EditPromptBarImage />
-                                )}
-                            </div>
-                        </div>
+
                     </div>
 
                     {/* Right Side - Gallery Sidebar */}

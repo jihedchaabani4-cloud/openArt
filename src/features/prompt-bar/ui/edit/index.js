@@ -1,4 +1,2 @@
 // Public exports for the edit/ subfolder
-export { EditPromptBarBase }  from "./EditPromptBarBase";
-export { EditPromptBarImage } from "./EditPromptBarImage";
-export { EditPromptBarVideo } from "./EditPromptBarVideo";
+export { EditElementPromptBar } from "./EditElementPromptBar";
