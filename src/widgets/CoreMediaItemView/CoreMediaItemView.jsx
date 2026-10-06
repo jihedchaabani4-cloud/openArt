@@ -85,6 +85,8 @@ export function CoreMediaItemView({
   showHoverOverlay = true,
   onRetry = null,
   onDelete = null,
+  onMouseEnter: propOnMouseEnter,
+  onMouseLeave: propOnMouseLeave,
   ...props
 }) {
   // Use media core hook to resolve metadata, sizing, and media state
@@ -115,20 +117,22 @@ export function CoreMediaItemView({
   // Local hover state for overlay visibility
   const [isHovered, setIsHovered] = useState(false);
 
-  const handleMouseEnter = useCallback(() => {
+  const handleMouseEnter = useCallback((e) => {
     setIsHovered(true);
     if (playOnHover && videoRef.current) {
       videoRef.current.play().catch(() => {});
     }
-  }, [playOnHover, videoRef]);
+    propOnMouseEnter?.(e);
+  }, [playOnHover, videoRef, propOnMouseEnter]);
 
-  const handleMouseLeave = useCallback(() => {
+  const handleMouseLeave = useCallback((e) => {
     setIsHovered(false);
     if (playOnHover && videoRef.current) {
       videoRef.current.pause();
       videoRef.current.currentTime = 0;
     }
-  }, [playOnHover, videoRef]);
+    propOnMouseLeave?.(e);
+  }, [playOnHover, videoRef, propOnMouseLeave]);
 
   const handleVideoLoaded = useCallback((e) => {
     core.handleVideoLoadedMetadata(e);
@@ -177,6 +181,7 @@ export function CoreMediaItemView({
             src={url}
             loop
             playsInline
+            preload="metadata"
             muted={core.isMuted}
             onTimeUpdate={handleVideoTime}
             onLoadedMetadata={handleVideoLoaded}
@@ -287,7 +292,7 @@ export function CoreMediaItemView({
         {/* Bottom edge slots */}
         <div className="w-full flex items-end justify-between p-3 gap-2">
           {/* Bottom Left Slot */}
-          <div className="pointer-events-auto flex items-center gap-2">
+          <div className="pointer-events-auto flex items-center gap-2 min-w-0">
             {bottomLeft}
             {isMenuActive && menuPosition === "bottomLeft" && (
               <StudioItemDropdownMenu
@@ -300,7 +305,7 @@ export function CoreMediaItemView({
           </div>
 
           {/* Bottom Right Slot */}
-          <div className="pointer-events-auto flex items-center gap-2 ml-auto">
+          <div className="pointer-events-auto flex items-center gap-2 ml-auto shrink-0">
             {bottomRight}
             {isMenuActive && menuPosition === "bottomRight" && (
               <StudioItemDropdownMenu

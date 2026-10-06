@@ -3,19 +3,17 @@ import { createPortal } from "react-dom";
 import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-motion";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { cn } from "@/shared/lib/utils";
-import { ImageStatusView } from "@/features/workflows/ui/ImageStatusView";
 import { ButtonGroup } from "@/shared/ui/button-group";
-import { ContextMenu, ContextMenuTrigger } from "@/shared/ui/context-menu";
 import { ConfirmDeleteDialog } from "@/widgets/dialogs/ConfirmDeleteDialog";
 import { InlineRenamePill } from "@/shared/ui/InlineRenamePill";
-import { FlowErrorTile } from "@/shared/ui/FlowErrorTile";
 import { useWorkflowActions } from "@/features/workflows/model/useMediaActions";
 import { useUpdateWorkflow } from "@/features/workflows/api/workflowsApi";
 import { usePromptStore } from "@/features/studio";
 import { useWorkflowsStore } from "@/features/workflows/model/useWorkflowsStore";
 import { ActionBtn } from "./ActionBtn";
-import { StudioItemDropdownMenu, StudioContextMenuContent } from "./StudioItemMenu";
+import { StudioItemDropdownMenu } from "./StudioItemMenu";
 import { getStudioMenuItems, getWorkflowEntityType } from "./studioMenuConfig";
+import { CoreMediaItemView } from "@/widgets/CoreMediaItemView";
 import { springGentle, iconCls } from "./constants";
 
 const EMPTY_IMG = typeof window !== 'undefined' ? (() => {
@@ -278,237 +276,172 @@ export const MediaGridItem = React.memo(function MediaGridItem({
   const hasAnyValidMedia = workflow?.items?.some(i => ["completed", "processing"].includes(i.status));
   const canNavigate = isDone || status === "processing" || hasAnyValidMedia;
 
-  // ── Error State (Exact Google Flow Video Tile specification) ─────────
-  if (isError) {
-    const errorMsg =
-      item?.error ||
-      workflow?.error ||
-      "This prompt might violate our policies about generating sexual content. Please try a different prompt or send feedback.";
+  const errorMsg = isError ? (
+    item?.error ||
+    workflow?.error ||
+    "This prompt might violate our policies about generating sexual content. Please try a different prompt or send feedback."
+  ) : null;
 
-    return (
-      <div
-        className={cn("relative overflow-hidden rounded-2xl", className)}
-        style={
-          albumWidth && albumHeight
-            ? {
-                width: albumWidth,
-                height: albumHeight,
-                aspectRatio: propAspect || aspect,
-              }
-            : {
-                width: "100%",
-                aspectRatio: propAspect || aspect,
-              }
-        }
-      >
-        <FlowErrorTile
-          error={errorMsg}
-          onReusePrompt={(e) => {
-            e?.stopPropagation();
-            handleReuseSettings();
-          }}
-          onDelete={(e) => {
-            e?.stopPropagation();
-            setIsDeleteConfirmOpen(true);
-          }}
-        />
-
-        <ConfirmDeleteDialog
-          open={isDeleteConfirmOpen}
-          onOpenChange={setIsDeleteConfirmOpen}
-          title="Delete generation?"
-          description="Are you sure you want to delete this failed generation?"
-          onConfirm={handleDelete}
-        />
-      </div>
-    );
-  }
+  const cardStyle = albumWidth && albumHeight
+    ? {
+        width: albumWidth,
+        height: albumHeight,
+        aspectRatio: `${albumWidth} / ${albumHeight}`,
+        transform: "translateZ(0)",
+        contain: "paint layout",
+        contentVisibility: "auto",
+        containIntrinsicSize: `${Math.round(albumWidth)}px ${Math.round(albumHeight)}px`,
+      }
+    : {
+        width: "100%",
+        aspectRatio: propAspect || aspect,
+        transform: "translateZ(0)",
+        contain: "paint layout",
+        contentVisibility: "auto",
+      };
 
   // ── Render ─────────────────────────────────────────────────────────────
   return (
     <>
-      <ContextMenu>
-        <ContextMenuTrigger asChild>
-          <div
-            draggable={isDraggable && !isRenaming}
-            onDragStart={isDraggable && !isRenaming ? handleDragStart : undefined}
-            onDrag={isDraggable && !isRenaming ? handleDrag : undefined}
-            onDragEnd={isDraggable && !isRenaming ? handleDragEnd : undefined}
-            onClick={canNavigate && !isRenaming ? (e) => onClick(workflow, e) : undefined}
-            className={cn(
-              "group relative overflow-hidden bg-[#0a0a0a] rounded-2xl",
-              "outline-2 outline-transparent",
-              canNavigate && !isRenaming
-                ? (isElementSheet ? "cursor-pointer shadow-lg hover:shadow-2xl" : "cursor-grab active:cursor-grabbing shadow-lg hover:shadow-2xl")
-                : "cursor-default",
-              className
-            )}
-            style={
-              albumWidth && albumHeight
-                ? {
-                    width: albumWidth,
-                    height: albumHeight,
-                    transform: "translateZ(0)",
-                    contain: "paint layout",
-                    contentVisibility: "auto",
-                    containIntrinsicSize: `${Math.round(albumWidth)}px ${Math.round(albumHeight)}px`,
-                  }
-                : {
-                    width: "100%",
-                    aspectRatio: propAspect || aspect,
-                    transform: "translateZ(0)",
-                    contain: "paint layout",
-                    contentVisibility: "auto",
-                  }
-            }
-          >
-            {/* ── Stable DOM measurement anchor for card ── */}
-            <div ref={cardRef} className="absolute inset-0 pointer-events-none -z-10" />
-            {/* ── Media ── */}
-            <ImageStatusView
-              status={status}
-              src={url}
-              alt={prompt}
-              isVideo={isVideo}
-              progress={item?.progress ?? workflow?.progress}
-              aspect={propAspect || (albumWidth && albumHeight ? `${albumWidth}/${albumHeight}` : aspect)}
-              error={item?.error || workflow?.error}
-              onRetry={(e) => {
-                e?.stopPropagation();
-                handleReuseSettings();
-              }}
-              onReusePrompt={(e) => {
-                e?.stopPropagation();
-                handleReuseSettings();
-              }}
-              onDelete={(e) => {
-                e?.stopPropagation();
-                handleDelete();
-              }}
-              showOverlay
-              className="w-full h-full object-cover relative z-0"
-            >
-              {isDone && isVideo && (
-                <video
-                  ref={videoRef}
-                  src={url}
-                  className="w-full h-full object-cover"
-                  onTimeUpdate={(e) => {
-                    const v = e.currentTarget;
-                    if (v.duration) progress.set((v.currentTime / v.duration) * 100);
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.play().catch(() => {})}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.pause();
-                    e.currentTarget.currentTime = 0;
-                    progress.set(0);
-                  }}
-                  muted
-                  loop
-                  playsInline
-                  preload="metadata"
-                />
-              )}
-            </ImageStatusView>
-
-            {/* ── Video scrub bar ── */}
-            {isDone && isVideo && (
-              <div className="absolute bottom-0 left-0 w-full h-0.5 bg-white/20 z-30 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                <motion.div
-                  className="h-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.5)]"
-                  style={{ width: progressWidth }}
-                />
-              </div>
-            )}
-
-            {/* ── Hover overlay ── */}
-            {isDone && (
-              <div className={cn(
-                "absolute inset-0 transition-opacity duration-200 flex flex-col justify-between z-10 pointer-events-none p-2",
-                isDropdownOpen ? "opacity-100" : "opacity-0 group-hover:opacity-100",
-              )}>
-                <div className="flex justify-end pointer-events-auto">
-                  <ButtonGroup className="bg-white/60 backdrop-blur-md rounded-lg">
-                    <ActionBtn onClick={(e) => { e.stopPropagation(); handleLike(); }}>
-                      <GoogleIcon 
-                        iconName="favorite" 
-                        fill={isLiked}
-                        className="text-[13px] text-[#303031]" 
-                      />
-                    </ActionBtn>
-                    {canReuse && (
-                      <ActionBtn onClick={(e) => { e.stopPropagation(); handleReuseSettings(); }}>
-                        <GoogleIcon iconName="history" className="text-[13px] text-[#303031]" />
-                      </ActionBtn>
-                    )}
-                    <StudioItemDropdownMenu
-                      open={isDropdownOpen}
-                      onOpenChange={setIsDropdownOpen}
-                      items={menuItems}
-                    />
-                  </ButtonGroup>
-                </div>
-              </div>
-            )}
-
-
-            {/* ── Entity Type Corner Badge (Character / Element) ── */}
-            {isDone && (isCharacter || isElement) && (
-              <div
-                className="absolute bottom-2.5 right-2.5 z-20 flex items-center justify-center w-7 h-7 rounded-[7px] bg-white text-black shadow-lg shadow-black/40 pointer-events-none transition-all duration-200 group-hover:scale-105"
-                title={isCharacter ? "Character" : "Element"}
-              >
-                <GoogleIcon
-                  iconName={isCharacter ? "accessibility_new" : "widgets"}
-                  fill
-                  weight={600}
-                  className="text-[16px] text-black"
-                />
-              </div>
-            )}
-
-            {/* ── Display name label ── */}
-            {displayName && !isRenaming && (
-              <div className={cn(
-                "absolute bottom-0 left-0 right-0 z-20 pointer-events-none transition-opacity duration-200",
-                showTileDetails ? "opacity-100" : "opacity-0 group-hover:opacity-100",
-              )}>
-                <div className="px-2.5 py-2 flex items-center gap-1.5">
-                  <span
-                    title="Double-click to rename"
-                    onDoubleClick={(e) => {
-                      e.stopPropagation();
-                      startRename();
-                    }}
-                    className="text-white/90 truncate text-[12px] font-semibold max-w-[80%] pointer-events-auto cursor-text select-none"
-                  >
-                    {displayName}
-                  </span>
-                </div>
-              </div>
-            )}
-
-          </div>
-        </ContextMenuTrigger>
-
-        {isDone && (
-          <StudioContextMenuContent items={menuItems} />
+      <CoreMediaItemView
+        workflow={workflow}
+        item={item}
+        src={url}
+        isVideo={isVideo}
+        status={status}
+        aspect={propAspect || aspect}
+        error={errorMsg}
+        progress={item?.progress ?? workflow?.progress}
+        fit="cover"
+        videoRef={videoRef}
+        playOnHover={true}
+        autoPlay={false}
+        onVideoTimeUpdate={(e) => {
+          const v = e.currentTarget;
+          if (v.duration) progress.set((v.currentTime / v.duration) * 100);
+        }}
+        onMouseLeave={() => {
+          progress.set(0);
+        }}
+        draggable={isDraggable && !isRenaming}
+        onDragStart={isDraggable && !isRenaming ? handleDragStart : undefined}
+        onDrag={isDraggable && !isRenaming ? handleDrag : undefined}
+        onDragEnd={isDraggable && !isRenaming ? handleDragEnd : undefined}
+        onClick={canNavigate && !isRenaming ? (e) => onClick(workflow, e) : undefined}
+        showHoverOverlay={false}
+        contextMenuItems={isDone ? menuItems : null}
+        onRetry={(e) => {
+          e?.stopPropagation();
+          handleReuseSettings();
+        }}
+        onDelete={(e) => {
+          e?.stopPropagation();
+          setIsDeleteConfirmOpen(true);
+        }}
+        className={cn(
+          "bg-[#0a0a0a] rounded-2xl outline-2 outline-transparent",
+          canNavigate && !isRenaming
+            ? (isElementSheet ? "cursor-pointer shadow-lg hover:shadow-2xl" : "cursor-grab active:cursor-grabbing shadow-lg hover:shadow-2xl")
+            : "cursor-default",
+          className
         )}
-      </ContextMenu>
+        style={cardStyle}
+        topRight={
+          isDone && (
+            <div className={cn(
+              "transition-opacity duration-200 pointer-events-auto",
+              isDropdownOpen ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+            )}>
+              <ButtonGroup className="bg-white/60 backdrop-blur-md rounded-lg">
+                <ActionBtn onClick={(e) => { e.stopPropagation(); handleLike(); }}>
+                  <GoogleIcon 
+                    iconName="favorite" 
+                    fill={isLiked}
+                    className="text-[13px] text-[#303031]" 
+                  />
+                </ActionBtn>
+                {canReuse && (
+                  <ActionBtn onClick={(e) => { e.stopPropagation(); handleReuseSettings(); }}>
+                    <GoogleIcon iconName="history" className="text-[13px] text-[#303031]" />
+                  </ActionBtn>
+                )}
+                <StudioItemDropdownMenu
+                  open={isDropdownOpen}
+                  onOpenChange={setIsDropdownOpen}
+                  items={menuItems}
+                />
+              </ButtonGroup>
+            </div>
+          )
+        }
+        bottomLeft={
+          displayName && !isRenaming && (
+            <div className={cn(
+              "transition-opacity duration-200 pointer-events-auto max-w-[80%]",
+              showTileDetails ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+            )}>
+              <span
+                title="Double-click to rename"
+                onDoubleClick={(e) => {
+                  e.stopPropagation();
+                  startRename();
+                }}
+                className="text-white/90 truncate text-[12px] font-semibold cursor-text select-none block"
+              >
+                {displayName}
+              </span>
+            </div>
+          )
+        }
+        bottomRight={
+          isDone && (isCharacter || isElement) && (
+            <div
+              className="flex items-center justify-center w-7 h-7 rounded-[7px] bg-white text-black shadow-lg shadow-black/40 pointer-events-none transition-all duration-200 group-hover:scale-105"
+              title={isCharacter ? "Character" : "Element"}
+            >
+              <GoogleIcon
+                iconName={isCharacter ? "accessibility_new" : "widgets"}
+                fill
+                weight={600}
+                className="text-[16px] text-black"
+              />
+            </div>
+          )
+        }
+        bottom={
+          isDone && isVideo && (
+            <div className="w-full h-0.5 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+              <motion.div
+                className="h-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.5)]"
+                style={{ width: progressWidth }}
+              />
+            </div>
+          )
+        }
+      >
+        {/* DOM measurement anchor for rename popup */}
+        <div ref={cardRef} className="absolute inset-0 pointer-events-none -z-10" />
+      </CoreMediaItemView>
 
       <ConfirmDeleteDialog
         open={isDeleteConfirmOpen}
         onOpenChange={setIsDeleteConfirmOpen}
         title={
-          entityType === "character"
-            ? "Delete Character?"
-            : entityType === "element"
-              ? "Delete Element?"
-              : isVideo
-                ? "Delete video?"
-                : "Delete image?"
+          isError
+            ? "Delete generation?"
+            : entityType === "character"
+              ? "Delete Character?"
+              : entityType === "element"
+                ? "Delete Element?"
+                : isVideo
+                  ? "Delete video?"
+                  : "Delete image?"
         }
-        description="This action cannot be undone."
+        description={
+          isError
+            ? "Are you sure you want to delete this failed generation?"
+            : "This action cannot be undone."
+        }
         onConfirm={handleDelete}
       />
 
