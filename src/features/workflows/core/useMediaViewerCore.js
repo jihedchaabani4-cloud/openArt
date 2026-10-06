@@ -84,37 +84,6 @@ export function useMediaViewerCore({ workflow, item: propItem = null }) {
     }
   }, [url]);
 
-  // Proactively probe image dimensions via browser Image object
-  useEffect(() => {
-    if (!url || isVideo || typeof window === "undefined") return;
-    const dim = getCachedImageDimensions(url);
-    if (dim) return;
-
-    let active = true;
-    const img = new Image();
-    img.src = url;
-
-    const onDimsReady = () => {
-      if (!active) return;
-      if (img.naturalWidth && img.naturalHeight) {
-        handleIntrinsicDimensions(img.naturalWidth, img.naturalHeight);
-        if (url) markMediaLoaded(url);
-        setIsMediaLoaded(true);
-      }
-    };
-
-    if (img.complete && img.naturalWidth && img.naturalHeight) {
-      onDimsReady();
-    } else {
-      img.onload = onDimsReady;
-    }
-
-    return () => {
-      active = false;
-      img.onload = null;
-    };
-  }, [url, isVideo, handleIntrinsicDimensions]);
-
   const displayAspect = intrinsicAspect || metaAspect || "1/1";
 
   const aspectRatioNumber = useMemo(() => {

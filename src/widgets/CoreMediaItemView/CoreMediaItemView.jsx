@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState, useCallback, useMemo, useEffect } from "react";
+import React, { useRef, useState, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/shared/lib/utils";
 import { ProcessingCard } from "@/shared/ui/ProcessingCard";
@@ -104,44 +104,6 @@ export function CoreMediaItemView({
   // Local hover state for overlay visibility
   const [isHovered, setIsHovered] = useState(false);
 
-  // Image & Video refs for dimension probing & cached sync
-  const imgRef = useRef(null);
-  const internalVideoRef = core.videoRef;
-  const videoRef = externalVideoRef || internalVideoRef;
-
-  const handledImageDimsRef = useRef(null);
-  const handledVideoDimsRef = useRef(null);
-
-  useEffect(() => {
-    handledImageDimsRef.current = null;
-    handledVideoDimsRef.current = null;
-  }, [url]);
-
-  const { handleIntrinsicDimensions, onMediaLoaded } = core;
-
-  useEffect(() => {
-    const img = imgRef.current;
-    if (img && img.complete && img.naturalWidth && img.naturalHeight) {
-      const key = `${url}:${img.naturalWidth}x${img.naturalHeight}`;
-      if (handledImageDimsRef.current !== key) {
-        handledImageDimsRef.current = key;
-        handleIntrinsicDimensions(img.naturalWidth, img.naturalHeight);
-        onMediaLoaded();
-      }
-    }
-  }, [url, handleIntrinsicDimensions, onMediaLoaded]);
-
-  useEffect(() => {
-    const video = videoRef?.current;
-    if (video && video.videoWidth && video.videoHeight) {
-      const key = `${url}:${video.videoWidth}x${video.videoHeight}`;
-      if (handledVideoDimsRef.current !== key) {
-        handledVideoDimsRef.current = key;
-        handleIntrinsicDimensions(video.videoWidth, video.videoHeight);
-      }
-    }
-  }, [url, videoRef, handleIntrinsicDimensions]);
-
   const handleVideoLoaded = useCallback((e) => {
     core.handleVideoLoadedMetadata(e);
     onVideoLoadedMetadata?.(e);
@@ -158,10 +120,13 @@ export function CoreMediaItemView({
     }
   }, [onClick, workflow, core.targetItem, url]);
 
+  const isContain = fit === "contain";
+
   return (
     <div
       className={cn(
-        "group relative select-none flex items-center justify-center overflow-hidden",
+        "group relative select-none items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-black/40 shadow-2xl",
+        isContain ? "inline-flex max-w-full max-h-full" : "flex w-full h-full",
         draggable ? "cursor-grab active:cursor-grabbing" : onClick ? "cursor-pointer" : "",
         className
       )}
@@ -172,12 +137,12 @@ export function CoreMediaItemView({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       style={{
-        aspectRatio: displayAspect,
+        ...(!isContain || !isCompleted ? { aspectRatio: displayAspect } : {}),
         ...propStyle,
       }}
     >
       {/* ── 1. The Media Layer ── */}
-      <div className="relative w-full h-full flex items-center justify-center overflow-hidden">
+      <div className={cn("relative flex items-center justify-center overflow-hidden", isContain ? "max-w-full max-h-full" : "w-full h-full")}>
         {isCompleted && isVideo && (
           <video
             ref={videoRef}
@@ -189,20 +154,20 @@ export function CoreMediaItemView({
             onLoadedMetadata={handleVideoLoaded}
             onClick={onVideoClick || core.togglePlay}
             className={cn(
-              "w-full h-full",
-              fit === "contain" ? "object-contain" : "object-cover",
+              isContain
+                ? "max-w-full max-h-full w-auto h-auto block object-contain select-none"
+                : "w-full h-full object-cover",
               mediaClassName
             )}
           />
         )}
 
         {isCompleted && !isVideo && (
-          <div className="relative w-full h-full flex items-center justify-center">
+          <div className={cn("relative flex items-center justify-center", isContain ? "max-w-full max-h-full" : "w-full h-full")}>
             {!core.isMediaLoaded && (
-              <div className="absolute inset-0 bg-[#15161a] animate-pulse" />
+              <div className="absolute inset-0 bg-[#15161a] animate-pulse rounded-2xl" />
             )}
             <img
-              ref={imgRef}
               src={url}
               alt={core.prompt || "Media"}
               decoding="async"
@@ -215,8 +180,10 @@ export function CoreMediaItemView({
               }}
               onError={core.onMediaError}
               className={cn(
-                "w-full h-full transition-opacity duration-300",
-                fit === "contain" ? "object-contain" : "object-cover",
+                "transition-opacity duration-300 select-none",
+                isContain
+                  ? "max-w-full max-h-full w-auto h-auto block object-contain"
+                  : "w-full h-full object-cover",
                 core.isMediaLoaded ? "opacity-100" : "opacity-0",
                 mediaClassName
               )}
@@ -229,7 +196,7 @@ export function CoreMediaItemView({
             progress={progress}
             isVideo={isVideo}
             showPlayIcon={isVideo}
-            className="w-full h-full rounded-none"
+            className="w-full h-full rounded-none min-w-[280px]"
           />
         )}
 
