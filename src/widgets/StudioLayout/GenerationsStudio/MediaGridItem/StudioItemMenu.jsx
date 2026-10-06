@@ -65,11 +65,15 @@ export function StudioItemDropdownMenu({
               className="flex items-center gap-3 cursor-pointer mat-mdc-menu-item flow-internal-menu-item"
             >
               {m.icon && (
-                <GoogleIcon
-                  iconName={m.icon}
-                  className={cn("text-[20px] shrink-0", m.iconClassName)}
-                  fill={m.fill}
-                />
+                typeof m.icon === "string" ? (
+                  <GoogleIcon
+                    iconName={m.icon}
+                    className={cn("text-[20px] shrink-0", m.iconClassName)}
+                    fill={m.fill}
+                  />
+                ) : (
+                  m.icon
+                )
               )}
               <span className="item-text min-w-0 flex-1 truncate">
                 <span className="label font-medium">{m.label}</span>
@@ -109,11 +113,15 @@ export function StudioContextMenuContent({
             className="flex items-center gap-3 cursor-pointer mat-mdc-menu-item flow-internal-menu-item"
           >
             {m.icon && (
-              <GoogleIcon
-                iconName={m.icon}
-                className={cn("text-[20px] shrink-0", m.iconClassName)}
-                fill={m.fill}
-              />
+              typeof m.icon === "string" ? (
+                <GoogleIcon
+                  iconName={m.icon}
+                  className={cn("text-[20px] shrink-0", m.iconClassName)}
+                  fill={m.fill}
+                />
+              ) : (
+                m.icon
+              )
             )}
             <span className="item-text min-w-0 flex-1 truncate">
               <span className="label font-medium">{m.label}</span>
