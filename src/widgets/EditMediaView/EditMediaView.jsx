@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState, useCallback } from "react";
+import React, { useRef, useState, useCallback, useEffect, useMemo } from "react";
 import { Play, Pause, Volume2, VolumeX, Maximize } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/button";
@@ -148,6 +148,63 @@ export function EditMediaView({
 }) {
   const core = useMediaViewerCore({ workflow, item });
 
+  const containerRef = useRef(null);
+  const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const update = () => {
+      const cs = window.getComputedStyle(el);
+      const padX = parseFloat(cs.paddingLeft || 0) + parseFloat(cs.paddingRight || 0);
+      const padY = parseFloat(cs.paddingTop || 0) + parseFloat(cs.paddingBottom || 0);
+      const w = Math.max(0, el.clientWidth - padX);
+      const h = Math.max(0, el.clientHeight - padY);
+      setContainerSize({ width: w, height: h });
+    };
+
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  const mediaStyle = useMemo(() => {
+    const aspect = core.aspectRatioNumber;
+    if (!containerSize.width || !containerSize.height || !aspect) {
+      return {
+        aspectRatio: core.displayAspect || "1/1",
+        maxWidth: "100%",
+        maxHeight: "100%",
+      };
+    }
+    const containerAspect = containerSize.width / containerSize.height;
+    if (containerAspect > aspect) {
+      // Container is wider than the media -> height fills available height
+      const height = Math.floor(containerSize.height);
+      const width = Math.floor(height * aspect);
+      return {
+        width: `${width}px`,
+        height: `${height}px`,
+        aspectRatio: `${aspect}`,
+        maxWidth: "100%",
+        maxHeight: "100%",
+      };
+    } else {
+      // Container is taller than the media -> width fills available width
+      const width = Math.floor(containerSize.width);
+      const height = Math.floor(width / aspect);
+      return {
+        width: `${width}px`,
+        height: `${height}px`,
+        aspectRatio: `${aspect}`,
+        maxWidth: "100%",
+        maxHeight: "100%",
+      };
+    }
+  }, [containerSize, core.aspectRatioNumber, core.displayAspect]);
+
   const isCompletedVideo = core.isCompleted && core.isVideo;
 
   const defaultBottomBar = isCompletedVideo ? (
@@ -165,41 +222,37 @@ export function EditMediaView({
   ) : null;
 
   return (
-    <div className={cn("relative w-full h-full flex items-center justify-center p-6 select-none overflow-hidden", className)}>
-      <div
-        className="relative max-w-full max-h-full flex items-center justify-center"
-        style={{
-          aspectRatio: core.displayAspect,
-          height: "100%",
-          maxHeight: "100%",
-        }}
-      >
-        <CoreMediaItemView
-          workflow={workflow}
-          item={item}
-          fit={fit}
-          className="w-full h-full rounded-2xl shadow-2xl border border-white/10 bg-black/40"
-          videoRef={core.videoRef}
-          onVideoClick={core.togglePlay}
-          // Slots
-          topLeft={topLeft}
-          topRight={topRight}
-          bottomLeft={bottomLeft}
-          bottomRight={bottomRight}
-          bottom={customBottom !== undefined ? customBottom : defaultBottomBar}
-          center={center}
-          overlay={overlay}
-          // Menu
-          showMenu={showMenu}
-          activeMenu={activeMenu}
-          menuItems={menuItems}
-          menuTrigger={menuTrigger}
-          menuPosition={menuPosition}
-          // Error handlers
-          onRetry={onRetry}
-          onDelete={onDelete}
-        />
-      </div>
+    <div
+      ref={containerRef}
+      className={cn("relative w-full h-full flex items-center justify-center p-6 select-none overflow-hidden", className)}
+    >
+      <CoreMediaItemView
+        core={core}
+        workflow={workflow}
+        item={item}
+        fit={fit}
+        className="rounded-2xl shadow-2xl border border-white/10 bg-black/40 overflow-hidden"
+        style={mediaStyle}
+        videoRef={core.videoRef}
+        onVideoClick={core.togglePlay}
+        // Slots
+        topLeft={topLeft}
+        topRight={topRight}
+        bottomLeft={bottomLeft}
+        bottomRight={bottomRight}
+        bottom={customBottom !== undefined ? customBottom : defaultBottomBar}
+        center={center}
+        overlay={overlay}
+        // Menu
+        showMenu={showMenu}
+        activeMenu={activeMenu}
+        menuItems={menuItems}
+        menuTrigger={menuTrigger}
+        menuPosition={menuPosition}
+        // Error handlers
+        onRetry={onRetry}
+        onDelete={onDelete}
+      />
     </div>
   );
 }

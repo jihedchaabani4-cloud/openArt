@@ -52,28 +52,83 @@ export function useMediaViewerCore({ workflow, item: propItem = null }) {
   // ── Intrinsic Dimensions & Pixel-Perfect Aspect Ratio ──
   const cachedDim = url ? getCachedImageDimensions(url) : null;
   const [intrinsicAspect, setIntrinsicAspect] = useState(
-    () => cachedDim ? `${cachedDim.width}/${cachedDim.height}` : null
+    () => (cachedDim ? `${cachedDim.width}/${cachedDim.height}` : null)
   );
-
-  useEffect(() => {
-    if (url) {
-      const dim = getCachedImageDimensions(url);
-      setIntrinsicAspect(dim ? `${dim.width}/${dim.height}` : null);
-    } else {
-      setIntrinsicAspect(null);
-    }
-  }, [url]);
+  const [intrinsicSize, setIntrinsicSize] = useState(
+    () => (cachedDim ? { width: cachedDim.width, height: cachedDim.height } : null)
+  );
 
   const handleIntrinsicDimensions = useCallback((w, h) => {
     if (!w || !h) return;
     const cssAspect = intrinsicSizeToCssAspect(w, h);
     setIntrinsicAspect(cssAspect);
+    setIntrinsicSize({ width: w, height: h });
     if (url) {
       setCachedImageDimensions(url, w, h);
     }
   }, [url]);
 
+  useEffect(() => {
+    if (url) {
+      const dim = getCachedImageDimensions(url);
+      if (dim) {
+        setIntrinsicAspect(`${dim.width}/${dim.height}`);
+        setIntrinsicSize({ width: dim.width, height: dim.height });
+      } else {
+        setIntrinsicAspect(null);
+        setIntrinsicSize(null);
+      }
+    } else {
+      setIntrinsicAspect(null);
+      setIntrinsicSize(null);
+    }
+  }, [url]);
+
+  // Proactively probe image dimensions via browser Image object
+  useEffect(() => {
+    if (!url || isVideo || typeof window === "undefined") return;
+    const dim = getCachedImageDimensions(url);
+    if (dim) return;
+
+    let active = true;
+    const img = new Image();
+    img.src = url;
+
+    const onDimsReady = () => {
+      if (!active) return;
+      if (img.naturalWidth && img.naturalHeight) {
+        handleIntrinsicDimensions(img.naturalWidth, img.naturalHeight);
+        if (url) markMediaLoaded(url);
+        setIsMediaLoaded(true);
+      }
+    };
+
+    if (img.complete && img.naturalWidth && img.naturalHeight) {
+      onDimsReady();
+    } else {
+      img.onload = onDimsReady;
+    }
+
+    return () => {
+      active = false;
+      img.onload = null;
+    };
+  }, [url, isVideo, handleIntrinsicDimensions]);
+
   const displayAspect = intrinsicAspect || metaAspect || "1/1";
+
+  const aspectRatioNumber = useMemo(() => {
+    if (intrinsicSize?.width && intrinsicSize?.height) {
+      return intrinsicSize.width / intrinsicSize.height;
+    }
+    if (displayAspect && displayAspect.includes("/")) {
+      const parts = displayAspect.split("/").map(Number);
+      if (parts[0] && parts[1]) {
+        return parts[0] / parts[1];
+      }
+    }
+    return 1;
+  }, [intrinsicSize, displayAspect]);
 
   // ── Media Loaded State ──
   const [isMediaLoaded, setIsMediaLoaded] = useState(() => isMediaLoadedInCache(url));
@@ -207,6 +262,8 @@ export function useMediaViewerCore({ workflow, item: propItem = null }) {
     isFailed,
     displayAspect,
     intrinsicAspect,
+    intrinsicSize,
+    aspectRatioNumber,
     handleIntrinsicDimensions,
     isMediaLoaded,
     onMediaLoaded,

@@ -33,6 +33,7 @@ export function CoreMediaItemView({
   // Media source props
   workflow,
   item = null,
+  core: propCore = null,
   src: propSrc = null,
   isVideo: propIsVideo = null,
   status: propStatus = null,
@@ -43,6 +44,7 @@ export function CoreMediaItemView({
   // Display configuration
   fit = "contain", // "contain" for full uncropped view, "cover" for grid tiles
   className,
+  style: propStyle = {},
   mediaClassName,
   draggable = false,
   onDragStart,
@@ -78,7 +80,8 @@ export function CoreMediaItemView({
   onDelete = null,
 }) {
   // Use media core hook to resolve metadata, sizing, and media state
-  const core = useMediaViewerCore({ workflow, item });
+  const localCore = useMediaViewerCore({ workflow, item });
+  const core = propCore || localCore;
 
   const isVideo = propIsVideo !== null ? propIsVideo : core.isVideo;
   const url = propSrc || core.url;
@@ -101,9 +104,25 @@ export function CoreMediaItemView({
   // Local hover state for overlay visibility
   const [isHovered, setIsHovered] = useState(false);
 
-  // Resolve video ref
+  // Image & Video refs for dimension probing & cached sync
+  const imgRef = useRef(null);
   const internalVideoRef = core.videoRef;
   const videoRef = externalVideoRef || internalVideoRef;
+
+  useEffect(() => {
+    const img = imgRef.current;
+    if (img && img.complete && img.naturalWidth && img.naturalHeight) {
+      core.handleIntrinsicDimensions(img.naturalWidth, img.naturalHeight);
+      core.onMediaLoaded();
+    }
+  }, [url, core]);
+
+  useEffect(() => {
+    const video = videoRef?.current;
+    if (video && video.videoWidth && video.videoHeight) {
+      core.handleIntrinsicDimensions(video.videoWidth, video.videoHeight);
+    }
+  }, [url, videoRef, core]);
 
   const handleVideoLoaded = useCallback((e) => {
     core.handleVideoLoadedMetadata(e);
@@ -136,6 +155,7 @@ export function CoreMediaItemView({
       onMouseLeave={() => setIsHovered(false)}
       style={{
         aspectRatio: displayAspect,
+        ...propStyle,
       }}
     >
       {/* ── 1. The Media Layer ── */}
@@ -164,6 +184,7 @@ export function CoreMediaItemView({
               <div className="absolute inset-0 bg-[#15161a] animate-pulse" />
             )}
             <img
+              ref={imgRef}
               src={url}
               alt={core.prompt || "Media"}
               decoding="async"
