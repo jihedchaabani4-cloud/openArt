@@ -27,6 +27,16 @@ export function StudioItemDropdownMenu({
   align = "end",
   className = "w-64",
 }) {
+  if (!items || items.length === 0) {
+    return (
+      trigger || (
+        <ActionBtn onClick={(e) => e.stopPropagation()} title="More options">
+          <GoogleIcon iconName="more_vert" className="text-[13px] text-[#303031]" />
+        </ActionBtn>
+      )
+    );
+  }
+
   return (
     <DropdownMenu open={open} onOpenChange={onOpenChange}>
       <DropdownMenuTrigger asChild>

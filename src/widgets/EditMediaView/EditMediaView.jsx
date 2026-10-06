@@ -136,8 +136,8 @@ export function EditMediaView({
   overlay,
 
   // Menu activation & items
-  showMenu = false,
-  activeMenu = false,
+  showMenu = true,
+  activeMenu = true,
   menuItems = [],
   menuTrigger = null,
   menuPosition = "topRight",

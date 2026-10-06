@@ -99,7 +99,7 @@ export function CoreMediaItemView({
   const isMenuOpen = controlledMenuOpen !== undefined ? controlledMenuOpen : internalMenuOpen;
   const setMenuOpen = controlledOnMenuOpenChange || setInternalMenuOpen;
 
-  const isMenuActive = Boolean(showMenu || activeMenu) && menuItems.length > 0;
+  const isMenuActive = Boolean(showMenu || activeMenu);
 
   // Local hover state for overlay visibility
   const [isHovered, setIsHovered] = useState(false);
