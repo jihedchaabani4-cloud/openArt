@@ -4,8 +4,6 @@ import { getItemMetadata, getPrimaryMedia, getPrimaryMediaConfig, getGenerationC
 import { downloadFile } from "@/shared/lib/utils";
 import { useRemoveAsset } from "@/features/media/api/mediaApi";
 import { usePathname, useRouter } from "next/navigation";
-
-import { useEditStore } from "@/features/prompt-bar/model/useEditStore";
 import { useElementStore } from "@/features/prompt-bar/model/useElementStore";
 import { usePromptStore } from "@/features/prompt-bar/model/usePromptStore";
 import { buildElementSheetDraft } from "./elementSheetConfig";
@@ -114,7 +112,6 @@ export function useWorkflowActions(workflow, item = null) {
 
       const elementStore = useElementStore.getState();
       const promptStore = usePromptStore.getState();
-      const editStore = useEditStore.getState();
 
       elementStore.hydrateElementDraft({
         mode: draft.mode,
@@ -129,25 +126,6 @@ export function useWorkflowActions(workflow, item = null) {
       if (draft.promptConfig.quality) promptStore.setQuality(draft.promptConfig.quality);
       if (draft.promptConfig.videoResolution) {
         promptStore.setVideoResolution(draft.promptConfig.videoResolution);
-      }
-
-      if (isEditPage) {
-        editStore.setEditTarget({
-          workflow_id: draft.workflowId,
-          workflow_type: draft.workflowType,
-          media_id: draft.mediaId,
-          primaryMediaId: draft.primaryMediaId,
-          primaryMediaUrl: draft.primaryMediaUrl,
-          url: draft.url,
-          dna: draft.dna,
-          elementMode: draft.mode,
-          isElementSheet: true,
-          isVideo: draft.isVideo,
-          prompt: draft.prompt,
-          ratio: draft.promptConfig.ratio,
-          quality: draft.promptConfig.quality,
-          videoResolution: draft.promptConfig.videoResolution,
-        });
       }
       return;
     }
@@ -171,21 +149,7 @@ export function useWorkflowActions(workflow, item = null) {
 
     const effectivePrompt = prompt || config.prompt || params.prompt || targetItem?.prompt || workflow?.prompt || "";
 
-    if (isEditPage) {
-      const editStore = useEditStore.getState();
-      // In edit page, reuse settings might mean setting up the edit bar
-      editStore.setPrompt(effectivePrompt);
-      editStore.setModelId(modelName || "nanobana_pro");
-      editStore.setRatio(ratioVal);
-      editStore.setReferenceImages(refs);
-
-      if (editStore.setQuality) editStore.setQuality(qualityVal || "2K");
-      if (editStore.setVideoResolution) editStore.setVideoResolution(videoResVal || "1080p");
-      if (editStore.setDuration) editStore.setDuration(durationVal || "5s");
-      if (editStore.setMotion) editStore.setMotion(motionVal ?? 50);
-      if (editStore.setCount) editStore.setCount(countVal);
-    } else {
-      // 1. Sync with Platform PromptBar store (if active on screen)
+    // 1. Sync with Platform PromptBar store (if active on screen)
       const activeBarStore = getActivePromptBarStore();
       if (activeBarStore) {
         const barState = activeBarStore.getState();
@@ -228,26 +192,12 @@ export function useWorkflowActions(workflow, item = null) {
           }
         });
       }
-    }
   };
 
   const handleEdit = () => {
     if (!canEnterEdit) return;
-    const config = (targetItem?.generationConfig) || getPrimaryMediaConfig(workflow) || {};
-    const modelName = config.model_name || config.model || "";
     const assetId = targetItem?.asset_id || targetItem?.name || targetItem?.id || "";
 
-    const editStore = useEditStore.getState();
-
-    // Set edit target
-    editStore.setEditTarget({ 
-      workflow_id: workflow.id || workflow.name,
-      media_id:    assetId,
-      prompt:      prompt || config.prompt || "",
-      model_name:  modelName,
-      ratio:       config.ratio || config.aspectRatio || "",
-    });
-    
     // Redirect to edit page
     const projectId = workflow.projectId || workflow.project_id;
     if (projectId) {
@@ -303,7 +253,7 @@ export function useWorkflowActions(workflow, item = null) {
         workflow_type: workflow?.workflow_type
       };
       
-      const activeStore = isEditPage ? useEditStore.getState() : usePromptStore.getState();
+      const activeStore = usePromptStore.getState();
       activeStore.addReference(asset, "normal");
     }
   };

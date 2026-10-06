@@ -6,11 +6,9 @@ import {
   getPrimaryMedia,
   getItemMetadata,
   intrinsicSizeToCssAspect,
-  intrinsicSizeToRatioLabel,
 } from "@/shared/lib/generationUtils";
 import dynamic from "next/dynamic";
 const WorkflowMediaCanvas = dynamic(() => import("@/features/workflows/ui/WorkflowMediaCanvas").then(mod => mod.WorkflowMediaCanvas), { ssr: false });
-import { useEditStore } from "@/features/studio";
 import { useBatchUploadAssets } from "@/features/media/api/mediaApi";
 import { Button } from "@/shared/ui/button";
 
@@ -49,15 +47,10 @@ export function WorkflowMediaPreview({
 
   const applyIntrinsicDimensions = useCallback((w, h) => {
     setIntrinsicAspectCss(intrinsicSizeToCssAspect(w, h));
-    const { editTarget: et, patchEditTarget, setRatio } = useEditStore.getState();
-    if (!et) return;
-    const label = intrinsicSizeToRatioLabel(w, h);
-    patchEditTarget({ ratio: label });
-    setRatio(label);
   }, []);
 
-  const { activeTab, selection, setSelection, clearSelection, editTarget } = useEditStore();
-  const disableSelection = !!editTarget?.isElementSheet;
+  const [selection, setSelection] = useState(null);
+  const disableSelection = workflow?.workflow_type === "ELEMENT_SHEET";
 
   const progress = useMotionValue(0);
   const progressWidth = useTransform(progress, (v) => `${v}%`);
@@ -162,9 +155,9 @@ export function WorkflowMediaPreview({
   };
 
   useEffect(() => {
-    clearSelection();
-    return () => clearSelection();
-  }, [activeItem?.id, activeItem?.name, activeTab, disableSelection, clearSelection]);
+    setSelection(null);
+    return () => setSelection(null);
+  }, [activeItem?.id, activeItem?.name, disableSelection]);
 
   useEffect(() => {
     let frame;
@@ -390,7 +383,7 @@ export function WorkflowMediaPreview({
                   imageUrl={url}
                   selection={disableSelection ? null : selection}
                   onSelectionChange={disableSelection ? undefined : setSelection}
-                  readOnly={disableSelection || activeTab !== "describe"}
+                  readOnly={disableSelection}
                   onIntrinsicSize={applyIntrinsicDimensions}
                 />
               ) : null}

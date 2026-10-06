@@ -1,5 +1,4 @@
 export { usePromptStore } from './usePromptStore';
-export { useEditStore } from './useEditStore';
 export { useCharacterStore, useElementStore } from './useCharacterStore';
 export { useLibraryFilter, extractIdentifyingKeys } from './useLibraryFilter';
 export { getEntityImageCount } from './core/entityService';

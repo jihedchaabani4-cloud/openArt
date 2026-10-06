@@ -7,8 +7,6 @@ import { useProjectData, useSetPrimaryMedia } from "@/features/workflows/api/wor
 import { WorkflowMediaPreview } from "@/widgets/StudioLayout/GenerationsStudio/MediaGridItem/WorkflowMediaPreview";
 import { WorkflowMediaGallery } from "@/features/workflows/ui/WorkflowMediaGallery";
 import { EditNavbar } from "@/widgets/EditNavbar/EditNavbar";
-import { EditElementPromptBar } from "@/features/prompt-bar/ui/edit/EditElementPromptBar";
-import { useEditStore } from "@/features/prompt-bar/model/useEditStore";
 import { useElementStore } from "@/features/prompt-bar/model/useElementStore";
 import { usePromptStore } from "@/features/prompt-bar/model/usePromptStore";
 import { buildElementSheetDraft } from "@/features/workflows/model/elementSheetConfig";
@@ -20,8 +18,6 @@ export default function ElementWorkflowEditPage() {
     const router = useRouter();
 
     const { activeSessionId } = useWorkflowsStore();
-    const setEditTarget = useEditStore((state) => state.setEditTarget);
-    const resetEditStore = useEditStore((state) => state.resetEditStore);
     const hydrateElementDraft = useElementStore((state) => state.hydrateElementDraft);
     const resetElementStore = useElementStore((state) => state.resetElementStore);
     const resetPromptStore = usePromptStore((state) => state.resetPromptStore);
@@ -71,30 +67,7 @@ export default function ElementWorkflowEditPage() {
         if (!currentItem) return undefined;
         if (!activeItem) setActiveItem(currentItem);
 
-        const meta = getItemMetadata(currentItem);
         const draft = buildElementSheetDraft(workflow, currentItem);
-        const workflowSessionId = workflow.metadata?.sessionId ?? activeSessionId ?? null;
-
-        setEditTarget({
-            project_id: projectId,
-            session_id: workflowSessionId,
-            workflow_id: workflow.id || workflow.name,
-            workflow_type: workflow.workflow_type,
-            media_id: currentItem?.id || currentItem?.name,
-            media_status: meta.status,
-            primaryMediaId: draft?.primaryMediaId ?? workflow.metadata?.primaryMediaId,
-            primaryMediaUrl: draft?.primaryMediaUrl ?? null,
-            primaryGenerationConfig: draft?.promptConfig ?? null,
-            dna: draft?.dna ?? null,
-            elementMode: draft?.mode ?? "character",
-            isElementSheet: true,
-            url: meta.url,
-            ratio: draft?.promptConfig?.ratio || currentItem?.params?.ratio || meta.ratioStr || "1:1",
-            quality: draft?.promptConfig?.quality || currentItem?.params?.quality || "standard",
-            videoResolution: draft?.promptConfig?.videoResolution || currentItem?.params?.video_resolution || "1080p",
-            prompt: "",
-            isVideo: meta.isVideo ?? false,
-        });
 
         if (draft) {
             hydrateElementDraft({
@@ -114,7 +87,6 @@ export default function ElementWorkflowEditPage() {
         }
 
         return () => {
-            resetEditStore();
             resetElementStore();
             resetPromptStore();
         };
@@ -124,10 +96,8 @@ export default function ElementWorkflowEditPage() {
         activeSessionId,
         hydrateElementDraft,
         projectId,
-        resetEditStore,
         resetElementStore,
         resetPromptStore,
-        setEditTarget,
         setGenerationMode,
         setModelId,
         setQuality,
@@ -161,11 +131,6 @@ export default function ElementWorkflowEditPage() {
                             sessionId={activeSessionId}
                         />
 
-                        <div className="bottom-8 inset-x-0 z-30 flex justify-center px-6 pointer-events-none">
-                            <div className="w-full max-w-[600px] pointer-events-auto">
-                                <EditElementPromptBar />
-                            </div>
-                        </div>
                     </div>
 
                     {showHistory && (

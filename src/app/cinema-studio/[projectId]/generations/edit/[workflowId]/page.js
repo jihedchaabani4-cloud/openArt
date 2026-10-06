@@ -7,7 +7,6 @@ import { useFilteredWorkflows } from "@/features/workflows/model/useFilteredWork
 import { WorkflowMediaPreview } from "@/widgets/StudioLayout/GenerationsStudio/MediaGridItem/WorkflowMediaPreview"
 import { WorkflowMediaGallery } from "@/features/workflows/ui/WorkflowMediaGallery"
 import { EditNavbar } from "@/widgets/EditNavbar/EditNavbar"
-import { useEditStore } from "@/features/prompt-bar/model/useEditStore"
 import { getPrimaryMedia, getItemMetadata } from "@/shared/lib/generationUtils"
 import { useSetPrimaryMedia } from "@/features/workflows/api/workflowsApi"
 import { LoadingScreen } from "@/shared/ui/LoadingScreen"
@@ -21,8 +20,6 @@ export default function WorkflowEditPage() {
     const router = useRouter()
     
     const { activeSessionId } = useWorkflowsStore()
-    const setEditTarget = useEditStore((s) => s.setEditTarget)
-    const resetEditStore = useEditStore((s) => s.resetEditStore)
     const setPrimaryMediaMutation = useSetPrimaryMedia()
     
     // Use the existing hook to find the workflow in the cache
@@ -41,43 +38,14 @@ export default function WorkflowEditPage() {
     const [activeItem, setActiveItem] = React.useState(null)
     const [showHistory, setShowHistory] = React.useState(true)
 
-    // Determine if the active item is a video
-    const activeItemMeta = activeItem ? getItemMetadata(activeItem) : null
-    const isVideoItem = activeItemMeta?.isVideo ?? false
 
-    // Sync activeItem and edit store when workflow is loaded or active item changes
+    // Sync activeItem when workflow is loaded
     React.useEffect(() => {
         if (workflow) {
-            console.log("🚀 [WorkflowEditPage] Workflow Data:", workflow);
             const currentItem = activeItem || getPrimaryMedia(workflow);
             if (!activeItem) setActiveItem(currentItem);
-
-            // Set edit target in the independent edit store
-            const meta = getItemMetadata(currentItem);
-            const primaryMedia = getPrimaryMedia(workflow);
-            const primaryMeta = getItemMetadata(primaryMedia);
-            
-            setEditTarget({
-                project_id: projectId,
-                session_id: activeSessionId,
-                workflow_id: workflow.id || workflow.name,
-                media_id: currentItem?.id || currentItem?.name,
-                media_status: meta.status,
-                primaryMediaId: workflow.metadata?.primaryMediaId,
-                primaryMediaUrl: primaryMeta.url,
-                url: meta.url,
-                ratio: currentItem?.params?.ratio || meta.ratioStr,
-                quality: currentItem?.params?.quality || "standard",
-                prompt: currentItem?.params?.prompt || "",
-                isVideo: isVideoItem,
-            });
         }
-
-        // Cleanup: clear edit store when leaving the page
-        return () => {
-            resetEditStore();
-        };
-    }, [workflow, activeItem, projectId, activeSessionId, setEditTarget, resetEditStore, isVideoItem]);
+    }, [workflow, activeItem]);
 
     if (isLoading) {
         return <LoadingScreen />;
