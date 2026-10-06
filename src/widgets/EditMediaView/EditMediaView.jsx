@@ -161,7 +161,7 @@ export function EditMediaView({
       const padY = parseFloat(cs.paddingTop || 0) + parseFloat(cs.paddingBottom || 0);
       const w = Math.max(0, el.clientWidth - padX);
       const h = Math.max(0, el.clientHeight - padY);
-      setContainerSize({ width: w, height: h });
+      setContainerSize((prev) => (prev.width === w && prev.height === h ? prev : { width: w, height: h }));
     };
 
     update();

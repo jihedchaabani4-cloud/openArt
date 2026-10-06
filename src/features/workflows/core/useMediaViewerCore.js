@@ -61,8 +61,8 @@ export function useMediaViewerCore({ workflow, item: propItem = null }) {
   const handleIntrinsicDimensions = useCallback((w, h) => {
     if (!w || !h) return;
     const cssAspect = intrinsicSizeToCssAspect(w, h);
-    setIntrinsicAspect(cssAspect);
-    setIntrinsicSize({ width: w, height: h });
+    setIntrinsicAspect((prev) => (prev === cssAspect ? prev : cssAspect));
+    setIntrinsicSize((prev) => (prev?.width === w && prev?.height === h ? prev : { width: w, height: h }));
     if (url) {
       setCachedImageDimensions(url, w, h);
     }
@@ -143,12 +143,12 @@ export function useMediaViewerCore({ workflow, item: propItem = null }) {
 
   const onMediaLoaded = useCallback(() => {
     if (url) markMediaLoaded(url);
-    setIsMediaLoaded(true);
+    setIsMediaLoaded((prev) => (prev ? prev : true));
   }, [url]);
 
   const onMediaError = useCallback(() => {
     if (url) markMediaLoaded(url);
-    setIsMediaLoaded(true);
+    setIsMediaLoaded((prev) => (prev ? prev : true));
   }, [url]);
 
   // ── Video Playback Engine ──

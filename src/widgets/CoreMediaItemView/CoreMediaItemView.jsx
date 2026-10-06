@@ -109,20 +109,38 @@ export function CoreMediaItemView({
   const internalVideoRef = core.videoRef;
   const videoRef = externalVideoRef || internalVideoRef;
 
+  const handledImageDimsRef = useRef(null);
+  const handledVideoDimsRef = useRef(null);
+
+  useEffect(() => {
+    handledImageDimsRef.current = null;
+    handledVideoDimsRef.current = null;
+  }, [url]);
+
+  const { handleIntrinsicDimensions, onMediaLoaded } = core;
+
   useEffect(() => {
     const img = imgRef.current;
     if (img && img.complete && img.naturalWidth && img.naturalHeight) {
-      core.handleIntrinsicDimensions(img.naturalWidth, img.naturalHeight);
-      core.onMediaLoaded();
+      const key = `${url}:${img.naturalWidth}x${img.naturalHeight}`;
+      if (handledImageDimsRef.current !== key) {
+        handledImageDimsRef.current = key;
+        handleIntrinsicDimensions(img.naturalWidth, img.naturalHeight);
+        onMediaLoaded();
+      }
     }
-  }, [url, core]);
+  }, [url, handleIntrinsicDimensions, onMediaLoaded]);
 
   useEffect(() => {
     const video = videoRef?.current;
     if (video && video.videoWidth && video.videoHeight) {
-      core.handleIntrinsicDimensions(video.videoWidth, video.videoHeight);
+      const key = `${url}:${video.videoWidth}x${video.videoHeight}`;
+      if (handledVideoDimsRef.current !== key) {
+        handledVideoDimsRef.current = key;
+        handleIntrinsicDimensions(video.videoWidth, video.videoHeight);
+      }
     }
-  }, [url, videoRef, core]);
+  }, [url, videoRef, handleIntrinsicDimensions]);
 
   const handleVideoLoaded = useCallback((e) => {
     core.handleVideoLoadedMetadata(e);
