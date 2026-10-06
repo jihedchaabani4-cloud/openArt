@@ -92,7 +92,7 @@ export function StudioSettingsDropdown(props) {
         </button>
       </DropdownMenuTrigger>
       
-      <DropdownMenuContent align="end" className="w-72 p-1.5 flex flex-col gap-1 font-['Google_Sans_Text',sans-serif]">
+      <DropdownMenuContent align="end" className="w-72 p-1.5 flex flex-col gap-1 font-sans antialiased">
         {/* ── 1. Grid Size Selector (styled like Prompt Bar Parameter Selector) ── */}
         <div className="flex flex-col gap-1 px-0.5 mb-1">
           <span className="text-[12px] font-medium text-[rgba(218,220,224,0.75)]">

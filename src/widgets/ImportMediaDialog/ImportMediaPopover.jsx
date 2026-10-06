@@ -21,6 +21,8 @@ import { RowsPhotoAlbum } from 'react-photo-album';
 import 'react-photo-album/rows.css';
 import { cn } from "@/shared/lib/utils";
 import { ImportMediaListView } from "./ImportMediaListView";
+import { useImportMediaKeyboard } from "./keyboard/useImportMediaKeyboard";
+import { KeyboardShortcutsHelp } from "./keyboard/KeyboardShortcutsHelp";
 
 const CATEGORIES = [
   { id: "all",       label: "All",        googleIcon: "dashboard" },
@@ -55,6 +57,7 @@ export function ImportMediaPopover({
   remainingImages,
   onUploadFromPC,
   anchorRef,
+  initialSearch = "",   // seed the search bar when the dialog first opens
 }) {
   const isAssetSelect = variant === "asset-select" || mode === "asset-select";
 
@@ -459,6 +462,13 @@ export function ImportMediaPopover({
     visibleItems,
   } = useLibraryFilter(unselectedLibrary, effectiveMode, defaultCategory, { selectedItems: propSelectedItems });
 
+  // Sync search whenever dialog opens or when user types query in prompt bar
+  React.useEffect(() => {
+    if (open) {
+      setSearch(initialSearch || "");
+    }
+  }, [open, initialSearch]);
+
   // Sync selectedCategory if current selection is not in availableCategories
   React.useEffect(() => {
     if (availableCategories.length > 0) {
@@ -599,6 +609,76 @@ export function ImportMediaPopover({
     onOpenChange(false);
   };
 
+  // ── Desktop-Class Keyboard Navigation Engine ───────────────────────────
+  const categoryRefs = React.useRef([]);
+  const cardRefs = React.useRef([]);
+  const searchInputRef = React.useRef(null);
+
+  // Direct selection helper used by click and Enter key
+  const handleSelectDirect = React.useCallback((item) => {
+    if (!item) return;
+    const candidateCount = item.image_count || 1;
+    if (typeof remainingImages === "number" && candidateCount > availableSlots) return;
+    if (typeof remainingImages !== "number" && availableSlots < 1) return;
+    const itemUrl = resolveMediaUrl(item) ?? item.url ?? item.image?.url ?? item.video?.url ?? item.file_url ?? "";
+    const isVideo = item.type === "video" || item.is_video || !!item.video;
+    const canonicalWorkflowId = item.workflow_id || item.workflowId || item.workflow?.id || item.id || null;
+    const asset = {
+      ...item,
+      url:           itemUrl,
+      workflow_id:   canonicalWorkflowId,
+      workflowId:    canonicalWorkflowId,
+      asset_id:      canonicalWorkflowId || item.id,
+      id:            canonicalWorkflowId || item.id,
+      is_video:      isVideo,
+      type:          item.type || (item.is_character ? "character" : (item.is_element ? "element" : "media")),
+      workflow_type: item.workflow_type || (item.is_character ? "CHARACTER_SHEET" : (item.is_element ? "ELEMENT_SHEET" : "GENERATED")),
+      displayName:   item.display_name || item.name || "Ref",
+      name:          item.display_name || item.name || "Ref",
+      image_count:   candidateCount,
+    };
+    onSelect([asset]);
+    onOpenChange(false);
+  }, [availableSlots, remainingImages, onSelect, onOpenChange]);
+
+  // Space key multi-select toggle helper
+  const handleToggleHighlight = React.useCallback((item) => {
+    if (!item) return;
+    toggleSelection(item);
+  }, []);
+
+  // Enter key commit or direct selection helper
+  const handleConfirmOrSelect = React.useCallback((highlightedItem) => {
+    if (selectedItems.length > 0) {
+      handleImport();
+    } else if (highlightedItem) {
+      handleSelectDirect(highlightedItem);
+    }
+  }, [selectedItems, handleImport, handleSelectDirect]);
+
+  const {
+    zone: navZone,
+    setZone: setNavZone,
+    highlightedCategoryIdx,
+    setHighlightedCategoryIdx,
+    highlightedAssetIdx,
+    setHighlightedAssetIdx,
+  } = useImportMediaKeyboard({
+    open,
+    availableCategories,
+    selectedCategory: selectedCategory || defaultCategory,
+    setSelectedCategory,
+    visibleItems,
+    layoutMode,
+    categoryRefs,
+    cardRefs,
+    searchInputRef,
+    onSelectAsset: handleSelectDirect,
+    onToggleAsset: handleToggleHighlight,
+    onConfirmSelection: handleConfirmOrSelect,
+    onClose: () => onOpenChange(false),
+  });
+
   React.useEffect(() => {
     if (!open) setSelectedItems([]);
   }, [open]);
@@ -692,7 +772,7 @@ export function ImportMediaPopover({
             isPanel
               ? ""
               : "fixed bottom-24 left-1/2 -translate-x-1/2 z-[9999] border border-white/5",
-            "flex flex-row overflow-hidden text-white font-['Google_Sans_Text',sans-serif]"
+            "flex flex-col overflow-hidden text-white font-sans antialiased"
           )}
         >
           {/* Hidden file input */}
@@ -705,26 +785,36 @@ export function ImportMediaPopover({
             onChange={handleFileChange}
           />
 
-          {/* ── Left Category Sidebar (Shown in standard mode only) ── */}
+          <div className="flex flex-row flex-1 min-h-0 overflow-hidden">
+            {/* ── Left Category Sidebar (Shown in standard mode only) ── */}
           {!isAssetSelect && (availableCategories.length > 0 || allowsImages || allowsVideos) && (
-            <div className="w-[140px] flex flex-col gap-1.5 shrink-0 select-none bg-transparent pr-1">
+            <div className="w-[144px] flex flex-col gap-1.5 shrink-0 select-none bg-transparent pl-1.5 pr-1">
               {availableCategories.length > 0 && (
                 <>
-                  <div className="px-2 pt-0.5 pb-1 text-[11px] font-semibold text-white/30 uppercase tracking-wider font-['Google_Sans_Text',sans-serif]">
+                  <div className="px-2 pt-0.5 pb-1 text-[11px] font-semibold text-white/30 uppercase tracking-wider font-sans antialiased">
                     Categories
                   </div>
                   
-                  <nav role="tablist" className="flex flex-col gap-1 flex-1">
-                    {availableCategories.map((cat) => {
+                  <nav role="tablist" className="flex flex-col gap-1 flex-1 p-0.5">
+                    {availableCategories.map((cat, catIdx) => {
                       const isActive = (selectedCategory || defaultCategory) === cat.id;
+                      const isHighlighted = navZone === "sidebar" && highlightedCategoryIdx === catIdx;
                       return (
                         <Button
+                          ref={(el) => { categoryRefs.current[catIdx] = el; }}
                           key={cat.id}
                           role="tab"
                           aria-selected={isActive}
                           variant={isActive ? "nav-tab-active" : "nav-tab"}
-                          onClick={() => setSelectedCategory(cat.id)}
-                          className="w-full justify-start h-8 text-xs cursor-pointer group px-2.5 flex items-center gap-2.5"
+                          onClick={() => {
+                            setSelectedCategory(cat.id);
+                            setHighlightedCategoryIdx(catIdx);
+                            setNavZone("sidebar");
+                          }}
+                          className={cn(
+                            "w-full justify-start h-8 text-xs cursor-pointer group px-2.5 flex items-center gap-2.5 transition-all",
+                            isHighlighted && "ring-1 ring-inset ring-white/70 bg-white/10"
+                          )}
                         >
                           <span className="w-4 h-4 flex items-center justify-center shrink-0">
                             <GoogleIcon iconName={cat.googleIcon} name={cat.googleIcon} weight={300} className={cn("text-[16px] transition-colors leading-none", isActive ? "text-white" : "text-white/60 group-hover:text-white")} />
@@ -767,13 +857,15 @@ export function ImportMediaPopover({
               {/* Search Bar Input */}
               <div className="flex-1">
                 <Input
+                  ref={searchInputRef}
                   variant="blurinput"
                   icon={Search}
                   iconStrokeWidth={1.75}
                   type="search"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search assets"
+                  onFocus={() => setNavZone("search")}
+                  placeholder="Search assets (press / to focus)"
                   aria-label="Search assets"
                   className="w-full text-sm"
                 />
@@ -820,7 +912,7 @@ export function ImportMediaPopover({
                 <DropdownMenuTrigger asChild>
                   <Button 
                     variant="ghost"
-                    className="flex items-center gap-2 px-3.5 h-9 rounded-[12px] text-xs font-medium text-white/80 hover:text-white hover:bg-white/10 active:bg-[rgba(218,220,224,0.25)] active:blur-[1.5px] transition-all min-w-[140px] justify-between border-none cursor-pointer font-['Google_Sans_Text',sans-serif] outline-none select-none"
+                    className="flex items-center gap-2 px-3.5 h-9 rounded-[12px] text-xs font-medium text-white/80 hover:text-white hover:bg-white/10 active:bg-[rgba(218,220,224,0.25)] active:blur-[1.5px] transition-all min-w-[140px] justify-between border-none cursor-pointer font-sans antialiased outline-none select-none"
                     style={{
                       backgroundColor: "rgba(218, 220, 224, 0.1)",
                       backdropFilter: "blur(80px)",
@@ -833,7 +925,7 @@ export function ImportMediaPopover({
                 </DropdownMenuTrigger>
                 <DropdownMenuContent 
                   align="end" 
-                  className="w-[var(--radix-dropdown-menu-trigger-width)] min-w-[var(--radix-dropdown-menu-trigger-width)] border-none rounded-[16px] z-[10000] text-white p-3 font-['Google_Sans_Text',sans-serif]"
+                  className="w-[var(--radix-dropdown-menu-trigger-width)] min-w-[var(--radix-dropdown-menu-trigger-width)] border-none rounded-[16px] z-[10000] text-white p-3 font-sans antialiased"
                   style={{
                     backgroundColor: "rgba(22, 23, 24, 0.95)",
                     backdropFilter: "blur(40px)",
@@ -863,6 +955,9 @@ export function ImportMediaPopover({
                   </div>
                 </DropdownMenuContent>
               </DropdownMenu>
+
+              {/* Keyboard Shortcuts Help '?' Button & Hover Dropdown */}
+              <KeyboardShortcutsHelp />
             </div>
 
             {layoutMode === "list" ? (
@@ -871,31 +966,8 @@ export function ImportMediaPopover({
                 remainingImages={remainingImages}
                 availableSlots={availableSlots}
                 maxAllowed={maxAllowed}
-                onSelectDirect={(item) => {
-                  if (!item) return;
-                  const candidateCount = item.image_count || 1;
-                  if (typeof remainingImages === "number" && candidateCount > availableSlots) return;
-                  if (typeof remainingImages !== "number" && availableSlots < 1) return;
-                  const itemUrl = resolveMediaUrl(item) ?? item.url ?? item.image?.url ?? item.video?.url ?? item.file_url ?? "";
-                  const isVideo = item.type === "video" || item.is_video || !!item.video;
-                  const canonicalWorkflowId = item.workflow_id || item.workflowId || item.workflow?.id || item.id || null;
-                  const asset = {
-                    ...item,
-                    url:           itemUrl,
-                    workflow_id:   canonicalWorkflowId,
-                    workflowId:    canonicalWorkflowId,
-                    asset_id:      canonicalWorkflowId || item.id,
-                    id:            canonicalWorkflowId || item.id,
-                    is_video:      isVideo,
-                    type:          item.type || (item.is_character ? "character" : (item.is_element ? "element" : "media")),
-                    workflow_type: item.workflow_type || (item.is_character ? "CHARACTER_SHEET" : (item.is_element ? "ELEMENT_SHEET" : "GENERATED")),
-                    displayName:   item.display_name || item.name || "Ref",
-                    name:          item.display_name || item.name || "Ref",
-                    image_count:   candidateCount,
-                  };
-                  onSelect([asset]);
-                  onOpenChange(false);
-                }}
+                focusedId={visibleItems[highlightedAssetIdx]?.id || visibleItems[highlightedAssetIdx]?.workflow_id}
+                onSelectDirect={handleSelectDirect}
                 loading={loading}
                 hasMore={hasMore}
                 onLoadMore={onLoadMore}
@@ -928,6 +1000,8 @@ export function ImportMediaPopover({
                               p.asset_id === item.id ||
                               p.url === itemUrl
                           );
+                          const itemIdx = visibleItems.indexOf(item);
+                          const isHighlighted = navZone === "gallery" && highlightedAssetIdx === itemIdx;
                           const candidateCount = item.image_count || 1;
                           const isOverQuota = typeof remainingImages === "number"
                             ? candidateCount > availableSlots
@@ -936,6 +1010,9 @@ export function ImportMediaPopover({
 
                           return (
                             <MediaViewCard
+                              ref={(el) => {
+                                if (itemIdx !== -1) cardRefs.current[itemIdx] = el;
+                              }}
                               key={photo.key}
                               item={item}
                               itemUrl={itemUrl}
@@ -943,8 +1020,17 @@ export function ImportMediaPopover({
                               width={width}
                               height={height}
                               isSelected={isSelected}
+                              isHighlighted={isHighlighted}
                               isDisabled={isDisabled}
-                              onSelect={toggleSelection}
+                              onSelect={() => {
+                                setHighlightedAssetIdx(itemIdx !== -1 ? itemIdx : 0);
+                                setNavZone("gallery");
+                                if (maxAllowed === 1) {
+                                  handleSelectDirect(item);
+                                } else {
+                                  toggleSelection(item);
+                                }
+                              }}
                             />
                           );
                         },
@@ -987,21 +1073,28 @@ export function ImportMediaPopover({
                         : "bg-white/5 text-white/20 cursor-not-allowed"
                     )}
                   >
-                    {selectedItems.length > 0 
-                      ? `Import (${selectedItems.length})`
-                      : "Select Media"
-                    }
+                    {selectedItems.length > 0 ? (
+                      <span className="flex items-center gap-2">
+                        <span>Import ({selectedItems.length})</span>
+                        <kbd className="px-1.5 py-0.5 text-[10px] font-mono bg-black/10 rounded border border-black/10 font-semibold leading-none">
+                          ↵ Enter
+                        </kbd>
+                      </span>
+                    ) : (
+                      "Select Media"
+                    )}
                   </Button>
                 </div>
               </>
             )}
           </div>
+        </div>
 
-          <style jsx>{`
-            .scrollbar-hide::-webkit-scrollbar { display: none; }
-            .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-          `}</style>
-        </motion.div>
+        <style jsx>{`
+          .scrollbar-hide::-webkit-scrollbar { display: none; }
+          .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        `}</style>
+      </motion.div>
   );
 
   if (isPanel) {

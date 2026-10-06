@@ -215,6 +215,8 @@ export function WorkflowMediaPreview({
               status={status}
               src={url}
               alt={prompt}
+              isVideo={isVideo}
+              progress={activeItem?.progress ?? workflow?.progress}
               aspect={displayAspect}
               error={activeItem.error}
               showOverlay

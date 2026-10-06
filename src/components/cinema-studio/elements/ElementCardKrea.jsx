@@ -4,6 +4,8 @@ import React, { useState, useEffect } from "react";
 import { Star, Trash2, Images, Loader2, AlertCircle } from "lucide-react";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { Button } from "@/shared/ui/button";
+import { FlowErrorTile } from "@/shared/ui/FlowErrorTile";
+import { ProcessingCard } from "@/shared/ui/ProcessingCard";
 
 const ELEMENT_TYPE_GOOGLE_ICONS = {
   object: "directions_car",
@@ -198,18 +200,15 @@ export function ElementCardKrea({ element, onClick, onDelete }) {
 
         {/* ── CARD STATES ── */}
         {isProcessing ? (
-          <div className="w-full h-full flex flex-col items-center justify-center gap-3 bg-zinc-900/90 text-white/70">
-            <Loader2 className="size-7 animate-spin text-white/80" />
-            <span className="text-xs font-medium">Processing element...</span>
-          </div>
+          <ProcessingCard
+            className="w-full h-full rounded-[8px]"
+            showPlayIcon={false}
+          />
         ) : isFailed ? (
-          <div className="w-full h-full flex flex-col items-center justify-center gap-2 bg-red-950/60 text-red-200 p-3 text-center backdrop-blur-sm">
-            <AlertCircle className="size-6 text-red-400" />
-            <span className="text-xs font-semibold">Generation Failed</span>
-            <span className="text-[10px] text-red-300/70 truncate max-w-full px-2">
-              {element.items?.[0]?.error || "Provider error"}
-            </span>
-          </div>
+          <FlowErrorTile
+            error={element.items?.[0]?.error || "Provider error"}
+            onDelete={onDelete ? (e) => { e?.stopPropagation?.(); onDelete(element.id || element.name); } : undefined}
+          />
         ) : (
           <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
             <div className="pointer-events-none relative h-full w-full">

@@ -1,10 +1,12 @@
 "use client";
 
 import { useMemo, useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { cn } from "@/shared/lib/utils";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { Button } from "@/shared/ui/button";
 import { resolveModelIcon } from "../../../core/modelManagement.js";
+import { calculateModelCredits } from "../../../core/creditCalculationService.js";
 
 /**
  * Ratio icon mapping using official Google Symbols
@@ -40,6 +42,217 @@ export function getRatioIcon(ratio) {
 
 const DEFAULT_RATIOS = ["16:9", "4:3", "1:1", "3:4", "9:16"];
 
+export function formatParamLabel(str) {
+  if (!str || typeof str !== "string") return str;
+  return str
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+/**
+ * Unified FlowSelect dropdown component
+ * Handles trigger button, floating portal placement, outside-click, scroll/resize,
+ * and unified Google Flow frosted glass styling.
+ */
+function FlowSelect({
+  value,
+  onChange,
+  items = [],
+  icon = null,
+  label = null,
+  displayValue = "",
+  width = 220,
+  maxHeightLimit = 320,
+  ariaLabel,
+}) {
+  const [open, setOpen] = useState(false);
+  const triggerRef = useRef(null);
+  const menuRef = useRef(null);
+  const [placement, setPlacement] = useState(null);
+
+  const calculatePlacement = () => {
+    if (!triggerRef.current) return;
+    const rect = triggerRef.current.getBoundingClientRect();
+    const padding = 16;
+
+    const spaceLeft = rect.left;
+    const spaceRight = window.innerWidth - rect.right;
+    const side = spaceLeft >= width + padding || spaceLeft > spaceRight ? "left" : "right";
+
+    const spaceGoingUp = rect.bottom - padding;
+    const spaceGoingDown = window.innerHeight - rect.top - padding;
+
+    let align = "bottom";
+    let maxHeight = maxHeightLimit;
+
+    // Prefer expanding upwards (align = 'bottom') because the settings popover sits near screen bottom.
+    // Only expand downwards if there is ample space below and it is greater than the space above.
+    if (spaceGoingDown >= maxHeightLimit && spaceGoingDown >= spaceGoingUp) {
+      align = "top";
+      maxHeight = Math.min(maxHeightLimit, Math.max(160, spaceGoingDown));
+    } else {
+      align = "bottom";
+      maxHeight = Math.min(maxHeightLimit, Math.max(160, spaceGoingUp));
+    }
+
+    const left = side === "left"
+      ? Math.max(padding, rect.left - width - 8)
+      : Math.min(window.innerWidth - padding - width, rect.right + 8);
+
+    const style = {
+      position: "fixed",
+      left: `${left}px`,
+      width: `${width}px`,
+      maxHeight: `${maxHeight}px`,
+      zIndex: 99999,
+    };
+
+    if (align === "top") {
+      style.top = `${rect.top}px`;
+    } else {
+      style.bottom = `${window.innerHeight - rect.bottom}px`;
+    }
+
+    setPlacement({ side, align, maxHeight, style });
+  };
+
+  const handleToggle = () => {
+    if (!open) {
+      calculatePlacement();
+    }
+    setOpen((v) => !v);
+  };
+
+  useEffect(() => {
+    if (!open) return;
+    calculatePlacement();
+    const handleOutside = (e) => {
+      if (
+        triggerRef.current && !triggerRef.current.contains(e.target) &&
+        menuRef.current && !menuRef.current.contains(e.target)
+      ) {
+        setOpen(false);
+      }
+    };
+    const handleScrollOrResize = (e) => {
+      if (menuRef.current && menuRef.current.contains(e.target)) return;
+      calculatePlacement();
+    };
+    document.addEventListener("mousedown", handleOutside);
+    window.addEventListener("resize", handleScrollOrResize);
+    window.addEventListener("scroll", handleScrollOrResize, true);
+    return () => {
+      document.removeEventListener("mousedown", handleOutside);
+      window.removeEventListener("resize", handleScrollOrResize);
+      window.removeEventListener("scroll", handleScrollOrResize, true);
+    };
+  }, [open]);
+
+  return (
+    <div className="relative w-full" ref={triggerRef}>
+      <Button
+        type="button"
+        variant="flow-select-trigger"
+        aria-label={ariaLabel || label || displayValue}
+        onClick={handleToggle}
+        className="w-full h-8 px-2.5 rounded-[12px] bg-[rgba(218,220,224,0.05)] hover:bg-[rgba(218,220,224,0.1)] active:bg-[rgba(218,220,224,0.15)] text-white flex items-center justify-between transition-all cursor-pointer outline-none text-[13px] font-sans antialiased"
+      >
+        <span className="flex items-center gap-1.5 truncate text-white">
+          {icon}
+          {label && <span className="text-white/60 font-normal">{label}:</span>}
+          <span className="truncate text-white font-medium">{displayValue}</span>
+        </span>
+        <GoogleIcon
+          iconName="arrow_drop_down"
+          className={cn("text-[20px] text-white transition-transform shrink-0", open && "rotate-180")}
+        />
+      </Button>
+
+      {open && placement && typeof document !== "undefined" && createPortal(
+        <div
+          ref={menuRef}
+          data-portal="true"
+          role="listbox"
+          className="fixed rounded-[16px] shadow-2xl p-1 bg-[rgba(22,23,24,0.9)] backdrop-blur-2xl border border-white/10 overflow-y-auto font-sans antialiased"
+          style={{
+            ...placement.style,
+            backgroundColor: "rgba(22, 23, 24, 0.9)",
+            backdropFilter: "blur(60px) saturate(180%) contrast(105%)",
+            WebkitBackdropFilter: "blur(60px) saturate(180%) contrast(105%)",
+          }}
+        >
+          {items.map((item) => {
+            const isSelected = String(value) === String(item.value);
+
+            return (
+              <button
+                key={String(item.value)}
+                type="button"
+                className={cn(
+                  "flex items-center justify-between w-full h-8 px-2.5 rounded-[10px] text-[13px] font-sans antialiased text-left transition-colors cursor-pointer",
+                  isSelected
+                    ? "bg-white/15 text-white font-semibold"
+                    : "text-white/80 hover:bg-white/10 hover:text-white font-medium"
+                )}
+                onClick={() => {
+                  onChange?.(item.value);
+                  setOpen(false);
+                }}
+              >
+                <span className="flex items-center gap-2 truncate">
+                  {item.icon}
+                  <span className="truncate">{item.label}</span>
+                </span>
+                {isSelected && (
+                  <GoogleIcon iconName="check" className="text-[16px] text-white shrink-0 ml-1" />
+                )}
+              </button>
+            );
+          })}
+        </div>,
+        document.body
+      )}
+    </div>
+  );
+}
+
+function FlowParamSelect({ paramKey, def, value, onChange }) {
+  const items = (def.values || []).map((item) => {
+    const itemVal = typeof item === "object" ? item.value : item;
+    const itemLabel = typeof item === "object" ? item.label || item.value : item;
+    return {
+      value: itemVal,
+      label: formatParamLabel(String(itemLabel)),
+    };
+  });
+
+  const selectedItem = items.find((it) => String(it.value) === String(value));
+  const rawLabel = selectedItem ? selectedItem.label : value || def.default || "Default";
+  const displayValue = formatParamLabel(String(rawLabel));
+  const paramTitle = def.label || formatParamLabel(paramKey);
+
+  const getParamIcon = () => {
+    if (paramKey.includes("camera")) return "videocam";
+    if (paramKey.includes("mode")) return "tune";
+    if (paramKey.includes("resolution")) return "hd";
+    return "tune";
+  };
+
+  return (
+    <FlowSelect
+      value={value ?? def.default}
+      onChange={(newVal) => onChange?.(paramKey, newVal)}
+      items={items}
+      icon={<GoogleIcon iconName={getParamIcon()} className="text-[16px] text-white/60 shrink-0" />}
+      label={paramTitle}
+      displayValue={displayValue}
+      width={220}
+      maxHeightLimit={260}
+      ariaLabel={paramTitle}
+    />
+  );
+}
+
 /**
  * FlowPromptBoxSettings
  *
@@ -72,21 +285,6 @@ export function FlowPromptBoxSettings({
   creditCost = 0,
   className,
 }) {
-  const [modelMenuOpen, setModelMenuOpen] = useState(false);
-  const modelMenuRef = useRef(null);
-
-  // Close internal model menu on click outside
-  useEffect(() => {
-    if (!modelMenuOpen) return;
-    const handleClick = (e) => {
-      if (modelMenuRef.current && !modelMenuRef.current.contains(e.target)) {
-        setModelMenuOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, [modelMenuOpen]);
-
   // Mode Options
   const modeOptions = useMemo(() => {
     const all = [
@@ -148,6 +346,11 @@ export function FlowPromptBoxSettings({
     return Number(paramValues.count || paramValues.variations) || 1;
   }, [variationParamEntry, paramValues]);
 
+  const displayCredits = useMemo(() => {
+    if (typeof creditCost === "number" && creditCost > 0) return creditCost;
+    return calculateModelCredits(currentModel, paramValues, currentCount);
+  }, [creditCost, currentModel, paramValues, currentCount]);
+
   // Other non-ratio non-count parameters (Quality, Duration, Sliders, etc.)
   const otherParams = useMemo(() => {
     if (!currentModel || models.length === 0) return [];
@@ -183,7 +386,7 @@ export function FlowPromptBoxSettings({
         "bg-[rgba(22,23,24,0.6)] backdrop-blur-[100px]",
         "border-none",
         "shadow-[var(--mat-menu-container-elevation-shadow,var(--glass-raised-box-shadow))]",
-        "text-white select-none font-['Google_Sans_Text',sans-serif]",
+        "text-white select-none font-sans antialiased",
         className
       )}
       style={{
@@ -361,8 +564,30 @@ export function FlowPromptBoxSettings({
             {otherParams.map(([key, def]) => {
               const val = paramValues[key];
 
-              // Render Select / Enums (e.g. Quality 1K/2K/4K or VideoResolution 720p/1080p)
+              // Render Select / Enums (e.g. Quality 1K/2K/4K or VideoResolution 720p/1080p, Duration, Camera Motion)
               if (Array.isArray(def.values) && def.values.length > 0) {
+                const hasLongLabels = def.values.some((item) => {
+                  const str = typeof item === "object" ? item.label || item.value : String(item);
+                  return str.length > 6;
+                });
+                const shouldUseDropdown =
+                  def.type === "select" || key === "camera_motion" || (hasLongLabels && def.values.length > 3);
+
+                if (shouldUseDropdown) {
+                  return (
+                    <FlowParamSelect
+                      key={key}
+                      paramKey={key}
+                      def={def}
+                      value={val}
+                      onChange={onParamChange}
+                    />
+                  );
+                }
+
+                const isGrid = def.values.length > 5;
+                const gridColsClass = def.values.length > 8 ? "grid-cols-5" : "grid-cols-4";
+
                 return (
                   <flow-toggles
                     key={key}
@@ -370,18 +595,21 @@ export function FlowPromptBoxSettings({
                     className="block w-full"
                   >
                     <mat-button-toggle-group
-                      className="mat-button-toggle-group toggle-group flex items-center gap-1 p-1 bg-[rgba(218,220,224,0.05)] rounded-[12px] w-full"
+                      className={cn(
+                        "mat-button-toggle-group toggle-group p-1 bg-[rgba(218,220,224,0.05)] rounded-[12px] w-full max-w-full",
+                        isGrid ? cn("grid", gridColsClass, "gap-1") : "flex items-center gap-1"
+                      )}
                       role="radiogroup"
                     >
                       {def.values.map((item) => {
                         const itemVal = typeof item === "object" ? item.value : item;
-                        let itemLabel = typeof item === "object" ? (item.label || item.value) : item;
+                        let itemLabel = typeof item === "object" ? item.label || item.value : item;
                         if ((key === "duration" || def.label?.toLowerCase()?.includes("durée")) && typeof itemLabel === "string") {
                           if (itemLabel.endsWith("s") && !itemLabel.includes(" ")) {
                             itemLabel = itemLabel.replace("s", " s");
                           }
                         }
-                        const isChecked = String(val) === String(itemVal);
+                        const isChecked = String(val) === String(itemVal) || (!val && itemVal === def.default);
                         const hasInfo = itemVal === "360p" || item?.info;
                         const infoText = item?.info || (itemVal === "360p" ? "La résolution 360p est générée plus rapidement, mais elle est plus faible" : "");
 
@@ -391,7 +619,8 @@ export function FlowPromptBoxSettings({
                             role="presentation"
                             aria-description={infoText || undefined}
                             className={cn(
-                              "mat-button-toggle toggle flex-toggle mat-button-toggle-appearance-standard mat-button-toggle-animations-enabled flex-1 flex h-8 rounded-[10px] transition-all",
+                              "mat-button-toggle toggle flex h-8 rounded-[10px] transition-all overflow-hidden",
+                              !isGrid && "flex-1",
                               isChecked && "mat-button-toggle-checked"
                             )}
                           >
@@ -402,12 +631,12 @@ export function FlowPromptBoxSettings({
                               role="radio"
                               aria-checked={isChecked}
                               className={cn(
-                                "mat-button-toggle-button w-full h-8 text-white",
+                                "mat-button-toggle-button w-full h-8 text-white px-1",
                                 isChecked ? "font-semibold" : "font-medium"
                               )}
                             >
                               <span className="mat-button-toggle-label-content flex items-center justify-center gap-1 truncate w-full text-center">
-                                <span className="toggle-label flex items-center justify-center gap-1">
+                                <span className="toggle-label flex items-center justify-center gap-1 truncate">
                                   <span className="toggle-text truncate text-white">{itemLabel}</span>
                                   {hasInfo && (
                                     <GoogleIcon
@@ -492,141 +721,48 @@ export function FlowPromptBoxSettings({
 
         {/* ── 4. MODEL SELECT TRIGGER (only when models exist) ── */}
         {models && models.length > 0 && currentModel && (
-          <div className="relative w-full" ref={modelMenuRef}>
-            <Button
-              type="button"
-              variant="flow-select-trigger"
-              aria-label="Sélectionner une famille de modèles"
-              onClick={() => setModelMenuOpen((v) => !v)}
-              className="mdc-button mat-mdc-button-base mat-mdc-menu-trigger mdc-button--unelevated mat-mdc-unelevated-button mat-unthemed flow-button-primary flow-button-medium w-full h-8 px-2.5 rounded-[12px] bg-[rgba(218,220,224,0.05)] hover:bg-[rgba(218,220,224,0.1)] active:bg-[rgba(218,220,224,0.2)] text-white flex items-center justify-between transition-all cursor-pointer outline-none"
-            >
-              <span className="mdc-button__label flex items-center justify-between w-full">
-                <span className="model-select-trigger-content flex items-center gap-2 text-[12px] font-medium truncate text-white">
-                  {currentModelIcon ? (
-                    <img
-                      src={currentModelIcon}
-                      alt=""
-                      className="size-3.5 rounded-[3px] object-contain brightness-0 invert shrink-0"
-                      onError={(e) => {
-                        e.currentTarget.style.display = "none";
-                      }}
-                    />
-                  ) : (
-                    <span className="text-[14px]">🍌</span>
-                  )}
-                  <span className="truncate text-white">{currentModel?.name || "Model"}</span>
-                </span>
-                <GoogleIcon
-                  iconName="arrow_drop_down"
-                  className={cn("text-[20px] text-white transition-transform", modelMenuOpen && "rotate-180")}
-                />
-              </span>
-            </Button>
-
-              {/* Inline Model Dropdown Menu if toggled */}
-              {modelMenuOpen && models.length > 0 && (
-                <div
-                  id="cdk-overlay-79"
-                  className="cdk-overlay-pane absolute bottom-[calc(100%+8px)] left-0 w-full z-50 !max-h-none !h-auto"
-                  style={{
-                    position: "absolute",
-                    bottom: "calc(100% + 8px)",
-                    left: 0,
-                    width: "100%",
-                    zIndex: 1000,
-                    maxHeight: "none",
-                    height: "auto",
-                  }}
-                >
-                  <div
-                    tabIndex={-1}
-                    role="menu"
-                    className="mat-mdc-menu-panel flow-menu-panel flow-model-picker-panel mat-menu-above mat-menu-after w-full !h-auto max-h-[320px] overflow-y-auto"
-                    id="mat-menu-panel-158"
-                    style={{
-                      transformOrigin: "left bottom",
-                      maxHeight: "320px",
-                      height: "auto",
-                      backgroundColor: "rgba(22, 23, 24, 0.6)",
-                      backdropFilter: "blur(100px)",
-                      WebkitBackdropFilter: "blur(100px)",
+          <FlowSelect
+            value={currentModel.id}
+            onChange={(selectedId) => onSelectModel?.(selectedId)}
+            items={models.map((m) => {
+              const icon = resolveModelIcon(m);
+              const isImgIcon = icon && (icon.startsWith("/") || icon.startsWith("http") || icon.includes("."));
+              return {
+                value: m.id,
+                label: m.name,
+                icon: isImgIcon ? (
+                  <img
+                    src={icon}
+                    alt=""
+                    className="size-4 object-contain brightness-0 invert shrink-0"
+                    onError={(e) => {
+                      e.currentTarget.style.display = "none";
                     }}
-                  >
-                    <div className="mat-mdc-menu-content">
-                      {models.map((m) => {
-                        const isSelected = m.id === currentModel?.id;
-                        const icon = resolveModelIcon(m);
-                        const isImgIcon = icon && (icon.startsWith("/") || icon.startsWith("http") || icon.includes("."));
-
-                        return (
-                          <flow-menu-item
-                            key={m.id}
-                            className={cn("block w-full !h-[48px] !min-h-[48px]", isSelected && "selected")}
-                          >
-                            <button
-                              type="button"
-                              mat-menu-item=""
-                              className={cn(
-                                "mat-mdc-menu-item mat-focus-indicator mat-mdc-menu-trigger mat-mdc-tooltip-trigger flow-internal-menu-item w-full !h-[48px] !min-h-[48px] text-white",
-                                isSelected && "selected"
-                              )}
-                              role="menuitem"
-                              tabIndex={0}
-                              aria-expanded="false"
-                              onClick={() => {
-                                onSelectModel?.(m.id);
-                                setModelMenuOpen(false);
-                              }}
-                            >
-                              <span className="mat-mdc-menu-item-text text-white">
-                                <span className="left-content flex items-center gap-2">
-                                  {isImgIcon ? (
-                                    <img
-                                      src={icon}
-                                      alt=""
-                                      className="size-4 object-contain brightness-0 invert shrink-0"
-                                      onError={(e) => {
-                                        e.currentTarget.style.display = "none";
-                                      }}
-                                    />
-                                  ) : (
-                                    <mat-icon
-                                      role="img"
-                                      className="mat-icon notranslate google-symbols mat-icon-no-color text-white"
-                                      aria-hidden="true"
-                                      data-mat-icon-type="font"
-                                    >
-                                      {icon || "volume_up"}
-                                    </mat-icon>
-                                  )}
-                                  <span className="item-text text-white">
-                                    <span className="label text-white">{m.name}</span>
-                                  </span>
-                                </span>
-                                {isSelected && (
-                                  <mat-icon
-                                    role="img"
-                                    className="mat-icon notranslate google-symbols mat-icon-no-color text-[16px] text-white shrink-0 ml-1"
-                                    aria-hidden="true"
-                                    data-mat-icon-type="font"
-                                  >
-                                    check
-                                  </mat-icon>
-                                )}
-                              </span>
-                              <div
-                                matripple=""
-                                className="mat-ripple mat-mdc-menu-ripple"
-                              />
-                            </button>
-                          </flow-menu-item>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
+                  />
+                ) : (
+                  <GoogleIcon iconName={icon || "volume_up"} className="text-[16px] text-white shrink-0" />
+                ),
+              };
+            })}
+            icon={
+              currentModelIcon ? (
+                <img
+                  src={currentModelIcon}
+                  alt=""
+                  className="size-3.5 rounded-[3px] object-contain brightness-0 invert shrink-0"
+                  onError={(e) => {
+                    e.currentTarget.style.display = "none";
+                  }}
+                />
+              ) : (
+                <span className="text-[14px]">🍌</span>
+              )
+            }
+            displayValue={currentModel?.name || "Model"}
+            width={240}
+            maxHeightLimit={320}
+            ariaLabel="Sélectionner une famille de modèles"
+          />
         )}
 
         {/* ── 6. OUTPUTS / VARIATIONS TOGGLES (only when models exist) ── */}
@@ -689,7 +825,7 @@ export function FlowPromptBoxSettings({
                   className="credit-cost-link text-white underline underline-offset-2 hover:text-white/80 transition-colors font-medium"
                   href="https://support.google.com/googleone?p=g1_ai_credit_menu"
                 >
-                  {creditCost || 0}&nbsp;crédits
+                  {displayCredits}&nbsp;{displayCredits === 1 ? "crédit" : "crédits"}
                 </a>
               </span>
             </span>

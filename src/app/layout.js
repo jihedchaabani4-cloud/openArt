@@ -15,10 +15,12 @@ const googleSans = localFont({
     {
       path: "../../public/fonts/GoogleSans-VariableFont_GRAD,opsz,wght.ttf",
       style: "normal",
+      weight: "100 900",
     },
     {
       path: "../../public/fonts/GoogleSans-Italic-VariableFont_GRAD,opsz,wght.ttf",
       style: "italic",
+      weight: "100 900",
     },
   ],
   display: "swap",

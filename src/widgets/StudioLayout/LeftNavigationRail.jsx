@@ -45,9 +45,7 @@ export function LeftNavigationRail() {
 
   if (!selectedProjectId) return null;
 
-  const elementsHref = elements.length > 0
-    ? `/cinema-studio/${selectedProjectId}/elements`
-    : `/cinema-studio/${selectedProjectId}/elements/new`;
+  const elementsHref = `/cinema-studio/${selectedProjectId}/elements`;
 
   const charactersHref = characters.length > 0
     ? `/cinema-studio/${selectedProjectId}/characters`
@@ -103,10 +101,10 @@ export function LeftNavigationRail() {
               prefetch={true}
               onClick={() => setOptimisticTab(item.id)}
               className={cn(
-                "flex items-center h-[42px] rounded-[14px] transition-colors duration-100 w-full select-none outline-none overflow-hidden",
+                "flex items-center h-[42px] rounded-[14px] transition-colors duration-100 w-full select-none outline-none overflow-hidden font-sans font-medium text-[14px] leading-5 antialiased",
                 item.isActive
-                  ? "bg-[#2a2a2a] text-white font-medium shadow-sm"
-                  : "text-white/80 hover:text-white hover:bg-white/[0.06] font-normal"
+                  ? "bg-[#2a2a2a] text-white shadow-sm"
+                  : "text-white/80 hover:text-white hover:bg-white/[0.06]"
               )}
               title={!isExpanded ? item.label : undefined}
             >
@@ -121,7 +119,7 @@ export function LeftNavigationRail() {
               </span>
               <span
                 className={cn(
-                  "text-[13.5px] tracking-tight truncate flex-1 pr-2 whitespace-nowrap",
+                  "tracking-normal truncate flex-1 pr-2 whitespace-nowrap",
                   isExpanded ? "block" : "hidden"
                 )}
               >
@@ -141,8 +139,8 @@ export function LeftNavigationRail() {
           type="button"
           onClick={handleToggleExpand}
           className={cn(
-            "flex items-center h-[42px] rounded-[14px] transition-colors duration-100 w-full select-none outline-none overflow-hidden cursor-pointer",
-            "text-white/80 hover:text-white hover:bg-white/[0.06] font-normal"
+            "flex items-center h-[42px] rounded-[14px] transition-colors duration-100 w-full select-none outline-none overflow-hidden cursor-pointer font-sans font-medium text-[14px] leading-5 antialiased",
+            "text-white/80 hover:text-white hover:bg-white/[0.06]"
           )}
           title={isExpanded ? "Réduire la barre" : "Développer la barre"}
           aria-label={isExpanded ? "Réduire la barre" : "Développer la barre"}
@@ -156,7 +154,7 @@ export function LeftNavigationRail() {
           </span>
           <span
             className={cn(
-              "text-[13.5px] tracking-tight truncate flex-1 text-left pr-2 whitespace-nowrap",
+              "tracking-normal truncate flex-1 text-left pr-2 whitespace-nowrap",
               isExpanded ? "block" : "hidden"
             )}
           >

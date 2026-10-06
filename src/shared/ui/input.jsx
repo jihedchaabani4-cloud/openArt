@@ -96,7 +96,7 @@ const Input = React.forwardRef(({
     return (
       <div 
         className={cn(
-          "flex flex-col gap-1.5 w-full font-['Google_Sans_Text',sans-serif]",
+          "flex flex-col gap-1.5 w-full font-sans antialiased",
           containerClassName
         )}
         style={{
@@ -113,7 +113,7 @@ const Input = React.forwardRef(({
         )}
         <div 
           className={cn(
-            "relative flex items-center justify-between w-full transition-all border-none outline-none font-['Google_Sans_Text',sans-serif]",
+            "relative flex items-center justify-between w-full transition-all border-none outline-none font-sans antialiased",
             isSearch
               ? "h-[42px] min-h-[42px] rounded-[16px] border border-[var(--foreground-state-05)] px-2.5 gap-2 text-sm text-[var(--mat-sys-on-surface,#e3e3e3)] shadow-[var(--glass-raised-box-shadow)] hover:bg-[var(--foreground-state-15)] focus-within:bg-[var(--foreground-state-15)] focus-within:border-[rgba(218,220,224,0.18)]"
               : isBlurInput
@@ -165,8 +165,8 @@ const Input = React.forwardRef(({
             value={hasPrefix ? displayValue : value}
             onChange={handleChange}
             className={cn(
-              "bg-transparent border-none outline-none p-0 flex-1 placeholder:text-[var(--mat-sys-on-surface-variant,#8e918f)] text-[var(--mat-sys-on-surface,#e3e3e3)] min-w-0 font-['Google_Sans_Text',sans-serif] shadow-none cursor-text",
-              isSearch ? "text-[13.5px] font-normal leading-normal placeholder:text-[rgba(218,220,224,0.45)]" : "text-sm font-medium",
+              "bg-transparent border-none outline-none p-0 flex-1 placeholder:text-[var(--mat-sys-on-surface-variant,#8e918f)] text-[var(--mat-sys-on-surface,#e3e3e3)] min-w-0 font-sans antialiased shadow-none cursor-text",
+              isSearch ? "text-[13.5px] font-medium leading-normal placeholder:text-[rgba(218,220,224,0.45)]" : "text-sm font-medium",
               className
             )}
             style={{
@@ -229,14 +229,15 @@ const Input = React.forwardRef(({
       onChange={onChange}
       className={cn(
         isNavbar
-          ? "bg-transparent border-none outline-none text-md font-medium tracking-tight text-[var(--mat-sys-on-surface,#e3e3e3)] placeholder:[var(--mat-sys-on-surface-variant,#8e918f)] max-w-[260px] focus:text-white focus:ring-0 p-0 shadow-none cursor-text disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          : "flex min-h-[52px] w-full rounded-[var(--mat-sys-corner-medium,12px)] border-none bg-transparent px-3 py-2 text-[var(--mat-sys-on-surface,#e3e3e3)] placeholder:text-[var(--mat-sys-on-surface-variant,#8e918f)] hover:bg-[var(--foreground-state-05)] focus:bg-[var(--foreground-state-10)] focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 transition-all font-sans shadow-none cursor-text p-0",
+          ? "bg-transparent border-none outline-none text-md font-medium tracking-tight text-[var(--mat-sys-on-surface,#e3e3e3)] placeholder:[var(--mat-sys-on-surface-variant,#8e918f)] max-w-[260px] focus:text-white focus:ring-0 p-0 shadow-none cursor-text disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-sans antialiased"
+          : "flex min-h-[52px] w-full rounded-[var(--mat-sys-corner-medium,12px)] border-none bg-transparent px-3 py-2 text-[var(--mat-sys-on-surface,#e3e3e3)] placeholder:text-[var(--mat-sys-on-surface-variant,#8e918f)] hover:bg-[var(--foreground-state-05)] focus:bg-[var(--foreground-state-10)] focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 transition-all font-sans antialiased shadow-none cursor-text p-0",
         !isNavbar && !className?.includes("text-") && "text-sm",
         className
       )}
       style={{
         WebkitTapHighlightColor: "transparent",
         textRendering: "optimizeSpeed",
+        WebkitFontSmoothing: "antialiased",
         borderStyle: "none",
         boxShadow: "none",
       }}

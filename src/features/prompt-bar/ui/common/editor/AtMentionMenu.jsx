@@ -1,14 +1,131 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
-import { GoogleIcon } from "@/shared/ui/GoogleIcon";
+import { cn } from "@/shared/lib/utils";
+
+// ── Icons ────────────────────────────────────────────────────────────────────
+
+function AssetLibraryIcon({ className }) {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      <rect width="18" height="18" x="3" y="3" rx="3" ry="3" />
+      <circle cx="9" cy="9" r="2" />
+      <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
+    </svg>
+  );
+}
 
 /**
- * AtMentionMenu (Version 2: Top Panel Menu Zone above PromptBar shell)
+ * Resolves the reference category label accurately:
+ *  - "Character" for characters
+ *  - "Element • [Type]" for elements (e.g. Element • Vehicle, Element • Style, Element • Object)
+ *  - "Upload" for uploaded user media
+ *  - "Generation" for generated media assets
+ */
+export function getReferenceCategory(ref) {
+  if (!ref) return "Generation";
+
+  const isChar =
+    ref.type === "character" ||
+    ref.role === "character" ||
+    ref.is_character ||
+    String(ref.workflow_type || ref.workflowType || "").toLowerCase().includes("character") ||
+    Boolean(ref.characterId);
+
+  const isElem =
+    ref.type === "element" ||
+    ref.role === "element" ||
+    ref.is_element ||
+    String(ref.workflow_type || ref.workflowType || "").toLowerCase().includes("element") ||
+    Boolean(ref.elementId);
+
+  if (isChar) {
+    return "Character";
+  }
+
+  if (isElem) {
+    let elemType =
+      ref.element_type ||
+      ref.elementType ||
+      ref.category ||
+      ref.subType ||
+      ref.subtype ||
+      ref.element?.element_type ||
+      ref.element?.type ||
+      ref.rawValue?.element_type;
+
+    if (!elemType && typeof ref.label === "string") {
+      const clean = ref.label.replace(/element/gi, "").trim();
+      if (clean && clean.toLowerCase() !== "element") {
+        elemType = clean;
+      }
+    }
+
+    if (!elemType && typeof ref.displayName === "string") {
+      if (ref.label && ref.label.toLowerCase() !== "element") {
+        elemType = ref.label;
+      }
+    }
+
+    if (!elemType) {
+      elemType = "Object";
+    }
+
+    const formattedElemType =
+      elemType.charAt(0).toUpperCase() + elemType.slice(1).toLowerCase();
+
+    return `Element • ${formattedElemType}`;
+  }
+
+  // Media references: distinguish Upload vs Generation
+  const isUpload =
+    ref.is_upload === true ||
+    ref.type === "upload" ||
+    ref.role === "upload" ||
+    ref.source === "upload" ||
+    ref.source === "uploaded" ||
+    ref.origin === "upload" ||
+    String(ref.workflow_type || ref.workflowType || "").toUpperCase() === "UPLOAD" ||
+    ref.workflowStepId === "UPLOAD" ||
+    String(ref.category || "").toLowerCase() === "upload" ||
+    String(ref.category || "").toLowerCase() === "uploads" ||
+    String(ref.label || "").toLowerCase() === "upload" ||
+    String(ref.label || "").toLowerCase() === "uploaded" ||
+    String(ref.id || "").toLowerCase().startsWith("upload") ||
+    String(ref.workflow_id || "").toLowerCase().startsWith("upload") ||
+    String(ref.assetId || "").toLowerCase().startsWith("upload") ||
+    Boolean(ref.rawValue?.is_upload || ref.rawValue?.type === "upload" || ref.rawValue?.workflow_type === "UPLOAD");
+
+  if (isUpload) {
+    return "Upload";
+  }
+
+  return "Generation";
+}
+
+/**
+ * AtMentionMenu
  *
- * Appears as a glassmorphic top panel directly above the prompt bar shell
- * when typing '@' or triggering the mention action.
+ * Streamlined @ mention menu matching the prompt bar design system:
+ *  - No borders (seamless with prompt bar shell)
+ *  - Background and blur matching prompt bar: bg-(--background-base-pri) / backdrop-blur-[80px]
+ *  - "Add" section: Asset library only
+ *  - "References" section showing type category:
+ *      • Character
+ *      • Element • [Type] (e.g. Element • Vehicle, Element • Style)
+ *      • Reference
+ *  - Keyboard navigation (Arrow Up/Down, Enter, Escape)
  */
 export function AtMentionMenu({
   open,
@@ -17,22 +134,83 @@ export function AtMentionMenu({
   onSelectReference,
   onOpenMediaLibrary,
   anchorRef,
+  query = "",
+  assetLibrarySubtitle = "Add from your assets",
+  className,
 }) {
-  const [search, setSearch] = useState("");
-  const [selectedIndex, setSelectedIndex] = useState(0);
   const containerRef = useRef(null);
+  const listRef = useRef(null);
+  const [selectedIndex, setSelectedIndex] = useState(0);
 
-  const filtered = references.filter((ref) => {
-    const title = (ref.displayName || ref.name || "").toLowerCase();
-    const sub = (ref.label || ref.type || "").toLowerCase();
-    const q = search.toLowerCase();
-    return title.includes(q) || sub.includes(q);
-  });
+  const q = (query || "").trim().toLowerCase();
 
-  // Handle outside click
+  const addItems = useMemo(() => {
+    const items = [
+      {
+        id: "asset_library",
+        section: "add",
+        title: "Asset library",
+        subtitle: assetLibrarySubtitle,
+        icon: AssetLibraryIcon,
+        action: () => {
+          onOpenMediaLibrary?.();
+        },
+      },
+    ];
+
+    if (!q) return items;
+    return items.filter(
+      (item) =>
+        item.title.toLowerCase().includes(q) ||
+        item.subtitle.toLowerCase().includes(q)
+    );
+  }, [q, assetLibrarySubtitle, onOpenMediaLibrary, onClose]);
+
+  const referenceItems = useMemo(() => {
+    if (!references || references.length === 0) return [];
+    const items = references.map((ref, idx) => {
+      const category = getReferenceCategory(ref);
+      return {
+        id: ref.id || ref.assetId || `ref_${idx}`,
+        section: "references",
+        title: ref.displayName || ref.name || `Reference #${idx + 1}`,
+        category,
+        url: ref.url || ref.thumbnail_url || ref.preview,
+        refData: ref,
+        action: () => {
+          onSelectReference?.(ref);
+          onClose?.();
+        },
+      };
+    });
+
+    if (!q) return items;
+    return items.filter(
+      (item) =>
+        item.title.toLowerCase().includes(q) ||
+        item.category.toLowerCase().includes(q)
+    );
+  }, [references, q, onSelectReference, onClose]);
+
+  // Combined flat list for unified keyboard navigation
+  const allItems = useMemo(() => {
+    return [...addItems, ...referenceItems];
+  }, [addItems, referenceItems]);
+
+  // Per-item DOM refs so we can scroll the highlighted item into view
+  const itemRefs = useRef([]);
+
+  // Reset highlight on query change or open
+  useEffect(() => {
+    if (open) {
+      setSelectedIndex(0);
+    }
+  }, [open, q]);
+
+  // Click outside listener
   useEffect(() => {
     if (!open) return;
-    const handleClick = (e) => {
+    const handleOutsideClick = (e) => {
       if (
         containerRef.current &&
         !containerRef.current.contains(e.target) &&
@@ -41,196 +219,168 @@ export function AtMentionMenu({
         onClose?.();
       }
     };
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
+    document.addEventListener("mousedown", handleOutsideClick);
+    return () => document.removeEventListener("mousedown", handleOutsideClick);
   }, [open, onClose, anchorRef]);
 
-  // Reset search when opening
+  // Scroll the newly-highlighted item into view on keyboard navigation
   useEffect(() => {
-    if (open) {
-      setSearch("");
-      setSelectedIndex(0);
+    const el = itemRefs.current[selectedIndex];
+    if (el) {
+      el.scrollIntoView({ block: "nearest", behavior: "smooth" });
     }
-  }, [open]);
+  }, [selectedIndex]);
 
-  // Keyboard navigation within the panel
+  // Keyboard navigation — capture phase so we intercept before Lexical/submit
+  // handlers; stopPropagation ensures Enter never triggers generate while open
   useEffect(() => {
     if (!open) return;
     const handleKeyDown = (e) => {
-      const total = filtered.length + (onOpenMediaLibrary ? 1 : 0);
-      if (total === 0) return;
+      if (allItems.length === 0) return;
 
       if (e.key === "ArrowDown") {
         e.preventDefault();
-        setSelectedIndex((i) => (i + 1) % total);
+        e.stopPropagation();
+        setSelectedIndex((prev) => (prev + 1) % allItems.length);
       } else if (e.key === "ArrowUp") {
         e.preventDefault();
-        setSelectedIndex((i) => (i - 1 + total) % total);
+        e.stopPropagation();
+        setSelectedIndex((prev) => (prev - 1 + allItems.length) % allItems.length);
       } else if (e.key === "Enter") {
         e.preventDefault();
-        if (selectedIndex < filtered.length) {
-          onSelectReference?.(filtered[selectedIndex]);
-          onClose?.();
-        } else if (onOpenMediaLibrary) {
-          onOpenMediaLibrary();
-          onClose?.();
+        e.stopPropagation();
+        const activeItem = allItems[selectedIndex];
+        if (activeItem) {
+          activeItem.action();
         }
       } else if (e.key === "Escape") {
         e.preventDefault();
+        e.stopPropagation();
         onClose?.();
       }
     };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [open, filtered, selectedIndex, onSelectReference, onOpenMediaLibrary, onClose]);
+
+    window.addEventListener("keydown", handleKeyDown, true);
+    return () => window.removeEventListener("keydown", handleKeyDown, true);
+  }, [open, allItems, selectedIndex, onClose]);
 
   if (!open) return null;
 
   return (
     <motion.div
       ref={containerRef}
-      initial={{ opacity: 0, scale: 0.98, y: 10 }}
+      initial={{ opacity: 0, scale: 0.98, y: 8 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.98, y: 8 }}
-      transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-      className="overflow-hidden rounded-[24px] bg-[#161718]/90 backdrop-blur-[60px] border border-white/10 shadow-[0_24px_80px_rgba(0,0,0,0.65)] pointer-events-auto w-full max-w-[580px] flex flex-col mb-2 z-50"
-    >
-      {/* Top Header */}
-      <div className="flex items-center justify-between px-4 pt-3.5 pb-2 border-b border-white/5">
-        <div className="flex items-center gap-2">
-          <div className="size-6 rounded-lg bg-white/10 flex items-center justify-center text-white/80">
-            <GoogleIcon iconName="alternate_email" className="text-[14px]" />
-          </div>
-          <span className="text-[12px] font-semibold text-white tracking-wide">
-            Mention Reference
-          </span>
-          <span className="text-[10px] text-white/40 px-1.5 py-0.5 rounded-full bg-white/5 border border-white/5">
-            {filtered.length} available
-          </span>
-        </div>
-
-        <div className="flex items-center gap-1 text-[10px] text-white/40">
-          <kbd className="px-1.5 py-0.5 rounded bg-white/10 font-mono text-[9px]">ESC</kbd>
-          <span>to close</span>
-        </div>
-      </div>
-
-      {/* Search Bar inside panel */}
-      {references.length > 3 && (
-        <div className="px-3 pt-2.5 pb-1">
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 border border-white/5 text-[13px] text-white/90 focus-within:border-white/20 focus-within:bg-white/10 transition-all">
-            <GoogleIcon iconName="search" className="text-[16px] text-white/40 shrink-0" />
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => {
-                setSearch(e.target.value);
-                setSelectedIndex(0);
-              }}
-              placeholder="Filter references..."
-              className="bg-transparent border-none outline-none text-white text-[13px] w-full placeholder:text-white/30"
-              autoFocus
-            />
-            {search && (
-              <button
-                type="button"
-                onClick={() => setSearch("")}
-                className="text-white/40 hover:text-white"
-              >
-                <GoogleIcon iconName="close" className="text-[14px]" />
-              </button>
-            )}
-          </div>
-        </div>
+      exit={{ opacity: 0, scale: 0.98, y: 6 }}
+      transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+      className={cn(
+        "w-full rounded-2xl bg-(--background-base-pri) backdrop-blur-[80px] shadow-none pointer-events-auto flex flex-col z-50 overflow-hidden select-none border-0 font-sans antialiased",
+        className
       )}
+    >
+      <div
+        ref={listRef}
+        className="flex flex-col py-2 px-2 max-h-[340px] overflow-y-auto scrollbar-thin scrollbar-thumb-white/15 scrollbar-track-transparent pr-1 font-sans antialiased"
+      >
+        {/* ── SECTION: Add ── */}
+        {addItems.length > 0 && (
+          <div>
+            <div className="text-[12px] font-medium text-white/50 px-3 pt-1 pb-1">
+              Add
+            </div>
+            <div className="flex flex-col gap-0.5">
+              {addItems.map((item) => {
+                const globalIdx = allItems.indexOf(item);
+                const isSelected = globalIdx === selectedIndex;
+                const Icon = item.icon;
 
-      {/* Reference Items List */}
-      <div className="flex flex-col gap-1 px-2.5 py-2 max-h-[280px] overflow-y-auto scrollbar-thin scrollbar-thumb-white/10">
-        {filtered.length === 0 ? (
-          <div className="py-6 text-center text-white/40 text-[12px]">
-            No matching references found.
+                return (
+                  <div
+                    key={item.id}
+                    ref={(el) => { itemRefs.current[globalIdx] = el; }}
+                    onClick={item.action}
+                    onMouseEnter={() => setSelectedIndex(globalIdx)}
+                    className={cn(
+                      "flex items-center gap-2.5 px-3 py-2 rounded-xl cursor-pointer transition-all text-left",
+                      isSelected
+                        ? "bg-white/[0.08] text-white ring-1 ring-white/20"
+                        : "hover:bg-white/[0.05] text-white/90"
+                    )}
+                  >
+                    <div className="size-4 shrink-0 flex items-center justify-center text-white/70">
+                      <Icon className="size-4" />
+                    </div>
+                    <div className="flex items-baseline gap-2 truncate">
+                      <span className="text-[14px] font-medium text-white">
+                        {item.title}
+                      </span>
+                      <span className="text-[13px] text-white/60 font-normal truncate">
+                        {item.subtitle}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
-        ) : (
-          filtered.map((ref, idx) => {
-            const isSelected = idx === selectedIndex;
-            const title = ref.displayName || ref.name || `Reference #${idx + 1}`;
-            const label = ref.label || ref.type || "Asset";
-            const imgUrl = ref.url || ref.thumbnail_url || ref.preview;
-
-            return (
-              <button
-                key={ref.id || ref.assetId || idx}
-                type="button"
-                onClick={() => {
-                  onSelectReference?.(ref);
-                  onClose?.();
-                }}
-                className={`flex items-center gap-3 px-3 py-2 rounded-xl text-left transition-all w-full group ${
-                  isSelected
-                    ? "bg-white/15 shadow-[0_2px_12px_rgba(0,0,0,0.3)] text-white"
-                    : "hover:bg-white/10 text-white/80 hover:text-white"
-                }`}
-              >
-                <div className="size-8 rounded-lg overflow-hidden border border-white/10 bg-white/5 shrink-0 flex items-center justify-center">
-                  {imgUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={imgUrl} alt={title} className="size-full object-cover" />
-                  ) : (
-                    <GoogleIcon iconName="image" className="text-[16px] text-white/50" />
-                  )}
-                </div>
-
-                <div className="flex flex-col min-w-0 flex-1">
-                  <span className="text-[13px] font-medium truncate leading-tight group-hover:text-white">
-                    {title}
-                  </span>
-                  <span className="text-[10px] text-white/45 truncate mt-0.5">
-                    {label}
-                  </span>
-                </div>
-
-                <div className="shrink-0 flex items-center gap-1.5 opacity-60 group-hover:opacity-100">
-                  <span className="text-[10px] text-white/50 px-2 py-0.5 rounded-md bg-white/5 border border-white/5">
-                    Insert @
-                  </span>
-                </div>
-              </button>
-            );
-          })
         )}
 
-        {/* Option to pick from Library or Upload */}
-        {onOpenMediaLibrary && (
-          <>
-            <div className="h-px bg-white/5 my-1" />
-            <button
-              type="button"
-              onClick={() => {
-                onOpenMediaLibrary();
-                onClose?.();
-              }}
-              className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-left transition-colors w-full text-[12px] ${
-                selectedIndex === filtered.length
-                  ? "bg-white/15 text-white"
-                  : "hover:bg-white/10 text-white/70 hover:text-white"
-              }`}
-            >
-              <div className="size-7 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-white/70">
-                <GoogleIcon iconName="add_photo_alternate" className="text-[16px]" />
-              </div>
-              <div className="flex flex-col">
-                <span className="font-medium text-white/90">Choose from Media Library / Upload...</span>
-                <span className="text-[10px] text-white/40">Pick any image from your workspace or disk</span>
-              </div>
-            </button>
-          </>
-        )}
-      </div>
+        {/* ── SECTION: Workspace References (if available or queried) ── */}
+        {referenceItems.length > 0 && (
+          <div>
+            <div className="text-[12px] font-medium text-white/50 px-3 pt-2 pb-1">
+              References
+            </div>
+            <div className="flex flex-col gap-0.5">
+              {referenceItems.map((item) => {
+                const globalIdx = allItems.indexOf(item);
+                const isSelected = globalIdx === selectedIndex;
 
-      {/* Footer shortcut hints */}
-      <div className="px-4 py-2 border-t border-white/5 bg-black/20 flex items-center justify-between text-[11px] text-white/40">
-        <span>Press <kbd className="px-1 py-0.5 rounded bg-white/10 text-white/70 font-mono text-[9px]">↑</kbd> <kbd className="px-1 py-0.5 rounded bg-white/10 text-white/70 font-mono text-[9px]">↓</kbd> to navigate</span>
-        <span>Press <kbd className="px-1 py-0.5 rounded bg-white/10 text-white/70 font-mono text-[9px]">ENTER</kbd> to insert</span>
+                return (
+                  <div
+                    key={item.id}
+                    ref={(el) => { itemRefs.current[globalIdx] = el; }}
+                    onClick={item.action}
+                    onMouseEnter={() => setSelectedIndex(globalIdx)}
+                    className={cn(
+                      "flex items-center gap-2.5 px-3 py-2 rounded-xl cursor-pointer transition-all text-left group",
+                      isSelected
+                        ? "bg-white/[0.08] text-white ring-1 ring-white/20"
+                        : "hover:bg-white/[0.05] text-white/90"
+                    )}
+                  >
+                    <div className="size-5 shrink-0 rounded-md overflow-hidden bg-white/10 flex items-center justify-center">
+                      {item.url ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={item.url}
+                          alt=""
+                          className="size-full object-cover"
+                        />
+                      ) : (
+                        <AssetLibraryIcon className="size-3 text-white/50" />
+                      )}
+                    </div>
+                    <div className="flex items-center justify-between gap-3 flex-1 min-w-0">
+                      <span className="text-[14px] font-medium text-white truncate">
+                        {item.title}
+                      </span>
+                      <span className="text-[11px] text-white/70 font-medium px-2 py-0.5 rounded-full bg-white/[0.06] shrink-0 border-0 ml-auto">
+                        {item.category}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {allItems.length === 0 && (
+          <div className="py-6 text-center text-[13px] text-white/40">
+            No matching options found
+          </div>
+        )}
       </div>
     </motion.div>
   );

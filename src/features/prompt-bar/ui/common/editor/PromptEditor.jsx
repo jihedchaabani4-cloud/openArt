@@ -28,7 +28,7 @@ const theme = {
 };
 
 // ── Sync external value + Enter to submit ────────────────────────────────────
-function SubmissionPlugin({ onSubmit, externalValue }) {
+function SubmissionPlugin({ onSubmit, externalValue, disabled = false }) {
   const [editor] = useLexicalComposerContext();
 
   useEffect(() => {
@@ -53,6 +53,7 @@ function SubmissionPlugin({ onSubmit, externalValue }) {
     return editor.registerCommand(
       KEY_DOWN_COMMAND,
       (e) => {
+        if (disabled) return false;
         if (e.key === "Enter" && !e.shiftKey) {
           e.preventDefault();
           onSubmit?.();
@@ -62,21 +63,61 @@ function SubmissionPlugin({ onSubmit, externalValue }) {
       },
       COMMAND_PRIORITY_HIGH
     );
-  }, [editor, onSubmit]);
+  }, [editor, onSubmit, disabled]);
 
   return null;
 }
 
 // ── @ Shortcut Plugin ────────────────────────────────────────────────────────
 /**
- * Intercepts the '@' key BEFORE it is inserted into the editor.
- * - Prevents the default insertion entirely (e.key === "@").
- * - Opens the Media Library dialog immediately.
- * - On asset selection, inserts MentionNode chips at the cursor position.
- * No text scanning, no deletion loops, no race conditions.
+ * Intercepts the '@' key:
+ *  - Opens the mention menu immediately.
+ *  - After opening, tracks every subsequent keystroke and emits the text
+ *    after the last '@' via onMentionQueryChange so the menu can filter live.
+ *  - On Escape, clears the query and closes the menu.
+ *  - On asset selection, removes the "@query" text and inserts MentionNode chips.
  */
-function AtShortcutPlugin({ onTriggerMentionDialog }) {
+function AtShortcutPlugin({ onTriggerMentionDialog, onMentionQueryChange, mentionOpen }) {
   const [editor] = useLexicalComposerContext();
+
+  // Track query live: read text after last @ each time editor content changes
+  useEffect(() => {
+    if (!mentionOpen) return;
+
+    return editor.registerUpdateListener(({ editorState }) => {
+      editorState.read(() => {
+        let query = "";
+        let found = false;
+
+        const selection = $getSelection();
+        if ($isRangeSelection(selection)) {
+          const anchor = selection.anchor;
+          const node = anchor.getNode();
+          const text = node.getTextContent?.() || "";
+          const offset = anchor.offset;
+          const before = text.slice(0, offset);
+          const atIndex = before.lastIndexOf("@");
+          if (atIndex !== -1) {
+            query = before.slice(atIndex + 1);
+            found = true;
+          }
+        }
+
+        // Fallback: check full editor text if selection was lost (e.g. blurred when clicking popover)
+        if (!found) {
+          const fullText = $getRoot().getTextContent();
+          const atIndex = fullText.lastIndexOf("@");
+          if (atIndex !== -1) {
+            const afterAt = fullText.slice(atIndex + 1);
+            query = afterAt.split("\n")[0];
+            found = true;
+          }
+        }
+
+        onMentionQueryChange?.(found ? query : "");
+      });
+    });
+  }, [editor, mentionOpen, onMentionQueryChange]);
 
   useEffect(() => {
     if (!onTriggerMentionDialog) return;
@@ -84,41 +125,101 @@ function AtShortcutPlugin({ onTriggerMentionDialog }) {
     return editor.registerCommand(
       KEY_DOWN_COMMAND,
       (event) => {
-        // Detect '@' regardless of keyboard layout (key value or Shift+2)
+        // When mention menu or import media popover is open, arrow keys navigate
+        // the popover items instead of moving the cursor in the prompt bar textarea.
+        if (mentionOpen && ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.key)) {
+          event.preventDefault();
+          return true;
+        }
+
         if (event.key !== "@") return false;
 
-        // ① Prevent '@' from ever appearing in the editor
-        event.preventDefault();
+        // Allow '@' to appear in the editor, then open the mention menu
+        setTimeout(() => {
+          onMentionQueryChange?.(""); // reset query
+          onTriggerMentionDialog((assets) => {
+            editor.update(() => {
+              const root = $getRoot();
+              
+              // Find the text node containing '@'
+              const textNodes = [];
+              function collect(node) {
+                if (node.getType?.() === "text") {
+                  textNodes.push(node);
+                } else if (typeof node.getChildren === "function") {
+                  node.getChildren().forEach(collect);
+                }
+              }
+              collect(root);
 
-        // ② Open the Media Library; provide a callback for when assets are chosen
-        onTriggerMentionDialog((assets) => {
-          editor.update(() => {
-            const selection = $getSelection();
-            if (!$isRangeSelection(selection)) return;
+              let targetNode = null;
+              let atIndex = -1;
+              let nodeText = "";
 
-            assets.forEach((asset, idx) => {
-              const assetType = asset.type || asset.workflow_type || (asset.characterId ? "character" : (asset.elementId ? "element" : "media"));
-              const canonicalId = asset.workflow_id || asset.workflowId || asset.workflow?.id || asset.id || asset.asset_id;
-              const mentionNode = $createMentionNode(
-                asset.url || asset.avatar_url || asset.image_url,
-                idx,
-                asset.displayName || asset.name || "Ref",
-                canonicalId,
-                assetType
-              );
-              // Insert chip + trailing space at the cursor
-              selection.insertNodes([mentionNode, $createTextNode(" ")]);
+              for (let i = textNodes.length - 1; i >= 0; i--) {
+                const tn = textNodes[i];
+                const content = tn.getTextContent?.() || "";
+                const idx = content.lastIndexOf("@");
+                if (idx !== -1) {
+                  targetNode = tn;
+                  atIndex = idx;
+                  nodeText = content;
+                  break;
+                }
+              }
+
+              if (targetNode && atIndex !== -1) {
+                const prefix = nodeText.slice(0, atIndex);
+                // The mention query extends to end of node or next space
+                targetNode.setTextContent(prefix);
+
+                let lastInserted = targetNode;
+                assets.forEach((asset, idx) => {
+                  const assetType = asset.type || asset.workflow_type || (asset.characterId ? "character" : (asset.elementId ? "element" : "media"));
+                  const canonicalId = asset.workflow_id || asset.workflowId || asset.workflow?.id || asset.id || asset.asset_id;
+                  const mentionNode = $createMentionNode(
+                    asset.url || asset.avatar_url || asset.image_url,
+                    idx,
+                    asset.displayName || asset.name || "Ref",
+                    canonicalId,
+                    assetType
+                  );
+                  lastInserted.insertAfter(mentionNode);
+                  lastInserted = mentionNode;
+                });
+
+                const space = $createTextNode(" ");
+                lastInserted.insertAfter(space);
+                space.select(1, 1);
+              } else {
+                // If no @ text node found, append at the end
+                const selection = $getSelection();
+                if ($isRangeSelection(selection)) {
+                  assets.forEach((asset, idx) => {
+                    const assetType = asset.type || asset.workflow_type || (asset.characterId ? "character" : (asset.elementId ? "element" : "media"));
+                    const canonicalId = asset.workflow_id || asset.workflowId || asset.workflow?.id || asset.id || asset.asset_id;
+                    const mentionNode = $createMentionNode(
+                      asset.url || asset.avatar_url || asset.image_url,
+                      idx,
+                      asset.displayName || asset.name || "Ref",
+                      canonicalId,
+                      assetType
+                    );
+                    selection.insertNodes([mentionNode, $createTextNode(" ")]);
+                  });
+                }
+              }
+
+              onMentionQueryChange?.(""); // clear query after insertion
             });
           });
-        });
+        }, 0);
 
-        // ③ Mark command as handled so nothing else processes it
-        return true;
+        return false;
       },
-      // HIGH priority so we run before SubmissionPlugin's Enter handler
       COMMAND_PRIORITY_HIGH
     );
-  }, [editor, onTriggerMentionDialog]);
+  }, [editor, onTriggerMentionDialog, onMentionQueryChange]);
 
   return null;
 }
@@ -131,6 +232,8 @@ export function PromptEditor({
   referenceImages,
   textareaRef,
   onTriggerMentionDialog,
+  onMentionQueryChange,
+  mentionOpen = false,
   placeholder = "Describe the scene you imagine...",
 }) {
   // Move nodes inside to participate in HMR correctly
@@ -177,10 +280,14 @@ export function PromptEditor({
         />
 
         <HistoryPlugin />
-        <AtShortcutPlugin onTriggerMentionDialog={onTriggerMentionDialog} />
+        <AtShortcutPlugin
+          onTriggerMentionDialog={onTriggerMentionDialog}
+          onMentionQueryChange={onMentionQueryChange}
+          mentionOpen={mentionOpen}
+        />
         <TextTagConverterPlugin referenceImages={referenceImages} />
         <OnChangePlugin onChange={handleLexicalChange} />
-        <SubmissionPlugin onSubmit={onSubmit} externalValue={value} />
+        <SubmissionPlugin onSubmit={onSubmit} externalValue={value} disabled={mentionOpen} />
       </div>
     </LexicalComposer>
   );

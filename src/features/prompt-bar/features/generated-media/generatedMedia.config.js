@@ -23,8 +23,8 @@ export const COMPOSITION_REQUIREMENTS = {
   ],
   video: {
     frames: [
-      { role: "start", label: "Start Frame", accepts: "image/*" },
-      { role: "end",   label: "End Frame",   accepts: "image/*" },
+      { role: "start", label: "Start", accepts: "image/*" },
+      { role: "end",   label: "End",   accepts: "image/*" },
     ],
     reference: [
       { role: "reference", label: "Reference", accepts: "image/*" },

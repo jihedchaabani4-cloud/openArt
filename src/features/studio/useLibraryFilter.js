@@ -133,7 +133,16 @@ export function useLibraryFilter(library = [], mode = "all", initialCategory = "
       items = items.filter((g) => 
         (g.prompt?.toLowerCase().includes(q)) || 
         (g.display_name?.toLowerCase().includes(q)) ||
+        (g.displayName?.toLowerCase().includes(q)) ||
+        (g.name?.toLowerCase().includes(q)) ||
+        (g.title?.toLowerCase().includes(q)) ||
+        (g.label?.toLowerCase().includes(q)) ||
+        (g.element_type?.toLowerCase().includes(q)) ||
+        (g.category?.toLowerCase().includes(q)) ||
+        (g.metadata?.displayName?.toLowerCase().includes(q)) ||
+        (g.mediaMetadata?.displayName?.toLowerCase().includes(q)) ||
         (g.asset_id?.toLowerCase().includes(q)) ||
+        (g.workflow_id?.toLowerCase().includes(q)) ||
         (g.id?.toLowerCase().includes(q))
       );
     }

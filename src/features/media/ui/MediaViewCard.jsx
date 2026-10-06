@@ -11,18 +11,19 @@ import { Button } from "@/shared/ui/button";
  * Modeled after Cinema Studio's MediaGridItem (rounded-2xl, video hover scrub, sleek shadow)
  * Pure media presentation: NO menus, NO action buttons, NO text labels.
  */
-export function MediaViewCard({
+export const MediaViewCard = React.forwardRef(function MediaViewCard({
   item,
   itemUrl: propUrl,
   isVideo: propIsVideo,
   isSelected = false,
+  isHighlighted = false,
   isDisabled = false,
   onSelect,
   width,
   height,
   aspectRatio,
   className,
-}) {
+}, ref) {
   const videoRef = useRef(null);
 
   // Motion values for video playback scrub bar
@@ -78,6 +79,7 @@ export function MediaViewCard({
 
   return (
     <Button
+      ref={ref}
       type="button"
       variant="ghost"
       size="tile"
@@ -95,9 +97,11 @@ export function MediaViewCard({
         aspectRatio: aspectRatio || undefined,
       }}
       className={cn(
-        "group relative rounded-xl overflow-hidden bg-[#0a0a0a] select-none border-none p-0 block text-left outline-none h-auto",
+        "group relative rounded-xl overflow-hidden bg-[#0a0a0a] select-none border-none p-0 block text-left outline-none h-auto transition-all",
         "shadow-lg hover:shadow-2xl",
-        isSelected
+        isHighlighted
+          ? "ring-2 ring-white scale-[1.02] shadow-2xl z-10"
+          : isSelected
           ? "ring-2 ring-white"
           : "hover:ring-2 hover:ring-white/20",
         isDisabled
@@ -178,4 +182,4 @@ export function MediaViewCard({
       )}
     </Button>
   );
-}
+});

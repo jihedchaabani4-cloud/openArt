@@ -11,6 +11,7 @@ import { MediaInput } from "../ui/common/MediaInput.jsx";
 import { SwapIcon, ReferenceButton, ViewReference } from "../ui/common/ReferenceButton.jsx";
 import { ImportMediaPopover } from "@/widgets/ImportMediaDialog/ImportMediaPopover";
 import { PromptEditor } from "../ui/common/editor/PromptEditor.jsx";
+import { AtMentionMenu } from "../ui/common/editor/AtMentionMenu.jsx";
 import { FlowPromptBoxSettings, getRatioIcon } from "../ui/common/selectors/FlowPromptBoxSettings.jsx";
 import { Button } from "@/shared/ui/button";
 
@@ -23,6 +24,7 @@ import {
   autoAssignReference,
   getAssetId,
 } from "../core/tagsService.js";
+import { calculateModelCredits } from "../core/creditCalculationService.js";
 import { getModelReferenceCapability, resolveModelIcon } from "../core/modelManagement.js";
 import {
   calculateUsedImages,
@@ -250,6 +252,10 @@ function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, class
   const currentRatioIcon = getRatioIcon(currentRatio);
   const currentCount = Number(paramValues.count || paramValues.variations) || 1;
 
+  const estimatedCredits = useMemo(() => {
+    return calculateModelCredits(currentModel, paramValues, currentCount);
+  }, [currentModel, paramValues, currentCount]);
+
   // 3. Active slot definitions — driven by featureConfig.COMPOSITION_REQUIREMENTS and currentModel.
   //    If the selected model does not support image inputs (text only), the Reference button is NOT shown!
   const activeSlots = useMemo(() => {
@@ -368,8 +374,47 @@ function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, class
 
   // Active references list for tags & mentions
   const activeReferences = useMemo(() => {
-    return getActiveReferences(activeSlots, paramValues, featureConfig, currentModel);
-  }, [activeSlots, paramValues, featureConfig, currentModel]);
+    const fromSlots = getActiveReferences(activeSlots, paramValues, featureConfig, currentModel);
+    const map = new Map();
+
+    (fromSlots || []).forEach((ref) => {
+      const id = ref.assetId || ref.id;
+      if (id) map.set(id, ref);
+    });
+
+    (elements || []).forEach((el) => {
+      const id = el?.workflow_id || el?.id;
+      if (id && !map.has(id)) {
+        map.set(id, {
+          ...el,
+          id,
+          assetId: id,
+          displayName: el.displayName || el.name || "Element",
+          url: el.url || el.preview || "",
+          type: "element",
+          role: "element",
+          element_type: el.element_type || el.type || el.category || "object",
+        });
+      }
+    });
+
+    (characters || []).forEach((ch) => {
+      const id = ch?.workflow_id || ch?.id;
+      if (id && !map.has(id)) {
+        map.set(id, {
+          ...ch,
+          id,
+          assetId: id,
+          displayName: ch.displayName || ch.name || "Character",
+          url: ch.url || ch.preview || "",
+          type: "character",
+          role: "character",
+        });
+      }
+    });
+
+    return Array.from(map.values());
+  }, [activeSlots, paramValues, featureConfig, currentModel, elements, characters]);
 
   // All selected media/references currently in slots/parameters/elements/characters
   const allSelectedMedia = useMemo(() => {
@@ -395,6 +440,7 @@ function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, class
   const [activeDialogMode, setActiveDialogMode] = useState("image");
   const [mentionCallback, setMentionCallback] = useState(null);
   const [quickMentionOpen, setQuickMentionOpen] = useState(false);
+  const [mentionQuery, setMentionQuery] = useState("");
   const dialogAnchorRef = useRef(null);
   const quickMentionAnchorRef = useRef(null);
 
@@ -516,16 +562,14 @@ function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, class
     return Array.from(map.values());
   }, [paramValues, elements, characters]);
 
+  // Typing '@' → opens AtMentionMenu. The query typed after '@' is tracked via
+  // mentionQuery and passed to ImportMedia when the user picks Asset Library.
   const handleTriggerMentionDialog = useCallback((cb) => {
     setMentionCallback(() => cb);
-    if (activeReferences.length > 0) {
+    if (!dialogOpen) {
       setQuickMentionOpen(true);
-    } else {
-      setActiveDialogSlot(null);
-      setActiveDialogMode("all");
-      setDialogOpen(true);
     }
-  }, [activeReferences]);
+  }, [dialogOpen]);
 
   const handleSelectExistingReference = useCallback((ref) => {
     if (mentionCallback) {
@@ -677,6 +721,7 @@ function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, class
     if (mentionCallback) {
       mentionCallback(normalizedItems);
       setMentionCallback(null);
+      setMentionQuery("");
     }
 
     setDialogOpen(false);
@@ -800,9 +845,8 @@ function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, class
   }, [activeDialogSlot, activeMode, activeDialogMode]);
 
   const activeSlotMaxAllowed = useMemo(() => {
-    if (!activeDialogSlot) return 1;
-    if (activeDialogSlot.role !== "reference") return 1;
-    return Math.max(1, remainingImagesQuota);
+    if (activeDialogSlot && activeDialogSlot.role !== "reference") return 1;
+    return typeof remainingImagesQuota === "number" ? Math.max(1, remainingImagesQuota) : 4;
   }, [activeDialogSlot, remainingImagesQuota]);
 
   // Only filter out items for the multi-reference slot in image and video modes.
@@ -854,60 +898,21 @@ function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, class
   const topPanelZone = (
     <AnimatePresence mode="wait" initial={false}>
       {quickMentionOpen && (
-        <motion.div
-          key="at-mention-panel"
-          initial={{ opacity: 0, scale: 0.97, y: 10 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.97, y: 8 }}
-          transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-          className="overflow-hidden rounded-[28px] bg-(--background-base-pri) backdrop-blur-[80px] border border-white/5 shadow-[0_24px_80px_rgba(0,0,0,0.58)] pointer-events-auto w-full max-w-[650px]"
-        >
-          {/* Inline quick-mention panel (AtMentionMenu equivalent) */}
-          <div className="flex flex-col" ref={quickMentionAnchorRef}>
-            <div className="px-4 pt-3 pb-1 text-[11px] font-medium text-white/40 uppercase tracking-wider">
-              Mention Reference (@)
-            </div>
-            <div className="flex flex-col gap-0.5 px-2 pb-2">
-              {activeReferences.map((ref) => (
-                <button
-                  key={ref.assetId + ref.role}
-                  type="button"
-                  onClick={() => handleSelectExistingReference(ref)}
-                  className="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-white/10 text-left transition-colors w-full group"
-                >
-                  {ref.url ? (
-                    <img
-                      src={ref.url}
-                      alt={ref.displayName}
-                      className="size-6 rounded-md object-cover border border-white/10 shrink-0"
-                    />
-                  ) : (
-                    <div className="size-6 rounded-md bg-white/10 flex items-center justify-center shrink-0">
-                      <GoogleIcon iconName="image" className="text-[14px] text-white/60" />
-                    </div>
-                  )}
-                  <div className="flex flex-col min-w-0 flex-1">
-                    <span className="text-[13px] text-white/90 truncate font-medium group-hover:text-white">
-                      {ref.displayName}
-                    </span>
-                    <span className="text-[10px] text-white/40 truncate">
-                      {ref.label}
-                    </span>
-                  </div>
-                </button>
-              ))}
-              <div className="h-[1px] bg-white/5 my-0.5" />
-              <button
-                type="button"
-                onClick={handleOpenMediaLibraryFromMention}
-                className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-white/10 text-left transition-colors w-full text-white/70 hover:text-white text-[12px]"
-              >
-                <GoogleIcon iconName="add_photo_alternate" className="text-[16px] text-white/60" />
-                <span>Choose from Library / Upload...</span>
-              </button>
-            </div>
-          </div>
-        </motion.div>
+        <div ref={quickMentionAnchorRef} className="w-full flex justify-center">
+          <AtMentionMenu
+            open={quickMentionOpen}
+            onClose={() => {
+              setQuickMentionOpen(false);
+              setMentionCallback(null);
+              setMentionQuery("");
+            }}
+            references={activeReferences}
+            onSelectReference={handleSelectExistingReference}
+            onOpenMediaLibrary={handleOpenMediaLibraryFromMention}
+            anchorRef={quickMentionAnchorRef}
+            query={mentionQuery}
+          />
+        </div>
       )}
 
       {!quickMentionOpen && dialogOpen && (
@@ -922,7 +927,10 @@ function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, class
           <ImportMediaPopover
             variant="panel"
             open={dialogOpen}
-            onOpenChange={setDialogOpen}
+            onOpenChange={(val) => {
+              setDialogOpen(val);
+              if (!val) setMentionQuery("");
+            }}
             anchorRef={dialogAnchorRef}
             allowedType={activeSlotAllowedType}
             maxAllowed={activeSlotMaxAllowed}
@@ -931,6 +939,7 @@ function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, class
             selectedItems={dialogSelectedItems}
             excludedItems={allSelectedMedia}
             onSelect={handleSelectMedia}
+            initialSearch={mentionQuery}
           />
         </motion.div>
       )}
@@ -965,7 +974,7 @@ function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, class
             paramValues={paramValues}
             onParamChange={setParameter}
             validationErrors={validationErrs}
-            creditCost={0}
+            creditCost={estimatedCredits}
           />
         </motion.div>
       )}
@@ -982,123 +991,91 @@ function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, class
     >
 
       {/* ── Reference Slots (Rendered directly with dumb MediaInput primitive) ─── */}
-      <AnimatePresence initial={false}>
-        {activeSlots.length > 0 && (
-          <motion.div
-            key="reference-slots-container"
-            layout
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
-            className="overflow-visible"
-          >
-            <div ref={dialogAnchorRef} className="px-4 pt-3 pb-1 flex items-center gap-2 flex-wrap">
-              <AnimatePresence mode="popLayout" initial={false}>
-                {activeSlots.map((slot) => {
-                  const backendKey = featureConfig?.resolveParameterMapping(currentModel, slot.role) ?? slot.role;
-                  const media = paramValues[backendKey];
-                  const isStart = slot.role === "start";
-                  const isReferenceRole = slot.role === "reference";
+      {activeSlots.length > 0 && (
+        <div className="overflow-visible">
+          <div ref={dialogAnchorRef} className="px-4 pt-3 pb-1 flex items-center gap-2 flex-wrap">
+            {activeSlots.map((slot) => {
+              const backendKey = featureConfig?.resolveParameterMapping(currentModel, slot.role) ?? slot.role;
+              const media = paramValues[backendKey];
+              const isStart = slot.role === "start";
+              const isEnd = slot.role === "end";
+              const isReferenceRole = slot.role === "reference";
+              const slotLabel = isStart ? "Start" : isEnd ? "End" : slot.label;
 
-                  if (isReferenceRole) {
-                    const refList = getReferenceItems(backendKey);
-                    const maxRefs = getSlotMaxRefs(slot);
-                    const usedImages = calculateUsedImages(refList);
-                    const remainingImages = Math.max(0, maxRefs - usedImages);
-                    const canAddMore = remainingImages > 0;
+              if (isReferenceRole) {
+                const refList = getReferenceItems(backendKey);
+                const maxRefs = getSlotMaxRefs(slot);
+                const usedImages = calculateUsedImages(refList);
+                const remainingImages = Math.max(0, maxRefs - usedImages);
+                const canAddMore = remainingImages > 0;
 
-                    return (
-                      <React.Fragment key={slot.role}>
-                        {/* Existing reference thumbnails (images, characters, elements) */}
-                        {refList.map((refItem) => {
-                          const itemId = refItem.workflow_id || refItem.id;
-                          return (
-                            <motion.div
-                              key={itemId}
-                              layout
-                              initial={{ opacity: 0, scale: 0.92 }}
-                              animate={{ opacity: 1, scale: 1 }}
-                              exit={{ opacity: 0, scale: 0.92 }}
-                              transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-                              className="flex items-center gap-2"
-                            >
-                              <ViewReference
-                                media={refItem}
-                                label={refItem.displayName || "Ref"}
-                                onRemove={() => handleRemoveReferenceItem(refItem, backendKey)}
-                              />
-                            </motion.div>
-                          );
-                        })}
+                return (
+                  <React.Fragment key={slot.role}>
+                    {/* Existing reference thumbnails (images, characters, elements) */}
+                    {refList.map((refItem) => {
+                      const itemId = refItem.workflow_id || refItem.id;
+                      return (
+                        <div key={itemId} className="flex items-center gap-2">
+                          <ViewReference
+                            media={refItem}
+                            label={refItem.displayName || "Ref"}
+                            onRemove={() => handleRemoveReferenceItem(refItem, backendKey)}
+                          />
+                        </div>
+                      );
+                    })}
 
-                        {/* Add button (shown beside thumbnails; hidden only when reaching max real images) */}
-                        {canAddMore && (
-                          <motion.div
-                            key={`${slot.role}-add-btn`}
-                            layout
-                            initial={{ opacity: 0, scale: 0.92 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.92 }}
-                            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-                            className="flex items-center gap-2"
-                          >
-                            <ReferenceButton
-                              variant="add"
-                              word={refList.length === 0 ? "Ref" : "Add"}
-                              onClick={() => handleOpenDialog(slot)}
-                              title={refList.length === 0 ? "Add Reference / Element / Character" : "Add another Reference"}
-                            />
-                          </motion.div>
-                        )}
+                    {/* Add button (shown beside thumbnails; hidden only when reaching max real images) */}
+                    {canAddMore && (
+                      <div key={`${slot.role}-add-btn`} className="flex items-center gap-2">
+                        <ReferenceButton
+                          variant="add"
+                          word={refList.length === 0 ? "Ref" : "Add"}
+                          onClick={() => handleOpenDialog(slot)}
+                          title={refList.length === 0 ? "Add Reference / Element / Character" : "Add another Reference"}
+                        />
+                      </div>
+                    )}
 
-                      </React.Fragment>
-                    );
-                  }
+                  </React.Fragment>
+                );
+              }
 
-                  // Fixed Keyframe Slot (Start Frame / End Frame in video mode)
-                  return (
-                    <motion.div
-                      key={slot.role}
-                      layout
-                      initial={{ opacity: 0, scale: 0.92 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.92 }}
-                      transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-                      className="flex items-center gap-2"
-                    >
-                      <MediaInput
-                        label={slot.label}
-                        value={media}
-                        accept={slot.accepts || "image/*"}
-                        onClick={() => handleOpenDialog(slot)}
-                        onChange={(val) => setParameter(backendKey, val)}
-                        onRemove={() => handleRemoveSlot(slot)}
-                      />
-                      {isStart && showSwap && (
-                        <button
-                          type="button"
-                          onClick={handleSwapFrames}
-                          disabled={!swapEnabled}
-                          className={cn(
-                            "p-1.5 transition-colors",
-                            swapEnabled
-                              ? "text-white/40 hover:text-white"
-                              : "text-white/15 cursor-not-allowed"
-                          )}
-                          title={swapEnabled ? "Swap start and end frames" : "Fill both frames to swap"}
-                        >
-                          <SwapIcon />
-                        </button>
+              // Fixed Keyframe Slot (Start Frame / End Frame in video mode)
+              return (
+                <div key={slot.role} className="flex items-center gap-2">
+                  <MediaInput
+                    label={slotLabel}
+                    role={slot.role}
+                    variant={slot.role}
+                    value={media}
+                    accept={slot.accepts || "image/*"}
+                    onClick={() => handleOpenDialog(slot)}
+                    onChange={(val) => setParameter(backendKey, val)}
+                    onRemove={() => handleRemoveSlot(slot)}
+                  />
+                  {isStart && showSwap && (
+                    <button
+                      type="button"
+                      onClick={handleSwapFrames}
+                      disabled={!swapEnabled}
+                      className={cn(
+                        "p-1.5 rounded-md transition-colors",
+                        swapEnabled
+                          ? "text-white/50 hover:text-white cursor-pointer hover:bg-white/5"
+                          : "text-white/15 cursor-not-allowed"
                       )}
-                    </motion.div>
-                  );
-                })}
-              </AnimatePresence>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+                      title={swapEnabled ? "Swap start and end frames" : "Fill both frames to swap"}
+                    >
+                      <SwapIcon />
+                    </button>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* ── Prompt Input (Lexical Rich Editor with @ Mentions) ─── */}
       {layout.showPromptInput && (
@@ -1109,6 +1086,8 @@ function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, class
             onSubmit={handleGenerate}
             referenceImages={activeReferences}
             onTriggerMentionDialog={handleTriggerMentionDialog}
+            onMentionQueryChange={setMentionQuery}
+            mentionOpen={quickMentionOpen || dialogOpen}
             placeholder="Describe what you want to create..."
           />
         </div>
@@ -1196,7 +1175,12 @@ function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, class
             ) : (
               <>
                 <GoogleIcon iconName="auto_awesome" className="text-[14px]" />
-                Generate
+                <span>Generate</span>
+                {estimatedCredits > 0 && (
+                  <span className="text-[11px] font-medium opacity-60 ml-0.5">
+                    ({estimatedCredits}&nbsp;cr)
+                  </span>
+                )}
               </>
             )}
           </Button>

@@ -66,32 +66,45 @@ function SelectValue({ ...props }) {
   return <SelectPrimitive.Value data-slot="select-value" {...props} />
 }
 
-function SelectTrigger({ className, size = "default", asChild = false, children, ...props }) {
+function SelectTrigger({ className, size = "default", variant = "default", asChild = false, children, ...props }) {
   return (
     <SelectPrimitive.Trigger
       data-slot="select-trigger"
       asChild={asChild}
       data-size={size}
+      data-variant={variant}
       className={cn(
         // Layout
-        "flex w-auto max-w-fit items-center",
+        "flex items-center",
+        variant === "blur" ? "w-full h-10 px-3.5 justify-between" : "w-auto max-w-fit px-3 py-2.5",
         // Shape
         "rounded-[var(--mat-sys-corner-medium,12px)]",
         // Colors
-        " bg-transparent",
+        variant === "blur"
+          ? "bg-[var(--foreground-state-10,rgba(218,220,224,0.1))] backdrop-blur-[80px] border-none text-[var(--mat-sys-on-surface,#e3e3e3)] hover:bg-[var(--foreground-state-15)]"
+          : "bg-transparent hover:bg-[var(--foreground-state-10)]",
         // Text
-        "px-3 py-2.5 text-sm text-[var(--mat-sys-on-surface,#e3e3e3)]",
-        " hover:bg-[var(--foreground-state-10)] hover:cursor-pointer transition-colors",
+        "text-sm font-medium text-[var(--mat-sys-on-surface,#e3e3e3)]",
+        "hover:cursor-pointer transition-colors outline-none",
 
         // Disabled
         "disabled:cursor-not-allowed disabled:opacity-50",
         className
       )}
+      style={
+        variant === "blur"
+          ? {
+              backgroundColor: "var(--foreground-state-10, rgba(218, 220, 224, 0.1))",
+              backdropFilter: "blur(80px)",
+              WebkitBackdropFilter: "blur(80px)",
+            }
+          : undefined
+      }
       {...props}
     >
       {children}
       <SelectPrimitive.Icon asChild>
-        <GoogleIcon iconName="keyboard_arrow_down" className="text-[18px] opacity-50" />
+        <GoogleIcon iconName="keyboard_arrow_down" className="text-[18px] opacity-60 shrink-0 ml-2" />
       </SelectPrimitive.Icon>
     </SelectPrimitive.Trigger>
   )
@@ -112,7 +125,7 @@ function SelectContent({
         data-slot="select-content"
         className={cn(
           // Layout
-          "relative z-[80] flex flex-col overflow-y-auto select-none font-['Google_Sans_Text',sans-serif]",
+          "relative z-[80] flex flex-col overflow-y-auto select-none font-sans antialiased",
           // Size
           "min-w-[120px] max-h-[500px]",
           // Shape
@@ -207,7 +220,7 @@ function SelectItem({ className, children, icon, subtitle, badge, iconVariant = 
       data-slot="select-item"
       className={cn(
         // Layout
-        "group flex cursor-pointer items-center gap-3 min-h-[40px] px-3.5 py-2 rounded-[var(--mat-sys-corner-medium,12px)] outline-none select-none font-['Google_Sans_Text',sans-serif] transition-all duration-150",
+        "group flex cursor-pointer items-center gap-3 min-h-[40px] px-3.5 py-2 rounded-[var(--mat-sys-corner-medium,12px)] outline-none select-none font-sans antialiased transition-all duration-150",
         // Text & State layers
         "text-[var(--mat-menu-item-label-text-color,var(--foreground-neutral-000,#fff))] hover:bg-[var(--mat-menu-item-hover-state-layer-color,var(--foreground-state-10))] focus:bg-[var(--mat-menu-item-focus-state-layer-color,var(--foreground-state-15))] data-[highlighted]:bg-[var(--mat-menu-item-hover-state-layer-color,var(--foreground-state-10))] data-[highlighted]:text-white",
         // Disabled

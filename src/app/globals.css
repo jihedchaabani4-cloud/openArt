@@ -6,9 +6,61 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* Force dark everywhere */
+/* Force dark everywhere & smooth rendering */
 html {
   color-scheme: light dark;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* ── Google Sans & Google Sans Text Variable Fonts ── */
+@font-face {
+  font-family: 'Google Sans';
+  font-style: normal;
+  font-weight: 100 900;
+  src: url('/fonts/GoogleSans-VariableFont_GRAD,opsz,wght.ttf') format('truetype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Google Sans';
+  font-style: italic;
+  font-weight: 100 900;
+  src: url('/fonts/GoogleSans-Italic-VariableFont_GRAD,opsz,wght.ttf') format('truetype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Google Sans Text';
+  font-style: normal;
+  font-weight: 100 900;
+  src: url('/fonts/GoogleSans-VariableFont_GRAD,opsz,wght.ttf') format('truetype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Google Sans Text';
+  font-style: italic;
+  font-weight: 100 900;
+  src: url('/fonts/GoogleSans-Italic-VariableFont_GRAD,opsz,wght.ttf') format('truetype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Google_Sans_Text';
+  font-style: normal;
+  font-weight: 100 900;
+  src: url('/fonts/GoogleSans-VariableFont_GRAD,opsz,wght.ttf') format('truetype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Google_Sans';
+  font-style: normal;
+  font-weight: 100 900;
+  src: url('/fonts/GoogleSans-VariableFont_GRAD,opsz,wght.ttf') format('truetype');
+  font-display: swap;
 }
 
 /* ── Google Symbols & Material Symbols ── */
@@ -110,7 +162,7 @@ mat-icon {
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-google-sans), sans-serif;
+  --font-sans: 'Google Sans Text', 'Google Sans', var(--font-google-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-mono: var(--font-geist-mono);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -352,57 +404,92 @@ mat-icon {
   --mat-sys-body-large-size: 1rem;
   --mat-sys-body-large-tracking: 0;
   --mat-sys-body-large-weight: 400;
+  --mat-sys-body-medium: 400 0.875rem/1.25rem Google Sans Text,Google Sans,sans-serif;
   --mat-sys-body-medium-font: Google Sans Text,Google Sans,sans-serif;
   --mat-sys-body-medium-line-height: 1.25rem;
   --mat-sys-body-medium-size: 0.875rem;
+  --mat-sys-body-medium-tracking: 0;
   --mat-sys-body-medium-weight: 400;
+  --mat-sys-body-small: 400 0.75rem/1rem Google Sans Text,Google Sans,sans-serif;
   --mat-sys-body-small-font: Google Sans Text,Google Sans,sans-serif;
   --mat-sys-body-small-line-height: 1rem;
   --mat-sys-body-small-size: 0.75rem;
   --mat-sys-body-small-tracking: 0.006rem;
   --mat-sys-body-small-weight: 400;
+  --mat-sys-display-large: 400 3.562rem/4rem Google Sans;
+  --mat-sys-display-large-font: Google Sans;
+  --mat-sys-display-large-line-height: 4rem;
+  --mat-sys-display-large-size: 3.562rem;
+  --mat-sys-display-large-tracking: 0;
+  --mat-sys-display-large-weight: 400;
+  --mat-sys-display-medium: 400 2.812rem/3.25rem Google Sans;
+  --mat-sys-display-medium-font: Google Sans;
+  --mat-sys-display-medium-line-height: 3.25rem;
+  --mat-sys-display-medium-size: 2.812rem;
+  --mat-sys-display-medium-tracking: 0;
+  --mat-sys-display-medium-weight: 400;
+  --mat-sys-display-small: 400 2.25rem/2.75rem Google Sans;
+  --mat-sys-display-small-font: Google Sans;
+  --mat-sys-display-small-line-height: 2.75rem;
+  --mat-sys-display-small-size: 2.25rem;
+  --mat-sys-display-small-tracking: 0;
+  --mat-sys-display-small-weight: 400;
+  --mat-sys-headline-large: 400 2rem/2.5rem Google Sans;
   --mat-sys-headline-large-font: Google Sans;
-  --mat-sys-headline-large-size: 2rem;
   --mat-sys-headline-large-line-height: 2.5rem;
+  --mat-sys-headline-large-size: 2rem;
+  --mat-sys-headline-large-tracking: 0;
   --mat-sys-headline-large-weight: 400;
+  --mat-sys-headline-medium: 400 1.75rem/2.25rem Google Sans;
   --mat-sys-headline-medium-font: Google Sans;
-  --mat-sys-headline-medium-size: 1.75rem;
   --mat-sys-headline-medium-line-height: 2.25rem;
+  --mat-sys-headline-medium-size: 1.75rem;
+  --mat-sys-headline-medium-tracking: 0;
   --mat-sys-headline-medium-weight: 400;
+  --mat-sys-headline-small: 400 1.5rem/2rem Google Sans;
   --mat-sys-headline-small-font: Google Sans;
-  --mat-sys-headline-small-size: 1.5rem;
   --mat-sys-headline-small-line-height: 2rem;
+  --mat-sys-headline-small-size: 1.5rem;
+  --mat-sys-headline-small-tracking: 0;
   --mat-sys-headline-small-weight: 400;
-  --mat-sys-title-large-font: Google Sans;
-  --mat-sys-title-large-size: 1.375rem;
-  --mat-sys-title-large-line-height: 1.75rem;
-  --mat-sys-title-large-weight: 400;
-  --mat-sys-title-medium-font: Google Sans Text,Google Sans,sans-serif;
-  --mat-sys-title-medium-size: 1rem;
-  --mat-sys-title-medium-line-height: 1.5rem;
-  --mat-sys-title-medium-weight: 500;
-  --mat-sys-title-small-font: Google Sans Text,Google Sans,sans-serif;
-  --mat-sys-title-small-size: 0.875rem;
-  --mat-sys-title-small-line-height: 1.25rem;
-  --mat-sys-title-small-tracking: 0;
-  --mat-sys-title-small-weight: 500;
+  --mat-sys-label-large: 500 0.875rem/1.25rem Google Sans Text,Google Sans,sans-serif;
   --mat-sys-label-large-font: Google Sans Text,Google Sans,sans-serif;
-  --mat-sys-label-large-size: 0.875rem;
   --mat-sys-label-large-line-height: 1.25rem;
+  --mat-sys-label-large-size: 0.875rem;
   --mat-sys-label-large-tracking: 0;
   --mat-sys-label-large-weight: 500;
   --mat-sys-label-large-weight-prominent: 700;
+  --mat-sys-label-medium: 500 0.75rem/1rem Google Sans Text,Google Sans,sans-serif;
   --mat-sys-label-medium-font: Google Sans Text,Google Sans,sans-serif;
-  --mat-sys-label-medium-size: 0.75rem;
   --mat-sys-label-medium-line-height: 1rem;
+  --mat-sys-label-medium-size: 0.75rem;
   --mat-sys-label-medium-tracking: 0.006rem;
   --mat-sys-label-medium-weight: 500;
   --mat-sys-label-medium-weight-prominent: 700;
+  --mat-sys-label-small: 500 0.688rem/1rem Google Sans Text,Google Sans,sans-serif;
   --mat-sys-label-small-font: Google Sans Text,Google Sans,sans-serif;
-  --mat-sys-label-small-size: 0.688rem;
   --mat-sys-label-small-line-height: 1rem;
+  --mat-sys-label-small-size: 0.688rem;
   --mat-sys-label-small-tracking: 0.006rem;
   --mat-sys-label-small-weight: 500;
+  --mat-sys-title-large: 400 1.375rem/1.75rem Google Sans;
+  --mat-sys-title-large-font: Google Sans;
+  --mat-sys-title-large-line-height: 1.75rem;
+  --mat-sys-title-large-size: 1.375rem;
+  --mat-sys-title-large-tracking: 0;
+  --mat-sys-title-large-weight: 400;
+  --mat-sys-title-medium: 500 1rem/1.5rem Google Sans Text,Google Sans,sans-serif;
+  --mat-sys-title-medium-font: Google Sans Text,Google Sans,sans-serif;
+  --mat-sys-title-medium-line-height: 1.5rem;
+  --mat-sys-title-medium-size: 1rem;
+  --mat-sys-title-medium-tracking: 0;
+  --mat-sys-title-medium-weight: 500;
+  --mat-sys-title-small: 500 0.875rem/1.25rem Google Sans Text,Google Sans,sans-serif;
+  --mat-sys-title-small-font: Google Sans Text,Google Sans,sans-serif;
+  --mat-sys-title-small-line-height: 1.25rem;
+  --mat-sys-title-small-size: 0.875rem;
+  --mat-sys-title-small-tracking: 0;
+  --mat-sys-title-small-weight: 500;
 
   /* Shape Tokens */
   --mat-sys-corner-extra-large: 28px;
@@ -456,7 +543,7 @@ mat-icon {
   --shadow-color-harsh: rgba(0,0,0,0.5);
   --banner-warning-background: rgba(35,44,0,1);
   --banner-warning-border: rgba(183,163,93,1);
-  --banner-error-background: rgba(29,0,2,1);
+  --banner-error-background: rgba(32, 33, 36, 0.95);
   --banner-error-border: rgba(179,110,108,1);
 
   /* Foreground & Background Color Scales */
@@ -495,6 +582,7 @@ mat-icon {
   --mat-menu-item-hover-state-layer-color: var(--foreground-state-10);
   --mat-menu-item-focus-state-layer-color: var(--foreground-state-15);
   --mat-menu-item-label-text-font: var(--mat-sys-title-small-font);
+  --mat-menu-item-label-text-line-height: var(--mat-sys-title-small-line-height);
   --mat-menu-item-label-text-size: var(--mat-sys-title-small-size);
   --mat-menu-item-label-text-tracking: var(--mat-sys-title-small-tracking);
   --mat-menu-item-label-text-weight: var(--mat-sys-title-small-weight);
@@ -522,6 +610,7 @@ mat-icon {
   --mat-slide-toggle-handle-width: 1.5rem;
   --mat-slide-toggle-unselected-handle-size: 1.125rem;
   --mat-slide-toggle-selected-handle-size: 1.25rem;
+  --mat-slide-toggle-pressed-handle-size: 1.25rem;
   --mat-slide-toggle-state-layer-size: 1.125rem;
   --mat-slide-toggle-unselected-handle-horizontal-margin: 0 0.125rem;
   --mat-slide-toggle-selected-handle-horizontal-margin: 0 0.125rem;
@@ -539,6 +628,53 @@ mat-icon {
   --mat-slide-toggle-label-text-size: var(--mat-sys-label-small-size);
   --mat-slide-toggle-label-text-tracking: var(--mat-sys-label-small-tracking);
   --mat-slide-toggle-label-text-weight: var(--mat-sys-label-small-weight);
+
+  /* Sidenav and Navigation Rail Tokens */
+  --sidenav-offset: var(--project-header-desktop-height, 4.75rem);
+  --sidenav-expanded-width: 14.5rem;
+  --sidenav-collapsed-width: 4rem;
+  --sidenav-scroll-padding: 0px;
+  --flow-icon-wght: 300;
+  --mat-sidenav-container-width: var(--sidenav-expanded-width);
+  --mat-sidenav-container-divider-color: transparent;
+  --mat-sidenav-container-background-color: var(--color-black, #000);
+  --mat-sidenav-container-text-color: var(--foreground-neutral-000, #fff);
+  --mat-sidenav-content-background-color: transparent;
+  --mat-list-active-indicator-color: var(--foreground-state-25);
+  --mat-list-active-indicator-shape: 16px;
+  --mat-list-list-item-container-color: transparent;
+  --mat-list-list-item-container-shape: 16px;
+  --mat-list-list-item-disabled-label-text-color: var(--foreground-state-base);
+  --mat-list-list-item-disabled-label-text-opacity: 0.5;
+  --mat-list-list-item-disabled-leading-icon-color: var(--foreground-state-base);
+  --mat-list-list-item-disabled-leading-icon-opacity: 0.5;
+  --mat-list-list-item-disabled-state-layer-color: transparent;
+  --mat-list-list-item-disabled-state-layer-opacity: 0;
+  --mat-list-list-item-disabled-trailing-icon-color: var(--foreground-state-base);
+  --mat-list-list-item-disabled-trailing-icon-opacity: 0.5;
+  --mat-list-list-item-focus-label-text-color: var(--foreground-neutral-000);
+  --mat-list-list-item-focus-state-layer-color: var(--foreground-state-base);
+  --mat-list-list-item-focus-state-layer-opacity: 0.15;
+  --mat-list-list-item-hover-label-text-color: var(--foreground-neutral-000);
+  --mat-list-list-item-hover-leading-icon-color: var(--foreground-neutral-000);
+  --mat-list-list-item-hover-trailing-icon-color: var(--foreground-neutral-000);
+  --mat-list-list-item-hover-state-layer-color: var(--foreground-state-base);
+  --mat-list-list-item-hover-state-layer-opacity: 0.15;
+  --mat-list-list-item-label-text-color: var(--foreground-neutral-000);
+  --mat-list-list-item-leading-icon-color: var(--foreground-neutral-000);
+  --mat-list-list-item-leading-icon-size: 1.5rem;
+  --mat-list-list-item-supporting-text-color: var(--foreground-state-60);
+  --mat-list-list-item-label-text-font: var(--mat-sys-title-small-font);
+  --mat-list-list-item-label-text-line-height: var(--mat-sys-title-small-line-height);
+  --mat-list-list-item-label-text-size: var(--mat-sys-title-small-size);
+  --mat-list-list-item-label-text-tracking: var(--mat-sys-title-small-tracking);
+  --mat-list-list-item-label-text-weight: var(--mat-sys-title-small-weight);
+  --mat-list-list-item-leading-icon-start-space: 0.75rem;
+  --mat-list-list-item-leading-icon-end-space: 1rem;
+  --mat-list-list-item-one-line-container-height: 3rem;
+  --mat-list-list-item-leading-avatar-shape: 8px;
+  --mat-list-list-item-leading-avatar-size: 2rem;
+  --mat-list-list-item-leading-avatar-color: var(--foreground-state-15);
 }
 
 /* ── Google Flow Menu Item Styling & Destructive / Danger Rules ── */
@@ -629,11 +765,17 @@ mat-icon {
   body {
     background-color: var(--mat-sys-background);
     color: var(--mat-sys-on-background);
-    font: var(--mat-sys-body-large);
-    font-family: var(--mat-sys-body-large-font), var(--font-google-sans), sans-serif !important;
+    font-family: 'Google Sans Text', 'Google Sans', var(--font-google-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+    font-size: var(--mat-sys-body-large-size, 1rem);
+    line-height: var(--mat-sys-body-large-line-height, 1.5rem);
+    font-weight: var(--mat-sys-body-large-weight, 400);
+    letter-spacing: var(--mat-sys-body-large-tracking, 0);
     font-optical-sizing: auto;
     font-style: normal;
     font-variation-settings: "GRAD" 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
 
   /* Hide native search clear button */
@@ -658,21 +800,55 @@ mat-icon {
   border-radius: var(--mat-menu-container-shape, 24px) !important;
   border: none !important;
   color: var(--mat-sys-on-surface, #e3e3e3) !important;
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
 }
 
 [data-slot="dropdown-menu-item"],
 [data-slot="context-menu-item"],
 .mat-mdc-menu-item,
-.flow-internal-menu-item {
+.flow-internal-menu-item,
+flow-menu-item {
   min-height: 48px !important;
   padding: 0.5rem 0.875rem !important;
   border-radius: var(--mat-sys-corner-medium, 12px) !important;
   color: var(--mat-menu-item-label-text-color, var(--foreground-neutral-000, #fff)) !important;
-  font-family: var(--mat-menu-item-label-text-font, 'Google Sans Text', sans-serif) !important;
+  font-family: var(--mat-menu-item-label-text-font, 'Google Sans Text', 'Google Sans', sans-serif) !important;
   font-size: var(--mat-menu-item-label-text-size, 0.875rem) !important;
   font-weight: var(--mat-menu-item-label-text-weight, 500) !important;
+  line-height: var(--mat-menu-item-label-text-line-height, 1.25rem) !important;
   letter-spacing: var(--mat-menu-item-label-text-tracking, 0) !important;
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
+  text-rendering: optimizeLegibility !important;
   transition: all 0.15s ease !important;
+}
+
+.mat-mdc-menu-item-text .left-content .item-text .label,
+.mat-mdc-menu-item .label,
+[data-slot="dropdown-menu-item"] .label,
+[data-slot="context-menu-item"] .label {
+  font-family: var(--mat-menu-item-label-text-font, 'Google Sans Text', 'Google Sans', sans-serif) !important;
+  font-size: var(--mat-menu-item-label-text-size, 0.875rem) !important;
+  font-weight: var(--mat-menu-item-label-text-weight, 500) !important;
+  line-height: var(--mat-menu-item-label-text-line-height, 1.25rem) !important;
+  letter-spacing: var(--mat-menu-item-label-text-tracking, 0) !important;
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
+}
+
+/* Sidenav & Navigation Rail Items */
+.mat-mdc-list-item,
+.mat-list-item,
+aside nav a,
+aside nav button {
+  font-family: var(--mat-list-list-item-label-text-font, 'Google Sans Text', 'Google Sans', sans-serif) !important;
+  font-size: var(--mat-list-list-item-label-text-size, 0.875rem) !important;
+  font-weight: var(--mat-list-list-item-label-text-weight, 500) !important;
+  line-height: var(--mat-list-list-item-label-text-line-height, 1.25rem) !important;
+  letter-spacing: var(--mat-list-list-item-label-text-tracking, 0) !important;
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
 }
 
 [data-slot="dropdown-menu-item"]:hover,
@@ -703,11 +879,11 @@ mat-divider,
 
 [data-slot="dialog-content"] {
   background-color: var(--mat-dialog-container-color, rgba(22, 23, 24, 0.95)) !important;
-  backdrop-filter: blur(80px);
-  -webkit-backdrop-filter: blur(80px);
-  box-shadow: var(--mat-dialog-container-elevation-shadow, 0 16px 32px -8px rgba(0,0,0,0.4)) !important;
+  backdrop-filter: blur(100px);
+  -webkit-backdrop-filter: blur(100px);
+  box-shadow: var(--mat-dialog-container-elevation-shadow, 0 24px 60px -12px rgba(0,0,0,0.6)) !important;
   border-radius: var(--mat-dialog-container-shape, 24px) !important;
-  border: 1px solid var(--mat-sys-outline-variant, rgba(255,255,255,0.08)) !important;
+  border: none !important;
   color: var(--mat-sys-on-surface, #e3e3e3) !important;
 }
 
@@ -903,6 +1079,14 @@ flow-menu-item {
   outline: none !important;
   background: transparent;
   color: var(--mat-menu-item-label-text-color, var(--foreground-neutral-000, #ffffff)) !important;
+  font-family: var(--mat-menu-item-label-text-font, 'Google Sans Text', 'Google Sans', sans-serif) !important;
+  font-size: var(--mat-menu-item-label-text-size, 0.875rem) !important;
+  font-weight: var(--mat-menu-item-label-text-weight, 500) !important;
+  line-height: var(--mat-menu-item-label-text-line-height, 1.25rem) !important;
+  letter-spacing: var(--mat-menu-item-label-text-tracking, 0) !important;
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
+  text-rendering: optimizeLegibility !important;
   cursor: pointer !important;
   text-align: left !important;
   user-select: none !important;
@@ -953,8 +1137,13 @@ flow-menu-item.selected .mat-mdc-menu-item,
 }
 
 .mat-mdc-menu-item-text .left-content .item-text .label {
-  font-size: var(--mat-menu-item-label-text-size, 0.8125rem);
-  font-weight: var(--mat-menu-item-label-text-weight, 500);
+  font-family: var(--mat-menu-item-label-text-font, 'Google Sans Text', 'Google Sans', sans-serif) !important;
+  font-size: var(--mat-menu-item-label-text-size, 0.875rem) !important;
+  font-weight: var(--mat-menu-item-label-text-weight, 500) !important;
+  line-height: var(--mat-menu-item-label-text-line-height, 1.25rem) !important;
+  letter-spacing: var(--mat-menu-item-label-text-tracking, 0) !important;
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
   color: var(--mat-menu-item-label-text-color, var(--foreground-neutral-000, #ffffff));
   white-space: nowrap;
   overflow: hidden;
@@ -1150,17 +1339,19 @@ flow-ingredient-chip,
   opacity: 0;
 }
 
-/* ── Custom Theme Input Variables & Textarea Utility ── */
+/* ── Global Typography & Color Variables ── */
 :root {
   -webkit-text-size-adjust: 100%;
   tab-size: 4;
-  font-family: var(--default-font-family, ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji");
-  font-feature-settings: var(--default-font-feature-settings, normal);
-  font-variation-settings: var(--default-font-variation-settings, normal);
+  font-family: 'Google Sans Text', 'Google Sans', var(--font-google-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-feature-settings: 'liga', 'kern';
+  font-variation-settings: "GRAD" 0;
   -webkit-tap-highlight-color: transparent;
-  --font-sans: "Suisse Intl", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
-  --font-mono: "Suisse Intl Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  --font-sans: 'Google Sans Text', 'Google Sans', var(--font-google-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: var(--font-geist-mono), monospace;
   --color-red-50: oklch(97.1% .013 17.38);
   --color-red-500: oklch(63.7% .237 25.331);
   --color-orange-500: oklch(70.5% .213 47.604);
@@ -1185,3 +1376,243 @@ flow-ingredient-chip,
   --color-neutral-500: oklch(55.6% 0 0);
   --color-stone-500: oklch(55.3% .013 58.071);
 }
+
+/* ── Google VideoFX / Flow Error Tile System ── */
+flow-video-tile {
+  display: block;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  box-sizing: border-box;
+  container-type: size;
+  -webkit-user-drag: none;
+  user-select: none;
+  border-radius: var(--tile-border-radius, 16px);
+  overflow: hidden;
+}
+
+flow-video-tile > .container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  box-sizing: border-box;
+}
+
+flow-error-tile {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.error-tile {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  box-sizing: border-box;
+  background: linear-gradient(180deg, rgba(28, 28, 28, .8), rgba(45, 45, 45, .8)) !important;
+  color: var(--foreground-state-90) !important;
+  backdrop-filter: blur(40px) !important;
+  -webkit-backdrop-filter: blur(40px) !important;
+  border-radius: 24px !important;
+  padding: 24px !important;
+  overflow: hidden !important;
+  position: relative !important;
+  border: none !important;
+  gap: .5rem !important;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37) !important;
+}
+
+.error-tile-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 100%;
+  height: 100%;
+  gap: 12px;
+}
+
+.error-message {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  width: 100%;
+  text-align: left;
+}
+
+.error-message .error-icon,
+.error-tile .error-icon {
+  font-size: 24px !important;
+  width: 24px !important;
+  height: 24px !important;
+  color: rgba(255, 255, 255, 0.85) !important;
+  margin-bottom: 6px !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.error-title {
+  font-family: var(--mat-sys-title-small-font, 'Google Sans', sans-serif) !important;
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  line-height: 22px !important;
+  color: #ffffff !important;
+  letter-spacing: 0 !important;
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
+}
+
+.error-subtitle {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-family: var(--mat-sys-body-small-font, 'Google Sans Text', sans-serif) !important;
+  font-size: 13px !important;
+  line-height: 19px !important;
+  color: rgba(255, 255, 255, 0.75) !important;
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
+}
+
+.error-message-text {
+  color: rgba(255, 255, 255, 0.75) !important;
+  word-break: break-word;
+  font-size: 13px !important;
+  line-height: 19px !important;
+}
+
+.disclaimer-message {
+  color: rgba(255, 255, 255, 0.5) !important;
+  font-size: 13px !important;
+  line-height: 19px !important;
+  margin-top: 2px;
+}
+
+.error-tile .buttons-container {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 8px !important;
+  margin-top: auto !important;
+  width: 100% !important;
+  align-self: flex-end !important;
+  padding-top: 12px;
+}
+
+.error-tile .buttons-container button.flow-icon-button,
+.error-tile .buttons-container button.mdc-icon-button,
+.error-tile .buttons-container .flow-icon-button-primary {
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  min-height: 40px !important;
+  border-radius: 9999px !important;
+  background-color: rgba(255, 255, 255, 0.12) !important;
+  backdrop-filter: blur(24px) !important;
+  -webkit-backdrop-filter: blur(24px) !important;
+  color: #ffffff !important;
+  border: none !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  padding: 0 !important;
+  outline: none !important;
+  position: relative !important;
+}
+
+.error-tile .buttons-container button.flow-icon-button:hover,
+.error-tile .buttons-container button.mdc-icon-button:hover,
+.error-tile .buttons-container .flow-icon-button-primary:hover {
+  background-color: rgba(255, 255, 255, 0.22) !important;
+  color: #ffffff !important;
+  transform: scale(1.04) !important;
+}
+
+.error-tile .buttons-container button.flow-icon-button:active,
+.error-tile .buttons-container button.mdc-icon-button:active,
+.error-tile .buttons-container .flow-icon-button-primary:active {
+  transform: scale(0.95) !important;
+  background-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+.error-tile .buttons-container mat-icon {
+  font-size: 20px !important;
+  width: 20px !important;
+  height: 20px !important;
+  color: currentColor !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* ── Aurora Processing Card Animation ── */
+.blob {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: 9999px;
+  will-change: transform, opacity;
+}
+.blob-a {
+  width: 68%;
+  height: 78%;
+  background: radial-gradient(circle at center, rgba(245, 247, 252, 0.85) 0%, rgba(195, 202, 215, 0.45) 42%, rgba(160, 165, 175, 0) 72%);
+  filter: blur(42px);
+  animation: drift-a 10s ease-in-out infinite;
+}
+.blob-b {
+  width: 52%;
+  height: 62%;
+  background: radial-gradient(circle at center, rgba(230, 235, 245, 0.7) 0%, rgba(185, 190, 205, 0.35) 40%, rgba(150, 155, 165, 0) 70%);
+  filter: blur(46px);
+  animation: drift-b 13s ease-in-out infinite;
+}
+
+@keyframes drift-a {
+  0% {
+    transform: translate3d(28%, -15%, 0) scale(1);
+    opacity: 0.85;
+  }
+  20% {
+    transform: translate3d(-12%, 35%, 0) scale(1.15);
+    opacity: 0.7;
+  }
+  40% {
+    transform: translate3d(52%, 22%, 0) scale(0.9);
+    opacity: 0.95;
+  }
+  60% {
+    transform: translate3d(8%, -22%, 0) scale(1.1);
+    opacity: 0.75;
+  }
+  80% {
+    transform: translate3d(62%, -8%, 0) scale(0.95);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate3d(28%, -15%, 0) scale(1);
+    opacity: 0.85;
+  }
+}
+@keyframes drift-b {
+  0%, 100% {
+    transform: translate3d(55%, 45%, 0) scale(1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: translate3d(-8%, 5%, 0) scale(1.22);
+    opacity: 0.65;
+  }
+}
+
+

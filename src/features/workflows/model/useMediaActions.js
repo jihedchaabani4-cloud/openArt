@@ -14,6 +14,7 @@ import {
   animateMedia,
   setPendingPromptAction,
   canAnyModelAcceptEntity,
+  getActivePromptBarStore,
 } from "@/features/studio";
 import { useRealBackendModels } from "@/features/prompt-bar/core/useRealBackendModels";
 
@@ -51,9 +52,22 @@ export function useWorkflowActions(workflow, item = null) {
   const workflowSessionId = workflow?.metadata?.sessionId ?? workflow?.session_id ?? null;
   const isSameSession = !activeSessionId || !workflowSessionId || workflowSessionId === activeSessionId;
   const isInProgress = ["processing", "pending", "uploading"].includes(metadata?.status);
-  const isUpload = targetItem?.workflowStepId === "upload" || !targetItem?.generationConfig;
+  const isFailed = ["failed", "rejected", "error"].includes(metadata?.status);
+
+  const prompt = targetItem?.params?.prompt 
+                || targetItem?.prompt
+                || targetItem?.mediaMetadata?.requestData?.promptInputs?.[0]?.textInput 
+                || workflow?.prompt
+                || workflow?.metadata?.prompt
+                || workflow?.metadata?.generationConfig?.prompt
+                || targetItem?.generationConfig?.prompt
+                || workflow?.display_name
+                || workflow?.metadata?.displayName 
+                || "";
+
+  const isUpload = targetItem?.workflowStepId === "upload" || (!isFailed && !targetItem?.generationConfig && !workflow?.metadata?.generationConfig && !prompt);
   const canUseAsInput = isSameSession && metadata?.status === "completed" && !!url;
-  const canReuseSettings = isSameSession && !isInProgress && !isUpload;
+  const canReuseSettings = !isInProgress && !isUpload;
   const canEnterEdit = isSameSession && (metadata?.status === "completed" || isInProgress);
   // Delete is allowed cross-session in UI (server enforces auth separately);
   // only block while a job is in progress to avoid race/confusion.
@@ -67,11 +81,6 @@ export function useWorkflowActions(workflow, item = null) {
   const isEntity = isElementSheet || isCharacter;
   const canAcceptEntity = isEntity ? canAnyModelAcceptEntity(workflow || targetItem, models) : true;
   const canAddToPrompt = canUseAsInput && canAcceptEntity;
-
-  const prompt = targetItem?.params?.prompt 
-                || targetItem?.mediaMetadata?.requestData?.promptInputs?.[0]?.textInput 
-                || workflow.metadata?.displayName 
-                || "";
 
   const handleLike = () => {
     if (workflow.id || workflow.name) {
@@ -160,10 +169,12 @@ export function useWorkflowActions(workflow, item = null) {
       type: r.url?.match(/\.(mp4|webm|mov)$/i) ? "video" : "image"
     }));
 
+    const effectivePrompt = prompt || config.prompt || params.prompt || targetItem?.prompt || workflow?.prompt || "";
+
     if (isEditPage) {
       const editStore = useEditStore.getState();
       // In edit page, reuse settings might mean setting up the edit bar
-      editStore.setPrompt(prompt || config.prompt || params.prompt || "");
+      editStore.setPrompt(effectivePrompt);
       editStore.setModelId(modelName || "nanobana_pro");
       editStore.setRatio(ratioVal);
       editStore.setReferenceImages(refs);
@@ -174,19 +185,49 @@ export function useWorkflowActions(workflow, item = null) {
       if (editStore.setMotion) editStore.setMotion(motionVal ?? 50);
       if (editStore.setCount) editStore.setCount(countVal);
     } else {
+      // 1. Sync with Platform PromptBar store (if active on screen)
+      const activeBarStore = getActivePromptBarStore();
+      if (activeBarStore) {
+        const barState = activeBarStore.getState();
+        if (effectivePrompt && barState.setPrompt) {
+          barState.setPrompt(effectivePrompt);
+        }
+        if (modelName && barState.selectModel) {
+          barState.selectModel(modelName);
+        }
+        if (ratioVal && barState.setParameter) {
+          barState.setParameter("ratio", ratioVal);
+          barState.setParameter("aspect_ratio", ratioVal);
+        }
+        if (barState.setActiveMode) {
+          barState.setActiveMode(isVideo ? "video" : "image");
+        }
+      }
+
+      // 2. Sync with Legacy / Global Prompt store
       const promptStore = usePromptStore.getState();
-      // In normal page, reuse settings for the generation bar
       promptStore.setGenerationMode(isVideo ? "keyframe" : "image");
-      promptStore.setPrompt(prompt || config.prompt || params.prompt || "");
-      promptStore.setModelId(modelName || "nanobana_pro");
-      promptStore.setRatio(ratioVal);
-      promptStore.setReferenceImages(refs);
+      if (effectivePrompt) promptStore.setPrompt(effectivePrompt);
+      if (modelName) promptStore.setModelId(modelName);
+      if (ratioVal) promptStore.setRatio(ratioVal);
+      if (refs.length) promptStore.setReferenceImages(refs);
 
       if (promptStore.setQuality) promptStore.setQuality(qualityVal || "2K");
       if (promptStore.setVideoResolution) promptStore.setVideoResolution(videoResVal || "1080p");
       if (promptStore.setDuration) promptStore.setDuration(durationVal || "5s");
       if (promptStore.setMotion) promptStore.setMotion(motionVal ?? 50);
       if (promptStore.setCount) promptStore.setCount(countVal);
+
+      // 3. Smooth scroll and focus on prompt bar input for instant visual feedback
+      if (typeof window !== "undefined") {
+        requestAnimationFrame(() => {
+          const editor = document.querySelector('[contenteditable="true"]') || document.querySelector('textarea[name="prompt"]');
+          if (editor) {
+            editor.focus();
+            editor.scrollIntoView({ behavior: "smooth", block: "nearest" });
+          }
+        });
+      }
     }
   };
 

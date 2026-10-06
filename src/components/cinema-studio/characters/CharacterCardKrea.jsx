@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { Star, Trash2, Loader2, AlertCircle, User, Sparkles } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 import { ProcessingCharacterCard } from "./ProcessingCharacterCard";
+import { FlowErrorTile } from "@/shared/ui/FlowErrorTile";
 
 /**
  * Pre-calculated stack offset definitions for character 3-view sheets.
@@ -118,15 +119,12 @@ export function CharacterCardKrea({ character, onClick, onDelete }) {
 
         {/* ── CARD STATES ── */}
         {isProcessing ? (
-          <ProcessingCharacterCard name={name} stepLabel={description || "Creating 3-view turnaround sheet..."} />
+          <ProcessingCharacterCard progress={character.progress ?? character.metadata?.progress} aspectRatio="370/240" />
         ) : isFailed ? (
-          <div className="w-full h-full flex flex-col items-center justify-center gap-2 bg-rose-950/80 text-rose-200 p-3 text-center backdrop-blur-md">
-            <AlertCircle className="size-6 text-rose-400" />
-            <span className="text-xs font-bold tracking-wide">Generation Failed</span>
-            <span className="text-[10px] text-rose-300/70 truncate max-w-full px-2">
-              {errorMessage}
-            </span>
-          </div>
+          <FlowErrorTile
+            error={errorMessage}
+            onDelete={onDelete}
+          />
         ) : images.length > 0 ? (
           <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
             <div className="pointer-events-none relative h-full w-full">

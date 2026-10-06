@@ -106,6 +106,7 @@ export const MODEL_ICON_MAP = {
   wavespeed: "/icons/models/replicate.svg",
   kling: "/icons/models/kling.svg",
   runway: "/icons/models/runway.svg",
+  ltx: "/icons/models/ltx.svg",
 };
 
 /**

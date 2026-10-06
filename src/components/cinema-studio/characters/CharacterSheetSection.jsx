@@ -58,8 +58,8 @@ export function CharacterSheetSection({
         </div>
       ) : isFailed && !activeSheetSrc ? (
         <div className="flex flex-col items-center justify-center gap-4 py-16 px-6 text-center">
-          <div className="size-12 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center">
-            <AlertCircle className="size-6 text-red-400" />
+          <div className="size-12 rounded-full bg-white/10 border border-white/15 flex items-center justify-center">
+            <AlertCircle className="size-6 text-white/70" />
           </div>
           <div className="flex flex-col gap-1">
             <p className="text-white/80 font-medium text-sm">Generation failed</p>

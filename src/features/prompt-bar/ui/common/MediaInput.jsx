@@ -24,6 +24,8 @@ import { cn } from "@/shared/lib/utils";
  */
 export function MediaInput({
   label,
+  role,
+  variant,
   value,
   onChange,
   onRemove,
@@ -99,6 +101,7 @@ export function MediaInput({
         />
       ) : (
         <ReferenceButton
+          variant={variant || role}
           word={label}
           disabled={disabled}
           onClick={handleClick}

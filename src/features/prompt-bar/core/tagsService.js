@@ -129,6 +129,8 @@ export function getActiveReferences(activeSlots = [], paramValues = {}, featureC
         url: item.url || item.preview || item.file_url || "",
         type: resolvedType,
         workflow_type: item.workflow_type,
+        is_upload: Boolean(item.is_upload || item.type === "upload" || item.workflow_type === "UPLOAD"),
+        element_type: item.element_type || item.elementType || item.category,
         rawValue: item,
       });
     }

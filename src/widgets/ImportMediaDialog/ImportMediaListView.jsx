@@ -15,6 +15,7 @@ import { AssetListItem } from "@/features/media";
  */
 export function ImportMediaListView({
   items = [],
+  focusedId: propFocusedId,
   onSelectDirect,
   loading = false,
   hasMore = false,
@@ -23,7 +24,9 @@ export function ImportMediaListView({
   availableSlots,
   maxAllowed,
 }) {
-  const [focusedId, setFocusedId] = useState(null);
+  const [internalFocusedId, setInternalFocusedId] = useState(null);
+  const focusedId = propFocusedId !== undefined ? propFocusedId : internalFocusedId;
+  const setFocusedId = setInternalFocusedId;
   const loadMoreRef = useRef(null);
 
   // Derive focused item from items
@@ -198,7 +201,7 @@ export function ImportMediaListView({
             </div>
           </>
         ) : (
-          <div className="flex-1 flex items-center justify-center text-white/20 text-xs uppercase tracking-widest font-['Google_Sans_Text',sans-serif]">
+          <div className="flex-1 flex items-center justify-center text-white/20 text-xs uppercase tracking-widest font-sans antialiased">
             No item selected
           </div>
         )}

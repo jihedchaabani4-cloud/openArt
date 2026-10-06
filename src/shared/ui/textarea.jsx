@@ -6,6 +6,7 @@ import { cn } from "@/shared/lib/utils";
 const Textarea = React.forwardRef(({
   className,
   containerClassName,
+  variant = "default",
   label,
   labelExtra,
   hint,
@@ -45,11 +46,24 @@ const Textarea = React.forwardRef(({
 
   const hasContainer = !!label || !!hint;
 
+  const isBlur = variant === "blur" || variant === "blurinput";
+
   const textareaElement = (
     <div 
       className={cn(
-        "relative w-full rounded-[var(--mat-sys-corner-large,16px)] bg-[var(--foreground-state-05)] p-4 transition-all border border-[var(--mat-sys-outline-variant,rgba(255,255,255,0.08))] hover:bg-[var(--foreground-state-10)] focus-within:bg-[var(--foreground-state-15)] focus-within:border-[var(--mat-sys-primary,#a8c7fa)]"
+        isBlur
+          ? "relative w-full rounded-[var(--mat-sys-corner-medium,12px)] p-3 transition-all border-none hover:bg-[var(--foreground-state-15)] focus-within:bg-[var(--foreground-state-15)]"
+          : "relative w-full rounded-[var(--mat-sys-corner-large,16px)] bg-[var(--foreground-state-05)] p-4 transition-all border border-[var(--mat-sys-outline-variant,rgba(255,255,255,0.08))] hover:bg-[var(--foreground-state-10)] focus-within:bg-[var(--foreground-state-15)] focus-within:border-[var(--mat-sys-primary,#a8c7fa)]"
       )}
+      style={
+        isBlur
+          ? {
+              backgroundColor: "var(--foreground-state-10, rgba(218, 220, 224, 0.1))",
+              backdropFilter: "blur(80px)",
+              WebkitBackdropFilter: "blur(80px)",
+            }
+          : undefined
+      }
     >
       <textarea
         ref={innerRef}

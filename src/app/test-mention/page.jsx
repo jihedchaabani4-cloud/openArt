@@ -48,26 +48,50 @@ const INITIAL_REFERENCES = [
     name: "Cyberpunk Cruiser",
     role: "element",
     type: "element",
-    label: "Vehicle Element",
+    element_type: "vehicle",
+    label: "Vehicle",
     url: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=150&q=80",
+  },
+  {
+    id: "elem_katana_02",
+    displayName: "Cyber Katana",
+    name: "Cyber Katana",
+    role: "element",
+    type: "element",
+    element_type: "object",
+    label: "Object",
+    url: "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=150&q=80",
+  },
+  {
+    id: "elem_retro_style_03",
+    displayName: "Synthwave Palette",
+    name: "Synthwave Palette",
+    role: "element",
+    type: "element",
+    element_type: "style",
+    label: "Style",
+    url: "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=150&q=80",
   },
   {
     id: "ref_tokyo_night",
     displayName: "Neo-Tokyo Alley",
     name: "Neo-Tokyo Alley",
     role: "reference",
-    type: "media",
-    label: "Environment Reference",
+    type: "reference",
+    workflow_type: "GENERATED",
+    label: "Environment Generation",
     url: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=150&q=80",
   },
   {
-    id: "ref_retro_anime",
-    displayName: "90s Anime Palette",
-    name: "90s Anime Palette",
-    role: "reference",
-    type: "media",
-    label: "Style Reference",
-    url: "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=150&q=80",
+    id: "upload_sketch_01",
+    displayName: "Concept Art Sketch",
+    name: "Concept Art Sketch",
+    role: "upload",
+    type: "upload",
+    is_upload: true,
+    workflow_type: "UPLOAD",
+    label: "Local Upload",
+    url: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=150&q=80",
   },
 ];
 
@@ -75,24 +99,64 @@ const editorTheme = {
   paragraph: "text-white/90 text-[14.5px] leading-relaxed",
 };
 
-// ── Version 2 Intercept Plugin (Calls parent to open Top Panel) ─────────────
-function AtShortcutPlugin({ onTriggerMention }) {
+function AtShortcutPlugin({ onTriggerMention, onMentionQueryChange, mentionOpen }) {
   const [editor] = useLexicalComposerContext();
+
+  React.useEffect(() => {
+    if (!mentionOpen) return;
+
+    return editor.registerUpdateListener(({ editorState }) => {
+      editorState.read(() => {
+        let query = "";
+        let found = false;
+
+        const selection = $getSelection();
+        if ($isRangeSelection(selection)) {
+          const anchor = selection.anchor;
+          const node = anchor.getNode();
+          const text = node.getTextContent?.() || "";
+          const offset = anchor.offset;
+          const before = text.slice(0, offset);
+          const atIndex = before.lastIndexOf("@");
+          if (atIndex !== -1) {
+            query = before.slice(atIndex + 1);
+            found = true;
+          }
+        }
+
+        if (!found) {
+          const fullText = $getRoot().getTextContent();
+          const atIndex = fullText.lastIndexOf("@");
+          if (atIndex !== -1) {
+            query = fullText.slice(atIndex + 1).split("\n")[0];
+            found = true;
+          }
+        }
+
+        onMentionQueryChange?.(found ? query : "");
+      });
+    });
+  }, [editor, mentionOpen, onMentionQueryChange]);
 
   React.useEffect(() => {
     return editor.registerCommand(
       KEY_DOWN_COMMAND,
       (e) => {
-        if (e.key === "@") {
+        if (mentionOpen && ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) {
           e.preventDefault();
-          onTriggerMention();
           return true;
+        }
+        if (e.key === "@") {
+          setTimeout(() => {
+            onTriggerMention?.();
+          }, 0);
+          return false;
         }
         return false;
       },
       COMMAND_PRIORITY_HIGH
     );
-  }, [editor, onTriggerMention]);
+  }, [editor, onTriggerMention, mentionOpen]);
 
   return null;
 }
@@ -117,21 +181,44 @@ function ExternalInsertPlugin({ insertTarget, onInserted }) {
         }
       }
 
-      const mentionNode = $createMentionNode(
-        insertTarget.url,
-        0,
-        insertTarget.displayName || insertTarget.name,
-        insertTarget.id,
-        insertTarget.type || "media"
-      );
-
-      const space = $createTextNode(" ");
       if (targetSelection && $isRangeSelection(targetSelection)) {
-        targetSelection.insertNodes([mentionNode, space]);
+        const anchor = targetSelection.anchor;
+        const node = anchor.getNode();
+        const text = node.getTextContent?.() || "";
+        const offset = anchor.offset;
+        const before = text.slice(0, offset);
+        const atIndex = before.lastIndexOf("@");
+
+        const mentionNode = $createMentionNode(
+          insertTarget.url,
+          0,
+          insertTarget.displayName || insertTarget.name,
+          insertTarget.id,
+          insertTarget.type || "media"
+        );
+
+        if (atIndex !== -1 && typeof node.setTextContent === "function") {
+          const prefix = text.slice(0, atIndex);
+          const suffix = text.slice(offset);
+          node.setTextContent(prefix);
+          const space = $createTextNode(" " + suffix);
+          node.insertAfter(space);
+          node.insertAfter(mentionNode);
+          space.select(1, 1);
+        } else {
+          targetSelection.insertNodes([mentionNode, $createTextNode(" ")]);
+        }
       } else {
         const root = $getRoot();
         const p = $createParagraphNode();
-        p.append(mentionNode, space);
+        const mentionNode = $createMentionNode(
+          insertTarget.url,
+          0,
+          insertTarget.displayName || insertTarget.name,
+          insertTarget.id,
+          insertTarget.type || "media"
+        );
+        p.append(mentionNode, $createTextNode(" "));
         root.append(p);
       }
     });
@@ -153,6 +240,7 @@ export default function TestMentionPage() {
   const [v2RawOutput, setV2RawOutput] = useState("");
   const [v2PanelOpen, setV2PanelOpen] = useState(false);
   const [v2InsertTarget, setV2InsertTarget] = useState(null);
+  const [v2MentionQuery, setV2MentionQuery] = useState("");
   const v2AnchorRef = useRef(null);
 
   const initialConfigV1 = useMemo(() => ({
@@ -170,16 +258,57 @@ export default function TestMentionPage() {
   }), []);
 
   const handleAddSample = () => {
-    const id = `ref_${Date.now()}`;
-    const newRef = {
-      id,
-      displayName: `Sample Asset #${references.length + 1}`,
-      name: `Sample Asset #${references.length + 1}`,
-      role: "reference",
-      type: "media",
-      label: "Custom Upload",
-      url: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=150&q=80",
-    };
+    const id = `asset_${Date.now()}`;
+    const sampleTypes = ["character", "vehicle", "object", "style", "generation", "upload"];
+    const chosen = sampleTypes[references.length % sampleTypes.length];
+
+    let newRef;
+    if (chosen === "character") {
+      newRef = {
+        id,
+        displayName: `Sample Character #${references.length + 1}`,
+        name: `Sample Character #${references.length + 1}`,
+        role: "character",
+        type: "character",
+        label: "Character",
+        url: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&q=80",
+      };
+    } else if (chosen === "upload") {
+      newRef = {
+        id,
+        displayName: `Uploaded Asset #${references.length + 1}`,
+        name: `Uploaded Asset #${references.length + 1}`,
+        role: "upload",
+        type: "upload",
+        is_upload: true,
+        workflow_type: "UPLOAD",
+        label: "User Upload",
+        url: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=150&q=80",
+      };
+    } else if (chosen === "generation") {
+      newRef = {
+        id,
+        displayName: `Sample Generation #${references.length + 1}`,
+        name: `Sample Generation #${references.length + 1}`,
+        role: "reference",
+        type: "reference",
+        workflow_type: "GENERATED",
+        label: "Generation",
+        url: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=150&q=80",
+      };
+    } else {
+      const typeName = chosen.charAt(0).toUpperCase() + chosen.slice(1);
+      newRef = {
+        id,
+        displayName: `Sample ${typeName} #${references.length + 1}`,
+        name: `Sample ${typeName} #${references.length + 1}`,
+        role: "element",
+        type: "element",
+        element_type: chosen,
+        label: typeName,
+        url: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=150&q=80",
+      };
+    }
     setReferences((prev) => [...prev, newRef]);
   };
 
@@ -402,13 +531,13 @@ export default function TestMentionPage() {
                 </span>
                 <div>
                   <h2 className="text-base font-semibold text-white flex items-center gap-2">
-                    Top Panel Shell Zone
+                    Krea-Style Mention Menu & Prompt Bar
                     <span className="px-2 py-0.5 rounded-full text-[10px] bg-cyan-500/20 text-cyan-300 font-mono">
                       AtMentionMenu.jsx
                     </span>
                   </h2>
                   <p className="text-white/40 text-[11.5px]">
-                    Opens as a sleek glassmorphic shelf above the prompt bar shell with search & filter.
+                    Floating top panel matching prompt bar style with Add (Files & Asset library) and zero borders.
                   </p>
                 </div>
               </div>
@@ -427,37 +556,49 @@ export default function TestMentionPage() {
             </div>
 
             {/* Interactive Prompt Bar Shell with Top Panel Zone */}
-            <div className="relative mt-2 flex flex-col items-center" ref={v2AnchorRef}>
+            <div className="relative mt-2 flex flex-col items-center gap-2 w-full" ref={v2AnchorRef}>
               {/* TOP PANEL ZONE */}
               <AtMentionMenu
                 open={v2PanelOpen}
-                onClose={() => setV2PanelOpen(false)}
+                onClose={() => {
+                  setV2PanelOpen(false);
+                  setV2MentionQuery("");
+                }}
                 references={references}
                 anchorRef={v2AnchorRef}
+                query={v2MentionQuery}
                 onSelectReference={(ref) => {
                   setV2InsertTarget(ref);
                   setV2PanelOpen(false);
+                  setV2MentionQuery("");
                 }}
-                onOpenMediaLibrary={() => alert("Version 2: Open Media Library clicked!")}
+                onOpenMediaLibrary={() => alert("Asset library clicked: Opening assets...")}
               />
 
-              {/* Prompt Bar Shell */}
-              <div className="w-full rounded-[24px] bg-[#161718]/80 backdrop-blur-xl border border-white/10 p-4 shadow-[0_16px_50px_rgba(0,0,0,0.5)] focus-within:border-white/30 transition-all">
+              {/* Prompt Bar Shell (Border-free and shadow-free matching prompt bar) */}
+              <div className="w-full rounded-[28px] bg-(--background-base-pri) backdrop-blur-[80px] p-3.5 shadow-none transition-all border-0">
                 <LexicalComposer initialConfig={initialConfigV2}>
-                  <div className="relative min-h-[70px] w-full">
+                  <div className="relative min-h-[50px] w-full px-1">
                     <RichTextPlugin
                       contentEditable={
-                        <ContentEditable className="outline-none text-white text-[14.5px] leading-relaxed min-h-[60px] py-1" />
+                        <ContentEditable className="outline-none text-white text-[15px] leading-relaxed min-h-[46px] py-1" />
                       }
                       placeholder={
-                        <span className="absolute top-1 left-0 text-white/30 text-[14.5px] pointer-events-none">
-                          Type @ to trigger top panel menu...
+                        <span className="absolute top-1 left-1 text-white/30 text-[15px] pointer-events-none">
+                          Type @ to trigger mention menu...
                         </span>
                       }
                       ErrorBoundary={LexicalErrorBoundary}
                     />
                     <HistoryPlugin />
-                    <AtShortcutPlugin onTriggerMention={() => setV2PanelOpen(true)} />
+                    <AtShortcutPlugin
+                      onTriggerMention={() => {
+                        setV2MentionQuery("");
+                        setV2PanelOpen(true);
+                      }}
+                      onMentionQueryChange={setV2MentionQuery}
+                      mentionOpen={v2PanelOpen}
+                    />
                     <ExternalInsertPlugin
                       insertTarget={v2InsertTarget}
                       onInserted={() => setV2InsertTarget(null)}
@@ -472,32 +613,47 @@ export default function TestMentionPage() {
                   </div>
                 </LexicalComposer>
 
-                {/* Bottom Bar Details */}
-                <div className="pt-3 mt-2 border-t border-white/5 flex items-center justify-between">
+                {/* Bottom Bar: Circular '+' on left, Auto Medium dropdown, Mic, and Circular '+' submit on right */}
+                <div className="pt-2 flex items-center justify-between">
+                  <button
+                    type="button"
+                    onClick={() => setV2PanelOpen(true)}
+                    className="size-8 rounded-full bg-white/10 hover:bg-white/15 active:scale-95 text-white/70 hover:text-white flex items-center justify-center transition-all shrink-0"
+                    title="Add media, reference or connector"
+                  >
+                    <GoogleIcon iconName="add" className="text-[18px]" />
+                  </button>
+
                   <div className="flex items-center gap-2">
+                    {/* Auto Medium Selector */}
                     <button
                       type="button"
-                      onClick={() => setV2PanelOpen((v) => !v)}
-                      className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-[11px] font-medium border transition-all ${
-                        v2PanelOpen
-                          ? "bg-cyan-500/20 text-cyan-300 border-cyan-500/40"
-                          : "bg-white/5 hover:bg-white/10 text-white/70 border-white/10"
-                      }`}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 text-white/80 hover:text-white text-[12.5px] font-medium transition-colors"
                     >
-                      <GoogleIcon iconName="alternate_email" className="text-[14px]" />
-                      <span>{v2PanelOpen ? "Close Menu" : "Trigger @ Menu"}</span>
+                      <span className="font-semibold text-white">Auto</span>
+                      <span className="text-white/60">Medium</span>
+                      <GoogleIcon iconName="keyboard_arrow_down" className="text-[15px] text-white/40" />
                     </button>
-                    <span className="text-[11px] text-white/35">Or press @ in text</span>
-                  </div>
 
-                  <Button
-                    type="button"
-                    size="xs"
-                    className="rounded-xl bg-white text-black font-semibold text-[11px] px-3 hover:bg-white/90"
-                    onClick={() => alert(`Submitted V2 prompt: ${v2RawOutput}`)}
-                  >
-                    Generate
-                  </Button>
+                    {/* Microphone Voice Button */}
+                    <button
+                      type="button"
+                      className="size-8 rounded-full hover:bg-white/10 text-white/60 hover:text-white flex items-center justify-center transition-colors"
+                      title="Voice Input"
+                    >
+                      <GoogleIcon iconName="mic" className="text-[18px]" />
+                    </button>
+
+                    {/* Circular White Action Button with Black '+' */}
+                    <button
+                      type="button"
+                      onClick={() => alert(`Submitted prompt: ${v2RawOutput}`)}
+                      className="size-8 rounded-full bg-white hover:bg-white/90 active:scale-95 text-black flex items-center justify-center transition-all shadow-md shrink-0 cursor-pointer"
+                      title="Generate"
+                    >
+                      <GoogleIcon iconName="add" className="text-[20px] font-bold text-black" />
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>

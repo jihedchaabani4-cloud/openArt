@@ -5,7 +5,7 @@ import { Slot } from "radix-ui"
 import { cn } from "@/shared/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex cursor-pointer  items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none",
+  "inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-medium font-sans antialiased transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none",
   {
     variants: {
       variant: {
@@ -100,13 +100,17 @@ const buttonVariants = cva(
         "flow-overlay-action":
           "bg-black/40 backdrop-blur-md text-white/80 hover:text-white hover:bg-black/65 active:scale-95 transition-all shadow-md border border-white/10 rounded-xl cursor-pointer",
         "nav-tab":
-          "font-['Google_Sans_Text',sans-serif] text-sm font-medium flex items-center justify-start gap-3 h-10 px-3.5 rounded-[14px] transition-all duration-200 text-white/70 hover:text-white hover:bg-white/10 active:bg-[rgba(218,220,224,0.25)] active:shadow-[0px_4px_32px_-8px_rgba(0,0,0,0.2)] active:blur-[1.5px] active:backdrop-blur-[25px] outline-none select-none cursor-pointer transform-none",
+          "font-sans antialiased text-sm font-medium flex items-center justify-start gap-3 h-10 px-3.5 rounded-[14px] transition-all duration-200 text-white/70 hover:text-white hover:bg-white/10 active:bg-[rgba(218,220,224,0.25)] active:shadow-[0px_4px_32px_-8px_rgba(0,0,0,0.2)] active:blur-[1.5px] active:backdrop-blur-[25px] outline-none select-none cursor-pointer transform-none",
         "nav-tab-active":
-          "font-['Google_Sans_Text',sans-serif] text-sm font-medium flex items-center justify-start gap-3 h-10 px-3.5 rounded-[14px] transition-all duration-200 bg-[rgba(218,220,224,0.25)] text-white shadow-[0px_4px_32px_-8px_rgba(0,0,0,0.2)] backdrop-blur-[25px] active:blur-[1.5px] outline-none select-none cursor-pointer transform-none",
+          "font-sans antialiased text-sm font-medium flex items-center justify-start gap-3 h-10 px-3.5 rounded-[14px] transition-all duration-200 bg-[rgba(218,220,224,0.25)] text-white shadow-[0px_4px_32px_-8px_rgba(0,0,0,0.2)] backdrop-blur-[25px] active:blur-[1.5px] outline-none select-none cursor-pointer transform-none",
         flow:
-          "font-['Google_Sans_Text',sans-serif] text-[12px] font-medium flex items-center justify-start gap-1.5 h-8 px-2.5 rounded-xl bg-white/5 border-none text-white/80 hover:text-white hover:bg-white/10 active:bg-[rgba(218,220,224,0.25)] active:shadow-[0px_4px_32px_-8px_rgba(0,0,0,0.2)] active:blur-[1.5px] active:backdrop-blur-[25px] transition-all duration-200 outline-none select-none cursor-pointer transform-none",
+          "font-sans antialiased text-[12px] font-medium flex items-center justify-start gap-1.5 h-8 px-2.5 rounded-xl bg-white/5 border-none text-white/80 hover:text-white hover:bg-white/10 active:bg-[rgba(218,220,224,0.25)] active:shadow-[0px_4px_32px_-8px_rgba(0,0,0,0.2)] active:blur-[1.5px] active:backdrop-blur-[25px] transition-all duration-200 outline-none select-none cursor-pointer transform-none",
         blur:
-          "font-['Google_Sans_Text',sans-serif] text-[12px] font-medium flex items-center justify-start gap-1.5 h-8 px-2.5 rounded-xl bg-white/5 border-none text-white/80 hover:text-white hover:bg-white/10 active:bg-[rgba(218,220,224,0.25)] active:shadow-[0px_4px_32px_-8px_rgba(0,0,0,0.2)] active:blur-[1.5px] active:backdrop-blur-[25px] transition-all duration-200 outline-none select-none cursor-pointer transform-none",
+          "font-sans antialiased text-[12px] font-medium flex items-center justify-start gap-1.5 h-8 px-2.5 rounded-xl bg-white/5 border-none text-white/80 hover:text-white hover:bg-white/10 active:bg-[rgba(218,220,224,0.25)] active:shadow-[0px_4px_32px_-8px_rgba(0,0,0,0.2)] active:blur-[1.5px] active:backdrop-blur-[25px] transition-all duration-200 outline-none select-none cursor-pointer transform-none",
+        "create-element":
+          "font-sans antialiased text-[15px] font-medium flex items-center justify-center gap-2 h-auto px-6 py-4 rounded-[24px] bg-[#4a4a4a] hover:bg-[#5a5a5a] text-[#d1d1d1] hover:text-white shadow-2xl shadow-black/50 transition-all active:scale-95 border-none backdrop-blur-md cursor-pointer",
+        "studio-fab":
+          "font-sans antialiased text-[15px] font-medium flex items-center justify-center gap-2 h-auto px-6 py-4 rounded-[24px] bg-[#4a4a4a] hover:bg-[#5a5a5a] text-[#d1d1d1] hover:text-white shadow-2xl shadow-black/50 transition-all active:scale-95 border-none backdrop-blur-md cursor-pointer",
       },
       size: {
         default: "h-8 px-3.5 text-[12px] rounded-[var(--mat-sys-corner-small,8px)] has-[>svg]:px-3",
@@ -125,6 +129,8 @@ const buttonVariants = cva(
         ratio: "h-[54px] min-h-[54px] p-0 has-[>svg]:p-0",
         /** User avatar square button size */
         avatar: "size-9 min-w-9 min-h-9 p-0 rounded-[var(--mat-sys-corner-medium,12px)] has-[>svg]:p-0",
+        /** Floating action button size */
+        fab: "h-auto min-h-0 px-6 py-4 rounded-[24px] text-[15px] has-[>svg]:px-6",
       },
     },
     defaultVariants: {

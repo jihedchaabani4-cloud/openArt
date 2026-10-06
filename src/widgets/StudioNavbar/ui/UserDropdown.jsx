@@ -43,7 +43,7 @@ function UserMenuButton({ iconName, label, onClick, variant = "filled", isLoadin
       variant={variant === "filled" ? "user-menu-filled" : "user-menu-outline"}
       onClick={onClick}
       disabled={isLoading}
-      className={cn("flex w-full items-center justify-center gap-2.5", className)}
+      className={cn("flex w-full items-center justify-center gap-2.5 font-sans font-medium text-[14px] antialiased", className)}
     >
       {isLoading ? (
         <Loader2 size={16} className="animate-spin text-white/70" />
@@ -129,7 +129,7 @@ export function UserDropdown({ className }) {
       <DropdownMenuContent
         align="end"
         sideOffset={10}
-        className="w-[360px] rounded-[var(--mat-sys-corner-extra-large,28px)] border border-[var(--mat-sys-outline-variant,rgba(255,255,255,0.08))] bg-[var(--mat-menu-container-color,var(--background-state-90))] backdrop-blur-[80px] p-4 shadow-[var(--mat-dialog-container-elevation-shadow)]"
+        className="w-[360px] rounded-[var(--mat-sys-corner-extra-large,28px)] border border-[var(--mat-sys-outline-variant,rgba(255,255,255,0.08))] bg-[var(--mat-menu-container-color,var(--background-state-90))] backdrop-blur-[80px] p-4 shadow-[var(--mat-dialog-container-elevation-shadow)] font-sans antialiased"
       >
 
 

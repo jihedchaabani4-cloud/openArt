@@ -15,6 +15,7 @@ import {
   generatedMediaConfig,
   useRealBackendModels,
 } from "@/features/prompt-bar/index.platform"
+import { isLtxModel } from "@/features/prompt-bar/providers/ltx/index.js"
 import { RowsPhotoAlbum } from 'react-photo-album'
 import 'react-photo-album/rows.css'
 import { MediaGridItem } from "@/widgets/StudioLayout/GenerationsStudio/MediaGridItem"
@@ -95,12 +96,33 @@ export default function GenerationsPage({ params }) {
             };
 
             try {
-                const res = await runGenerate({ payload, isVideo });
-                const finalProj = res?.project_id ?? projectId;
-                const finalSess = res?.session_id ?? activeSessionId;
-                if (finalProj) {
-                    queryClient.invalidateQueries({ queryKey: queryKeys.assets.byProject(finalProj, finalSess) });
-                    queryClient.invalidateQueries({ queryKey: queryKeys.generations.byProject(finalProj, finalSess) });
+                if (isLtxModel(request.model)) {
+                    // ── LTX Provider ──────────────────────────────────────────
+                    // Call the Next.js proxy route → LTX API directly.
+                    // LTX returns a job ID immediately (async); polling happens in the backend.
+                    const res = await fetch("/api/ltx/generate", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(payload),
+                    });
+                    const data = await res.json();
+                    if (!data.ok) {
+                        throw new Error(data.message || "LTX generation failed");
+                    }
+                    // Invalidate to show optimistic state — real result comes via polling
+                    if (projectId) {
+                        queryClient.invalidateQueries({ queryKey: queryKeys.assets.byProject(projectId, activeSessionId) });
+                        queryClient.invalidateQueries({ queryKey: queryKeys.generations.byProject(projectId, activeSessionId) });
+                    }
+                } else {
+                    // ── Internal Backend (all other providers) ────────────────
+                    const res = await runGenerate({ payload, isVideo });
+                    const finalProj = res?.project_id ?? projectId;
+                    const finalSess = res?.session_id ?? activeSessionId;
+                    if (finalProj) {
+                        queryClient.invalidateQueries({ queryKey: queryKeys.assets.byProject(finalProj, finalSess) });
+                        queryClient.invalidateQueries({ queryKey: queryKeys.generations.byProject(finalProj, finalSess) });
+                    }
                 }
             } catch (err) {
                 console.error("Generation execution failed:", err);

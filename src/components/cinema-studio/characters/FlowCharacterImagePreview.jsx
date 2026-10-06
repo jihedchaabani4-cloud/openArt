@@ -32,7 +32,7 @@ export function FlowCharacterImagePreview({
       )}
     >
       <div className="empty-container w-full max-w-xl flex flex-col items-center justify-center gap-6 text-center">
-        <span className="empty-state-text text-[18px] sm:text-[21px] md:text-[22px] leading-snug font-medium font-['Google_Sans',sans-serif] text-white tracking-[-0.01em]">
+        <span className="empty-state-text text-[18px] sm:text-[21px] md:text-[22px] leading-snug font-medium font-sans antialiased text-white tracking-[-0.01em]">
           {text}
         </span>
 

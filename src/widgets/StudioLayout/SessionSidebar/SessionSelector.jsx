@@ -84,7 +84,7 @@ export function SessionSelector({
         <DropdownMenuContent
           align="end"
           sideOffset={8}
-          className="w-64 p-1.5 flex flex-col gap-0.5 font-['Google_Sans_Text',sans-serif]"
+          className="w-64 p-1.5 flex flex-col gap-0.5 font-sans antialiased"
         >
           {/* Header */}
           <div className="flex items-center justify-between px-2.5 py-1.5 text-[11px] font-semibold text-[rgba(218,220,224,0.6)] uppercase tracking-wider">
@@ -123,7 +123,7 @@ export function SessionSelector({
                     setOpen(false);
                   }}
                   className={cn(
-                    "flex items-center justify-between px-2.5 py-2 min-h-[38px] rounded-[10px] cursor-pointer text-[13px] font-medium transition-colors",
+                    "flex items-center justify-between px-2.5 py-2 min-h-[38px] rounded-[10px] cursor-pointer text-[14px] font-medium leading-5 transition-colors",
                     isSelected
                       ? "bg-white/15 text-white"
                       : "text-white/80 hover:text-white hover:bg-white/10"
@@ -164,7 +164,7 @@ export function SessionSelector({
               onCreateSession?.();
               setOpen(false);
             }}
-            className="flex items-center gap-2 px-2.5 py-2 rounded-[10px] text-[13px] font-medium text-white hover:bg-white/10 cursor-pointer"
+            className="flex items-center gap-2 px-2.5 py-2 rounded-[10px] text-[14px] font-medium leading-5 text-white hover:bg-white/10 cursor-pointer"
           >
             <GoogleIcon iconName="add" className="text-[16px] text-white/80" />
             <span>Nouvelle session</span>

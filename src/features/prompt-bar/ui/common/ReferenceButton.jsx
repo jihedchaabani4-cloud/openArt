@@ -7,11 +7,11 @@ import { cn } from "@/shared/lib/utils";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 
 const VARIANTS = {
-  start:  { word: "Start",  HoverContent: () => <span className="text-[10px] uppercase tracking-[0.08em] text-[rgba(218,220,224,0.5)]">pick</span> },
-  end:    { word: "End",    HoverContent: () => <span className="text-[10px] uppercase tracking-[0.08em] text-[rgba(218,220,224,0.5)]">pick</span> },
-  motion: { word: "Motion", HoverContent: () => <Play size={15} strokeWidth={1.5} className="text-[rgba(218,220,224,0.6)]" /> },
-  ref:    { word: "Ref",    HoverContent: () => <Image size={15} strokeWidth={1.5} className="text-[rgba(218,220,224,0.6)]" /> },
-  add:    { word: "Add",    HoverContent: () => <Plus size={15} strokeWidth={1.5} className="text-[rgba(218,220,224,0.6)]" /> },
+  start:  { word: "Start",  HoverContent: () => <Plus size={15} strokeWidth={1.5} className="text-[rgba(218,220,224,0.7)]" /> },
+  end:    { word: "End",    HoverContent: () => <Plus size={15} strokeWidth={1.5} className="text-[rgba(218,220,224,0.7)]" /> },
+  motion: { word: "Motion", HoverContent: () => <Play size={15} strokeWidth={1.5} className="text-[rgba(218,220,224,0.7)]" /> },
+  ref:    { word: "Ref",    HoverContent: () => <Plus size={15} strokeWidth={1.5} className="text-[rgba(218,220,224,0.7)]" /> },
+  add:    { word: "Add",    HoverContent: () => <Plus size={15} strokeWidth={1.5} className="text-[rgba(218,220,224,0.7)]" /> },
 };
 
 export function ReferenceButton({
@@ -28,9 +28,9 @@ export function ReferenceButton({
   onDrop,
   ...props
 }) {
-  const preset = variant ? VARIANTS[variant] : null;
+  const preset = variant ? VARIANTS[variant] : (word ? VARIANTS[word.toLowerCase()] : null);
   const displayWord = word ?? preset?.word ?? null;
-  const HoverContent = hoverContent ?? preset?.HoverContent ?? null;
+  const HoverContent = hoverContent !== undefined ? hoverContent : (preset?.HoverContent ?? null);
 
   return (
     <div
@@ -57,11 +57,13 @@ export function ReferenceButton({
       {displayWord && (
         <span
           className={cn(
-            "absolute pointer-events-none",
+            "pointer-events-none select-none",
             "text-[13px] font-medium text-[rgba(218,220,224,0.75)]",
             "tracking-[0.01em] whitespace-nowrap",
             "transition-all duration-200 ease-out",
-            "group-hover:-translate-y-2 group-hover:opacity-0"
+            HoverContent
+              ? "absolute group-hover:-translate-y-2 group-hover:opacity-0"
+              : "group-hover:text-white"
           )}
         >
           {displayWord}
@@ -88,8 +90,8 @@ export function ReferenceButton({
 
 export function SwapIcon({ className }) {
   return (
-    <div className={cn("flex items-center justify-center text-white/40 shrink-0", className)}>
-      <ArrowLeftRight size={18} strokeWidth={3} />
+    <div className={cn("flex items-center justify-center shrink-0", className)}>
+      <ArrowLeftRight size={16} strokeWidth={2} />
     </div>
   );
 }
@@ -182,7 +184,7 @@ export function ViewReference({
 
         {/* Hover overlay — cancel button */}
         <div
-          className="hover-icon-overlay absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10"
+          className="hover-icon-overlay absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-20"
           title={`Supprimer ${tooltipText}`}
         >
           <GoogleIcon

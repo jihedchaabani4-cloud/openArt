@@ -56,10 +56,10 @@ export function AssetListItem({
 
       {/* Asset Text: Title and Uniform Type Subtitle */}
       <div className="flex-1 min-w-0 flex flex-col justify-center text-left">
-        <span className="text-[13px] font-normal text-[#e3e3e3] truncate leading-tight font-['Google_Sans_Text',sans-serif]">
+        <span className="text-[13px] font-medium text-[#e3e3e3] truncate leading-tight font-sans antialiased">
           {title}
         </span>
-        <span className="text-[11px] font-normal text-[#c4c7c5] truncate font-['Google_Sans_Text',sans-serif] mt-0.5">
+        <span className="text-[11px] font-normal text-[#c4c7c5] truncate font-sans antialiased mt-0.5">
           {typeLabel}
         </span>
       </div>

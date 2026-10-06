@@ -8,6 +8,7 @@ import { ButtonGroup } from "@/shared/ui/button-group";
 import { ContextMenu, ContextMenuTrigger } from "@/shared/ui/context-menu";
 import { ConfirmDeleteDialog } from "@/widgets/dialogs/ConfirmDeleteDialog";
 import { InlineRenamePill } from "@/shared/ui/InlineRenamePill";
+import { FlowErrorTile } from "@/shared/ui/FlowErrorTile";
 import { useWorkflowActions } from "@/features/workflows/model/useMediaActions";
 import { useUpdateWorkflow } from "@/features/workflows/api/workflowsApi";
 import { usePromptStore } from "@/features/studio";
@@ -277,6 +278,52 @@ export const MediaGridItem = React.memo(function MediaGridItem({
   const hasAnyValidMedia = workflow?.items?.some(i => ["completed", "processing"].includes(i.status));
   const canNavigate = isDone || status === "processing" || hasAnyValidMedia;
 
+  // ── Error State (Exact Google Flow Video Tile specification) ─────────
+  if (isError) {
+    const errorMsg =
+      item?.error ||
+      workflow?.error ||
+      "This prompt might violate our policies about generating sexual content. Please try a different prompt or send feedback.";
+
+    return (
+      <div
+        className={cn("relative overflow-hidden rounded-2xl", className)}
+        style={
+          albumWidth && albumHeight
+            ? {
+                width: albumWidth,
+                height: albumHeight,
+                aspectRatio: propAspect || aspect,
+              }
+            : {
+                width: "100%",
+                aspectRatio: propAspect || aspect,
+              }
+        }
+      >
+        <FlowErrorTile
+          error={errorMsg}
+          onReusePrompt={(e) => {
+            e?.stopPropagation();
+            handleReuseSettings();
+          }}
+          onDelete={(e) => {
+            e?.stopPropagation();
+            setIsDeleteConfirmOpen(true);
+          }}
+        />
+
+        <ConfirmDeleteDialog
+          open={isDeleteConfirmOpen}
+          onOpenChange={setIsDeleteConfirmOpen}
+          title="Delete generation?"
+          description="Are you sure you want to delete this failed generation?"
+          onConfirm={handleDelete}
+        />
+      </div>
+    );
+  }
+
   // ── Render ─────────────────────────────────────────────────────────────
   return (
     <>
@@ -322,8 +369,22 @@ export const MediaGridItem = React.memo(function MediaGridItem({
               status={status}
               src={url}
               alt={prompt}
+              isVideo={isVideo}
+              progress={item?.progress ?? workflow?.progress}
               aspect={propAspect || (albumWidth && albumHeight ? `${albumWidth}/${albumHeight}` : aspect)}
-              error={item.error}
+              error={item?.error || workflow?.error}
+              onRetry={(e) => {
+                e?.stopPropagation();
+                handleReuseSettings();
+              }}
+              onReusePrompt={(e) => {
+                e?.stopPropagation();
+                handleReuseSettings();
+              }}
+              onDelete={(e) => {
+                e?.stopPropagation();
+                handleDelete();
+              }}
               showOverlay
               className="w-full h-full object-cover relative z-0"
             >
@@ -390,25 +451,6 @@ export const MediaGridItem = React.memo(function MediaGridItem({
               </div>
             )}
 
-            {/* ── Error quick-actions ── */}
-            {isError && !isDone && (
-              <div className="absolute bottom-2 right-2 z-30 pointer-events-auto">
-                <ButtonGroup className="bg-white/60 backdrop-blur-md rounded-lg">
-                  {canReuse && (
-                    <ActionBtn onClick={(e) => { e.stopPropagation(); handleReuseSettings(); }} title="Reuse Settings">
-                      <GoogleIcon iconName="history" className="text-[13px] text-[#303031]" />
-                    </ActionBtn>
-                  )}
-                  <ActionBtn
-                    onClick={(e) => { e.stopPropagation(); if (canDelete) setIsDeleteConfirmOpen(true); }}
-                    disabled={!canDelete}
-                    title={canDelete ? "Delete" : "Cannot delete while processing"}
-                  >
-                    <GoogleIcon iconName="delete" className="text-[13px] text-[#303031]" />
-                  </ActionBtn>
-                </ButtonGroup>
-              </div>
-            )}
 
             {/* ── Entity Type Corner Badge (Character / Element) ── */}
             {isDone && (isCharacter || isElement) && (

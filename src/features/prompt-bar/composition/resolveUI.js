@@ -7,8 +7,8 @@ export const UI_SLOTS = {
     { role: "reference", label: "Reference", accepts: "image/*" },
   ],
   video_frames: [
-    { role: "start", label: "Start Frame", accepts: "image/*" },
-    { role: "end",   label: "End Frame",   accepts: "image/*" },
+    { role: "start", label: "Start", accepts: "image/*" },
+    { role: "end",   label: "End",   accepts: "image/*" },
   ],
   video_reference: [
     { role: "reference", label: "Reference", accepts: "video/*,image/*" },

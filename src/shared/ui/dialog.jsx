@@ -33,7 +33,7 @@ function DialogOverlay({ className, ...props }) {
     <DialogPrimitive.Overlay
       data-slot="dialog-overlay"
       className={cn(
-        "fixed inset-0 z-50 bg-black/40 backdrop-blur-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0 duration-700",
+        "fixed inset-0 z-50 bg-black/65 backdrop-blur-[24px] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0 duration-300",
         className
       )}
       {...props}
@@ -56,6 +56,23 @@ function DialogContent({
       <DialogPrimitive.Content
         data-slot="dialog-content"
         className={cn(
+          // GLASS (border-none, maximum blur)
+          variant === "glass" &&
+            `
+            z-50 fixed top-[50%] left-[50%]
+            translate-x-[-50%] translate-y-[-50%]
+            w-full max-w-[calc(100%-2rem)]
+            rounded-[28px] border-none outline-none
+            bg-[rgba(20,21,24,0.72)] backdrop-blur-[100px]
+            shadow-[0_32px_80px_-16px_rgba(0,0,0,0.85),0_0_50px_-10px_rgba(0,0,0,0.5)]
+            data-[state=open]:animate-in
+            data-[state=closed]:animate-out
+            data-[state=open]:fade-in-0
+            data-[state=closed]:fade-out-0
+            data-[state=open]:zoom-in-95
+            data-[state=closed]:zoom-out-95
+          `,
+
           // FULL SCREEN
           variant === "full" &&
             "fixed inset-0 z-50 w-screen h-screen outline-none bg-[var(--mat-dialog-container-color,var(--background-state-90))] backdrop-blur-[80px]",

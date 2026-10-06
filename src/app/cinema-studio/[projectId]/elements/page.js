@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 
 import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows"
 import { useElementSheetWorkflows } from "@/features/elements"
@@ -20,6 +20,7 @@ import { MediaGridItem } from "@/widgets/StudioLayout/GenerationsStudio/MediaGri
 import { HowToDrawer } from "@/components/cinema-studio/elements/HowToDrawer";
 import { useWorkflowDelete } from "@/features/workflows";
 import { ConfirmDeleteDialog } from "@/widgets/dialogs/ConfirmDeleteDialog";
+import { NewElementDialog } from "@/widgets/NewElementDialog";
 
 const PAGE_SIZE = 30;
 
@@ -45,16 +46,18 @@ export default function ElementsPage({ params }) {
     
     const isDragging = usePromptStore(s => s.isDraggingGalleryItem);
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const [isNewElementOpen, setIsNewElementOpen] = React.useState(false);
     
     // Natively fetch element sheet workflows
-    const { workflows: existingSheets, isLoading } = useElementSheetWorkflows(projectId)
+    const { workflows: existingSheets, isLoading } = useElementSheetWorkflows(projectId);
 
-    // Redirect to /elements/new if project has 0 elements
+    // Auto-open modal if URL has ?new=true or ?create=true
     React.useEffect(() => {
-        if (!isLoading && existingSheets.length === 0 && projectId) {
-            router.replace(`/cinema-studio/${projectId}/elements/new`);
+        if (searchParams?.get("new") === "true" || searchParams?.get("create") === "true") {
+            setIsNewElementOpen(true);
         }
-    }, [isLoading, existingSheets.length, projectId, router]);
+    }, [searchParams]);
 
     const sheetsListKey = React.useMemo(
         () => existingSheets.map((workflow) => workflow.id || workflow.name).join("|"),
@@ -171,7 +174,7 @@ export default function ElementsPage({ params }) {
         photo: renderPhoto,
     }), [renderPhoto]);
 
-    if (isLoading || existingSheets.length === 0) {
+    if (isLoading) {
         return <LoadingScreen message="Loading elements..." />
     }
 
@@ -206,6 +209,15 @@ export default function ElementsPage({ params }) {
                             <p className="text-[13px] text-white/20 mt-1">
                                 Click &quot;New element&quot; below to create your first element.
                             </p>
+                            <Button
+                                type="button"
+                                variant="studio-white"
+                                onClick={() => setIsNewElementOpen(true)}
+                                className="mt-4 rounded-full px-5 py-2.5 font-medium text-sm flex items-center gap-2 border-none"
+                            >
+                                <Plus className="size-4" />
+                                <span>Create element</span>
+                            </Button>
                         </div>
                     ) : (
                         <div className="flex flex-col gap-6 w-full pb-32 pt-4">
@@ -229,11 +241,12 @@ export default function ElementsPage({ params }) {
                 <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-40">
                     <Button
                         type="button"
-                        onClick={() => router.push(`/cinema-studio/${projectId}/elements/new`)}
-                        className="flex items-center gap-2 h-auto px-6 py-4 rounded-[24px] bg-[#4a4a4a] hover:bg-[#5a5a5a] text-[#d1d1d1] hover:text-white shadow-2xl shadow-black/50 transition-all active:scale-95 border border-white/5 backdrop-blur-md cursor-pointer"
+                        variant="create-element"
+                        size="fab"
+                        onClick={() => setIsNewElementOpen(true)}
                     >
                         <Plus className="size-5" />
-                        <span className="font-medium text-[15px]">New element</span>
+                        <span>New element</span>
                     </Button>
                 </div>
 
@@ -249,6 +262,12 @@ export default function ElementsPage({ params }) {
                     description="This action will permanently delete this element reference sheet."
                     onConfirm={() => confirmDelete(projectId)}
                     isDeleting={isDeleting}
+                />
+
+                <NewElementDialog
+                    open={isNewElementOpen}
+                    onOpenChange={setIsNewElementOpen}
+                    projectId={projectId}
                 />
 
 

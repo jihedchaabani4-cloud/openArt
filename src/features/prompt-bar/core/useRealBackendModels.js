@@ -12,6 +12,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/shared/api/client";
 import { adaptBackendCatalog, adaptBackendModel } from "../core/modelManagement.js";
+import { LTX_MODELS_CATALOG } from "../providers/ltx/ltxModels.js";
 
 /**
  * Fetches and normalizes models from the backend.
@@ -60,14 +61,19 @@ export function useRealBackendModels({ projectId = null } = {}) {
         throw new Error("Backend did not return a valid models array.");
       }
 
-      const adaptedModels = adaptBackendCatalog(rawList);
+      // Merge LTX static models — deduplicate by key so backend can override later
+      const backendKeys = new Set(rawList.map((m) => m.key || m.id || m.modelFamily));
+      const ltxRaw = LTX_MODELS_CATALOG.filter((m) => !backendKeys.has(m.key));
+      const mergedRaw = [...rawList, ...ltxRaw];
+
+      const adaptedModels = adaptBackendCatalog(mergedRaw);
       const modelsMap = {};
       const rawModelsMap = {};
 
-      for (let i = 0; i < rawList.length; i++) {
+      for (let i = 0; i < mergedRaw.length; i++) {
         const adapted = adaptedModels[i];
         modelsMap[adapted.id] = adapted;
-        rawModelsMap[adapted.id] = rawList[i];
+        rawModelsMap[adapted.id] = mergedRaw[i];
       }
 
       return {

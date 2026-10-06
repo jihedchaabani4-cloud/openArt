@@ -46,8 +46,8 @@ export const generatedMediaType = createPromptBarType({
         frames: {
           label: "Frames",
           referenceSlots: [
-            { role: "start", label: "Start Frame", accepts: ["image"], maxCount: 1 },
-            { role: "end",   label: "End Frame",   accepts: ["image"], maxCount: 1 },
+            { role: "start", label: "Start", accepts: ["image"], maxCount: 1 },
+            { role: "end",   label: "End",   accepts: ["image"], maxCount: 1 },
           ],
         },
         reference: {

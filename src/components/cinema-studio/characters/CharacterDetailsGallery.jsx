@@ -59,7 +59,7 @@ export function CharacterDetailsGallery({
           {/* Header Bar with Counter and Action Buttons */}
           <div className="flex items-center justify-between px-1 py-1 w-full shrink-0">
             <div className="flex items-center gap-2">
-              <span className="text-[13px] font-medium font-['Google_Sans_Text',sans-serif] text-white/70">
+              <span className="text-[13px] font-medium font-sans antialiased text-white/70">
                 Photos de référence
               </span>
               <span className="text-[11.5px] px-2 py-0.5 rounded-full bg-white/10 text-white/60 font-medium">
