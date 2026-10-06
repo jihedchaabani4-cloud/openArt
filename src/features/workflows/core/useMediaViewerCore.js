@@ -38,7 +38,7 @@ export function formatMediaDuration(seconds) {
  * Core hook providing all state, sizing, video playback controls,
  * and metadata resolution for media viewers (EditMediaView, MediaGridItem, etc.).
  */
-export function useMediaViewerCore({ workflow, item: propItem = null }) {
+export function useMediaViewerCore({ workflow, item: propItem = null, autoPlay = true }) {
   const targetItem = propItem || (workflow ? getPrimaryMedia(workflow) : null);
   const metadata = useMemo(() => {
     return targetItem
@@ -137,7 +137,7 @@ export function useMediaViewerCore({ workflow, item: propItem = null }) {
   // Autoplay on src change
   useEffect(() => {
     const video = videoRef.current;
-    if (!video || !url || !isVideo) return;
+    if (!video || !url || !isVideo || !autoPlay) return;
 
     setCurrentTime(0);
     setDuration(0);
@@ -151,7 +151,7 @@ export function useMediaViewerCore({ workflow, item: propItem = null }) {
         setIsPlaying(false);
       });
     }
-  }, [url, isVideo]);
+  }, [url, isVideo, autoPlay]);
 
   const togglePlay = useCallback(() => {
     const video = videoRef.current;

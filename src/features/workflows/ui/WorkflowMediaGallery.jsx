@@ -7,7 +7,7 @@ import { ActionBtn } from "@/widgets/StudioLayout/GenerationsStudio/MediaGridIte
 import { ButtonGroup } from "@/shared/ui/button-group";
 import { cn } from "@/shared/lib/utils";
 import { getItemMetadata } from "@/shared/lib/generationUtils";
-import { ImageStatusView } from "./ImageStatusView";
+import { CoreMediaItemView } from "@/widgets/CoreMediaItemView";
 import { ConfirmDeleteDialog } from "@/widgets/dialogs/ConfirmDeleteDialog";
 
 function tokenizePrompt(prompt = "") {
@@ -111,95 +111,94 @@ export function WorkflowMediaGallery({
             const firstRefUrl = referenceImages[0]?.url || referenceImages[0]?.file_url;
             const displayUrl = iUrl || ((meta.status === 'processing' || meta.status === 'uploading') ? firstRefUrl : null);
             
+            const isPortrait = Boolean(
+              meta?.aspect &&
+              (meta.aspect === "9/16" ||
+               meta.aspect === "2/3" ||
+               meta.aspect === "3/4" ||
+               meta.aspect === "4/5" ||
+               (typeof meta.aspect === "string" && meta.aspect.includes("/") && Number(meta.aspect.split("/")[0]) < Number(meta.aspect.split("/")[1])))
+            );
+            const cardWidth = (meta.status === "processing" || meta.status === "uploading" || !meta.url) 
+              ? "100%" 
+              : (isPortrait ? "auto" : "100%");
+            const cardHeight = isPortrait ? "200px" : "auto";
+
             return (
               <div 
                 key={item.id || item.name}
                 className="flex flex-col gap-3 group/item"
               >
-                {/* Main Media Card */}
-                <div
+                {/* Main Media Card powered by CoreMediaItemView */}
+                <CoreMediaItemView
+                  item={item}
+                  src={displayUrl}
+                  isVideo={iVideo}
+                  status={meta.status || "completed"}
+                  aspect={meta.aspect && meta.aspect !== "auto" ? meta.aspect : "16/9"}
+                  fit="cover"
+                  playOnHover={true}
+                  showHoverOverlay={false}
                   onClick={(e) => {
-                    e.stopPropagation();
+                    e?.stopPropagation?.();
                     if (!isSelectable) return;
                     onSelect(item);
                   }}
                   className={cn(
-                    "relative rounded-2xl overflow-hidden border transition-all duration-300",
-                    "group transform  self-start",
+                    "transition-all duration-300 self-start group",
                     isSelectable ? "cursor-pointer" : "opacity-50 pointer-events-none",
                     isPrimary 
-                      ? "border-white border-2 " 
+                      ? "border-white border-2" 
                       : "border-white/5 opacity-80"
                   )}
                   style={{ 
                     maxWidth: "300px",
                     maxHeight: "200px",
-                    width: (meta.status === "processing" || meta.status === "uploading" || !meta.url) ? "100%" : "auto",
-                    height: "auto",
+                    width: cardWidth,
+                    height: cardHeight,
                     aspectRatio: meta.aspect && meta.aspect !== "auto" ? meta.aspect : "16/9"
                   }}
-                >
-                  <ImageStatusView
-                    status={meta.status || 'completed'}
-                    src={displayUrl}
-                    alt={prompt}
-                    aspect={meta.aspect || "auto"}
-                    className="w-full h-full object-cover transition-transform duration-700"
-                    showOverlay={true}
-                  >
-                    {iVideo && iUrl && (
-                      <video 
-                        src={iUrl} 
-                        className="w-full h-full object-cover" 
-                        muted 
-                        loop 
-                        playsInline
-                        onMouseEnter={(e) => e.currentTarget.play()}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.pause();
-                          e.currentTarget.currentTime = 0;
-                        }}
-                      />
-                    )}
-                  </ImageStatusView>
-                  
-                  {/* Video Indicator */}
-                  {iVideo && (
-                    <div className="absolute top-3 right-3 p-1.5 bg-black/60 backdrop-blur-md rounded-lg border border-white/10 z-10">
-                      <Play className="size-3 fill-white text-white" />
+                  topLeft={
+                    <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                      <ButtonGroup 
+                        className="bg-white/60 backdrop-blur-md rounded-lg scale-90 origin-top-left"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <ConfirmDeleteDialog
+                          onConfirm={() => handleDetach(itemId)}
+                          description="Voulez-vous détacher ce média vers un nouveau workflow ?"
+                          confirmLabel="Détacher"
+                        >
+                          <ActionBtn title="Detach to new workflow">
+                            <Scissors className="size-3.5" />
+                          </ActionBtn>
+                        </ConfirmDeleteDialog>
+                        
+                        <ConfirmDeleteDialog
+                          onConfirm={() => handleDelete(itemId)}
+                          description="Cette action est irréversible. Le média sera définitivement supprimé."
+                          confirmLabel="Supprimer"
+                        >
+                          <ActionBtn title="Delete media">
+                            <Trash2 className="size-3.5" />
+                          </ActionBtn>
+                        </ConfirmDeleteDialog>
+                      </ButtonGroup>
                     </div>
-                  )}
-                  
-                  {/* Selection Glow */}
-                  {isActive && (
-                    <div className="absolute inset-0 bg-white/5 pointer-events-none z-10" />
-                  )}
-
-                  {/* Actions Overlay */}
-                  <div className="absolute top-2 left-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-20">
-                    <ButtonGroup className="bg-white/60 backdrop-blur-md rounded-lg scale-90 origin-top-left">
-                      <ConfirmDeleteDialog
-                        onConfirm={() => handleDetach(itemId)}
-                        description="Voulez-vous détacher ce média vers un nouveau workflow ?"
-                        confirmLabel="Détacher"
-                      >
-                        <ActionBtn title="Detach to new workflow">
-                          <Scissors className="size-3.5" />
-                        </ActionBtn>
-                      </ConfirmDeleteDialog>
-                      
-                      <ConfirmDeleteDialog
-                        onConfirm={() => handleDelete(itemId)}
-                        description="Cette action est irréversible. Le média sera définitivement supprimé."
-                        confirmLabel="Supprimer"
-                      >
-                        <ActionBtn title="Delete media">
-                          <Trash2 className="size-3.5" />
-                        </ActionBtn>
-                      </ConfirmDeleteDialog>
-                    </ButtonGroup>
-                  </div>
-                </div>
+                  }
+                  topRight={
+                    iVideo ? (
+                      <div className="p-1.5 bg-black/60 backdrop-blur-md rounded-lg border border-white/10">
+                        <Play className="size-3 fill-white text-white" />
+                      </div>
+                    ) : null
+                  }
+                  overlay={
+                    isActive ? (
+                      <div className="absolute inset-0 bg-white/5 pointer-events-none" />
+                    ) : null
+                  }
+                />
 
                 {/* Reference Images Row (if any) */}
                 {referenceImages.length > 0 && (

@@ -71,6 +71,8 @@ export function CoreMediaItemView({
   onMenuOpenChange: controlledOnMenuOpenChange,
 
   // Video options & callbacks
+  autoPlay = true,
+  playOnHover = false,
   videoRef: externalVideoRef,
   onVideoTimeUpdate,
   onVideoLoadedMetadata,
@@ -80,8 +82,11 @@ export function CoreMediaItemView({
   onDelete = null,
 }) {
   // Use media core hook to resolve metadata, sizing, and media state
-  const localCore = useMediaViewerCore({ workflow, item });
+  const shouldAutoPlay = autoPlay && !playOnHover;
+  const localCore = useMediaViewerCore({ workflow, item, autoPlay: shouldAutoPlay });
   const core = propCore || localCore;
+  const internalVideoRef = useRef(null);
+  const videoRef = externalVideoRef || core.videoRef || internalVideoRef;
 
   const isVideo = propIsVideo !== null ? propIsVideo : core.isVideo;
   const url = propSrc || core.url;
@@ -103,6 +108,21 @@ export function CoreMediaItemView({
 
   // Local hover state for overlay visibility
   const [isHovered, setIsHovered] = useState(false);
+
+  const handleMouseEnter = useCallback(() => {
+    setIsHovered(true);
+    if (playOnHover && videoRef.current) {
+      videoRef.current.play().catch(() => {});
+    }
+  }, [playOnHover, videoRef]);
+
+  const handleMouseLeave = useCallback(() => {
+    setIsHovered(false);
+    if (playOnHover && videoRef.current) {
+      videoRef.current.pause();
+      videoRef.current.currentTime = 0;
+    }
+  }, [playOnHover, videoRef]);
 
   const handleVideoLoaded = useCallback((e) => {
     core.handleVideoLoadedMetadata(e);
@@ -134,8 +154,8 @@ export function CoreMediaItemView({
       onDragStart={draggable ? onDragStart : undefined}
       onDragEnd={draggable ? onDragEnd : undefined}
       onClick={handleCardClick}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
       style={{
         ...(!isContain || !isCompleted ? { aspectRatio: displayAspect } : {}),
         ...propStyle,
@@ -196,7 +216,7 @@ export function CoreMediaItemView({
             progress={progress}
             isVideo={isVideo}
             showPlayIcon={isVideo}
-            className="w-full h-full rounded-none min-w-[280px]"
+            className="w-full h-full rounded-none"
           />
         )}
 
@@ -296,9 +316,7 @@ export function CoreMediaItemView({
       {/* ── 5. Slot: General Overlay / Children ── */}
       {(overlay || children) && (
         <div className="absolute inset-0 z-10 pointer-events-none">
-          <div className="w-full h-full pointer-events-auto">
-            {overlay || children}
-          </div>
+          {overlay || children}
         </div>
       )}
     </div>
