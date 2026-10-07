@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { useWorkflowsStore } from "@/features/workflows";
 import { useBatchUploadAssets } from "../api/mediaApi";
 import { intrinsicSizeToRatioLabel } from "@/shared/lib/displayUtils";
@@ -13,15 +13,20 @@ import { intrinsicSizeToRatioLabel } from "@/shared/lib/displayUtils";
  *
  * @param {string} [overrideProjectId] - Optional explicit projectId
  * @returns {{
- *   uploadMedia: (filesOrFile: File | File[]) => Promise<Array<object> | object>,
+ *   uploadMedia: (filesOrFile: File | File[], options?: { folderId?: string, collectionId?: string }) => Promise<Array<object> | object>,
  *   isUploading: boolean,
  *   projectId: string,
+ *   folderId: string | null,
+ *   collectionId: string | null,
  * }}
  */
 export function useUploadMedia(overrideProjectId) {
   const params = useParams();
+  const searchParams = useSearchParams();
   const routeProjectId = params?.projectId;
 
+  const urlFolderId = searchParams?.get("collection_id") || searchParams?.get("folder_id") || searchParams?.get("folderId");
+  const storeFolderId = useWorkflowsStore((s) => s.activeCollectionId || s.selectedFolderId);
   const storeProjectId = useWorkflowsStore((s) => s.selectedProjectId);
 
   const effectiveProjectId = overrideProjectId || routeProjectId || storeProjectId;
@@ -29,7 +34,7 @@ export function useUploadMedia(overrideProjectId) {
   const { mutateAsync: uploadBatchToServer, isPending: isUploading } = useBatchUploadAssets();
 
   const uploadMedia = useCallback(
-    async (filesOrFile) => {
+    async (filesOrFile, options = {}) => {
       const isArray = Array.isArray(filesOrFile);
       const files = isArray ? filesOrFile : [filesOrFile];
 
@@ -38,9 +43,20 @@ export function useUploadMedia(overrideProjectId) {
         throw new Error("Project ID is required for asset uploads.");
       }
 
+      const effectiveFolderId =
+        options?.folderId ||
+        options?.collectionId ||
+        options?.folder_id ||
+        options?.collection_id ||
+        urlFolderId ||
+        storeFolderId ||
+        null;
+
       const results = await uploadBatchToServer({
         files,
         projectId: effectiveProjectId,
+        folderId: effectiveFolderId,
+        collectionId: effectiveFolderId,
       });
 
       // Normalize each returned item to match Prompt Bar and Media Store contract
@@ -77,12 +93,14 @@ export function useUploadMedia(overrideProjectId) {
 
       return isArray ? normalized : normalized[0];
     },
-    [effectiveProjectId, uploadBatchToServer]
+    [effectiveProjectId, uploadBatchToServer, urlFolderId, storeFolderId]
   );
 
   return {
     uploadMedia,
     isUploading,
     projectId: effectiveProjectId,
+    collectionId: urlFolderId || storeFolderId || null,
+    folderId: urlFolderId || storeFolderId || null,
   };
 }

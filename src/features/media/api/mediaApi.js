@@ -158,8 +158,9 @@ export function useLibraryWorkflowDetail(workflowId, { enabled = false, initialD
 export function useBatchUploadAssets() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ files, projectId }) => {
+    mutationFn: async ({ files, projectId, folderId, collectionId }) => {
       if (!projectId) throw new Error("Project ID required");
+      const effectiveFolderId = folderId || collectionId || null;
       
       const results = await Promise.all(files.map(async (file) => {
         // Since we already calculated metadata in onMutate, we can pass it here or re-calculate.
@@ -172,6 +173,10 @@ export function useBatchUploadAssets() {
         formData.append("workflowType", "UPLOAD");
         formData.append("type", "upload");
         formData.append("source", "upload");
+        if (effectiveFolderId) {
+          formData.append("folder_id", effectiveFolderId);
+          formData.append("collection_id", effectiveFolderId);
+        }
         if (metadata?.width && metadata?.height) {
           formData.append("width", String(metadata.width));
           formData.append("height", String(metadata.height));
@@ -191,7 +196,8 @@ export function useBatchUploadAssets() {
       return results;
     },
 
-    onMutate: async ({ files, projectId }) => {
+    onMutate: async ({ files, projectId, folderId, collectionId }) => {
+      const effectiveFolderId = folderId || collectionId || null;
       const generationsKey = queryKeys.generations.byProject(projectId);
       const projectDataKey = queryKeys.projectData.byProject(projectId);
 
@@ -256,6 +262,7 @@ export function useBatchUploadAssets() {
         optimisticWorkflows.push({
           name:          optimisticId,
           projectId:     projectId,
+          folder_id:     effectiveFolderId,
           workflow_type: 'UPLOAD',
           workflowType:  'UPLOAD',
           is_upload:     true,
@@ -276,6 +283,7 @@ export function useBatchUploadAssets() {
           url:            localUrl,
           status:         'uploading',
           projectId:      projectId,
+          folder_id:      effectiveFolderId,
           workflowId:     optimisticId,
           workflowStepId: 'upload',
           workflow_type:  'UPLOAD',
@@ -346,6 +354,9 @@ export function useBatchUploadAssets() {
       queryClient.invalidateQueries({ queryKey: queryKeys.assets.byProject(variables.projectId) });
       queryClient.invalidateQueries({ queryKey: queryKeys.generations.byProject(variables.projectId) });
       queryClient.invalidateQueries({ queryKey: queryKeys.projectData.byProject(variables.projectId) });
+      if (variables?.folderId || variables?.collectionId) {
+        queryClient.invalidateQueries({ queryKey: ["folders"] });
+      }
     },
   });
 }

@@ -16,6 +16,12 @@ export const useWorkflowUiStore = create(
       selectedProjectId: null,
       setSelectedProjectId: (id) => set({ selectedProjectId: id }),
 
+      selectedFolderId: null,
+      setSelectedFolderId: (id) => set({ selectedFolderId: id, activeCollectionId: id }),
+
+      activeCollectionId: null,
+      setActiveCollectionId: (id) => set({ activeCollectionId: id, selectedFolderId: id }),
+
       activeStudioTab: "assets", // "assets" | "elements" | "characters"
       setActiveStudioTab: (tab) => set((s) => {
         const target = tab === 'elements' ? '_elementFilters' : '_generationFilters';

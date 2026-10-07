@@ -9,9 +9,9 @@ import { Button } from "@/shared/ui/button";
 export function NavbarImportButton() {
   const { selectedProjectId: projectId, activeStudioTab } = useGenerationsStore();
   const fileInputRef = useRef(null);
-  const { uploadMedia, isUploading } = useUploadMedia();
+  const { uploadMedia, isUploading, folderId, collectionId } = useUploadMedia();
 
-  if (activeStudioTab !== 'generations') return null;
+  if (activeStudioTab !== 'assets' && activeStudioTab !== 'generations') return null;
 
   const handleClick = () => {
     if (!projectId) return;
@@ -22,7 +22,7 @@ export function NavbarImportButton() {
     if (files.length === 0) return;
 
     try {
-      await uploadMedia(files);
+      await uploadMedia(files, { folderId, collectionId });
     } catch (err) {
       console.error("Batch upload failed in Navbar:", err);
     } finally {
