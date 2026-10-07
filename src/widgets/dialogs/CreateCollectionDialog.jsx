@@ -18,6 +18,7 @@ export function CreateCollectionDialog({
   open,
   onOpenChange,
   projectId,
+  parentId = null,
   onCreated,
 }) {
   const [name, setName] = React.useState("");
@@ -50,6 +51,7 @@ export function CreateCollectionDialog({
       const created = await createFolder({
         projectId,
         name: trimmed,
+        parentId: parentId || null,
       });
 
       if (created?.id) {

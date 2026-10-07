@@ -111,6 +111,7 @@ export function NavbarImportButton() {
         open={createCollectionOpen}
         onOpenChange={setCreateCollectionOpen}
         projectId={projectId}
+        parentId={currentCollectionId}
       />
     </>
   );
