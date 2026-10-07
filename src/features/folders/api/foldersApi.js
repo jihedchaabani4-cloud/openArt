@@ -15,11 +15,7 @@ export function useProjectFolders(projectId) {
       if (res?.ok === false || res?.success === false) {
         throw new Error(res?.message || "Failed to fetch folders");
       }
-      if (Array.isArray(res)) return res;
-      if (Array.isArray(res?.items)) return res.items;
-      if (Array.isArray(res?.data)) return res.data;
-      if (Array.isArray(res?.folders)) return res.folders;
-      return [];
+      return res?.items ?? res?.data ?? (Array.isArray(res) ? res : []);
     },
     enabled: !!projectId,
     staleTime: 30_000,
@@ -56,21 +52,23 @@ export function useCreateFolder() {
 }
 
 /**
- * Update a folder/collection (e.g. rename).
+ * Update (rename/move) an existing folder/collection.
  */
 export function useUpdateFolder() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ folderId, projectId, name }) => {
-      const res = await api.patch(`/folders/${folderId}`, { name });
+    mutationFn: async ({ folderId, patch, projectId: _projectId }) => {
+      if (!folderId) throw new Error("Folder ID is required");
+      const res = await api.patch(`/folders/${folderId}`, patch);
       if (res?.ok === false || res?.success === false) {
-        throw new Error(res?.message || "Failed to update collection");
+        throw new Error(res?.message || res?.error || "Failed to update collection");
       }
       return res?.data ?? res;
     },
     onSuccess: (_, variables) => {
-      if (variables.projectId) {
+      if (variables?.projectId) {
         queryClient.invalidateQueries({ queryKey: queryKeys.folders.byProject(variables.projectId) });
+        queryClient.invalidateQueries({ queryKey: queryKeys.projectData.byProject(variables.projectId) });
       }
       queryClient.invalidateQueries({ queryKey: queryKeys.folders.all() });
     },
@@ -83,16 +81,18 @@ export function useUpdateFolder() {
 export function useDeleteFolder() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ folderId, projectId }) => {
+    mutationFn: async ({ folderId, projectId: _projectId }) => {
+      if (!folderId) throw new Error("Folder ID is required");
       const res = await api.delete(`/folders/${folderId}`);
       if (res?.ok === false || res?.success === false) {
-        throw new Error(res?.message || "Failed to delete collection");
+        throw new Error(res?.message || res?.error || "Failed to delete collection");
       }
       return folderId;
     },
     onSuccess: (_, variables) => {
-      if (variables.projectId) {
+      if (variables?.projectId) {
         queryClient.invalidateQueries({ queryKey: queryKeys.folders.byProject(variables.projectId) });
+        queryClient.invalidateQueries({ queryKey: queryKeys.projectData.byProject(variables.projectId) });
       }
       queryClient.invalidateQueries({ queryKey: queryKeys.folders.all() });
     },

@@ -1,224 +1,249 @@
 "use client";
 
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState } from "react";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { cn } from "@/shared/lib/utils";
-import { ButtonGroup } from "@/shared/ui/button-group";
-import { ActionBtn } from "./ActionBtn";
-import { StudioItemDropdownMenu } from "./StudioItemMenu";
-import { CoreMediaItemView } from "@/widgets/CoreMediaItemView";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/shared/ui/dropdown-menu";
 import { ConfirmDeleteDialog } from "@/widgets/dialogs/ConfirmDeleteDialog";
-import { useDeleteFolder, useUpdateFolder } from "@/features/folders";
-import { InlineRenamePill } from "@/shared/ui/InlineRenamePill";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/shared/ui/dialog";
+import { Input } from "@/shared/ui/input";
+import { Button } from "@/shared/ui/button";
+import { useUpdateFolder, useDeleteFolder } from "@/features/folders";
+import { useWorkflowsStore } from "@/features/workflows";
 
 export const CollectionGridItem = React.memo(function CollectionGridItem({
   collection,
+  projectId,
+  width,
+  height,
   className,
-  onClick = () => {},
-  width: albumWidth = null,
-  height: albumHeight = null,
-  aspect = "4/3",
+  onClick,
 }) {
-  const [isLiked, setIsLiked] = useState(false);
+  const [isLiked, setIsLiked] = useState(Boolean(collection?.favorited || collection?.is_liked));
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
-  const [isRenaming, setIsRenaming] = useState(false);
-  const [cardRect, setCardRect] = useState(null);
+  const [isRenameOpen, setIsRenameOpen] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [renameValue, setRenameValue] = useState(collection?.name || "");
+  const [errorMessage, setErrorMessage] = useState(null);
 
-  const cardRef = useRef(null);
-  const canDismissRef = useRef(false);
-
+  const { mutateAsync: updateFolder, isPending: isUpdating } = useUpdateFolder();
   const { mutateAsync: deleteFolder, isPending: isDeleting } = useDeleteFolder();
-  const { mutateAsync: updateFolder } = useUpdateFolder();
+  const setActiveCollectionId = useWorkflowsStore((s) => s.setActiveCollectionId);
+  const activeCollectionId = useWorkflowsStore((s) => s.activeCollectionId);
 
-  const collectionId = collection?.id;
-  const projectId = collection?.project_id || collection?.projectId;
-  const collectionName = collection?.name || "Untitled collection";
+  const handleCardClick = (e) => {
+    // Prevent navigation if interacting with dropdown or action buttons
+    if (e.target.closest("[data-no-card-click]")) return;
+    onClick?.(collection);
+  };
 
-  // Dynamically track card position while rename pill is open
-  useEffect(() => {
-    if (!isRenaming) {
-      setCardRect(null);
+  const handleToggleLike = (e) => {
+    e.stopPropagation();
+    setIsLiked((prev) => !prev);
+  };
+
+  const handleOpenRename = (e) => {
+    e.stopPropagation();
+    setIsDropdownOpen(false);
+    setRenameValue(collection?.name || "");
+    setErrorMessage(null);
+    setIsRenameOpen(true);
+  };
+
+  const handleSaveRename = async (e) => {
+    e?.preventDefault?.();
+    const trimmed = renameValue.trim();
+    if (!trimmed || trimmed === collection?.name) {
+      setIsRenameOpen(false);
       return;
     }
-    const updateRect = () => {
-      if (cardRef.current) {
-        const r = cardRef.current.getBoundingClientRect();
-        setCardRect({
-          top: r.top,
-          left: r.left,
-          width: r.width,
-          height: r.height,
-          bottom: r.bottom,
-          right: r.right,
-        });
-      }
-    };
-    updateRect();
-    window.addEventListener("scroll", updateRect, true);
-    window.addEventListener("resize", updateRect);
-    return () => {
-      window.removeEventListener("scroll", updateRect, true);
-      window.removeEventListener("resize", updateRect);
-    };
-  }, [isRenaming]);
 
-  const startRename = useCallback(() => {
-    if (cardRef.current) {
-      const r = cardRef.current.getBoundingClientRect();
-      setCardRect({
-        top: r.top,
-        left: r.left,
-        width: r.width,
-        height: r.height,
-        bottom: r.bottom,
-        right: r.right,
+    setErrorMessage(null);
+    try {
+      await updateFolder({
+        folderId: collection.id,
+        patch: { name: trimmed },
+        projectId,
       });
+      setIsRenameOpen(false);
+    } catch (err) {
+      setErrorMessage(err.message || "Failed to rename collection");
     }
-    canDismissRef.current = false;
-    setIsRenaming(true);
-    setTimeout(() => {
-      canDismissRef.current = true;
-    }, 150);
-  }, []);
-
-  const handleRename = async (newName) => {
-    if (!collectionId || !newName?.trim()) return;
-    await updateFolder({
-      folderId: collectionId,
-      projectId,
-      name: newName.trim(),
-    });
   };
 
-  const handleDelete = async () => {
-    if (!collectionId) return;
-    await deleteFolder({
-      folderId: collectionId,
-      projectId,
-    });
+  const handleOpenDelete = (e) => {
+    e.stopPropagation();
+    setIsDropdownOpen(false);
+    setIsDeleteOpen(true);
   };
 
-  const cardStyle = albumWidth && albumHeight
-    ? {
-        width: albumWidth,
-        height: albumHeight,
-        aspectRatio: `${albumWidth} / ${albumHeight}`,
-        transform: "translateZ(0)",
-        contain: "paint layout",
-        contentVisibility: "auto",
+  const handleConfirmDelete = async () => {
+    try {
+      await deleteFolder({
+        folderId: collection.id,
+        projectId,
+      });
+      if (activeCollectionId === collection.id) {
+        setActiveCollectionId(null);
       }
-    : {
-        width: "100%",
-        aspectRatio: aspect || "4/3",
-        transform: "translateZ(0)",
-        contain: "paint layout",
-        contentVisibility: "auto",
-      };
-
-  const menuItems = [
-    {
-      key: "rename",
-      label: "Rename",
-      icon: "edit",
-      onClick: startRename,
-    },
-    {
-      key: "delete",
-      label: "Delete collection",
-      icon: "delete",
-      variant: "destructive",
-      onClick: () => setIsDeleteConfirmOpen(true),
-    },
-  ];
+      setIsDeleteOpen(false);
+    } catch (err) {
+      alert(err.message || "Cannot delete collection with items inside");
+    }
+  };
 
   return (
     <>
-      <div ref={cardRef} className="relative w-full h-full">
-        <CoreMediaItemView
-          className={cn(
-            "bg-[#303134] hover:bg-[#38393d] border border-white/5 rounded-2xl cursor-pointer select-none transition-all duration-200 shadow-xl",
-            className
-          )}
-          style={cardStyle}
-          onClick={(e) => {
-            if (!isRenaming) {
-              onClick(collection, e);
-            }
-          }}
-          contextMenuItems={menuItems}
-          topRight={
-            <div
-              className={cn(
-                "transition-opacity duration-200 pointer-events-auto",
-                isDropdownOpen ? "opacity-100" : "opacity-0 group-hover:opacity-100"
-              )}
+      <div
+        style={{ width, height }}
+        onClick={handleCardClick}
+        className={cn(
+          "relative rounded-2xl overflow-hidden bg-[#2b2d31] hover:bg-[#34363b] transition-all duration-200 cursor-pointer group flex flex-col justify-between p-5 border border-white/5 shadow-xl select-none",
+          className
+        )}
+      >
+        {/* Top-Right Action Pill */}
+        <div
+          data-no-card-click="true"
+          className="self-end flex items-center bg-black/40 hover:bg-black/60 backdrop-blur-md rounded-full px-1.5 py-1 gap-1 z-10 transition-colors"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Like Button */}
+          <button
+            type="button"
+            onClick={handleToggleLike}
+            title={isLiked ? "Unlike collection" : "Like collection"}
+            className="size-7 flex items-center justify-center rounded-full hover:bg-white/10 text-white/80 hover:text-white transition-colors"
+          >
+            <GoogleIcon
+              iconName={isLiked ? "favorite" : "favorite_border"}
+              className={cn("text-[17px]", isLiked ? "text-red-500" : "text-white/80")}
+            />
+          </button>
+
+          {/* More Menu */}
+          <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                className="size-7 flex items-center justify-center rounded-full hover:bg-white/10 text-white/80 hover:text-white transition-colors"
+                title="Collection options"
+              >
+                <GoogleIcon iconName="more_vert" className="text-[17px]" />
+              </button>
+            </DropdownMenuTrigger>
+
+            <DropdownMenuContent
+              align="end"
+              className="w-40 p-1.5 flex flex-col gap-0.5 font-sans"
             >
-              <ButtonGroup className="bg-white/60 backdrop-blur-md rounded-lg">
-                <ActionBtn
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setIsLiked((prev) => !prev);
-                  }}
-                  title={isLiked ? "Unlike collection" : "Like collection"}
-                >
-                  <GoogleIcon
-                    iconName="favorite"
-                    fill={isLiked}
-                    className="text-[13px] text-[#303031]"
-                  />
-                </ActionBtn>
-                <StudioItemDropdownMenu
-                  open={isDropdownOpen}
-                  onOpenChange={setIsDropdownOpen}
-                  items={menuItems}
-                />
-              </ButtonGroup>
-            </div>
-          }
-          bottomLeft={
-            !isRenaming && (
-              <div className="p-1 pointer-events-auto max-w-[calc(100%-20px)]">
-                <span
-                  title={collectionName}
-                  onDoubleClick={(e) => {
-                    e.stopPropagation();
-                    startRename();
-                  }}
-                  className="text-white/95 text-[18px] sm:text-[20px] font-semibold tracking-tight leading-snug truncate block select-none"
-                >
-                  {collectionName}
-                </span>
-              </div>
-            )
-          }
-        />
+              <DropdownMenuItem
+                onClick={handleOpenRename}
+                className="flex items-center gap-2.5 cursor-pointer py-2 px-2.5 rounded-[10px] hover:bg-white/10 text-white text-[13px]"
+              >
+                <GoogleIcon iconName="edit" className="text-[16px] text-white/70" />
+                <span>Rename</span>
+              </DropdownMenuItem>
+
+              <DropdownMenuItem
+                variant="destructive"
+                onClick={handleOpenDelete}
+                className="flex items-center gap-2.5 cursor-pointer py-2 px-2.5 rounded-[10px] hover:bg-red-500/20 text-red-400 text-[13px]"
+              >
+                <GoogleIcon iconName="delete" className="text-[16px] text-red-400" />
+                <span>Delete</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+
+        {/* Bottom Title */}
+        <div className="z-10 mt-auto pointer-events-none">
+          <h3 className="text-[22px] font-medium text-white/95 tracking-tight leading-snug line-clamp-2">
+            {collection?.name || "Untitled collection"}
+          </h3>
+        </div>
       </div>
 
+      {/* Rename Dialog */}
+      <Dialog open={isRenameOpen} onOpenChange={setIsRenameOpen}>
+        <DialogContent
+          variant="small"
+          className="bg-[rgba(22,23,24,0.95)] backdrop-blur-[80px] border border-white/10 text-white rounded-[24px] max-w-[340px] p-5 shadow-2xl"
+          showCloseButton={false}
+        >
+          <form onSubmit={handleSaveRename} className="flex flex-col gap-4">
+            <DialogHeader className="space-y-1 text-left">
+              <DialogTitle className="text-[15px] font-semibold text-white">
+                Rename collection
+              </DialogTitle>
+            </DialogHeader>
+
+            <div className="space-y-1.5">
+              <Input
+                value={renameValue}
+                onChange={(e) => {
+                  setRenameValue(e.target.value);
+                  if (errorMessage) setErrorMessage(null);
+                }}
+                placeholder="Collection name"
+                className="h-10 text-[13px] bg-white/5 border-white/10 rounded-xl focus:border-white/25"
+                disabled={isUpdating}
+                autoFocus
+              />
+              {errorMessage && (
+                <p className="text-[11px] text-red-400 px-1">{errorMessage}</p>
+              )}
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-1">
+              <Button
+                type="button"
+                variant="studio-ghost"
+                size="sm"
+                onClick={() => setIsRenameOpen(false)}
+                disabled={isUpdating}
+                className="text-[13px] text-white/70 hover:text-white"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                variant="studio-accent"
+                size="sm"
+                disabled={!renameValue.trim() || isUpdating}
+                className="text-[13px] px-4 font-medium"
+              >
+                {isUpdating ? (
+                  <GoogleIcon iconName="progress_activity" className="text-[14px] animate-spin" />
+                ) : (
+                  "Save"
+                )}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
       <ConfirmDeleteDialog
-        open={isDeleteConfirmOpen}
-        onOpenChange={setIsDeleteConfirmOpen}
-        description={`Delete collection "${collectionName}"?`}
-        onConfirm={handleDelete}
+        open={isDeleteOpen}
+        onOpenChange={setIsDeleteOpen}
+        description={`Delete collection "${collection?.name || "Untitled collection"}"?`}
+        onConfirm={handleConfirmDelete}
         loading={isDeleting}
         confirmLabel={isDeleting ? "Deleting..." : "Delete"}
         cancelLabel="Cancel"
-      />
-
-      <InlineRenamePill
-        isOpen={isRenaming}
-        initialName={collectionName}
-        onSave={handleRename}
-        onClose={() => setIsRenaming(false)}
-        canDismissRef={canDismissRef}
-        customPosition={
-          cardRect
-            ? {
-                top: `${cardRect.bottom + 10}px`,
-                left: `${Math.max(12, Math.min(cardRect.left, window.innerWidth - 320))}px`,
-              }
-            : undefined
-        }
       />
     </>
   );
