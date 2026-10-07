@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { createPortal } from "react-dom";
 import { motion, useMotionValue, useTransform } from "framer-motion";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
@@ -710,6 +711,8 @@ const CollectionMediaGridItem = React.memo(function CollectionMediaGridItem({
         contentVisibility: "auto",
       };
 
+  const router = useRouter();
+
   return (
     <>
       <CoreMediaItemView
@@ -720,8 +723,8 @@ const CollectionMediaGridItem = React.memo(function CollectionMediaGridItem({
           if (!isRenaming) {
             if (onClick) {
               onClick(col, e);
-            } else if (col?.id) {
-              setActiveCollectionId(col.id);
+            } else if (col?.id && projectId) {
+              router.push(`/cinema-studio/${projectId}/collection/${col.id}`);
             }
           }
         }}

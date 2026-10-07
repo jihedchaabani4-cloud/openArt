@@ -20,7 +20,7 @@ export function NavbarImportButton() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [createCollectionOpen, setCreateCollectionOpen] = useState(false);
 
-  if (activeStudioTab !== "assets" && activeStudioTab !== "generations") return null;
+  if (activeStudioTab !== "assets" && activeStudioTab !== "generations" && activeStudioTab !== "collection") return null;
 
   const handleUploadClick = () => {
     setDropdownOpen(false);

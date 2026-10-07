@@ -132,45 +132,27 @@ export default function AssetsPage({ params }) {
         return [];
     }, [rawFolders]);
 
-    const activeCollectionId = useGenerationsStore(s => s.activeCollectionId);
     const setActiveCollectionId = useGenerationsStore(s => s.setActiveCollectionId);
     const searchParams = useSearchParams();
 
-    // Sync URL search params with activeCollectionId if present
+    // Reset active collection when on root assets feed, or redirect if URL has collection_id
     React.useEffect(() => {
         const urlColId = searchParams?.get("collection_id") || searchParams?.get("folder_id");
-        if (urlColId && urlColId !== useGenerationsStore.getState().activeCollectionId) {
-            setActiveCollectionId(urlColId);
+        if (urlColId && projectId) {
+            router.replace(`/cinema-studio/${projectId}/collection/${urlColId}`);
+            return;
         }
-    }, [searchParams, setActiveCollectionId]);
+        setActiveCollectionId(null);
+    }, [searchParams, projectId, router, setActiveCollectionId]);
 
-    const currentCollection = React.useMemo(() => {
-        if (!activeCollectionId) return null;
-        return collections.find(c => c.id === activeCollectionId) || null;
-    }, [collections, activeCollectionId]);
-
-    // Unified list containing workflows + collections in the same list
+    // Unified list containing collections first, then root workflows
     const combinedItems = React.useMemo(() => {
-        if (activeCollectionId) {
-            // Inside a collection: show only workflows belonging to this collection
-            return workflows
-                .filter(w => w.folder_id === activeCollectionId || w.folderId === activeCollectionId)
-                .map(w => ({
-                    type: "workflow",
-                    data: w,
-                    key: w.id || w.name,
-                }));
-        }
-
-        // At root level:
-        // Collections first
         const collectionItems = collections.map(col => ({
             type: "collection",
             data: col,
             key: `col-${col.id}`,
         }));
 
-        // Workflows without a collection
         const rootWorkflows = workflows
             .filter(w => !w.folder_id && !w.folderId)
             .map(w => ({
@@ -180,7 +162,7 @@ export default function AssetsPage({ params }) {
             }));
 
         return [...collectionItems, ...rootWorkflows];
-    }, [activeCollectionId, collections, workflows]);
+    }, [collections, workflows]);
 
     const itemListKey = React.useMemo(
         () => combinedItems.map((item) => item.key).join("|"),
@@ -352,23 +334,6 @@ export default function AssetsPage({ params }) {
                                 transition={{ duration: 0.15 }}
                                 className="flex flex-col gap-6 w-full pb-32"
                             >
-                                {activeCollectionId && (
-                                    <div className="flex items-center gap-2 mb-1 px-1 text-sm font-medium">
-                                        <button
-                                            type="button"
-                                            onClick={() => setActiveCollectionId(null)}
-                                            className="flex items-center gap-1.5 text-white/60 hover:text-white transition-colors cursor-pointer group"
-                                        >
-                                            <GoogleIcon iconName="arrow_back" className="text-[18px] text-white/60 group-hover:text-white transition-colors" />
-                                            <span>All assets</span>
-                                        </button>
-                                        <span className="text-white/25">/</span>
-                                        <span className="text-white flex items-center gap-1.5">
-                                            <GoogleIcon iconName="folder" className="text-[18px] text-white/70" />
-                                            {currentCollection?.name || "Collection"}
-                                        </span>
-                                    </div>
-                                )}
                                 <RowsPhotoAlbum
                                     photos={photos}
                                     targetRowHeight={density.targetRowHeight}
@@ -390,25 +355,7 @@ export default function AssetsPage({ params }) {
                                 exit={{ opacity: 0, scale: 1.05 }}
                                 className="w-full h-full flex items-center justify-center"
                             >
-                                {activeCollectionId ? (
-                                    <div className="flex flex-col items-center gap-3">
-                                        <div className="flex items-center gap-2 text-sm">
-                                            <button
-                                                type="button"
-                                                onClick={() => setActiveCollectionId(null)}
-                                                className="flex items-center gap-1 text-white/60 hover:text-white transition-colors"
-                                            >
-                                                <GoogleIcon iconName="arrow_back" className="text-[18px]" />
-                                                <span>Back to all assets</span>
-                                            </button>
-                                        </div>
-                                        <p className="text-[16px] text-white/40">
-                                            This collection is empty. Upload media to add items.
-                                        </p>
-                                    </div>
-                                ) : (
-                                    <EmptyState />
-                                )}
+                                <EmptyState />
                             </motion.div>
                         )}
                     </AnimatePresence>
