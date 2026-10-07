@@ -38,4 +38,9 @@ export const queryKeys = {
   projectData: {
     byProject: (projectId) => ["projectData", projectId],
   },
+
+  folders: {
+    all: () => ["folders"],
+    byProject: (projectId) => ["folders", projectId],
+  },
 };
