@@ -184,10 +184,13 @@ export default function AssetsPage({ params }) {
 
     // Navigate into a collection
     const handleCollectionClick = React.useCallback((collection) => {
-        if (collection?.id) {
-            setActiveCollectionId(collection.id);
+        const id = typeof collection === "string"
+            ? collection
+            : (collection?.id || collection?.name || collection?.folder_id || collection?.folderId);
+        if (id && projectId) {
+            router.push(`/cinema-studio/${projectId}/collection/${id}`);
         }
-    }, [setActiveCollectionId]);
+    }, [projectId, router]);
 
     const scrollRef = React.useRef(null);
     const prevScrollTop = React.useRef(0);

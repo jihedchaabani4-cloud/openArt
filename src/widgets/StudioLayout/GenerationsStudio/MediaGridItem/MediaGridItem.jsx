@@ -713,21 +713,27 @@ const CollectionMediaGridItem = React.memo(function CollectionMediaGridItem({
 
   const router = useRouter();
 
+  const handleNavigate = useCallback(
+    (e) => {
+      if (isRenaming) return;
+      const targetCol = col || collection || workflow;
+      const targetId = targetCol?.id || targetCol?.name;
+      if (onClick) {
+        onClick(targetCol, e);
+      } else if (targetId && projectId) {
+        router.push(`/cinema-studio/${projectId}/collection/${targetId}`);
+      }
+    },
+    [isRenaming, col, collection, workflow, onClick, projectId, router]
+  );
+
   return (
     <>
       <CoreMediaItemView
         fit="cover"
         showHoverOverlay={false}
         contextMenuItems={menuItems}
-        onClick={(e) => {
-          if (!isRenaming) {
-            if (onClick) {
-              onClick(col, e);
-            } else if (col?.id && projectId) {
-              router.push(`/cinema-studio/${projectId}/collection/${col.id}`);
-            }
-          }
-        }}
+        onClick={handleNavigate}
         className={cn(
           "bg-[#323438] hover:bg-[#383a3f] transition-colors border-0 cursor-pointer shadow-xl",
           className
@@ -765,14 +771,17 @@ const CollectionMediaGridItem = React.memo(function CollectionMediaGridItem({
         }
         bottomLeft={
           !isRenaming && (
-            <div className="pointer-events-auto max-w-full">
+            <div
+              className="pointer-events-auto max-w-full cursor-pointer"
+              onClick={handleNavigate}
+            >
               <h3
                 title={collectionName}
                 onDoubleClick={(e) => {
                   e.stopPropagation();
                   startRename();
                 }}
-                className="text-[20px] sm:text-[22px] font-medium text-white/95 tracking-tight leading-snug line-clamp-2 px-1 select-none"
+                className="text-[20px] sm:text-[22px] font-medium text-white/95 tracking-tight leading-snug line-clamp-2 px-1 select-none hover:text-white"
               >
                 {collectionName}
               </h3>
