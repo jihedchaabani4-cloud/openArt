@@ -10,7 +10,7 @@ Ce document explique comment les données circulent dans l'application, en se co
 **Rôle :** Gère l'état de l'interface pour tout ce qui concerne les workflows, les filtres et les sélections.
 - **Fichier :** `src/features/workflows/model/useWorkflowsStore.js`
 - **États Clés :**
-    - `selectedProjectId` / `activeSessionId` : Identifiants du projet et de la session en cours.
+    - `selectedProjectId` : Identifiant du projet en cours.
     - `filters` : Objet contenant les filtres actifs (types, modèles, recherche par prompt, favoris).
     - `gridSize` : Taille de la grille (`"sm"`, `"md"`, `"lg"`).
     - `isDetailView` / `selectedMediaId` : État de la vue focus (zoom).
@@ -28,8 +28,7 @@ Ce document explique comment les données circulent dans l'application, en se co
 **Rôle :** Gère la communication avec le backend pour les workflows et les médias.
 - **Fichier :** `src/features/workflows/api/workflowsApi.js`
 - **Hooks de Lecture :**
-    - `useProjectData(projectId, sessionId)` : **Source unique de vérité.** Récupère tout le contenu d'un projet (sessions, workflows, media).
-    - `useProjectSessions(projectId)` : Retourne uniquement la liste des sessions.
+    - `useProjectData(projectId)` : **Source unique de vérité.** Récupère tout le contenu d'un projet (workflows, media, assets).
 - **Hooks d'Action (Mutations) :**
     - `useGenerateMutation()` : Lance une nouvelle génération (Image ou Vidéo).
     - `useRemoveWorkflow()` : Supprime un workflow complet.

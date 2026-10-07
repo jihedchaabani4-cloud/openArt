@@ -98,7 +98,6 @@ export function useCreateCharacterMutation({ onError } = {}) {
           name: payload.name,
           prompt: payload.prompt,
           projectId,
-          sessionId: payload.session_id,
         });
 
         const optimisticMedia = characterService.buildOptimisticMedia({

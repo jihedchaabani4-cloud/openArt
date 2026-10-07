@@ -9,20 +9,15 @@ export const queryKeys = {
     list: () => ["projects", "list"],
   },
 
-  sessions: {
-    all: () => ["sessions"],
-    byProject: (projectId) => ["sessions", projectId],
-  },
-
   workflows: {
     all: () => ["workflows"],
-    byProject: (projectId, sessionId) => ["workflows", projectId, sessionId],
+    byProject: (projectId) => ["workflows", projectId],
     paginated: (page) => ["allWorkflows", page],
   },
 
   generations: {
     all: () => ["workflows"],
-    byProject: (projectId, sessionId) => ["workflows", projectId, sessionId],
+    byProject: (projectId) => ["workflows", projectId],
   },
 
   assets: {
@@ -42,6 +37,5 @@ export const queryKeys = {
 
   projectData: {
     byProject: (projectId) => ["projectData", projectId],
-    byProjectAndSession: (projectId, sessionId) => ["projectData", projectId, sessionId],
   },
-}
+};

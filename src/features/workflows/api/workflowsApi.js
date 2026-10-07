@@ -15,17 +15,14 @@ import { useAuthSession } from '@/shared/api/auth';
  * 🧠 Blueprint Layer: Pure Hook.
  * Logic is handled by the Layout (Control Layer).
  */
-export function useProjectData(projectId, sessionId = null) {
+export function useProjectData(projectId) {
   const { data: user, isLoading: authLoading } = useAuthSession();
-  const queryKey = sessionId
-    ? queryKeys.projectData.byProjectAndSession(projectId, sessionId)
-    : queryKeys.projectData.byProject(projectId);
+  const queryKey = queryKeys.projectData.byProject(projectId);
 
   return useQuery({
     queryKey,
     queryFn: async () => {
-      let url = `/workflows/project-data/${projectId}`;
-      if (sessionId) url += `?session_id=${sessionId}`;
+      const url = `/workflows/project-data/${projectId}`;
       
       try {
         const res = await api.get(url, {
@@ -96,37 +93,6 @@ export function useProjectData(projectId, sessionId = null) {
   });
 }
 
-/**
- * useProjectSessions:
- * Convenience hook — returns only the sessions list from the unified fetch.
- */
-export function useProjectSessions(projectId) {
-  const { data } = useProjectData(projectId);
-  const rawSessions = data?.projectContents?.sessions ?? [];
-  // Backend schema: { name: "uuid", metadata: { displayName: "human name" } }
-  return rawSessions.map((s, idx) => ({
-    session_id:   s.name,                                          // UUID stored in "name"
-    session_name: s.metadata?.displayName || s.name || `Session ${idx + 1}`,
-  }));
-}
-
-export function useSessionCollections(projectId, sessionId) {
-  const { data } = useProjectData(projectId);
-  const collections = data?.projectContents?.collections ?? [];
-  return collections.filter(c => c.parentCollectionId === sessionId);
-}
-
-export function useSessionMedia(projectId, _sessionId) {
-  const { data } = useProjectData(projectId);
-  return data?.projectContents?.media ?? [];
-}
-
-export function useSessionWorkflows(projectId, sessionId) {
-  const { data } = useProjectData(projectId);
-  const workflows = data?.projectContents?.workflows ?? [];
-  return workflows.filter(w => w.session_id === sessionId || w.metadata?.sessionId === sessionId);
-}
-
 // ── Mutations ─────────────────────────────────────────────────────────────────
 
 export function useGenerateMutation({ onError } = {}) {
@@ -153,7 +119,6 @@ export function useGenerateMutation({ onError } = {}) {
 
       if (previousData) {
         const optimisticId = `optimistic-gen-${Date.now()}`;
-        const sessionId = payload.session_id;
 
         const optimisticWorkflow = {
           name: optimisticId,
@@ -162,7 +127,6 @@ export function useGenerateMutation({ onError } = {}) {
           metadata: {
             displayName: payload.prompt || (isVideo ? "Video Generation" : "Image Generation"),
             createTime: new Date().toISOString(),
-            sessionId: sessionId,
             favorited: false,
           }
         };
@@ -549,82 +513,18 @@ export function useSetPrimaryMedia() {
 }
 
 export function useMoveWorkflow() {
-  const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ workflowId, sessionId, projectId, newsession = false, sessionName }) => {
-      const body = {};
-      if (newsession) {
-        body.newsession = true;
-        if (sessionName) body.session_name = sessionName;
-      } else {
-        if (!sessionId) throw new Error('sessionId is required when newsession is false');
-        body.session_id = sessionId;
-      }
-      if (projectId) body.project_id = projectId;
-
-      const res = await api.patch(`/workflows/workflows/${workflowId}/move`, body);
-      if (!res.ok) throw new Error(res.message || 'Failed to move workflow');
-      return res;
-    },
-
-    onMutate: async ({ workflowId, sessionId, projectId }) => {
-      // 1. Cancel in-flight queries
-      const projectKey = queryKeys.projectData.byProject(projectId);
-      await queryClient.cancelQueries({ queryKey: projectKey });
-
-      // 2. Snapshot current state
-      const previousData = queryClient.getQueryData(projectKey);
-
-      // 3. Optimistically update
-      if (previousData) {
-        queryClient.setQueryData(projectKey, (old) => {
-          if (!old?.projectContents?.workflows) return old;
-          
-          return {
-            ...old,
-            projectContents: {
-              ...old.projectContents,
-              workflows: old.projectContents.workflows.map(wf => {
-                if (wf.id === workflowId || wf.name === workflowId) {
-                  return {
-                    ...wf,
-                    session_id: sessionId,
-                    metadata: {
-                      ...(wf.metadata || {}),
-                      sessionId: sessionId
-                    }
-                  };
-                }
-                return wf;
-              })
-            }
-          };
-        });
-      }
-
-      return { previousData, projectKey };
-    },
-
-    onError: (err, variables, context) => {
-      if (context?.previousData) {
-        queryClient.setQueryData(context.projectKey, context.previousData);
-      }
-    },
-
-    onSettled: (res, err, variables) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.projectData.byProject(variables.projectId) });
-    },
+    mutationFn: async () => ({ ok: true }),
   });
 }
 
 export function useDetachMedia() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ mediaId, projectId, sessionId, displayName }) => {
+    mutationFn: async ({ mediaId, projectId, displayName }) => {
       const res = await api.post(`/workflows/detach-media`, {
         media_id: mediaId,
         project_id: projectId,
-        session_id: sessionId,
         display_name: displayName,
       });
       if (!res.ok) throw new Error(res.message || 'Failed to detach media');

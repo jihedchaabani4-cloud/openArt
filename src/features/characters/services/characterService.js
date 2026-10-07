@@ -40,7 +40,7 @@ export const characterService = {
   /**
    * Build optimistic workflow container for instant 0ms UI response.
    */
-  buildOptimisticWorkflow({ id, name, prompt, projectId, sessionId }) {
+  buildOptimisticWorkflow({ id, name, prompt, projectId }) {
     return {
       id,
       name: id,
@@ -49,7 +49,6 @@ export const characterService = {
       metadata: {
         displayName: name || prompt || "Untitled Character",
         createTime: new Date().toISOString(),
-        sessionId,
         favorited: false,
       },
     };

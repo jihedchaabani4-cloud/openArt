@@ -3,21 +3,16 @@
 import * as React from "react"
 import { motion } from "framer-motion"
 import { useProjects, useUpdateProject } from "@/features/projects/api/projectsApi"
-import { useProjectSessions } from "@/features/workflows/api/workflowsApi"
-import { useCreateSession } from "@/features/projects/api/createSessionApi"
 import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows"
 
 import { StudioNavbarLeft } from "./ui/StudioNavbarLeft"
 import { StudioNavbarCenter } from "./ui/StudioNavbarCenter"
 import { StudioNavbarRight } from "./ui/StudioNavbarRight"
 import { UserDropdown } from "./ui/UserDropdown"
-import { CreateSessionDialog } from "./ui/CreateSessionDialog"
 
 import { useNavbarSearch } from "./hooks/useNavbarSearch"
 
 export function StudioNavbar() {
-    const activeSessionId = useGenerationsStore(s => s.activeSessionId);
-    const setActiveSessionId = useGenerationsStore(s => s.setActiveSessionId);
     const activeProjectId = useGenerationsStore(s => s.selectedProjectId);
     const filters = useGenerationsStore(s => s.filters);
     const setFilter = useGenerationsStore(s => s.setFilter);
@@ -28,21 +23,12 @@ export function StudioNavbar() {
 
     const { data: projects = [] } = useProjects();
     const { mutateAsync: updateProject } = useUpdateProject();
-    const rawSessions = useProjectSessions(activeProjectId);
-    const projectSessions = React.useMemo(() => rawSessions || [], [rawSessions]);
-    const createSessionMutation = useCreateSession();
 
     const activeProject = React.useMemo(
         () => projects.find(p => p.project_id === activeProjectId),
         [projects, activeProjectId]
     );
     const selectedProjectName = activeProject?.project_name || "Select Project";
-
-    const activeSession = React.useMemo(
-        () => projectSessions.find(s => s.session_id === activeSessionId),
-        [projectSessions, activeSessionId]
-    );
-    const selectedSessionName = activeSession?.session_name || null;
 
     const {
         searchExpanded,
@@ -51,32 +37,12 @@ export function StudioNavbar() {
         handleCloseSearch
     } = useNavbarSearch(setFilter)
 
-    const [isCreateSessionOpen, setIsCreateSessionOpen] = React.useState(false)
-
     const handleEditProjectName = async (nextName) => {
         if (!activeProjectId) return
         await updateProject({
             projectId: activeProjectId,
             projectData: { project_name: nextName },
         })
-    }
-
-    const handleCreateSession = async (name) => {
-        if (!activeProjectId) return
-
-        const latestSession = projectSessions[0]
-        if (latestSession && !latestSession.thumbnail) {
-            setActiveSessionId(latestSession.session_id)
-            setIsCreateSessionOpen(false)
-            return
-        }
-
-        const newSession = await createSessionMutation.mutateAsync({
-            session_name: name,
-            project_id: activeProjectId,
-        })
-        if (newSession) setActiveSessionId(newSession.session_id)
-        setIsCreateSessionOpen(false)
     }
 
     return (
@@ -95,11 +61,6 @@ export function StudioNavbar() {
                     selectedProjectName={selectedProjectName}
                     onEditProjectName={handleEditProjectName}
                     activeProjectId={activeProjectId}
-                    projectSessions={projectSessions}
-                    activeSessionId={activeSessionId}
-                    setActiveSessionId={setActiveSessionId}
-                    selectedSessionName={selectedSessionName}
-                    setIsCreateSessionOpen={setIsCreateSessionOpen}
                 />
 
                 {!isCleanNavbarTab ? (
@@ -121,14 +82,6 @@ export function StudioNavbar() {
                     </div>
                 )}
             </div>
-
-            <CreateSessionDialog
-                isOpen={isCreateSessionOpen}
-                onOpenChange={setIsCreateSessionOpen}
-                onCreate={handleCreateSession}
-                isCreating={createSessionMutation.isLoading}
-            />
         </motion.nav>
-
     )
 }

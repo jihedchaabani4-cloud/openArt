@@ -20,16 +20,9 @@ export function StudioNavbarLeft({
     searchExpanded,
     selectedProjectName,
     onEditProjectName,
-    projectSessions = [],
-    activeSessionId,
-    setActiveSessionId,
     activeProjectId,
-    selectedSessionName,
-    setIsCreateSessionOpen,
 }) {
-    const [sessionsOpen, setSessionsOpen] = React.useState(false)
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false)
-    const dropdownRef = React.useRef(null)
     const nameRef = React.useRef(null)
     const router = useRouter()
     const { mutateAsync: deleteProject, isLoading: isDeleting } = useDeleteProject()
@@ -43,17 +36,6 @@ export function StudioNavbarLeft({
             console.error("Failed to delete project:", err)
         }
     }
-
-    React.useEffect(() => {
-        if (!sessionsOpen) return
-        const handleClick = (e) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-                setSessionsOpen(false)
-            }
-        }
-        document.addEventListener("mousedown", handleClick)
-        return () => document.removeEventListener("mousedown", handleClick)
-    }, [sessionsOpen])
 
     return (
         <div className={cn(

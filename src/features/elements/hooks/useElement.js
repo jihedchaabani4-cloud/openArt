@@ -141,7 +141,6 @@ export function useCreateElementSheetMutation({ onError } = {}) {
               payload.prompt ||
               (isCharacterType ? "Untitled Character" : "Untitled Element"),
             createTime: new Date().toISOString(),
-            sessionId: null,
             favorited: false,
           },
         };

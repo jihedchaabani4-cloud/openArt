@@ -63,7 +63,6 @@ export function useLibraryFilter(library = [], mode = "all", initialCategory = "
   const [sort,            setSort]            = useState("recent");
   const [search,          setSearch]          = useState("");
   const [selectedProject, setSelectedProject] = useState("all_projects");
-  const [selectedSession, setSelectedSession] = useState("all_sessions");
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
 
   useEffect(() => {
@@ -113,21 +112,7 @@ export function useLibraryFilter(library = [], mode = "all", initialCategory = "
       items = items.filter((g) => g.project_id === selectedProject);
     }
 
-    // 3. Session filter
-    if (selectedSession !== "all_sessions") {
-      items = items.filter((g) => {
-        const sId = 
-          g.session_id || 
-          g.sessionId || 
-          g.mediaMetadata?.sessionId || 
-          g.mediaMetadata?.session_id ||
-          g.metadata?.sessionId || 
-          g.metadata?.session_id;
-        return sId === selectedSession;
-      });
-    }
-
-    // 4. Search filter
+    // 3. Search filter
     if (search.trim()) {
       const q = search.toLowerCase();
       items = items.filter((g) => 
@@ -199,13 +184,12 @@ export function useLibraryFilter(library = [], mode = "all", initialCategory = "
           return dateB - dateA;
       }
     });
-  }, [library, sort, search, mode, selectedCategory, selectedProject, selectedSession, excludedKeySet]);
+  }, [library, sort, search, mode, selectedCategory, selectedProject, excludedKeySet]);
 
   return {
     sort,            setSort,
     search,          setSearch,
     selectedProject, setSelectedProject,
-    selectedSession, setSelectedSession,
     selectedCategory, setSelectedCategory,
     visibleItems,
   };

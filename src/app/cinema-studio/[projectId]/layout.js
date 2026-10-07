@@ -28,8 +28,6 @@ export default function StudioLayout({ children }) {
     const queryClient = useQueryClient()
     const selectedProjectId = useWorkflowsStore(s => s.selectedProjectId);
     const setSelectedProjectId = useWorkflowsStore(s => s.setSelectedProjectId);
-    const activeSessionId = useWorkflowsStore(s => s.activeSessionId);
-    const setActiveSessionId = useWorkflowsStore(s => s.setActiveSessionId);
     const setIsNavbarHidden = useWorkflowsStore(s => s.setIsNavbarHidden);
     
     // 🔹 Data Layer (Pure Hook, controlled error)
@@ -41,31 +39,12 @@ export default function StudioLayout({ children }) {
             setSelectedProjectId(projectId);
         }
     }, [projectId, selectedProjectId, setSelectedProjectId]);
-
-    // 🚀 Auto-select last session if current one is invalid or missing
-    useEffect(() => {
-        if (!projectData) return;
-        
-        const sessions = projectData?.projectContents?.sessions || [];
-        if (sessions.length === 0) return;
-
-        const sessionExists = sessions.some(s => s.name === activeSessionId);
-
-        if (!activeSessionId || !sessionExists) {
-            // Pick the newest session based on createTime
-            const sorted = [...sessions].sort((a, b) => 
-                new Date(b.metadata?.createTime || 0) - new Date(a.metadata?.createTime || 0)
-            );
-            if (sorted[0]) {
-                setActiveSessionId(sorted[0].name);
-            }
-        }
-    }, [projectData, activeSessionId, setActiveSessionId]);
     
     // 🔹 Local Entry state
     const [isEntryLoading, setIsEntryLoading] = useState(true)
 
     const isEditPage =
+        pathname?.includes("/assets/edit/") ||
         pathname?.includes("/generations/edit/") ||
         pathname?.includes("/edit/") ||
         pathname?.includes("/elements/new") ||

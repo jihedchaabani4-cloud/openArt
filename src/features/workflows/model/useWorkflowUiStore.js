@@ -9,17 +9,14 @@ import { persist } from "zustand/middleware";
 export const useWorkflowUiStore = create(
   persist(
     (set, get) => ({
-      // Active Workspace & Session Selection
+      // Active Workspace Selection
       activeWorkspaceId: null,
       setActiveWorkspaceId: (id) => set({ activeWorkspaceId: id, selectedNodeId: null }),
 
       selectedProjectId: null,
       setSelectedProjectId: (id) => set({ selectedProjectId: id }),
 
-      activeSessionId: null,
-      setActiveSessionId: (id) => set({ activeSessionId: id }),
-
-      activeStudioTab: "generations", // "generations" | "elements" | "characters"
+      activeStudioTab: "assets", // "assets" | "elements" | "characters"
       setActiveStudioTab: (tab) => set((s) => {
         const target = tab === 'elements' ? '_elementFilters' : '_generationFilters';
         return {

@@ -97,16 +97,6 @@ export function ImportMediaPopover({
   const { data: projectData } = useProjectData(projectId);
   const { uploadMedia, isUploading } = useUploadMedia(projectId);
 
-  // Build session name lookup from project data
-  const sessionNameMap = React.useMemo(() => {
-    const raw = projectData?.projectContents?.sessions ?? [];
-    const map = {};
-    raw.forEach(s => {
-      if (s.name) map[s.name] = s.metadata?.displayName || null;
-    });
-    return map;
-  }, [projectData]);
-
   const effectiveLibrary = React.useMemo(() => {
     const rawWorkflows = projectData?.projectContents?.workflows ?? [];
     const libraryItems = Array.isArray(library) ? library : (library?.items || []);
@@ -292,7 +282,6 @@ export function ImportMediaPopover({
             is_video: isVid,
             is_character: semanticCategory === "character",
             is_element:   semanticCategory === "element",
-            session_id: mainMedia?.session_id || mainMedia?.sessionId || w.session_id || w.metadata?.sessionId,
             workflow_type: isUploadItem ? "UPLOAD" : (w.workflow_type || w.workflowType || mainMedia?.workflow_type || "GENERATED"),
             is_upload: isUploadItem,
             display_name: w.metadata?.displayName || w.display_name || w.name || mainMedia?.display_name || "Sans titre",
@@ -457,7 +446,6 @@ export function ImportMediaPopover({
 
   const {
     search,          setSearch,
-    selectedSession, setSelectedSession,
     selectedCategory, setSelectedCategory,
     visibleItems,
   } = useLibraryFilter(unselectedLibrary, effectiveMode, defaultCategory, { selectedItems: propSelectedItems });
@@ -478,49 +466,6 @@ export function ImportMediaPopover({
       }
     }
   }, [availableCategories, selectedCategory, defaultCategory, setSelectedCategory]);
-
-  // Extract unique sessions from the library using the session ID and create time
-  const sessions = React.useMemo(() => {
-    const flatItems = unselectedLibrary;
-    const unique = new Map();
-
-    flatItems.forEach(item => {
-      const sId =
-        item.session_id ||
-        item.sessionId ||
-        item.mediaMetadata?.sessionId ||
-        item.mediaMetadata?.session_id ||
-        item.metadata?.sessionId ||
-        item.metadata?.session_id;
-
-      if (!sId || unique.has(sId)) return;
-
-      const displayName = sessionNameMap[sId];
-      const time =
-        item.mediaMetadata?.createTime ||
-        item.created_at ||
-        item.create_time ||
-        item.metadata?.createTime;
-
-      const formattedDate = time
-        ? new Date(time).toLocaleString("fr-FR", {
-            day: "2-digit",
-            month: "short",
-            hour: "2-digit",
-            minute: "2-digit",
-          })
-        : "Unknown Session";
-
-      unique.set(sId, {
-        id:   sId,
-        name: displayName || formattedDate,
-      });
-    });
-
-    return Array.from(unique.values()).sort((a, b) => b.id.localeCompare(a.id));
-  }, [unselectedLibrary, sessionNameMap]);
-
-  const activeSessionName = sessions.find(s => s.id === selectedSession)?.name || "All Sessions";
 
   const [selectedItems, setSelectedItems] = React.useState([]);
   const [layoutMode, setLayoutMode] = React.useState("grid"); // "grid" | "list"
@@ -852,7 +797,7 @@ export function ImportMediaPopover({
 
           {/* ── Right Content Area ── */}
           <div className="flex-1 flex flex-col min-w-0 min-h-0 pl-1">
-            {/* Search & Session Header Bar */}
+            {/* Search Header Bar */}
             <div className="pb-2.5 flex items-center gap-2 shrink-0">
               {/* Search Bar Input */}
               <div className="flex-1">
@@ -906,55 +851,6 @@ export function ImportMediaPopover({
                   <GoogleIcon iconName="view_list" weight={300} className="text-[17px]" />
                 </Button>
               </div>
-
-              {/* Session Selector Dropdown */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button 
-                    variant="ghost"
-                    className="flex items-center gap-2 px-3.5 h-9 rounded-[12px] text-xs font-medium text-white/80 hover:text-white hover:bg-white/10 active:bg-[rgba(218,220,224,0.25)] active:blur-[1.5px] transition-all min-w-[140px] justify-between border-none cursor-pointer font-sans antialiased outline-none select-none"
-                    style={{
-                      backgroundColor: "rgba(218, 220, 224, 0.1)",
-                      backdropFilter: "blur(80px)",
-                      WebkitBackdropFilter: "blur(80px)",
-                    }}
-                  >
-                    <span className="truncate leading-none flex items-center">{activeSessionName}</span>
-                    <ChevronDown className="size-3.5 opacity-60 shrink-0" strokeWidth={1.75} />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent 
-                  align="end" 
-                  className="w-[var(--radix-dropdown-menu-trigger-width)] min-w-[var(--radix-dropdown-menu-trigger-width)] border-none rounded-[16px] z-[10000] text-white p-3 font-sans antialiased"
-                  style={{
-                    backgroundColor: "rgba(22, 23, 24, 0.95)",
-                    backdropFilter: "blur(40px)",
-                    WebkitBackdropFilter: "blur(40px)",
-                    boxShadow: "rgba(0, 0, 0, 0.2) 0px 4px 32px -8px",
-                  }}
-                >
-                  <DropdownMenuItem 
-                    onClick={() => setSelectedSession("all_sessions")} 
-                    className={cn("text-xs font-medium rounded-[10px] p-2.5 cursor-pointer transition-colors", selectedSession === "all_sessions" ? "bg-white/15 text-white font-semibold" : "text-white/80 hover:text-white hover:bg-white/10")}
-                  >
-                    All Sessions
-                  </DropdownMenuItem>
-                  <div className="max-h-[200px] overflow-y-auto custom-scrollbar flex flex-col gap-0.5 mt-0.5">
-                    {sessions.map(s => (
-                      <DropdownMenuItem 
-                        key={s.id} 
-                        onClick={() => setSelectedSession(s.id)}
-                        className={cn("text-xs font-medium rounded-[10px] p-2.5 cursor-pointer transition-colors", selectedSession === s.id ? "bg-white/15 text-white font-semibold" : "text-white/80 hover:text-white hover:bg-white/10")}
-                      >
-                        {s.name}
-                      </DropdownMenuItem>
-                    ))}
-                    {sessions.length === 0 && (
-                      <DropdownMenuItem className="text-xs text-white/40 pointer-events-none italic">No sessions found</DropdownMenuItem>
-                    )}
-                  </div>
-                </DropdownMenuContent>
-              </DropdownMenu>
 
               {/* Keyboard Shortcuts Help '?' Button & Hover Dropdown */}
               <KeyboardShortcutsHelp />

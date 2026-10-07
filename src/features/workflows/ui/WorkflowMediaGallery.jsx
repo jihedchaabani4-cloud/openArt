@@ -274,7 +274,6 @@ export function WorkflowMediaGallery({
   activeItem = null,
   primaryMediaId = null,
   projectId = null,
-  sessionId = null,
   onSelect = () => {},
   blockSelectWhenNotCompleted = false,
   className,
@@ -284,7 +283,7 @@ export function WorkflowMediaGallery({
   const detachMediaMutation = useDetachMedia();
 
   const handleDetach = (mediaId) => {
-    detachMediaMutation.mutate({ mediaId, projectId, sessionId });
+    detachMediaMutation.mutate({ mediaId, projectId });
   };
 
   const handleDelete = (mediaId) => {

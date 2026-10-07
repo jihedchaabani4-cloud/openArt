@@ -130,14 +130,14 @@ export function EditNavbar({
         await deleteMedia({ mediaId })
         // If it was the last item, redirect back
         if (workflow?.items?.length <= 1) {
-            router.push(`/cinema-studio/${projectId}/generations`)
+            router.push(`/cinema-studio/${projectId}/assets`)
         }
     }
 
     return (
         <NavbarCore
-            onBack={() => router.push(`/cinema-studio/${projectId}/generations`)}
-            backLabel="Back to generations"
+            onBack={() => router.push(`/cinema-studio/${projectId}/assets`)}
+            backLabel="Back to assets"
             left={
                 <>
                     <EditableDisplayName
@@ -203,7 +203,7 @@ export function EditNavbar({
                     <NavbarAction
                         variant="white"
                         label="Done"
-                        onClick={() => router.push(`/cinema-studio/${projectId}/generations`)}
+                        onClick={() => router.push(`/cinema-studio/${projectId}/assets`)}
                     />
                 </>
             }

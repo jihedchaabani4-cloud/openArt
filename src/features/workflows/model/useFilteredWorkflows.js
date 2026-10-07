@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+﻿import { useMemo } from 'react';
 import { useProjectData } from '../api/workflowsApi';
 import { useWorkflowsStore } from './useWorkflowsStore';
 import { getGenerationConfig } from '@/shared/lib/referenceUtils';
@@ -88,8 +88,8 @@ function buildInputAssets(references = []) {
  *   workflows: [{ ...wf, items: media[] }]
  * }
  */
-export function useFilteredWorkflows(projectId, sessionId) {
-  // Always fetch the FULL project data (cached heavily) so switching sessions doesn't trigger a refetch
+export function useFilteredWorkflows(projectId) {
+  // Always fetch the FULL project data (cached heavily)
   const queryResult           = useProjectData(projectId);
   const { _generationFilters: filters, showUploadedMedia } = useWorkflowsStore();
   const showUploaded          = showUploadedMedia !== false;
@@ -144,10 +144,6 @@ export function useFilteredWorkflows(projectId, sessionId) {
 
       // Filter uploads if needed
       if (!showUploaded && type === 'upload') return false;
-
-      // فلتر session
-      const wfSessionId = wf.metadata?.sessionId ?? wf.session_id ?? wf.sessionId;
-      if (sessionId && wfSessionId && wfSessionId !== sessionId) return false;
 
       // فلتر نوع الميديا (صورة / فيديو)
       if (filters.types?.length > 0) {
@@ -212,7 +208,6 @@ export function useFilteredWorkflows(projectId, sessionId) {
     filters,
     showUploadedMedia,
     showUploaded,
-    sessionId,
   ]);
 
   // ── availableModels ──────────────────────────────────────────────────────

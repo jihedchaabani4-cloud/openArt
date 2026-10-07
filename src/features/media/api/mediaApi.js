@@ -69,10 +69,9 @@ export function useUserLibrary({
   limit = 30,
   offset = 0,
   projectId,
-  sessionId,
 } = {}) {
   return useQuery({
-    queryKey: queryKeys.library.user({ limit, offset, projectId: projectId || null, sessionId: sessionId || null }),
+    queryKey: queryKeys.library.user({ limit, offset, projectId: projectId || null }),
     queryFn: async () => {
       const params = new URLSearchParams({
         limit: String(limit),
@@ -80,7 +79,6 @@ export function useUserLibrary({
       });
 
       if (projectId) params.set("project_id", projectId);
-      if (sessionId) params.set("session_id", sessionId);
 
       const res = await api.get(`/workflows/library?${params.toString()}`);
       if (res.ok === false || res.success === false) {
@@ -102,13 +100,11 @@ export function useInfiniteUserLibrary({
   enabled = false,
   limit = 30,
   projectId,
-  sessionId,
 } = {}) {
   return useInfiniteQuery({
     queryKey: queryKeys.library.user({
       limit,
       projectId: projectId || null,
-      sessionId: sessionId || null,
       mode: "infinite",
     }),
     queryFn: async ({ pageParam = 0 }) => {
@@ -118,7 +114,6 @@ export function useInfiniteUserLibrary({
       });
 
       if (projectId) params.set("project_id", projectId);
-      if (sessionId) params.set("session_id", sessionId);
 
       const res = await api.get(`/workflows/library?${params.toString()}`);
       if (res.ok === false || res.success === false) {
@@ -163,7 +158,7 @@ export function useLibraryWorkflowDetail(workflowId, { enabled = false, initialD
 export function useBatchUploadAssets() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ files, projectId, sessionId }) => {
+    mutationFn: async ({ files, projectId }) => {
       if (!projectId) throw new Error("Project ID required");
       
       const results = await Promise.all(files.map(async (file) => {
@@ -173,7 +168,6 @@ export function useBatchUploadAssets() {
         const formData = new FormData();
         formData.append("file", file);
         formData.append("project_id", projectId);
-        formData.append("session_id", sessionId || "");
         formData.append("workflow_type", "UPLOAD");
         formData.append("workflowType", "UPLOAD");
         formData.append("type", "upload");
@@ -197,8 +191,8 @@ export function useBatchUploadAssets() {
       return results;
     },
 
-    onMutate: async ({ files, projectId, sessionId }) => {
-      const generationsKey = queryKeys.generations.byProject(projectId, sessionId);
+    onMutate: async ({ files, projectId }) => {
+      const generationsKey = queryKeys.generations.byProject(projectId);
       const projectDataKey = queryKeys.projectData.byProject(projectId);
 
       await queryClient.cancelQueries({ queryKey: generationsKey });
@@ -240,7 +234,6 @@ export function useBatchUploadAssets() {
           model_label:     'Upload',
           model_icon_url:  null,
           params:          { prompt: isVideo ? 'Vidéo importée' : 'Image importée', ratio: resolvedRatio },
-          session_id:      sessionId,
           created_at:      new Date().toISOString(),
           items: [{
             id:         `${optimisticId}-item`,
@@ -271,7 +264,6 @@ export function useBatchUploadAssets() {
             displayName:    isVideo ? 'Vidéo importée' : 'Image importée',
             createTime:     new Date().toISOString(),
             primaryMediaId: `${optimisticId}-item`,
-            sessionId:      sessionId,
             favorited:      false,
             source:         'upload',
             isUpload:       true,
@@ -352,7 +344,7 @@ export function useBatchUploadAssets() {
         context?.localUrls?.forEach(url => URL.revokeObjectURL(url));
       }, 2000);
       queryClient.invalidateQueries({ queryKey: queryKeys.assets.byProject(variables.projectId) });
-      queryClient.invalidateQueries({ queryKey: queryKeys.generations.byProject(variables.projectId, variables.sessionId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.generations.byProject(variables.projectId) });
       queryClient.invalidateQueries({ queryKey: queryKeys.projectData.byProject(variables.projectId) });
     },
   });

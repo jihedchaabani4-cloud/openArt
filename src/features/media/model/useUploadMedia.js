@@ -7,28 +7,24 @@ import { intrinsicSizeToRatioLabel } from "@/shared/lib/displayUtils";
 /**
  * useUploadMedia
  * Unified hook for uploading media files (images/videos) to the backend.
- * Automatically resolves projectId & activeSessionId from route params or store.
+ * Automatically resolves projectId from route params or store.
  * Dispatches to POST /api/assets/upload, triggers optimistic updates,
  * and returns canonical normalized items with workflow_id.
  *
  * @param {string} [overrideProjectId] - Optional explicit projectId
- * @param {string} [overrideSessionId] - Optional explicit sessionId
  * @returns {{
  *   uploadMedia: (filesOrFile: File | File[]) => Promise<Array<object> | object>,
  *   isUploading: boolean,
  *   projectId: string,
- *   sessionId: string,
  * }}
  */
-export function useUploadMedia(overrideProjectId, overrideSessionId) {
+export function useUploadMedia(overrideProjectId) {
   const params = useParams();
   const routeProjectId = params?.projectId;
 
   const storeProjectId = useWorkflowsStore((s) => s.selectedProjectId);
-  const storeSessionId = useWorkflowsStore((s) => s.activeSessionId);
 
   const effectiveProjectId = overrideProjectId || routeProjectId || storeProjectId;
-  const effectiveSessionId = overrideSessionId || storeSessionId || "";
 
   const { mutateAsync: uploadBatchToServer, isPending: isUploading } = useBatchUploadAssets();
 
@@ -45,7 +41,6 @@ export function useUploadMedia(overrideProjectId, overrideSessionId) {
       const results = await uploadBatchToServer({
         files,
         projectId: effectiveProjectId,
-        sessionId: effectiveSessionId,
       });
 
       // Normalize each returned item to match Prompt Bar and Media Store contract
@@ -82,13 +77,12 @@ export function useUploadMedia(overrideProjectId, overrideSessionId) {
 
       return isArray ? normalized : normalized[0];
     },
-    [effectiveProjectId, effectiveSessionId, uploadBatchToServer]
+    [effectiveProjectId, uploadBatchToServer]
   );
 
   return {
     uploadMedia,
     isUploading,
     projectId: effectiveProjectId,
-    sessionId: effectiveSessionId,
   };
 }

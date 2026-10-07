@@ -30,10 +30,6 @@ export function useWorkflowActions(workflow, item = null) {
     pathname?.includes("/generations/edit/") ||
     pathname?.includes("/elements/edit/");
 
-  const { 
-    activeSessionId,
-  } = useWorkflowsStore();
-
   const { mutate: toggleLike } = useToggleWorkflowLike();
   const { mutate: removeWorkflow } = useRemoveWorkflow();
   const { mutate: removeAsset } = useRemoveAsset();
@@ -47,8 +43,6 @@ export function useWorkflowActions(workflow, item = null) {
     : { status: 'processing', url: null, isVideo: false, isAudio: false, aspect: '1/1', ratioStr: null, prompt: '' };
   const { isVideo, url } = metadata;
 
-  const workflowSessionId = workflow?.metadata?.sessionId ?? workflow?.session_id ?? null;
-  const isSameSession = !activeSessionId || !workflowSessionId || workflowSessionId === activeSessionId;
   const isInProgress = ["processing", "pending", "uploading"].includes(metadata?.status);
   const isFailed = ["failed", "rejected", "error"].includes(metadata?.status);
 
@@ -64,10 +58,10 @@ export function useWorkflowActions(workflow, item = null) {
                 || "";
 
   const isUpload = targetItem?.workflowStepId === "upload" || (!isFailed && !targetItem?.generationConfig && !workflow?.metadata?.generationConfig && !prompt);
-  const canUseAsInput = isSameSession && metadata?.status === "completed" && !!url;
+  const canUseAsInput = metadata?.status === "completed" && !!url;
   const canReuseSettings = !isInProgress && !isUpload;
-  const canEnterEdit = isSameSession && (metadata?.status === "completed" || isInProgress);
-  // Delete is allowed cross-session in UI (server enforces auth separately);
+  const canEnterEdit = metadata?.status === "completed" || isInProgress;
+  // Delete is allowed in UI (server enforces auth separately);
   // only block while a job is in progress to avoid race/confusion.
   const canDelete = !isInProgress;
   const isElementSheet = workflow?.workflow_type === "ELEMENT_SHEET";
@@ -210,9 +204,9 @@ export function useWorkflowActions(workflow, item = null) {
     const media = targetItem || workflow;
     const handled = animateMedia({ media });
     if (!handled) {
-      if (projectId && !pathname?.includes("/generations")) {
+      if (projectId && !pathname?.includes("/assets") && !pathname?.includes("/generations")) {
         setPendingPromptAction({ type: "animate", media, projectId });
-        router.push(`/cinema-studio/${projectId}/generations`);
+        router.push(`/cinema-studio/${projectId}/assets`);
         return;
       }
       const assetId = targetItem?.asset_id || targetItem?.name || targetItem?.id || "";
@@ -237,9 +231,9 @@ export function useWorkflowActions(workflow, item = null) {
     const media = targetItem || workflow;
     const handled = addMediaToPrompt({ media });
     if (!handled) {
-      if (projectId && !pathname?.includes("/generations")) {
+      if (projectId && !pathname?.includes("/assets") && !pathname?.includes("/generations")) {
         setPendingPromptAction({ type: "add_reference", media, projectId });
-        router.push(`/cinema-studio/${projectId}/generations`);
+        router.push(`/cinema-studio/${projectId}/assets`);
         return;
       }
       const workflowId = workflow?.id || targetItem?.workflow_id || targetItem?.workflowId || null;

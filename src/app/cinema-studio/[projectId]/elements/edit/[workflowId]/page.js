@@ -17,7 +17,6 @@ export default function ElementWorkflowEditPage() {
     const { projectId, workflowId } = useParams();
     const router = useRouter();
 
-    const { activeSessionId } = useWorkflowsStore();
     const hydrateElementDraft = useElementStore((state) => state.hydrateElementDraft);
     const resetElementStore = useElementStore((state) => state.resetElementStore);
     const resetPromptStore = usePromptStore((state) => state.resetPromptStore);
@@ -93,7 +92,6 @@ export default function ElementWorkflowEditPage() {
     }, [
         workflow,
         activeItem,
-        activeSessionId,
         hydrateElementDraft,
         projectId,
         resetElementStore,
@@ -135,7 +133,6 @@ export default function ElementWorkflowEditPage() {
                                 activeItem={activeItem}
                                 primaryMediaId={workflow.metadata?.primaryMediaId}
                                 projectId={projectId}
-                                sessionId={activeSessionId}
                                 onSelect={(item) => {
                                     const meta = getItemMetadata(item);
                                     if (!meta?.url && meta?.status !== "processing") return;
@@ -147,8 +144,6 @@ export default function ElementWorkflowEditPage() {
                                         setPrimaryMediaMutation.mutate({
                                             workflowId: currentWorkflowId,
                                             mediaId,
-                                            projectId,
-                                            sessionId: activeSessionId,
                                         });
                                     }
                                 }}

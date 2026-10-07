@@ -130,7 +130,7 @@ export default function NewCharacterPage() {
     if (existingSheets && existingSheets.length > 0) {
       router.push(`/cinema-studio/${effectiveProjectId}/characters`);
     } else {
-      router.push(`/cinema-studio/${effectiveProjectId}/generations`);
+      router.push(`/cinema-studio/${effectiveProjectId}/assets`);
     }
   };
 

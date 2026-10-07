@@ -36,7 +36,7 @@ export function LeftNavigationRail() {
 
   const isCharactersActive = pathname?.includes("/characters");
   const isElementsActive = pathname?.includes("/elements");
-  const currentActiveTab = optimisticTab || (isCharactersActive ? "characters" : isElementsActive ? "elements" : "generations");
+  const currentActiveTab = optimisticTab || (isCharactersActive ? "characters" : isElementsActive ? "elements" : "assets");
 
   const handleToggleExpand = (e) => {
     e?.stopPropagation();
@@ -53,11 +53,11 @@ export function LeftNavigationRail() {
 
   const navItems = [
     {
-      id: "generations",
-      label: "Générations",
+      id: "assets",
+      label: "Assets",
       icon: "image",
-      href: `/cinema-studio/${selectedProjectId}/generations`,
-      isActive: currentActiveTab === "generations",
+      href: `/cinema-studio/${selectedProjectId}/assets`,
+      isActive: currentActiveTab === "assets",
     },
     {
       id: "elements",
