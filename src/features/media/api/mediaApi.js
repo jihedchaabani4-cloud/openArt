@@ -167,7 +167,6 @@ export function useBatchUploadAssets() {
         // To keep it simple and parallel, we re-calculate if needed, or better, pass a metadata map.
         const metadata = await getMediaMetadata(file); 
         const formData = new FormData();
-        formData.append("file", file);
         formData.append("project_id", projectId);
         formData.append("workflow_type", "UPLOAD");
         formData.append("workflowType", "UPLOAD");
@@ -175,13 +174,16 @@ export function useBatchUploadAssets() {
         formData.append("source", "upload");
         if (effectiveFolderId) {
           formData.append("folder_id", effectiveFolderId);
+          formData.append("folderId", effectiveFolderId);
           formData.append("collection_id", effectiveFolderId);
+          formData.append("collectionId", effectiveFolderId);
         }
         if (metadata?.width && metadata?.height) {
           formData.append("width", String(metadata.width));
           formData.append("height", String(metadata.height));
           formData.append("ratio", metadata.ratio || "");
         }
+        formData.append("file", file);
         const res = await api.postForm("/assets/upload", formData);
         if (res?.url && (res?.width || metadata?.width) && (res?.height || metadata?.height)) {
           setCachedImageDimensions(

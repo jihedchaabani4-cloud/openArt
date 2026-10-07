@@ -79,7 +79,11 @@ export default function CollectionDetailPage({ params }) {
   // Filter workflows belonging strictly to this collection
   const collectionWorkflows = React.useMemo(() => {
     return allWorkflows.filter(
-      (w) => w.folder_id === collectionId || w.folderId === collectionId
+      (w) =>
+        w.folder_id === collectionId ||
+        w.folderId === collectionId ||
+        w.metadata?.folder_id === collectionId ||
+        w.metadata?.folderId === collectionId
     );
   }, [allWorkflows, collectionId]);
 
