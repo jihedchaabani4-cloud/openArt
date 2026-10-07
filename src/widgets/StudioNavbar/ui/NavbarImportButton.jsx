@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { usePathname, useParams } from "next/navigation";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { useUploadMedia } from "@/features/media";
 import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows";
@@ -16,7 +17,14 @@ import { CreateCollectionDialog } from "@/widgets/dialogs/CreateCollectionDialog
 export function NavbarImportButton() {
   const { selectedProjectId: projectId, activeStudioTab } = useGenerationsStore();
   const fileInputRef = useRef(null);
-  const { uploadMedia, isUploading, folderId, collectionId } = useUploadMedia();
+  const pathname = usePathname();
+  const params = useParams();
+
+  // If in collection page: send collectionId. If in assets direct: do NOT send collectionId (null).
+  const isCollectionPage = pathname?.includes("/collection/") || Boolean(params?.collectionId);
+  const currentCollectionId = isCollectionPage ? (params?.collectionId || null) : null;
+
+  const { uploadMedia, isUploading } = useUploadMedia();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [createCollectionOpen, setCreateCollectionOpen] = useState(false);
 
@@ -38,7 +46,10 @@ export function NavbarImportButton() {
     if (files.length === 0) return;
 
     try {
-      await uploadMedia(files, { folderId, collectionId });
+      await uploadMedia(files, {
+        collectionId: currentCollectionId,
+        folderId: currentCollectionId,
+      });
     } catch (err) {
       console.error("Batch upload failed in Navbar:", err);
     } finally {

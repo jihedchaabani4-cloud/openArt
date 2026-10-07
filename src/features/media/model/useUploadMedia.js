@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { useParams, useSearchParams } from "next/navigation";
+import { useParams, useSearchParams, usePathname } from "next/navigation";
 import { useWorkflowsStore } from "@/features/workflows";
 import { useBatchUploadAssets } from "../api/mediaApi";
 import { intrinsicSizeToRatioLabel } from "@/shared/lib/displayUtils";
@@ -22,13 +22,22 @@ import { intrinsicSizeToRatioLabel } from "@/shared/lib/displayUtils";
  */
 export function useUploadMedia(overrideProjectId) {
   const params = useParams();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   const routeProjectId = params?.projectId;
+  const routeCollectionId = params?.collectionId;
 
-  const urlFolderId = searchParams?.get("collection_id") || searchParams?.get("folder_id") || searchParams?.get("folderId");
-  const storeFolderId = useWorkflowsStore((s) => s.activeCollectionId || s.selectedFolderId);
+  const isCollectionPage = pathname?.includes("/collection/") || Boolean(routeCollectionId);
+  const isDirectAssetsPage = pathname?.includes("/assets") && !isCollectionPage;
+
+  // In direct assets: strictly null. In collection page: routeCollectionId.
+  const pageCollectionId = isDirectAssetsPage
+    ? null
+    : (isCollectionPage
+        ? (routeCollectionId || null)
+        : (searchParams?.get("collection_id") || searchParams?.get("folder_id") || searchParams?.get("folderId") || null));
+
   const storeProjectId = useWorkflowsStore((s) => s.selectedProjectId);
-
   const effectiveProjectId = overrideProjectId || routeProjectId || storeProjectId;
 
   const { mutateAsync: uploadBatchToServer, isPending: isUploading } = useBatchUploadAssets();
@@ -43,20 +52,23 @@ export function useUploadMedia(overrideProjectId) {
         throw new Error("Project ID is required for asset uploads.");
       }
 
-      const effectiveFolderId =
-        options?.folderId ||
-        options?.collectionId ||
-        options?.folder_id ||
-        options?.collection_id ||
-        urlFolderId ||
-        storeFolderId ||
-        null;
+      // Check if options explicitly defined folderId / collectionId (null is preserved)
+      const explicitFolderId =
+        options?.folderId !== undefined
+          ? options.folderId
+          : (options?.collectionId !== undefined
+              ? options.collectionId
+              : (options?.folder_id !== undefined
+                  ? options.folder_id
+                  : options?.collection_id));
+
+      const effectiveFolderId = explicitFolderId !== undefined ? explicitFolderId : pageCollectionId;
 
       const results = await uploadBatchToServer({
         files,
         projectId: effectiveProjectId,
-        folderId: effectiveFolderId,
-        collectionId: effectiveFolderId,
+        folderId: effectiveFolderId || null,
+        collectionId: effectiveFolderId || null,
       });
 
       // Normalize each returned item to match Prompt Bar and Media Store contract
@@ -93,14 +105,14 @@ export function useUploadMedia(overrideProjectId) {
 
       return isArray ? normalized : normalized[0];
     },
-    [effectiveProjectId, uploadBatchToServer, urlFolderId, storeFolderId]
+    [effectiveProjectId, uploadBatchToServer, pageCollectionId]
   );
 
   return {
     uploadMedia,
     isUploading,
     projectId: effectiveProjectId,
-    collectionId: urlFolderId || storeFolderId || null,
-    folderId: urlFolderId || storeFolderId || null,
+    collectionId: pageCollectionId,
+    folderId: pageCollectionId,
   };
 }
