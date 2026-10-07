@@ -50,3 +50,47 @@ export function useCreateFolder() {
     },
   });
 }
+
+/**
+ * Update a folder/collection (e.g. rename).
+ */
+export function useUpdateFolder() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ folderId, projectId, name }) => {
+      const res = await api.patch(`/folders/${folderId}`, { name });
+      if (res?.ok === false || res?.success === false) {
+        throw new Error(res?.message || "Failed to update collection");
+      }
+      return res?.data ?? res;
+    },
+    onSuccess: (_, variables) => {
+      if (variables.projectId) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.folders.byProject(variables.projectId) });
+      }
+      queryClient.invalidateQueries({ queryKey: queryKeys.folders.all() });
+    },
+  });
+}
+
+/**
+ * Delete a folder/collection.
+ */
+export function useDeleteFolder() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ folderId, projectId }) => {
+      const res = await api.delete(`/folders/${folderId}`);
+      if (res?.ok === false || res?.success === false) {
+        throw new Error(res?.message || "Failed to delete collection");
+      }
+      return folderId;
+    },
+    onSuccess: (_, variables) => {
+      if (variables.projectId) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.folders.byProject(variables.projectId) });
+      }
+      queryClient.invalidateQueries({ queryKey: queryKeys.folders.all() });
+    },
+  });
+}

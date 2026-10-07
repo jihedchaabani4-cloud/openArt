@@ -16,13 +16,15 @@ import { getStudioMenuItems, getWorkflowEntityType } from "./studioMenuConfig";
 import { CoreMediaItemView } from "@/widgets/CoreMediaItemView";
 import { springGentle, iconCls } from "./constants";
 
+import { CollectionGridItem } from "./CollectionGridItem";
+
 const EMPTY_IMG = typeof window !== 'undefined' ? (() => {
   const img = new Image();
   img.src = "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
   return img;
 })() : null;
 
-export const MediaGridItem = React.memo(function MediaGridItem({
+const WorkflowMediaGridItem = React.memo(function WorkflowMediaGridItem({
   workflow,
   item: propItem = null,
   aspect: propAspect = null,
@@ -558,3 +560,20 @@ export const MediaGridItem = React.memo(function MediaGridItem({
     </>
   );
 });
+
+export const MediaGridItem = React.memo(function MediaGridItem(props) {
+  if (props.workflow?.type === "collection" || props.workflow?.isCollection) {
+    return (
+      <CollectionGridItem
+        collection={props.workflow}
+        className={props.className}
+        onClick={props.onClick}
+        width={props.width}
+        height={props.height}
+        aspect={props.aspect}
+      />
+    );
+  }
+  return <WorkflowMediaGridItem {...props} />;
+});
+

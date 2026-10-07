@@ -19,6 +19,8 @@ import { isLtxModel } from "@/features/prompt-bar/providers/ltx/index.js"
 import { RowsPhotoAlbum } from 'react-photo-album'
 import 'react-photo-album/rows.css'
 import { MediaGridItem } from "@/widgets/StudioLayout/GenerationsStudio/MediaGridItem"
+import { GoogleIcon } from "@/shared/ui/GoogleIcon";
+import { useProjectFolders } from "@/features/folders";
 
 import { usePromptStore } from "@/features/prompt-bar/model/usePromptStore";
 import { getPrimaryMedia } from "@/shared/lib/generationUtils";
@@ -52,6 +54,11 @@ export default function AssetsPage({ params }) {
     const setActiveStudioTab   = useGenerationsStore(s => s.setActiveStudioTab);
     const gridSize             = useGenerationsStore(s => s.gridSize);
     const setIsNavbarHidden    = useGenerationsStore(s => s.setIsNavbarHidden);
+    const activeCollectionId   = useGenerationsStore(s => s.activeCollectionId);
+    const setActiveCollectionId = useGenerationsStore(s => s.setActiveCollectionId);
+
+    // Fetch project folders/collections
+    const { data: projectFolders = [] } = useProjectFolders(projectId);
 
     // Set the active project on mount
     React.useEffect(() => {
@@ -139,6 +146,38 @@ export default function AssetsPage({ params }) {
         router.push(`/cinema-studio/${projectId}/assets/edit/${workflowId}`);
     }, [projectId, router]);
 
+    const activeCollection = React.useMemo(() => {
+        if (!activeCollectionId) return null;
+        return projectFolders.find((f) => f.id === activeCollectionId) || null;
+    }, [projectFolders, activeCollectionId]);
+
+    const handleCollectionClick = React.useCallback((collection) => {
+        if (!collection?.id) return;
+        setActiveCollectionId(collection.id);
+    }, [setActiveCollectionId]);
+
+    // Format collections list (shown at the beginning of the grid in root view)
+    const collections = React.useMemo(() => {
+        if (activeCollectionId) return [];
+        return (projectFolders || []).map((col) => ({
+            ...col,
+            type: "collection",
+            isCollection: true,
+            key: `collection-${col.id}`,
+        }));
+    }, [projectFolders, activeCollectionId]);
+
+    // Workflows: when inside a collection, filter by that collection's ID
+    const displayedWorkflows = React.useMemo(() => {
+        if (!activeCollectionId) return visibleWorkflows;
+        return workflows.filter((w) => w.folder_id === activeCollectionId || w.metadata?.folderId === activeCollectionId);
+    }, [workflows, visibleWorkflows, activeCollectionId]);
+
+    // Combined items: Collections placed FIRST, followed by workflows
+    const allGridItems = React.useMemo(() => {
+        return [...collections, ...displayedWorkflows];
+    }, [collections, displayedWorkflows]);
+
     const scrollRef = React.useRef(null);
     const prevScrollTop = React.useRef(0);
     
@@ -192,13 +231,13 @@ export default function AssetsPage({ params }) {
             <MediaGridItem
                 key={photo.key}
                 workflow={photo.workflow}
-                onClick={handleWorkflowClick}
+                onClick={photo.isCollection ? handleCollectionClick : handleWorkflowClick}
                 className="rounded-2xl border-none shadow-xl"
                 width={width}
                 height={height}
             />
         ),
-        [handleWorkflowClick]
+        [handleWorkflowClick, handleCollectionClick]
     );
 
     const albumRender = React.useMemo(() => ({
@@ -206,11 +245,28 @@ export default function AssetsPage({ params }) {
     }), [renderPhoto]);
 
     const photos = React.useMemo(() => {
-        return visibleWorkflows.reduce((acc, workflow, i) => {
-            const primaryItem = getPrimaryMedia(workflow);
+        return allGridItems.reduce((acc, item, i) => {
+            if (item.type === "collection" || item.isCollection) {
+                const BASE = 1200;
+                const width  = BASE;
+                const height = Math.round(BASE * (3 / 4));
+
+                acc.push({
+                    src:          "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=",
+                    width,
+                    height,
+                    key:          item.key || `collection-${item.id}`,
+                    workflow:     item,
+                    type:         "collection",
+                    isCollection: true,
+                });
+                return acc;
+            }
+
+            const primaryItem = getPrimaryMedia(item);
             if (!primaryItem) return acc;
 
-            const meta = getDisplayMeta(primaryItem, workflow);
+            const meta = getDisplayMeta(primaryItem, item);
             const aspect = meta?.aspect ?? "3/4";
             const [wStr, hStr] = aspect.split("/");
             const wNum = parseFloat(wStr) || 3;
@@ -222,17 +278,19 @@ export default function AssetsPage({ params }) {
             const url = meta?.url || "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
 
             acc.push({
-                src:      url,
+                src:          url,
                 width,
                 height,
-                key:      workflow.id || workflow.name || String(i),
-                workflow,
+                key:          item.id || item.name || String(i),
+                workflow:     item,
+                type:         "workflow",
+                isCollection: false,
             });
             return acc;
         }, []);
-    }, [visibleWorkflows]);
+    }, [allGridItems]);
 
-    if (isLoading && workflows.length === 0) {
+    if (isLoading && workflows.length === 0 && projectFolders.length === 0) {
         return <LoadingScreen message="Loading assets" />
     }
 
@@ -255,8 +313,22 @@ export default function AssetsPage({ params }) {
                     onScroll={handleScroll}
                     className="flex-1 overflow-y-auto pt-[72px] overflow-x-hidden px-3 py-3 custom-scrollbar"
                 >
+                    {activeCollection && (
+                        <div className="flex items-center gap-2 mb-3 px-1">
+                            <button
+                                onClick={() => setActiveCollectionId(null)}
+                                className="flex items-center gap-1.5 text-[13px] text-white/50 hover:text-white transition-colors cursor-pointer"
+                            >
+                                <GoogleIcon iconName="arrow_back" className="text-[16px]" />
+                                <span>All Assets</span>
+                            </button>
+                            <span className="text-white/20 text-xs">/</span>
+                            <span className="text-[13px] text-white/90 font-medium">{activeCollection.name}</span>
+                        </div>
+                    )}
+
                     <AnimatePresence mode="wait">
-                        {workflows.length > 0 ? (
+                        {allGridItems.length > 0 ? (
                             <motion.div 
                                 key="feed"
                                 initial={{ opacity: 0 }}
@@ -272,7 +344,7 @@ export default function AssetsPage({ params }) {
                                     rowConstraints={{ singleRowMaxHeight: density.targetRowHeight * density.maxRowHeightMultiplier }}
                                     render={albumRender}
                                 />
-                                {hasMore && (
+                                {hasMore && !activeCollectionId && (
                                     <div className="flex justify-center pt-2 text-sm text-white/45">
                                         Scroll down to load 30 more
                                     </div>
