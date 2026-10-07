@@ -147,7 +147,10 @@ export default function AssetsPage({ params }) {
 
     // Unified list containing collections first, then root workflows
     const combinedItems = React.useMemo(() => {
-        const collectionItems = collections.map(col => ({
+        // Only root-level folders (no parent) appear on the assets page
+        const rootCollections = collections.filter(c => !c.parentId && !c.parent_id);
+
+        const collectionItems = rootCollections.map(col => ({
             type: "collection",
             data: col,
             key: `col-${col.id}`,

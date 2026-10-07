@@ -57,7 +57,7 @@ export default function CollectionDetailPage({ params }) {
     };
   }, [projectId, collectionId, setSelectedProjectId, setActiveStudioTab, setActiveCollectionId]);
 
-  // Fetch folders to get collection metadata
+  // Fetch folders to get collection metadata + sub-collections
   const { data: rawFolders = [], isLoading: isFoldersLoading } = useProjectFolders(projectId);
   const collections = React.useMemo(() => {
     if (Array.isArray(rawFolders)) return rawFolders;
@@ -67,6 +67,13 @@ export default function CollectionDetailPage({ params }) {
 
   const collection = React.useMemo(() => {
     return collections.find((c) => c.id === collectionId) || null;
+  }, [collections, collectionId]);
+
+  // Sub-collections whose parent is this collection
+  const subCollections = React.useMemo(() => {
+    return collections.filter(
+      (c) => c.parentId === collectionId || c.parent_id === collectionId
+    );
   }, [collections, collectionId]);
 
   // Fetch project workflows
@@ -87,20 +94,35 @@ export default function CollectionDetailPage({ params }) {
     );
   }, [allWorkflows, collectionId]);
 
+  // Combined: sub-collections first, then assets
+  const combinedItems = React.useMemo(() => {
+    const subItems = subCollections.map((col) => ({
+      type: "collection",
+      data: col,
+      key: `col-${col.id}`,
+    }));
+    const assetItems = collectionWorkflows.map((w) => ({
+      type: "workflow",
+      data: w,
+      key: w.id || w.name,
+    }));
+    return [...subItems, ...assetItems];
+  }, [subCollections, collectionWorkflows]);
+
   // Pagination & scroll
   const [visibleCount, setVisibleCount] = React.useState(PAGE_SIZE);
-  const hasMore = visibleCount < collectionWorkflows.length;
-  const visibleWorkflows = React.useMemo(
-    () => collectionWorkflows.slice(0, visibleCount),
-    [collectionWorkflows, visibleCount]
+  const hasMore = visibleCount < combinedItems.length;
+  const visibleItems = React.useMemo(
+    () => combinedItems.slice(0, visibleCount),
+    [combinedItems, visibleCount]
   );
 
   const scrollRef = React.useRef(null);
   const prevScrollTop = React.useRef(0);
 
   const loadMore = React.useCallback(() => {
-    setVisibleCount((cur) => Math.min(cur + PAGE_SIZE, collectionWorkflows.length));
-  }, [collectionWorkflows.length]);
+    setVisibleCount((cur) => Math.min(cur + PAGE_SIZE, combinedItems.length));
+  }, [combinedItems.length]);
 
   const handleScroll = React.useCallback(() => {
     const el = scrollRef.current;
@@ -198,9 +220,33 @@ export default function CollectionDetailPage({ params }) {
     [projectId, router]
   );
 
-  // Photos preparation for RowsPhotoAlbum
+  // Navigate into a sub-collection
+  const handleCollectionClick = React.useCallback(
+    (col) => {
+      const id = typeof col === "string" ? col : col?.id;
+      if (id && projectId) {
+        router.push(`/cinema-studio/${projectId}/collection/${id}`);
+      }
+    },
+    [projectId, router]
+  );
+
+  // Photos preparation for RowsPhotoAlbum — handles both sub-collections and workflows
   const photos = React.useMemo(() => {
-    return visibleWorkflows.reduce((acc, workflow, i) => {
+    return visibleItems.reduce((acc, item, i) => {
+      if (item.type === "collection") {
+        acc.push({
+          src: "data:image/svg+xml;charset=utf-8,<svg xmlns='http://www.w3.org/2000/svg'/>",
+          width: 1200,
+          height: 900,
+          key: item.key,
+          itemType: "collection",
+          collection: item.data,
+        });
+        return acc;
+      }
+
+      const workflow = item.data;
       const primaryItem = getPrimaryMedia(workflow);
       if (!primaryItem) return acc;
 
@@ -212,7 +258,6 @@ export default function CollectionDetailPage({ params }) {
       const BASE = 1200;
       const width = Math.round(BASE * (wNum / Math.max(wNum, hNum)));
       const height = Math.round(BASE * (hNum / Math.max(wNum, hNum)));
-
       const url = meta?.url || "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
 
       acc.push({
@@ -220,11 +265,12 @@ export default function CollectionDetailPage({ params }) {
         width,
         height,
         key: workflow.id || workflow.name || String(i),
+        itemType: "workflow",
         workflow,
       });
       return acc;
     }, []);
-  }, [visibleWorkflows]);
+  }, [visibleItems]);
 
   const density = getStudioGridDensity(gridSize);
 
@@ -233,16 +279,18 @@ export default function CollectionDetailPage({ params }) {
       return (
         <MediaGridItem
           key={photo.key}
+          collection={photo.collection}
           workflow={photo.workflow}
+          itemType={photo.itemType}
           projectId={projectId}
-          onClick={handleWorkflowClick}
+          onClick={photo.itemType === "collection" ? handleCollectionClick : handleWorkflowClick}
           className="rounded-2xl border-none shadow-xl"
           width={width}
           height={height}
         />
       );
     },
-    [handleWorkflowClick, projectId]
+    [handleCollectionClick, handleWorkflowClick, projectId]
   );
 
   const albumRender = React.useMemo(
@@ -252,7 +300,7 @@ export default function CollectionDetailPage({ params }) {
 
   const isDragging = usePromptStore((s) => s.isDraggingGalleryItem);
 
-  if ((isFoldersLoading || isWorkflowsLoading) && collectionWorkflows.length === 0 && !collection) {
+  if ((isFoldersLoading || isWorkflowsLoading) && combinedItems.length === 0 && !collection) {
     return <LoadingScreen message="Loading collection..." />;
   }
 
@@ -287,7 +335,7 @@ export default function CollectionDetailPage({ params }) {
         >
           {/* ── Content Feed or Empty State ── */}
           <AnimatePresence mode="wait">
-            {collectionWorkflows.length > 0 ? (
+            {combinedItems.length > 0 ? (
               <motion.div
                 key="collection-grid"
                 initial={{ opacity: 0 }}
