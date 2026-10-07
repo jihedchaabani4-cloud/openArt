@@ -8,7 +8,7 @@ import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows";
 import { useFilteredWorkflows as useFilteredGenerations } from "@/features/workflows/model/useFilteredWorkflows";
 import { useQueryClient } from "@tanstack/react-query";
 import { useGenerateMutation } from "@/features/workflows/api/workflowsApi";
-import { useProjectFolders, useUpdateFolder, useDeleteFolder } from "@/features/folders";
+import { useProjectFolders } from "@/features/folders";
 import { useUploadMedia } from "@/features/media";
 import { queryKeys } from "@/shared/api/queryKeys";
 import {
@@ -23,20 +23,6 @@ import "react-photo-album/rows.css";
 import { MediaGridItem } from "@/widgets/StudioLayout/GenerationsStudio/MediaGridItem";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { Button } from "@/shared/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from "@/shared/ui/dropdown-menu";
-import { ConfirmDeleteDialog } from "@/widgets/dialogs/ConfirmDeleteDialog";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/shared/ui/dialog";
-import { Input } from "@/shared/ui/input";
 
 import { usePromptStore } from "@/features/prompt-bar/model/usePromptStore";
 import { getPrimaryMedia } from "@/shared/lib/generationUtils";
@@ -198,53 +184,6 @@ export default function CollectionDetailPage({ params }) {
     [projectId, collectionId, realModels, runGenerate, queryClient]
   );
 
-  // Collection Rename & Delete actions
-  const [isRenameOpen, setIsRenameOpen] = React.useState(false);
-  const [renameValue, setRenameValue] = React.useState("");
-  const [renameError, setRenameError] = React.useState(null);
-  const [isDeleteOpen, setIsDeleteOpen] = React.useState(false);
-
-  const { mutateAsync: updateFolder, isPending: isUpdating } = useUpdateFolder();
-  const { mutateAsync: deleteFolder, isPending: isDeleting } = useDeleteFolder();
-
-  const handleOpenRename = () => {
-    setRenameValue(collection?.name || "");
-    setRenameError(null);
-    setIsRenameOpen(true);
-  };
-
-  const handleSaveRename = async (e) => {
-    e?.preventDefault?.();
-    const trimmed = renameValue.trim();
-    if (!trimmed || trimmed === collection?.name) {
-      setIsRenameOpen(false);
-      return;
-    }
-    try {
-      await updateFolder({
-        folderId: collectionId,
-        patch: { name: trimmed },
-        projectId,
-      });
-      setIsRenameOpen(false);
-    } catch (err) {
-      setRenameError(err.message || "Failed to rename collection");
-    }
-  };
-
-  const handleConfirmDelete = async () => {
-    try {
-      await deleteFolder({
-        folderId: collectionId,
-        projectId,
-      });
-      setIsDeleteOpen(false);
-      router.replace(`/cinema-studio/${projectId}/assets`);
-    } catch (err) {
-      alert(err.message || "Cannot delete collection with items inside");
-    }
-  };
-
   // Navigate to edit workflow
   const handleWorkflowClick = React.useCallback(
     (workflow) => {
@@ -313,8 +252,6 @@ export default function CollectionDetailPage({ params }) {
     return <LoadingScreen message="Loading collection..." />;
   }
 
-  const collectionName = collection?.name || "Collection";
-
   return (
     <div className="flex h-full w-full overflow-hidden text-white bg-background relative">
       <main className="flex-1 flex flex-col relative min-w-0 overflow-hidden z-10">
@@ -344,81 +281,6 @@ export default function CollectionDetailPage({ params }) {
           onScroll={handleScroll}
           className="flex-1 overflow-y-auto pt-[72px] overflow-x-hidden px-4 py-3 custom-scrollbar"
         >
-          {/* ── Collection Header & Breadcrumb ── */}
-          <div className="flex items-center justify-between gap-4 mb-5 pt-2 pb-1 border-b border-white/5">
-            <div className="flex items-center gap-2 text-sm font-medium">
-              <button
-                type="button"
-                onClick={() => router.push(`/cinema-studio/${projectId}/assets`)}
-                className="flex items-center gap-1.5 text-white/60 hover:text-white transition-colors cursor-pointer group"
-              >
-                <GoogleIcon
-                  iconName="arrow_back"
-                  className="text-[18px] text-white/60 group-hover:text-white transition-colors"
-                />
-                <span>All assets</span>
-              </button>
-              <span className="text-white/25">/</span>
-              <div className="flex items-center gap-2">
-                <GoogleIcon iconName="folder" className="text-[18px] text-white/70" />
-                <h1 className="text-white text-[16px] sm:text-[18px] font-semibold tracking-tight">
-                  {collectionName}
-                </h1>
-                <span className="text-xs text-white/40 ml-1">
-                  ({collectionWorkflows.length})
-                </span>
-              </div>
-            </div>
-
-            {/* Actions: Upload & Collection Options */}
-            <div className="flex items-center gap-2">
-              <Button
-                variant="studio-ghost"
-                size="sm"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={isUploading}
-                className="h-8 gap-1.5 text-xs text-white/80 hover:text-white bg-white/5 hover:bg-white/10 rounded-xl px-3"
-              >
-                {isUploading ? (
-                  <GoogleIcon iconName="progress_activity" className="text-[14px] animate-spin" />
-                ) : (
-                  <GoogleIcon iconName="upload" className="text-[15px]" />
-                )}
-                <span>Upload</span>
-              </Button>
-
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="studio-ghost"
-                    size="icon"
-                    className="size-8 rounded-xl bg-white/5 hover:bg-white/10 text-white/80 hover:text-white"
-                    title="Collection options"
-                  >
-                    <GoogleIcon iconName="more_horiz" className="text-[18px]" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-40 p-1.5 flex flex-col gap-0.5">
-                  <DropdownMenuItem
-                    onClick={handleOpenRename}
-                    className="flex items-center gap-2.5 cursor-pointer py-2 px-2.5 rounded-[10px] text-[13px]"
-                  >
-                    <GoogleIcon iconName="edit" className="text-[16px] text-white/70" />
-                    <span>Rename</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    variant="destructive"
-                    onClick={() => setIsDeleteOpen(true)}
-                    className="flex items-center gap-2.5 cursor-pointer py-2 px-2.5 rounded-[10px] text-red-400 text-[13px]"
-                  >
-                    <GoogleIcon iconName="delete" className="text-[16px] text-red-400" />
-                    <span>Delete</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          </div>
-
           {/* ── Content Feed or Empty State ── */}
           <AnimatePresence mode="wait">
             {collectionWorkflows.length > 0 ? (
@@ -486,75 +348,6 @@ export default function CollectionDetailPage({ params }) {
           isGenerating={isGeneratingMutation}
         />
       </main>
-
-      {/* Rename Dialog */}
-      <Dialog open={isRenameOpen} onOpenChange={setIsRenameOpen}>
-        <DialogContent
-          variant="small"
-          className="bg-[rgba(22,23,24,0.95)] backdrop-blur-[80px] border border-white/10 text-white rounded-[24px] max-w-[340px] p-5 shadow-2xl"
-          showCloseButton={false}
-        >
-          <form onSubmit={handleSaveRename} className="flex flex-col gap-4">
-            <DialogHeader className="space-y-1 text-left">
-              <DialogTitle className="text-[15px] font-semibold text-white">
-                Rename collection
-              </DialogTitle>
-            </DialogHeader>
-
-            <div className="space-y-1.5">
-              <Input
-                value={renameValue}
-                onChange={(e) => {
-                  setRenameValue(e.target.value);
-                  if (renameError) setRenameError(null);
-                }}
-                placeholder="Collection name"
-                className="h-10 text-[13px] bg-white/5 border-white/10 rounded-xl focus:border-white/25"
-                disabled={isUpdating}
-                autoFocus
-              />
-              {renameError && <p className="text-[11px] text-red-400 px-1">{renameError}</p>}
-            </div>
-
-            <div className="flex items-center justify-end gap-2 pt-1">
-              <Button
-                type="button"
-                variant="studio-ghost"
-                size="sm"
-                onClick={() => setIsRenameOpen(false)}
-                disabled={isUpdating}
-                className="text-[13px] text-white/70 hover:text-white"
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                variant="studio-accent"
-                size="sm"
-                disabled={!renameValue.trim() || isUpdating}
-                className="text-[13px] px-4 font-medium"
-              >
-                {isUpdating ? (
-                  <GoogleIcon iconName="progress_activity" className="text-[14px] animate-spin" />
-                ) : (
-                  "Save"
-                )}
-              </Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
-
-      {/* Delete Confirmation Dialog */}
-      <ConfirmDeleteDialog
-        open={isDeleteOpen}
-        onOpenChange={setIsDeleteOpen}
-        description={`Delete collection "${collectionName}"?`}
-        onConfirm={handleConfirmDelete}
-        loading={isDeleting}
-        confirmLabel={isDeleting ? "Deleting..." : "Delete"}
-        cancelLabel="Cancel"
-      />
     </div>
   );
 }
