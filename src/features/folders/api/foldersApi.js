@@ -15,7 +15,11 @@ export function useProjectFolders(projectId) {
       if (res?.ok === false || res?.success === false) {
         throw new Error(res?.message || "Failed to fetch folders");
       }
-      return res?.data ?? res ?? [];
+      if (Array.isArray(res)) return res;
+      if (Array.isArray(res?.items)) return res.items;
+      if (Array.isArray(res?.data)) return res.data;
+      if (Array.isArray(res?.folders)) return res.folders;
+      return [];
     },
     enabled: !!projectId,
     staleTime: 30_000,
