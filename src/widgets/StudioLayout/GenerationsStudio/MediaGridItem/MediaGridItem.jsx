@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
-import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-motion";
+import { motion, useMotionValue, useTransform } from "framer-motion";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { cn } from "@/shared/lib/utils";
 import { ButtonGroup } from "@/shared/ui/button-group";
@@ -14,9 +14,7 @@ import { ActionBtn } from "./ActionBtn";
 import { StudioItemDropdownMenu } from "./StudioItemMenu";
 import { getStudioMenuItems, getWorkflowEntityType } from "./studioMenuConfig";
 import { CoreMediaItemView } from "@/widgets/CoreMediaItemView";
-import { springGentle, iconCls } from "./constants";
-
-import { CollectionGridItem } from "./CollectionGridItem";
+import { useUpdateFolder, useDeleteFolder } from "@/features/folders";
 
 const EMPTY_IMG = typeof window !== 'undefined' ? (() => {
   const img = new Image();
@@ -561,19 +559,281 @@ const WorkflowMediaGridItem = React.memo(function WorkflowMediaGridItem({
   );
 });
 
-export const MediaGridItem = React.memo(function MediaGridItem(props) {
-  if (props.workflow?.type === "collection" || props.workflow?.isCollection) {
-    return (
-      <CollectionGridItem
-        collection={props.workflow}
-        className={props.className}
-        onClick={props.onClick}
-        width={props.width}
-        height={props.height}
-        aspect={props.aspect}
+const CollectionMediaGridItem = React.memo(function CollectionMediaGridItem({
+  collection,
+  workflow,
+  className,
+  onClick,
+  width: albumWidth = null,
+  height: albumHeight = null,
+  aspect = null,
+  projectId: propProjectId = null,
+}) {
+  const col = collection || workflow;
+  const storeProjectId = useWorkflowsStore((s) => s.selectedProjectId);
+  const projectId = propProjectId || storeProjectId;
+  const setActiveCollectionId = useWorkflowsStore((s) => s.setActiveCollectionId);
+  const activeCollectionId = useWorkflowsStore((s) => s.activeCollectionId);
+
+  const [isLiked, setIsLiked] = useState(Boolean(col?.favorited || col?.is_liked));
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  const [isRenaming, setIsRenaming] = useState(false);
+  const [cardRect, setCardRect] = useState(null);
+
+  const { mutateAsync: updateFolder } = useUpdateFolder();
+  const { mutateAsync: deleteFolder, isPending: isDeleting } = useDeleteFolder();
+
+  const cardRef = useRef(null);
+  const canDismissRef = useRef(false);
+
+  const collectionName = col?.name || "Untitled collection";
+
+  // Dynamically track card position while rename is open
+  useEffect(() => {
+    if (!isRenaming) {
+      setCardRect(null);
+      return;
+    }
+    const updateRect = () => {
+      if (cardRef.current) {
+        const r = cardRef.current.getBoundingClientRect();
+        setCardRect({
+          top: r.top,
+          left: r.left,
+          width: r.width,
+          height: r.height,
+          bottom: r.bottom,
+          right: r.right,
+        });
+      }
+    };
+    updateRect();
+    window.addEventListener("scroll", updateRect, true);
+    window.addEventListener("resize", updateRect);
+    return () => {
+      window.removeEventListener("scroll", updateRect, true);
+      window.removeEventListener("resize", updateRect);
+    };
+  }, [isRenaming]);
+
+  const startRename = useCallback(() => {
+    if (cardRef.current) {
+      const r = cardRef.current.getBoundingClientRect();
+      setCardRect({
+        top: r.top,
+        left: r.left,
+        width: r.width,
+        height: r.height,
+        bottom: r.bottom,
+        right: r.right,
+      });
+    }
+    canDismissRef.current = false;
+    setIsRenaming(true);
+    setTimeout(() => {
+      canDismissRef.current = true;
+    }, 150);
+  }, []);
+
+  const handleRename = async (newName) => {
+    if (!col?.id || !projectId) return;
+    await updateFolder({
+      folderId: col.id,
+      patch: { name: newName },
+      projectId,
+    });
+  };
+
+  const handleDelete = async () => {
+    if (!col?.id || !projectId) return;
+    try {
+      await deleteFolder({
+        folderId: col.id,
+        projectId,
+      });
+      if (activeCollectionId === col.id) {
+        setActiveCollectionId(null);
+      }
+      setIsDeleteConfirmOpen(false);
+    } catch (err) {
+      alert(err.message || "Cannot delete collection with items inside");
+    }
+  };
+
+  const getPillPosition = () => {
+    if (!cardRect || typeof window === "undefined" || !cardRect.width) {
+      return { bottom: "32px", left: "50%", transform: "translateX(-50%)" };
+    }
+    const PADDING = 10;
+    const PILL_HEIGHT = 56;
+    const spaceBelow = window.innerHeight - cardRect.bottom;
+    let top = cardRect.bottom + PADDING;
+    if (spaceBelow < PILL_HEIGHT + 20) {
+      top = Math.max(12, cardRect.bottom - PILL_HEIGHT - PADDING);
+    }
+    const left = Math.max(12, Math.min(cardRect.left, window.innerWidth - 580));
+    return { top: `${top}px`, left: `${left}px` };
+  };
+
+  const menuItems = [
+    {
+      key: "rename",
+      label: "Rename",
+      icon: "edit",
+      onClick: startRename,
+    },
+    {
+      key: "delete",
+      label: "Delete",
+      icon: "delete",
+      variant: "destructive",
+      onClick: () => setIsDeleteConfirmOpen(true),
+    },
+  ];
+
+  const cardStyle = albumWidth && albumHeight
+    ? {
+        width: albumWidth,
+        height: albumHeight,
+        aspectRatio: `${albumWidth} / ${albumHeight}`,
+        transform: "translateZ(0)",
+        contain: "paint layout",
+        contentVisibility: "auto",
+        containIntrinsicSize: `${Math.round(albumWidth)}px ${Math.round(albumHeight)}px`,
+      }
+    : {
+        width: "100%",
+        aspectRatio: aspect || "4/3",
+        transform: "translateZ(0)",
+        contain: "paint layout",
+        contentVisibility: "auto",
+      };
+
+  return (
+    <>
+      <CoreMediaItemView
+        fit="cover"
+        showHoverOverlay={false}
+        contextMenuItems={menuItems}
+        onClick={(e) => {
+          if (!isRenaming) {
+            if (onClick) {
+              onClick(col, e);
+            } else if (col?.id) {
+              setActiveCollectionId(col.id);
+            }
+          }
+        }}
+        className={cn(
+          "bg-[#323438] hover:bg-[#383a3f] transition-colors border-0 cursor-pointer shadow-xl",
+          className
+        )}
+        style={cardStyle}
+        topRight={
+          <div
+            className={cn(
+              "transition-opacity duration-200 pointer-events-auto",
+              isDropdownOpen ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+            )}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <ButtonGroup className="bg-white/60 backdrop-blur-md rounded-lg">
+              <ActionBtn
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsLiked((v) => !v);
+                }}
+                title={isLiked ? "Unlike collection" : "Like collection"}
+              >
+                <GoogleIcon
+                  iconName="favorite"
+                  fill={isLiked}
+                  className={cn("text-[13px]", isLiked ? "text-red-500" : "text-[#303031]")}
+                />
+              </ActionBtn>
+              <StudioItemDropdownMenu
+                open={isDropdownOpen}
+                onOpenChange={setIsDropdownOpen}
+                items={menuItems}
+              />
+            </ButtonGroup>
+          </div>
+        }
+        bottomLeft={
+          !isRenaming && (
+            <div className="pointer-events-auto max-w-full">
+              <h3
+                title={collectionName}
+                onDoubleClick={(e) => {
+                  e.stopPropagation();
+                  startRename();
+                }}
+                className="text-[20px] sm:text-[22px] font-medium text-white/95 tracking-tight leading-snug line-clamp-2 px-1 select-none"
+              >
+                {collectionName}
+              </h3>
+            </div>
+          )
+        }
+      >
+        <div ref={cardRef} className="absolute inset-0 pointer-events-none -z-10" />
+      </CoreMediaItemView>
+
+      <ConfirmDeleteDialog
+        open={isDeleteConfirmOpen}
+        onOpenChange={setIsDeleteConfirmOpen}
+        title="Delete collection?"
+        description={`Are you sure you want to delete collection "${collectionName}"?`}
+        onConfirm={handleDelete}
+        loading={isDeleting}
       />
-    );
+
+      {isRenaming && typeof window !== "undefined" && createPortal(
+        <div className="fixed inset-0 z-[99999]">
+          <div
+            className="fixed inset-0 bg-black/40 backdrop-blur-[1px] cursor-default"
+            onPointerDown={(e) => {
+              e.stopPropagation();
+              if (canDismissRef.current) setIsRenaming(false);
+            }}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (canDismissRef.current) setIsRenaming(false);
+            }}
+          />
+          <div
+            className="fixed z-[100000] pointer-events-auto"
+            style={getPillPosition()}
+            onClick={(e) => e.stopPropagation()}
+            onMouseDown={(e) => e.stopPropagation()}
+            onPointerDown={(e) => e.stopPropagation()}
+          >
+            <InlineRenamePill
+              initialName={collectionName}
+              onSave={handleRename}
+              onCancel={() => setIsRenaming(false)}
+            />
+          </div>
+        </div>,
+        document.body
+      )}
+    </>
+  );
+});
+
+export const MediaGridItem = React.memo(function MediaGridItem(props) {
+  if (
+    props.itemType === "collection" ||
+    props.collection ||
+    props.workflow?.type === "collection" ||
+    props.workflow?.isCollection
+  ) {
+    return <CollectionMediaGridItem {...props} />;
   }
   return <WorkflowMediaGridItem {...props} />;
 });
+
+export { CollectionMediaGridItem, CollectionMediaGridItem as CollectionGridItem };
+
 

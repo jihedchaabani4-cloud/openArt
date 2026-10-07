@@ -19,7 +19,7 @@ import {
 import { isLtxModel } from "@/features/prompt-bar/providers/ltx/index.js"
 import { RowsPhotoAlbum } from 'react-photo-album'
 import 'react-photo-album/rows.css'
-import { MediaGridItem, CollectionGridItem } from "@/widgets/StudioLayout/GenerationsStudio/MediaGridItem"
+import { MediaGridItem } from "@/widgets/StudioLayout/GenerationsStudio/MediaGridItem"
 import { GoogleIcon } from "@/shared/ui/GoogleIcon"
 
 import { usePromptStore } from "@/features/prompt-bar/model/usePromptStore";
@@ -257,25 +257,14 @@ export default function AssetsPage({ params }) {
 
     const renderPhoto = React.useCallback(
         (_, { photo, width, height }) => {
-            if (photo.itemType === "collection") {
-                return (
-                    <CollectionGridItem
-                        key={photo.key}
-                        collection={photo.collection}
-                        projectId={projectId}
-                        onClick={handleCollectionClick}
-                        className="rounded-2xl border-none shadow-xl"
-                        width={width}
-                        height={height}
-                    />
-                );
-            }
-
             return (
                 <MediaGridItem
                     key={photo.key}
+                    collection={photo.collection}
                     workflow={photo.workflow}
-                    onClick={handleWorkflowClick}
+                    itemType={photo.itemType}
+                    projectId={projectId}
+                    onClick={photo.itemType === "collection" ? handleCollectionClick : handleWorkflowClick}
                     className="rounded-2xl border-none shadow-xl"
                     width={width}
                     height={height}
