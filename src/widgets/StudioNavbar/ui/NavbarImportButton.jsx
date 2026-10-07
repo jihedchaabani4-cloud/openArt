@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { usePathname, useParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { useUploadMedia } from "@/features/media";
 import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows";
@@ -18,11 +18,11 @@ export function NavbarImportButton() {
   const { selectedProjectId: projectId, activeStudioTab } = useGenerationsStore();
   const fileInputRef = useRef(null);
   const pathname = usePathname();
-  const params = useParams();
 
-  // If in collection page: send collectionId. If in assets direct: do NOT send collectionId (null).
-  const isCollectionPage = pathname?.includes("/collection/") || Boolean(params?.collectionId);
-  const currentCollectionId = isCollectionPage ? (params?.collectionId || null) : null;
+  // NavbarImportButton lives inside the [projectId] layout — useParams() never sees [collectionId].
+  // Extract it from the pathname directly: /cinema-studio/[pid]/collection/[cid]
+  const collectionMatch = pathname?.match(/\/collection\/([^/]+)/);
+  const currentCollectionId = collectionMatch ? collectionMatch[1] : null;
 
   const { uploadMedia, isUploading } = useUploadMedia();
   const [dropdownOpen, setDropdownOpen] = useState(false);
