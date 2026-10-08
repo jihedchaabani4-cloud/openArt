@@ -8,9 +8,10 @@ import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows";
 import { useFilteredWorkflows as useFilteredGenerations } from "@/features/workflows/model/useFilteredWorkflows";
 import { useQueryClient } from "@tanstack/react-query";
 import { useGenerateMutation } from "@/features/workflows/api/workflowsApi";
-import { useProjectFolders } from "@/features/folders";
+import { useProjectFolders, useUpdateFolder, useMoveAssetToFolder } from "@/features/folders";
 import { useUploadMedia } from "@/features/media";
 import { queryKeys } from "@/shared/api/queryKeys";
+import { cn } from "@/shared/lib/utils";
 import {
   PromptBarPlatform,
   generatedMediaType,
@@ -94,6 +95,67 @@ export default function CollectionDetailPage({ params }) {
     );
   }, [allWorkflows, collectionId]);
 
+  // Drag state & move mutations
+  const isDragging = usePromptStore((s) => s.isDraggingGalleryItem);
+  const draggedItem = usePromptStore((s) => s.draggedItem);
+  const { mutateAsync: moveAsset } = useMoveAssetToFolder();
+  const { mutateAsync: updateFolder } = useUpdateFolder();
+  const [isRootDragOver, setIsRootDragOver] = React.useState(false);
+
+  const handleRootDragOver = React.useCallback((e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    e.dataTransfer.dropEffect = "move";
+    setIsRootDragOver(true);
+  }, []);
+
+  const handleRootDragLeave = React.useCallback((e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!e.currentTarget.contains(e.relatedTarget)) {
+      setIsRootDragOver(false);
+    }
+  }, []);
+
+  const handleRootDrop = React.useCallback(async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsRootDragOver(false);
+
+    const currentDragged = usePromptStore.getState().draggedItem;
+    const itemType = e.dataTransfer.getData("itemType") || currentDragged?.type;
+
+    if (itemType === "workflow" || currentDragged?.type === "workflow") {
+      const assetId = e.dataTransfer.getData("assetId") || 
+                      e.dataTransfer.getData("workflowId") || 
+                      currentDragged?.id;
+      if (!assetId) return;
+
+      try {
+        await moveAsset({
+          assetId,
+          folderId: null, // Move to Root (out of collection)
+          projectId,
+        });
+      } catch (err) {
+        console.error("Failed to move asset to root:", err);
+      }
+    } else if (itemType === "collection" || currentDragged?.type === "collection") {
+      const draggedFolderId = e.dataTransfer.getData("collectionId") || currentDragged?.id;
+      if (!draggedFolderId) return;
+
+      try {
+        await updateFolder({
+          folderId: draggedFolderId,
+          patch: { parentId: null }, // Move to Root (out of parent collection)
+          projectId,
+        });
+      } catch (err) {
+        console.error("Failed to move collection to root:", err);
+      }
+    }
+  }, [moveAsset, updateFolder, projectId]);
+
   // Combined: sub-collections first, then assets
   const combinedItems = React.useMemo(() => {
     const subItems = subCollections.map((col) => ({
@@ -101,13 +163,19 @@ export default function CollectionDetailPage({ params }) {
       data: col,
       key: `col-${col.id}`,
     }));
+
+    // While dragging: hide all workflows so only sub-collections appear as drop targets
+    if (isDragging) {
+      return subItems;
+    }
+
     const assetItems = collectionWorkflows.map((w) => ({
       type: "workflow",
       data: w,
       key: w.id || w.name,
     }));
     return [...subItems, ...assetItems];
-  }, [subCollections, collectionWorkflows]);
+  }, [subCollections, collectionWorkflows, isDragging]);
 
   // Pagination & scroll
   const [visibleCount, setVisibleCount] = React.useState(PAGE_SIZE);
@@ -298,8 +366,6 @@ export default function CollectionDetailPage({ params }) {
     [renderPhoto]
   );
 
-  const isDragging = usePromptStore((s) => s.isDraggingGalleryItem);
-
   if ((isFoldersLoading || isWorkflowsLoading) && combinedItems.length === 0 && !collection) {
     return <LoadingScreen message="Loading collection..." />;
   }
@@ -310,13 +376,23 @@ export default function CollectionDetailPage({ params }) {
         <AnimatePresence>
           {isDragging && (
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 z-[25] bg-black/60 backdrop-blur-[4px] pointer-events-none"
-            />
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="absolute top-20 left-1/2 -translate-x-1/2 z-30 px-4 py-2 rounded-full bg-[#1e1f23]/95 backdrop-blur-xl border border-white/20 text-[13px] font-medium text-white shadow-2xl flex items-center gap-2 pointer-events-none"
+            >
+              <GoogleIcon iconName="drive_file_move" className="text-[17px] text-white/90" />
+              <span>Drop onto a sub-collection or to Root</span>
+            </motion.div>
           )}
         </AnimatePresence>
+
+        {/* Preserve dragged workflow in DOM to prevent browser canceling HTML5 drag */}
+        {isDragging && draggedItem?.workflow && (
+          <div style={{ position: "fixed", top: -9999, left: -9999, pointerEvents: "none", opacity: 0 }}>
+            <MediaGridItem workflow={draggedItem.workflow} />
+          </div>
+        )}
 
         {/* Hidden upload file input */}
         <input
@@ -333,6 +409,29 @@ export default function CollectionDetailPage({ params }) {
           onScroll={handleScroll}
           className="flex-1 overflow-y-auto pt-[72px] overflow-x-hidden px-4 py-3 custom-scrollbar"
         >
+          {/* Root drop zone (move out of collection) */}
+          <AnimatePresence>
+            {isDragging && (
+              <motion.div
+                initial={{ opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                onDragOver={handleRootDragOver}
+                onDragLeave={handleRootDragLeave}
+                onDrop={handleRootDrop}
+                className={cn(
+                  "w-full mb-4 py-4 px-6 rounded-2xl border-2 border-dashed border-white/20 bg-white/[0.04] flex items-center justify-center gap-3 text-white/60 transition-all cursor-pointer",
+                  isRootDragOver && "border-white bg-white/15 text-white ring-2 ring-white ring-offset-2 ring-offset-[#121316] outline outline-2 outline-white scale-[1.01] shadow-[0_0_30px_rgba(255,255,255,0.4)]"
+                )}
+              >
+                <GoogleIcon iconName="drive_file_move" className="text-[20px]" />
+                <span className="text-[13px] font-semibold tracking-wide">
+                  Drop here to move out of collection (to Root)
+                </span>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           {/* ── Content Feed or Empty State ── */}
           <AnimatePresence mode="wait">
             {combinedItems.length > 0 ? (

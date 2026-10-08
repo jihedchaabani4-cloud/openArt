@@ -66,6 +66,7 @@ export default function AssetsPage({ params }) {
     }, [projectId, setSelectedProjectId, setActiveStudioTab])
 
     const isDragging = usePromptStore(s => s.isDraggingGalleryItem);
+    const draggedItem = usePromptStore(s => s.draggedItem);
     const router = useRouter();
 
     const queryClient = useQueryClient();
@@ -156,6 +157,11 @@ export default function AssetsPage({ params }) {
             key: `col-${col.id}`,
         }));
 
+        // While dragging: hide all workflows so only collections appear as drop targets
+        if (isDragging) {
+            return collectionItems;
+        }
+
         const rootWorkflows = workflows
             .filter(w => !w.folder_id && !w.folderId)
             .map(w => ({
@@ -165,7 +171,7 @@ export default function AssetsPage({ params }) {
             }));
 
         return [...collectionItems, ...rootWorkflows];
-    }, [collections, workflows]);
+    }, [collections, workflows, isDragging]);
 
     const itemListKey = React.useMemo(
         () => combinedItems.map((item) => item.key).join("|"),
@@ -317,13 +323,23 @@ export default function AssetsPage({ params }) {
                 <AnimatePresence>
                     {isDragging && (
                         <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            className="absolute inset-0 z-[25] bg-black/60 backdrop-blur-[4px] pointer-events-none"
-                        />
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            className="absolute top-20 left-1/2 -translate-x-1/2 z-30 px-4 py-2 rounded-full bg-[#1e1f23]/95 backdrop-blur-xl border border-white/20 text-[13px] font-medium text-white shadow-2xl flex items-center gap-2 pointer-events-none"
+                        >
+                            <GoogleIcon iconName="drive_file_move" className="text-[17px] text-white/90" />
+                            <span>Drop onto a collection to move</span>
+                        </motion.div>
                     )}
                 </AnimatePresence>
+
+                {/* Preserve dragged workflow in DOM to prevent browser canceling HTML5 drag */}
+                {isDragging && draggedItem?.workflow && (
+                    <div style={{ position: "fixed", top: -9999, left: -9999, pointerEvents: "none", opacity: 0 }}>
+                        <MediaGridItem workflow={draggedItem.workflow} />
+                    </div>
+                )}
 
                 <div 
                     ref={scrollRef}

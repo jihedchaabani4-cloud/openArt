@@ -15,7 +15,7 @@ import { ActionBtn } from "./ActionBtn";
 import { StudioItemDropdownMenu } from "./StudioItemMenu";
 import { getStudioMenuItems, getWorkflowEntityType } from "./studioMenuConfig";
 import { CoreMediaItemView } from "@/widgets/CoreMediaItemView";
-import { useUpdateFolder, useDeleteFolder } from "@/features/folders";
+import { useUpdateFolder, useDeleteFolder, useMoveAssetToFolder } from "@/features/folders";
 
 const EMPTY_IMG = typeof window !== 'undefined' ? (() => {
   const img = new Image();
@@ -289,9 +289,10 @@ const WorkflowMediaGridItem = React.memo(function WorkflowMediaGridItem({
 
   const handleDragStart = (e) => {
     e.dataTransfer.setData("imageUrl",   url);
-    e.dataTransfer.setData("assetId",    item.name || item.id);
+    e.dataTransfer.setData("assetId",    item?.name || item?.id || workflow?.id || "");
     e.dataTransfer.setData("isVideo",    String(isVideo));
     e.dataTransfer.setData("workflowId", workflow?.name || workflow?.id || "");
+    e.dataTransfer.setData("itemType",   "workflow");
     e.dataTransfer.effectAllowed = "all";
     e.dataTransfer.setDragImage(EMPTY_IMG, 0, 0);
     lastPos.current = { x: e.clientX, y: e.clientY };
@@ -299,7 +300,13 @@ const WorkflowMediaGridItem = React.memo(function WorkflowMediaGridItem({
     mouseY.set(e.clientY);
     setIsDragging(true);
     usePromptStore.getState().setIsDraggingGalleryItem(true);
-    usePromptStore.getState().setDraggedItem(item);
+    usePromptStore.getState().setDraggedItem({
+      type: "workflow",
+      id: workflow?.id || workflow?.name || item?.id,
+      workflow,
+      item,
+      url,
+    });
     onDragStart(e, { url, aspect, item });
   };
 
@@ -584,11 +591,129 @@ const CollectionMediaGridItem = React.memo(function CollectionMediaGridItem({
 
   const { mutateAsync: updateFolder } = useUpdateFolder();
   const { mutateAsync: deleteFolder, isPending: isDeleting } = useDeleteFolder();
+  const { mutateAsync: moveAsset } = useMoveAssetToFolder();
+
+  const [isDragOver, setIsDragOver] = useState(false);
+  const [isDraggingThis, setIsDraggingThis] = useState(false);
+  const mouseX = useMotionValue(-500);
+  const mouseY = useMotionValue(-500);
+  const lastPos = useRef({ x: -500, y: -500 });
+  const rafRef = useRef(null);
 
   const cardRef = useRef(null);
   const canDismissRef = useRef(false);
 
   const collectionName = col?.name || "Untitled collection";
+
+  const handleDragStart = (e) => {
+    if (isRenaming) return;
+    setIsDraggingThis(true);
+    e.dataTransfer.setData("collectionId", col?.id || "");
+    e.dataTransfer.setData("itemType", "collection");
+    e.dataTransfer.effectAllowed = "all";
+    e.dataTransfer.setDragImage(EMPTY_IMG, 0, 0);
+
+    lastPos.current = { x: e.clientX, y: e.clientY };
+    mouseX.set(e.clientX);
+    mouseY.set(e.clientY);
+
+    usePromptStore.getState().setIsDraggingGalleryItem(true);
+    usePromptStore.getState().setDraggedItem({
+      type: "collection",
+      id: col?.id,
+      collection: col,
+    });
+  };
+
+  const handleDrag = useCallback((e) => {
+    if (e.clientX === 0 && e.clientY === 0) return;
+    lastPos.current = { x: e.clientX, y: e.clientY };
+    if (rafRef.current) return;
+    rafRef.current = requestAnimationFrame(() => {
+      mouseX.set(lastPos.current.x);
+      mouseY.set(lastPos.current.y);
+      rafRef.current = null;
+    });
+  }, [mouseX, mouseY]);
+
+  const handleDragEnd = () => {
+    if (rafRef.current) { cancelAnimationFrame(rafRef.current); rafRef.current = null; }
+    setIsDraggingThis(false);
+    usePromptStore.getState().setIsDraggingGalleryItem(false);
+    usePromptStore.getState().setDraggedItem(null);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const currentDragged = usePromptStore.getState().draggedItem;
+    if (currentDragged?.type === "collection" && currentDragged?.id === col?.id) {
+      e.dataTransfer.dropEffect = "none";
+      return;
+    }
+    e.dataTransfer.dropEffect = "move";
+    if (!isDragOver) setIsDragOver(true);
+  };
+
+  const handleDragEnter = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const currentDragged = usePromptStore.getState().draggedItem;
+    if (currentDragged?.type === "collection" && currentDragged?.id === col?.id) {
+      return;
+    }
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!e.currentTarget.contains(e.relatedTarget)) {
+      setIsDragOver(false);
+    }
+  };
+
+  const handleDrop = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+
+    const currentDragged = usePromptStore.getState().draggedItem;
+    const itemType = e.dataTransfer.getData("itemType") || currentDragged?.type;
+    const targetFolderId = col?.id;
+
+    if (!targetFolderId) return;
+
+    if (itemType === "workflow" || currentDragged?.type === "workflow") {
+      const assetId = e.dataTransfer.getData("assetId") || 
+                      e.dataTransfer.getData("workflowId") || 
+                      currentDragged?.id;
+      if (!assetId) return;
+
+      try {
+        await moveAsset({
+          assetId,
+          folderId: targetFolderId,
+          projectId,
+        });
+      } catch (err) {
+        console.error("Failed to move asset into collection:", err);
+      }
+    } else if (itemType === "collection" || currentDragged?.type === "collection") {
+      const draggedFolderId = e.dataTransfer.getData("collectionId") || currentDragged?.id;
+      if (!draggedFolderId || draggedFolderId === targetFolderId) return;
+
+      try {
+        await updateFolder({
+          folderId: draggedFolderId,
+          patch: { parentId: targetFolderId },
+          projectId,
+        });
+      } catch (err) {
+        console.error("Failed to move collection into collection:", err);
+      }
+    }
+  };
 
   // Dynamically track card position while rename is open
   useEffect(() => {
@@ -734,8 +859,17 @@ const CollectionMediaGridItem = React.memo(function CollectionMediaGridItem({
         showHoverOverlay={false}
         contextMenuItems={menuItems}
         onClick={handleNavigate}
+        draggable={!isRenaming}
+        onDragStart={handleDragStart}
+        onDrag={handleDrag}
+        onDragEnd={handleDragEnd}
+        onDragOver={handleDragOver}
+        onDragEnter={handleDragEnter}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
         className={cn(
-          "bg-[#323438] hover:bg-[#383a3f] transition-colors border-0 cursor-pointer shadow-xl",
+          "bg-[#323438] hover:bg-[#383a3f] transition-all border-0 cursor-pointer shadow-xl",
+          isDragOver && "ring-2 ring-white ring-offset-2 ring-offset-[#121316] outline outline-2 outline-white scale-[1.03] shadow-[0_0_35px_rgba(255,255,255,0.45)] !border-white",
           className
         )}
         style={cardStyle}
@@ -828,6 +962,28 @@ const CollectionMediaGridItem = React.memo(function CollectionMediaGridItem({
             />
           </div>
         </div>,
+        document.body
+      )}
+
+      {/* ── Collection drag ghost portal ── */}
+      {isDraggingThis && typeof window !== "undefined" && createPortal(
+        <motion.div
+          className="fixed top-0 left-0 z-[99999] pointer-events-none rounded-[16px] px-4 py-3 bg-[#242528]/95 border border-white/20 shadow-[0_16px_40px_rgba(0,0,0,0.6)] flex items-center gap-2.5 backdrop-blur-md"
+          style={{
+            x: mouseX,
+            y: mouseY,
+            translateX: "-50%",
+            translateY: "-50%",
+          }}
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.15 }}
+        >
+          <GoogleIcon iconName="folder" className="text-[20px] text-white/90" />
+          <span className="text-[13px] font-medium text-white max-w-[150px] truncate">
+            {collectionName}
+          </span>
+        </motion.div>,
         document.body
       )}
     </>
