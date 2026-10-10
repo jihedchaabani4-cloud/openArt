@@ -4,6 +4,7 @@ import { characterService } from "../services/characterService";
 import { stripWorkflowPrefix } from "@/features/workflows/lib/cacheHelpers";
 import { queryKeys } from "@/shared/api/queryKeys";
 import { useOptimisticMutation } from "@/shared/lib/optimistic/useOptimisticMutation";
+import { workflowEntity } from "@/shared/lib/optimistic/entityKeys";
 
 /**
  * useUpdateCharacter
@@ -16,7 +17,7 @@ export function useUpdateCharacter() {
       return await characterService.updateCharacter(characterId, characterData);
     },
     getCacheKeys: ({ projectId }) => (projectId ? [queryKeys.projectData.byProject(projectId)] : []),
-    getMutationKey: ({ characterId }) => ["updateCharacter", stripWorkflowPrefix(characterId)],
+    getEntityKey: ({ characterId }) => workflowEntity(characterId),
     applyOptimistic: (oldData, { characterId, characterData }) => {
       if (!oldData?.projectContents) return oldData;
       const cleanId = stripWorkflowPrefix(characterId);

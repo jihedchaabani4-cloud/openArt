@@ -220,27 +220,35 @@ describe("useOptimisticMutation", () => {
   it("skips query invalidation if another in-flight mutation on same entity is active", async () => {
     const { queryClient, wrapper } = createWrapper();
     const key = ["folder", "f1"];
+    queryClient.setQueryData(key, []);
     const invalidateSpy = vi.spyOn(queryClient, "invalidateQueries");
 
-    // Mock queryClient.isMutating to simulate concurrent mutations (> 1)
-    vi.spyOn(queryClient, "isMutating").mockReturnValue(2);
+    let releaseSlow;
+    const slowPromise = new Promise((r) => { releaseSlow = r; });
+    const options = (fn) => ({
+      mutationFn: fn,
+      getCacheKeys: () => [key],
+      getEntityKey: (vars) => ["folder", vars.id],
+      applyOptimistic: (old) => old,
+    });
 
     const { result } = renderHook(
-      () =>
-        useOptimisticMutation({
-          mutationFn: async () => ({ ok: true }),
-          getCacheKeys: () => [key],
-          getMutationKey: (vars) => ["folder", vars.id],
-          applyOptimistic: (old) => old,
-        }),
+      () => ({
+        slow: useOptimisticMutation(options(() => slowPromise)),
+        fast: useOptimisticMutation(options(async () => ({ ok: true }))),
+      }),
       { wrapper }
     );
 
+    act(() => result.current.slow.mutate({ id: "f1" }));
     await act(async () => {
-      await result.current.mutateAsync({ id: "f1" });
+      await result.current.fast.mutateAsync({ id: "f1" });
     });
 
-    // Since isMutating returned 2, invalidation should be skipped to prevent overwriting newer optimistic state
+    // "slow" is still in flight on the same entity: invalidating now could overwrite its newer state
     expect(invalidateSpy).not.toHaveBeenCalled();
+
+    await act(async () => releaseSlow({ ok: true }));
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: key });
   });
 });

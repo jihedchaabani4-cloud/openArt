@@ -3,6 +3,7 @@
 import { api } from "@/shared/api/client";
 import { queryKeys } from "@/shared/api/queryKeys";
 import { useOptimisticMutation } from "@/shared/lib/optimistic/useOptimisticMutation";
+import { folderEntity } from "@/shared/lib/optimistic/entityKeys";
 import { matchFolderId, patchFolderName, patchFolderParent } from "@/shared/lib/optimistic/cacheOps";
 
 /**
@@ -20,7 +21,7 @@ export function useUpdateFolder() {
       return res?.data ?? res;
     },
     getCacheKeys: ({ projectId }) => (projectId ? [queryKeys.folders.byProject(projectId)] : []),
-    getMutationKey: ({ folderId }) => ["updateFolder", folderId],
+    getEntityKey: ({ folderId }) => folderEntity(folderId),
     applyOptimistic: (oldFolders, { folderId, patch }) => {
       if (!Array.isArray(oldFolders)) return oldFolders;
       return oldFolders.map((f) => {

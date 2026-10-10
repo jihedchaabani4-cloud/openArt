@@ -4,6 +4,7 @@ import { api } from '@/shared/api/client';
 import { queryKeys } from '@/shared/api/queryKeys';
 import { matchMediaId } from '@/features/workflows/lib/cacheHelpers';
 import { useOptimisticMutation } from '@/shared/lib/optimistic/useOptimisticMutation';
+import { mediaEntity } from '@/shared/lib/optimistic/entityKeys';
 
 export function useDetachMedia() {
   return useOptimisticMutation({
@@ -17,7 +18,7 @@ export function useDetachMedia() {
       return res;
     },
     getCacheKeys: ({ projectId }) => (projectId ? [queryKeys.projectData.byProject(projectId)] : []),
-    getMutationKey: ({ mediaId }) => ['detachMedia', mediaId],
+    getEntityKey: ({ mediaId }) => mediaEntity(mediaId),
     onMutate: (variables) => {
       const tempWfId = `temp-detached-${Date.now()}`;
       variables.tempWfId = tempWfId;

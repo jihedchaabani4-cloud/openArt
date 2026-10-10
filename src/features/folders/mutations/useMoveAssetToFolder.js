@@ -3,6 +3,7 @@
 import { api } from "@/shared/api/client";
 import { queryKeys } from "@/shared/api/queryKeys";
 import { useOptimisticMutation } from "@/shared/lib/optimistic/useOptimisticMutation";
+import { workflowEntity } from "@/shared/lib/optimistic/entityKeys";
 import { matchWorkflowId, patchWorkflowFolder } from "@/shared/lib/optimistic/cacheOps";
 
 /**
@@ -22,7 +23,7 @@ export function useMoveAssetToFolder() {
       return res?.data ?? res;
     },
     getCacheKeys: ({ projectId }) => (projectId ? [queryKeys.projectData.byProject(projectId)] : []),
-    getMutationKey: ({ assetId }) => ["moveAsset", assetId],
+    getEntityKey: ({ assetId }) => workflowEntity(assetId),
     applyOptimistic: (oldData, { assetId, folderId }) => {
       if (!oldData?.projectContents?.workflows) return oldData;
       const normalizedFolderId = folderId || null;

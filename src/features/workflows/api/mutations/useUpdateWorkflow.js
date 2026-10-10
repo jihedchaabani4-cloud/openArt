@@ -4,6 +4,7 @@ import { api } from '@/shared/api/client';
 import { queryKeys } from '@/shared/api/queryKeys';
 import { stripWorkflowPrefix } from '@/features/workflows/lib/cacheHelpers';
 import { useOptimisticMutation } from '@/shared/lib/optimistic/useOptimisticMutation';
+import { workflowEntity } from '@/shared/lib/optimistic/entityKeys';
 
 export function useUpdateWorkflow() {
   return useOptimisticMutation({
@@ -14,7 +15,7 @@ export function useUpdateWorkflow() {
       return res;
     },
     getCacheKeys: ({ projectId }) => (projectId ? [queryKeys.projectData.byProject(projectId)] : []),
-    getMutationKey: ({ workflowId }) => ["updateWorkflow", stripWorkflowPrefix(workflowId)],
+    getEntityKey: ({ workflowId }) => workflowEntity(workflowId),
     applyOptimistic: (oldData, { workflowId, workflowData }) => {
       if (!oldData?.projectContents) return oldData;
       const cleanId = stripWorkflowPrefix(workflowId);

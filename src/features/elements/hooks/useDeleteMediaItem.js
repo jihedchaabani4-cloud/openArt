@@ -4,6 +4,7 @@ import { api } from "@/shared/api/client";
 import { queryKeys } from "@/shared/api/queryKeys";
 import { matchMediaId } from "@/features/workflows/lib/cacheHelpers";
 import { useOptimisticMutation } from "@/shared/lib/optimistic/useOptimisticMutation";
+import { mediaEntity } from "@/shared/lib/optimistic/entityKeys";
 
 /**
  * useDeleteMediaItem
@@ -16,7 +17,7 @@ export function useDeleteMediaItem() {
       return res;
     },
     getCacheKeys: ({ projectId }) => (projectId ? [queryKeys.projectData.byProject(projectId)] : []),
-    getMutationKey: ({ mediaId }) => ['deleteElementMedia', mediaId],
+    getEntityKey: ({ mediaId }) => mediaEntity(mediaId),
     applyOptimistic: (old, { mediaId }) => {
       if (!old?.projectContents?.media) return old;
       const targetMedia = (old.projectContents.media || []).find((m) => matchMediaId(m, mediaId));

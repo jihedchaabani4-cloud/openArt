@@ -3,6 +3,7 @@
 import { api } from "@/shared/api/client";
 import { queryKeys } from "@/shared/api/queryKeys";
 import { useOptimisticMutation } from "@/shared/lib/optimistic/useOptimisticMutation";
+import { folderEntity } from "@/shared/lib/optimistic/entityKeys";
 import { matchFolderId, removeById } from "@/shared/lib/optimistic/cacheOps";
 
 /**
@@ -20,7 +21,7 @@ export function useDeleteFolder() {
       return folderId;
     },
     getCacheKeys: ({ projectId }) => (projectId ? [queryKeys.folders.byProject(projectId)] : []),
-    getMutationKey: ({ folderId }) => ["deleteFolder", folderId],
+    getEntityKey: ({ folderId }) => folderEntity(folderId),
     applyOptimistic: (oldFolders, { folderId }) => {
       return removeById(oldFolders, folderId, matchFolderId);
     },

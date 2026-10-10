@@ -4,6 +4,7 @@ import { api } from '@/shared/api/client';
 import { queryKeys } from '@/shared/api/queryKeys';
 import { matchMediaId } from '@/features/workflows/lib/cacheHelpers';
 import { useOptimisticMutation } from '@/shared/lib/optimistic/useOptimisticMutation';
+import { mediaEntity } from '@/shared/lib/optimistic/entityKeys';
 
 export function useRemoveWorkflowItem() {
   return useOptimisticMutation({
@@ -13,7 +14,7 @@ export function useRemoveWorkflowItem() {
       return itemId;
     },
     getCacheKeys: ({ projectId }) => (projectId ? [queryKeys.projectData.byProject(projectId)] : []),
-    getMutationKey: ({ itemId }) => ['removeWorkflowItem', itemId],
+    getEntityKey: ({ itemId }) => mediaEntity(itemId),
     applyOptimistic: (old, { itemId }) => {
       if (!old?.projectContents?.media) return old;
       const targetMedia = (old.projectContents.media || []).find((m) => matchMediaId(m, itemId));

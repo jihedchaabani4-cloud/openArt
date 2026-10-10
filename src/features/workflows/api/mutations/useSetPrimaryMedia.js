@@ -4,6 +4,7 @@ import { api } from '@/shared/api/client';
 import { queryKeys } from '@/shared/api/queryKeys';
 import { matchWorkflowId } from '@/shared/lib/optimistic/cacheOps';
 import { useOptimisticMutation } from '@/shared/lib/optimistic/useOptimisticMutation';
+import { workflowEntity } from '@/shared/lib/optimistic/entityKeys';
 
 export function useSetPrimaryMedia() {
   return useOptimisticMutation({
@@ -13,7 +14,7 @@ export function useSetPrimaryMedia() {
       return res;
     },
     getCacheKeys: ({ projectId }) => (projectId ? [queryKeys.projectData.byProject(projectId)] : []),
-    getMutationKey: ({ workflowId }) => ['setPrimaryMedia', workflowId],
+    getEntityKey: ({ workflowId }) => workflowEntity(workflowId),
     applyOptimistic: (oldData, { workflowId, mediaId }) => {
       if (!oldData?.projectContents?.workflows) return oldData;
       return {
