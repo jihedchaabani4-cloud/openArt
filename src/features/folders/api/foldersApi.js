@@ -2,6 +2,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/shared/api/client";
 import { queryKeys } from "@/shared/api/queryKeys";
+import { stripWorkflowPrefix, getFolderId, applyFolderIdPatch } from "@/features/workflows/lib/cacheHelpers";
 
 /**
  * Fetch project folders/collections.
@@ -65,7 +66,34 @@ export function useUpdateFolder() {
       }
       return res?.data ?? res;
     },
-    onSuccess: (_, variables) => {
+    onMutate: async ({ folderId, patch, projectId }) => {
+      if (!projectId) return {};
+      const foldersKey = queryKeys.folders.byProject(projectId);
+
+      await queryClient.cancelQueries({ queryKey: foldersKey });
+      const previousFolders = queryClient.getQueryData(foldersKey);
+
+      if (previousFolders) {
+        queryClient.setQueryData(foldersKey, (old) => {
+          if (!Array.isArray(old)) return old;
+          return old.map((f) => {
+            const fId = getFolderId(f);
+            if (fId === folderId) {
+              return { ...f, ...patch };
+            }
+            return f;
+          });
+        });
+      }
+
+      return { previousFolders, foldersKey, projectId };
+    },
+    onError: (err, variables, context) => {
+      if (context?.previousFolders) {
+        queryClient.setQueryData(context.foldersKey, context.previousFolders);
+      }
+    },
+    onSettled: (res, err, variables) => {
       if (variables?.projectId) {
         queryClient.invalidateQueries({ queryKey: queryKeys.folders.byProject(variables.projectId) });
         queryClient.invalidateQueries({ queryKey: queryKeys.projectData.byProject(variables.projectId) });
@@ -89,7 +117,31 @@ export function useDeleteFolder() {
       }
       return folderId;
     },
-    onSuccess: (_, variables) => {
+    onMutate: async ({ folderId, projectId }) => {
+      if (!projectId) return {};
+      const foldersKey = queryKeys.folders.byProject(projectId);
+
+      await queryClient.cancelQueries({ queryKey: foldersKey });
+      const previousFolders = queryClient.getQueryData(foldersKey);
+
+      if (previousFolders) {
+        queryClient.setQueryData(foldersKey, (old) => {
+          if (!Array.isArray(old)) return old;
+          return old.filter((f) => {
+            const fId = getFolderId(f);
+            return fId !== folderId;
+          });
+        });
+      }
+
+      return { previousFolders, foldersKey, projectId };
+    },
+    onError: (err, variables, context) => {
+      if (context?.previousFolders) {
+        queryClient.setQueryData(context.foldersKey, context.previousFolders);
+      }
+    },
+    onSettled: (res, err, variables) => {
       if (variables?.projectId) {
         queryClient.invalidateQueries({ queryKey: queryKeys.folders.byProject(variables.projectId) });
         queryClient.invalidateQueries({ queryKey: queryKeys.projectData.byProject(variables.projectId) });
@@ -115,7 +167,49 @@ export function useMoveAssetToFolder() {
       }
       return res?.data ?? res;
     },
-    onSuccess: (_, variables) => {
+    onMutate: async ({ assetId, folderId = null, projectId }) => {
+      if (!projectId) return {};
+      const projectKey = queryKeys.projectData.byProject(projectId);
+
+      await queryClient.cancelQueries({ queryKey: projectKey });
+      const previousData = queryClient.getQueryData(projectKey);
+
+      if (previousData) {
+        queryClient.setQueryData(projectKey, (old) => {
+          if (!old?.projectContents?.workflows) return old;
+          const normalizedFolderId = folderId || null;
+          const cleanAssetId = stripWorkflowPrefix(assetId);
+          return {
+            ...old,
+            projectContents: {
+              ...old.projectContents,
+              workflows: old.projectContents.workflows.map((wf) => {
+                const wfRawId = String(wf.id || wf.name || wf.workflowId || '');
+                const wfCleanId = stripWorkflowPrefix(wfRawId);
+                const wfAltCleanId = stripWorkflowPrefix(wf.name || '');
+                if (
+                  wfRawId === assetId ||
+                  wfCleanId === assetId ||
+                  wfCleanId === cleanAssetId ||
+                  wfAltCleanId === cleanAssetId
+                ) {
+                  return applyFolderIdPatch(wf, normalizedFolderId);
+                }
+                return wf;
+              }),
+            },
+          };
+        });
+      }
+
+      return { previousData, projectKey, projectId };
+    },
+    onError: (err, variables, context) => {
+      if (context?.previousData) {
+        queryClient.setQueryData(context.projectKey, context.previousData);
+      }
+    },
+    onSettled: (res, err, variables) => {
       if (variables?.projectId) {
         queryClient.invalidateQueries({ queryKey: queryKeys.projectData.byProject(variables.projectId) });
         queryClient.invalidateQueries({ queryKey: queryKeys.folders.byProject(variables.projectId) });

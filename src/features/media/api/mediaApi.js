@@ -5,6 +5,7 @@ import { api} from '@/shared/api/client';
 import { queryKeys } from '@/shared/api/queryKeys';
 import { downloadBlob } from '@/shared/lib/utils';
 import { intrinsicSizeToRatioLabel, setCachedImageDimensions } from '@/shared/lib/displayUtils';
+import { matchMediaId } from '@/features/workflows/lib/cacheHelpers';
 
 const LIMIT = 30;
 
@@ -382,11 +383,11 @@ export function useRemoveAsset() {
       if (previousData) {
         queryClient.setQueryData(projectKey, (old) => {
           if (!old) return old;
-          const targetMedia = (old.projectContents?.media || []).find(m => m.id === assetId || m.name === assetId);
+          const targetMedia = (old.projectContents?.media || []).find(m => matchMediaId(m, assetId));
           const targetWfId = targetMedia?.workflowId || targetMedia?.workflow_id;
 
           const updatedMedia = (old.projectContents?.media || []).filter(
-            m => m.id !== assetId && m.name !== assetId
+            m => !matchMediaId(m, assetId)
           );
 
           const hasRemainingMedia = targetWfId 

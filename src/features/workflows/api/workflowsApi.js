@@ -5,6 +5,7 @@ import { queryKeys } from '@/shared/api/queryKeys';
 import { useWorkflowsStore } from '../model/useWorkflowsStore';
 import { normalizeProjectData } from '../model/domainNormalizer';
 import { useAuthSession } from '@/shared/api/auth';
+import { stripWorkflowPrefix, matchMediaId } from '@/features/workflows/lib/cacheHelpers';
 
 // ── Project Data (Unified Hook) ───────────────────────────────────────────────
 
@@ -308,7 +309,7 @@ export function useToggleLike() {
             projectContents: {
               ...old.projectContents,
               media: old.projectContents.media.map((m) => {
-                if (m.id === itemId || m.name === itemId) {
+                if (matchMediaId(m, itemId)) {
                   return {
                     ...m,
                     is_liked: !m.is_liked,
@@ -415,14 +416,14 @@ export function useUpdateWorkflow() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ workflowId, workflowData }) => {
-      const cleanId = String(workflowId || '').replace(/^workflows\//, '');
+      const cleanId = stripWorkflowPrefix(workflowId);
       const res = await api.patch(`/workflows/workflows/${cleanId}`, workflowData);
       if (res && res.ok === false) throw new Error(res.message || "Failed to update workflow");
       return res;
     },
     onSuccess: (data, variables) => {
       const { workflowId, workflowData } = variables || {};
-      const cleanId = String(workflowId || '').replace(/^workflows\//, '');
+      const cleanId = stripWorkflowPrefix(workflowId);
 
       // 1. Immediately update query cache across all projectData queries
       if (cleanId && workflowData) {
@@ -431,7 +432,7 @@ export function useUpdateWorkflow() {
         queryClient.setQueriesData({ queryKey: ['projectData'] }, (oldData) => {
           if (!oldData?.projectContents) return oldData;
           const updatedWorkflows = (oldData.projectContents.workflows || []).map((w) => {
-            const wCleanId = String(w.id || w.name || '').replace(/^workflows\//, '');
+            const wCleanId = stripWorkflowPrefix(w.id || w.name || '');
             if (wCleanId === cleanId) {
               return {
                 ...w,
@@ -449,8 +450,8 @@ export function useUpdateWorkflow() {
           });
 
           const updatedCharacters = (oldData.projectContents.characters || []).map((c) => {
-            const cId = String(c.id || '').replace(/^workflows\//, '');
-            const cWfId = String(c.workflow_id || '').replace(/^workflows\//, '');
+            const cId = stripWorkflowPrefix(c.id || '');
+            const cWfId = stripWorkflowPrefix(c.workflow_id || '');
             if (cId === cleanId || cWfId === cleanId) {
               return {
                 ...c,
@@ -465,8 +466,8 @@ export function useUpdateWorkflow() {
           });
 
           const updatedElements = (oldData.projectContents.elements || []).map((el) => {
-            const elId = String(el.id || '').replace(/^workflows\//, '');
-            const elWfId = String(el.workflow_id || '').replace(/^workflows\//, '');
+            const elId = stripWorkflowPrefix(el.id || '');
+            const elWfId = stripWorkflowPrefix(el.workflow_id || '');
             if (elId === cleanId || elWfId === cleanId) {
               return {
                 ...el,

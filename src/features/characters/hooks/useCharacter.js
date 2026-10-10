@@ -4,6 +4,7 @@ import { queryKeys } from "@/shared/api/queryKeys";
 import { useProjectData } from "@/features/workflows/api/workflowsApi";
 import { useWorkflowsStore, useWorkflowDelete } from "@/features/workflows";
 import { characterService } from "../services/characterService";
+import { stripWorkflowPrefix, matchWorkflowId, matchMediaId } from "@/features/workflows/lib/cacheHelpers";
 
 // ─── Individual Character Mutations & Queries ────────────────────────────────
 
@@ -31,11 +32,11 @@ export function useCharacterWorkflows(projectId) {
         const primaryId = w.primary_media_id || w.primaryMediaId || w.metadata?.primaryMediaId;
         const validItems = items.filter(m => m.step_id !== "character_detail" && Boolean(m.url || m.file_url));
         const mainMedia =
-          (primaryId && validItems.find((m) => (m.id === primaryId || m.name === primaryId))) ||
+          (primaryId && validItems.find((m) => matchMediaId(m, primaryId))) ||
           validItems.find((m) => m.step_id === "character_sheet" || m.stepId === "character_sheet") ||
           validItems.find((m) => m.step_id === "CAE") ||
           validItems[0] ||
-          (primaryId && items.find((m) => (m.id === primaryId || m.name === primaryId) && m.step_id !== "character_detail")) ||
+          (primaryId && items.find((m) => matchMediaId(m, primaryId) && m.step_id !== "character_detail")) ||
           items.find((m) => m.step_id === "character_sheet" || m.stepId === "character_sheet") ||
           items.find((m) => m.step_id === "CAE") ||
           items.find((m) => m.step_id !== "character_detail") ||
@@ -161,7 +162,7 @@ export function useUpdateCharacter() {
     },
     onSuccess: (data, variables) => {
       const { characterId, characterData } = variables || {};
-      const cleanId = String(characterId || "").replace(/^workflows\//, "");
+      const cleanId = stripWorkflowPrefix(characterId);
 
       if (cleanId && characterData) {
         const newName = characterData.name || characterData.title || characterData.display_name;
@@ -171,8 +172,8 @@ export function useUpdateCharacter() {
           if (!oldData?.projectContents) return oldData;
 
           const updatedCharacters = (oldData.projectContents.characters || []).map((c) => {
-            const cId = String(c.id || "").replace(/^workflows\//, "");
-            const cWfId = String(c.workflow_id || "").replace(/^workflows\//, "");
+            const cId = stripWorkflowPrefix(c.id || "");
+            const cWfId = stripWorkflowPrefix(c.workflow_id || "");
             if (cId === cleanId || cWfId === cleanId) {
               return {
                 ...c,
@@ -187,7 +188,7 @@ export function useUpdateCharacter() {
           });
 
           const updatedWorkflows = (oldData.projectContents.workflows || []).map((w) => {
-            const wCleanId = String(w.id || w.name || "").replace(/^workflows\//, "");
+            const wCleanId = stripWorkflowPrefix(w.id || w.name || "");
             if (wCleanId === cleanId) {
               return {
                 ...w,
@@ -333,7 +334,7 @@ const isValidUUID = (id) => id && UUID_REGEX.test(id);
  */
 export function useCharacter({ projectId, characterId } = {}) {
   const cleanId = useMemo(() => {
-    return String(characterId || "").replace(/^workflows\//, "");
+    return stripWorkflowPrefix(characterId);
   }, [characterId]);
 
   const { data: projectData, isLoading } = useProjectData(projectId);
@@ -365,7 +366,7 @@ export function useCharacter({ projectId, characterId } = {}) {
     const rawCharacters = projectData?.projectContents?.characters ?? [];
 
     const found = rawWorkflows.find(
-      (w) => w.id === cleanId || w.name === cleanId || (w.id || w.name) === cleanId
+      (w) => matchWorkflowId(w, cleanId)
     );
     if (!found) return null;
 
@@ -407,7 +408,7 @@ export function useCharacter({ projectId, characterId } = {}) {
 
     // 2. Identify explicit sheet items
     const explicitSheets = validItems.filter((m) => {
-      if (primaryMediaId && (m.id === primaryMediaId || m.name === primaryMediaId)) return true;
+      if (primaryMediaId && matchMediaId(m, primaryMediaId)) return true;
       return m.step_id === "character_sheet" || m.step_id === "CAE" || m.step_id === "upload";
     });
 
@@ -416,8 +417,8 @@ export function useCharacter({ projectId, characterId } = {}) {
     // 3. Ensure primaryMediaId comes first if present
     if (primaryMediaId) {
       targetList.sort((a, b) => {
-        if (a.id === primaryMediaId || a.name === primaryMediaId) return -1;
-        if (b.id === primaryMediaId || b.name === primaryMediaId) return 1;
+        if (matchMediaId(a, primaryMediaId)) return -1;
+        if (matchMediaId(b, primaryMediaId)) return 1;
         return 0;
       });
     }
@@ -439,7 +440,7 @@ export function useCharacter({ projectId, characterId } = {}) {
   const mainMedia = useMemo(() => {
     if (primaryMediaId) {
       const match = items.find(
-        (m) => (m.id === primaryMediaId || m.name === primaryMediaId) && m.step_id !== "character_detail" && Boolean(m.url || m.file_url)
+        (m) => matchMediaId(m, primaryMediaId) && m.step_id !== "character_detail" && Boolean(m.url || m.file_url)
       );
       if (match) return match;
     }
