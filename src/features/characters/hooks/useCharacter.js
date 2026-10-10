@@ -1,324 +1,16 @@
 import { useCallback, useMemo, useState, useRef, useEffect } from "react";
-import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { queryKeys } from "@/shared/api/queryKeys";
-import { useProjectData } from "@/features/workflows/api/workflowsApi";
-import { useWorkflowsStore, useWorkflowDelete } from "@/features/workflows";
+import { useProjectData } from "@/features/workflows/api/queries/useProjectData";
+import { useWorkflowDelete } from "@/features/workflows/model/useWorkflowDelete";
 import { characterService } from "../services/characterService";
 import { stripWorkflowPrefix, matchMediaId } from "@/features/workflows/lib/cacheHelpers";
+import { useUpdateCharacter } from "./useUpdateCharacter";
+import { useSetCharacterSheetMedia } from "./useSetCharacterSheetMedia";
+import { useAddMediaToCharacter } from "./useAddMediaToCharacter";
+import { useRemoveMediaFromCharacter } from "./useRemoveMediaFromCharacter";
+import { useGenerateCharacterSheetMutation } from "./useGenerateCharacterSheetMutation";
 
-// ─── Individual Character Mutations & Queries ────────────────────────────────
-
-/**
- * useCharacterWorkflows
- * Retrieves all character workflows for a given project, decorated with their
- * media items, primary turnaround sheet media, and visual generation status.
- */
-export function useCharacterWorkflows(projectId) {
-  const { data, isLoading, isError } = useProjectData(projectId);
-  const workflows = data?.projectContents?.workflows ?? [];
-  const media = data?.projectContents?.media ?? [];
-
-  const characterWorkflows = useMemo(() => {
-    return workflows
-      .filter((w) => {
-        const type = String(w.workflow_type || "").toUpperCase();
-        return type === "CHARACTER" || type === "CHARACTER_SHEET";
-      })
-      .map((w) => {
-        const wId = w.name || w.id;
-        const items = media.filter((m) => m.workflowId === wId || m.workflow_id === wId);
-
-        // Locate main turnaround sheet media
-        const primaryId = w.primary_media_id || w.primaryMediaId || w.metadata?.primaryMediaId;
-        const validItems = items.filter(m => m.step_id !== "character_detail" && Boolean(m.url || m.file_url));
-        const mainMedia =
-          (primaryId && validItems.find((m) => matchMediaId(m, primaryId))) ||
-          validItems.find((m) => m.step_id === "character_sheet" || m.stepId === "character_sheet") ||
-          validItems.find((m) => m.step_id === "CAE") ||
-          validItems[0] ||
-          (primaryId && items.find((m) => matchMediaId(m, primaryId) && m.step_id !== "character_detail")) ||
-          items.find((m) => m.step_id === "character_sheet" || m.stepId === "character_sheet") ||
-          items.find((m) => m.step_id === "CAE") ||
-          items.find((m) => m.step_id !== "character_detail") ||
-          items[0] ||
-          w.main_media ||
-          null;
-
-        let status = "processing";
-        if (mainMedia) {
-          if (mainMedia.status === "failed" || mainMedia.status === "error") {
-            status = "failed";
-          } else if (mainMedia.status === "success" || mainMedia.status === "completed" || Boolean(mainMedia.url)) {
-            status = "completed";
-          } else if (mainMedia.status === "processing" || mainMedia.status === "pending") {
-            status = "processing";
-          }
-        }
-
-        const primaryUrl = mainMedia?.url || mainMedia?.file_url || w.url || null;
-
-        return {
-          ...w,
-          items,
-          mainMedia,
-          primary_media_url: primaryUrl,
-          status,
-          isMultiMedia: items.length > 1,
-        };
-      });
-  }, [workflows, media]);
-
-  return { workflows: characterWorkflows, isLoading, isError };
-}
-
-/**
- * useCreateCharacterMutation
- * Creates a new character workflow container and initiates sheet generation.
- */
-export function useCreateCharacterMutation({ onError } = {}) {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async (inputData) => {
-      const payload = inputData?.payload || inputData || {};
-      return await characterService.createCharacter(payload);
-    },
-    onMutate: async (inputData) => {
-      useWorkflowsStore.getState().fireScrollToTop();
-      const payload = inputData?.payload || inputData || {};
-      const projectId = payload.projectId || payload.project_id;
-      if (!projectId) return {};
-
-      const projectKey = queryKeys.projectData.byProject(projectId);
-      await queryClient.cancelQueries({ queryKey: projectKey });
-      const previousData = queryClient.getQueryData(projectKey);
-
-      if (previousData) {
-        const optimisticId = `optimistic-char-${Date.now()}`;
-        const optimisticWorkflow = characterService.buildOptimisticWorkflow({
-          id: optimisticId,
-          name: payload.name,
-          prompt: payload.prompt,
-          projectId,
-        });
-
-        const optimisticMedia = characterService.buildOptimisticMedia({
-          id: optimisticId,
-          workflowId: optimisticId,
-          projectId,
-          prompt: payload.prompt,
-        });
-
-        const optimisticChar = characterService.buildOptimisticCharacter({
-          id: optimisticId,
-          workflowId: optimisticId,
-          projectId,
-          name: payload.name,
-          prompt: payload.prompt,
-        });
-
-        queryClient.setQueryData(projectKey, (old) => {
-          if (!old) return old;
-          return {
-            ...old,
-            projectContents: {
-              ...old.projectContents,
-              workflows: [optimisticWorkflow, ...(old.projectContents?.workflows || [])],
-              media: [optimisticMedia, ...(old.projectContents?.media || [])],
-              characters: [optimisticChar, ...(old.projectContents?.characters || [])],
-            },
-          };
-        });
-      }
-
-      return { previousData, projectKey };
-    },
-    onError: (err, variables, context) => {
-      console.error("❌ Character creation failed:", err);
-      if (context?.previousData) {
-        queryClient.setQueryData(context.projectKey, context.previousData);
-      }
-      if (typeof onError === "function") onError(err);
-    },
-    onSuccess: (res, payload) => {
-      const projectId = payload?.projectId || payload?.project_id || res?.project_id || res?.character?.project_id;
-      if (projectId) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.projectData.byProject(projectId) });
-        queryClient.refetchQueries({ queryKey: queryKeys.projectData.byProject(projectId) });
-      }
-    },
-  });
-}
-
-/**
- * useUpdateCharacter
- * Updates character properties (name, title, description, character_info, etc.)
- * with instant bidirectional cache update across both `workflows` and `characters`.
- */
-export function useUpdateCharacter() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async ({ characterId, characterData }) => {
-      return await characterService.updateCharacter(characterId, characterData);
-    },
-    onSuccess: (data, variables) => {
-      const { characterId, characterData } = variables || {};
-      const cleanId = stripWorkflowPrefix(characterId);
-
-      if (cleanId && characterData) {
-        const newName = characterData.name || characterData.title || characterData.display_name;
-        const newDesc = characterData.description || characterData.character_info;
-
-        queryClient.setQueriesData({ queryKey: ["projectData"] }, (oldData) => {
-          if (!oldData?.projectContents) return oldData;
-
-          const updatedCharacters = (oldData.projectContents.characters || []).map((c) => {
-            const cId = stripWorkflowPrefix(c.id || "");
-            const cWfId = stripWorkflowPrefix(c.workflow_id || "");
-            if (cId === cleanId || cWfId === cleanId) {
-              return {
-                ...c,
-                ...characterData,
-                description: newDesc !== undefined ? newDesc : c.description,
-                character_info: newDesc !== undefined ? newDesc : c.character_info,
-                name: newName || c.name,
-                title: newName || c.title,
-              };
-            }
-            return c;
-          });
-
-          const updatedWorkflows = (oldData.projectContents.workflows || []).map((w) => {
-            const wCleanId = stripWorkflowPrefix(w.id || w.name || "");
-            if (wCleanId === cleanId) {
-              return {
-                ...w,
-                display_name: newName || w.display_name,
-                name: newName || w.name,
-                description: newDesc !== undefined ? newDesc : w.description,
-                character_info: newDesc !== undefined ? newDesc : w.character_info,
-                metadata: {
-                  ...w.metadata,
-                  displayName: newName || w.metadata?.displayName,
-                },
-              };
-            }
-            return w;
-          });
-
-          return {
-            ...oldData,
-            projectContents: {
-              ...oldData.projectContents,
-              workflows: updatedWorkflows,
-              characters: updatedCharacters,
-            },
-          };
-        });
-      }
-
-      queryClient.invalidateQueries({ queryKey: ["projectData"] });
-      queryClient.invalidateQueries({ queryKey: ["workflows"] });
-    },
-  });
-}
-
-/**
- * useGenerateCharacterSheetMutation
- * Regenerates the 3-view turnaround sheet for an existing character.
- */
-export function useGenerateCharacterSheetMutation({ onError } = {}) {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async ({ characterId, prompt, references, projectId }) => {
-      return await characterService.generateSheet({ characterId, prompt, references, projectId });
-    },
-    onSuccess: (data, variables) => {
-      if (variables?.projectId) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.projectData.byProject(variables.projectId) });
-      }
-      queryClient.invalidateQueries({ queryKey: ["projectData"] });
-    },
-    onError: (err) => {
-      console.error("❌ Sheet generation failed:", err);
-      if (typeof onError === "function") onError(err);
-    },
-  });
-}
-
-/**
- * useGenerateCharacterDescriptionMutation
- * Generates an evocative character prompt using the AI Art Director.
- */
-export function useGenerateCharacterDescriptionMutation() {
-  return useMutation({
-    mutationFn: async ({ concept, archetype, style }) => {
-      return await characterService.generateDescription({ concept, archetype, style });
-    },
-  });
-}
-
-/**
- * useAddMediaToCharacter
- * Attaches a detail reference media item to the character.
- */
-export function useAddMediaToCharacter() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async (params) => {
-      return await characterService.addDetailMedia(params);
-    },
-    onSuccess: (data, variables) => {
-      if (variables?.projectId) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.projectData.byProject(variables.projectId) });
-      }
-      queryClient.invalidateQueries({ queryKey: ["projectData"] });
-    },
-  });
-}
-
-/**
- * useRemoveMediaFromCharacter
- * Removes a detail reference media item from the character.
- */
-export function useRemoveMediaFromCharacter() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async ({ characterId, mediaId, projectId }) => {
-      const res = await characterService.removeDetailMedia({ characterId, mediaId });
-      return res;
-    },
-    onSuccess: (data, variables) => {
-      if (variables?.projectId) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.projectData.byProject(variables.projectId) });
-      } else {
-        queryClient.invalidateQueries({ queryKey: ["projectData"] });
-      }
-    },
-  });
-}
-
-/**
- * useSetCharacterSheetMedia
- * Replaces or uploads the primary turnaround sheet media for the character.
- */
-export function useSetCharacterSheetMedia() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async (params) => {
-      return await characterService.setSheetMedia(params);
-    },
-    onSuccess: (data, variables) => {
-      if (variables?.projectId) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.projectData.byProject(variables.projectId) });
-      }
-      queryClient.invalidateQueries({ queryKey: ["projectData"] });
-      queryClient.invalidateQueries({ queryKey: ["workflows"] });
-    },
-  });
-}
-
-// ─── Unified Hook: useCharacter ──────────────────────────────────────────────
-
+// ─── Shared constants (moved outside class hook to keep it usable) ───────────
 const MAX_DETAIL_IMAGES = 5;
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const isValidUUID = (id) => id && UUID_REGEX.test(id);
@@ -331,6 +23,10 @@ const isValidUUID = (id) => id && UUID_REGEX.test(id);
  * @param {Object} params
  * @param {string} params.projectId
  * @param {string} params.characterId - The character workflow ID
+ *
+ * NOTE: Individual character-level mutations and the project-wide useCharacterWorkflows
+ * listing now live in sibling files under features/characters/hooks/ (1 hook / file).
+ * This file contains ONLY the unified composition hook.
  */
 export function useCharacter({ projectId, characterId } = {}) {
   const cleanId = useMemo(() => {
@@ -339,7 +35,7 @@ export function useCharacter({ projectId, characterId } = {}) {
 
   const { data: projectData, isLoading } = useProjectData(projectId);
 
-  // Mutations
+  // Mutations — imported from the new split files per plan
   const updateCharacterMutation = useUpdateCharacter();
   const setSheetMediaMutation = useSetCharacterSheetMedia();
   const addMediaMutation = useAddMediaToCharacter();
