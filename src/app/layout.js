@@ -4,6 +4,7 @@ import localFont from "next/font/local";
 
 import { ReactQueryProvider } from "@/shared/lib/ReactQueryProvider";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Toaster } from "sonner";
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
@@ -52,6 +53,7 @@ export default function RootLayout({ children }) {
       >
         <ReactQueryProvider>
           {children}
+          <Toaster theme="dark" position="bottom-right" richColors closeButton />
           <SpeedInsights />
         </ReactQueryProvider>
       </body>
