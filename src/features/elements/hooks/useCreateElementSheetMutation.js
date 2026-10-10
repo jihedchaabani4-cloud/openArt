@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/shared/api/client";
 import { queryKeys } from "@/shared/api/queryKeys";
 import { useWorkflowsStore } from "@/features/workflows/model/useWorkflowsStore";
+import { logger } from "@/shared/lib/logger";
 
 /**
  * useCreateElementSheetMutation
@@ -99,7 +100,7 @@ export function useCreateElementSheetMutation({ onError } = {}) {
       return { previousData, projectKey };
     },
     onError: (err, variables, context) => {
-      console.error("❌ Element sheet creation failed:", err);
+      logger.error("element_sheet_creation_failed", { error: err });
       if (context?.previousData) {
         queryClient.setQueryData(context.projectKey, context.previousData);
       }

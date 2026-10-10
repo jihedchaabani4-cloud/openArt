@@ -4,6 +4,7 @@ import { useState, useCallback } from "react";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { api } from "@/shared/api/client";
 import { queryKeys } from "@/shared/api/queryKeys";
+import { logger } from "@/shared/lib/logger";
 
 /**
  * useWorkflowDelete Component/Hook
@@ -64,7 +65,7 @@ export function useWorkflowDelete() {
     },
 
     onError: (err, variables, context) => {
-      console.error("❌ Unified workflow delete failed, rolling back:", err);
+      logger.error("workflow_delete_failed", { error: err, variables });
       if (context?.previousData) {
         queryClient.setQueryData(context.projectKey, context.previousData);
       }

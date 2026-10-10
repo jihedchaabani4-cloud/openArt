@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/shared/api/queryKeys";
 import { useWorkflowsStore } from "@/features/workflows/model/useWorkflowsStore";
 import { characterService } from "../services/characterService";
+import { logger } from "@/shared/lib/logger";
 
 /**
  * useCreateCharacterMutation
@@ -67,7 +68,7 @@ export function useCreateCharacterMutation({ onError } = {}) {
       return { previousData, projectKey };
     },
     onError: (err, variables, context) => {
-      console.error("❌ Character creation failed:", err);
+      logger.error("character_creation_failed", { error: err });
       if (context?.previousData) {
         queryClient.setQueryData(context.projectKey, context.previousData);
       }

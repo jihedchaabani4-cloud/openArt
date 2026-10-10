@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/shared/api/client';
 import { queryKeys } from '@/shared/api/queryKeys';
 import { useWorkflowsStore } from '@/features/workflows/model/useWorkflowsStore';
+import { logger } from '@/shared/lib/logger';
 
 export function useGenerateMutation({ onError } = {}) {
   const queryClient = useQueryClient();
@@ -80,7 +81,7 @@ export function useGenerateMutation({ onError } = {}) {
       return { previousData, projectKey };
     },
     onError: (err, variables, context) => {
-      console.error('❌ Workflow execution failed:', err);
+      logger.error("workflow_generation_failed", { error: err });
       if (context?.previousData) {
         queryClient.setQueryData(context.projectKey, context.previousData);
       }

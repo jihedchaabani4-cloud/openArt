@@ -143,11 +143,12 @@ export function useBatchUploadAssets() {
           }]
         });
 
-        // ProjectData format
+        // ProjectData format — all 4 folder_id variants written so folder filtering works immediately
         optimisticWorkflows.push({
           name:          optimisticId,
           projectId:     projectId,
           folder_id:     effectiveFolderId,
+          folderId:      effectiveFolderId,
           workflow_type: 'UPLOAD',
           workflowType:  'UPLOAD',
           is_upload:     true,
@@ -159,6 +160,8 @@ export function useBatchUploadAssets() {
             favorited:      false,
             source:         'upload',
             isUpload:       true,
+            folder_id:      effectiveFolderId,
+            folderId:       effectiveFolderId,
           },
         });
 

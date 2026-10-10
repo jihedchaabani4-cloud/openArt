@@ -1,4 +1,5 @@
 "use client";
+import { logger } from "@/shared/lib/logger";
 
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { Check, X, Loader2 } from "lucide-react";
@@ -49,7 +50,7 @@ export function InlineRenamePill({
       isClosingRef.current = true;
       onCancel?.();
     } catch (err) {
-      console.error("[InlineRenamePill] Save failed:", err);
+      logger.error("inline_rename_save_failed", { error: err });
       setIsSaving(false);
     }
   }, [name, initialName, isSaving, onSave, onCancel]);

@@ -3,6 +3,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/shared/api/queryKeys";
 import { characterService } from "../services/characterService";
+import { logger } from "@/shared/lib/logger";
 
 /**
  * useGenerateCharacterSheetMutation
@@ -21,7 +22,7 @@ export function useGenerateCharacterSheetMutation({ onError } = {}) {
       queryClient.invalidateQueries({ queryKey: ["projectData"] });
     },
     onError: (err) => {
-      console.error("❌ Sheet generation failed:", err);
+      logger.error("character_sheet_generation_failed", { error: err });
       if (typeof onError === "function") onError(err);
     },
   });
