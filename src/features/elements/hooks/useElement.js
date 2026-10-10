@@ -5,7 +5,7 @@ import { queryKeys } from "@/shared/api/queryKeys";
 import { useProjectData } from "@/features/workflows/api/workflowsApi";
 import { useWorkflowsStore, useWorkflowDelete } from "@/features/workflows";
 import { ELEMENT_TYPES } from "@/features/workflows/model/elementSheetConfig";
-import { stripWorkflowPrefix, matchWorkflowId } from "@/features/workflows/lib/cacheHelpers";
+import { stripWorkflowPrefix } from "@/features/workflows/lib/cacheHelpers";
 
 // ─── Element Workflows List Hook ──────────────────────────────────────────────
 
@@ -405,7 +405,7 @@ export function useElement({ projectId, elementId } = {}) {
     const rawElements = projectData?.projectContents?.elements ?? [];
 
     const found = rawWorkflows.find(
-      (w) => matchWorkflowId(w, cleanId)
+      (w) => (w.id || w.name) === cleanId || w.id === cleanId || w.name === cleanId
     );
     if (!found) return null;
 

@@ -4,7 +4,7 @@ import { queryKeys } from "@/shared/api/queryKeys";
 import { useProjectData } from "@/features/workflows/api/workflowsApi";
 import { useWorkflowsStore, useWorkflowDelete } from "@/features/workflows";
 import { characterService } from "../services/characterService";
-import { stripWorkflowPrefix, matchWorkflowId, matchMediaId } from "@/features/workflows/lib/cacheHelpers";
+import { stripWorkflowPrefix, matchMediaId } from "@/features/workflows/lib/cacheHelpers";
 
 // ─── Individual Character Mutations & Queries ────────────────────────────────
 
@@ -366,7 +366,7 @@ export function useCharacter({ projectId, characterId } = {}) {
     const rawCharacters = projectData?.projectContents?.characters ?? [];
 
     const found = rawWorkflows.find(
-      (w) => matchWorkflowId(w, cleanId)
+      (w) => w.id === cleanId || w.name === cleanId || (w.id || w.name) === cleanId
     );
     if (!found) return null;
 
