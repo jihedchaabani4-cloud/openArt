@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { useElement } from "./useElement";
+import { useElement } from "./useElementComposer";
 import { useProjectData, useSetPrimaryMedia } from "@/features/workflows/api/workflowsApi";
 
 /**
