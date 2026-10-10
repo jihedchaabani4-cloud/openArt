@@ -46,26 +46,26 @@ export function useOptimisticMutation({
     mutationFn,
 
     onMutate: async (variables) => {
+      // 1. Run user onMutate first so variables/context can be initialized (e.g. temp IDs)
+      let userContext;
+      if (typeof userOnMutate === "function") {
+        userContext = await userOnMutate(variables);
+      }
+
       const keys = typeof getCacheKeys === "function" ? getCacheKeys(variables) || [] : [];
       const snapshots = [];
 
-      // 1. For each cache key: cancel in-flight queries and capture snapshot
+      // 2. For each cache key: cancel in-flight queries and capture snapshot
       for (const key of keys) {
         if (!key) continue;
         await queryClient.cancelQueries({ queryKey: key });
         const previousData = queryClient.getQueryData(key);
         snapshots.push({ key, previousData });
 
-        // 2. Apply optimistic patch ONLY if previous data exists in cache (cold cache stays untouched)
+        // 3. Apply optimistic patch ONLY if previous data exists in cache (cold cache stays untouched)
         if (previousData !== undefined && typeof applyOptimistic === "function") {
           queryClient.setQueryData(key, (old) => applyOptimistic(old, variables, key));
         }
-      }
-
-      // 3. Delegate to caller onMutate if supplied
-      let userContext;
-      if (typeof userOnMutate === "function") {
-        userContext = await userOnMutate(variables);
       }
 
       return {

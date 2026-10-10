@@ -95,13 +95,14 @@ export function EditNavbar({
     const { mutateAsync: updateWorkflow } = useUpdateWorkflow()
     const { mutateAsync: deleteMedia } = useDeleteMedia()
 
-    const handleEditWorkflowName = async (nextName) => {
+    const handleEditWorkflowName = (nextName) => {
         const workflowId = workflow?.id || workflow?.name
         if (!workflowId) return
 
-        await updateWorkflow({
+        updateWorkflow({
             workflowId,
             workflowData: { display_name: nextName },
+            projectId,
         })
     }
 
@@ -123,12 +124,12 @@ export function EditNavbar({
         }
     }
 
-    const handleDeleteMedia = async () => {
+    const handleDeleteMedia = () => {
         const mediaId = activeItem?.id || activeItem?.name
         if (!mediaId) return
 
-        await deleteMedia({ mediaId })
-        // If it was the last item, redirect back
+        deleteMedia({ mediaId, projectId })
+        // If it was the last item, redirect back immediately
         if (workflow?.items?.length <= 1) {
             router.push(`/cinema-studio/${projectId}/assets`)
         }

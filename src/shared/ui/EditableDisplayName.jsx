@@ -57,7 +57,11 @@ export const EditableDisplayName = React.forwardRef(({
     const currentValue = String(displayName || "").trim()
 
     if (nextValue && nextValue !== currentValue) {
-      await onSave?.(nextValue)
+      try {
+        await onSave?.(nextValue)
+      } catch {
+        setValue(displayName || "")
+      }
     }
 
     setIsEditing(false)
