@@ -27,7 +27,7 @@ import { Button } from "@/shared/ui/button";
 
 import { usePromptStore } from "@/features/prompt-bar/model/usePromptStore";
 import { getPrimaryMedia } from "@/shared/lib/generationUtils";
-import { getItemMetadata as getDisplayMeta, getStudioGridDensity } from "@/shared/lib/displayUtils";
+import { getItemMetadata as getDisplayMeta, getStudioGridDensity, buildCollectionCoverById } from "@/shared/lib/displayUtils";
 import { LoadingScreen } from "@/shared/ui/LoadingScreen";
 
 const PAGE_SIZE = 30;
@@ -95,6 +95,17 @@ export default function CollectionDetailPage({ params }) {
     );
   }, [allWorkflows, collectionId]);
 
+  const collectionCoverById = React.useMemo(
+    () => buildCollectionCoverById(allWorkflows),
+    [allWorkflows]
+  );
+
+  const parentId = collection?.parent_id || collection?.parentId || null;
+  const parentCollection = React.useMemo(() => {
+    if (!parentId) return null;
+    return collections.find((c) => c.id === parentId) || null;
+  }, [collections, parentId]);
+
   // Drag state & move mutations
   const isDragging = usePromptStore((s) => s.isDraggingGalleryItem);
   const draggedItem = usePromptStore((s) => s.draggedItem);
@@ -117,7 +128,7 @@ export default function CollectionDetailPage({ params }) {
     }
   }, []);
 
-  const handleRootDrop = React.useCallback(async (e) => {
+  const handleRootDrop = React.useCallback((e) => {
     e.preventDefault();
     e.stopPropagation();
     setIsRootDragOver(false);
@@ -126,35 +137,28 @@ export default function CollectionDetailPage({ params }) {
     const itemType = e.dataTransfer.getData("itemType") || currentDragged?.type;
 
     if (itemType === "workflow" || currentDragged?.type === "workflow") {
-      const assetId = e.dataTransfer.getData("assetId") || 
-                      e.dataTransfer.getData("workflowId") || 
-                      currentDragged?.id;
+      const assetId = currentDragged?.id ||
+                      e.dataTransfer.getData("workflowId") ||
+                      e.dataTransfer.getData("assetId");
       if (!assetId) return;
 
-      try {
-        await moveAsset({
-          assetId,
-          folderId: null, // Move to Root (out of collection)
-          projectId,
-        });
-      } catch (err) {
-        console.error("Failed to move asset to root:", err);
-      }
+      // Optimistic move: onMutate executes immediately, errors trigger toast and rollback.
+      moveAsset({
+        assetId,
+        folderId: parentId || null, // Move to parent folder (or Root)
+        projectId,
+      });
     } else if (itemType === "collection" || currentDragged?.type === "collection") {
       const draggedFolderId = e.dataTransfer.getData("collectionId") || currentDragged?.id;
-      if (!draggedFolderId) return;
+      if (!draggedFolderId || draggedFolderId === collectionId) return;
 
-      try {
-        await updateFolder({
-          folderId: draggedFolderId,
-          patch: { parentId: null }, // Move to Root (out of parent collection)
-          projectId,
-        });
-      } catch (err) {
-        console.error("Failed to move collection to root:", err);
-      }
+      updateFolder({
+        folderId: draggedFolderId,
+        patch: { parentId: parentId || null }, // Move to parent folder (or Root)
+        projectId,
+      });
     }
-  }, [moveAsset, updateFolder, projectId]);
+  }, [moveAsset, updateFolder, projectId, parentId, collectionId]);
 
   // Combined: sub-collections first, then assets
   const combinedItems = React.useMemo(() => {
@@ -164,18 +168,13 @@ export default function CollectionDetailPage({ params }) {
       key: `col-${col.id}`,
     }));
 
-    // While dragging: hide all workflows so only sub-collections appear as drop targets
-    if (isDragging) {
-      return subItems;
-    }
-
     const assetItems = collectionWorkflows.map((w) => ({
       type: "workflow",
       data: w,
       key: w.id || w.name,
     }));
     return [...subItems, ...assetItems];
-  }, [subCollections, collectionWorkflows, isDragging]);
+  }, [subCollections, collectionWorkflows]);
 
   // Pagination & scroll
   const [visibleCount, setVisibleCount] = React.useState(PAGE_SIZE);
@@ -306,10 +305,12 @@ export default function CollectionDetailPage({ params }) {
         acc.push({
           src: "data:image/svg+xml;charset=utf-8,<svg xmlns='http://www.w3.org/2000/svg'/>",
           width: 1200,
-          height: 900,
+          height: 1200,
           key: item.key,
           itemType: "collection",
           collection: item.data,
+          coverUrl: collectionCoverById.get(item.data?.id)?.url || null,
+          coverIsVideo: collectionCoverById.get(item.data?.id)?.isVideo || false,
         });
         return acc;
       }
@@ -338,7 +339,7 @@ export default function CollectionDetailPage({ params }) {
       });
       return acc;
     }, []);
-  }, [visibleItems]);
+  }, [visibleItems, collectionCoverById]);
 
   const density = getStudioGridDensity(gridSize);
 
@@ -350,6 +351,8 @@ export default function CollectionDetailPage({ params }) {
           collection={photo.collection}
           workflow={photo.workflow}
           itemType={photo.itemType}
+          coverUrl={photo.coverUrl}
+          coverIsVideo={photo.coverIsVideo}
           projectId={projectId}
           onClick={photo.itemType === "collection" ? handleCollectionClick : handleWorkflowClick}
           className="rounded-2xl border-none shadow-xl"
@@ -426,7 +429,7 @@ export default function CollectionDetailPage({ params }) {
               >
                 <GoogleIcon iconName="drive_file_move" className="text-[20px]" />
                 <span className="text-[13px] font-semibold tracking-wide">
-                  Drop here to move out of collection (to Root)
+                  Drop here to move out of collection {parentCollection?.name ? `(to ${parentCollection.name})` : "(to Root)"}
                 </span>
               </motion.div>
             )}

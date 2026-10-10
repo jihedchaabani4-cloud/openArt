@@ -53,10 +53,12 @@ const WorkflowMediaGridItem = React.memo(function WorkflowMediaGridItem({
   const [isDragging,          setIsDragging]          = useState(false);
   const [cardRect,            setCardRect]            = useState(null);
   const [measuredWidth,       setMeasuredWidth]       = useState(albumWidth || 0);
+  const [dragTarget,          setDragTarget]          = useState(null);
   
   const { mutateAsync: updateWorkflow } = useUpdateWorkflow();
   const showTileDetails = useWorkflowsStore(s => s.showTileDetails);
   const setShowTileDetails = useWorkflowsStore(s => s.setShowTileDetails);
+  const isGalleryDragging = usePromptStore((s) => s.isDraggingGalleryItem);
   
   const toggleTileDetails = () => setShowTileDetails(!showTileDetails);
 
@@ -90,6 +92,14 @@ const WorkflowMediaGridItem = React.memo(function WorkflowMediaGridItem({
     };
     window.addEventListener("dragover", hideBlockCursor);
     return () => window.removeEventListener("dragover", hideBlockCursor);
+  }, [isDragging]);
+
+  // ── Listen for drag target changes (collection hover / move-out hover) ──
+  useEffect(() => {
+    if (!isDragging) { setDragTarget(null); return; }
+    const handler = (e) => setDragTarget(e.detail?.target ?? null);
+    window.addEventListener("studio:drag-target-change", handler);
+    return () => window.removeEventListener("studio:drag-target-change", handler);
   }, [isDragging]);
 
   // ── Throttled drag handler ─────────────────────────────────────────────
@@ -385,7 +395,8 @@ const WorkflowMediaGridItem = React.memo(function WorkflowMediaGridItem({
           setIsDeleteConfirmOpen(true);
         }}
         className={cn(
-          "bg-[#0a0a0a] rounded-2xl outline-2 outline-transparent",
+          "bg-[#0a0a0a] rounded-2xl outline-2 outline-transparent transition-opacity duration-200",
+          isGalleryDragging && "opacity-50",
           canNavigate && !isRenaming
             ? (isElementSheet ? "cursor-pointer shadow-lg hover:shadow-2xl" : "cursor-grab active:cursor-grabbing shadow-lg hover:shadow-2xl")
             : "cursor-default",
@@ -533,7 +544,7 @@ const WorkflowMediaGridItem = React.memo(function WorkflowMediaGridItem({
       {/* ── Drag ghost portal ── */}
       {isDragging && createPortal(
         <motion.div
-          className="fixed top-0 left-0 z-[99999] pointer-events-none rounded-[12px] overflow-hidden border-2 border-white/80 shadow-[0_16px_40px_rgba(0,0,0,0.55)]"
+          className="fixed top-0 left-0 z-[99999] pointer-events-none flex flex-col items-center gap-2"
           style={(() => {
             let numericAspect = 1;
             if (typeof aspect === "number") {
@@ -542,24 +553,50 @@ const WorkflowMediaGridItem = React.memo(function WorkflowMediaGridItem({
               const [w, h] = aspect.split("/").map(Number);
               if (w && h) numericAspect = w / h;
             }
-            
             return {
-              width: numericAspect > 1 ? 120 : 120 * numericAspect,
-              height: numericAspect > 1 ? 120 / numericAspect : 120,
-              x: mouseX, 
+              x: mouseX,
               y: mouseY,
-              translateX: "-50%", 
+              translateX: "-50%",
               translateY: "-50%",
+              width: numericAspect > 1 ? 120 : 120 * numericAspect,
             };
           })()}
           initial={{ scale: 0.7, opacity: 0 }}
-          animate={{ scale: 1,   opacity: 1 }}
+          animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.15, ease: "easeOut" }}
         >
-          {isVideo
-            ? <video src={url} className="w-full h-full object-cover" muted loop autoPlay playsInline />
-            : <img   src={url} className="w-full h-full object-cover" alt="" />
-          }
+          <div
+            className="rounded-[12px] overflow-hidden border-2 border-white/80 shadow-[0_16px_40px_rgba(0,0,0,0.55)]"
+            style={(() => {
+              let numericAspect = 1;
+              if (typeof aspect === "number") {
+                numericAspect = aspect;
+              } else if (typeof aspect === "string" && aspect.includes("/")) {
+                const [w, h] = aspect.split("/").map(Number);
+                if (w && h) numericAspect = w / h;
+              }
+              return {
+                width: numericAspect > 1 ? 120 : 120 * numericAspect,
+                height: numericAspect > 1 ? 120 / numericAspect : 120,
+              };
+            })()}
+          >
+            {isVideo
+              ? <video src={url} className="w-full h-full object-cover" muted loop autoPlay playsInline />
+              : <img   src={url} className="w-full h-full object-cover" alt="" />
+            }
+          </div>
+          {(dragTarget === "add-to-collection" || dragTarget === "move-out") && (
+            <motion.div
+              key={dragTarget}
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.12 }}
+              className="px-3 py-1.5 rounded-lg bg-black/80 backdrop-blur-md border border-white/20 text-white text-[11px] font-medium whitespace-nowrap shadow-lg"
+            >
+              {dragTarget === "add-to-collection" ? "Add to collection" : "Move out of collection"}
+            </motion.div>
+          )}
         </motion.div>,
         document.body
       )}
@@ -570,14 +607,16 @@ const WorkflowMediaGridItem = React.memo(function WorkflowMediaGridItem({
 const CollectionMediaGridItem = React.memo(function CollectionMediaGridItem({
   collection,
   workflow,
+  coverUrl = null,
+  coverIsVideo = false,
   className,
   onClick,
   width: albumWidth = null,
   height: albumHeight = null,
-  aspect = null,
   projectId: propProjectId = null,
 }) {
   const col = collection || workflow;
+  const router = useRouter();
   const storeProjectId = useWorkflowsStore((s) => s.selectedProjectId);
   const projectId = propProjectId || storeProjectId;
   const setActiveCollectionId = useWorkflowsStore((s) => s.setActiveCollectionId);
@@ -604,6 +643,9 @@ const CollectionMediaGridItem = React.memo(function CollectionMediaGridItem({
   const canDismissRef = useRef(false);
 
   const collectionName = col?.name || "Untitled collection";
+  const collectionTileOverlay = (
+    <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.03)_0%,rgba(255,255,255,0)_48%,rgba(0,0,0,0.42)_100%)]" />
+  );
 
   const handleDragStart = (e) => {
     if (isRenaming) return;
@@ -652,7 +694,10 @@ const CollectionMediaGridItem = React.memo(function CollectionMediaGridItem({
       return;
     }
     e.dataTransfer.dropEffect = "move";
-    if (!isDragOver) setIsDragOver(true);
+    if (!isDragOver) {
+      setIsDragOver(true);
+      window.dispatchEvent(new CustomEvent("studio:drag-target-change", { detail: { target: "add-to-collection" } }));
+    }
   };
 
   const handleDragEnter = (e) => {
@@ -663,6 +708,7 @@ const CollectionMediaGridItem = React.memo(function CollectionMediaGridItem({
       return;
     }
     setIsDragOver(true);
+    window.dispatchEvent(new CustomEvent("studio:drag-target-change", { detail: { target: "add-to-collection" } }));
   };
 
   const handleDragLeave = (e) => {
@@ -670,13 +716,15 @@ const CollectionMediaGridItem = React.memo(function CollectionMediaGridItem({
     e.stopPropagation();
     if (!e.currentTarget.contains(e.relatedTarget)) {
       setIsDragOver(false);
+      window.dispatchEvent(new CustomEvent("studio:drag-target-change", { detail: { target: null } }));
     }
   };
 
-  const handleDrop = async (e) => {
+  const handleDrop = (e) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragOver(false);
+    window.dispatchEvent(new CustomEvent("studio:drag-target-change", { detail: { target: null } }));
 
     const currentDragged = usePromptStore.getState().draggedItem;
     const itemType = e.dataTransfer.getData("itemType") || currentDragged?.type;
@@ -685,33 +733,26 @@ const CollectionMediaGridItem = React.memo(function CollectionMediaGridItem({
     if (!targetFolderId) return;
 
     if (itemType === "workflow" || currentDragged?.type === "workflow") {
-      const assetId = e.dataTransfer.getData("assetId") || 
-                      e.dataTransfer.getData("workflowId") || 
+      const assetId = e.dataTransfer.getData("assetId") ||
+                      e.dataTransfer.getData("workflowId") ||
                       currentDragged?.id;
       if (!assetId) return;
 
-      try {
-        await moveAsset({
-          assetId,
-          folderId: targetFolderId,
-          projectId,
-        });
-      } catch (err) {
-        console.error("Failed to move asset into collection:", err);
-      }
+      // Optimistic update runs synchronously in mutation onMutate; errors notify via toast & rollback.
+      moveAsset({
+        assetId,
+        folderId: targetFolderId,
+        projectId,
+      });
     } else if (itemType === "collection" || currentDragged?.type === "collection") {
       const draggedFolderId = e.dataTransfer.getData("collectionId") || currentDragged?.id;
       if (!draggedFolderId || draggedFolderId === targetFolderId) return;
 
-      try {
-        await updateFolder({
-          folderId: draggedFolderId,
-          patch: { parentId: targetFolderId },
-          projectId,
-        });
-      } catch (err) {
-        console.error("Failed to move collection into collection:", err);
-      }
+      updateFolder({
+        folderId: draggedFolderId,
+        patch: { parentId: targetFolderId },
+        projectId,
+      });
     }
   };
 
@@ -762,29 +803,31 @@ const CollectionMediaGridItem = React.memo(function CollectionMediaGridItem({
     }, 150);
   }, []);
 
-  const handleRename = async (newName) => {
+  const handleRename = (newName) => {
     if (!col?.id || !projectId) return;
-    await updateFolder({
+    updateFolder({
       folderId: col.id,
       patch: { name: newName },
       projectId,
     });
   };
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
     if (!col?.id || !projectId) return;
-    try {
-      await deleteFolder({
-        folderId: col.id,
-        projectId,
-      });
-      if (activeCollectionId === col.id) {
-        setActiveCollectionId(null);
-      }
-      setIsDeleteConfirmOpen(false);
-    } catch (err) {
-      alert(err.message || "Cannot delete collection with items inside");
+    setIsDeleteConfirmOpen(false);
+    if (activeCollectionId === col.id) {
+      setActiveCollectionId(null);
+      const parentId = col?.parent_id || col?.parentId || null;
+      router.push(
+        parentId
+          ? `/cinema-studio/${projectId}/collection/${parentId}`
+          : `/cinema-studio/${projectId}/assets`
+      );
     }
+    deleteFolder({
+      folderId: col.id,
+      projectId,
+    });
   };
 
   const getPillPosition = () => {
@@ -821,22 +864,20 @@ const CollectionMediaGridItem = React.memo(function CollectionMediaGridItem({
   const cardStyle = albumWidth && albumHeight
     ? {
         width: albumWidth,
-        height: albumHeight,
-        aspectRatio: `${albumWidth} / ${albumHeight}`,
+        height: albumWidth,
+        aspectRatio: "1 / 1",
         transform: "translateZ(0)",
         contain: "paint layout",
         contentVisibility: "auto",
-        containIntrinsicSize: `${Math.round(albumWidth)}px ${Math.round(albumHeight)}px`,
+        containIntrinsicSize: `${Math.round(albumWidth)}px ${Math.round(albumWidth)}px`,
       }
     : {
         width: "100%",
-        aspectRatio: aspect || "4/3",
+        aspectRatio: "1 / 1",
         transform: "translateZ(0)",
         contain: "paint layout",
         contentVisibility: "auto",
       };
-
-  const router = useRouter();
 
   const handleNavigate = useCallback(
     (e) => {
@@ -868,8 +909,8 @@ const CollectionMediaGridItem = React.memo(function CollectionMediaGridItem({
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         className={cn(
-          "bg-[#323438] hover:bg-[#383a3f] transition-all border-0 cursor-pointer shadow-xl",
-          isDragOver && "ring-2 ring-white ring-offset-2 ring-offset-[#121316] outline outline-2 outline-white scale-[1.03] shadow-[0_0_35px_rgba(255,255,255,0.45)] !border-white",
+          "bg-[#505050] hover:bg-[#565656] transition-all border border-white/10 cursor-pointer shadow-[0_18px_50px_rgba(0,0,0,0.38)]",
+          isDragOver && "outline outline-2 outline-white",
           className
         )}
         style={cardStyle}
@@ -881,24 +922,34 @@ const CollectionMediaGridItem = React.memo(function CollectionMediaGridItem({
             )}
             onClick={(e) => e.stopPropagation()}
           >
-            <ButtonGroup className="bg-white/60 backdrop-blur-md rounded-lg">
+            <ButtonGroup className="rounded-[10px] border border-white/10 bg-[#343434]/95 backdrop-blur-md shadow-[0_14px_34px_rgba(0,0,0,0.48)]">
               <ActionBtn
                 onClick={(e) => {
                   e.stopPropagation();
                   setIsLiked((v) => !v);
                 }}
                 title={isLiked ? "Unlike collection" : "Like collection"}
+                className="bg-transparent text-white hover:bg-white/12"
               >
                 <GoogleIcon
                   iconName="favorite"
                   fill={isLiked}
-                  className={cn("text-[13px]", isLiked ? "text-red-500" : "text-[#303031]")}
+                  className={cn("text-[13px]", isLiked ? "text-red-400" : "text-white/85")}
                 />
               </ActionBtn>
               <StudioItemDropdownMenu
                 open={isDropdownOpen}
                 onOpenChange={setIsDropdownOpen}
                 items={menuItems}
+                trigger={
+                  <ActionBtn
+                    onClick={(e) => e.stopPropagation()}
+                    title="More options"
+                    className="bg-transparent text-white hover:bg-white/12"
+                  >
+                    <GoogleIcon iconName="more_vert" className="text-[13px] text-white/85" />
+                  </ActionBtn>
+                }
               />
             </ButtonGroup>
           </div>
@@ -923,6 +974,16 @@ const CollectionMediaGridItem = React.memo(function CollectionMediaGridItem({
           )
         }
       >
+        {coverUrl && (
+          <div className="absolute inset-0">
+            {coverIsVideo ? (
+              <video src={coverUrl} className="h-full w-full object-cover" muted loop playsInline />
+            ) : (
+              <img src={coverUrl} className="h-full w-full object-cover" alt="" />
+            )}
+          </div>
+        )}
+        {collectionTileOverlay}
         <div ref={cardRef} className="absolute inset-0 pointer-events-none -z-10" />
       </CoreMediaItemView>
 
@@ -968,21 +1029,28 @@ const CollectionMediaGridItem = React.memo(function CollectionMediaGridItem({
       {/* ── Collection drag ghost portal ── */}
       {isDraggingThis && typeof window !== "undefined" && createPortal(
         <motion.div
-          className="fixed top-0 left-0 z-[99999] pointer-events-none rounded-[16px] px-4 py-3 bg-[#242528]/95 border border-white/20 shadow-[0_16px_40px_rgba(0,0,0,0.6)] flex items-center gap-2.5 backdrop-blur-md"
+          className="fixed top-0 left-0 z-[99999] pointer-events-none overflow-hidden rounded-[18px] border border-white/70 bg-[#505050] shadow-[0_22px_70px_rgba(0,0,0,0.62)]"
           style={{
             x: mouseX,
             y: mouseY,
             translateX: "-50%",
             translateY: "-50%",
+            width: "clamp(96px, 9vw, 132px)",
+            aspectRatio: "1 / 1",
           }}
-          initial={{ scale: 0.8, opacity: 0 }}
+          initial={{ scale: 0.92, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.15 }}
         >
-          <GoogleIcon iconName="folder" className="text-[20px] text-white/90" />
-          <span className="text-[13px] font-medium text-white max-w-[150px] truncate">
-            {collectionName}
-          </span>
+          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.04)_0%,rgba(255,255,255,0)_50%,rgba(0,0,0,0.46)_100%)]" />
+          <div className="absolute inset-x-2.5 bottom-2.5 flex items-end justify-between gap-2">
+            <h3 className="min-w-0 truncate text-[12px] font-medium leading-tight tracking-tight text-white/92">
+              {collectionName}
+            </h3>
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] border border-white/10 bg-[#343434]/95 text-white/90 shadow-[0_10px_24px_rgba(0,0,0,0.45)]">
+              <GoogleIcon iconName="folder" className="text-[16px]" />
+            </div>
+          </div>
         </motion.div>,
         document.body
       )}
