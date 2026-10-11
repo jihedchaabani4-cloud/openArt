@@ -14,8 +14,7 @@ import {
 } from "@/shared/ui/dropdown-menu"
 import { Button } from "@/shared/ui/button"
 import { NavbarBackButton } from "@/widgets/NavbarCore/ui/NavbarBackButton"
-import { ConfirmDeleteDialog } from "@/widgets/dialogs/ConfirmDeleteDialog"
-import { useProjectFolders, useUpdateFolder, useDeleteFolder, useMoveAssetToFolder } from "@/features/folders"
+import { useProjectFolders, useUpdateFolder, useDeleteFolder, useFolderMove } from "@/features/folders"
 
 export function StudioNavbarLeft({
     searchExpanded,
@@ -69,7 +68,7 @@ export function StudioNavbarLeft({
     const { mutateAsync: deleteProject, isPending: isProjectDeleting } = useDeleteProject()
     const { mutateAsync: updateFolder } = useUpdateFolder()
     const { mutateAsync: deleteFolder, isPending: isFolderDeleting } = useDeleteFolder()
-    const { mutateAsync: moveAsset } = useMoveAssetToFolder()
+    const { moveItemOut } = useFolderMove(projectId)
 
     // Independent drag detection via window drag events (zero coupling to prompt-bar)
     const [isDragging, setIsDragging] = React.useState(false)
@@ -104,23 +103,25 @@ export function StudioNavbarLeft({
             const id = workflowId || assetId
             if (id) {
                 // Optimistic move: onMutate executes synchronously, errors rollback and show toast.
-                moveAsset({
-                    assetId: id,
-                    folderId: parentId || null,
+                moveItemOut({
+                    itemType: "workflow",
+                    itemId: id,
+                    currentFolderId: collectionId,
                     projectId,
                 })
             }
         } else if (itemType === "collection") {
             if (draggedFolderId && draggedFolderId !== collectionId) {
-                updateFolder({
-                    folderId: draggedFolderId,
-                    patch: { parentId: parentId || null },
+                moveItemOut({
+                    itemType: "collection",
+                    itemId: draggedFolderId,
+                    currentFolderId: collectionId,
                     projectId,
                 })
             }
         }
         // Move done — no navigation, cache is optimistically updated
-    }, [collectionId, parentId, projectId, moveAsset, updateFolder])
+    }, [collectionId, projectId, moveItemOut])
 
     const handleBackDragOver = React.useCallback((e) => {
         if (!isCollectionPage) return

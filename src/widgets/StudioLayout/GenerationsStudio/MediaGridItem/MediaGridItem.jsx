@@ -14,8 +14,7 @@ import { useWorkflowsStore } from "@/features/workflows/model/useWorkflowsStore"
 import { ActionBtn } from "./ActionBtn";
 import { StudioItemDropdownMenu } from "./StudioItemMenu";
 import { getStudioMenuItems, getWorkflowEntityType } from "./studioMenuConfig";
-import { CoreMediaItemView } from "@/widgets/CoreMediaItemView";
-import { useUpdateFolder, useDeleteFolder, useMoveAssetToFolder } from "@/features/folders";
+import { useUpdateFolder, useDeleteFolder, useFolderMove } from "@/features/folders";
 
 const EMPTY_IMG = typeof window !== 'undefined' ? (() => {
   const img = new Image();
@@ -630,7 +629,7 @@ const CollectionMediaGridItem = React.memo(function CollectionMediaGridItem({
 
   const { mutateAsync: updateFolder } = useUpdateFolder();
   const { mutateAsync: deleteFolder, isPending: isDeleting } = useDeleteFolder();
-  const { mutateAsync: moveAsset } = useMoveAssetToFolder();
+  const { moveItem } = useFolderMove(projectId);
 
   const [isDragOver, setIsDragOver] = useState(false);
   const [isDraggingThis, setIsDraggingThis] = useState(false);
@@ -733,24 +732,25 @@ const CollectionMediaGridItem = React.memo(function CollectionMediaGridItem({
     if (!targetFolderId) return;
 
     if (itemType === "workflow" || currentDragged?.type === "workflow") {
-      const assetId = e.dataTransfer.getData("assetId") ||
-                      e.dataTransfer.getData("workflowId") ||
-                      currentDragged?.id;
-      if (!assetId) return;
+      const itemId = e.dataTransfer.getData("workflowId") ||
+                     currentDragged?.id ||
+                     e.dataTransfer.getData("assetId");
+      if (!itemId) return;
 
-      // Optimistic update runs synchronously in mutation onMutate; errors notify via toast & rollback.
-      moveAsset({
-        assetId,
-        folderId: targetFolderId,
+      moveItem({
+        itemType: "workflow",
+        itemId,
+        targetFolderId,
         projectId,
       });
     } else if (itemType === "collection" || currentDragged?.type === "collection") {
       const draggedFolderId = e.dataTransfer.getData("collectionId") || currentDragged?.id;
       if (!draggedFolderId || draggedFolderId === targetFolderId) return;
 
-      updateFolder({
-        folderId: draggedFolderId,
-        patch: { parentId: targetFolderId },
+      moveItem({
+        itemType: "collection",
+        itemId: draggedFolderId,
+        targetFolderId,
         projectId,
       });
     }

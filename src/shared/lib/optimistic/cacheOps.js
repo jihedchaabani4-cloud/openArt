@@ -22,14 +22,30 @@ export function matchWorkflowId(entity, targetId) {
   const target = stripWorkflowPrefix(targetId);
   if (target === "") return false;
 
-  const entityId = !isBlank(entity.id) ? stripWorkflowPrefix(entity.id) : "";
+  const entityId = !isBlank(entity.id)
+    ? stripWorkflowPrefix(entity.id)
+    : !isBlank(entity.asset_id)
+    ? stripWorkflowPrefix(entity.asset_id)
+    : "";
   const entityName = !isBlank(entity.name) ? stripWorkflowPrefix(entity.name) : "";
 
-  if (entity.id === targetId || entity.name === targetId) {
+  if (entity.id === targetId || entity.name === targetId || entity.asset_id === targetId) {
     return entityId === target || entityName === target;
   }
 
-  return (entityId !== "" && entityId === target) || (entityName !== "" && entityName === target);
+  if ((entityId !== "" && entityId === target) || (entityName !== "" && entityName === target)) {
+    return true;
+  }
+
+  // Also match when targetId is a nested media/item record of this workflow
+  if (Array.isArray(entity.items) && entity.items.some((it) => matchWorkflowId(it, targetId))) {
+    return true;
+  }
+  if (Array.isArray(entity.media) && entity.media.some((m) => matchWorkflowId(m, targetId))) {
+    return true;
+  }
+
+  return false;
 }
 
 /**

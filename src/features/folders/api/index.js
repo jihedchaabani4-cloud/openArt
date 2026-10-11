@@ -5,3 +5,4 @@ export { useCreateFolder } from "../mutations/useCreateFolder";
 export { useUpdateFolder } from "../mutations/useUpdateFolder";
 export { useDeleteFolder } from "../mutations/useDeleteFolder";
 export { useMoveAssetToFolder } from "../mutations/useMoveAssetToFolder";
+export { useFolderMove, getParentFolderId, resolveMoveOutTarget } from "../model/useFolderMove";

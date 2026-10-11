@@ -8,7 +8,7 @@ import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows";
 import { useFilteredWorkflows as useFilteredGenerations } from "@/features/workflows/model/useFilteredWorkflows";
 import { useQueryClient } from "@tanstack/react-query";
 import { useGenerateMutation } from "@/features/workflows/api/workflowsApi";
-import { useProjectFolders, useUpdateFolder, useMoveAssetToFolder } from "@/features/folders";
+import { useProjectFolders, useFolderMove } from "@/features/folders";
 import { useUploadMedia } from "@/features/media";
 import { queryKeys } from "@/shared/api/queryKeys";
 import { cn } from "@/shared/lib/utils";
@@ -109,8 +109,7 @@ export default function CollectionDetailPage({ params }) {
   // Drag state & move mutations
   const isDragging = usePromptStore((s) => s.isDraggingGalleryItem);
   const draggedItem = usePromptStore((s) => s.draggedItem);
-  const { mutateAsync: moveAsset } = useMoveAssetToFolder();
-  const { mutateAsync: updateFolder } = useUpdateFolder();
+  const { moveItemOut } = useFolderMove(projectId);
   const [isRootDragOver, setIsRootDragOver] = React.useState(false);
 
   const handleRootDragOver = React.useCallback((e) => {
@@ -137,28 +136,29 @@ export default function CollectionDetailPage({ params }) {
     const itemType = e.dataTransfer.getData("itemType") || currentDragged?.type;
 
     if (itemType === "workflow" || currentDragged?.type === "workflow") {
-      const assetId = currentDragged?.id ||
-                      e.dataTransfer.getData("workflowId") ||
-                      e.dataTransfer.getData("assetId");
-      if (!assetId) return;
+      const itemId = currentDragged?.id ||
+                     e.dataTransfer.getData("workflowId") ||
+                     e.dataTransfer.getData("assetId");
+      if (!itemId) return;
 
-      // Optimistic move: onMutate executes immediately, errors trigger toast and rollback.
-      moveAsset({
-        assetId,
-        folderId: parentId || null, // Move to parent folder (or Root)
+      moveItemOut({
+        itemType: "workflow",
+        itemId,
+        currentFolderId: collectionId,
         projectId,
       });
     } else if (itemType === "collection" || currentDragged?.type === "collection") {
       const draggedFolderId = e.dataTransfer.getData("collectionId") || currentDragged?.id;
       if (!draggedFolderId || draggedFolderId === collectionId) return;
 
-      updateFolder({
-        folderId: draggedFolderId,
-        patch: { parentId: parentId || null }, // Move to parent folder (or Root)
+      moveItemOut({
+        itemType: "collection",
+        itemId: draggedFolderId,
+        currentFolderId: collectionId,
         projectId,
       });
     }
-  }, [moveAsset, updateFolder, projectId, parentId, collectionId]);
+  }, [moveItemOut, projectId, collectionId]);
 
   // Combined: sub-collections first, then assets
   const combinedItems = React.useMemo(() => {
