@@ -1,7 +1,7 @@
 // [FSD Layer: shared/lib/optimistic] Shared entity keys for optimistic concurrency.
 // Owns: the ONE key format per entity type, so different hooks touching the same item
 // (e.g. move folder + delete folder, rename workflow + move workflow) coordinate.
-// Public: folderEntity(id) · workflowEntity(id) · mediaEntity(id)
+// Public: folderEntity(id) · workflowEntity(id) · mediaEntity(id) · projectEntity(id)
 
 import { stripWorkflowPrefix } from "@/features/workflows/lib/cacheHelpers";
 
@@ -13,3 +13,6 @@ export const workflowEntity = (workflowId) => ["workflow", stripWorkflowPrefix(S
 
 /** @param {string} mediaId */
 export const mediaEntity = (mediaId) => ["media", String(mediaId ?? "")];
+
+/** @param {string} projectId */
+export const projectEntity = (projectId) => ["project", String(projectId ?? "")];

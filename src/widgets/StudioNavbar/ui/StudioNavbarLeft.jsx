@@ -197,13 +197,9 @@ export function StudioNavbarLeft({
                 projectId,
             })
         } else {
-            try {
-                await deleteProject(projectId)
-                setIsDeleteDialogOpen(false)
-                router.push("/cinema-studio")
-            } catch (err) {
-                console.error("Failed to delete project:", err)
-            }
+            setIsDeleteDialogOpen(false)
+            router.push("/cinema-studio")
+            deleteProject(projectId).catch(() => {})
         }
     }
 
