@@ -1,73 +1,60 @@
 // [FSD Layer: features/media/api/mutations] — Delete asset mutation (1 hook / file).
-// Body copied VERBATIM from features/media/api/mediaApi.js useRemoveAsset.
-// Includes the cascade-workflow-removal optimistic patching (no media left = workflow removed).
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+// Optimistically removes asset with workflow cascade; rolls back on error.
 import { api } from '@/shared/api/client';
 import { queryKeys } from '@/shared/api/queryKeys';
 import { matchMediaId } from '@/features/workflows/lib/cacheHelpers';
+import { mediaEntity } from '@/shared/lib/optimistic/entityKeys';
+import { useOptimisticMutation } from '@/shared/lib/optimistic/useOptimisticMutation';
 
 export function useRemoveAsset() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async ({ assetId, projectId }) => {
+  return useOptimisticMutation({
+    mutationFn: async ({ assetId }) => {
       const res = await api.delete(`/assets/${assetId}`);
       if (res.ok === false) throw new Error(res.error || 'Failed to delete asset');
       return res;
     },
 
-    onMutate: async ({ assetId, projectId }) => {
-      if (!projectId) return {};
-      const projectKey = queryKeys.projectData.byProject(projectId);
+    getEntityKey: ({ assetId }) => mediaEntity(assetId),
 
-      await queryClient.cancelQueries({ queryKey: projectKey });
-      const previousData = queryClient.getQueryData(projectKey);
+    getCacheKeys: ({ projectId }) => (projectId ? [queryKeys.projectData.byProject(projectId)] : []),
 
-      if (previousData) {
-        queryClient.setQueryData(projectKey, (old) => {
-          if (!old) return old;
-          const targetMedia = (old.projectContents?.media || []).find(m => matchMediaId(m, assetId));
-          const targetWfId = targetMedia?.workflowId || targetMedia?.workflow_id;
+    applyOptimistic: (oldData, { assetId }) => {
+      if (!oldData?.projectContents) return oldData;
+      const targetMedia = (oldData.projectContents?.media || []).find((m) => matchMediaId(m, assetId));
+      const targetWfId = targetMedia?.workflowId || targetMedia?.workflow_id;
 
-          const updatedMedia = (old.projectContents?.media || []).filter(
-            m => !matchMediaId(m, assetId)
-          );
+      const updatedMedia = (oldData.projectContents?.media || []).filter(
+        (m) => !matchMediaId(m, assetId)
+      );
 
-          const hasRemainingMedia = targetWfId
-            ? updatedMedia.some(m => (m.workflowId || m.workflow_id) === targetWfId)
-            : true;
+      const hasRemainingMedia = targetWfId
+        ? updatedMedia.some((m) => (m.workflowId || m.workflow_id) === targetWfId)
+        : true;
 
-          const updatedWorkflows = (old.projectContents?.workflows || []).filter(wf => {
-            if (!targetWfId) return true;
-            const wfId = wf.name || wf.id;
-            return wfId !== targetWfId || hasRemainingMedia;
-          });
+      const updatedWorkflows = (oldData.projectContents?.workflows || []).filter((wf) => {
+        if (!targetWfId) return true;
+        const wfId = wf.name || wf.id;
+        return wfId !== targetWfId || hasRemainingMedia;
+      });
 
-          return {
-            ...old,
-            projectContents: {
-              ...old.projectContents,
-              media: updatedMedia,
-              workflows: updatedWorkflows,
-            }
-          };
-        });
-      }
-
-      return { previousData, projectKey };
+      return {
+        ...oldData,
+        projectContents: {
+          ...oldData.projectContents,
+          media: updatedMedia,
+          workflows: updatedWorkflows,
+        },
+      };
     },
 
-    onError: (_err, _vars, context) => {
-      if (context?.previousData) {
-        queryClient.setQueryData(context.projectKey, context.previousData);
-      }
-    },
+    invalidateKeys: ({ projectId }) => [
+      ...(projectId ? [queryKeys.projectData.byProject(projectId)] : []),
+      queryKeys.assets.all(),
+      queryKeys.generations.all(),
+    ],
 
-    onSettled: (res, err, variables) => {
-      if (variables.projectId) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.projectData.byProject(variables.projectId) });
-      }
-      queryClient.invalidateQueries({ queryKey: queryKeys.assets.all() });
-      queryClient.invalidateQueries({ queryKey: queryKeys.generations.all() });
-    },
+    errorMessage: 'Failed to delete asset. Changes were reverted.',
   });
 }
+
+export default useRemoveAsset;

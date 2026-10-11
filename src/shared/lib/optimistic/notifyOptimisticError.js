@@ -6,6 +6,24 @@ import { toast } from "sonner";
 import { logger } from "@/shared/lib/logger";
 
 const DEFAULT_ERROR_MESSAGE = "Action failed. Changes were reverted.";
+const SENSITIVE_KEY_REGEX = /prompt|token|secret|password|apikey|api_key|bearer/i;
+
+function sanitizeLogContext(obj) {
+  if (!obj || typeof obj !== "object") return obj;
+  if (Array.isArray(obj)) return obj.map(sanitizeLogContext);
+
+  const out = {};
+  for (const [k, v] of Object.entries(obj)) {
+    if (SENSITIVE_KEY_REGEX.test(k)) {
+      out[k] = "[REDACTED]";
+    } else if (v && typeof v === "object") {
+      out[k] = sanitizeLogContext(v);
+    } else {
+      out[k] = v;
+    }
+  }
+  return out;
+}
 
 /**
  * Notify user via toast and log structured error record when an optimistic mutation fails.
@@ -35,7 +53,7 @@ export function notifyOptimisticError(error, customMessage, context = {}) {
   logger.error("optimistic_mutation_failed", {
     message,
     error,
-    ...context,
+    ...sanitizeLogContext(context),
   });
 
   return message;

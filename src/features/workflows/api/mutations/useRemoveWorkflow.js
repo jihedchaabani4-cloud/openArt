@@ -1,13 +1,14 @@
 // [FSD Layer: features/workflows/api/mutations] — Remove workflow mutation (1 hook/file).
-// Body copied VERBATIM from features/workflows/api/workflowsApi.js useRemoveWorkflow.
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+// Optimistically removes workflow and associated media; rolls back on error.
 import { api } from '@/shared/api/client';
 import { queryKeys } from '@/shared/api/queryKeys';
+import { matchWorkflowId } from '@/shared/lib/optimistic/cacheOps';
+import { workflowEntity } from '@/shared/lib/optimistic/entityKeys';
+import { useOptimisticMutation } from '@/shared/lib/optimistic/useOptimisticMutation';
 
 export function useRemoveWorkflow() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async ({ workflowId, workflowIds, projectId }) => {
+  return useOptimisticMutation({
+    mutationFn: async ({ workflowId, workflowIds }) => {
       const ids = workflowIds || (workflowId ? [workflowId] : []);
       if (ids.length === 0) throw new Error("workflowId is required");
 
@@ -17,50 +18,46 @@ export function useRemoveWorkflow() {
             body: JSON.stringify({ workflow_ids: ids }),
           });
 
-      if (!res.ok) throw new Error(res.message);
+      if (!res.ok) throw new Error(res.message || "Failed to remove workflow");
       return ids;
     },
 
-    onMutate: async ({ workflowId, workflowIds, projectId }) => {
-      if (!projectId) return {};
+    getEntityKey: ({ workflowId, workflowIds }) => {
+      const targetId = workflowId || (Array.isArray(workflowIds) ? workflowIds[0] : null);
+      return targetId ? workflowEntity(targetId) : null;
+    },
+
+    getCacheKeys: ({ projectId }) => (projectId ? [queryKeys.projectData.byProject(projectId)] : []),
+
+    applyOptimistic: (oldData, { workflowId, workflowIds }) => {
+      if (!oldData?.projectContents) return oldData;
       const idsToRemove = workflowIds || (workflowId ? [workflowId] : []);
-      const projectKey = queryKeys.projectData.byProject(projectId);
+      const cleanIds = idsToRemove.map((id) => String(id || '').replace(/^workflows\//, ''));
 
-      await queryClient.cancelQueries({ queryKey: projectKey });
-      const previousData = queryClient.getQueryData(projectKey);
-
-      if (previousData) {
-        queryClient.setQueryData(projectKey, (old) => {
-          if (!old) return old;
-          return {
-            ...old,
-            projectContents: {
-              ...old.projectContents,
-              workflows: (old.projectContents?.workflows || []).filter(
-                wf => !idsToRemove.includes(wf.id) && !idsToRemove.includes(wf.name)
-              ),
-              media: (old.projectContents?.media || []).filter(
-                m => !idsToRemove.includes(m.workflowId)
-              )
+      return {
+        ...oldData,
+        projectContents: {
+          ...oldData.projectContents,
+          workflows: (oldData.projectContents?.workflows || []).filter(
+            (wf) => !idsToRemove.some((id) => matchWorkflowId(wf, id))
+          ),
+          media: (oldData.projectContents?.media || []).filter(
+            (m) => {
+              const mWf = String(m.workflowId || m.workflow_id || '').replace(/^workflows\//, '');
+              return !cleanIds.includes(mWf);
             }
-          };
-        });
-      }
-
-      return { previousData, projectKey, projectId };
+          ),
+        },
+      };
     },
 
-    onError: (err, variables, context) => {
-      if (context?.previousData) {
-        queryClient.setQueryData(context.projectKey, context.previousData);
-      }
-    },
+    invalidateKeys: ({ projectId }) => [
+      ...(projectId ? [queryKeys.projectData.byProject(projectId)] : []),
+      queryKeys.library.all(),
+    ],
 
-    onSettled: (res, err, variables) => {
-      if (variables.projectId) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.projectData.byProject(variables.projectId) });
-      }
-      queryClient.invalidateQueries({ queryKey: queryKeys.library.all() });
-    },
+    errorMessage: "Failed to remove workflow. Changes were reverted.",
   });
 }
+
+export default useRemoveWorkflow;

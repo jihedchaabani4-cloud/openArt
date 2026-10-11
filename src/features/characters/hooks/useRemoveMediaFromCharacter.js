@@ -2,6 +2,7 @@
 // Optimistically removes the media item from the cache; rolls back if API fails.
 import { queryKeys } from "@/shared/api/queryKeys";
 import { characterService } from "../services/characterService";
+import { mediaEntity } from "@/shared/lib/optimistic/entityKeys";
 import { useOptimisticMutation } from "@/shared/lib/optimistic/useOptimisticMutation";
 
 /**
@@ -15,6 +16,8 @@ export function useRemoveMediaFromCharacter() {
       const res = await characterService.removeDetailMedia({ characterId, mediaId });
       return res;
     },
+
+    getEntityKey: ({ mediaId }) => mediaEntity(mediaId),
 
     getCacheKeys: ({ projectId }) =>
       projectId ? [queryKeys.projectData.byProject(projectId)] : [],

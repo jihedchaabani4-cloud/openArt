@@ -1,13 +1,14 @@
 // [FSD Layer: features/workflows/api/mutations] — Toggle workflow like (1 hook/file).
-// Body copied VERBATIM from features/workflows/api/workflowsApi.js useToggleWorkflowLike.
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+// Optimistically toggles metadata.favorited; rolls back on error.
 import { api } from '@/shared/api/client';
 import { queryKeys } from '@/shared/api/queryKeys';
+import { matchWorkflowId } from '@/shared/lib/optimistic/cacheOps';
+import { workflowEntity } from '@/shared/lib/optimistic/entityKeys';
+import { useOptimisticMutation } from '@/shared/lib/optimistic/useOptimisticMutation';
 
 export function useToggleWorkflowLike() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async ({ workflowId, workflowIds, favorited, projectId } = {}) => {
+  return useOptimisticMutation({
+    mutationFn: async ({ workflowId, workflowIds, favorited } = {}) => {
       const normalizedIds = Array.isArray(workflowIds)
         ? workflowIds.filter(Boolean)
         : [workflowId].filter(Boolean);
@@ -21,57 +22,50 @@ export function useToggleWorkflowLike() {
             ...(favorited !== undefined ? { favorited: !!favorited } : {}),
           });
 
-      if (!res.ok) throw new Error(res.message);
+      if (!res.ok) throw new Error(res.message || "Failed to toggle workflow like");
       return normalizedIds;
     },
-    onMutate: async ({ workflowId, workflowIds, favorited, projectId }) => {
-      if (!projectId) return {};
-      const projectKey = queryKeys.projectData.byProject(projectId);
+
+    getEntityKey: ({ workflowId, workflowIds }) => {
+      const targetId = workflowId || (Array.isArray(workflowIds) ? workflowIds[0] : null);
+      return targetId ? workflowEntity(targetId) : null;
+    },
+
+    getCacheKeys: ({ projectId }) => (projectId ? [queryKeys.projectData.byProject(projectId)] : []),
+
+    applyOptimistic: (oldData, { workflowId, workflowIds, favorited }) => {
+      if (!oldData?.projectContents?.workflows) return oldData;
       const normalizedIds = Array.isArray(workflowIds)
         ? workflowIds.filter(Boolean)
         : [workflowId].filter(Boolean);
 
-      await queryClient.cancelQueries({ queryKey: projectKey });
-      const previousData = queryClient.getQueryData(projectKey);
+      return {
+        ...oldData,
+        projectContents: {
+          ...oldData.projectContents,
+          workflows: oldData.projectContents.workflows.map((wf) => {
+            if (normalizedIds.some((id) => matchWorkflowId(wf, id))) {
+              return {
+                ...wf,
+                metadata: {
+                  ...(wf.metadata || {}),
+                  favorited: favorited !== undefined ? favorited : !wf.metadata?.favorited,
+                },
+              };
+            }
+            return wf;
+          }),
+        },
+      };
+    },
 
-      if (previousData) {
-        queryClient.setQueryData(projectKey, (old) => {
-          if (!old?.projectContents?.workflows) return old;
-          return {
-            ...old,
-            projectContents: {
-              ...old.projectContents,
-              workflows: old.projectContents.workflows.map((wf) => {
-                if (normalizedIds.includes(wf.id) || normalizedIds.includes(wf.name)) {
-                  return {
-                    ...wf,
-                    metadata: {
-                      ...(wf.metadata || {}),
-                      favorited: favorited !== undefined ? favorited : !wf.metadata?.favorited,
-                    },
-                  };
-                }
-                return wf;
-              }),
-            },
-          };
-        });
-      }
+    invalidateKeys: ({ projectId }) => [
+      ...(projectId ? [queryKeys.projectData.byProject(projectId)] : []),
+      queryKeys.library.all(),
+    ],
 
-      return { previousData, projectKey };
-    },
-    onError: (err, variables, context) => {
-      if (context?.previousData) {
-        queryClient.setQueryData(context.projectKey, context.previousData);
-      }
-    },
-    onSettled: (res, err, variables) => {
-      if (variables.projectId) {
-        queryClient.invalidateQueries({
-          queryKey: queryKeys.projectData.byProject(variables.projectId),
-        });
-      }
-      queryClient.invalidateQueries({ queryKey: queryKeys.library.all() });
-    },
+    errorMessage: "Failed to update favorite status. Changes were reverted.",
   });
 }
+
+export default useToggleWorkflowLike;

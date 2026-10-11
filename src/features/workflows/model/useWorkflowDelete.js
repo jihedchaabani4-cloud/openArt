@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { api } from "@/shared/api/client";
 import { queryKeys } from "@/shared/api/queryKeys";
-import { logger } from "@/shared/lib/logger";
+import { matchWorkflowId } from "@/shared/lib/optimistic/cacheOps";
+import { workflowEntity } from "@/shared/lib/optimistic/entityKeys";
+import { useOptimisticMutation } from "@/shared/lib/optimistic/useOptimisticMutation";
 
 /**
  * useWorkflowDelete Component/Hook
@@ -13,17 +14,16 @@ import { logger } from "@/shared/lib/logger";
  * 
  * Features:
  * - Instant 0ms Optimistic UI cache removal.
+ * - Coordinated with entityTracker (workflowEntity).
  * - Handles confirmation dialog state.
- * - Rollback on network failure.
- * - Refetches and syncs React Query project store.
+ * - Standardized rollback & toast on network failure.
  */
 export function useWorkflowDelete() {
-  const queryClient = useQueryClient();
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
-  // Mutation with instant Optimistic UI removal
-  const deleteMutation = useMutation({
+  // Mutation with instant Optimistic UI removal and tracker coordination
+  const deleteMutation = useOptimisticMutation({
     mutationFn: async ({ workflowId, workflowType }) => {
       const cleanId = String(workflowId || '').replace(/^workflows\//, '');
       const type = String(workflowType || '').toUpperCase();
@@ -36,48 +36,36 @@ export function useWorkflowDelete() {
       return await api.delete(`/workflows/workflows/${cleanId}`);
     },
 
-    onMutate: async ({ workflowId, projectId }) => {
-      if (!projectId) return {};
-      const projectKey = queryKeys.projectData.byProject(projectId);
+    getEntityKey: ({ workflowId }) => workflowEntity(workflowId),
 
-      await queryClient.cancelQueries({ queryKey: projectKey });
-      const previousData = queryClient.getQueryData(projectKey);
+    getCacheKeys: ({ projectId }) => (projectId ? [queryKeys.projectData.byProject(projectId)] : []),
 
-      if (previousData) {
-        queryClient.setQueryData(projectKey, (old) => {
-          if (!old) return old;
-          return {
-            ...old,
-            projectContents: {
-              ...old.projectContents,
-              workflows: (old.projectContents?.workflows || []).filter(
-                (wf) => wf.id !== workflowId && wf.name !== workflowId
-              ),
-              media: (old.projectContents?.media || []).filter(
-                (m) => m.workflowId !== workflowId
-              ),
-            },
-          };
-        });
-      }
-
-      return { previousData, projectKey };
+    applyOptimistic: (oldData, { workflowId }) => {
+      if (!oldData?.projectContents) return oldData;
+      const cleanId = String(workflowId || '').replace(/^workflows\//, '');
+      return {
+        ...oldData,
+        projectContents: {
+          ...oldData.projectContents,
+          workflows: (oldData.projectContents?.workflows || []).filter(
+            (wf) => !matchWorkflowId(wf, workflowId)
+          ),
+          characters: (oldData.projectContents?.characters || []).filter(
+            (c) => !matchWorkflowId(c, workflowId)
+          ),
+          elements: (oldData.projectContents?.elements || []).filter(
+            (el) => !matchWorkflowId(el, workflowId)
+          ),
+          media: (oldData.projectContents?.media || []).filter(
+            (m) => String(m.workflowId || m.workflow_id || '').replace(/^workflows\//, '') !== cleanId
+          ),
+        },
+      };
     },
 
-    onError: (err, variables, context) => {
-      logger.error("workflow_delete_failed", { error: err, variables });
-      if (context?.previousData) {
-        queryClient.setQueryData(context.projectKey, context.previousData);
-      }
-    },
+    invalidateKeys: ({ projectId }) => (projectId ? [queryKeys.projectData.byProject(projectId)] : []),
 
-    onSuccess: (data, variables) => {
-      if (variables.projectId) {
-        queryClient.invalidateQueries({
-          queryKey: queryKeys.projectData.byProject(variables.projectId),
-        });
-      }
-    },
+    errorMessage: "Failed to delete item. Changes were reverted.",
   });
 
   // Prompt confirmation dialog
