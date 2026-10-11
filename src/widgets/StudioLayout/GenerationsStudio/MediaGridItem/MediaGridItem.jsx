@@ -14,6 +14,7 @@ import { useWorkflowsStore } from "@/features/workflows/model/useWorkflowsStore"
 import { ActionBtn } from "./ActionBtn";
 import { StudioItemDropdownMenu } from "./StudioItemMenu";
 import { getStudioMenuItems, getWorkflowEntityType } from "./studioMenuConfig";
+import { CoreMediaItemView } from "@/widgets/CoreMediaItemView";
 import { useUpdateFolder, useDeleteFolder, useFolderMove } from "@/features/folders";
 
 const EMPTY_IMG = typeof window !== 'undefined' ? (() => {

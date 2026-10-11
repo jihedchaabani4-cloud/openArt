@@ -14,6 +14,7 @@ import {
 } from "@/shared/ui/dropdown-menu"
 import { Button } from "@/shared/ui/button"
 import { NavbarBackButton } from "@/widgets/NavbarCore/ui/NavbarBackButton"
+import { ConfirmDeleteDialog } from "@/widgets/dialogs/ConfirmDeleteDialog"
 import { useProjectFolders, useUpdateFolder, useDeleteFolder, useFolderMove } from "@/features/folders"
 
 export function StudioNavbarLeft({
