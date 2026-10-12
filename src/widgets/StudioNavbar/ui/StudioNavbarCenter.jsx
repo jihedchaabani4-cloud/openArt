@@ -13,8 +13,10 @@ export function StudioNavbarCenter({
 }) {
     return (
         <div className={cn(
-            "flex items-center justify-center transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] px-2",
-            searchExpanded ? "flex-1 w-full" : "flex-none w-full max-w-[420px] sm:max-w-[460px] mx-auto"
+            "flex items-center justify-center transition-[max-width,width] duration-350 ease-[cubic-bezier(0.22,1,0.36,1)] px-2 flex-none w-full mx-auto",
+            searchExpanded
+                ? "max-w-[560px] sm:max-w-[640px] md:max-w-[700px]"
+                : "max-w-[360px] sm:max-w-[420px] md:max-w-[460px]"
         )}>
             <div className="flex items-center gap-4 w-full min-w-0 relative">
                 <Input

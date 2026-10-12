@@ -120,4 +120,38 @@ describe("StudioNavbar Layout & Collection Page Header", () => {
     expect(rightWrapper.className).not.toContain("ml-auto flex flex-none");
     expect(rightWrapper.className).toContain("flex-1");
   });
+
+  it("smoothly expands search input from default max-width to expanded max-width without collapsing to width 0 or zero flex-basis", () => {
+    const { container: collapsedContainer } = renderWithClient(
+      <StudioNavbarCenter
+        searchExpanded={false}
+        searchInputRef={{ current: null }}
+        handleCloseSearch={vi.fn()}
+        handleOpenSearch={vi.fn()}
+        filters={{}}
+        setFilter={vi.fn()}
+      />
+    );
+    const collapsedWrapper = collapsedContainer.firstChild;
+    expect(collapsedWrapper.className).toContain("max-w-[460px]");
+    expect(collapsedWrapper.className).toContain("flex-none");
+
+    cleanup();
+
+    const { container: expandedContainer } = renderWithClient(
+      <StudioNavbarCenter
+        searchExpanded={true}
+        searchInputRef={{ current: null }}
+        handleCloseSearch={vi.fn()}
+        handleOpenSearch={vi.fn()}
+        filters={{}}
+        setFilter={vi.fn()}
+      />
+    );
+    const expandedWrapper = expandedContainer.firstChild;
+    // Must expand to a wider max-width (e.g. 680px/720px) rather than resetting to flex-1 (basis 0)
+    expect(expandedWrapper.className).not.toContain("flex-1");
+    expect(expandedWrapper.className).toContain("flex-none");
+    expect(expandedWrapper.className).toMatch(/max-w-\[(680px|700px|720px)\]/);
+  });
 });
