@@ -242,7 +242,7 @@ export default function CharactersPage({ params }) {
                 <div 
                     ref={scrollRef}
                     onScroll={handleScroll}
-                    className="flex-1 overflow-y-auto pt-[72px] overflow-x-hidden px-3 py-3 custom-scrollbar w-full"
+                    className="flex-1 overflow-y-auto pt-[56px] overflow-x-hidden px-3 custom-scrollbar w-full"
                 >
                     {visibleSheets.length === 0 ? (
                         <div className="w-full flex flex-col items-center justify-center py-28 text-center">
@@ -254,7 +254,7 @@ export default function CharactersPage({ params }) {
                             </p>
                         </div>
                     ) : (
-                        <div className="flex flex-col gap-6 w-full pb-32 pt-4">
+                        <div className="flex flex-col gap-6 w-full pb-32">
                             <RowsPhotoAlbum
                                 photos={photos}
                                 targetRowHeight={density.targetRowHeight}

@@ -198,7 +198,7 @@ export default function ElementsPage({ params }) {
                 <div 
                     ref={scrollRef}
                     onScroll={handleScroll}
-                    className="flex-1 overflow-y-auto pt-[72px] overflow-x-hidden px-3 py-3 custom-scrollbar w-full"
+                    className="flex-1 overflow-y-auto pt-[56px] overflow-x-hidden px-3 custom-scrollbar w-full"
                 >
                     {/* ── Elements Grid (Full Width 100%) ── */}
                     {visibleSheets.length === 0 ? (
@@ -220,7 +220,7 @@ export default function ElementsPage({ params }) {
                             </Button>
                         </div>
                     ) : (
-                        <div className="flex flex-col gap-6 w-full pb-32 pt-4">
+                        <div className="flex flex-col gap-6 w-full pb-32">
                             <RowsPhotoAlbum
                                 photos={photos}
                                 targetRowHeight={density.targetRowHeight}

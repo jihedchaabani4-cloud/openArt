@@ -332,7 +332,7 @@ export default function AssetsPage({ params }) {
                 <div 
                     ref={scrollRef}
                     onScroll={handleScroll}
-                    className="flex-1 overflow-y-auto pt-[72px] overflow-x-hidden px-3 py-3 custom-scrollbar"
+                    className="flex-1 overflow-y-auto pt-[56px] overflow-x-hidden px-3 custom-scrollbar"
                 >
                     <AnimatePresence mode="wait">
                         {combinedItems.length > 0 ? (

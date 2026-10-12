@@ -81,12 +81,12 @@ export function LeftNavigationRail() {
       style={{
         width: isExpanded ? 230 : 64,
       }}
-      className="h-full shrink-0 relative z-40 bg-black flex flex-col select-none py-3 px-2 overflow-hidden border-none"
+      className="h-full shrink-0 relative z-40 bg-black flex flex-col select-none pt-0 pb-3 px-2 overflow-hidden border-none"
     >
       {/* ── Top Spacer (animates cleanly with StudioNavbar hide/show) ── */}
       <motion.div
         initial={false}
-        animate={{ height: isNavbarHidden ? 0 : 64 }}
+        animate={{ height: isNavbarHidden ? 8 : 56 }}
         transition={{ duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
         className="w-full shrink-0 overflow-hidden"
       />
