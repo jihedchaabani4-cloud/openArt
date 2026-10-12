@@ -644,13 +644,7 @@ const CollectionMediaGridItem = React.memo(function CollectionMediaGridItem({
 
   const collectionName = col?.name || "Untitled collection";
   const collectionTileOverlay = (
-    <div
-      className="absolute inset-0 pointer-events-none"
-      style={{
-        background:
-          "var(--tile-scrim-gradient, linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.04) 20%, rgba(0, 0, 0, 0.12) 40%, rgba(0, 0, 0, 0.25) 60%, rgba(0, 0, 0, 0.4) 80%, rgba(0, 0, 0, 0.5)))",
-      }}
-    />
+    <div className="collection-tile-scrim" />
   );
 
   const handleDragStart = (e) => {
@@ -877,10 +871,6 @@ const CollectionMediaGridItem = React.memo(function CollectionMediaGridItem({
         contain: "paint layout",
         contentVisibility: "auto",
         containIntrinsicSize: `${Math.round(albumWidth)}px ${Math.round(albumWidth)}px`,
-        borderRadius: "var(--tile-border-radius, 16px)",
-        background: !coverUrl
-          ? "var(--collection-empty-thumbnail-background, linear-gradient(1deg, #333 0.49%, #4e4e4e 99.15%))"
-          : undefined,
       }
     : {
         width: "100%",
@@ -888,10 +878,6 @@ const CollectionMediaGridItem = React.memo(function CollectionMediaGridItem({
         transform: "translateZ(0)",
         contain: "paint layout",
         contentVisibility: "auto",
-        borderRadius: "var(--tile-border-radius, 16px)",
-        background: !coverUrl
-          ? "var(--collection-empty-thumbnail-background, linear-gradient(1deg, #333 0.49%, #4e4e4e 99.15%))"
-          : undefined,
       };
 
   const handleNavigate = useCallback(
@@ -924,8 +910,8 @@ const CollectionMediaGridItem = React.memo(function CollectionMediaGridItem({
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         className={cn(
-          "transition-all border border-white/10 cursor-pointer shadow-[0_18px_50px_rgba(0,0,0,0.38)] rounded-[16px]",
-          !coverUrl && "bg-[linear-gradient(1deg,#333_0.49%,#4e4e4e_99.15%)]",
+          "collection-tile",
+          !coverUrl && "collection-tile-empty",
           isDragOver && "outline outline-2 outline-white",
           className
         )}
@@ -972,29 +958,9 @@ const CollectionMediaGridItem = React.memo(function CollectionMediaGridItem({
         }
         bottom={
           !isRenaming && (
-            <div
-              className="title collection-title-container"
-              style={{
-                "--title-padding-top": "3rem",
-                "--title-padding-inline-end": "4.75rem",
-                position: "absolute",
-                bottom: 0,
-                insetInlineStart: 0,
-                width: "100%",
-                height: "fit-content",
-                boxSizing: "border-box",
-                paddingBlock: "var(--title-padding-top, 3rem) 1rem",
-                paddingInline: "1.25rem var(--title-padding-inline-end, 4.75rem)",
-                font: "var(--mat-sys-display-small, 400 2.25rem/2.75rem 'Google Sans', sans-serif)",
-                lineHeight: 1.25,
-                color: "var(--foreground-state-90, rgba(218, 220, 224, 0.9))",
-                pointerEvents: "none",
-                userSelect: "none",
-                WebkitFontSmoothing: "antialiased",
-              }}
-            >
+            <div className="title">
               <span
-                className="title-text pointer-events-auto cursor-pointer line-clamp-2 hover:text-white transition-colors"
+                className="title-text"
                 title={collectionName}
                 onClick={handleNavigate}
                 onDoubleClick={(e) => {
