@@ -308,20 +308,6 @@ export default function AssetsPage({ params }) {
     return (
         <div className="flex h-full w-full overflow-hidden text-white bg-background relative">
             <main className="flex-1 flex flex-col relative min-w-0 overflow-hidden z-10">
-                <AnimatePresence>
-                    {isDragging && (
-                        <motion.div
-                            initial={{ opacity: 0, y: -10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -10 }}
-                            className="absolute top-20 left-1/2 -translate-x-1/2 z-30 px-4 py-2 rounded-full bg-[#1e1f23]/95 backdrop-blur-xl border border-white/20 text-[13px] font-medium text-white shadow-2xl flex items-center gap-2 pointer-events-none"
-                        >
-                            <GoogleIcon iconName="drive_file_move" className="text-[17px] text-white/90" />
-                            <span>Drop onto a collection to move</span>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
-
                 {/* Preserve dragged workflow in DOM to prevent browser canceling HTML5 drag */}
                 {isDragging && draggedItem?.workflow && (
                     <div style={{ position: "fixed", top: -9999, left: -9999, pointerEvents: "none", opacity: 0 }}>
