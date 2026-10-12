@@ -8,3 +8,4 @@ export * as tagsService from './core/tagsService';
 export * as entityService from './core/entityService';
 export { adaptBackendModel, adaptBackendCatalog, getModelReferenceCapability } from './core/modelManagement';
 export { useDragAutoScroll, findScrollContainer, scrollContainerBy } from './useDragAutoScroll';
+export { useStudioItemDrag, detectDropTargetAtPoint } from './useStudioItemDrag';

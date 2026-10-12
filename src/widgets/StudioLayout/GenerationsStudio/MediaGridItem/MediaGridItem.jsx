@@ -9,7 +9,7 @@ import { ConfirmDeleteDialog } from "@/widgets/dialogs/ConfirmDeleteDialog";
 import { InlineRenamePill } from "@/shared/ui/InlineRenamePill";
 import { useWorkflowActions } from "@/features/workflows/model/useMediaActions";
 import { useUpdateWorkflow } from "@/features/workflows/api/workflowsApi";
-import { usePromptStore } from "@/features/studio";
+import { usePromptStore, useStudioItemDrag } from "@/features/studio";
 import { useWorkflowsStore } from "@/features/workflows/model/useWorkflowsStore";
 import { ActionBtn } from "./ActionBtn";
 import { StudioItemDropdownMenu } from "./StudioItemMenu";
@@ -50,10 +50,8 @@ const WorkflowMediaGridItem = React.memo(function WorkflowMediaGridItem({
   const [isDropdownOpen,      setIsDropdownOpen]      = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [isRenaming,          setIsRenaming]          = useState(false);
-  const [isDragging,          setIsDragging]          = useState(false);
   const [cardRect,            setCardRect]            = useState(null);
   const [measuredWidth,       setMeasuredWidth]       = useState(albumWidth || 0);
-  const [dragTarget,          setDragTarget]          = useState(null);
   
   const { mutateAsync: updateWorkflow } = useUpdateWorkflow();
   const showTileDetails = useWorkflowsStore(s => s.showTileDetails);
@@ -82,25 +80,6 @@ const WorkflowMediaGridItem = React.memo(function WorkflowMediaGridItem({
     usePromptStore.getState().setIsDraggingGalleryItem(false);
     usePromptStore.getState().setDraggedItem(null);
   }, []);
-
-  // ── Block-cursor fix while dragging ───────────────────────────────────
-  useEffect(() => {
-    if (!isDragging) return;
-    const hideBlockCursor = (e) => {
-      e.preventDefault();
-      e.dataTransfer.dropEffect = "move";
-    };
-    window.addEventListener("dragover", hideBlockCursor);
-    return () => window.removeEventListener("dragover", hideBlockCursor);
-  }, [isDragging]);
-
-  // ── Listen for drag target changes (collection hover / move-out hover) ──
-  useEffect(() => {
-    if (!isDragging) { setDragTarget(null); return; }
-    const handler = (e) => setDragTarget(e.detail?.target ?? null);
-    window.addEventListener("studio:drag-target-change", handler);
-    return () => window.removeEventListener("studio:drag-target-change", handler);
-  }, [isDragging]);
 
   // ── Throttled drag handler ─────────────────────────────────────────────
   const handleDrag = useCallback((e) => {
@@ -297,112 +276,23 @@ const WorkflowMediaGridItem = React.memo(function WorkflowMediaGridItem({
     },
   });
 
-  const pointerStartRef = useRef(null);
-  const isPointerDraggingRef = useRef(false);
-  const justDraggedRef = useRef(false);
-
-  const handlePointerDown = useCallback((e) => {
-    if (e.button !== 0 || isRenaming || !isDraggable) return;
-    if (e.target.closest("button, input, textarea, [data-prevent-drag], a, [role='menuitem']")) return;
-
-    pointerStartRef.current = { x: e.clientX, y: e.clientY };
-    isPointerDraggingRef.current = false;
-
-    const onPointerMove = (moveEvent) => {
-      if (!pointerStartRef.current) return;
-      const dx = moveEvent.clientX - pointerStartRef.current.x;
-      const dy = moveEvent.clientY - pointerStartRef.current.y;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-
-      if (!isPointerDraggingRef.current && dist > 5) {
-        isPointerDraggingRef.current = true;
-        setIsDragging(true);
-        usePromptStore.getState().setIsDraggingGalleryItem(true);
-        usePromptStore.getState().setDraggedItem({
-          type: "workflow",
-          id: workflow?.id || workflow?.name || item?.id,
-          workflow,
-          item,
-          url,
-        });
-        window.dispatchEvent(new Event("dragstart"));
-        window.dispatchEvent(new CustomEvent("studio:drag-start"));
-      }
-
-      if (isPointerDraggingRef.current) {
-        lastPos.current = { x: moveEvent.clientX, y: moveEvent.clientY };
-        mouseX.set(moveEvent.clientX);
-        mouseY.set(moveEvent.clientY);
-
-        const targetEl = document.elementFromPoint(moveEvent.clientX, moveEvent.clientY);
-        const colCard = targetEl?.closest("[data-collection-drop-id]");
-        const backBtn = targetEl?.closest("[data-drop-back]");
-        const rootDrop = targetEl?.closest("[data-drop-root]");
-
-        if (colCard) {
-          const colId = colCard.dataset.collectionDropId;
-          window.dispatchEvent(new CustomEvent("studio:pointer-hover-target", { detail: { target: "add-to-collection", collectionId: colId } }));
-          setDragTarget("add-to-collection");
-        } else if (backBtn) {
-          window.dispatchEvent(new CustomEvent("studio:pointer-hover-target", { detail: { target: "move-out", area: "navbar" } }));
-          setDragTarget("move-out");
-        } else if (rootDrop) {
-          window.dispatchEvent(new CustomEvent("studio:pointer-hover-target", { detail: { target: "move-out", area: "root" } }));
-          setDragTarget("move-out");
-        } else {
-          window.dispatchEvent(new CustomEvent("studio:pointer-hover-target", { detail: { target: null } }));
-          setDragTarget(null);
-        }
-      }
-    };
-
-    const onPointerUp = (upEvent) => {
-      window.removeEventListener("pointermove", onPointerMove);
-      window.removeEventListener("pointerup", onPointerUp);
-      window.removeEventListener("pointercancel", onPointerUp);
-
-      if (isPointerDraggingRef.current) {
-        isPointerDraggingRef.current = false;
-        justDraggedRef.current = true;
-        setTimeout(() => { justDraggedRef.current = false; }, 150);
-
-        setIsDragging(false);
-        usePromptStore.getState().setIsDraggingGalleryItem(false);
-        usePromptStore.getState().setDraggedItem(null);
-        setDragTarget(null);
-        window.dispatchEvent(new Event("dragend"));
-        window.dispatchEvent(new CustomEvent("studio:drag-end"));
-        window.dispatchEvent(new CustomEvent("studio:pointer-hover-target", { detail: { target: null } }));
-
-        const targetEl = document.elementFromPoint(upEvent.clientX, upEvent.clientY);
-        const colCard = targetEl?.closest("[data-collection-drop-id]");
-        const backBtn = targetEl?.closest("[data-drop-back]");
-        const rootDrop = targetEl?.closest("[data-drop-root]");
-
-        if (colCard) {
-          const targetFolderId = colCard.dataset.collectionDropId;
-          const wfId = workflow?.name || workflow?.id || item?.workflow_id || item?.id;
-          if (wfId && targetFolderId) {
-            window.dispatchEvent(new CustomEvent("studio:drop-to-collection", {
-              detail: { itemType: "workflow", itemId: wfId, targetFolderId }
-            }));
-          }
-        } else if (backBtn || rootDrop) {
-          const wfId = workflow?.name || workflow?.id || item?.workflow_id || item?.id;
-          if (wfId) {
-            window.dispatchEvent(new CustomEvent("studio:drop-to-back", {
-              detail: { itemType: "workflow", itemId: wfId, workflowId: wfId }
-            }));
-          }
-        }
-      }
-      pointerStartRef.current = null;
-    };
-
-    window.addEventListener("pointermove", onPointerMove);
-    window.addEventListener("pointerup", onPointerUp);
-    window.addEventListener("pointercancel", onPointerUp);
-  }, [isRenaming, isDraggable, workflow, item, url, mouseX, mouseY]);
+  const wfId = workflow?.name || workflow?.id || item?.workflow_id || item?.id;
+  const {
+    handlePointerDown,
+    isDragging,
+    dragTarget,
+    justDraggedRef,
+  } = useStudioItemDrag({
+    itemType: "workflow",
+    item: workflow || item,
+    itemId: wfId,
+    url,
+    isDraggable,
+    isRenaming,
+    mouseX,
+    mouseY,
+    lastPos,
+  });
 
   const handleDragStart = (e) => {
     e.dataTransfer.setData("imageUrl",   url);
@@ -744,10 +634,9 @@ const CollectionMediaGridItem = React.memo(function CollectionMediaGridItem({
 
   const { mutateAsync: updateFolder } = useUpdateFolder();
   const { mutateAsync: deleteFolder, isPending: isDeleting } = useDeleteFolder();
-  const { moveItem } = useFolderMove(projectId);
+  const { moveItem, executeMoveFromPayload } = useFolderMove(projectId);
 
   const [isDragOver, setIsDragOver] = useState(false);
-  const [isDraggingThis, setIsDraggingThis] = useState(false);
   const mouseX = useMotionValue(-500);
   const mouseY = useMotionValue(-500);
   const lastPos = useRef({ x: -500, y: -500 });
@@ -761,10 +650,6 @@ const CollectionMediaGridItem = React.memo(function CollectionMediaGridItem({
     <div className="collection-tile-scrim" />
   );
 
-  const pointerStartRef = useRef(null);
-  const isPointerDraggingRef = useRef(false);
-  const justDraggedRef = useRef(false);
-
   useEffect(() => {
     const handlePointerHover = (e) => {
       if (e.detail?.target === "add-to-collection" && e.detail?.collectionId === col?.id) {
@@ -775,15 +660,11 @@ const CollectionMediaGridItem = React.memo(function CollectionMediaGridItem({
     };
     const handlePointerDrop = (e) => {
       if (e.detail?.targetFolderId === col?.id && projectId) {
-        const { itemType, itemId, targetFolderId } = e.detail;
-        if (itemId && targetFolderId && itemId !== targetFolderId) {
-          moveItem({
-            itemType,
-            itemId,
-            targetFolderId,
-            projectId,
-          });
-        }
+        executeMoveFromPayload({
+          payload: e.detail,
+          targetFolderId: col.id,
+          projectId,
+        });
       }
     };
     window.addEventListener("studio:pointer-hover-target", handlePointerHover);
@@ -792,101 +673,22 @@ const CollectionMediaGridItem = React.memo(function CollectionMediaGridItem({
       window.removeEventListener("studio:pointer-hover-target", handlePointerHover);
       window.removeEventListener("studio:drop-to-collection", handlePointerDrop);
     };
-  }, [col?.id, projectId, moveItem]);
+  }, [col?.id, projectId, executeMoveFromPayload]);
 
-  const handlePointerDown = useCallback((e) => {
-    if (e.button !== 0 || isRenaming) return;
-    if (e.target.closest("button, input, textarea, [data-prevent-drag], a, [role='menuitem']")) return;
-
-    pointerStartRef.current = { x: e.clientX, y: e.clientY };
-    isPointerDraggingRef.current = false;
-
-    const onPointerMove = (moveEvent) => {
-      if (!pointerStartRef.current) return;
-      const dx = moveEvent.clientX - pointerStartRef.current.x;
-      const dy = moveEvent.clientY - pointerStartRef.current.y;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-
-      if (!isPointerDraggingRef.current && dist > 5) {
-        isPointerDraggingRef.current = true;
-        setIsDraggingThis(true);
-        usePromptStore.getState().setIsDraggingGalleryItem(true);
-        usePromptStore.getState().setDraggedItem({
-          type: "collection",
-          id: col?.id,
-          collection: col,
-        });
-        window.dispatchEvent(new Event("dragstart"));
-        window.dispatchEvent(new CustomEvent("studio:drag-start"));
-      }
-
-      if (isPointerDraggingRef.current) {
-        lastPos.current = { x: moveEvent.clientX, y: moveEvent.clientY };
-        mouseX.set(moveEvent.clientX);
-        mouseY.set(moveEvent.clientY);
-
-        const targetEl = document.elementFromPoint(moveEvent.clientX, moveEvent.clientY);
-        const colCard = targetEl?.closest("[data-collection-drop-id]");
-        const backBtn = targetEl?.closest("[data-drop-back]");
-        const rootDrop = targetEl?.closest("[data-drop-root]");
-
-        if (colCard && colCard.dataset.collectionDropId !== col?.id) {
-          const colId = colCard.dataset.collectionDropId;
-          window.dispatchEvent(new CustomEvent("studio:pointer-hover-target", { detail: { target: "add-to-collection", collectionId: colId } }));
-        } else if (backBtn) {
-          window.dispatchEvent(new CustomEvent("studio:pointer-hover-target", { detail: { target: "move-out", area: "navbar" } }));
-        } else if (rootDrop) {
-          window.dispatchEvent(new CustomEvent("studio:pointer-hover-target", { detail: { target: "move-out", area: "root" } }));
-        } else {
-          window.dispatchEvent(new CustomEvent("studio:pointer-hover-target", { detail: { target: null } }));
-        }
-      }
-    };
-
-    const onPointerUp = (upEvent) => {
-      window.removeEventListener("pointermove", onPointerMove);
-      window.removeEventListener("pointerup", onPointerUp);
-      window.removeEventListener("pointercancel", onPointerUp);
-
-      if (isPointerDraggingRef.current) {
-        isPointerDraggingRef.current = false;
-        justDraggedRef.current = true;
-        setTimeout(() => { justDraggedRef.current = false; }, 150);
-
-        setIsDraggingThis(false);
-        usePromptStore.getState().setIsDraggingGalleryItem(false);
-        usePromptStore.getState().setDraggedItem(null);
-        window.dispatchEvent(new Event("dragend"));
-        window.dispatchEvent(new CustomEvent("studio:drag-end"));
-        window.dispatchEvent(new CustomEvent("studio:pointer-hover-target", { detail: { target: null } }));
-
-        const targetEl = document.elementFromPoint(upEvent.clientX, upEvent.clientY);
-        const colCard = targetEl?.closest("[data-collection-drop-id]");
-        const backBtn = targetEl?.closest("[data-drop-back]");
-        const rootDrop = targetEl?.closest("[data-drop-root]");
-
-        if (colCard && colCard.dataset.collectionDropId !== col?.id) {
-          const targetFolderId = colCard.dataset.collectionDropId;
-          if (col?.id && targetFolderId) {
-            window.dispatchEvent(new CustomEvent("studio:drop-to-collection", {
-              detail: { itemType: "collection", itemId: col.id, targetFolderId }
-            }));
-          }
-        } else if (backBtn || rootDrop) {
-          if (col?.id) {
-            window.dispatchEvent(new CustomEvent("studio:drop-to-back", {
-              detail: { itemType: "collection", itemId: col.id, collectionId: col.id }
-            }));
-          }
-        }
-      }
-      pointerStartRef.current = null;
-    };
-
-    window.addEventListener("pointermove", onPointerMove);
-    window.addEventListener("pointerup", onPointerUp);
-    window.addEventListener("pointercancel", onPointerUp);
-  }, [isRenaming, col, mouseX, mouseY]);
+  const {
+    handlePointerDown,
+    isDragging: isDraggingThis,
+    justDraggedRef,
+  } = useStudioItemDrag({
+    itemType: "collection",
+    item: col,
+    itemId: col?.id,
+    isDraggable: true,
+    isRenaming,
+    mouseX,
+    mouseY,
+    lastPos,
+  });
 
   const handleDragStart = (e) => {
     if (isRenaming) return;
@@ -967,35 +769,13 @@ const CollectionMediaGridItem = React.memo(function CollectionMediaGridItem({
     setIsDragOver(false);
     window.dispatchEvent(new CustomEvent("studio:drag-target-change", { detail: { target: null } }));
 
-    const currentDragged = usePromptStore.getState().draggedItem;
-    const itemType = e.dataTransfer.getData("itemType") || currentDragged?.type;
-    const targetFolderId = col?.id;
-
-    if (!targetFolderId) return;
-
-    if (itemType === "workflow" || currentDragged?.type === "workflow") {
-      const itemId = e.dataTransfer.getData("workflowId") ||
-                     currentDragged?.id ||
-                     e.dataTransfer.getData("assetId");
-      if (!itemId) return;
-
-      moveItem({
-        itemType: "workflow",
-        itemId,
-        targetFolderId,
-        projectId,
-      });
-    } else if (itemType === "collection" || currentDragged?.type === "collection") {
-      const draggedFolderId = e.dataTransfer.getData("collectionId") || currentDragged?.id;
-      if (!draggedFolderId || draggedFolderId === targetFolderId) return;
-
-      moveItem({
-        itemType: "collection",
-        itemId: draggedFolderId,
-        targetFolderId,
-        projectId,
-      });
-    }
+    if (!col?.id) return;
+    executeMoveFromPayload({
+      payload: e.dataTransfer,
+      fallbackDraggedItem: usePromptStore.getState().draggedItem,
+      targetFolderId: col.id,
+      projectId,
+    });
   };
 
   // Dynamically track card position while rename is open

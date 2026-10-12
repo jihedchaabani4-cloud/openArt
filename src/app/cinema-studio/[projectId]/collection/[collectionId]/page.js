@@ -108,7 +108,7 @@ export default function CollectionDetailPage({ params }) {
   // Drag state & move mutations
   const isDragging = usePromptStore((s) => s.isDraggingGalleryItem);
   const draggedItem = usePromptStore((s) => s.draggedItem);
-  const { moveItemOut } = useFolderMove(projectId);
+  const { executeMoveFromPayload } = useFolderMove(projectId);
   const [isRootDragOver, setIsRootDragOver] = React.useState(false);
 
   const handleRootDragOver = React.useCallback((e) => {
@@ -131,33 +131,14 @@ export default function CollectionDetailPage({ params }) {
     e.stopPropagation();
     setIsRootDragOver(false);
 
-    const currentDragged = usePromptStore.getState().draggedItem;
-    const itemType = e.dataTransfer.getData("itemType") || currentDragged?.type;
-
-    if (itemType === "workflow" || currentDragged?.type === "workflow") {
-      const itemId = currentDragged?.id ||
-                     e.dataTransfer.getData("workflowId") ||
-                     e.dataTransfer.getData("assetId");
-      if (!itemId) return;
-
-      moveItemOut({
-        itemType: "workflow",
-        itemId,
-        currentFolderId: collectionId,
-        projectId,
-      });
-    } else if (itemType === "collection" || currentDragged?.type === "collection") {
-      const draggedFolderId = e.dataTransfer.getData("collectionId") || currentDragged?.id;
-      if (!draggedFolderId || draggedFolderId === collectionId) return;
-
-      moveItemOut({
-        itemType: "collection",
-        itemId: draggedFolderId,
-        currentFolderId: collectionId,
-        projectId,
-      });
-    }
-  }, [moveItemOut, projectId, collectionId]);
+    executeMoveFromPayload({
+      payload: e.dataTransfer,
+      fallbackDraggedItem: usePromptStore.getState().draggedItem,
+      currentFolderId: collectionId,
+      projectId,
+      isMoveOut: true,
+    });
+  }, [executeMoveFromPayload, projectId, collectionId]);
 
   React.useEffect(() => {
     const onPointerHover = (e) => {

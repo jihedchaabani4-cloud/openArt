@@ -71,7 +71,7 @@ export function StudioNavbarLeft({
     const { mutateAsync: deleteProject, isPending: isProjectDeleting } = useDeleteProject()
     const { mutateAsync: updateFolder } = useUpdateFolder()
     const { mutateAsync: deleteFolder, isPending: isFolderDeleting } = useDeleteFolder()
-    const { moveItemOut } = useFolderMove(projectId)
+    const { executeMoveFromPayload } = useFolderMove(projectId)
     const { downloadCollection, isDownloading } = useDownloadCollection()
 
     const favoriteFolderIds = useWorkflowsStore((s) => s.favoriteFolderIds || {})
@@ -121,32 +121,13 @@ export function StudioNavbarLeft({
     const isDeleting = isCollectionPage ? isFolderDeleting : isProjectDeleting
 
     const executeMoveToParent = React.useCallback((transferData) => {
-        const { itemType, workflowId, assetId, collectionId: draggedFolderId, itemId } = transferData
-
-        if (itemType === "workflow") {
-            const id = itemId || workflowId || assetId
-            if (id) {
-                // Optimistic move: onMutate executes synchronously, errors rollback and show toast.
-                moveItemOut({
-                    itemType: "workflow",
-                    itemId: id,
-                    currentFolderId: collectionId,
-                    projectId,
-                })
-            }
-        } else if (itemType === "collection") {
-            const folderId = itemId || draggedFolderId
-            if (folderId && folderId !== collectionId) {
-                moveItemOut({
-                    itemType: "collection",
-                    itemId: folderId,
-                    currentFolderId: collectionId,
-                    projectId,
-                })
-            }
-        }
-        // Move done — no navigation, cache is optimistically updated
-    }, [collectionId, projectId, moveItemOut])
+        executeMoveFromPayload({
+            payload: transferData,
+            currentFolderId: collectionId,
+            projectId,
+            isMoveOut: true,
+        })
+    }, [collectionId, projectId, executeMoveFromPayload])
 
     const handleBackDragOver = React.useCallback((e) => {
         if (!isCollectionPage) return

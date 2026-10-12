@@ -59,6 +59,46 @@ export function resolveMoveOutTarget({ folders = [], currentFolderId, itemType, 
 }
 
 /**
+ * Pure helper to parse drag transfer data from either HTML5 DataTransfer, CustomEvent detail, or plain object.
+ *
+ * @param {Object} [source] - Event payload, CustomEvent detail, or DataTransfer instance
+ * @param {Object} [fallbackDraggedItem] - Item from usePromptStore
+ * @returns {{ itemType: "workflow"|"collection", itemId: string|null }}
+ */
+export function parseTransferPayload(source, fallbackDraggedItem = null) {
+  if (!source && !fallbackDraggedItem) {
+    return { itemType: "workflow", itemId: null };
+  }
+
+  // If source has getData (HTML5 DataTransfer)
+  if (source && typeof source.getData === "function") {
+    const rawType = source.getData("itemType") || fallbackDraggedItem?.type;
+    const itemType = rawType === "collection" ? "collection" : "workflow";
+    const itemId =
+      fallbackDraggedItem?.id ||
+      source.getData("itemId") ||
+      source.getData("workflowId") ||
+      source.getData("assetId") ||
+      source.getData("collectionId") ||
+      null;
+    return { itemType, itemId };
+  }
+
+  // Plain object or CustomEvent detail
+  const rawType = source?.itemType || fallbackDraggedItem?.type;
+  const itemType = rawType === "collection" ? "collection" : "workflow";
+  const itemId =
+    source?.itemId ||
+    source?.workflowId ||
+    source?.assetId ||
+    source?.collectionId ||
+    fallbackDraggedItem?.id ||
+    null;
+
+  return { itemType, itemId };
+}
+
+/**
  * Unified hook for moving items (workflows and collections).
  * Encapsulates Layer 2 (Move logic) delegating execution to Layer 1 (Base mutations).
  *
@@ -130,10 +170,50 @@ export function useFolderMove(projectId) {
     [folders, moveItem]
   );
 
+  /**
+   * Unified dispatcher for moving an item from a drag/drop payload (Move IN or Move OUT).
+   */
+  const executeMoveFromPayload = React.useCallback(
+    async ({
+      payload,
+      fallbackDraggedItem = null,
+      targetFolderId = null,
+      currentFolderId = null,
+      isMoveOut = false,
+      projectId: overrideProjectId,
+    }) => {
+      const { itemType, itemId } = parseTransferPayload(payload, fallbackDraggedItem);
+      if (!itemId) return null;
+
+      // Prevent moving a collection into itself
+      if (itemType === "collection" && targetFolderId && itemId === targetFolderId) {
+        return null;
+      }
+
+      if (isMoveOut) {
+        return moveItemOut({
+          itemType,
+          itemId,
+          currentFolderId,
+          projectId: overrideProjectId,
+        });
+      }
+
+      return moveItem({
+        itemType,
+        itemId,
+        targetFolderId,
+        projectId: overrideProjectId,
+      });
+    },
+    [moveItem, moveItemOut]
+  );
+
   return {
     folders,
     moveItem,
     moveItemOut,
+    executeMoveFromPayload,
     moveToFolder: moveItem,
     moveWorkflow: ({ workflowId, targetFolderId, projectId: pId }) =>
       moveItem({ itemType: "workflow", itemId: workflowId, targetFolderId, projectId: pId }),
