@@ -105,6 +105,18 @@ export const useWorkflowUiStore = create(
       draggedImage: null,
       setDraggedImage: (img) => set({ draggedImage: img }),
       clearDraggedImage: () => set({ draggedImage: null }),
+
+      // Favorite Collections / Folders
+      favoriteFolderIds: {},
+      toggleFavoriteFolder: (id) => {
+        if (!id) return;
+        set((s) => ({
+          favoriteFolderIds: {
+            ...(s.favoriteFolderIds || {}),
+            [id]: !(s.favoriteFolderIds || {})[id],
+          },
+        }));
+      },
     }),
     {
       name: "studio-ui-settings",
@@ -115,6 +127,7 @@ export const useWorkflowUiStore = create(
         showDetails: state.showDetails,
         clearPromptOnSubmit: state.clearPromptOnSubmit,
         showUploadedMedia: state.showUploadedMedia,
+        favoriteFolderIds: state.favoriteFolderIds,
       }),
     }
   )

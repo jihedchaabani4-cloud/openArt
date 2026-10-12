@@ -15,7 +15,7 @@ import { ActionBtn } from "./ActionBtn";
 import { StudioItemDropdownMenu } from "./StudioItemMenu";
 import { getStudioMenuItems, getWorkflowEntityType } from "./studioMenuConfig";
 import { CoreMediaItemView } from "@/widgets/CoreMediaItemView";
-import { useUpdateFolder, useDeleteFolder, useFolderMove } from "@/features/folders";
+import { useUpdateFolder, useDeleteFolder, useFolderMove, useDownloadCollection } from "@/features/folders";
 
 const EMPTY_IMG = typeof window !== 'undefined' ? (() => {
   const img = new Image();
@@ -622,7 +622,11 @@ const CollectionMediaGridItem = React.memo(function CollectionMediaGridItem({
   const setActiveCollectionId = useWorkflowsStore((s) => s.setActiveCollectionId);
   const activeCollectionId = useWorkflowsStore((s) => s.activeCollectionId);
 
-  const [isLiked, setIsLiked] = useState(Boolean(col?.favorited || col?.is_liked));
+  const favoriteFolderIds = useWorkflowsStore((s) => s.favoriteFolderIds || {});
+  const toggleFavoriteFolder = useWorkflowsStore((s) => s.toggleFavoriteFolder);
+  const folderId = col?.id;
+  const isLiked = Boolean(favoriteFolderIds[folderId] ?? col?.favorited ?? col?.is_liked);
+  const { downloadCollection, isDownloading } = useDownloadCollection();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [isRenaming, setIsRenaming] = useState(false);
@@ -846,7 +850,38 @@ const CollectionMediaGridItem = React.memo(function CollectionMediaGridItem({
     return { top: `${top}px`, left: `${left}px` };
   };
 
+  const handleToggleLike = (e) => {
+    e?.stopPropagation?.();
+    if (folderId) toggleFavoriteFolder?.(folderId);
+  };
+
+  const handleDownload = (e) => {
+    e?.stopPropagation?.();
+    if (folderId) {
+      downloadCollection({
+        collectionId: folderId,
+        collectionName,
+        projectId,
+      });
+    }
+  };
+
   const menuItems = [
+    {
+      key: "like",
+      label: isLiked ? "Unlike collection" : "Like collection",
+      icon: "favorite",
+      fill: isLiked,
+      iconClassName: isLiked ? "text-red-400 fill-red-400" : undefined,
+      onClick: handleToggleLike,
+    },
+    {
+      key: "download",
+      label: isDownloading ? "Downloading..." : "Download collection",
+      icon: "download",
+      disabled: isDownloading,
+      onClick: handleDownload,
+    },
     {
       key: "rename",
       label: "Rename",
@@ -926,17 +961,14 @@ const CollectionMediaGridItem = React.memo(function CollectionMediaGridItem({
           >
             <ButtonGroup className="rounded-[10px] border border-white/10 bg-[#343434]/95 backdrop-blur-md shadow-[0_14px_34px_rgba(0,0,0,0.48)]">
               <ActionBtn
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsLiked((v) => !v);
-                }}
+                onClick={handleToggleLike}
                 title={isLiked ? "Unlike collection" : "Like collection"}
                 className="bg-transparent text-white hover:bg-white/12"
               >
                 <GoogleIcon
                   iconName="favorite"
                   fill={isLiked}
-                  className={cn("text-[13px]", isLiked ? "text-red-400" : "text-white/85")}
+                  className={cn("text-[13px]", isLiked ? "text-red-400 fill-red-400" : "text-white/85")}
                 />
               </ActionBtn>
               <StudioItemDropdownMenu

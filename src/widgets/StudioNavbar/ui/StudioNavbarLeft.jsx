@@ -15,7 +15,8 @@ import {
 import { Button } from "@/shared/ui/button"
 import { NavbarBackButton } from "@/widgets/NavbarCore/ui/NavbarBackButton"
 import { ConfirmDeleteDialog } from "@/widgets/dialogs/ConfirmDeleteDialog"
-import { useProjectFolders, useUpdateFolder, useDeleteFolder, useFolderMove } from "@/features/folders"
+import { useProjectFolders, useUpdateFolder, useDeleteFolder, useFolderMove, useDownloadCollection } from "@/features/folders"
+import { useWorkflowsStore } from "@/features/workflows/model/useWorkflowsStore"
 
 export function StudioNavbarLeft({
     searchExpanded,
@@ -70,6 +71,25 @@ export function StudioNavbarLeft({
     const { mutateAsync: updateFolder } = useUpdateFolder()
     const { mutateAsync: deleteFolder, isPending: isFolderDeleting } = useDeleteFolder()
     const { moveItemOut } = useFolderMove(projectId)
+    const { downloadCollection, isDownloading } = useDownloadCollection()
+
+    const favoriteFolderIds = useWorkflowsStore((s) => s.favoriteFolderIds || {})
+    const toggleFavoriteFolder = useWorkflowsStore((s) => s.toggleFavoriteFolder)
+    const isLiked = Boolean(favoriteFolderIds[collectionId] ?? activeCollection?.favorited ?? activeCollection?.is_liked)
+
+    const handleToggleLike = () => {
+        if (collectionId) toggleFavoriteFolder?.(collectionId)
+    }
+
+    const handleDownloadCollection = () => {
+        if (!collectionId) return
+        downloadCollection({
+            collectionId,
+            collectionName: displayName,
+            projectId,
+            folders: collections,
+        })
+    }
 
     // Independent drag detection via window drag events (zero coupling to prompt-bar)
     const [isDragging, setIsDragging] = React.useState(false)
@@ -276,7 +296,23 @@ export function StudioNavbarLeft({
                         <GoogleIcon iconName="more_vert" className="text-[16px]" />
                     </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="min-w-[140px]">
+                <DropdownMenuContent align="start" className="min-w-[160px]">
+                    {isCollectionPage && (
+                        <>
+                            <DropdownMenuItem onClick={handleToggleLike}>
+                                <GoogleIcon
+                                    iconName="favorite"
+                                    fill={isLiked}
+                                    className={cn("text-[13px]", isLiked ? "text-red-400 fill-red-400" : "")}
+                                />
+                                {isLiked ? "Unlike collection" : "Like collection"}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={handleDownloadCollection} disabled={isDownloading}>
+                                <GoogleIcon iconName="download" className="text-[13px]" />
+                                {isDownloading ? "Downloading..." : "Download collection"}
+                            </DropdownMenuItem>
+                        </>
+                    )}
                     <DropdownMenuItem onClick={() => nameRef.current?.startEditing()}>
                         <GoogleIcon iconName="edit" className="text-[13px]" />
                       Rename
