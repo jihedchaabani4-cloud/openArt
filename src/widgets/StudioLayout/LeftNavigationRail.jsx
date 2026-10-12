@@ -81,7 +81,7 @@ export function LeftNavigationRail() {
       style={{
         width: isExpanded ? 230 : 64,
       }}
-      className="h-full shrink-0 relative z-40 bg-black flex flex-col select-none py-3 px-2 overflow-hidden border-none"
+      className="h-full shrink-0 relative z-40 bg-background flex flex-col select-none py-3 px-2 overflow-hidden border-none"
     >
       {/* ── Top Spacer (animates cleanly with StudioNavbar hide/show) ── */}
       <motion.div
