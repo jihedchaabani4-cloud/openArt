@@ -12,7 +12,12 @@ const LTX_API_BASE = "https://api.ltx.io/v2";
 const LTX_API_KEY = process.env.LTX_API_KEY;
 
 /** Models that natively support first+last frame (image-to-video with last_frame_uri) */
-const FRAME_MODELS = new Set(["ltx-2-3-pro", "ltx-2-3-fast"]);
+const FRAME_MODELS = new Set([
+  "ltx-2-3-pro",
+  "ltx_2_3_pro",
+  "ltx-2-3-fast",
+  "ltx_2_3_fast",
+]);
 
 /**
  * Resolves a workflow asset reference to a publicly accessible URL.
@@ -153,5 +158,5 @@ export async function pollLtxJob(jobId, endpoint, { pollIntervalMs = 5000, maxAt
  * @returns {boolean}
  */
 export function isLtxModel(modelId) {
-  return typeof modelId === "string" && modelId.startsWith("ltx-");
+  return typeof modelId === "string" && (modelId.startsWith("ltx-") || modelId.startsWith("ltx_"));
 }
