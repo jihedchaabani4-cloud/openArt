@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { useParams, useRouter } from "next/navigation"
+import { useParams, useRouter, useSearchParams } from "next/navigation"
 import { motion } from "framer-motion"
 import { GoogleIcon } from "@/shared/ui/GoogleIcon"
 import { Button } from "@/shared/ui/button"
@@ -9,6 +9,7 @@ import { downloadFile } from "@/shared/lib/utils"
 import { getPrimaryMediaConfig } from "@/shared/lib/generationUtils"
 import { EditableDisplayName } from "@/shared/ui/EditableDisplayName"
 import { useUpdateWorkflow, useDeleteMedia } from "@/features/workflows/api/workflowsApi"
+import { useProjectFolders } from "@/features/folders"
 import { UserDropdown } from "@/widgets/StudioNavbar/ui/UserDropdown"
 import { NavbarCore, NavbarAction } from "@/widgets/NavbarCore"
 import { ConfirmDeleteDialog } from "@/widgets/dialogs/ConfirmDeleteDialog"
@@ -80,20 +81,80 @@ function buildCleanWorkflowTitle(workflow) {
     return "Untitled Workflow"
 }
 
+export function resolveEditNavbarBackDestination({
+    workflow,
+    queryCollectionId = null,
+    projectId,
+    folders = [],
+    fallbackBackUrl = null,
+    fallbackBackLabel = null,
+}) {
+    const workflowFolderId =
+        workflow?.folder_id ||
+        workflow?.folderId ||
+        workflow?.metadata?.folder_id ||
+        workflow?.metadata?.folderId ||
+        null
+
+    const collectionId = workflowFolderId || queryCollectionId || null
+
+    if (collectionId) {
+        const folder = Array.isArray(folders)
+            ? folders.find((f) => (f?.id || f?.name) === collectionId)
+            : null
+        const folderName = folder?.name || null
+
+        return {
+            collectionId,
+            destination: `/cinema-studio/${projectId}/collection/${collectionId}`,
+            label: folderName ? `Back to ${folderName}` : "Back to collection",
+        }
+    }
+
+    return {
+        collectionId: null,
+        destination: fallbackBackUrl || `/cinema-studio/${projectId}/assets`,
+        label: fallbackBackLabel || "Back to assets",
+    }
+}
+
 export function EditNavbar({
     workflow,
     activeItem,
     showHistory = true,
-    onToggleHistory = () => {}
+    onToggleHistory = () => {},
+    fallbackBackUrl = null,
+    fallbackBackLabel = null,
 }) {
     const { projectId } = useParams()
     const router = useRouter()
+    const searchParams = useSearchParams()
     const nameRef = React.useRef(null)
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false)
     const [isDownloading, setIsDownloading] = React.useState(false)
     const displayTitle = React.useMemo(() => buildCleanWorkflowTitle(workflow), [workflow])
     const { mutateAsync: updateWorkflow } = useUpdateWorkflow()
     const { mutateAsync: deleteMedia } = useDeleteMedia()
+
+    const queryCollectionId = searchParams?.get("collectionId") || searchParams?.get("folderId") || null
+
+    const { data: rawFolders = [] } = useProjectFolders(projectId)
+    const folders = React.useMemo(() => {
+        if (Array.isArray(rawFolders)) return rawFolders
+        if (Array.isArray(rawFolders?.items)) return rawFolders.items
+        return []
+    }, [rawFolders])
+
+    const { destination: backDestination, label: backLabel } = React.useMemo(() => {
+        return resolveEditNavbarBackDestination({
+            workflow,
+            queryCollectionId,
+            projectId,
+            folders,
+            fallbackBackUrl,
+            fallbackBackLabel,
+        })
+    }, [workflow, queryCollectionId, projectId, folders, fallbackBackUrl, fallbackBackLabel])
 
     const handleEditWorkflowName = (nextName) => {
         const workflowId = workflow?.id || workflow?.name
@@ -131,14 +192,14 @@ export function EditNavbar({
         deleteMedia({ mediaId, projectId })
         // If it was the last item, redirect back immediately
         if (workflow?.items?.length <= 1) {
-            router.push(`/cinema-studio/${projectId}/assets`)
+            router.push(backDestination)
         }
     }
 
     return (
         <NavbarCore
-            onBack={() => router.push(`/cinema-studio/${projectId}/assets`)}
-            backLabel="Back to assets"
+            onBack={() => router.push(backDestination)}
+            backLabel={backLabel}
             left={
                 <>
                     <EditableDisplayName
@@ -204,7 +265,7 @@ export function EditNavbar({
                     <NavbarAction
                         variant="white"
                         label="Done"
-                        onClick={() => router.push(`/cinema-studio/${projectId}/assets`)}
+                        onClick={() => router.push(backDestination)}
                     />
                 </>
             }

@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { useParams, useRouter } from "next/navigation"
+import { useParams, useRouter, useSearchParams } from "next/navigation"
 import { useFilteredWorkflows } from "@/features/workflows/model/useFilteredWorkflows"
 import { EditMediaView } from "@/widgets/EditMediaView"
 import { WorkflowMediaGallery } from "@/features/workflows/ui/WorkflowMediaGallery"
@@ -17,6 +17,8 @@ import { LoadingScreen } from "@/shared/ui/LoadingScreen"
 export default function AssetEditPage() {
     const { projectId, workflowId } = useParams()
     const router = useRouter()
+    const searchParams = useSearchParams()
+    const queryCollectionId = searchParams?.get("collectionId") || searchParams?.get("folderId") || null
     
     const setPrimaryMediaMutation = useSetPrimaryMedia()
     
@@ -26,12 +28,15 @@ export default function AssetEditPage() {
     const workflows = fetchResult?.filteredWorkflows || []
     const workflow = workflows.find(w => (w.id || w.name) === workflowId)
 
-    // Redirect back to assets if workflow is not found after loading
+    // Redirect back to collection or assets if workflow is not found after loading
     React.useEffect(() => {
         if (!isLoading && !workflow && workflows.length > 0) {
-            router.replace(`/cinema-studio/${projectId}/assets`);
+            const fallback = queryCollectionId
+                ? `/cinema-studio/${projectId}/collection/${queryCollectionId}`
+                : `/cinema-studio/${projectId}/assets`;
+            router.replace(fallback);
         }
-    }, [isLoading, workflow, workflows.length, router, projectId]);
+    }, [isLoading, workflow, workflows.length, router, projectId, queryCollectionId]);
 
     const [activeItem, setActiveItem] = React.useState(null)
     const [showHistory, setShowHistory] = React.useState(true)

@@ -268,9 +268,9 @@ export default function CollectionDetailPage({ params }) {
     (workflow) => {
       const workflowId = workflow?.id || workflow?.name;
       if (!workflowId || !projectId) return;
-      router.push(`/cinema-studio/${projectId}/assets/edit/${workflowId}`);
+      router.push(`/cinema-studio/${projectId}/assets/edit/${workflowId}?collectionId=${collectionId}`);
     },
-    [projectId, router]
+    [projectId, collectionId, router]
   );
 
   // Navigate into a sub-collection

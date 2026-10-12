@@ -115,6 +115,8 @@ export default function ElementWorkflowEditPage() {
                 workflow={workflow}
                 showHistory={showHistory}
                 onToggleHistory={() => setShowHistory(!showHistory)}
+                fallbackBackUrl={`/cinema-studio/${projectId}/elements`}
+                fallbackBackLabel="Back to elements"
             />
 
             <div className="flex-1 flex flex-col overflow-hidden p-4 pt-20">
