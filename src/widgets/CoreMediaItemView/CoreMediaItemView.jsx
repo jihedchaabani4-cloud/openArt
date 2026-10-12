@@ -311,13 +311,13 @@ export function CoreMediaItemView({
             )}
             {effectiveShowVideoBadge && (
               <div
-                className="flex items-center justify-center w-7 h-7 rounded-lg bg-black/40 backdrop-blur-md text-white drop-shadow-md pointer-events-none select-none"
+                className="flex items-center justify-center w-7 h-7 bg-transparent border-0 shadow-none pointer-events-none select-none"
                 title="Video"
                 aria-label="Video"
               >
                 <GoogleIcon
                   iconName="videocam"
-                  className="text-[16px] text-white"
+                  className="text-[16px] text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]"
                 />
               </div>
             )}

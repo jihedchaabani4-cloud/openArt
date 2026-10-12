@@ -147,8 +147,11 @@ describe("CoreMediaItemView - Liked top-left indicator badge", () => {
     const videoBadge = screen.getByTitle("Video");
     expect(videoBadge).toBeDefined();
     expect(videoBadge.getAttribute("aria-label")).toBe("Video");
+    expect(videoBadge.className).toContain("bg-transparent");
+    expect(videoBadge.className).not.toContain("bg-black/40");
     const icon = videoBadge.querySelector(".mat-icon, span");
     expect(icon?.textContent).toContain("videocam");
+    expect(icon?.className).toContain("text-white");
   });
 
   it("does not render video indicator icon when isVideo is false", () => {
