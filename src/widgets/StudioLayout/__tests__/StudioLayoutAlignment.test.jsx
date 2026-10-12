@@ -121,3 +121,21 @@ describe("EditNavbar & NavbarCore matches StudioNavbar layout", () => {
     expect(navbarCoreFile).toMatch(/initial=\{false\}/);
   });
 });
+
+describe("Media Item border radius", () => {
+  it("uses rounded-xl instead of rounded-2xl across MediaGridItem and gallery views", () => {
+    const assetsFile = fs.readFileSync(
+      path.resolve(__dirname, "../../../app/cinema-studio/[projectId]/assets/page.js"),
+      "utf8"
+    );
+    const mediaGridItemFile = fs.readFileSync(
+      path.resolve(__dirname, "../GenerationsStudio/MediaGridItem/MediaGridItem.jsx"),
+      "utf8"
+    );
+
+    expect(assetsFile).toContain("rounded-xl");
+    expect(assetsFile).not.toContain("rounded-2xl");
+    expect(mediaGridItemFile).toContain("rounded-xl");
+    expect(mediaGridItemFile).not.toContain("rounded-2xl");
+  });
+});

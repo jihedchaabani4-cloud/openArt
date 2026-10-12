@@ -397,7 +397,7 @@ const WorkflowMediaGridItem = React.memo(function WorkflowMediaGridItem({
           setIsDeleteConfirmOpen(true);
         }}
         className={cn(
-          "bg-[#0a0a0a] rounded-2xl outline-2 outline-transparent transition-opacity duration-200",
+          "bg-[#0a0a0a] rounded-xl outline-2 outline-transparent transition-opacity duration-200",
           isGalleryDragging && "opacity-50",
           canNavigate && !isRenaming
             ? (isElementSheet ? "cursor-pointer shadow-lg hover:shadow-2xl" : "cursor-grab active:cursor-grabbing shadow-lg hover:shadow-2xl")

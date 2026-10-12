@@ -245,7 +245,7 @@ export default function AssetsPage({ params }) {
                     coverIsVideo={photo.coverIsVideo}
                     projectId={projectId}
                     onClick={photo.itemType === "collection" ? handleCollectionClick : handleWorkflowClick}
-                    className="rounded-2xl border-none shadow-xl"
+                    className="rounded-xl border-none shadow-xl"
                     width={width}
                     height={height}
                 />

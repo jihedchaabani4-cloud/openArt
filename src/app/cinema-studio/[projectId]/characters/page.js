@@ -208,7 +208,7 @@ export default function CharactersPage({ params }) {
                 key={photo.key}
                 workflow={photo.workflow}
                 onClick={handleWorkflowClick}
-                className="rounded-2xl border-none shadow-xl"
+                className="rounded-xl border-none shadow-xl"
                 width={width}
                 height={height}
                 aspect={photo.aspect}

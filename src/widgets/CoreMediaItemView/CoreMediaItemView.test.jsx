@@ -111,4 +111,16 @@ describe("CoreMediaItemView - Liked top-left indicator badge", () => {
       window.history.pushState({}, "", originalPath);
     }
   });
+
+  it("uses rounded-xl border radius instead of rounded-2xl to subtly reduce corner curvature", () => {
+    const { container } = render(
+      <CoreMediaItemView
+        src="https://example.com/test.png"
+        status="completed"
+      />
+    );
+    const card = container.firstChild;
+    expect(card.className).toContain("rounded-xl");
+    expect(card.className).not.toContain("rounded-2xl");
+  });
 });

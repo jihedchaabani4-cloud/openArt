@@ -26,7 +26,7 @@ export function FlowErrorTile({
       <div className="container w-full h-full flex flex-col">
         <flow-error-tile class="flow-error-tile block w-full h-full">
           <div
-            className="error-tile w-full h-full flex flex-col p-3 sm:p-4 md:p-5 overflow-hidden rounded-2xl select-none"
+            className="error-tile w-full h-full flex flex-col p-3 sm:p-4 md:p-5 overflow-hidden rounded-xl select-none"
             style={{
               background: "linear-gradient(180deg, rgba(28, 28, 28, .8), rgba(45, 45, 45, .8))",
               color: "var(--foreground-state-90)",
