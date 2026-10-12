@@ -30,3 +30,12 @@ test("Layout Contract: PromptBarPlatform uses unified p-2.5 and gap-1 and remove
   assert.ok(/innerClassName=["'][^"']*p-2\.5[^"']*["']/.test(content), "must have innerClassName with p-2.5");
   assert.ok(/innerClassName=["'][^"']*gap-1[^"']*["']/.test(content), "must have innerClassName with gap-1");
 });
+
+test("Layout Contract: Generate button is circular icon button with ArrowRight instead of text 'Generate'", () => {
+  const platformPath = path.resolve(__dirname, "../platform/PromptBarPlatform.jsx");
+  const content = fs.readFileSync(platformPath, "utf8");
+
+  assert.equal(content.includes("<span>Generate</span>"), false, "must not include <span>Generate</span>");
+  assert.ok(content.includes("ArrowRight"), "must include ArrowRight");
+  assert.ok(content.includes("size-8"), "must include size-8 for circular button");
+});

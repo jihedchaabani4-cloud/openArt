@@ -28,4 +28,14 @@ describe("PromptBar Padding & Row Spacing Layout Contract", () => {
     expect(platformContent).toMatch(/innerClassName=["'][^"']*p-2\.5[^"']*["']/);
     expect(platformContent).toMatch(/innerClassName=["'][^"']*gap-1[^"']*["']/);
   });
+
+  it("Generate button renders as a circular icon button with right arrow instead of text 'Generate'", () => {
+    const platformFilePath = path.resolve(__dirname, "../platform/PromptBarPlatform.jsx");
+    const platformContent = fs.readFileSync(platformFilePath, "utf8");
+
+    // The text 'Generate' label inside button must be replaced with the right arrow icon
+    expect(platformContent).not.toContain("<span>Generate</span>");
+    expect(platformContent).toMatch(/ArrowRight/);
+    expect(platformContent).toMatch(/size-8/);
+  });
 });

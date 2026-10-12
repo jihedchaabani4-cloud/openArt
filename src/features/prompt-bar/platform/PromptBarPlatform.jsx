@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect, useCallback, useMemo, useContext } 
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/shared/lib/utils";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
+import { ArrowRight } from "lucide-react";
 
 // Production UI Components integrated directly
 import { PromptBarShell } from "../ui/common/PromptBarShell.jsx";
@@ -1159,30 +1160,21 @@ function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, class
           <Button
             type="button"
             variant="flow-generate"
+            aria-label="Generate"
+            title={estimatedCredits > 0 ? `Generate (${estimatedCredits} cr)` : "Generate"}
             onClick={handleGenerate}
             disabled={isGenerateDisabled}
             className={cn(
-              "h-8 px-3.5 rounded-full text-[13px] font-semibold transition-all flex items-center gap-1.5",
+              "size-8 min-w-8 p-0 rounded-full flex items-center justify-center transition-all shrink-0",
               isGenerateDisabled
                 ? "bg-white/10 text-white/30 cursor-not-allowed"
-                : "bg-white text-black hover:bg-white/90 active:scale-95"
+                : "bg-white text-black hover:bg-white/90 active:scale-95 shadow-sm"
             )}
           >
             {isGenerating ? (
-              <>
-                <span className="size-3 rounded-full border-2 border-black/30 border-t-black animate-spin" />
-                Generating…
-              </>
+              <span className="size-3.5 rounded-full border-2 border-black/30 border-t-black animate-spin" />
             ) : (
-              <>
-                <GoogleIcon iconName="auto_awesome" className="text-[14px]" />
-                <span>Generate</span>
-                {estimatedCredits > 0 && (
-                  <span className="text-[11px] font-medium opacity-60 ml-0.5">
-                    ({estimatedCredits}&nbsp;cr)
-                  </span>
-                )}
-              </>
+              <ArrowRight className="size-4 shrink-0" strokeWidth={2.5} />
             )}
           </Button>
         </div>
