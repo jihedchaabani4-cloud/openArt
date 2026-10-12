@@ -12,6 +12,7 @@ import { useProjectData } from "@/features/workflows/api/workflowsApi"
 import { LoadingScreen } from "@/shared/ui/LoadingScreen"
 import { ProjectError } from "@/shared/ui/ProjectError"
 import { queryKeys } from "@/shared/api/queryKeys"
+import { useDragAutoScroll } from "@/features/studio"
 
 /**
  * [FSD Layer: widgets/StudioLayout]
@@ -23,6 +24,7 @@ import { queryKeys } from "@/shared/api/queryKeys"
  * 3. Pure Cache Management on entry/exit.
  */
 export default function StudioLayout({ children }) {
+    useDragAutoScroll();
     const pathname = usePathname()
     const { projectId } = useParams()
     const queryClient = useQueryClient()

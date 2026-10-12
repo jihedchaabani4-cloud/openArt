@@ -242,6 +242,7 @@ export default function CharactersPage({ params }) {
                 <div 
                     ref={scrollRef}
                     onScroll={handleScroll}
+                    data-scroll-container="true"
                     className="flex-1 overflow-y-auto pt-[72px] overflow-x-hidden px-3 custom-scrollbar w-full"
                 >
                     {visibleSheets.length === 0 ? (
