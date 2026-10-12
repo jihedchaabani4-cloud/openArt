@@ -139,3 +139,18 @@ describe("Media Item border radius", () => {
     expect(mediaGridItemFile).not.toContain("rounded-2xl");
   });
 });
+
+describe("CollectionMediaGridItem action button group & menu styling", () => {
+  it("matches generated media item ButtonGroup background and button styles", () => {
+    const mediaGridItemFile = fs.readFileSync(
+      path.resolve(__dirname, "../GenerationsStudio/MediaGridItem/MediaGridItem.jsx"),
+      "utf8"
+    );
+
+    // Collection item must use the same bg-white/60 backdrop-blur-md rounded-lg as generated items
+    expect(mediaGridItemFile).not.toContain('rounded-[10px] border border-white/10 bg-[#343434]/95 backdrop-blur-md shadow-[0_14px_34px_rgba(0,0,0,0.48)]');
+    expect(mediaGridItemFile).not.toContain('className="bg-transparent text-white hover:bg-white/12"');
+  });
+});
+
+

@@ -963,31 +963,21 @@ const CollectionMediaGridItem = React.memo(function CollectionMediaGridItem({
             )}
             onClick={(e) => e.stopPropagation()}
           >
-            <ButtonGroup className="rounded-[10px] border border-white/10 bg-[#343434]/95 backdrop-blur-md shadow-[0_14px_34px_rgba(0,0,0,0.48)]">
+            <ButtonGroup className="bg-white/60 backdrop-blur-md rounded-lg">
               <ActionBtn
                 onClick={handleToggleLike}
                 title={isLiked ? "Unlike collection" : "Like collection"}
-                className="bg-transparent text-white hover:bg-white/12"
               >
                 <GoogleIcon
                   iconName="favorite"
                   fill={isLiked}
-                  className={cn("text-[13px]", isLiked ? "text-red-400 fill-red-400" : "text-white/85")}
+                  className="text-[13px] text-[#303031]"
                 />
               </ActionBtn>
               <StudioItemDropdownMenu
                 open={isDropdownOpen}
                 onOpenChange={setIsDropdownOpen}
                 items={menuItems}
-                trigger={
-                  <ActionBtn
-                    onClick={(e) => e.stopPropagation()}
-                    title="More options"
-                    className="bg-transparent text-white hover:bg-white/12"
-                  >
-                    <GoogleIcon iconName="more_vert" className="text-[13px] text-white/85" />
-                  </ActionBtn>
-                }
               />
             </ButtonGroup>
           </div>
