@@ -19,6 +19,7 @@ describe("CoreMediaItemView - Liked top-left indicator badge", () => {
     const likedBadge = screen.getByTitle("Liked");
     expect(likedBadge).toBeDefined();
     expect(likedBadge.getAttribute("aria-label")).toBe("Liked");
+    expect(likedBadge.className).toContain("bg-transparent");
   });
 
   it("does not render the liked badge when isLiked is false", () => {

@@ -294,7 +294,7 @@ export function CoreMediaItemView({
                   onLikeToggle?.(e);
                 }}
                 className={cn(
-                  "flex items-center justify-center w-7 h-7 rounded-full bg-black/40 backdrop-blur-md border border-white/10 shadow-sm transition-transform",
+                  "flex items-center justify-center w-7 h-7 bg-transparent border-0 shadow-none transition-transform",
                   onLikeToggle ? "cursor-pointer hover:scale-110 active:scale-95" : "cursor-default"
                 )}
                 title="Liked"
@@ -303,7 +303,7 @@ export function CoreMediaItemView({
                 <GoogleIcon
                   iconName="favorite"
                   fill={true}
-                  className="text-[14px] text-white fill-white"
+                  className="text-[16px] text-white fill-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]"
                 />
               </button>
             )}
