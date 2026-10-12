@@ -4,15 +4,15 @@ const BASE_CARD_CLASS =
 export const PROMPT_BAR_VARIANTS = {
   generation: {
     cardClassName: `${BASE_CARD_CLASS} border border-white/5`,
-    innerClassName: "w-full flex flex-col gap-1 p-2",
+    innerClassName: "w-full flex flex-col gap-1 p-2.5",
   },
   edit: {
     cardClassName: BASE_CARD_CLASS,
-    innerClassName: "w-full flex flex-col gap-1 p-2",
+    innerClassName: "w-full flex flex-col gap-1 p-2.5",
   },
   elements: {
     cardClassName: `${BASE_CARD_CLASS} overflow-hidden`,
-    innerClassName: "w-full flex flex-col gap-1 p-2",
+    innerClassName: "w-full flex flex-col gap-1 p-2.5",
   },
 };
 

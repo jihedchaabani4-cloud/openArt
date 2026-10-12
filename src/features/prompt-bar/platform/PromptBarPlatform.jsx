@@ -987,7 +987,7 @@ function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, class
       variant="generation"
       hideBackground={true}
       className={cn("w-full", className)}
-      innerClassName="w-full flex flex-col gap-1 p-2"
+      innerClassName="w-full flex flex-col gap-1 p-2.5"
       popover={settingsOverlay}
     >
 
