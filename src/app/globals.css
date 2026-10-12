@@ -150,7 +150,6 @@ mat-icon {
 }
 
 @theme inline {
-  --color-ig-primary-background: rgb(var(--ig-primary-background));
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: 'Google Sans Text', 'Google Sans', var(--font-google-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -214,9 +213,8 @@ mat-icon {
 }
 
 :root {
-  --ig-primary-background: 12, 16, 20;
-  --background-primary: rgb(var(--ig-primary-background));
-  --background-base-primary: rgb(var(--ig-primary-background));
+  --background-primary: #000000;
+  --background-base-primary: #000000;
   --packages-bg: rgb(43, 43, 43, 0.8);
   --radius: 0.625rem;
 
@@ -319,7 +317,7 @@ mat-icon {
   --account-panel-overlay-z-index: calc(var(--ogb-account-switcher-z-index) + 1);
 
   /* Material System Colors (dark) */
-  --mat-sys-background: rgb(var(--ig-primary-background));
+  --mat-sys-background: #000000;
   --mat-sys-error: #f2b8b5;
   --mat-sys-error-container: #8c1d18;
   --mat-sys-inverse-on-surface: #303030;
