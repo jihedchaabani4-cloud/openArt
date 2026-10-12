@@ -170,5 +170,19 @@ describe("Media item borderless design and video indicator", () => {
   });
 });
 
+describe("Header backdrop bottom smoothing", () => {
+  it("uses an ultra-smooth feathered easing at the bottom of header-backdrop", () => {
+    const globalsCssFile = fs.readFileSync(
+      path.resolve(__dirname, "../../../app/globals.css"),
+      "utf8"
+    );
+
+    // Verifies that the mask has smooth feathered tapering stops at the bottom
+    expect(globalsCssFile).toContain(".header-backdrop");
+    expect(globalsCssFile).toMatch(/mask-image:.*rgba\(0,\s*0,\s*0,\s*0\.03\)/);
+  });
+});
+
+
 
 
