@@ -244,6 +244,13 @@ mat-icon {
   --foreground-state-08: rgba(218, 220, 224, 0.08);
   --foreground-state-05: rgba(218, 220, 224, 0.05);
 
+  /* Collection Tile Tokens (Google VideoFX / ImageFX) */
+  --title-padding-top: 3rem;
+  --title-padding-inline-end: 4.75rem;
+  --tile-border-radius: 16px;
+  --tile-scrim-gradient: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.04) 20%, rgba(0, 0, 0, 0.12) 40%, rgba(0, 0, 0, 0.25) 60%, rgba(0, 0, 0, 0.4) 80%, rgba(0, 0, 0, 0.5));
+  --collection-empty-thumbnail-background: linear-gradient(1deg, #333 0.49%, #4e4e4e 99.15%);
+
   /* Google Flow Prompt Box & Button Layout Tokens */
   --prompt-box-bottom-control-height: 2rem;
   --prompt-box-min-height: 5.625rem;
@@ -1604,5 +1611,35 @@ flow-error-tile {
     opacity: 0.65;
   }
 }
+
+/* ── Google VideoFX Collection Tile Title ── */
+.collection-title-container {
+  --title-padding-top: 3rem;
+  --title-padding-inline-end: 4.75rem;
+  position: absolute;
+  bottom: 0;
+  inset-inline-start: 0;
+  width: 100%;
+  height: fit-content;
+  box-sizing: border-box;
+  padding-block: var(--title-padding-top) 1rem;
+  padding-inline: 1.25rem var(--title-padding-inline-end);
+  font: var(--mat-sys-display-small, 400 2.25rem/2.75rem 'Google Sans', sans-serif);
+  color: var(--foreground-state-90, rgba(218, 220, 224, 0.9));
+  line-height: 1.25;
+  pointer-events: none;
+  user-select: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+@media (max-width: 640px) {
+  .collection-title-container {
+    --title-padding-top: 1.5rem;
+    --title-padding-inline-end: 2rem;
+    font: 400 1.5rem/1.85rem 'Google Sans', sans-serif;
+    padding-inline: 0.875rem var(--title-padding-inline-end);
+  }
+}
+
 
 
