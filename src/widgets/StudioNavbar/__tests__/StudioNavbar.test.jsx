@@ -93,7 +93,7 @@ describe("StudioNavbar Layout & Collection Page Header", () => {
     expect(input.className).toContain("font-medium");
   });
 
-  it("centers search bar with flex-none max-w container instead of asymmetrical flex basis", () => {
+  it("centers search bar with absolute 50% anchor container instead of asymmetrical flex basis", () => {
     const { container } = renderWithClient(
       <StudioNavbarCenter
         searchExpanded={false}
@@ -107,8 +107,8 @@ describe("StudioNavbar Layout & Collection Page Header", () => {
 
     const centerWrapper = container.firstChild;
     expect(centerWrapper.className).not.toContain("flex-[1_1_38%]");
-    expect(centerWrapper.className).toContain("mx-auto");
-    expect(centerWrapper.className).toContain("flex-none");
+    expect(centerWrapper.className).toContain("left-1/2");
+    expect(centerWrapper.className).toContain("-translate-x-1/2");
   });
 
   it("sets balanced flex-1 layout on right navbar section for horizontal symmetry", () => {
@@ -121,7 +121,7 @@ describe("StudioNavbar Layout & Collection Page Header", () => {
     expect(rightWrapper.className).toContain("flex-1");
   });
 
-  it("smoothly expands search input from default max-width to expanded max-width without collapsing to width 0 or zero flex-basis", () => {
+  it("smoothly expands search input from default max-width to full navbar width (max-w-full) without collapsing to width 0 or zero flex-basis", () => {
     const { container: collapsedContainer } = renderWithClient(
       <StudioNavbarCenter
         searchExpanded={false}
@@ -134,7 +134,6 @@ describe("StudioNavbar Layout & Collection Page Header", () => {
     );
     const collapsedWrapper = collapsedContainer.firstChild;
     expect(collapsedWrapper.className).toContain("max-w-[460px]");
-    expect(collapsedWrapper.className).toContain("flex-none");
 
     cleanup();
 
@@ -149,9 +148,8 @@ describe("StudioNavbar Layout & Collection Page Header", () => {
       />
     );
     const expandedWrapper = expandedContainer.firstChild;
-    // Must expand to a wider max-width (e.g. 680px/720px) rather than resetting to flex-1 (basis 0)
+    // Must expand across the entire navbar (max-w-full)
+    expect(expandedWrapper.className).toContain("max-w-full");
     expect(expandedWrapper.className).not.toContain("flex-1");
-    expect(expandedWrapper.className).toContain("flex-none");
-    expect(expandedWrapper.className).toMatch(/max-w-\[(680px|700px|720px)\]/);
   });
 });

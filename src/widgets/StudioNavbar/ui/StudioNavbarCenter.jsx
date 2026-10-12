@@ -13,9 +13,9 @@ export function StudioNavbarCenter({
 }) {
     return (
         <div className={cn(
-            "flex items-center justify-center transition-[max-width,width] duration-350 ease-[cubic-bezier(0.22,1,0.36,1)] px-2 flex-none w-full mx-auto",
+            "flex items-center justify-center transition-[max-width,width] duration-350 ease-[cubic-bezier(0.22,1,0.36,1)] px-1 sm:px-2 z-30 absolute left-1/2 -translate-x-1/2 w-full mx-auto",
             searchExpanded
-                ? "max-w-[560px] sm:max-w-[640px] md:max-w-[700px]"
+                ? "max-w-full"
                 : "max-w-[360px] sm:max-w-[420px] md:max-w-[460px]"
         )}>
             <div className="flex items-center gap-4 w-full min-w-0 relative">
@@ -24,7 +24,7 @@ export function StudioNavbarCenter({
                     variant="search"
                     googleIcon="search"
                     placeholder="Rechercher des médias..."
-                    onClear={filters.prompt ? () => { setFilter('prompt', ''); handleCloseSearch?.(); } : undefined}
+                    onClear={searchExpanded ? () => { setFilter('prompt', ''); handleCloseSearch?.(); } : undefined}
                     type="search"
                     value={filters.prompt || ""}
                     onChange={(e) => setFilter('prompt', e.target.value)}

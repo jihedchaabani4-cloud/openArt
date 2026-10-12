@@ -4,6 +4,7 @@ import * as React from "react"
 import { motion } from "framer-motion"
 import { useProjects, useUpdateProject } from "@/features/projects/api/projectsApi"
 import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows"
+import { cn } from "@/shared/lib/utils"
 
 import { StudioNavbarLeft } from "./ui/StudioNavbarLeft"
 import { StudioNavbarCenter } from "./ui/StudioNavbarCenter"
@@ -55,7 +56,7 @@ export function StudioNavbar() {
             transition={{ duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
             className="absolute top-0 left-0 px-3 sm:px-6 h-16 w-full z-50 flex flex-col justify-center bg-transparent overflow-hidden"
         >
-            <div className="flex items-center h-16 w-full min-w-0 gap-2">
+            <div className="relative flex items-center h-16 w-full min-w-0">
                 <StudioNavbarLeft
                     searchExpanded={searchExpanded}
                     selectedProjectName={selectedProjectName}
@@ -65,6 +66,15 @@ export function StudioNavbar() {
 
                 {!isCleanNavbarTab ? (
                     <>
+                        {/* Spacing placeholder for symmetric flex columns */}
+                        <div
+                            className={cn(
+                                "flex-none w-full transition-[max-width] duration-350 ease-[cubic-bezier(0.22,1,0.36,1)] pointer-events-none invisible mx-auto",
+                                searchExpanded ? "max-w-full" : "max-w-[360px] sm:max-w-[420px] md:max-w-[460px]"
+                            )}
+                            aria-hidden="true"
+                        />
+
                         <StudioNavbarCenter
                             searchExpanded={searchExpanded}
                             searchInputRef={searchInputRef}

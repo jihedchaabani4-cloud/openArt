@@ -227,8 +227,8 @@ export function StudioNavbarLeft({
 
     return (
         <div className={cn(
-            "flex min-w-0 items-center gap-2.5 transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] flex-1",
-            searchExpanded ? "opacity-60 sm:opacity-80 max-sm:hidden" : "opacity-100"
+            "flex min-w-0 items-center gap-2.5 transition-opacity duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] flex-1",
+            searchExpanded ? "opacity-0 pointer-events-none" : "opacity-100"
         )}>
             {isCollectionPage && isDragging ? (
                 <button
