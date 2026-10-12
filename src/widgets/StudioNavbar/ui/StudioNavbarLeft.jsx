@@ -121,10 +121,10 @@ export function StudioNavbarLeft({
     const isDeleting = isCollectionPage ? isFolderDeleting : isProjectDeleting
 
     const executeMoveToParent = React.useCallback((transferData) => {
-        const { itemType, workflowId, assetId, collectionId: draggedFolderId } = transferData
+        const { itemType, workflowId, assetId, collectionId: draggedFolderId, itemId } = transferData
 
         if (itemType === "workflow") {
-            const id = workflowId || assetId
+            const id = itemId || workflowId || assetId
             if (id) {
                 // Optimistic move: onMutate executes synchronously, errors rollback and show toast.
                 moveItemOut({
@@ -135,10 +135,11 @@ export function StudioNavbarLeft({
                 })
             }
         } else if (itemType === "collection") {
-            if (draggedFolderId && draggedFolderId !== collectionId) {
+            const folderId = itemId || draggedFolderId
+            if (folderId && folderId !== collectionId) {
                 moveItemOut({
                     itemType: "collection",
-                    itemId: draggedFolderId,
+                    itemId: folderId,
                     currentFolderId: collectionId,
                     projectId,
                 })
@@ -200,9 +201,9 @@ export function StudioNavbarLeft({
 
     React.useEffect(() => {
         const onPointerHover = (e) => {
-            if (e.detail?.target === "move-out") {
+            if (e.detail?.target === "move-out" && (!e.detail.area || e.detail.area === "navbar")) {
                 setIsBackDragOver(true)
-            } else if (!e.detail?.target) {
+            } else {
                 setIsBackDragOver(false)
             }
         }

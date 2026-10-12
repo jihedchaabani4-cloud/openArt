@@ -325,6 +325,8 @@ const WorkflowMediaGridItem = React.memo(function WorkflowMediaGridItem({
           item,
           url,
         });
+        window.dispatchEvent(new Event("dragstart"));
+        window.dispatchEvent(new CustomEvent("studio:drag-start"));
       }
 
       if (isPointerDraggingRef.current) {
@@ -335,13 +337,17 @@ const WorkflowMediaGridItem = React.memo(function WorkflowMediaGridItem({
         const targetEl = document.elementFromPoint(moveEvent.clientX, moveEvent.clientY);
         const colCard = targetEl?.closest("[data-collection-drop-id]");
         const backBtn = targetEl?.closest("[data-drop-back]");
+        const rootDrop = targetEl?.closest("[data-drop-root]");
 
         if (colCard) {
           const colId = colCard.dataset.collectionDropId;
           window.dispatchEvent(new CustomEvent("studio:pointer-hover-target", { detail: { target: "add-to-collection", collectionId: colId } }));
           setDragTarget("add-to-collection");
         } else if (backBtn) {
-          window.dispatchEvent(new CustomEvent("studio:pointer-hover-target", { detail: { target: "move-out" } }));
+          window.dispatchEvent(new CustomEvent("studio:pointer-hover-target", { detail: { target: "move-out", area: "navbar" } }));
+          setDragTarget("move-out");
+        } else if (rootDrop) {
+          window.dispatchEvent(new CustomEvent("studio:pointer-hover-target", { detail: { target: "move-out", area: "root" } }));
           setDragTarget("move-out");
         } else {
           window.dispatchEvent(new CustomEvent("studio:pointer-hover-target", { detail: { target: null } }));
@@ -364,11 +370,14 @@ const WorkflowMediaGridItem = React.memo(function WorkflowMediaGridItem({
         usePromptStore.getState().setIsDraggingGalleryItem(false);
         usePromptStore.getState().setDraggedItem(null);
         setDragTarget(null);
+        window.dispatchEvent(new Event("dragend"));
+        window.dispatchEvent(new CustomEvent("studio:drag-end"));
         window.dispatchEvent(new CustomEvent("studio:pointer-hover-target", { detail: { target: null } }));
 
         const targetEl = document.elementFromPoint(upEvent.clientX, upEvent.clientY);
         const colCard = targetEl?.closest("[data-collection-drop-id]");
         const backBtn = targetEl?.closest("[data-drop-back]");
+        const rootDrop = targetEl?.closest("[data-drop-root]");
 
         if (colCard) {
           const targetFolderId = colCard.dataset.collectionDropId;
@@ -378,11 +387,11 @@ const WorkflowMediaGridItem = React.memo(function WorkflowMediaGridItem({
               detail: { itemType: "workflow", itemId: wfId, targetFolderId }
             }));
           }
-        } else if (backBtn) {
+        } else if (backBtn || rootDrop) {
           const wfId = workflow?.name || workflow?.id || item?.workflow_id || item?.id;
           if (wfId) {
             window.dispatchEvent(new CustomEvent("studio:drop-to-back", {
-              detail: { itemType: "workflow", itemId: wfId }
+              detail: { itemType: "workflow", itemId: wfId, workflowId: wfId }
             }));
           }
         }
@@ -807,6 +816,8 @@ const CollectionMediaGridItem = React.memo(function CollectionMediaGridItem({
           id: col?.id,
           collection: col,
         });
+        window.dispatchEvent(new Event("dragstart"));
+        window.dispatchEvent(new CustomEvent("studio:drag-start"));
       }
 
       if (isPointerDraggingRef.current) {
@@ -817,12 +828,15 @@ const CollectionMediaGridItem = React.memo(function CollectionMediaGridItem({
         const targetEl = document.elementFromPoint(moveEvent.clientX, moveEvent.clientY);
         const colCard = targetEl?.closest("[data-collection-drop-id]");
         const backBtn = targetEl?.closest("[data-drop-back]");
+        const rootDrop = targetEl?.closest("[data-drop-root]");
 
         if (colCard && colCard.dataset.collectionDropId !== col?.id) {
           const colId = colCard.dataset.collectionDropId;
           window.dispatchEvent(new CustomEvent("studio:pointer-hover-target", { detail: { target: "add-to-collection", collectionId: colId } }));
         } else if (backBtn) {
-          window.dispatchEvent(new CustomEvent("studio:pointer-hover-target", { detail: { target: "move-out" } }));
+          window.dispatchEvent(new CustomEvent("studio:pointer-hover-target", { detail: { target: "move-out", area: "navbar" } }));
+        } else if (rootDrop) {
+          window.dispatchEvent(new CustomEvent("studio:pointer-hover-target", { detail: { target: "move-out", area: "root" } }));
         } else {
           window.dispatchEvent(new CustomEvent("studio:pointer-hover-target", { detail: { target: null } }));
         }
@@ -842,11 +856,14 @@ const CollectionMediaGridItem = React.memo(function CollectionMediaGridItem({
         setIsDraggingThis(false);
         usePromptStore.getState().setIsDraggingGalleryItem(false);
         usePromptStore.getState().setDraggedItem(null);
+        window.dispatchEvent(new Event("dragend"));
+        window.dispatchEvent(new CustomEvent("studio:drag-end"));
         window.dispatchEvent(new CustomEvent("studio:pointer-hover-target", { detail: { target: null } }));
 
         const targetEl = document.elementFromPoint(upEvent.clientX, upEvent.clientY);
         const colCard = targetEl?.closest("[data-collection-drop-id]");
         const backBtn = targetEl?.closest("[data-drop-back]");
+        const rootDrop = targetEl?.closest("[data-drop-root]");
 
         if (colCard && colCard.dataset.collectionDropId !== col?.id) {
           const targetFolderId = colCard.dataset.collectionDropId;
@@ -855,10 +872,10 @@ const CollectionMediaGridItem = React.memo(function CollectionMediaGridItem({
               detail: { itemType: "collection", itemId: col.id, targetFolderId }
             }));
           }
-        } else if (backBtn) {
+        } else if (backBtn || rootDrop) {
           if (col?.id) {
             window.dispatchEvent(new CustomEvent("studio:drop-to-back", {
-              detail: { itemType: "collection", itemId: col.id }
+              detail: { itemType: "collection", itemId: col.id, collectionId: col.id }
             }));
           }
         }

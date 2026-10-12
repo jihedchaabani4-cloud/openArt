@@ -156,8 +156,27 @@ export default function CollectionDetailPage({ params }) {
         currentFolderId: collectionId,
         projectId,
       });
-    }
   }, [moveItemOut, projectId, collectionId]);
+
+  React.useEffect(() => {
+    const onPointerHover = (e) => {
+      if (e.detail?.target === "move-out" && e.detail.area === "root") {
+        setIsRootDragOver(true);
+      } else {
+        setIsRootDragOver(false);
+      }
+    };
+    window.addEventListener("studio:pointer-hover-target", onPointerHover);
+    return () => {
+      window.removeEventListener("studio:pointer-hover-target", onPointerHover);
+    };
+  }, []);
+
+  React.useEffect(() => {
+    if (!isDragging) {
+      setIsRootDragOver(false);
+    }
+  }, [isDragging]);
 
   // Combined: sub-collections first, then assets
   const combinedItems = React.useMemo(() => {
@@ -403,6 +422,7 @@ export default function CollectionDetailPage({ params }) {
           <AnimatePresence>
             {isDragging && (
               <motion.div
+                data-drop-root="true"
                 initial={{ opacity: 0, y: -8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
