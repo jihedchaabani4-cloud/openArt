@@ -157,7 +157,7 @@ export function CoreMediaItemView({
     <div
       className={cn(
         "group relative select-none items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-black/40 shadow-2xl",
-        isContain ? "inline-flex max-w-full max-h-full" : "flex w-full h-full",
+        isContain ? "inline-flex w-fit h-fit max-w-full max-h-full shrink-0" : "flex w-full h-full",
         draggable ? "cursor-grab active:cursor-grabbing" : onClick ? "cursor-pointer" : "",
         className
       )}
@@ -174,7 +174,7 @@ export function CoreMediaItemView({
       {...props}
     >
       {/* ── 1. The Media Layer ── */}
-      <div className={cn("relative flex items-center justify-center overflow-hidden", isContain ? "max-w-full max-h-full" : "w-full h-full")}>
+      <div className={cn("relative flex items-center justify-center overflow-hidden", isContain ? "w-fit h-fit max-w-full max-h-full" : "w-full h-full")}>
         {isCompleted && isVideo && (
           <video
             ref={videoRef}
@@ -196,7 +196,7 @@ export function CoreMediaItemView({
         )}
 
         {isCompleted && !isVideo && (
-          <div className={cn("relative flex items-center justify-center", isContain ? "max-w-full max-h-full" : "w-full h-full")}>
+          <div className={cn("relative flex items-center justify-center", isContain ? "w-fit h-fit max-w-full max-h-full" : "w-full h-full")}>
             {!core.isMediaLoaded && (
               <div className="absolute inset-0 bg-[#15161a] animate-pulse rounded-2xl" />
             )}

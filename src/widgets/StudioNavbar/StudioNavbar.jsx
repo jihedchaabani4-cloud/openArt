@@ -53,9 +53,9 @@ export function StudioNavbar() {
             }}
             animate={isNavbarHidden ? "hidden" : "visible"}
             transition={{ duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
-            className="absolute top-0 left-0 pl-2.5 pr-8 h-16 w-full z-50 flex flex-col justify-center bg-transparent"
+            className="absolute top-0 left-0 pl-2.5 pr-4 sm:pr-8 h-16 w-full z-50 flex flex-col justify-center bg-transparent overflow-hidden"
         >
-            <div className="flex items-center h-16 w-full">
+            <div className="flex items-center h-16 w-full min-w-0 gap-2">
                 <StudioNavbarLeft
                     searchExpanded={searchExpanded}
                     selectedProjectName={selectedProjectName}
@@ -77,7 +77,7 @@ export function StudioNavbar() {
                         <StudioNavbarRight searchExpanded={searchExpanded} />
                     </>
                 ) : (
-                    <div className="ml-auto flex items-center gap-2 z-50">
+                    <div className="ml-auto flex flex-none items-center gap-2 z-50">
                         <UserDropdown />
                     </div>
                 )}

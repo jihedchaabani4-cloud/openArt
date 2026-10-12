@@ -34,8 +34,12 @@ export function ConfirmDeleteDialog({
   const setIsOpen = isControlled ? onOpenChange : setInternalOpen;
 
   const handleConfirm = async () => {
-    await onConfirm();
-    setIsOpen(false);
+    try {
+      await onConfirm();
+      setIsOpen(false);
+    } catch {
+      // Keep the dialog open when delete fails (e.g. collection not empty).
+    }
   };
 
   return (

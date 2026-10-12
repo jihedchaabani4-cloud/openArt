@@ -51,7 +51,21 @@ export async function apiRequest(endpoint, options = {}) {
             throw new Error(errMsg);
         }
 
-        return await response.json();
+        if (response.status === 204 || response.status === 205) {
+            return null;
+        }
+
+        const contentType = response.headers.get("content-type") || "";
+        const text = await response.text();
+        if (!text) return null;
+        if (contentType.includes("application/json")) {
+            return JSON.parse(text);
+        }
+        try {
+            return JSON.parse(text);
+        } catch {
+            return text;
+        }
     } catch (error) {
         if (error.name === 'TimeoutError' || error.name === 'AbortError') {
             console.error(`🔌 API Request Timed Out [${url}] after ${timeoutMs}ms`);

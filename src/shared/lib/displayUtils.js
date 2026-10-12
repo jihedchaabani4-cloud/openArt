@@ -459,3 +459,57 @@ export function isMediaVideo(item) {
     item.asset_type === "video"
   );
 }
+
+export function getWorkflowFolderId(workflow) {
+  return (
+    workflow?.folder_id ||
+    workflow?.folderId ||
+    workflow?.metadata?.folder_id ||
+    workflow?.metadata?.folderId ||
+    null
+  );
+}
+
+function getWorkflowMediaTime(workflow) {
+  const media = getPrimaryMedia(workflow);
+  const raw =
+    media?.updated_at ||
+    media?.updatedAt ||
+    media?.create_time ||
+    media?.created_at ||
+    media?.createdAt ||
+    workflow?.updated_at ||
+    workflow?.updatedAt ||
+    workflow?.create_time ||
+    workflow?.created_at ||
+    workflow?.createdAt;
+  const time = raw ? new Date(raw).getTime() : 0;
+  return Number.isFinite(time) ? time : 0;
+}
+
+/**
+ * Cover for a collection = last completed media whose folder_id is that collection.
+ * Media inside nested collections is never used for a parent cover.
+ */
+export function buildCollectionCoverById(workflows) {
+  const byId = new Map();
+  (workflows || []).forEach((workflow) => {
+    const folderId = getWorkflowFolderId(workflow);
+    if (!folderId) return;
+
+    const media = getPrimaryMedia(workflow);
+    const meta = getItemMetadata(media, workflow);
+    if (!meta?.url || meta.status !== "completed") return;
+
+    const time = getWorkflowMediaTime(workflow);
+    const current = byId.get(folderId);
+    if (!current || time >= current.time) {
+      byId.set(folderId, {
+        url: meta.url,
+        isVideo: Boolean(meta.isVideo),
+        time,
+      });
+    }
+  });
+  return byId;
+}

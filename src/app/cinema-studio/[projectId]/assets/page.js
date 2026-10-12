@@ -24,7 +24,7 @@ import { GoogleIcon } from "@/shared/ui/GoogleIcon"
 
 import { usePromptStore } from "@/features/prompt-bar/model/usePromptStore";
 import { getPrimaryMedia } from "@/shared/lib/generationUtils";
-import { getItemMetadata as getDisplayMeta, getStudioGridDensity } from "@/shared/lib/displayUtils";
+import { getItemMetadata as getDisplayMeta, getStudioGridDensity, buildCollectionCoverById } from "@/shared/lib/displayUtils";
 import { LoadingScreen } from "@/shared/ui/LoadingScreen";
 
 const PAGE_SIZE = 30;
@@ -133,6 +133,11 @@ export default function AssetsPage({ params }) {
         return [];
     }, [rawFolders]);
 
+    const collectionCoverById = React.useMemo(
+        () => buildCollectionCoverById(workflows),
+        [workflows]
+    );
+
     const setActiveCollectionId = useGenerationsStore(s => s.setActiveCollectionId);
     const searchParams = useSearchParams();
 
@@ -157,11 +162,6 @@ export default function AssetsPage({ params }) {
             key: `col-${col.id}`,
         }));
 
-        // While dragging: hide all workflows so only collections appear as drop targets
-        if (isDragging) {
-            return collectionItems;
-        }
-
         const rootWorkflows = workflows
             .filter(w => !w.folder_id && !w.folderId)
             .map(w => ({
@@ -171,7 +171,7 @@ export default function AssetsPage({ params }) {
             }));
 
         return [...collectionItems, ...rootWorkflows];
-    }, [collections, workflows, isDragging]);
+    }, [collections, workflows]);
 
     const itemListKey = React.useMemo(
         () => combinedItems.map((item) => item.key).join("|"),
@@ -257,6 +257,8 @@ export default function AssetsPage({ params }) {
                     collection={photo.collection}
                     workflow={photo.workflow}
                     itemType={photo.itemType}
+                    coverUrl={photo.coverUrl}
+                    coverIsVideo={photo.coverIsVideo}
                     projectId={projectId}
                     onClick={photo.itemType === "collection" ? handleCollectionClick : handleWorkflowClick}
                     className="rounded-2xl border-none shadow-xl"
@@ -278,10 +280,12 @@ export default function AssetsPage({ params }) {
                 acc.push({
                     src: "data:image/svg+xml;charset=utf-8,<svg xmlns='http://www.w3.org/2000/svg'/>",
                     width: 1200,
-                    height: 900,
+                    height: 1200,
                     key: item.key,
                     itemType: "collection",
                     collection: item.data,
+                    coverUrl: collectionCoverById.get(item.data?.id)?.url || null,
+                    coverIsVideo: collectionCoverById.get(item.data?.id)?.isVideo || false,
                 });
                 return acc;
             }
@@ -311,7 +315,7 @@ export default function AssetsPage({ params }) {
             });
             return acc;
         }, []);
-    }, [visibleItems]);
+    }, [visibleItems, collectionCoverById]);
 
     if ((isLoading || isFoldersLoading) && combinedItems.length === 0) {
         return <LoadingScreen message="Loading assets" />

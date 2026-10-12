@@ -1,7 +1,5 @@
 "use client"
 
-import * as React from "react"
-import { GoogleIcon } from "@/shared/ui/GoogleIcon"
 import { cn } from "@/shared/lib/utils"
 import { Input } from "@/shared/ui/input"
 
@@ -15,10 +13,10 @@ export function StudioNavbarCenter({
 }) {
     return (
         <div className={cn(
-            "shrink-0 flex items-center px-4 justify-center gap-2 relative overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
-            searchExpanded ? "basis-full" : "basis-[38%]"
+            "min-w-0 flex items-center px-2 sm:px-4 justify-center gap-2 relative overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
+            searchExpanded ? "flex-[1_1_auto]" : "flex-[1_1_38%]"
         )}>
-            <div className="flex items-center gap-4 w-full relative">
+            <div className="flex items-center gap-4 w-full min-w-0 relative">
                 <Input
                     ref={searchInputRef}
                     variant="search"

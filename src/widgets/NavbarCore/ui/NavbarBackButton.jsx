@@ -25,6 +25,11 @@ export function NavbarBackButton({
   iconName = "arrow_back",
   className,
   disabled = false,
+  children,
+  onDragOver,
+  onDragEnter,
+  onDragLeave,
+  onDrop,
 }) {
   const router = useRouter();
 
@@ -33,12 +38,21 @@ export function NavbarBackButton({
       <Button
         asChild
         variant="studio-ghost"
-        size="icon"
+        size={children ? "default" : "icon"}
         disabled={disabled}
-        className={cn("h-10 w-10 rounded-[var(--mat-sys-corner-medium,12px)] cursor-pointer shrink-0 text-[var(--mat-sys-on-surface,#e3e3e3)] hover:text-white", className)}
+        className={cn(
+          "rounded-[var(--mat-sys-corner-medium,12px)] cursor-pointer shrink-0 text-[var(--mat-sys-on-surface,#e3e3e3)] hover:text-white transition-all",
+          children ? "h-10 px-3.5 gap-2 font-medium text-sm" : "h-10 w-10",
+          className
+        )}
+        onDragOver={onDragOver}
+        onDragEnter={onDragEnter}
+        onDragLeave={onDragLeave}
+        onDrop={onDrop}
       >
         <Link href={href} aria-label={label} title={label}>
           <GoogleIcon iconName={iconName} className="text-[20px]" />
+          {children}
         </Link>
       </Button>
     );
@@ -57,14 +71,23 @@ export function NavbarBackButton({
     <Button
       type="button"
       variant="studio-ghost"
-      size="icon"
+      size={children ? "default" : "icon"}
       disabled={disabled}
-      className={cn("h-10 w-10 rounded-[var(--mat-sys-corner-medium,12px)] cursor-pointer shrink-0 text-[var(--mat-sys-on-surface,#e3e3e3)] hover:text-white", className)}
+      className={cn(
+        "rounded-[var(--mat-sys-corner-medium,12px)] cursor-pointer shrink-0 text-[var(--mat-sys-on-surface,#e3e3e3)] hover:text-white transition-all",
+        children ? "h-10 px-3.5 gap-2 font-medium text-sm" : "h-10 w-10",
+        className
+      )}
       onClick={handleClick}
+      onDragOver={onDragOver}
+      onDragEnter={onDragEnter}
+      onDragLeave={onDragLeave}
+      onDrop={onDrop}
       aria-label={label}
       title={label}
     >
       <GoogleIcon iconName={iconName} className="text-[20px]" />
+      {children}
     </Button>
   );
 }

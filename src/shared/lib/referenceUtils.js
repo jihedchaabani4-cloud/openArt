@@ -128,7 +128,6 @@ export function buildReferencesPayload(referenceImages) {
         r.asset_id    ||
         r.id          ||
         r.ref_media_id ||
-        r.url          || // fallback: direct HTTP URL for uploaded images
         null;
 
       if (!workflowId) return null; // skip invalid refs
