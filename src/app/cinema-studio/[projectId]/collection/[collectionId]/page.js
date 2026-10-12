@@ -156,6 +156,7 @@ export default function CollectionDetailPage({ params }) {
         currentFolderId: collectionId,
         projectId,
       });
+    }
   }, [moveItemOut, projectId, collectionId]);
 
   React.useEffect(() => {
