@@ -297,6 +297,104 @@ const WorkflowMediaGridItem = React.memo(function WorkflowMediaGridItem({
     },
   });
 
+  const pointerStartRef = useRef(null);
+  const isPointerDraggingRef = useRef(false);
+  const justDraggedRef = useRef(false);
+
+  const handlePointerDown = useCallback((e) => {
+    if (e.button !== 0 || isRenaming || !isDraggable) return;
+    if (e.target.closest("button, input, textarea, [data-prevent-drag], a, [role='menuitem']")) return;
+
+    pointerStartRef.current = { x: e.clientX, y: e.clientY };
+    isPointerDraggingRef.current = false;
+
+    const onPointerMove = (moveEvent) => {
+      if (!pointerStartRef.current) return;
+      const dx = moveEvent.clientX - pointerStartRef.current.x;
+      const dy = moveEvent.clientY - pointerStartRef.current.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+
+      if (!isPointerDraggingRef.current && dist > 5) {
+        isPointerDraggingRef.current = true;
+        setIsDragging(true);
+        usePromptStore.getState().setIsDraggingGalleryItem(true);
+        usePromptStore.getState().setDraggedItem({
+          type: "workflow",
+          id: workflow?.id || workflow?.name || item?.id,
+          workflow,
+          item,
+          url,
+        });
+      }
+
+      if (isPointerDraggingRef.current) {
+        lastPos.current = { x: moveEvent.clientX, y: moveEvent.clientY };
+        mouseX.set(moveEvent.clientX);
+        mouseY.set(moveEvent.clientY);
+
+        const targetEl = document.elementFromPoint(moveEvent.clientX, moveEvent.clientY);
+        const colCard = targetEl?.closest("[data-collection-drop-id]");
+        const backBtn = targetEl?.closest("[data-drop-back]");
+
+        if (colCard) {
+          const colId = colCard.dataset.collectionDropId;
+          window.dispatchEvent(new CustomEvent("studio:pointer-hover-target", { detail: { target: "add-to-collection", collectionId: colId } }));
+          setDragTarget("add-to-collection");
+        } else if (backBtn) {
+          window.dispatchEvent(new CustomEvent("studio:pointer-hover-target", { detail: { target: "move-out" } }));
+          setDragTarget("move-out");
+        } else {
+          window.dispatchEvent(new CustomEvent("studio:pointer-hover-target", { detail: { target: null } }));
+          setDragTarget(null);
+        }
+      }
+    };
+
+    const onPointerUp = (upEvent) => {
+      window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("pointerup", onPointerUp);
+      window.removeEventListener("pointercancel", onPointerUp);
+
+      if (isPointerDraggingRef.current) {
+        isPointerDraggingRef.current = false;
+        justDraggedRef.current = true;
+        setTimeout(() => { justDraggedRef.current = false; }, 150);
+
+        setIsDragging(false);
+        usePromptStore.getState().setIsDraggingGalleryItem(false);
+        usePromptStore.getState().setDraggedItem(null);
+        setDragTarget(null);
+        window.dispatchEvent(new CustomEvent("studio:pointer-hover-target", { detail: { target: null } }));
+
+        const targetEl = document.elementFromPoint(upEvent.clientX, upEvent.clientY);
+        const colCard = targetEl?.closest("[data-collection-drop-id]");
+        const backBtn = targetEl?.closest("[data-drop-back]");
+
+        if (colCard) {
+          const targetFolderId = colCard.dataset.collectionDropId;
+          const wfId = workflow?.name || workflow?.id || item?.workflow_id || item?.id;
+          if (wfId && targetFolderId) {
+            window.dispatchEvent(new CustomEvent("studio:drop-to-collection", {
+              detail: { itemType: "workflow", itemId: wfId, targetFolderId }
+            }));
+          }
+        } else if (backBtn) {
+          const wfId = workflow?.name || workflow?.id || item?.workflow_id || item?.id;
+          if (wfId) {
+            window.dispatchEvent(new CustomEvent("studio:drop-to-back", {
+              detail: { itemType: "workflow", itemId: wfId }
+            }));
+          }
+        }
+      }
+      pointerStartRef.current = null;
+    };
+
+    window.addEventListener("pointermove", onPointerMove);
+    window.addEventListener("pointerup", onPointerUp);
+    window.addEventListener("pointercancel", onPointerUp);
+  }, [isRenaming, isDraggable, workflow, item, url, mouseX, mouseY]);
+
   const handleDragStart = (e) => {
     e.dataTransfer.setData("imageUrl",   url);
     e.dataTransfer.setData("assetId",    item?.name || item?.id || workflow?.id || "");
@@ -381,11 +479,12 @@ const WorkflowMediaGridItem = React.memo(function WorkflowMediaGridItem({
         onMouseLeave={() => {
           progress.set(0);
         }}
-        draggable={isDraggable && !isRenaming}
-        onDragStart={isDraggable && !isRenaming ? handleDragStart : undefined}
-        onDrag={isDraggable && !isRenaming ? handleDrag : undefined}
-        onDragEnd={isDraggable && !isRenaming ? handleDragEnd : undefined}
-        onClick={canNavigate && !isRenaming ? (e) => onClick(workflow, e) : undefined}
+        draggable={false}
+        onPointerDown={isDraggable && !isRenaming ? handlePointerDown : undefined}
+        onClick={canNavigate && !isRenaming ? (e) => {
+          if (justDraggedRef.current) return;
+          onClick(workflow, e);
+        } : undefined}
         showHoverOverlay={false}
         contextMenuItems={isDone ? menuItems : null}
         onRetry={(e) => {
@@ -653,6 +752,125 @@ const CollectionMediaGridItem = React.memo(function CollectionMediaGridItem({
     <div className="collection-tile-scrim" />
   );
 
+  const pointerStartRef = useRef(null);
+  const isPointerDraggingRef = useRef(false);
+  const justDraggedRef = useRef(false);
+
+  useEffect(() => {
+    const handlePointerHover = (e) => {
+      if (e.detail?.target === "add-to-collection" && e.detail?.collectionId === col?.id) {
+        setIsDragOver(true);
+      } else if (!e.detail?.target || e.detail?.collectionId !== col?.id) {
+        setIsDragOver(false);
+      }
+    };
+    const handlePointerDrop = (e) => {
+      if (e.detail?.targetFolderId === col?.id && projectId) {
+        const { itemType, itemId, targetFolderId } = e.detail;
+        if (itemId && targetFolderId && itemId !== targetFolderId) {
+          moveItem({
+            itemType,
+            itemId,
+            targetFolderId,
+            projectId,
+          });
+        }
+      }
+    };
+    window.addEventListener("studio:pointer-hover-target", handlePointerHover);
+    window.addEventListener("studio:drop-to-collection", handlePointerDrop);
+    return () => {
+      window.removeEventListener("studio:pointer-hover-target", handlePointerHover);
+      window.removeEventListener("studio:drop-to-collection", handlePointerDrop);
+    };
+  }, [col?.id, projectId, moveItem]);
+
+  const handlePointerDown = useCallback((e) => {
+    if (e.button !== 0 || isRenaming) return;
+    if (e.target.closest("button, input, textarea, [data-prevent-drag], a, [role='menuitem']")) return;
+
+    pointerStartRef.current = { x: e.clientX, y: e.clientY };
+    isPointerDraggingRef.current = false;
+
+    const onPointerMove = (moveEvent) => {
+      if (!pointerStartRef.current) return;
+      const dx = moveEvent.clientX - pointerStartRef.current.x;
+      const dy = moveEvent.clientY - pointerStartRef.current.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+
+      if (!isPointerDraggingRef.current && dist > 5) {
+        isPointerDraggingRef.current = true;
+        setIsDraggingThis(true);
+        usePromptStore.getState().setIsDraggingGalleryItem(true);
+        usePromptStore.getState().setDraggedItem({
+          type: "collection",
+          id: col?.id,
+          collection: col,
+        });
+      }
+
+      if (isPointerDraggingRef.current) {
+        lastPos.current = { x: moveEvent.clientX, y: moveEvent.clientY };
+        mouseX.set(moveEvent.clientX);
+        mouseY.set(moveEvent.clientY);
+
+        const targetEl = document.elementFromPoint(moveEvent.clientX, moveEvent.clientY);
+        const colCard = targetEl?.closest("[data-collection-drop-id]");
+        const backBtn = targetEl?.closest("[data-drop-back]");
+
+        if (colCard && colCard.dataset.collectionDropId !== col?.id) {
+          const colId = colCard.dataset.collectionDropId;
+          window.dispatchEvent(new CustomEvent("studio:pointer-hover-target", { detail: { target: "add-to-collection", collectionId: colId } }));
+        } else if (backBtn) {
+          window.dispatchEvent(new CustomEvent("studio:pointer-hover-target", { detail: { target: "move-out" } }));
+        } else {
+          window.dispatchEvent(new CustomEvent("studio:pointer-hover-target", { detail: { target: null } }));
+        }
+      }
+    };
+
+    const onPointerUp = (upEvent) => {
+      window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("pointerup", onPointerUp);
+      window.removeEventListener("pointercancel", onPointerUp);
+
+      if (isPointerDraggingRef.current) {
+        isPointerDraggingRef.current = false;
+        justDraggedRef.current = true;
+        setTimeout(() => { justDraggedRef.current = false; }, 150);
+
+        setIsDraggingThis(false);
+        usePromptStore.getState().setIsDraggingGalleryItem(false);
+        usePromptStore.getState().setDraggedItem(null);
+        window.dispatchEvent(new CustomEvent("studio:pointer-hover-target", { detail: { target: null } }));
+
+        const targetEl = document.elementFromPoint(upEvent.clientX, upEvent.clientY);
+        const colCard = targetEl?.closest("[data-collection-drop-id]");
+        const backBtn = targetEl?.closest("[data-drop-back]");
+
+        if (colCard && colCard.dataset.collectionDropId !== col?.id) {
+          const targetFolderId = colCard.dataset.collectionDropId;
+          if (col?.id && targetFolderId) {
+            window.dispatchEvent(new CustomEvent("studio:drop-to-collection", {
+              detail: { itemType: "collection", itemId: col.id, targetFolderId }
+            }));
+          }
+        } else if (backBtn) {
+          if (col?.id) {
+            window.dispatchEvent(new CustomEvent("studio:drop-to-back", {
+              detail: { itemType: "collection", itemId: col.id }
+            }));
+          }
+        }
+      }
+      pointerStartRef.current = null;
+    };
+
+    window.addEventListener("pointermove", onPointerMove);
+    window.addEventListener("pointerup", onPointerUp);
+    window.addEventListener("pointercancel", onPointerUp);
+  }, [isRenaming, col, mouseX, mouseY]);
+
   const handleDragStart = (e) => {
     if (isRenaming) return;
     setIsDraggingThis(true);
@@ -919,7 +1137,7 @@ const CollectionMediaGridItem = React.memo(function CollectionMediaGridItem({
 
   const handleNavigate = useCallback(
     (e) => {
-      if (isRenaming) return;
+      if (isRenaming || justDraggedRef.current) return;
       const targetCol = col || collection || workflow;
       const targetId = targetCol?.id || targetCol?.name;
       if (onClick) {
@@ -940,7 +1158,9 @@ const CollectionMediaGridItem = React.memo(function CollectionMediaGridItem({
         onClick={handleNavigate}
         isLiked={isLiked}
         onLikeToggle={handleToggleLike}
-        draggable={!isRenaming}
+        draggable={false}
+        data-collection-drop-id={col?.id}
+        onPointerDown={!isRenaming ? handlePointerDown : undefined}
         onDragStart={handleDragStart}
         onDrag={handleDrag}
         onDragEnd={handleDragEnd}

@@ -17,6 +17,7 @@ import { NavbarBackButton } from "@/widgets/NavbarCore/ui/NavbarBackButton"
 import { ConfirmDeleteDialog } from "@/widgets/dialogs/ConfirmDeleteDialog"
 import { useProjectFolders, useUpdateFolder, useDeleteFolder, useFolderMove, useDownloadCollection } from "@/features/folders"
 import { useWorkflowsStore } from "@/features/workflows/model/useWorkflowsStore"
+import { usePromptStore } from "@/features/prompt-bar/model/usePromptStore"
 
 export function StudioNavbarLeft({
     searchExpanded,
@@ -91,16 +92,18 @@ export function StudioNavbarLeft({
         })
     }
 
-    // Independent drag detection via window drag events (zero coupling to prompt-bar)
-    const [isDragging, setIsDragging] = React.useState(false)
+    // Independent drag detection via window drag events and prompt store
+    const isGalleryDragging = usePromptStore((s) => s.isDraggingGalleryItem)
+    const [isWindowDragging, setIsWindowDragging] = React.useState(false)
+    const isDragging = isWindowDragging || isGalleryDragging
     const [isBackDragOver, setIsBackDragOver] = React.useState(false)
 
     React.useEffect(() => {
         const onDragStart = () => {
-            setIsDragging(true)
+            setIsWindowDragging(true)
         }
         const onDragEnd = () => {
-            setIsDragging(false)
+            setIsWindowDragging(false)
             setIsBackDragOver(false)
         }
 
@@ -195,6 +198,28 @@ export function StudioNavbarLeft({
         }
     }, [isDragging])
 
+    React.useEffect(() => {
+        const onPointerHover = (e) => {
+            if (e.detail?.target === "move-out") {
+                setIsBackDragOver(true)
+            } else if (!e.detail?.target) {
+                setIsBackDragOver(false)
+            }
+        }
+        const onPointerDrop = (e) => {
+            if (e.detail) {
+                executeMoveToParent(e.detail)
+                setIsBackDragOver(false)
+            }
+        }
+        window.addEventListener("studio:pointer-hover-target", onPointerHover)
+        window.addEventListener("studio:drop-to-back", onPointerDrop)
+        return () => {
+            window.removeEventListener("studio:pointer-hover-target", onPointerHover)
+            window.removeEventListener("studio:drop-to-back", onPointerDrop)
+        }
+    }, [executeMoveToParent])
+
     const handleSaveName = (nextName) => {
         const trimmed = nextName?.trim()
         if (!trimmed) return
@@ -233,6 +258,7 @@ export function StudioNavbarLeft({
             {isCollectionPage && isDragging ? (
                 <button
                     type="button"
+                    data-drop-back="true"
                     onDragOver={handleBackDragOver}
                     onDragEnter={handleBackDragEnter}
                     onDragLeave={handleBackDragLeave}

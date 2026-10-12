@@ -285,8 +285,11 @@ export function useDragAutoScroll(options = {}) {
     window.addEventListener("dragleave", handleDragLeave, { capture: true });
     window.addEventListener("dragover", handlePointerDrag, { capture: true, passive: true });
     window.addEventListener("drag", handlePointerDrag, { capture: true, passive: true });
+    window.addEventListener("pointermove", handlePointerDrag, { capture: true, passive: true });
     window.addEventListener("wheel", handleWheel, { capture: true, passive: false });
     window.addEventListener("mouseup", handleDragEnd, { capture: true });
+    window.addEventListener("pointerup", handleDragEnd, { capture: true });
+    window.addEventListener("pointercancel", handleDragEnd, { capture: true });
 
     return () => {
       unsubscribe();
@@ -298,8 +301,11 @@ export function useDragAutoScroll(options = {}) {
       window.removeEventListener("dragleave", handleDragLeave, { capture: true });
       window.removeEventListener("dragover", handlePointerDrag, { capture: true });
       window.removeEventListener("drag", handlePointerDrag, { capture: true });
+      window.removeEventListener("pointermove", handlePointerDrag, { capture: true });
       window.removeEventListener("wheel", handleWheel, { capture: true });
       window.removeEventListener("mouseup", handleDragEnd, { capture: true });
+      window.removeEventListener("pointerup", handleDragEnd, { capture: true });
+      window.removeEventListener("pointercancel", handleDragEnd, { capture: true });
     };
   }, [
     enabled,

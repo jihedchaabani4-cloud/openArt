@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { renderHook, act } from "@testing-library/react";
+import { renderHook, act, cleanup } from "@testing-library/react";
 import { useDragAutoScroll, findScrollContainer } from "@/features/studio/useDragAutoScroll";
 import { usePromptStore } from "@/features/prompt-bar/model/usePromptStore";
 
@@ -29,6 +29,11 @@ describe("useDragAutoScroll & Mouse Wheel During Drag", () => {
   });
 
   afterEach(() => {
+    act(() => {
+      window.dispatchEvent(new Event("dragend", { bubbles: true }));
+      usePromptStore.getState().setIsDraggingGalleryItem(false);
+    });
+    cleanup();
     vi.useRealTimers();
     if (container && container.parentNode) {
       container.parentNode.removeChild(container);
@@ -88,6 +93,12 @@ describe("useDragAutoScroll & Mouse Wheel During Drag", () => {
     });
 
     expect(container.scrollTop).toBeLessThan(scrollBefore);
+
+    // End drag
+    act(() => {
+      window.dispatchEvent(new Event("dragend", { bubbles: true }));
+      usePromptStore.getState().setIsDraggingGalleryItem(false);
+    });
   });
 
   it("auto-scrolls DOWN when dragging near the bottom of the container / page", () => {
@@ -109,6 +120,12 @@ describe("useDragAutoScroll & Mouse Wheel During Drag", () => {
     });
 
     expect(container.scrollTop).toBeGreaterThan(scrollBefore);
+
+    // End drag
+    act(() => {
+      window.dispatchEvent(new Event("dragend", { bubbles: true }));
+      usePromptStore.getState().setIsDraggingGalleryItem(false);
+    });
   });
 
   it("stops auto-scrolling immediately when dragend or drop occurs", () => {
@@ -138,5 +155,33 @@ describe("useDragAutoScroll & Mouse Wheel During Drag", () => {
 
     // Scroll should not have changed after dragend
     expect(container.scrollTop).toBe(scrollMid);
+  });
+
+  it("scrolls via mouse wheel during pointer drag and stops on pointerup", () => {
+    renderHook(() => useDragAutoScroll());
+
+    act(() => {
+      usePromptStore.getState().setIsDraggingGalleryItem(true);
+    });
+
+    const initialScroll = container.scrollTop;
+
+    // Pointer move in middle of screen (neutral zone, no edge auto-scroll)
+    window.dispatchEvent(new MouseEvent("pointermove", { clientX: 500, clientY: 300, bubbles: true }));
+
+    // Wheel event during pointer drag
+    window.dispatchEvent(new WheelEvent("wheel", { deltaY: -80, clientX: 500, clientY: 300, bubbles: true, cancelable: true }));
+
+    expect(container.scrollTop).toBe(initialScroll - 80);
+
+    // Pointer up ends drag
+    act(() => {
+      window.dispatchEvent(new MouseEvent("pointerup", { bubbles: true }));
+      usePromptStore.getState().setIsDraggingGalleryItem(false);
+    });
+
+    // Subsequent wheel does not change scroll
+    window.dispatchEvent(new WheelEvent("wheel", { deltaY: 50, bubbles: true, cancelable: true }));
+    expect(container.scrollTop).toBe(initialScroll - 80);
   });
 });
