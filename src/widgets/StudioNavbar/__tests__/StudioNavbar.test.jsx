@@ -163,4 +163,18 @@ describe("StudioNavbar Layout & Collection Page Header", () => {
     expect(nav.className).not.toContain("px-3 sm:px-6");
     expect(nav.className).not.toContain("sm:pl-6");
   });
+
+  it("removes shadow from the search input and applies header-backdrop element with black-to-transparent 60% mask to StudioNavbar", () => {
+    const { container } = renderWithClient(<StudioNavbar />);
+    const backdrop = container.querySelector(".header-backdrop");
+    expect(backdrop).toBeDefined();
+    expect(backdrop.className).toContain("header-backdrop-visible");
+
+    const searchWrapper = container.querySelector("div[class*='rounded-[16px]']");
+    expect(searchWrapper).toBeDefined();
+    expect(searchWrapper.className).not.toContain("shadow-[var(--glass-raised-box-shadow)]");
+    expect(searchWrapper.className).toContain("shadow-none");
+    expect(searchWrapper.style.boxShadow).toBeFalsy();
+  });
 });
+

@@ -60,11 +60,12 @@ export function NavbarCore({
       animate={isHidden ? "hidden" : "visible"}
       transition={{ duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
       className={cn(
-        "top-0 left-0 w-full z-50 flex items-center h-16 pl-3 pr-4 sm:pr-6 bg-transparent border-none",
+        "top-0 left-0 w-full z-50 flex items-center h-16 pl-3 pr-4 sm:pr-6 bg-transparent border-none overflow-hidden",
         position,
         className
       )}
     >
+      <div className="header-backdrop header-backdrop-visible" aria-hidden="true" />
       {children ? (
         children
       ) : (

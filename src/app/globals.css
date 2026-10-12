@@ -1684,6 +1684,26 @@ flow-error-tile {
   }
 }
 
+/* ── Google VideoFX Header Backdrop ── */
+.header-backdrop {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  mask-image: linear-gradient(180deg, #000 0, #000 60%, rgba(0, 0, 0, 0.8) 80%, rgba(0, 0, 0, 0.4) 90%, rgba(0, 0, 0, 0.2) 95%, rgba(0, 0, 0, 0.1) 97%, transparent);
+  -webkit-mask-image: linear-gradient(180deg, #000 0, #000 60%, rgba(0, 0, 0, 0.8) 80%, rgba(0, 0, 0, 0.4) 90%, rgba(0, 0, 0, 0.2) 95%, rgba(0, 0, 0, 0.1) 97%, transparent);
+  z-index: -1;
+  background: var(--header-blur-background, linear-gradient(180deg, #000, color-mix(in srgb, #000 50%, transparent) 75%, transparent));
+  transition: opacity 0.3s ease-in-out;
+  opacity: 0.6;
+}
+
+.header-backdrop-visible {
+  opacity: 0.6;
+}
+
+
 
 
 
