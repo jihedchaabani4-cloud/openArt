@@ -9,8 +9,8 @@ import { UserDropdown } from "./UserDropdown"
 export const StudioNavbarRight = React.memo(function StudioNavbarRight({ searchExpanded }) {
     return (
         <div className={cn(
-            "ml-auto flex flex-none items-center justify-end whitespace-nowrap transition-[opacity,flex-basis] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] gap-1",
-            searchExpanded ? "basis-0 opacity-0 pointer-events-none overflow-hidden" : "basis-auto opacity-100"
+            "flex min-w-0 items-center justify-end whitespace-nowrap transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] gap-1",
+            searchExpanded ? "basis-0 w-0 opacity-0 pointer-events-none overflow-hidden" : "flex-1 opacity-100"
         )}>
             <NavbarImportButton />
             <StudioSettingsDropdown />

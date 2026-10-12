@@ -228,7 +228,7 @@ export function StudioNavbarLeft({
     return (
         <div className={cn(
             "flex min-w-0 items-center gap-2.5 transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] overflow-hidden",
-            searchExpanded ? "basis-0 w-0 opacity-0 pointer-events-none" : "flex-[1_1_35%] opacity-100"
+            searchExpanded ? "basis-0 w-0 opacity-0 pointer-events-none" : "flex-1 opacity-100"
         )}>
             {isCollectionPage && isDragging ? (
                 <button
@@ -254,12 +254,7 @@ export function StudioNavbarLeft({
                         href={backHref}
                         label={backLabel}
                         iconName={backIcon}
-                        className={cn(
-                            "transition-all shrink-0",
-                            isCollectionPage
-                                ? "h-10 w-10 rounded-xl border border-white/15 bg-white/[0.05] hover:bg-white/[0.12] hover:border-white/30 text-white shadow-sm flex items-center justify-center"
-                                : ""
-                        )}
+                        className="transition-all shrink-0 border-0 border-transparent shadow-none"
                         onDragOver={isCollectionPage ? handleBackDragOver : undefined}
                         onDragEnter={isCollectionPage ? handleBackDragEnter : undefined}
                         onDragLeave={isCollectionPage ? handleBackDragLeave : undefined}
@@ -271,12 +266,7 @@ export function StudioNavbarLeft({
                         displayName={displayName}
                         placeholder={isCollectionPage ? "Untitled collection" : "Untitled"}
                         onSave={handleSaveName}
-                        inputClassName={cn(
-                            "focus:text-white transition-all",
-                            isCollectionPage
-                                ? "text-2xl sm:text-[28px] font-bold max-w-[360px] sm:max-w-[480px] text-white tracking-tight px-2 py-0.5 leading-tight"
-                                : "text-md font-medium max-w-[160px]"
-                        )}
+                        inputClassName="text-md font-medium max-w-[160px] sm:max-w-[200px] focus:text-white transition-all"
                     />
                 </>
             )}
@@ -286,12 +276,7 @@ export function StudioNavbarLeft({
                     <Button
                         variant="studio-ghost"
                         size="icon"
-                        className={cn(
-                            "transition-all shrink-0",
-                            isCollectionPage
-                                ? "h-10 w-10 rounded-xl border border-white/10 bg-white/[0.04] hover:bg-white/[0.1] text-white/80 hover:text-white"
-                                : "h-9 w-9"
-                        )}
+                        className="h-9 w-9 transition-all shrink-0 border-0 border-transparent"
                     >
                         <GoogleIcon iconName="more_vert" className="text-[16px]" />
                     </Button>
