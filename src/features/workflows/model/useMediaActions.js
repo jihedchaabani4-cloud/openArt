@@ -273,7 +273,13 @@ export function useWorkflowActions(workflow, item = null) {
     aspect: metadata.aspect,
     status: metadata.status,
     prompt,
-    isLiked: workflow.metadata?.favorited || false,
+    isLiked: Boolean(
+      workflow?.metadata?.favorited ||
+      workflow?.favorited ||
+      workflow?.is_liked ||
+      targetItem?.is_liked ||
+      targetItem?.favorited
+    ),
     isElementSheet,
     item: targetItem, // return the resolved item
   };

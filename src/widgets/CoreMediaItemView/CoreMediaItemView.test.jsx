@@ -1,0 +1,77 @@
+import { describe, it, expect, vi, afterEach } from "vitest";
+import { render, screen, fireEvent, cleanup } from "@testing-library/react";
+import { CoreMediaItemView } from "./CoreMediaItemView";
+
+describe("CoreMediaItemView - Liked top-left indicator badge", () => {
+  afterEach(() => {
+    cleanup();
+    vi.clearAllMocks();
+  });
+  it("renders the liked badge in the top-left corner when isLiked is true", () => {
+    render(
+      <CoreMediaItemView
+        src="https://example.com/test.png"
+        status="completed"
+        isLiked={true}
+      />
+    );
+
+    const likedBadge = screen.getByTitle("Liked");
+    expect(likedBadge).toBeDefined();
+    expect(likedBadge.getAttribute("aria-label")).toBe("Liked");
+  });
+
+  it("does not render the liked badge when isLiked is false", () => {
+    render(
+      <CoreMediaItemView
+        src="https://example.com/test.png"
+        status="completed"
+        isLiked={false}
+      />
+    );
+
+    const likedBadge = screen.queryByTitle("Liked");
+    expect(likedBadge).toBeNull();
+  });
+
+  it("calls onLikeToggle and stops propagation when liked badge is clicked", () => {
+    const onLikeToggle = vi.fn();
+    const onCardClick = vi.fn();
+
+    render(
+      <CoreMediaItemView
+        src="https://example.com/test.png"
+        status="completed"
+        isLiked={true}
+        onLikeToggle={onLikeToggle}
+        onClick={onCardClick}
+      />
+    );
+
+    const likedBadge = screen.getByTitle("Liked");
+    fireEvent.click(likedBadge);
+
+    expect(onLikeToggle).toHaveBeenCalledTimes(1);
+    expect(onCardClick).not.toHaveBeenCalled();
+  });
+
+  it("deduces isLiked=true from workflow.metadata.favorited", () => {
+    const workflow = {
+      id: "wf-1",
+      metadata: {
+        favorited: true,
+      },
+    };
+
+    render(
+      <CoreMediaItemView
+        workflow={workflow}
+        src="https://example.com/test.png"
+        status="completed"
+      />
+    );
+
+    const likedBadge = screen.getByTitle("Liked");
+    expect(likedBadge).toBeDefined();
+  });
+});
