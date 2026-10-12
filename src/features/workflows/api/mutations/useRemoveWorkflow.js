@@ -11,11 +11,12 @@ export function useRemoveWorkflow() {
     mutationFn: async ({ workflowId, workflowIds }) => {
       const ids = workflowIds || (workflowId ? [workflowId] : []);
       if (ids.length === 0) throw new Error("workflowId is required");
+      const cleanIds = ids.map((id) => String(id || '').replace(/^workflows\//, ''));
 
-      const res = ids.length === 1
-        ? await api.delete(`/workflows/workflows/${ids[0]}`)
+      const res = cleanIds.length === 1
+        ? await api.delete(`/workflows/workflows/${cleanIds[0]}`)
         : await api.delete(`/workflows/workflows`, {
-            body: JSON.stringify({ workflow_ids: ids }),
+            body: JSON.stringify({ workflow_ids: cleanIds }),
           });
 
       if (!res.ok) throw new Error(res.message || "Failed to remove workflow");
