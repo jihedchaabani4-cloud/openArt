@@ -6,6 +6,7 @@ import { toast } from "sonner";
 
 vi.mock("@/shared/api/client", () => ({
   api: {
+    get: vi.fn(),
     getBlob: vi.fn(),
   },
 }));
@@ -108,5 +109,151 @@ describe("downloadCollectionAsZip", () => {
     expect(toast.info).toHaveBeenCalledWith(
       expect.stringContaining("has no media to download")
     );
+  });
+
+  it("resolves media from projectData.projectContents.media when workflows do not have items array", async () => {
+    const mockBlob = new Blob(["image-data"], { type: "image/png" });
+    api.getBlob.mockResolvedValue(mockBlob);
+
+    const mockQueryClient = {
+      getQueryData: vi.fn((key) => {
+        if (key[0] === "folders") {
+          return [{ id: "col-cvcx", name: "cvcx", parentId: null }];
+        }
+        if (key[0] === "projectData") {
+          return {
+            projectContents: {
+              workflows: [
+                {
+                  id: "wf-cvcx-1",
+                  display_name: "Workflow in CVCX",
+                  folder_id: "col-cvcx",
+                },
+              ],
+              media: [
+                {
+                  id: "m-1",
+                  workflow_id: "wf-cvcx-1",
+                  url: "https://example.com/art1.png",
+                  status: "completed",
+                },
+                {
+                  id: "m-2",
+                  workflow_id: "wf-cvcx-1",
+                  url: "https://example.com/art2.png",
+                  status: "completed",
+                },
+              ],
+            },
+          };
+        }
+        return null;
+      }),
+    };
+
+    const result = await downloadCollectionAsZip({
+      collectionId: "col-cvcx",
+      projectId: "proj-1",
+      queryClient: mockQueryClient,
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.totalFiles).toBe(2);
+    expect(downloadBlob).toHaveBeenCalledWith(
+      expect.any(Blob),
+      "cvcx.zip"
+    );
+  });
+
+  it("fetches folders and projectData from API when queryClient cache is empty", async () => {
+    const mockBlob = new Blob(["image-data"], { type: "image/png" });
+    api.getBlob.mockResolvedValue(mockBlob);
+
+    api.get.mockImplementation(async (endpoint) => {
+      if (endpoint === "/projects/proj-remote/folders") {
+        return { items: [{ id: "col-remote", name: "Remote Col", parentId: null }] };
+      }
+      if (endpoint === "/workflows/project-data/proj-remote") {
+        return {
+          result: {
+            data: {
+              json: {
+                projectContents: {
+                  workflows: [
+                    { id: "wf-remote-1", folder_id: "col-remote", title: "Fetched Art" },
+                  ],
+                  media: [
+                    { id: "m-remote-1", workflow_id: "wf-remote-1", file_url: "https://example.com/remote.png" },
+                  ],
+                },
+              },
+            },
+          },
+        };
+      }
+      throw new Error(`Unexpected endpoint: ${endpoint}`);
+    });
+
+    const mockQueryClient = {
+      getQueryData: vi.fn(() => null),
+      setQueryData: vi.fn(),
+    };
+
+    const result = await downloadCollectionAsZip({
+      collectionId: "col-remote",
+      projectId: "proj-remote",
+      queryClient: mockQueryClient,
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.totalFiles).toBe(1);
+    expect(api.get).toHaveBeenCalledWith("/projects/proj-remote/folders");
+    expect(api.get).toHaveBeenCalledWith("/workflows/project-data/proj-remote");
+    expect(downloadBlob).toHaveBeenCalledWith(expect.any(Blob), "Remote Col.zip");
+  });
+
+  it("handles direct folder-scoped media and deduplicates identical items", async () => {
+    const mockBlob = new Blob(["direct-image"], { type: "image/png" });
+    api.getBlob.mockResolvedValue(mockBlob);
+
+    const folders = [{ id: "col-direct", name: "Direct Col", parentId: null }];
+    const mockQueryClient = {
+      getQueryData: vi.fn((key) => {
+        if (key[0] === "folders") return folders;
+        if (key[0] === "projectData") {
+          return {
+            projectContents: {
+              workflows: [
+                {
+                  id: "wf-d-1",
+                  folder_id: "col-direct",
+                  items: [
+                    { id: "m-shared-1", url: "https://example.com/shared.png" },
+                  ],
+                },
+              ],
+              media: [
+                // Shared media already in wf.items -> should be deduplicated
+                { id: "m-shared-1", workflow_id: "wf-d-1", url: "https://example.com/shared.png" },
+                // Direct media in folder without workflow
+                { id: "m-direct-2", folder_id: "col-direct", image: { url: "https://example.com/direct2.png" } },
+              ],
+            },
+          };
+        }
+        return null;
+      }),
+    };
+
+    const result = await downloadCollectionAsZip({
+      collectionId: "col-direct",
+      projectId: "proj-direct",
+      folders,
+      queryClient: mockQueryClient,
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.totalFiles).toBe(2);
+    expect(downloadBlob).toHaveBeenCalledWith(expect.any(Blob), "Direct Col.zip");
   });
 });

@@ -4,16 +4,20 @@ import JSZip from "jszip";
 import { api } from "@/shared/api/client";
 import { downloadBlob } from "@/shared/lib/utils";
 import { queryKeys } from "@/shared/api/queryKeys";
+import { logger } from "@/shared/lib/logger";
+import { useWorkflowsStore } from "@/features/workflows/model/useWorkflowsStore";
 import { toast } from "sonner";
 
 /**
  * Clean filename utility removing invalid filesystem characters.
  */
 function sanitizeFilename(name) {
-  return String(name || "untitled")
-    .replace(/[\\/:*?"<>|]/g, "_")
-    .trim()
-    .slice(0, 60) || "untitled";
+  return (
+    String(name || "untitled")
+      .replace(/[\\/:*?"<>|]/g, "_")
+      .trim()
+      .slice(0, 60) || "untitled"
+  );
 }
 
 /**
@@ -34,7 +38,64 @@ function getExtensionFromUrl(url = "", isVideo = false) {
 }
 
 /**
- * Core service function: downloads a collection and all its sub-collections as a ZIP archive.
+ * Canonical URL extractor supporting all backend media schemas.
+ */
+function extractMediaUrl(item) {
+  if (!item) return null;
+  if (typeof item === "string") return item;
+  return (
+    item.url ??
+    item.file_url ??
+    item.src ??
+    item.image?.generatedImage?.url ??
+    item.image?.url ??
+    item.video?.generatedVideo?.uri ??
+    item.video?.generatedVideo?.url ??
+    item.video?.url ??
+    item.asset?.file_url ??
+    item.primary_media_url ??
+    item.primary_media?.url ??
+    null
+  );
+}
+
+/**
+ * Canonical video detector supporting all backend media schemas.
+ */
+function isMediaVideo(item, url = "") {
+  if (!item && !url) return false;
+  return Boolean(
+    item?.isVideo ||
+    item?.is_video ||
+    item?.type === "video" ||
+    item?.asset_type === "video" ||
+    item?.video ||
+    /\.(mp4|webm|mov|m4v)(\?.*)?$/i.test(url || "")
+  );
+}
+
+/**
+ * Checks if an item (workflow or media) belongs to a target folder / collection.
+ */
+function isItemInFolder(item, targetFolderId) {
+  if (!item || !targetFolderId) return false;
+  const target = String(targetFolderId);
+  const candidates = [
+    item.folder_id,
+    item.folderId,
+    item.collection_id,
+    item.collectionId,
+    item.metadata?.folder_id,
+    item.metadata?.folderId,
+    item.metadata?.collection_id,
+    item.metadata?.collectionId,
+  ];
+  return candidates.some((c) => c != null && String(c) === target);
+}
+
+/**
+ * Core service function: downloads a collection, its workflows, workflow media,
+ * and all nested sub-collections as a organized ZIP archive.
  */
 export async function downloadCollectionAsZip({
   collectionId,
@@ -48,125 +109,236 @@ export async function downloadCollectionAsZip({
     throw new Error("collectionId is required");
   }
 
+  const effectiveProjectId =
+    projectId ||
+    (typeof window !== "undefined"
+      ? useWorkflowsStore.getState?.().selectedProjectId
+      : null);
+
   // 1. Resolve folders list
-  let allFolders = Array.isArray(passedFolders) ? passedFolders : null;
-  if (!allFolders && queryClient && projectId) {
-    const cached = queryClient.getQueryData(queryKeys.folders.byProject(projectId));
+  let allFolders = Array.isArray(passedFolders) ? [...passedFolders] : null;
+  if ((!allFolders || allFolders.length === 0) && queryClient && effectiveProjectId) {
+    const cached = queryClient.getQueryData(queryKeys.folders.byProject(effectiveProjectId));
     if (Array.isArray(cached)) allFolders = cached;
     else if (Array.isArray(cached?.items)) allFolders = cached.items;
   }
-  if (!allFolders) allFolders = [];
-
-  // 2. Resolve workflows list
-  let allWorkflows = Array.isArray(passedWorkflows) ? passedWorkflows : null;
-  if (!allWorkflows && queryClient && projectId) {
-    const projectData = queryClient.getQueryData(queryKeys.projectData.byProject(projectId));
-    if (Array.isArray(projectData?.projectContents?.workflows)) {
-      allWorkflows = projectData.projectContents.workflows;
+  if ((!allFolders || allFolders.length === 0) && effectiveProjectId) {
+    try {
+      const res = await api.get(`/projects/${effectiveProjectId}/folders`);
+      const items = res?.items ?? res?.data ?? (Array.isArray(res) ? res : []);
+      if (Array.isArray(items) && items.length > 0) {
+        allFolders = items;
+        queryClient?.setQueryData(queryKeys.folders.byProject(effectiveProjectId), items);
+      }
+    } catch (err) {
+      logger.warn("download_collection_fetch_folders_failed", { error: err?.message });
     }
   }
-  if (!allWorkflows) allWorkflows = [];
+  if (!allFolders) allFolders = [];
 
-  const targetFolder = allFolders.find((f) => f.id === collectionId);
-  const cleanRootName = sanitizeFilename(targetFolder?.name || collectionName || "Untitled collection");
+  // 2. Resolve project contents (workflows & media)
+  let projectContents = null;
+  if (queryClient && effectiveProjectId) {
+    const cached = queryClient.getQueryData(queryKeys.projectData.byProject(effectiveProjectId));
+    if (cached?.projectContents) {
+      projectContents = cached.projectContents;
+    }
+  }
+  if (!projectContents && effectiveProjectId) {
+    try {
+      const res = await api.get(`/workflows/project-data/${effectiveProjectId}`);
+      const data =
+        res?.data?.data?.json ||
+        res?.data?.json ||
+        res?.result?.data?.json ||
+        res?.json ||
+        res?.data;
+      if (data?.projectContents) {
+        projectContents = data.projectContents;
+        queryClient?.setQueryData(queryKeys.projectData.byProject(effectiveProjectId), data);
+      }
+    } catch (err) {
+      logger.warn("download_collection_fetch_project_data_failed", { error: err?.message });
+    }
+  }
+
+  const rawWorkflows = Array.isArray(projectContents?.workflows) ? projectContents.workflows : [];
+  const rawMedia = Array.isArray(projectContents?.media) ? projectContents.media : [];
+
+  // Merge workflows from projectContents with any passedWorkflows
+  const workflowsMap = new Map();
+  for (const w of rawWorkflows) {
+    if (w?.id || w?.name) {
+      workflowsMap.set(String(w.id || w.name), w);
+    }
+  }
+  if (Array.isArray(passedWorkflows)) {
+    for (const w of passedWorkflows) {
+      const key = String(w.id || w.name || "");
+      if (key) {
+        const existing = workflowsMap.get(key) || {};
+        workflowsMap.set(key, { ...existing, ...w });
+      }
+    }
+  }
+  const allWorkflows = Array.from(workflowsMap.values());
+
+  // Index media by workflow ID variants
+  const mediaByWorkflow = {};
+  for (const m of rawMedia) {
+    const wfId = m.workflowId || m.workflow_id || m.workflowName;
+    if (!wfId) continue;
+    const strId = String(wfId);
+    (mediaByWorkflow[strId] ??= []).push(m);
+    const cleanId = strId.replace(/^workflows\//, "");
+    if (cleanId !== strId) {
+      (mediaByWorkflow[cleanId] ??= []).push(m);
+    }
+  }
+
+  const targetFolder = allFolders.find(
+    (f) => String(f.id) === String(collectionId) || f.name === collectionId
+  );
+  const cleanRootName = sanitizeFilename(
+    targetFolder?.name || collectionName || "Untitled collection"
+  );
+  const rootFolderId = targetFolder?.id || collectionId;
 
   const zip = new JSZip();
   let totalFiles = 0;
 
   // Recursive collector
   async function collectFolderContents(currentFolderId, zipFolder) {
-    // Collect workflows directly in currentFolderId
-    const workflowsInFolder = allWorkflows.filter((w) => {
-      const fid = w.folder_id || w.folderId || w.metadata?.folder_id || w.metadata?.folderId;
-      return fid === currentFolderId;
-    });
+    const folderKey = String(currentFolderId);
+    const workflowsInFolder = allWorkflows.filter((w) => isItemInFolder(w, folderKey));
 
-    const usedNames = new Set();
+    const collectedMediaKeys = new Set();
+    const mediaToDownload = [];
 
-    for (let wIdx = 0; wIdx < workflowsInFolder.length; wIdx++) {
-      const wf = workflowsInFolder[wIdx];
+    function addMediaItem(item, parentWf = null) {
+      if (!item) return;
+      if (item.status === "failed" || item.status === "rejected") return;
 
-      // Extract all valid media items
-      const mediaList = [];
-      if (Array.isArray(wf.items) && wf.items.length > 0) {
-        for (const it of wf.items) {
-          if (it?.url && it?.status !== "failed") {
-            mediaList.push({ url: it.url, isVideo: Boolean(it.isVideo) });
-          }
+      const url = extractMediaUrl(item);
+      if (!url) return;
+
+      const dedupeKey = item.id || item.name || url;
+      if (collectedMediaKeys.has(dedupeKey)) return;
+      collectedMediaKeys.add(dedupeKey);
+
+      const isVideo = isMediaVideo(item, url);
+      const wfDisplayName =
+        parentWf?.display_name ||
+        parentWf?.title ||
+        parentWf?.name ||
+        parentWf?.metadata?.displayName;
+      const baseName = sanitizeFilename(
+        wfDisplayName ||
+        item.name ||
+        item.id ||
+        (parentWf?.prompt ? parentWf.prompt.slice(0, 30) : null) ||
+        "media"
+      );
+
+      mediaToDownload.push({
+        url,
+        isVideo,
+        baseName,
+        id: item.id || parentWf?.id || null,
+      });
+    }
+
+    // 1. Collect media belonging to workflows in this folder
+    for (const wf of workflowsInFolder) {
+      const cleanWfId = String(wf.id || wf.name || "").replace(/^workflows\//, "");
+      const wfItems =
+        (Array.isArray(wf.items) && wf.items.length > 0 ? wf.items : null) ||
+        (Array.isArray(wf.media) && wf.media.length > 0 ? wf.media : null) ||
+        (Array.isArray(wf.media_items) && wf.media_items.length > 0 ? wf.media_items : null) ||
+        mediaByWorkflow[wf.id] ||
+        mediaByWorkflow[wf.name] ||
+        mediaByWorkflow[cleanWfId] ||
+        [];
+
+      if (wfItems.length > 0) {
+        for (const it of wfItems) {
+          addMediaItem(it, wf);
         }
-      }
-      if (mediaList.length === 0 && Array.isArray(wf.media_items) && wf.media_items.length > 0) {
-        for (const it of wf.media_items) {
-          if (it?.url && it?.status !== "failed") {
-            mediaList.push({ url: it.url, isVideo: Boolean(it.isVideo) });
-          }
-        }
-      }
-      if (mediaList.length === 0) {
-        const primaryUrl = wf.primary_media?.url || wf.url;
-        if (primaryUrl) {
-          mediaList.push({
-            url: primaryUrl,
-            isVideo: Boolean(
-              wf.primary_media?.isVideo ||
-              wf.isVideo ||
-              /\.(mp4|webm|mov)$/i.test(primaryUrl)
-            ),
-          });
-        }
-      }
-
-      for (let mIdx = 0; mIdx < mediaList.length; mIdx++) {
-        const item = mediaList[mIdx];
-        try {
-          const blob = await api.getBlob(item.url);
-          const ext = getExtensionFromUrl(item.url, item.isVideo);
-          const baseName = sanitizeFilename(
-            wf.display_name ||
-            wf.title ||
-            (wf.prompt ? wf.prompt.slice(0, 30) : `asset-${wf.id || wIdx + 1}`)
+      } else {
+        if (wf.primary_media) {
+          addMediaItem(wf.primary_media, wf);
+        } else if (wf.primary_media_url || wf.url || wf.file_url) {
+          addMediaItem(
+            {
+              url: wf.primary_media_url || wf.url || wf.file_url,
+              isVideo: isMediaVideo(wf),
+            },
+            wf
           );
-
-          let finalName = mediaList.length > 1
-            ? `${baseName}-${mIdx + 1}.${ext}`
-            : `${baseName}.${ext}`;
-
-          let duplicateCounter = 1;
-          while (usedNames.has(finalName)) {
-            finalName = `${baseName}-${duplicateCounter}.${ext}`;
-            duplicateCounter++;
-          }
-          usedNames.add(finalName);
-
-          zipFolder.file(finalName, blob);
-          totalFiles++;
-        } catch (err) {
-          console.error(`Failed to download media for workflow ${wf.id}:`, err);
         }
       }
     }
 
-    // Collect child sub-collections (sections)
-    const childFolders = allFolders.filter(
-      (f) => f.parentId === currentFolderId || f.parent_id === currentFolderId
-    );
+    // 2. Collect any direct media in rawMedia scoped to this folder
+    for (const m of rawMedia) {
+      if (isItemInFolder(m, folderKey)) {
+        addMediaItem(m, null);
+      }
+    }
+
+    // 3. Download media blobs into current zipFolder
+    const usedNames = new Set();
+    for (let i = 0; i < mediaToDownload.length; i++) {
+      const item = mediaToDownload[i];
+      try {
+        const blob = await api.getBlob(item.url);
+        const ext = getExtensionFromUrl(item.url, item.isVideo);
+        let finalName = `${item.baseName}.${ext}`;
+        let duplicateCounter = 1;
+        while (usedNames.has(finalName)) {
+          finalName = `${item.baseName}-${duplicateCounter}.${ext}`;
+          duplicateCounter++;
+        }
+        usedNames.add(finalName);
+
+        zipFolder.file(finalName, blob);
+        totalFiles++;
+      } catch (err) {
+        logger.warn("collection_media_download_failed", {
+          mediaId: item.id || "unknown",
+          error: err?.message,
+        });
+      }
+    }
+
+    // 4. Collect child sub-collections (sections)
+    const childFolders = allFolders.filter((f) => {
+      const pId = f.parentId || f.parent_id;
+      return pId != null && String(pId) === folderKey;
+    });
 
     for (const child of childFolders) {
-      const childFolderName = sanitizeFilename(child.name || "Untitled section");
+      const childFolderName = sanitizeFilename(
+        child.name || child.display_name || "Untitled section"
+      );
       const childZipFolder = zipFolder.folder(childFolderName);
       await collectFolderContents(child.id, childZipFolder);
     }
   }
 
-  // Execute recursive collection
-  await collectFolderContents(collectionId, zip);
+  // Execute recursive collection from rootFolderId
+  await collectFolderContents(rootFolderId, zip);
 
   if (totalFiles === 0) {
     toast.info(`Collection "${cleanRootName}" has no media to download.`);
     return { success: false, totalFiles: 0 };
   }
 
-  const toastId = toast.loading(`Zipping collection "${cleanRootName}" (${totalFiles} ${totalFiles === 1 ? "file" : "files"})...`);
+  const toastId = toast.loading(
+    `Zipping collection "${cleanRootName}" (${totalFiles} ${
+      totalFiles === 1 ? "file" : "files"
+    })...`
+  );
 
   try {
     const zipBlob = await zip.generateAsync({ type: "blob" });
@@ -203,3 +375,4 @@ export function useDownloadCollection() {
 
   return { downloadCollection, isDownloading };
 }
+
