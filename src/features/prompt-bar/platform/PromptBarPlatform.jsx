@@ -987,13 +987,14 @@ function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, class
       variant="generation"
       hideBackground={true}
       className={cn("w-full", className)}
+      innerClassName="w-full flex flex-col gap-1 p-2"
       popover={settingsOverlay}
     >
 
       {/* ── Reference Slots (Rendered directly with dumb MediaInput primitive) ─── */}
       {activeSlots.length > 0 && (
         <div className="overflow-visible">
-          <div ref={dialogAnchorRef} className="px-4 pt-3 pb-1 flex items-center gap-2 flex-wrap">
+          <div ref={dialogAnchorRef} className="flex items-center gap-2 flex-wrap">
             {activeSlots.map((slot) => {
               const backendKey = featureConfig?.resolveParameterMapping(currentModel, slot.role) ?? slot.role;
               const media = paramValues[backendKey];
@@ -1079,7 +1080,7 @@ function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, class
 
       {/* ── Prompt Input (Lexical Rich Editor with @ Mentions) ─── */}
       {layout.showPromptInput && (
-        <div className="px-4 pt-3 pb-2">
+        <div className="w-full">
           <PromptEditor
             value={prompt}
             onChange={setPrompt}
@@ -1094,7 +1095,7 @@ function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, class
       )}
 
       {/* ── Bottom Row ──────────────────────────────────────── */}
-      <div className="px-3 pb-3 flex items-center justify-between gap-2 w-full">
+      <div className="flex items-center justify-between gap-2 w-full">
         {/* Left side spacer */}
         <div className="flex items-center gap-1.5 min-w-[32px]" />
 
