@@ -123,4 +123,45 @@ describe("CoreMediaItemView - Liked top-left indicator badge", () => {
     expect(card.className).toContain("rounded-xl");
     expect(card.className).not.toContain("rounded-2xl");
   });
+
+  it("removes border from the media card container", () => {
+    const { container } = render(
+      <CoreMediaItemView
+        src="https://example.com/test.png"
+        status="completed"
+      />
+    );
+    const card = container.firstChild;
+    expect(card.className).not.toContain("border-white/10");
+  });
+
+  it("renders a video indicator icon on the left when isVideo is true", () => {
+    render(
+      <CoreMediaItemView
+        src="https://example.com/test.mp4"
+        status="completed"
+        isVideo={true}
+      />
+    );
+
+    const videoBadge = screen.getByTitle("Video");
+    expect(videoBadge).toBeDefined();
+    expect(videoBadge.getAttribute("aria-label")).toBe("Video");
+    const icon = videoBadge.querySelector(".mat-icon, span");
+    expect(icon?.textContent).toContain("videocam");
+  });
+
+  it("does not render video indicator icon when isVideo is false", () => {
+    render(
+      <CoreMediaItemView
+        src="https://example.com/test.png"
+        status="completed"
+        isVideo={false}
+      />
+    );
+
+    const videoBadge = screen.queryByTitle("Video");
+    expect(videoBadge).toBeNull();
+  });
 });
+

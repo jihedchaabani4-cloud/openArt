@@ -91,6 +91,7 @@ export function CoreMediaItemView({
   isLiked: propIsLiked = null,
   onLikeToggle = null,
   showLikedBadge = true,
+  showVideoBadge = true,
   ...props
 }) {
   // Use media core hook to resolve metadata, sizing, and media state
@@ -128,6 +129,7 @@ export function CoreMediaItemView({
     }
   } catch {}
   const effectiveShowLikedBadge = Boolean(showLikedBadge) && !isEditRoute;
+  const effectiveShowVideoBadge = Boolean(showVideoBadge) && Boolean(isVideo) && Boolean(url) && !isProcessing && !isFailed;
 
   // Local or controlled menu open state
   const [internalMenuOpen, setInternalMenuOpen] = useState(false);
@@ -178,7 +180,7 @@ export function CoreMediaItemView({
   const cardElement = (
     <div
       className={cn(
-        "group relative select-none items-center justify-center overflow-hidden rounded-xl border border-white/10 bg-black/40 shadow-2xl",
+        "group relative select-none items-center justify-center overflow-hidden rounded-xl bg-black/40 shadow-2xl",
         isContain ? "inline-flex w-fit h-fit max-w-full max-h-full shrink-0" : "flex w-full h-full",
         draggable ? "cursor-grab active:cursor-grabbing" : onClick ? "cursor-pointer" : "",
         className
@@ -277,7 +279,7 @@ export function CoreMediaItemView({
       <div
         className={cn(
           "absolute inset-0 z-20 pointer-events-none flex flex-col justify-between transition-opacity duration-200",
-          showHoverOverlay && !(isLiked && effectiveShowLikedBadge)
+          showHoverOverlay && !(isLiked && effectiveShowLikedBadge) && !effectiveShowVideoBadge
             ? (isHovered || isMenuOpen ? "opacity-100" : "opacity-0")
             : "opacity-100"
         )}
@@ -306,6 +308,18 @@ export function CoreMediaItemView({
                   className="text-[16px] text-white fill-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]"
                 />
               </button>
+            )}
+            {effectiveShowVideoBadge && (
+              <div
+                className="flex items-center justify-center w-7 h-7 rounded-lg bg-black/40 backdrop-blur-md text-white drop-shadow-md pointer-events-none select-none"
+                title="Video"
+                aria-label="Video"
+              >
+                <GoogleIcon
+                  iconName="videocam"
+                  className="text-[16px] text-white"
+                />
+              </div>
             )}
             {topLeft}
             {isMenuActive && menuPosition === "topLeft" && (

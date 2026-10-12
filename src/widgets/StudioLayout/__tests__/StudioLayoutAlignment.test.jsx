@@ -153,4 +153,22 @@ describe("CollectionMediaGridItem action button group & menu styling", () => {
   });
 });
 
+describe("Media item borderless design and video indicator", () => {
+  it("removes border from CoreMediaItemView and collection tiles, and includes video icon indicator", () => {
+    const coreMediaFile = fs.readFileSync(
+      path.resolve(__dirname, "../../CoreMediaItemView/CoreMediaItemView.jsx"),
+      "utf8"
+    );
+    const globalsCssFile = fs.readFileSync(
+      path.resolve(__dirname, "../../../app/globals.css"),
+      "utf8"
+    );
+
+    expect(coreMediaFile).not.toContain("border border-white/10");
+    expect(globalsCssFile).not.toContain("border: 1px solid rgba(255, 255, 255, 0.1);");
+    expect(coreMediaFile).toContain('iconName="videocam"');
+  });
+});
+
+
 

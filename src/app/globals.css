@@ -1618,7 +1618,7 @@ flow-error-tile {
 .collection-tile {
   border-radius: var(--tile-border-radius, 16px) !important;
   box-shadow: var(--tile-shadow, 0 18px 50px rgba(0, 0, 0, 0.38)) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: none;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   cursor: pointer;
 }
