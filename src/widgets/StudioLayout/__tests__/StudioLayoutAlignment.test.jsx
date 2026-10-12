@@ -4,6 +4,7 @@ import { render } from "@testing-library/react";
 import fs from "fs";
 import path from "path";
 import { LeftNavigationRail } from "../LeftNavigationRail";
+import { NavbarCore } from "@/widgets/NavbarCore";
 
 // Mock router & store
 let mockNavbarHidden = false;
@@ -40,17 +41,17 @@ describe("LeftNavigationRail & Media Grid Baseline Alignment", () => {
     expect(aside.className).toContain("pt-0");
   });
 
-  it("LeftNavigationRail top spacer animates to 64px when navbar is visible", () => {
+  it("LeftNavigationRail top spacer animates to 72px when navbar is visible", () => {
     mockNavbarHidden = false;
     const railFile = fs.readFileSync(
       path.resolve(__dirname, "../LeftNavigationRail.jsx"),
       "utf8"
     );
-    // Spacer height must be 64 when navbar is visible (isNavbarHidden ? ... : 64)
-    expect(railFile).toMatch(/animate=\{\{\s*height:\s*isNavbarHidden\s*\?\s*\d+\s*:\s*64\s*\}\}/);
+    // Spacer height must be 72 when navbar is visible (isNavbarHidden ? ... : 72)
+    expect(railFile).toMatch(/animate=\{\{\s*height:\s*isNavbarHidden\s*\?\s*\d+\s*:\s*72\s*\}\}/);
   });
 
-  it("Media grid scroll containers use pt-[64px] and remove py-3 / pt-4 across all studio views", () => {
+  it("Media grid scroll containers use pt-[72px] and remove py-3 / pt-4 across all studio views", () => {
     const assetsFile = fs.readFileSync(
       path.resolve(__dirname, "../../../app/cinema-studio/[projectId]/assets/page.js"),
       "utf8"
@@ -68,26 +69,46 @@ describe("LeftNavigationRail & Media Grid Baseline Alignment", () => {
       "utf8"
     );
 
-    // Assets page: pt-[64px], no py-3
-    expect(assetsFile).toContain("pt-[64px]");
-    expect(assetsFile).not.toMatch(/pt-\[56px\]/);
-    expect(assetsFile).not.toMatch(/pt-\[64px\][^\n]*\bpy-3\b/);
+    // Assets page: pt-[72px], no py-3
+    expect(assetsFile).toContain("pt-[72px]");
+    expect(assetsFile).not.toMatch(/pt-\[64px\]/);
+    expect(assetsFile).not.toMatch(/pt-\[72px\][^\n]*\bpy-3\b/);
 
-    // Collection page: pt-[64px], no py-3
-    expect(collectionFile).toContain("pt-[64px]");
-    expect(collectionFile).not.toMatch(/pt-\[56px\]/);
-    expect(collectionFile).not.toMatch(/pt-\[64px\][^\n]*\bpy-3\b/);
+    // Collection page: pt-[72px], no py-3
+    expect(collectionFile).toContain("pt-[72px]");
+    expect(collectionFile).not.toMatch(/pt-\[64px\]/);
+    expect(collectionFile).not.toMatch(/pt-\[72px\][^\n]*\bpy-3\b/);
 
-    // Elements page: pt-[64px], no py-3, no pt-4 on grid
-    expect(elementsFile).toContain("pt-[64px]");
-    expect(elementsFile).not.toMatch(/pt-\[56px\]/);
-    expect(elementsFile).not.toMatch(/pt-\[64px\][^\n]*\bpy-3\b/);
+    // Elements page: pt-[72px], no py-3, no pt-4 on grid
+    expect(elementsFile).toContain("pt-[72px]");
+    expect(elementsFile).not.toMatch(/pt-\[64px\]/);
+    expect(elementsFile).not.toMatch(/pt-\[72px\][^\n]*\bpy-3\b/);
     expect(elementsFile).not.toMatch(/pb-32\s+pt-4/);
 
-    // Characters page: pt-[64px], no py-3, no pt-4 on grid
-    expect(charactersFile).toContain("pt-[64px]");
-    expect(charactersFile).not.toMatch(/pt-\[56px\]/);
-    expect(charactersFile).not.toMatch(/pt-\[64px\][^\n]*\bpy-3\b/);
+    // Characters page: pt-[72px], no py-3, no pt-4 on grid
+    expect(charactersFile).toContain("pt-[72px]");
+    expect(charactersFile).not.toMatch(/pt-\[64px\]/);
+    expect(charactersFile).not.toMatch(/pt-\[72px\][^\n]*\bpy-3\b/);
     expect(charactersFile).not.toMatch(/pb-32\s+pt-4/);
+  });
+});
+
+describe("EditNavbar & NavbarCore matches StudioNavbar layout", () => {
+  it("removes px-6 padding and matches StudioNavbar pl-3, transparent background, and borderless design", () => {
+    const { container } = render(
+      <NavbarCore onBack={vi.fn()} backLabel="Back" showUserDropdown={false} left={<span>Edit Item</span>} />
+    );
+
+    const nav = container.querySelector("nav");
+    expect(nav).toBeDefined();
+
+    // Must NOT have px-6 or border-b or bg-black/40
+    expect(nav.className).not.toContain("px-6");
+    expect(nav.className).not.toContain("border-b");
+    expect(nav.className).not.toContain("bg-black/40");
+
+    // Must match StudioNavbar pl-3, pr-4 / pr-6, bg-transparent
+    expect(nav.className).toContain("pl-3");
+    expect(nav.className).toContain("bg-transparent");
   });
 });

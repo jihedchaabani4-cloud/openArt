@@ -396,7 +396,7 @@ export default function CollectionDetailPage({ params }) {
         <div
           ref={scrollRef}
           onScroll={handleScroll}
-          className="flex-1 overflow-y-auto pt-[64px] overflow-x-hidden px-3 custom-scrollbar"
+          className="flex-1 overflow-y-auto pt-[72px] overflow-x-hidden px-3 custom-scrollbar"
         >
           {/* Root drop zone (move out of collection) */}
           <AnimatePresence>

@@ -60,7 +60,7 @@ export function NavbarCore({
       }
       transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
       className={cn(
-        "top-0 left-0 w-full z-50 flex items-center h-16 px-6 border-b border-white/5 bg-black/40 backdrop-blur-xl",
+        "top-0 left-0 w-full z-50 flex items-center h-16 pl-3 pr-4 sm:pr-6 bg-transparent border-none",
         position,
         className
       )}
@@ -76,6 +76,7 @@ export function NavbarCore({
                 onClick={onBack}
                 href={backHref}
                 label={backLabel}
+                className="transition-all shrink-0 border-0 border-transparent shadow-none"
               />
             )}
             {left}
