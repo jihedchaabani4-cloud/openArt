@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { StudioNavbarLeft } from "../ui/StudioNavbarLeft";
 import { StudioNavbarCenter } from "../ui/StudioNavbarCenter";
 import { StudioNavbarRight } from "../ui/StudioNavbarRight";
+import { StudioNavbar } from "../StudioNavbar";
 
 // Mock Next.js navigation
 let mockPathname = "/cinema-studio/proj-1";
@@ -22,6 +23,8 @@ vi.mock("next/navigation", () => ({
 
 // Mock projects API & folders
 vi.mock("@/features/projects/api/projectsApi", () => ({
+  useProjects: () => ({ data: [{ project_id: "proj-1", project_name: "My Project" }] }),
+  useUpdateProject: () => ({ mutateAsync: vi.fn() }),
   useDeleteProject: () => ({ mutateAsync: vi.fn() }),
 }));
 
@@ -151,5 +154,13 @@ describe("StudioNavbar Layout & Collection Page Header", () => {
     // Must expand across the entire navbar (max-w-full)
     expect(expandedWrapper.className).toContain("max-w-full");
     expect(expandedWrapper.className).not.toContain("flex-1");
+  });
+
+  it("enforces padding-left: 3 (pl-3) permanently so back button aligns directly above sidebar menu icons", () => {
+    const { container } = renderWithClient(<StudioNavbar />);
+    const nav = container.querySelector("nav");
+    expect(nav.className).toContain("pl-3");
+    expect(nav.className).not.toContain("px-3 sm:px-6");
+    expect(nav.className).not.toContain("sm:pl-6");
   });
 });

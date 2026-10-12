@@ -54,7 +54,7 @@ export function StudioNavbar() {
             }}
             animate={isNavbarHidden ? "hidden" : "visible"}
             transition={{ duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
-            className="absolute top-0 left-0 px-3 sm:px-6 h-16 w-full z-50 flex flex-col justify-center bg-transparent overflow-hidden"
+            className="absolute top-0 left-0 pl-3 pr-4 sm:pr-6 h-16 w-full z-50 flex flex-col justify-center bg-transparent overflow-hidden"
         >
             <div className="relative flex items-center h-16 w-full min-w-0">
                 <StudioNavbarLeft
