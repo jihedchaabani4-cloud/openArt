@@ -2,7 +2,6 @@
 
 import * as React from "react"
 import { useParams, useRouter, useSearchParams } from "next/navigation"
-import { motion } from "framer-motion"
 import { GoogleIcon } from "@/shared/ui/GoogleIcon"
 import { Button } from "@/shared/ui/button"
 import { downloadFile } from "@/shared/lib/utils"

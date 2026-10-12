@@ -52,13 +52,13 @@ export function NavbarCore({
 
   return (
     <motion.nav
-      initial={{ opacity: 0, y: -10 }}
-      animate={
-        isHidden
-          ? { y: "-100%", opacity: 0 }
-          : { y: 0, opacity: 1 }
-      }
-      transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+      initial={false}
+      variants={{
+        visible: { y: 0, opacity: 1 },
+        hidden: { y: "-100%", opacity: 0 },
+      }}
+      animate={isHidden ? "hidden" : "visible"}
+      transition={{ duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
       className={cn(
         "top-0 left-0 w-full z-50 flex items-center h-16 pl-3 pr-4 sm:pr-6 bg-transparent border-none",
         position,

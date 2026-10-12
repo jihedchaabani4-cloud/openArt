@@ -111,4 +111,13 @@ describe("EditNavbar & NavbarCore matches StudioNavbar layout", () => {
     expect(nav.className).toContain("pl-3");
     expect(nav.className).toContain("bg-transparent");
   });
+
+  it("disables entry animation on mount by setting initial={false} without initial opacity/offset", () => {
+    const navbarCoreFile = fs.readFileSync(
+      path.resolve(__dirname, "../../NavbarCore/NavbarCore.jsx"),
+      "utf8"
+    );
+    expect(navbarCoreFile).not.toContain("initial={{ opacity: 0");
+    expect(navbarCoreFile).toMatch(/initial=\{false\}/);
+  });
 });
