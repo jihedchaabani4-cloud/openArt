@@ -197,5 +197,31 @@ describe("Phase 3 Optimistic Mutations", () => {
       expect(folders.some((f) => f.id === "real-folder-42")).toBe(true);
       expect(folders.some((f) => String(f.id).startsWith("temp-"))).toBe(false);
     });
+
+    it("defaults to 'Untitled collection' when name is omitted or empty", async () => {
+      const { queryClient, wrapper } = createWrapper();
+      const fKey = queryKeys.folders.byProject("proj-1");
+      queryClient.setQueryData(fKey, []);
+
+      api.post.mockResolvedValueOnce({
+        data: { id: "folder-default-1", name: "Untitled collection", projectId: "proj-1" },
+      });
+
+      const { result } = renderHook(() => useCreateFolder(), { wrapper });
+
+      await act(async () => {
+        await result.current.mutateAsync({
+          projectId: "proj-1",
+        });
+      });
+
+      expect(api.post).toHaveBeenCalledWith(
+        "/projects/proj-1/folders",
+        expect.objectContaining({ name: "Untitled collection" })
+      );
+      const folders = queryClient.getQueryData(fKey);
+      expect(folders).toHaveLength(1);
+      expect(folders[0].name).toBe("Untitled collection");
+    });
   });
 });

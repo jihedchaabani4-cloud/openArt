@@ -249,12 +249,12 @@ export function StudioNavbarLeft({
                     <EditableDisplayName
                         ref={nameRef}
                         displayName={displayName}
-                        placeholder="Untitled"
+                        placeholder={isCollectionPage ? "Untitled collection" : "Untitled"}
                         onSave={handleSaveName}
                         inputClassName={cn(
                             "focus:text-white transition-all",
                             isCollectionPage
-                                ? "text-lg font-semibold max-w-[240px] text-white tracking-tight px-2 py-0.5"
+                                ? "text-2xl sm:text-[28px] font-bold max-w-[360px] sm:max-w-[480px] text-white tracking-tight px-2 py-0.5 leading-tight"
                                 : "text-md font-medium max-w-[160px]"
                         )}
                     />

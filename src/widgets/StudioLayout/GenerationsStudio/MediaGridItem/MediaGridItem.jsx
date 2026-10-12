@@ -967,7 +967,7 @@ const CollectionMediaGridItem = React.memo(function CollectionMediaGridItem({
                   e.stopPropagation();
                   startRename();
                 }}
-                className="text-[20px] sm:text-[22px] font-medium text-white/95 tracking-tight leading-snug line-clamp-2 px-1 select-none hover:text-white"
+                className="text-[22px] sm:text-[26px] font-bold text-white/95 tracking-tight leading-snug line-clamp-2 px-1 select-none hover:text-white"
               >
                 {collectionName}
               </h3>

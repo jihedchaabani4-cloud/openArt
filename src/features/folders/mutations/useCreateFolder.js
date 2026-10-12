@@ -15,10 +15,13 @@ export function useCreateFolder() {
   return useOptimisticMutation({
     mutationFn: async ({ projectId, name, parentId = null }) => {
       if (!projectId) throw new Error("Project ID is required");
-      if (!name || !name.trim()) throw new Error("Collection name is required");
+
+      const resolvedName = (name && typeof name === "string" && name.trim())
+        ? name.trim()
+        : "Untitled collection";
 
       const res = await api.post(`/projects/${projectId}/folders`, {
-        name: name.trim(),
+        name: resolvedName,
         parentId: parentId || null,
       });
 
@@ -30,10 +33,12 @@ export function useCreateFolder() {
     },
     getCacheKeys: ({ projectId }) => (projectId ? [queryKeys.folders.byProject(projectId)] : []),
     applyOptimistic: (oldFolders, { name, parentId, projectId, tempId }) => {
-      const trimmed = name?.trim();
+      const resolvedName = (name && typeof name === "string" && name.trim())
+        ? name.trim()
+        : "Untitled collection";
       const folderTemp = {
         id: tempId,
-        name: trimmed,
+        name: resolvedName,
         parentId: parentId || null,
         parent_id: parentId || null,
         projectId,
