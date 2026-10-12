@@ -73,5 +73,41 @@ describe("CoreMediaItemView - Liked top-left indicator badge", () => {
 
     const likedBadge = screen.getByTitle("Liked");
     expect(likedBadge).toBeDefined();
+    const icon = likedBadge.querySelector(".mat-icon, span");
+    expect(icon?.className).toContain("text-white");
+    expect(icon?.className).toContain("fill-white");
+  });
+
+  it("does not render the liked badge when showLikedBadge is false (edit page mode)", () => {
+    render(
+      <CoreMediaItemView
+        src="https://example.com/test.png"
+        status="completed"
+        isLiked={true}
+        showLikedBadge={false}
+      />
+    );
+
+    const likedBadge = screen.queryByTitle("Liked");
+    expect(likedBadge).toBeNull();
+  });
+
+  it("automatically suppresses liked badge when current pathname is an edit route", () => {
+    const originalPath = window.location.pathname;
+    try {
+      window.history.pushState({}, "", "/cinema-studio/proj-1/assets/edit/wf-123");
+      render(
+        <CoreMediaItemView
+          src="https://example.com/test.png"
+          status="completed"
+          isLiked={true}
+        />
+      );
+
+      const likedBadge = screen.queryByTitle("Liked");
+      expect(likedBadge).toBeNull();
+    } finally {
+      window.history.pushState({}, "", originalPath);
+    }
   });
 });

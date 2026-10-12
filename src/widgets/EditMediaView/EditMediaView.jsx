@@ -145,6 +145,7 @@ export function EditMediaView({
   // Callbacks
   onRetry = null,
   onDelete = null,
+  showLikedBadge = false,
 }) {
   const core = useMediaViewerCore({ workflow, item });
 
@@ -173,6 +174,7 @@ export function EditMediaView({
         fit={fit}
         videoRef={core.videoRef}
         onVideoClick={core.togglePlay}
+        showLikedBadge={showLikedBadge}
         // Slots
         topLeft={topLeft}
         topRight={topRight}

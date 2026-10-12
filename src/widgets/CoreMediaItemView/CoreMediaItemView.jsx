@@ -120,6 +120,15 @@ export function CoreMediaItemView({
         workflow?.metadata?.favorited
       );
 
+  // Automatically hide liked badge on edit pages unless explicitly forced
+  let isEditRoute = false;
+  try {
+    if (typeof window !== "undefined" && window.location?.pathname?.includes("/edit")) {
+      isEditRoute = true;
+    }
+  } catch {}
+  const effectiveShowLikedBadge = Boolean(showLikedBadge) && !isEditRoute;
+
   // Local or controlled menu open state
   const [internalMenuOpen, setInternalMenuOpen] = useState(false);
   const isMenuOpen = controlledMenuOpen !== undefined ? controlledMenuOpen : internalMenuOpen;
@@ -268,7 +277,7 @@ export function CoreMediaItemView({
       <div
         className={cn(
           "absolute inset-0 z-20 pointer-events-none flex flex-col justify-between transition-opacity duration-200",
-          showHoverOverlay && !isLiked
+          showHoverOverlay && !(isLiked && effectiveShowLikedBadge)
             ? (isHovered || isMenuOpen ? "opacity-100" : "opacity-0")
             : "opacity-100"
         )}
@@ -277,7 +286,7 @@ export function CoreMediaItemView({
         <div className="w-full flex items-start justify-between p-3 gap-2">
           {/* Top Left Slot */}
           <div className="pointer-events-auto flex items-center gap-2">
-            {isLiked && showLikedBadge && (
+            {isLiked && effectiveShowLikedBadge && (
               <button
                 type="button"
                 onClick={(e) => {
@@ -285,7 +294,7 @@ export function CoreMediaItemView({
                   onLikeToggle?.(e);
                 }}
                 className={cn(
-                  "flex items-center justify-center w-7 h-7 rounded-full bg-black/60 backdrop-blur-md border border-white/15 shadow-[0_2px_8px_rgba(0,0,0,0.5)] transition-transform",
+                  "flex items-center justify-center w-7 h-7 rounded-full bg-black/40 backdrop-blur-md border border-white/10 shadow-sm transition-transform",
                   onLikeToggle ? "cursor-pointer hover:scale-110 active:scale-95" : "cursor-default"
                 )}
                 title="Liked"
@@ -294,7 +303,7 @@ export function CoreMediaItemView({
                 <GoogleIcon
                   iconName="favorite"
                   fill={true}
-                  className="text-[14px] text-red-500 fill-red-500"
+                  className="text-[14px] text-white fill-white"
                 />
               </button>
             )}
