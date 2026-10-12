@@ -198,7 +198,7 @@ export default function ElementsPage({ params }) {
                 <div 
                     ref={scrollRef}
                     onScroll={handleScroll}
-                    className="flex-1 overflow-y-auto pt-[56px] overflow-x-hidden px-3 custom-scrollbar w-full"
+                    className="flex-1 overflow-y-auto pt-[64px] overflow-x-hidden px-3 custom-scrollbar w-full"
                 >
                     {/* ── Elements Grid (Full Width 100%) ── */}
                     {visibleSheets.length === 0 ? (
