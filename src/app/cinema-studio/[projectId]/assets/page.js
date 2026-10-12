@@ -16,7 +16,6 @@ import {
   generatedMediaConfig,
   useRealBackendModels,
 } from "@/features/prompt-bar/index.platform"
-import { isLtxModel } from "@/features/prompt-bar/providers/ltx/index.js"
 import { RowsPhotoAlbum } from 'react-photo-album'
 import 'react-photo-album/rows.css'
 import { MediaGridItem } from "@/widgets/StudioLayout/GenerationsStudio/MediaGridItem"
@@ -77,8 +76,8 @@ export default function AssetsPage({ params }) {
     const handleGenerate = React.useCallback(
         async (request) => {
             if (!request?.prompt?.trim()) return;
-            const chosenModel = realModels.find((m) => m.id === request.model);
-            const isVideo = chosenModel?.domain === "video";
+            const chosenModel = realModels.find((m) => m.id === request.model || m.key === request.model);
+            const isVideo = chosenModel?.domain === "video" || chosenModel?.category === "video" || String(request.model).startsWith("ltx") || String(request.model).startsWith("seedance") || String(request.model).startsWith("wan");
 
             const payload = {
                 model: request.model,
@@ -91,25 +90,10 @@ export default function AssetsPage({ params }) {
             };
 
             try {
-                if (isLtxModel(request.model)) {
-                    const res = await fetch("/api/ltx/generate", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify(payload),
-                    });
-                    const data = await res.json();
-                    if (!data.ok) {
-                        throw new Error(data.message || "LTX generation failed");
-                    }
-                    if (projectId) {
-                        queryClient.invalidateQueries({ queryKey: queryKeys.projectData.byProject(projectId) });
-                    }
-                } else {
-                    const res = await runGenerate({ payload, isVideo });
-                    const finalProj = res?.project_id ?? projectId;
-                    if (finalProj) {
-                        queryClient.invalidateQueries({ queryKey: queryKeys.projectData.byProject(finalProj) });
-                    }
+                const res = await runGenerate({ payload, isVideo });
+                const finalProj = res?.project_id ?? projectId;
+                if (finalProj) {
+                    queryClient.invalidateQueries({ queryKey: queryKeys.projectData.byProject(finalProj) });
                 }
             } catch (err) {
                 console.error("Generation execution failed:", err);
