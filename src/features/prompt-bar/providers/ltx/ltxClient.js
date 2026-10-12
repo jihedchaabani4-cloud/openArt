@@ -40,6 +40,42 @@ function resolveImageUrl(val) {
   return null;
 }
 
+const RESOLUTION_TIERS = {
+  "720p":  { "16:9": "1280x720",  "9:16": "720x1280" },
+  "1080p": { "16:9": "1920x1080", "9:16": "1080x1920" },
+  "1440p": { "16:9": "2560x1440", "9:16": "1440x2560" },
+  "4k":    { "16:9": "3840x2160", "9:16": "2160x3840" },
+};
+
+/**
+ * Resolves resolution tier or WxH string.
+ * @param {string} [rawRes]
+ * @param {string} [aspectRatio="16:9"]
+ * @returns {string}
+ */
+export function resolveLtxResolution(rawRes, aspectRatio = "16:9") {
+  if (!rawRes) return aspectRatio === "9:16" ? "720x1280" : "1280x720";
+  const str = String(rawRes).toLowerCase();
+  if (/^\d+x\d+$/.test(str)) return str;
+  const ratioKey = aspectRatio === "9:16" ? "9:16" : "16:9";
+  return RESOLUTION_TIERS[str]?.[ratioKey] || (aspectRatio === "9:16" ? "720x1280" : "1280x720");
+}
+
+/**
+ * Resolves duration to a safe, valid integer (defaults to 8 if omitted or invalid).
+ * @param {any} rawDuration
+ * @returns {number}
+ */
+export function resolveLtxDuration(rawDuration) {
+  if (rawDuration === undefined || rawDuration === null || rawDuration === "") {
+    return 8;
+  }
+  const parsed = typeof rawDuration === "number"
+    ? rawDuration
+    : parseInt(String(rawDuration).replace(/\D+/g, ""), 10);
+  return !isNaN(parsed) && parsed > 0 ? parsed : 8;
+}
+
 /**
  * Submits a video generation job to the LTX API.
  * Automatically routes to text-to-video or image-to-video based on payload.
@@ -59,6 +95,7 @@ export async function submitLtxGeneration(payload) {
   const {
     duration,
     resolution,
+    aspect_ratio,
     fps,
     generate_audio,
     camera_motion,
@@ -72,24 +109,33 @@ export async function submitLtxGeneration(payload) {
   // Route to image-to-video if a start frame is provided, otherwise text-to-video
   const endpoint = imageUrl ? "image-to-video" : "text-to-video";
 
+  // Normalize model identifier: ltx_2_3_pro -> ltx-2-3-pro
+  const providerModel = typeof model === "string" ? model.replace(/_/g, "-") : model;
+
+  // Resolve duration as a required positive integer (defaults to 8s)
+  const resolvedDuration = resolveLtxDuration(duration);
+
+  // Resolve resolution tier or string
+  const resolvedResolution = resolveLtxResolution(resolution, aspect_ratio || payload.aspect_ratio);
+
   /** @type {Record<string, any>} */
   const ltxPayload = {
     prompt,
-    model,
-    duration: duration ?? null, // null = auto (LTX-2.5 only)
-    resolution: resolution || "1280x720",
+    model: providerModel,
+    duration: resolvedDuration,
+    resolution: resolvedResolution,
   };
 
   // Optional common params
-  if (fps !== undefined) ltxPayload.fps = fps;
-  if (generate_audio !== undefined) ltxPayload.generate_audio = generate_audio;
+  if (fps !== undefined && fps !== null) ltxPayload.fps = Number(fps);
+  if (generate_audio !== undefined && generate_audio !== null) ltxPayload.generate_audio = Boolean(generate_audio);
   if (camera_motion) ltxPayload.camera_motion = camera_motion;
 
   // Image-to-video specific
   if (imageUrl) {
     ltxPayload.image_uri = imageUrl;
     // First+Last frame (supported by ltx-2-3-*)
-    if (lastFrameUrl && FRAME_MODELS.has(model)) {
+    if (lastFrameUrl && (FRAME_MODELS.has(model) || FRAME_MODELS.has(providerModel))) {
       ltxPayload.last_frame_uri = lastFrameUrl;
     }
   }

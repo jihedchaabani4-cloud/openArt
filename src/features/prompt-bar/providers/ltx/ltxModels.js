@@ -47,7 +47,7 @@ const CAMERA_MOTION_VALUES = [
  */
 const BASE_LTX_PARAMS = {
   prompt: { type: "string", required: true },
-  duration: { type: "number", required: false },
+  duration: { type: "number", required: true, default: 8, values: [6, 8, 10] },
   fps: { type: "number", default: 24 },
   generate_audio: { type: "boolean", default: true },
   camera_motion: { type: "string", values: CAMERA_MOTION_VALUES },
