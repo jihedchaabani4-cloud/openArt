@@ -113,7 +113,7 @@ function WorkflowMediaGalleryCard({
         src={displayUrl}
         isVideo={iVideo}
         status={meta.status || "completed"}
-        aspect={meta.aspect && meta.aspect !== "auto" ? meta.aspect : "16/9"}
+        aspect={meta.aspect && meta.aspect !== "auto" ? meta.aspect : (iVideo ? "16/9" : "3/4")}
         fit="cover"
         playOnHover={true}
         showHoverOverlay={false}
@@ -135,7 +135,7 @@ function WorkflowMediaGalleryCard({
           maxHeight: "200px",
           width: cardWidth,
           height: cardHeight,
-          aspectRatio: meta.aspect && meta.aspect !== "auto" ? meta.aspect : "16/9"
+          aspectRatio: meta.aspect && meta.aspect !== "auto" ? meta.aspect : (iVideo ? "16/9" : "3/4")
         }}
         topLeft={
           <div className="opacity-0 group-hover:opacity-100 transition-opacity">

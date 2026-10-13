@@ -39,7 +39,7 @@ export function useWorkflowActions(workflow, item = null) {
   // When there's no media yet (placeholder workflow), treat as processing so the
   // UI shows a spinner rather than a blank or disappearing card.
   const metadata = targetItem 
-    ? getItemMetadata(targetItem)
+    ? getItemMetadata(targetItem, workflow)
     : { status: 'processing', url: null, isVideo: false, isAudio: false, aspect: '1/1', ratioStr: null, prompt: '' };
   const { isVideo, url } = metadata;
 

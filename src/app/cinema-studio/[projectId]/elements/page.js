@@ -12,7 +12,7 @@ import { Button } from "@/shared/ui/button";
 import { usePromptStore } from "@/features/studio";
 import { LoadingScreen } from "@/shared/ui/LoadingScreen";
 import { getPrimaryMedia } from "@/shared/lib/generationUtils";
-import { getItemMetadata as getDisplayMeta, getStudioGridDensity } from "@/shared/lib/displayUtils";
+import { getItemMetadata as getDisplayMeta, getStudioGridDensity, getCachedImageDimensions, setCachedImageDimensions } from "@/shared/lib/displayUtils";
 
 import { RowsPhotoAlbum } from 'react-photo-album';
 import 'react-photo-album/rows.css';
@@ -73,21 +73,58 @@ export default function ElementsPage({ params }) {
     const [isHowToOpen, setIsHowToOpen] = React.useState(false);
     const { isDeleteDialogOpen, setIsDeleteDialogOpen, confirmDelete, isDeleting } = useWorkflowDelete();
 
+    const [dimensionsVersion, setDimensionsVersion] = React.useState(0);
+
+    // Probe and cache authentic natural dimensions for element images
+    React.useEffect(() => {
+        visibleSheets.forEach((workflow) => {
+            const primaryItem = getPrimaryMedia(workflow);
+            if (!primaryItem) return;
+            const meta = getDisplayMeta(primaryItem, workflow);
+            const url = meta?.url || primaryItem?.url || primaryItem?.file_url;
+            if (!url || url.startsWith("data:image/gif")) return;
+
+            if (getCachedImageDimensions(url)) return;
+
+            const img = new window.Image();
+            img.onload = () => {
+                if (img.naturalWidth && img.naturalHeight) {
+                    setCachedImageDimensions(url, img.naturalWidth, img.naturalHeight);
+                    setDimensionsVersion((v) => v + 1);
+                }
+            };
+            img.src = url;
+            if (img.complete && img.naturalWidth && img.naturalHeight) {
+                setCachedImageDimensions(url, img.naturalWidth, img.naturalHeight);
+            }
+        });
+    }, [visibleSheets]);
+
     const photos = React.useMemo(() => {
+        void dimensionsVersion;
         return visibleSheets.reduce((acc, workflow, i) => {
             const primaryItem = getPrimaryMedia(workflow);
             if (!primaryItem) return acc;
 
             const meta = getDisplayMeta(primaryItem, workflow);
-            const aspect = meta?.aspect ?? "1/1";
-            const [wStr, hStr] = aspect.split("/");
-            const wNum = parseFloat(wStr) || 1;
-            const hNum = parseFloat(hStr) || 1;
+            const url = meta?.url || "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
+
+            // 1. Highest priority: verified authentic image dimensions
+            let natural = getCachedImageDimensions(url);
+            let wNum = natural?.width;
+            let hNum = natural?.height;
+
+            // 2. Second priority: If natural dimensions not yet available, use metadata aspect
+            if (!wNum || !hNum) {
+                const aspect = meta?.aspect && meta.aspect !== "auto" ? meta.aspect : (meta?.isVideo ? "16/9" : "3/4");
+                const [wStr, hStr] = String(aspect).split("/");
+                wNum = parseFloat(wStr) || 1;
+                hNum = parseFloat(hStr) || 1;
+            }
+
             const BASE = 1200;
             const width  = Math.round(BASE * (wNum / Math.max(wNum, hNum)));
             const height = Math.round(BASE * (hNum / Math.max(wNum, hNum)));
-
-            const url = meta?.url || "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
 
             acc.push({
                 src:      url,
@@ -98,7 +135,7 @@ export default function ElementsPage({ params }) {
             });
             return acc;
         }, []);
-    }, [visibleSheets]);
+    }, [visibleSheets, dimensionsVersion]);
 
     // Navigate to the Edit Page for this workflow
     const handleWorkflowClick = React.useCallback((workflow) => {

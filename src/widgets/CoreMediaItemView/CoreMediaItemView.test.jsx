@@ -166,5 +166,35 @@ describe("CoreMediaItemView - Liked top-left indicator badge", () => {
     const videoBadge = screen.queryByTitle("Video");
     expect(videoBadge).toBeNull();
   });
+
+  describe("Aspect ratio preservation across display modes", () => {
+    it("applies displayAspect to cardElement style when fit is contain and media is completed", () => {
+      const { container } = render(
+        <CoreMediaItemView
+          src="https://example.com/test.png"
+          status="completed"
+          fit="contain"
+          aspect="16/9"
+        />
+      );
+
+      const card = container.firstChild;
+      expect(card.style.aspectRatio).toBe("16/9");
+    });
+
+    it("applies displayAspect to cardElement style when fit is cover", () => {
+      const { container } = render(
+        <CoreMediaItemView
+          src="https://example.com/test.png"
+          status="completed"
+          fit="cover"
+          aspect="9/16"
+        />
+      );
+
+      const card = container.firstChild;
+      expect(card.style.aspectRatio).toBe("9/16");
+    });
+  });
 });
 

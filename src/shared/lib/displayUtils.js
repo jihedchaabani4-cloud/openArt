@@ -153,6 +153,47 @@ export function getItemMetadata(item, group) {
               item.asset?.file_url ?? 
               (item._displayType === 'shot' ? item.video_url : null);
 
+/**
+ * Safely extracts configured or declared aspect ratio string from item or group.
+ */
+function extractRawRatio(item, group) {
+  if (!item && !group) return null;
+  const mediaObj = item?.image ?? item?.video;
+
+  const candidates = [
+    item?.aspectRatio,
+    item?.ratio,
+    item?.params?.ratio,
+    item?.params?.aspectRatio,
+    item?.generationConfig?.aspectRatio,
+    item?.generationConfig?.ratio,
+    item?.metadata?.generationConfig?.aspectRatio,
+    item?.metadata?.generationConfig?.ratio,
+    item?.mediaMetadata?.requestData?.generationConfig?.aspectRatio,
+    item?.mediaMetadata?.requestData?.generationConfig?.ratio,
+    mediaObj?.userUploadedImage?.aspectRatio,
+    mediaObj?.generatedImage?.aspectRatio,
+    item?.asset?.meta_data?.ratio,
+    item?.asset?.meta_data?.aspectRatio,
+    group?.generationConfig?.ratio,
+    group?.generationConfig?.aspectRatio,
+    group?.metadata?.generationConfig?.ratio,
+    group?.metadata?.generationConfig?.aspectRatio,
+    group?.params?.ratio,
+    group?.params?.aspectRatio,
+    group?.aspectRatio,
+    group?.ratio,
+    item?._displayType === 'shot' ? '16:9' : null,
+  ];
+
+  for (const c of candidates) {
+    if (c && typeof c === 'string' && c !== 'IMAGE_ASPECT_RATIO_UNSPECIFIED' && c.trim().length > 0) {
+      return c.trim();
+    }
+  }
+  return null;
+}
+
   const cachedDims = getCachedImageDimensions(url);
 
   // ── New schema: item has item.image or item.video ──────────────────────────
@@ -162,34 +203,31 @@ export function getItemMetadata(item, group) {
 
     const mediaObj = item.image ?? item.video;
     // Dimensions from the nested image/video object, or item directly
-    const dims = mediaObj?.dimensions ?? (item.image?.generatedImage) ?? item.dimensions ?? null;
-    const w = cachedDims?.width ?? dims?.width ?? item.width ?? item.params?.width ?? null;
-    const h = cachedDims?.height ?? dims?.height ?? item.height ?? item.params?.height ?? null;
+    const dims = mediaObj?.dimensions ?? (item.image?.generatedImage) ?? item.dimensions ?? group?.dimensions ?? null;
+    const w = cachedDims?.width ?? dims?.width ?? item.width ?? item.params?.width ?? group?.params?.width ?? null;
+    const h = cachedDims?.height ?? dims?.height ?? item.height ?? item.params?.height ?? group?.params?.height ?? null;
     const hasValidDims = w && h && !isNaN(w) && !isNaN(h) && Number(w) > 0 && Number(h) > 0;
 
-    const rawRatio = (item.aspectRatio && item.aspectRatio !== "IMAGE_ASPECT_RATIO_UNSPECIFIED" ? item.aspectRatio : null)
-      ?? (item.ratio && item.ratio !== "IMAGE_ASPECT_RATIO_UNSPECIFIED" ? item.ratio : null)
-      ?? (mediaObj?.userUploadedImage?.aspectRatio && mediaObj.userUploadedImage.aspectRatio !== "IMAGE_ASPECT_RATIO_UNSPECIFIED" ? mediaObj.userUploadedImage.aspectRatio : null)
-      ?? (mediaObj?.generatedImage?.aspectRatio || null)
-      ?? (item.generationConfig?.aspectRatio || null)
-      ?? (item.params?.ratio || null);
+    const rawRatio = extractRawRatio(item, group);
 
     let aspect;
     if (isAudio) {
       aspect = '4/1';
     } else if (cachedDims?.aspect) {
       aspect = cachedDims.aspect;
-    } else if (hasValidDims) {
-      aspect = `${w}/${h}`;
     } else if (rawRatio) {
       aspect = rawRatio.replace(':', '/');
+    } else if (hasValidDims) {
+      aspect = `${w}/${h}`;
     } else {
-      aspect = isVideo ? '16/9' : '3/4';
+      const isChar = group?.workflow_type === "CHARACTER" || group?.workflow_type === "CHARACTER_SHEET" || group?.is_character || group?.entity_type === "character";
+      const isElem = group?.workflow_type === "ELEMENT_SHEET" || group?.is_element || group?.entity_type === "element";
+      aspect = isElem ? '1/1' : (isChar ? '1/1' : (isVideo ? '16/9' : '3/4'));
     }
 
     const ratioStr = cachedDims 
       ? intrinsicSizeToRatioLabel(cachedDims.width, cachedDims.height)
-      : (hasValidDims ? intrinsicSizeToRatioLabel(w, h) : (rawRatio || null));
+      : (rawRatio || (hasValidDims ? intrinsicSizeToRatioLabel(w, h) : null));
 
     return {
       isVideo,
@@ -211,29 +249,21 @@ export function getItemMetadata(item, group) {
     item.asset_type === 'audio' ||
     item.asset?.asset_type === 'audio';
 
-  const w = cachedDims?.width ?? item.dimensions?.width ?? item.asset?.meta_data?.width ?? item.width ?? item.params?.width ?? null;
-  const h = cachedDims?.height ?? item.dimensions?.height ?? item.asset?.meta_data?.height ?? item.height ?? item.params?.height ?? null;
+  const w = cachedDims?.width ?? item.dimensions?.width ?? item.asset?.meta_data?.width ?? item.width ?? item.params?.width ?? group?.params?.width ?? null;
+  const h = cachedDims?.height ?? item.dimensions?.height ?? item.asset?.meta_data?.height ?? item.height ?? item.params?.height ?? group?.params?.height ?? null;
   const hasValidDims = w && h && !isNaN(w) && !isNaN(h) && Number(w) > 0 && Number(h) > 0;
 
-  let rawRatio =
-    item.params?.ratio ??
-    (group?.params?.ratio || null) ??
-    item.asset?.meta_data?.ratio ??
-    item.aspectRatio ??
-    item.ratio ??
-    (item._displayType === 'shot' ? '16:9' : null);
-
-  if (rawRatio === "IMAGE_ASPECT_RATIO_UNSPECIFIED") rawRatio = null;
+  const rawRatio = extractRawRatio(item, group);
 
   let aspect;
   if (isAudio) {
     aspect = '4/1';
   } else if (cachedDims?.aspect) {
     aspect = cachedDims.aspect;
-  } else if (hasValidDims) {
-    aspect = `${w}/${h}`;
   } else if (rawRatio) {
     aspect = rawRatio.replace(':', '/');
+  } else if (hasValidDims) {
+    aspect = `${w}/${h}`;
   } else {
     const isChar = group?.workflow_type === "CHARACTER" || group?.workflow_type === "CHARACTER_SHEET" || group?.is_character || group?.entity_type === "character";
     const isElem = group?.workflow_type === "ELEMENT_SHEET" || group?.is_element || group?.entity_type === "element";
@@ -243,7 +273,7 @@ export function getItemMetadata(item, group) {
 
   const ratioStr = cachedDims
     ? intrinsicSizeToRatioLabel(cachedDims.width, cachedDims.height)
-    : (hasValidDims ? intrinsicSizeToRatioLabel(w, h) : (rawRatio || null));
+    : (rawRatio || (hasValidDims ? intrinsicSizeToRatioLabel(w, h) : null));
 
   return {
     isVideo,

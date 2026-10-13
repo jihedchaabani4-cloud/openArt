@@ -86,7 +86,7 @@ export default function AssetEditPage() {
                                 projectId={projectId}
                                 onSelect={(item) => {
                                     // Allow switching even if processing
-                                    const meta = getItemMetadata(item);
+                                    const meta = getItemMetadata(item, workflow);
                                     if (!meta?.url && meta?.status !== "processing") return;
 
                                     setActiveItem(item);

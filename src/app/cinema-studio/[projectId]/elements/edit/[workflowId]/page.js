@@ -136,7 +136,7 @@ export default function ElementWorkflowEditPage() {
                                 primaryMediaId={workflow.metadata?.primaryMediaId}
                                 projectId={projectId}
                                 onSelect={(item) => {
-                                    const meta = getItemMetadata(item);
+                                    const meta = getItemMetadata(item, workflow);
                                     if (!meta?.url && meta?.status !== "processing") return;
 
                                     setActiveItem(item);

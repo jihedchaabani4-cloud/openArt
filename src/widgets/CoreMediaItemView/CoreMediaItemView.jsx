@@ -192,7 +192,7 @@ export function CoreMediaItemView({
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       style={{
-        ...(!isContain || !isCompleted ? { aspectRatio: displayAspect } : {}),
+        ...(displayAspect ? { aspectRatio: displayAspect } : {}),
         ...propStyle,
       }}
       {...props}
