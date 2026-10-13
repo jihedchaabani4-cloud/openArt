@@ -144,14 +144,17 @@ describe("ElementDetailsGallery - Studio Media Grid Form", () => {
       />
     );
 
-    expect(screen.getByText("Images de référence")).toBeDefined();
-    // Counter badge must be removed per user request
+    // 'Images de référence' title is removed per user request
+    expect(screen.queryByText("Images de référence")).toBeNull();
     expect(screen.queryByText(/7 \/ 6/)).toBeNull();
     expect(screen.queryByText(/\d+ \/ \d+/)).toBeNull();
 
-    // 2 action buttons (Upload and Select Assets) must be present even when full
-    expect(screen.getByTitle("Importer depuis l'ordinateur")).toBeDefined();
-    expect(screen.getByTitle("Ajouter à partir du projet")).toBeDefined();
+    // 2 action buttons (Upload and Select Assets) with blur variant must be present
+    const uploadBtn = screen.getByTitle("Importer depuis l'ordinateur");
+    const assetsBtn = screen.getByTitle("Ajouter à partir du projet");
+    expect(uploadBtn).toBeDefined();
+    expect(assetsBtn).toBeDefined();
+    expect(uploadBtn.className).toContain("rounded-full");
   });
 
   it("renders minimal empty state without big clumsy banner when items is empty", () => {
