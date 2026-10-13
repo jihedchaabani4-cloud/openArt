@@ -140,7 +140,7 @@ function WorkflowMediaGalleryCard({
         topLeft={
           <div className="opacity-0 group-hover:opacity-100 transition-opacity">
             <ButtonGroup 
-              className="bg-white/60 backdrop-blur-md rounded-lg scale-90 origin-top-left"
+              className="bg-white/60 backdrop-blur-md rounded-lg border-0 border-none scale-90 origin-top-left"
               onClick={(e) => e.stopPropagation()}
             >
               <ActionBtn 

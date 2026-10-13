@@ -7,7 +7,7 @@ export const ActionBtn = React.forwardRef(({ onClick, children, className, ...pr
     ref={ref}
     variant="groupBtn"
     size="icon"
-    className={cn("h-7 w-7 transition-all text-[#303031] hover:bg-white/90 rounded-md", className)}
+    className={cn("h-7 w-7 transition-all text-[#303031] hover:bg-white/90 rounded-md border-0 border-none shadow-none", className)}
     onClick={onClick}
     {...props}
   >

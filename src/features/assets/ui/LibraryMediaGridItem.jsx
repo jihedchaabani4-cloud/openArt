@@ -129,7 +129,7 @@ export function LibraryMediaGridItem({
 
           <div className="absolute inset-0 z-10 flex flex-col justify-between p-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
             <div className="flex justify-end">
-              <ButtonGroup className="pointer-events-auto bg-white/60 backdrop-blur-md rounded-lg">
+              <ButtonGroup className="pointer-events-auto bg-white/60 backdrop-blur-md rounded-lg border-0 border-none">
                 <ActionBtn
                   onClick={(e) => {
                     e.stopPropagation();

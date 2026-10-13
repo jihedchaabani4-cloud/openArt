@@ -151,6 +151,20 @@ describe("CollectionMediaGridItem action button group & menu styling", () => {
     expect(mediaGridItemFile).not.toContain('rounded-[10px] border border-white/10 bg-[#343434]/95 backdrop-blur-md shadow-[0_14px_34px_rgba(0,0,0,0.48)]');
     expect(mediaGridItemFile).not.toContain('className="bg-transparent text-white hover:bg-white/12"');
   });
+
+  it("ensures media grid item ButtonGroup and ActionBtn have no border", () => {
+    const mediaGridItemFile = fs.readFileSync(
+      path.resolve(__dirname, "../GenerationsStudio/MediaGridItem/MediaGridItem.jsx"),
+      "utf8"
+    );
+    const buttonGroupFile = fs.readFileSync(
+      path.resolve(__dirname, "../../../shared/ui/button-group.jsx"),
+      "utf8"
+    );
+
+    expect(mediaGridItemFile).toContain('ButtonGroup className="bg-white/60 backdrop-blur-md rounded-lg border-0 border-none"');
+    expect(buttonGroupFile).not.toContain("border border-[var(--mat-sys-outline-variant");
+  });
 });
 
 describe("Media item borderless design and video indicator", () => {

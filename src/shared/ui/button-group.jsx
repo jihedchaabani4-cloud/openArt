@@ -6,7 +6,7 @@ const ButtonGroup = React.forwardRef(({ className, children, ...props }, ref) =>
     <div
       ref={ref}
       className={cn(
-        "flex items-center bg-[var(--foreground-state-05)] border border-[var(--mat-sys-outline-variant,rgba(255,255,255,0.08))] max-w-fit rounded-[var(--mat-sys-corner-medium,12px)] p-1 gap-0.5",
+        "flex items-center bg-[var(--foreground-state-05)] border-0 border-none max-w-fit rounded-[var(--mat-sys-corner-medium,12px)] p-1 gap-0.5",
         className
       )}
       {...props}
