@@ -99,8 +99,8 @@ export default function ElementWorkflowEditPage() {
       />
 
       {/* ── Scrollable Body ── */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden pt-[80px] pb-16 custom-scrollbar">
-        <div className="px-6 lg:px-[45px] pt-4">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden pt-[64px] pb-10 custom-scrollbar">
+        <div className="px-6 lg:px-[45px] pt-2">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start w-full max-w-[1560px] mx-auto">
             {/* Left Sidebar: Title, Type, Info, Guidelines */}
             <ElementInfoSidebar

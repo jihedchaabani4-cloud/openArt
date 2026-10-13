@@ -12,8 +12,53 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/shared/ui/dropdown-menu";
+import {
+  HoverCard,
+  HoverCardTrigger,
+  HoverCardContent,
+} from "@/shared/ui/hover-card";
 import { Check, Copy, Sparkles, Loader2 } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
+
+/**
+ * InputInfoHover
+ * Sleek, subtle hover trigger button that presents contextual input descriptions
+ * on hover without cluttering the sidebar layout with static text blocks.
+ */
+export function InputInfoHover({ content, title, testId }) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <HoverCard open={open} onOpenChange={setOpen} openDelay={80} closeDelay={150}>
+      <HoverCardTrigger asChild>
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            setOpen((prev) => !prev);
+          }}
+          className={cn(
+            "inline-flex items-center justify-center size-4 rounded-full text-white/40 hover:text-white hover:bg-white/10 transition-colors cursor-pointer outline-none shrink-0",
+            open && "text-white bg-white/15"
+          )}
+          aria-label={title || content}
+          title={content}
+          data-testid={testId}
+        >
+          <GoogleIcon iconName="info" className="text-[13px] leading-none" />
+        </button>
+      </HoverCardTrigger>
+      <HoverCardContent
+        side="top"
+        align="start"
+        sideOffset={6}
+        className="z-50 w-64 rounded-xl border border-white/10 bg-[#1e1e1f] backdrop-blur-xl p-3 text-[11.5px] text-white/80 shadow-2xl leading-relaxed"
+      >
+        {content}
+      </HoverCardContent>
+    </HoverCard>
+  );
+}
 
 /**
  * ElementInfoSidebar
@@ -55,7 +100,7 @@ export function ElementInfoSidebar({
     ) || ELEMENT_TYPES[0];
 
   return (
-    <div className={cn("lg:col-span-3 xl:col-span-3 flex flex-col gap-5", className)}>
+    <div className={cn("lg:col-span-3 xl:col-span-3 flex flex-col gap-4", className)}>
       {/* 1. Editable Element Name */}
       <div className="flex flex-col gap-1">
         <Input
@@ -75,8 +120,15 @@ export function ElementInfoSidebar({
       </div>
 
       {/* 2. Element Type Dropdown — style matches DropdownSegmented (bg-white/5, no border, blur) */}
-      <div className="flex flex-col gap-2">
-        <span className="text-xs font-semibold text-white/70">Type d'élément</span>
+      <div className="flex flex-col gap-1.5">
+        <div className="flex items-center gap-1.5">
+          <span className="text-xs font-semibold text-white/70">Type d'élément</span>
+          <InputInfoHover
+            content="Définit la catégorie de référence (Objet, Style, Police ou Logo) pour guider la génération."
+            title="Info type"
+            testId="type-info-hover"
+          />
+        </div>
         <DropdownMenu open={typeOpen} onOpenChange={setTypeOpen}>
           <DropdownMenuTrigger asChild>
             <Button
@@ -138,11 +190,16 @@ export function ElementInfoSidebar({
       </div>
 
       {/* 3. Element Description / Notes */}
-      <div className="flex flex-col gap-1 pt-1">
+      <div className="flex flex-col gap-1">
         <div className="flex items-center justify-between pb-1">
-          <div className="flex items-baseline gap-1.5">
+          <div className="flex items-center gap-1.5">
             <span className="text-xs font-semibold text-white/70">Description / Contexte</span>
             <span className="text-[11px] text-white/40">(optionnel)</span>
+            <InputInfoHover
+              content="Le modèle utilisera cette description pour intégrer fidèlement l'élément dans vos prompts."
+              title="Info description"
+              testId="desc-info-hover"
+            />
           </div>
 
           {onAnalyzeVision && (
@@ -173,16 +230,20 @@ export function ElementInfoSidebar({
           rows={3}
           minHeight={90}
           maxHeight={240}
-          hint="Le modèle utilisera cette description pour intégrer fidèlement l'élément dans vos prompts."
         />
       </div>
 
       {/* 4. Directives de rendu (Guidelines) */}
-      <div className="flex flex-col gap-1 pt-2 border-t border-white/5">
+      <div className="flex flex-col gap-1 pt-1.5 border-t border-white/5">
         <div className="flex items-center justify-between pb-1">
-          <div className="flex items-baseline gap-1.5">
+          <div className="flex items-center gap-1.5">
             <span className="text-xs font-semibold text-white/70">Directives de rendu</span>
             <span className="text-[11px] text-white/40">(règles d'utilisation)</span>
+            <InputInfoHover
+              content="Consignes et règles spécifiques que l'IA doit suivre lors de l'utilisation de cet élément."
+              title="Info directives"
+              testId="guidelines-info-hover"
+            />
           </div>
 
           {draftGuidelines?.trim() && (
@@ -208,9 +269,8 @@ export function ElementInfoSidebar({
           value={draftGuidelines}
           onChange={(e) => setDraftGuidelines && setDraftGuidelines(e.target.value)}
           onBlur={() => onSaveGuidelines && onSaveGuidelines(draftGuidelines)}
-          minHeight={160}
+          minHeight={130}
           maxHeight={340}
-          hint="Consignes et règles spécifiques que l'IA doit suivre lors de l'utilisation de cet élément."
         />
       </div>
     </div>
