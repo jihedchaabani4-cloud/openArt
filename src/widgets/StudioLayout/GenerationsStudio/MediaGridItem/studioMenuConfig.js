@@ -7,6 +7,16 @@
  */
 export function getWorkflowEntityType(workflow) {
   if (!workflow) return "generation";
+  if (
+    workflow.type === "collection" ||
+    workflow.itemType === "collection" ||
+    workflow.entity_type === "collection" ||
+    workflow.entity_type === "folder" ||
+    Boolean(workflow.is_collection) ||
+    Boolean(workflow.is_folder)
+  ) {
+    return "collection";
+  }
   const wType = String(workflow.workflow_type || workflow.workflowType || "").toUpperCase();
   if (
     wType === "CHARACTER" ||
@@ -91,6 +101,7 @@ export function getStudioMenuItems({
   const {
     isLiked = false,
     isVideo = false,
+    isDownloading = false,
     showTileDetails = false,
     canDelete = true,
     canReuse = false,
@@ -117,7 +128,7 @@ export function getStudioMenuItems({
     onClick: handleReuseSettings,
   };
 
-  // 3. Animate (Image to Video start frame)
+  // 3. Animate (Image to Video start frame - upload & generation only)
   const itemAnimate = {
     key: "animate",
     icon: "movie",
@@ -204,17 +215,64 @@ export function getStudioMenuItems({
     onClick: onDelete,
   });
 
+  // Folder / Collection specific items
+  const itemFolderLike = {
+    key: "like",
+    label: isLiked ? "Unlike collection" : "Like collection",
+    icon: "favorite",
+    fill: isLiked,
+    iconClassName: isLiked ? "text-red-400 fill-red-400" : undefined,
+    onClick: handleLike,
+  };
+
+  const itemFolderDownload = {
+    key: "download",
+    label: isDownloading ? "Downloading..." : "Download collection",
+    icon: "download",
+    disabled: isDownloading,
+    onClick: handleDownload,
+  };
+
+  const itemFolderDelete = {
+    key: "delete",
+    label: "Delete",
+    icon: "delete",
+    variant: "destructive",
+    onClick: onDelete,
+  };
+
   const separator = (id) => ({ key: `sep-${id}`, type: "separator" });
 
   let rawItems = [];
 
   switch (type) {
+    case "collection":
+    case "folder":
+      rawItems = [
+        itemFolderLike,
+        ...(handleDownload ? [itemFolderDownload] : []),
+        ...(onRename ? [itemRename] : []),
+        itemFolderDelete,
+      ];
+      break;
+
     case "character":
+      rawItems = [
+        itemLike,
+        separator("fav"),
+        itemAddToPrompt,
+        ...(handleDownload ? [itemDownload] : []),
+        ...(onRename ? [itemRename] : []),
+        ...(handleSetCover ? [itemSetCover, separator("cover")] : []),
+        ...(toggleTileDetails ? [itemTileDetails, separator("details")] : []),
+        itemDelete("Placer dans la corbeille"),
+      ];
+      break;
+
     case "element":
       rawItems = [
         itemLike,
         separator("fav"),
-        ...(handleAnimate && !isVideo ? [itemAnimate, separator("animate")] : []),
         itemAddToPrompt,
         ...(handleDownload ? [itemDownload] : []),
         ...(onRename ? [itemRename] : []),

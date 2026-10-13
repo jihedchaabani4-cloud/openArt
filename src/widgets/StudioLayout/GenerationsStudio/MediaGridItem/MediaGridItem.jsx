@@ -883,36 +883,20 @@ const CollectionMediaGridItem = React.memo(function CollectionMediaGridItem({
     }
   };
 
-  const menuItems = [
-    {
-      key: "like",
-      label: isLiked ? "Unlike collection" : "Like collection",
-      icon: "favorite",
-      fill: isLiked,
-      iconClassName: isLiked ? "text-red-400 fill-red-400" : undefined,
-      onClick: handleToggleLike,
+  const menuItems = getStudioMenuItems({
+    type: "collection",
+    item: col,
+    actions: {
+      handleLike: handleToggleLike,
+      handleDownload,
+      onRename: startRename,
+      onDelete: () => setIsDeleteConfirmOpen(true),
     },
-    {
-      key: "download",
-      label: isDownloading ? "Downloading..." : "Download collection",
-      icon: "download",
-      disabled: isDownloading,
-      onClick: handleDownload,
+    state: {
+      isLiked,
+      isDownloading,
     },
-    {
-      key: "rename",
-      label: "Rename",
-      icon: "edit",
-      onClick: startRename,
-    },
-    {
-      key: "delete",
-      label: "Delete",
-      icon: "delete",
-      variant: "destructive",
-      onClick: () => setIsDeleteConfirmOpen(true),
-    },
-  ];
+  });
 
   const cardStyle = albumWidth && albumHeight
     ? {

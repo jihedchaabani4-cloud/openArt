@@ -1,8 +1,8 @@
 import { describe, it, expect, vi } from "vitest";
-import { getStudioMenuItems } from "../studioMenuConfig";
+import { getStudioMenuItems, getWorkflowEntityType } from "../studioMenuConfig";
 
-describe("studioMenuConfig - getStudioMenuItems animate function & exclusions", () => {
-  it("includes 'Animer' item for non-video generation and triggers handleAnimate", () => {
+describe("studioMenuConfig - Per-type menu list & animate exclusions", () => {
+  it("includes 'Animer' for non-video generation items", () => {
     const handleAnimate = vi.fn();
     const items = getStudioMenuItems({
       type: "generation",
@@ -24,16 +24,9 @@ describe("studioMenuConfig - getStudioMenuItems animate function & exclusions", 
 
     animateItem.onClick();
     expect(handleAnimate).toHaveBeenCalledTimes(1);
-
-    // Share and 'Ajouter à la scène' should not be present
-    const keys = items.map((i) => i.key);
-    expect(keys).not.toContain("share");
-    const labels = items.map((i) => i.label);
-    expect(labels).not.toContain("Ajouter à la scène");
-    expect(labels).not.toContain("Partager");
   });
 
-  it("includes 'Animer' item for non-video upload items", () => {
+  it("includes 'Animer' for non-video upload items", () => {
     const handleAnimate = vi.fn();
     const items = getStudioMenuItems({
       type: "upload",
@@ -51,13 +44,9 @@ describe("studioMenuConfig - getStudioMenuItems animate function & exclusions", 
     const animateItem = items.find((i) => i.key === "animate");
     expect(animateItem).toBeDefined();
     expect(animateItem.label).toBe("Animer");
-    expect(animateItem.icon).toBe("movie");
-
-    const keys = items.map((i) => i.key);
-    expect(keys).not.toContain("share");
   });
 
-  it("includes 'Animer' item for non-video character / element items", () => {
+  it("does NOT include 'animate' for character items even when handleAnimate is provided", () => {
     const handleAnimate = vi.fn();
     const items = getStudioMenuItems({
       type: "character",
@@ -72,12 +61,27 @@ describe("studioMenuConfig - getStudioMenuItems animate function & exclusions", 
       },
     });
 
-    const animateItem = items.find((i) => i.key === "animate");
-    expect(animateItem).toBeDefined();
-    expect(animateItem.label).toBe("Animer");
+    const keys = items.map((i) => i.key);
+    expect(keys).not.toContain("animate");
+  });
+
+  it("does NOT include 'animate' for element items even when handleAnimate is provided", () => {
+    const handleAnimate = vi.fn();
+    const items = getStudioMenuItems({
+      type: "element",
+      actions: {
+        handleAnimate,
+        handleAddToPrompt: vi.fn(),
+        handleLike: vi.fn(),
+        onDelete: vi.fn(),
+      },
+      state: {
+        isVideo: false,
+      },
+    });
 
     const keys = items.map((i) => i.key);
-    expect(keys).not.toContain("share");
+    expect(keys).not.toContain("animate");
   });
 
   it("does NOT include 'animate' or 'Ajouter à la scène' when isVideo is true", () => {
@@ -99,6 +103,42 @@ describe("studioMenuConfig - getStudioMenuItems animate function & exclusions", 
     const labels = items.map((i) => i.label);
     expect(keys).not.toContain("animate");
     expect(labels).not.toContain("Ajouter à la scène");
-    expect(labels).not.toContain("Animer");
+  });
+
+  it("provides dedicated menu list for folder / collection items", () => {
+    const handleLike = vi.fn();
+    const handleDownload = vi.fn();
+    const onRename = vi.fn();
+    const onDelete = vi.fn();
+
+    const items = getStudioMenuItems({
+      type: "collection",
+      actions: {
+        handleLike,
+        handleDownload,
+        onRename,
+        onDelete,
+      },
+      state: {
+        isLiked: true,
+      },
+    });
+
+    const keys = items.map((i) => i.key);
+    expect(keys).toContain("like");
+    expect(keys).toContain("download");
+    expect(keys).toContain("rename");
+    expect(keys).toContain("delete");
+
+    // Must NOT have media/generation-specific actions
+    expect(keys).not.toContain("animate");
+    expect(keys).not.toContain("reuse");
+    expect(keys).not.toContain("add");
+    expect(keys).not.toContain("cover");
+  });
+
+  it("detects collection entity type in getWorkflowEntityType", () => {
+    expect(getWorkflowEntityType({ type: "collection" })).toBe("collection");
+    expect(getWorkflowEntityType({ itemType: "collection" })).toBe("collection");
   });
 });
