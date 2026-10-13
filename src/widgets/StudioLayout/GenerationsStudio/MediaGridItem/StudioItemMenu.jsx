@@ -46,7 +46,7 @@ export function StudioItemDropdownMenu({
           </ActionBtn>
         )}
       </DropdownMenuTrigger>
-      <DropdownMenuContent align={align} className={cn("p-2", className)}>
+      <DropdownMenuContent align={align} className={cn("p-1.5 min-w-[15rem] w-64 flow-menu-panel mat-mdc-menu-panel", className)}>
         {items.map((m, i) => {
           if (m.key === "separator" || m.type === "separator") {
             return <DropdownMenuSeparator key={m.key || `sep-${i}`} className="my-1.5" />;
@@ -62,21 +62,28 @@ export function StudioItemDropdownMenu({
                 if (onOpenChange) onOpenChange(false);
                 m.onClick?.(e);
               }}
-              className="flex items-center gap-3 cursor-pointer mat-mdc-menu-item flow-internal-menu-item"
-            >
-              {m.icon && (
-                typeof m.icon === "string" ? (
-                  <GoogleIcon
-                    iconName={m.icon}
-                    className={cn("text-[20px] shrink-0", m.iconClassName)}
-                    fill={m.fill}
-                  />
-                ) : (
-                  m.icon
-                )
+              className={cn(
+                "cursor-pointer mat-mdc-menu-item flow-internal-menu-item",
+                m.variant === "destructive" && "delete-button"
               )}
-              <span className="item-text min-w-0 flex-1 truncate">
-                <span className="label font-medium">{m.label}</span>
+            >
+              <span className="mat-mdc-menu-item-text">
+                <span className="left-content">
+                  {m.icon && (
+                    typeof m.icon === "string" ? (
+                      <GoogleIcon
+                        iconName={m.icon}
+                        className={cn("text-[20px] shrink-0 mat-icon google-symbols", m.iconClassName)}
+                        fill={m.fill}
+                      />
+                    ) : (
+                      m.icon
+                    )
+                  )}
+                  <span className="item-text min-w-0 flex-1 truncate">
+                    <span className="label font-medium">{m.label}</span>
+                  </span>
+                </span>
               </span>
             </DropdownMenuItem>
           );
@@ -95,7 +102,7 @@ export function StudioContextMenuContent({
   className = "w-64",
 }) {
   return (
-    <ContextMenuContent className={cn("p-2", className)}>
+    <ContextMenuContent className={cn("p-1.5 min-w-[15rem] w-64 flow-menu-panel mat-mdc-menu-panel", className)}>
       {items.map((m, i) => {
         if (m.key === "separator" || m.type === "separator") {
           return <ContextMenuSeparator key={m.key || `ctx-sep-${i}`} className="my-1.5" />;
@@ -110,21 +117,28 @@ export function StudioContextMenuContent({
               if (m.disabled) return;
               m.onClick?.(e);
             }}
-            className="flex items-center gap-3 cursor-pointer mat-mdc-menu-item flow-internal-menu-item"
-          >
-            {m.icon && (
-              typeof m.icon === "string" ? (
-                <GoogleIcon
-                  iconName={m.icon}
-                  className={cn("text-[20px] shrink-0", m.iconClassName)}
-                  fill={m.fill}
-                />
-              ) : (
-                m.icon
-              )
+            className={cn(
+              "cursor-pointer mat-mdc-menu-item flow-internal-menu-item",
+              m.variant === "destructive" && "delete-button"
             )}
-            <span className="item-text min-w-0 flex-1 truncate">
-              <span className="label font-medium">{m.label}</span>
+          >
+            <span className="mat-mdc-menu-item-text">
+              <span className="left-content">
+                {m.icon && (
+                  typeof m.icon === "string" ? (
+                    <GoogleIcon
+                      iconName={m.icon}
+                      className={cn("text-[20px] shrink-0 mat-icon google-symbols", m.iconClassName)}
+                      fill={m.fill}
+                    />
+                  ) : (
+                    m.icon
+                  )
+                )}
+                <span className="item-text min-w-0 flex-1 truncate">
+                  <span className="label font-medium">{m.label}</span>
+                </span>
+              </span>
             </span>
           </ContextMenuItem>
         );

@@ -309,7 +309,17 @@ mat-icon {
   --filter-chips-bar-height: 2.5rem;
   --trash-action-bar-height: 2.5rem;
   --page-padding: 1rem;
+  --prompt-box-min-height: 5.625rem;
+  --prompt-box-max-height: min(28.75rem,65vh);
+  --prompt-box-settings-width: 17.5rem;
+  --prompt-box-settings-width-wide: 21rem;
   --prompt-box-bottom-spacing: 2rem;
+  --prompt-box-footer-padding: 5rem;
+  --prompt-box-bottom-control-height: 2rem;
+  --flow-menu-panel-width: 16rem;
+  --flow-menu-panel-min-width: 15rem;
+  --flow-panel-border-radius: 20px;
+  --glass-raised-box-shadow: 0 16px 32px -8px rgba(0,0,0,.4);
   --ogb-account-switcher-block-size: 2.5rem;
   --ogb-account-switcher-z-index: 1000;
   --angular-notice-z-index: var(--ogb-account-switcher-z-index);
@@ -549,8 +559,22 @@ mat-icon {
   --foreground-color-100: #f1f3f4;
   --foreground-color-200: #e8eaed;
   --foreground-color-300: #dadce0;
-  --foreground-color-danger: #fe6e6e;
+  --foreground-neutral-000: #fff;
+  --foreground-neutral-100: #f1f3f4;
+  --foreground-neutral-200: #e8eaed;
+  --foreground-neutral-300: #dadce0;
+  --foreground-neutral-400: #bdc1c6;
+  --foreground-state-90: rgba(218,220,224,0.9);
+  --foreground-state-75: rgba(218,220,224,0.75);
+  --foreground-state-60: rgba(218,220,224,0.6);
+  --foreground-state-50: rgba(218,220,224,0.5);
+  --foreground-state-25: rgba(218,220,224,0.25);
+  --foreground-state-15: rgba(218,220,224,0.15);
+  --foreground-state-10: rgba(218,220,224,0.1);
+  --foreground-state-08: rgba(218,220,224,0.08);
+  --foreground-state-05: rgba(218,220,224,0.05);
   --foreground-state-base: #dadce0;
+  --foreground-color-danger: #fe6e6e;
   --background-color-100: #202124;
   --background-color-200: #3c4043;
   --background-color-300: #80868b;
@@ -559,6 +583,24 @@ mat-icon {
   --background-neutral-200: #3c4043;
   --background-neutral-300: #5f6368;
   --background-neutral-400: #80868b;
+  --background-state-90: rgba(22,23,24,0.9);
+  --background-state-75: rgba(22,23,24,0.75);
+  --background-state-50: rgba(22,23,24,0.5);
+  --background-state-25: rgba(22,23,24,0.25);
+  --background-state-15: rgba(22,23,24,0.15);
+  --background-state-10: rgba(22,23,24,0.1);
+  --background-state-05: rgba(22,23,24,0.05);
+  --background-color-danger: #b22f25;
+  --gradient-foreground-90: rgba(255,255,255,0.9);
+  --gradient-foreground-70: rgba(255,255,255,0.7);
+  --gradient-foreground-45: rgba(255,255,255,0.45);
+  --gradient-foreground-25: rgba(255,255,255,0.25);
+  --gradient-foreground-0: rgba(255,255,255,0);
+  --gradient-background-90: rgba(255,255,255,0.9);
+  --gradient-background-70: rgba(255,255,255,0.7);
+  --gradient-background-45: rgba(255,255,255,0.45);
+  --gradient-background-25: rgba(255,255,255,0.25);
+  --gradient-background-0: rgba(255,255,255,0);
 
   /* Material Component Tokens */
   --mat-dialog-container-color: var(--background-state-90);
@@ -792,13 +834,17 @@ mat-icon {
 [data-slot="popover-content"],
 .mat-mdc-menu-panel,
 .flow-menu-panel {
-  background-color: var(--mat-menu-container-color, var(--background-state-90)) !important;
+  background-color: var(--mat-menu-container-color, var(--background-state-90, rgba(22, 23, 24, 0.9))) !important;
   backdrop-filter: blur(100px) saturate(190%) contrast(105%) !important;
   -webkit-backdrop-filter: blur(100px) saturate(190%) contrast(105%) !important;
   box-shadow: var(--mat-menu-container-elevation-shadow, 0 16px 32px -8px rgba(0,0,0,0.4)) !important;
   border-radius: var(--mat-menu-container-shape, 24px) !important;
   border: none !important;
+  padding: 0.375rem !important;
+  min-width: var(--flow-menu-panel-min-width, 15rem) !important;
   color: var(--mat-sys-on-surface, #e3e3e3) !important;
+  box-sizing: border-box !important;
+  color-scheme: dark !important;
   -webkit-font-smoothing: antialiased !important;
   -moz-osx-font-smoothing: grayscale !important;
 }
@@ -809,7 +855,9 @@ mat-icon {
 .flow-internal-menu-item,
 flow-menu-item {
   min-height: 48px !important;
-  padding: 0.5rem 0.875rem !important;
+  height: 48px !important;
+  padding: 0 0.75rem !important;
+  gap: var(--mat-menu-item-spacing, 0.75rem) !important;
   border-radius: var(--mat-sys-corner-medium, 12px) !important;
   color: var(--mat-menu-item-label-text-color, var(--foreground-neutral-000, #fff)) !important;
   font-family: var(--mat-menu-item-label-text-font, 'Google Sans Text', 'Google Sans', sans-serif) !important;
@@ -820,7 +868,32 @@ flow-menu-item {
   -webkit-font-smoothing: antialiased !important;
   -moz-osx-font-smoothing: grayscale !important;
   text-rendering: optimizeLegibility !important;
-  transition: all 0.15s ease !important;
+  transition: background-color 0.15s ease, color 0.15s ease !important;
+}
+
+.mat-mdc-menu-item-text {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+.mat-mdc-menu-item-text .left-content,
+.left-content {
+  display: flex !important;
+  align-items: center !important;
+  gap: var(--mat-menu-item-spacing, 0.75rem) !important;
+  flex: 1 !important;
+  min-width: 0 !important;
+}
+
+.mat-mdc-menu-item-text .left-content .item-text,
+.item-text {
+  display: flex !important;
+  flex-direction: column !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
 }
 
 .mat-mdc-menu-item-text .left-content .item-text .label,
@@ -834,6 +907,9 @@ flow-menu-item {
   letter-spacing: var(--mat-menu-item-label-text-tracking, 0) !important;
   -webkit-font-smoothing: antialiased !important;
   -moz-osx-font-smoothing: grayscale !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
 }
 
 /* Sidenav & Navigation Rail Items */
@@ -1036,12 +1112,13 @@ flow-credit-cost-label {
 .flow-model-picker-panel,
 .mat-mdc-menu-panel {
   border-radius: var(--mat-menu-container-shape, 24px) !important;
-  background-color: var(--mat-menu-container-color, rgba(22, 23, 24, 0.6)) !important;
+  background-color: var(--mat-menu-container-color, var(--background-state-90, rgba(22, 23, 24, 0.9))) !important;
   backdrop-filter: blur(100px) saturate(190%) contrast(105%) !important;
   -webkit-backdrop-filter: blur(100px) saturate(190%) contrast(105%) !important;
   border: none !important;
   box-shadow: var(--mat-menu-container-elevation-shadow, 0 16px 32px -8px rgba(0, 0, 0, 0.4)) !important;
-  padding: 0.25rem !important;
+  padding: 0.375rem !important;
+  min-width: var(--flow-menu-panel-min-width, 15rem) !important;
   overflow-y: auto;
   box-sizing: border-box;
   color-scheme: dark;
@@ -1072,7 +1149,7 @@ flow-menu-item {
   width: 100% !important;
   min-height: 48px !important;
   height: 48px !important;
-  padding: 0 0.5rem !important;
+  padding: 0 0.75rem !important;
   border-radius: var(--mat-sys-corner-medium, 12px) !important;
   border: none !important;
   outline: none !important;
@@ -1096,20 +1173,48 @@ flow-menu-item {
 
 .flow-internal-menu-item:hover,
 .mat-mdc-menu-item:hover {
-  background-color: var(--mat-menu-item-hover-state-layer-color, rgba(218, 220, 224, 0.08));
+  background-color: var(--mat-menu-item-hover-state-layer-color, rgba(218, 220, 224, 0.1)) !important;
+  color: #ffffff !important;
 }
 
 .flow-internal-menu-item:focus-visible,
 .mat-mdc-menu-item:focus-visible {
-  background-color: var(--mat-menu-item-focus-state-layer-color, rgba(218, 220, 224, 0.12));
+  background-color: var(--mat-menu-item-focus-state-layer-color, rgba(218, 220, 224, 0.15)) !important;
+  color: #ffffff !important;
 }
 
 flow-menu-item.selected .flow-internal-menu-item,
 flow-menu-item.selected .mat-mdc-menu-item,
 .flow-internal-menu-item.selected,
 .mat-mdc-menu-item.selected {
-  background-color: var(--foreground-state-15, rgba(218, 220, 224, 0.15));
-  color: #ffffff;
+  background-color: var(--foreground-state-25, rgba(218, 220, 224, 0.25)) !important;
+  color: #ffffff !important;
+}
+
+/* Delete / Trash action button */
+.delete-button .mat-mdc-menu-item,
+.delete-button .flow-internal-menu-item,
+.delete-button,
+[data-slot="dropdown-menu-item"][data-variant="destructive"],
+[data-slot="context-menu-item"][data-variant="destructive"],
+[data-slot="dropdown-menu-item"][data-variant="danger"],
+[data-slot="context-menu-item"][data-variant="danger"] {
+  color: var(--foreground-color-danger, #fe6e6e) !important;
+}
+
+.delete-button .mat-mdc-menu-item .label,
+.delete-button .mat-mdc-menu-item .mat-icon,
+.delete-button .mat-mdc-menu-item .google-symbols,
+.delete-button .flow-internal-menu-item .label,
+.delete-button .flow-internal-menu-item .mat-icon,
+.delete-button .flow-internal-menu-item .google-symbols,
+[data-slot="dropdown-menu-item"][data-variant="destructive"] .label,
+[data-slot="dropdown-menu-item"][data-variant="destructive"] svg,
+[data-slot="dropdown-menu-item"][data-variant="destructive"] .google-symbols,
+[data-slot="context-menu-item"][data-variant="destructive"] .label,
+[data-slot="context-menu-item"][data-variant="destructive"] svg,
+[data-slot="context-menu-item"][data-variant="destructive"] .google-symbols {
+  color: var(--foreground-color-danger, #fe6e6e) !important;
 }
 
 .mat-mdc-menu-item-text {
@@ -1123,7 +1228,7 @@ flow-menu-item.selected .mat-mdc-menu-item,
 .mat-mdc-menu-item-text .left-content {
   display: flex;
   align-items: center;
-  gap: 0.625rem;
+  gap: var(--mat-menu-item-spacing, 0.75rem);
   flex: 1;
   min-width: 0;
 }
@@ -1143,7 +1248,7 @@ flow-menu-item.selected .mat-mdc-menu-item,
   letter-spacing: var(--mat-menu-item-label-text-tracking, 0) !important;
   -webkit-font-smoothing: antialiased !important;
   -moz-osx-font-smoothing: grayscale !important;
-  color: var(--mat-menu-item-label-text-color, var(--foreground-neutral-000, #ffffff));
+  color: inherit;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1154,10 +1259,18 @@ flow-menu-item.selected .mat-mdc-menu-item,
   font-size: 20px;
   width: 20px;
   height: 20px;
-  color: var(--mat-menu-item-icon-color, var(--foreground-neutral-000, #ffffff));
+  color: inherit;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
+}
+
+.mat-mdc-menu-submenu-icon {
+  width: 5px;
+  height: 10px;
+  fill: var(--foreground-neutral-400, #bdc1c6);
+  margin-left: auto;
   flex-shrink: 0;
 }
 
