@@ -57,46 +57,41 @@ export function ElementDetailsGallery({
         onChange={handleFileChange}
       />
 
-      {/* ── Gallery Header: Title, Counter & Action Buttons ── */}
+      {/* ── Gallery Header: Title & Action Buttons ── */}
       <div className="flex items-center justify-between pb-3 border-b border-white/5 w-full shrink-0">
         <div className="flex items-center gap-2.5">
           <span className="text-sm font-semibold text-white/90 tracking-wide">
             Images de référence
           </span>
-          <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-white/5 text-white/50 border border-white/5">
-            {validItems.length} / {maxAllowed}
-          </span>
         </div>
 
-        {!isFull && (
-          <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            onClick={() => fileInputRef.current?.click()}
+            className="h-8 px-3 rounded-lg text-xs font-medium flex items-center gap-1.5 cursor-pointer"
+            title="Importer depuis l'ordinateur"
+          >
+            <GoogleIcon iconName="upload" className="text-[16px]" />
+            <span>Importer</span>
+          </Button>
+
+          {onOpenAssets && (
             <Button
               type="button"
-              variant="secondary"
+              variant="ghost"
               size="sm"
-              onClick={() => fileInputRef.current?.click()}
-              className="h-8 px-3 rounded-lg text-xs font-medium flex items-center gap-1.5 cursor-pointer"
-              title="Importer depuis l'ordinateur"
+              onClick={onOpenAssets}
+              className="h-8 px-3 rounded-lg text-xs font-medium flex items-center gap-1.5 text-white/70 hover:text-white hover:bg-white/10 cursor-pointer"
+              title="Ajouter à partir du projet"
             >
-              <GoogleIcon iconName="upload" className="text-[16px]" />
-              <span>Importer</span>
+              <GoogleIcon iconName="add" className="text-[16px]" />
+              <span>Depuis le projet</span>
             </Button>
-
-            {onOpenAssets && (
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={onOpenAssets}
-                className="h-8 px-3 rounded-lg text-xs font-medium flex items-center gap-1.5 text-white/70 hover:text-white hover:bg-white/10 cursor-pointer"
-                title="Ajouter à partir du projet"
-              >
-                <GoogleIcon iconName="add" className="text-[16px]" />
-                <span>Depuis le projet</span>
-              </Button>
-            )}
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       {/* ── Gallery Body: Element Media Gallery Grid or Minimal Empty State ── */}

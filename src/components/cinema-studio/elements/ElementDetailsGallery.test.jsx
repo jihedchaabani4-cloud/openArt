@@ -125,17 +125,31 @@ describe("ElementDetailsGallery - Studio Media Grid Form", () => {
     expect(screen.queryByText("Couverture")).toBeNull();
   });
 
-  it("renders sleek header with compact action buttons and counter", () => {
+  it("renders sleek header with compact action buttons and without counter badge", () => {
+    // 7 items (more than max 6) to verify buttons stay visible and no 7 / 6 badge is rendered
+    const sevenItems = [
+      ...mockItems,
+      { id: "item-3", url: "https://example.com/3.png" },
+      { id: "item-4", url: "https://example.com/4.png" },
+      { id: "item-5", url: "https://example.com/5.png" },
+      { id: "item-6", url: "https://example.com/6.png" },
+      { id: "item-7", url: "https://example.com/7.png" },
+    ];
+
     renderWithClient(
       <ElementDetailsGallery
-        items={mockItems}
+        items={sevenItems}
         primaryMediaId="item-1"
         onOpenAssets={vi.fn()}
       />
     );
 
     expect(screen.getByText("Images de référence")).toBeDefined();
-    expect(screen.getByText("2 / 6")).toBeDefined();
+    // Counter badge must be removed per user request
+    expect(screen.queryByText(/7 \/ 6/)).toBeNull();
+    expect(screen.queryByText(/\d+ \/ \d+/)).toBeNull();
+
+    // 2 action buttons (Upload and Select Assets) must be present even when full
     expect(screen.getByTitle("Importer depuis l'ordinateur")).toBeDefined();
     expect(screen.getByTitle("Ajouter à partir du projet")).toBeDefined();
   });
