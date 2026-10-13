@@ -43,17 +43,13 @@ export function ElementEditNavbar({
               <DropdownMenuTrigger asChild>
                 <Button
                   type="button"
-                  variant="blur"
+                  variant="ghost"
                   data-testid="import-dropdown-trigger"
-                  className="rounded-full h-8 px-3.5 text-[12px] bg-white/10 hover:bg-white/15 text-white gap-1.5 cursor-pointer font-medium shadow-sm transition-all outline-none"
-                  title="Importer des images"
+                  className="rounded-full h-8 w-8 p-0 text-white hover:text-white hover:bg-white/10 bg-transparent cursor-pointer transition-colors outline-none flex items-center justify-center"
+                  title="Ajouter des images"
+                  aria-label="Ajouter des images"
                 >
-                  <GoogleIcon iconName="upload" className="text-[17px]" />
-                  <span>Importer</span>
-                  <GoogleIcon
-                    iconName="expand_more"
-                    className="text-[16px] text-white/60 transition-transform duration-200"
-                  />
+                  <GoogleIcon iconName="add" className="text-[20px] text-white" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" sideOffset={6} className="min-w-[210px] p-1.5">

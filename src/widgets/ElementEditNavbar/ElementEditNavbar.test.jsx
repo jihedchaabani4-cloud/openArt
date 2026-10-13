@@ -34,9 +34,13 @@ describe("ElementEditNavbar", () => {
       />
     );
 
-    // Dropdown trigger is rendered
+    // Dropdown trigger is rendered as a simple icon-only '+' button without text or bg
     const trigger = screen.getByTestId("import-dropdown-trigger");
     expect(trigger).toBeDefined();
+    expect(trigger.textContent).toBe("add");
+    expect(trigger.textContent).not.toContain("Importer");
+    expect(trigger.className).toContain("bg-transparent");
+    expect(trigger.className).not.toMatch(/(^|\s)bg-white\/10(\s|$)/);
 
     // Both options are in the dropdown menu
     const uploadItem = screen.getByText("Importer depuis l'ordinateur");
