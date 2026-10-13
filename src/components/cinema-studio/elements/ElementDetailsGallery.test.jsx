@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, afterEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
 import React from "react";
 import { ElementDetailsGallery } from "./ElementDetailsGallery";
@@ -69,8 +69,15 @@ function renderWithClient(ui) {
 }
 
 describe("ElementDetailsGallery - Studio Media Grid Form", () => {
+  let clientWidthSpy;
+
+  beforeEach(() => {
+    clientWidthSpy = vi.spyOn(HTMLElement.prototype, "clientWidth", "get").mockImplementation(() => 800);
+  });
+
   afterEach(() => {
     cleanup();
+    clientWidthSpy?.mockRestore();
   });
 
   const mockItems = [
@@ -161,5 +168,33 @@ describe("ElementDetailsGallery - Studio Media Grid Form", () => {
     cards.forEach((card) => {
       expect(card.style.aspectRatio).not.toBe("1/1");
     });
+  });
+
+  it("ElementMediaGalleryGrid uses RowsPhotoAlbum photo layout conforming to studio media grid", () => {
+    const multiAspectItems = [
+      {
+        id: "wide-1",
+        url: "https://example.com/wide.png",
+        aspectRatio: "16:9",
+        status: "completed",
+      },
+      {
+        id: "tall-2",
+        url: "https://example.com/tall.png",
+        aspectRatio: "9:16",
+        status: "completed",
+      },
+    ];
+
+    const { container } = renderWithClient(
+      <ElementMediaGalleryGrid
+        items={multiAspectItems}
+        onUploadFiles={vi.fn()}
+      />
+    );
+
+    // Verify it renders RowsPhotoAlbum just like the studio media grid
+    const photoAlbum = container.querySelector(".react-photo-album, .react-photo-album--rows");
+    expect(photoAlbum).not.toBeNull();
   });
 });
