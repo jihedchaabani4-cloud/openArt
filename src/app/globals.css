@@ -191,7 +191,7 @@ mat-icon {
   --radius-2xl: var(--mat-dialog-container-shape, 24px);
   --radius-3xl: var(--mat-sys-corner-extra-large, 28px);
   --radius-full: var(--mat-sys-corner-full, 9999px);
-  --radius-button: var(--button-border-radius, 9999px);
+  --radius-button: var(--button-border-radius, 12px);
 
   /* Custom UI Tokens */
   --background-base-pri:rgba(22, 23, 24, 0.9);
@@ -218,9 +218,13 @@ mat-icon {
   --background-base-primary: #000000;
   --packages-bg: rgb(43, 43, 43, 0.8);
   --radius: 0.625rem;
-  --button-border-radius: 9999px;
-  --button-radius: var(--button-border-radius, 9999px);
-  --mat-button-border-radius: var(--button-border-radius, 9999px);
+  --mat-button-filled-container-shape: 12px;
+  --mat-button-outlined-container-shape: 12px;
+  --mat-button-text-container-shape: 12px;
+  --mat-button-tonal-container-shape: 12px;
+  --button-border-radius: var(--mat-button-filled-container-shape, 12px);
+  --button-radius: var(--button-border-radius, 12px);
+  --mat-button-border-radius: var(--button-border-radius, 12px);
 
   /* Google Flow Design Tokens */
   --prompt-box-settings-width: 17.5rem;
@@ -262,7 +266,7 @@ mat-icon {
   --prompt-box-min-height: 5.625rem;
   --prompt-box-max-height: min(28.75rem, 65vh);
   --prompt-box-footer-padding: 5rem;
-  --mat-button-filled-container-shape: 15px;
+  --mat-button-filled-container-shape: 12px;
   --mat-button-filled-horizontal-padding: 0.75rem;
   --mat-button-filled-container-color: var(--foreground-state-05);
   --mat-button-filled-container-height: var(--prompt-box-bottom-control-height);
