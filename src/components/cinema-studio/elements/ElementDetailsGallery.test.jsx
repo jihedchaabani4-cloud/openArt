@@ -286,4 +286,16 @@ describe("ElementDetailsGallery - Studio Media Grid Form", () => {
     expect(screen.getByText("Définir comme couverture")).toBeDefined();
     expect(screen.getByText("Supprimer l'image")).toBeDefined();
   });
+
+  it("does not render the 'Ajouter une image' tile in ElementMediaGalleryGrid even when onUploadFiles is provided", () => {
+    renderWithClient(
+      <ElementMediaGalleryGrid
+        items={mockItems}
+        onUploadFiles={vi.fn()}
+      />
+    );
+
+    expect(screen.queryByText("Ajouter une image")).toBeNull();
+    expect(screen.queryByTitle("Ajouter une image de référence")).toBeNull();
+  });
 });

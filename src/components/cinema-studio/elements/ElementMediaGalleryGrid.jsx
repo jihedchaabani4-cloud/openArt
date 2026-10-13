@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useMemo, useCallback } from "react";
+import React, { useMemo, useCallback } from "react";
 import { RowsPhotoAlbum } from "react-photo-album";
 import "react-photo-album/rows.css";
 import { Loader2 } from "lucide-react";
@@ -37,19 +37,6 @@ export function ElementMediaGalleryGrid({
   isSettingCover = false,
   className,
 }) {
-  const fileInputRef = useRef(null);
-
-  const handleFileChange = (e) => {
-    const files = Array.from(e.target.files || []);
-    if (files.length > 0 && onUploadFiles) {
-      onUploadFiles(files);
-    }
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-  };
-
-  const isFull = items.length >= maxAllowed;
   const validItems = useMemo(
     () => items.filter((m) => Boolean(m.url || m.file_url || m.asset?.file_url || m.id || m.name)),
     [items]
@@ -57,7 +44,7 @@ export function ElementMediaGalleryGrid({
 
   // Build photo album entries with authentic aspect ratios
   const photos = useMemo(() => {
-    const list = validItems.map((item, idx) => {
+    return validItems.map((item, idx) => {
       const url = item.url || item.file_url || item.asset?.file_url;
       let natural = getCachedImageDimensions(url);
       let wNum = natural?.width;
@@ -84,44 +71,10 @@ export function ElementMediaGalleryGrid({
         itemType: "media",
       };
     });
-
-    // Add "+ Add Image" tile if not full
-    if (!isFull && onUploadFiles) {
-      list.push({
-        src: "data:image/svg+xml;charset=utf-8,<svg xmlns='http://www.w3.org/2000/svg'/>",
-        width: 1200,
-        height: 1200,
-        key: "add-media-tile",
-        itemType: "add_tile",
-      });
-    }
-
-    return list;
-  }, [validItems, workflow, isFull, onUploadFiles]);
+  }, [validItems, workflow]);
 
   const renderPhoto = useCallback(
     (_, { photo, width, height }) => {
-      if (photo.itemType === "add_tile") {
-        return (
-          <div
-            key="add-media-tile"
-            onClick={() => fileInputRef.current?.click()}
-            style={{ width, height }}
-            className="group/addtile relative rounded-xl border border-dashed border-white/15 hover:border-white/30 bg-white/[0.02] hover:bg-white/[0.05] transition-all flex flex-col items-center justify-center gap-2 cursor-pointer select-none"
-            title="Ajouter une image de référence"
-          >
-            <div className="w-10 h-10 rounded-full bg-white/5 group-hover/addtile:bg-white/10 flex items-center justify-center transition-colors">
-              <GoogleIcon
-                iconName="add"
-                className="text-[20px] text-white/50 group-hover/addtile:text-white"
-              />
-            </div>
-            <span className="text-xs font-medium text-white/50 group-hover/addtile:text-white transition-colors">
-              Ajouter une image
-            </span>
-          </div>
-        );
-      }
 
       const item = photo.item;
       const mediaId = item?.id || item?.name || item?.asset_id;
@@ -234,7 +187,6 @@ export function ElementMediaGalleryGrid({
       workflow,
       onSetCover,
       onDeleteImage,
-      fileInputRef,
     ]
   );
 
@@ -242,15 +194,6 @@ export function ElementMediaGalleryGrid({
 
   return (
     <div className={cn("w-full overflow-y-auto custom-scrollbar p-1", className)}>
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        multiple
-        className="hidden"
-        onChange={handleFileChange}
-      />
-
       <RowsPhotoAlbum
         photos={photos}
         defaultContainerWidth={900}
