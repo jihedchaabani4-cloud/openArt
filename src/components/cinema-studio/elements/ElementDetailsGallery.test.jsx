@@ -2,6 +2,7 @@ import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
 import React from "react";
 import { ElementDetailsGallery } from "./ElementDetailsGallery";
+import { ElementMediaGalleryGrid } from "./ElementMediaGalleryGrid";
 
 // Mock router
 vi.mock("next/navigation", () => ({
@@ -87,7 +88,7 @@ describe("ElementDetailsGallery - Studio Media Grid Form", () => {
     },
   ];
 
-  it("renders cards conforming to studio form without border-white/10", () => {
+  it("renders cards conforming to studio form without border-white/10 and without like buttons", () => {
     const { container } = renderWithClient(
       <ElementDetailsGallery
         items={mockItems}
@@ -95,11 +96,15 @@ describe("ElementDetailsGallery - Studio Media Grid Form", () => {
       />
     );
 
-    const cards = container.querySelectorAll(".group\\/elem-tile, .group");
+    const cards = container.querySelectorAll(".group");
     expect(cards.length).toBeGreaterThan(0);
     cards.forEach((card) => {
       expect(card.className).not.toContain("border-white/10");
     });
+
+    // Clean media items: no like button or video icons by default
+    expect(screen.queryByTitle("Liked")).toBeNull();
+    expect(screen.queryByTitle("Video")).toBeNull();
   });
 
   it("renders couverture badge for the primary media", () => {
@@ -139,5 +144,22 @@ describe("ElementDetailsGallery - Studio Media Grid Form", () => {
 
     expect(screen.getByText("Aucune image de référence")).toBeDefined();
     expect(container.querySelector("[data-component='flow-character-image-preview']")).toBeNull();
+  });
+
+  it("ElementMediaGalleryGrid renders reference items cleanly without forced 1:1 aspect ratio", () => {
+    const { container } = renderWithClient(
+      <ElementMediaGalleryGrid
+        items={mockItems}
+        primaryMediaId="item-1"
+        onUploadFiles={vi.fn()}
+      />
+    );
+
+    const cards = container.querySelectorAll(".group");
+    expect(cards.length).toBeGreaterThanOrEqual(2);
+    // Does not force 1:1 on cards
+    cards.forEach((card) => {
+      expect(card.style.aspectRatio).not.toBe("1/1");
+    });
   });
 });

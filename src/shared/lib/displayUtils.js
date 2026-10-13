@@ -222,7 +222,7 @@ function extractRawRatio(item, group) {
     } else {
       const isChar = group?.workflow_type === "CHARACTER" || group?.workflow_type === "CHARACTER_SHEET" || group?.is_character || group?.entity_type === "character";
       const isElem = group?.workflow_type === "ELEMENT_SHEET" || group?.is_element || group?.entity_type === "element";
-      aspect = isElem ? '1/1' : (isChar ? '1/1' : (isVideo ? '16/9' : '3/4'));
+      aspect = isElem ? null : (isChar ? null : (isVideo ? '16/9' : null));
     }
 
     const ratioStr = cachedDims 
@@ -267,7 +267,7 @@ function extractRawRatio(item, group) {
   } else {
     const isChar = group?.workflow_type === "CHARACTER" || group?.workflow_type === "CHARACTER_SHEET" || group?.is_character || group?.entity_type === "character";
     const isElem = group?.workflow_type === "ELEMENT_SHEET" || group?.is_element || group?.entity_type === "element";
-    const defaultRatio = isElem ? '1/1' : (isChar ? '1/1' : (isVideo ? '16/9' : '3/4'));
+    const defaultRatio = isElem ? null : (isChar ? null : (isVideo ? '16/9' : null));
     aspect = defaultRatio;
   }
 

@@ -56,7 +56,7 @@ export function useMediaViewerCore({ workflow, item: propItem = null, mediaId = 
   const metadata = useMemo(() => {
     return targetItem
       ? getItemMetadata(targetItem, workflow)
-      : { status: "empty", url: null, isVideo: false, aspect: "1/1", prompt: "" };
+      : { status: "empty", url: null, isVideo: false, aspect: null, prompt: "" };
   }, [targetItem, workflow]);
 
   const { isVideo, url, status, aspect: metaAspect, prompt, error } = metadata;
@@ -97,7 +97,7 @@ export function useMediaViewerCore({ workflow, item: propItem = null, mediaId = 
     }
   }, [url]);
 
-  const displayAspect = intrinsicAspect || metaAspect || "1/1";
+  const displayAspect = intrinsicAspect || metaAspect || null;
 
   const aspectRatioNumber = useMemo(() => {
     if (intrinsicSize?.width && intrinsicSize?.height) {
