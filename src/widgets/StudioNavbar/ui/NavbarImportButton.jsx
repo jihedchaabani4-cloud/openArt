@@ -104,7 +104,7 @@ export function NavbarImportButton() {
         >
           <DropdownMenuItem
             onClick={handleUploadClick}
-            className="flex items-center gap-2.5 cursor-pointer py-2 px-2.5 rounded-[12px] hover:bg-white/10 text-white min-h-[40px]"
+            className="flex items-center gap-2.5 cursor-pointer py-1.5 px-2.5 rounded-[12px] hover:bg-white/10 text-white min-h-[38px]"
           >
             <GoogleIcon iconName="upload" className="text-[18px] text-white/80" />
             <span className="text-[13px] font-medium">Upload media</span>
@@ -113,7 +113,7 @@ export function NavbarImportButton() {
           <DropdownMenuItem
             onClick={handleCreateCollectionClick}
             disabled={isCreatingFolder}
-            className="flex items-center gap-2.5 cursor-pointer py-2 px-2.5 rounded-[12px] hover:bg-white/10 text-white min-h-[40px]"
+            className="flex items-center gap-2.5 cursor-pointer py-1.5 px-2.5 rounded-[12px] hover:bg-white/10 text-white min-h-[38px]"
           >
             <GoogleIcon iconName="create_new_folder" className="text-[18px] text-white/80" />
             <span className="text-[13px] font-medium">Create collection</span>

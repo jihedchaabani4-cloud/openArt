@@ -50,6 +50,15 @@ describe("ElementEditNavbar", () => {
     expect(uploadItem).toBeDefined();
     expect(assetsItem).toBeDefined();
 
+    // Verify standardized width and compact item sizing
+    const menuContent = uploadItem.closest('[data-slot="dropdown-menu-content"]');
+    expect(menuContent.className).toContain("w-52");
+    expect(menuContent.className).not.toContain("min-w-[210px]");
+
+    const uploadMenuItem = uploadItem.closest('[data-slot="dropdown-menu-item"]');
+    expect(uploadMenuItem.className).toContain("min-h-[38px]");
+    expect(uploadMenuItem.className).toContain("text-[13px]");
+
     // Clicking options triggers callbacks
     fireEvent.click(uploadItem);
     expect(onUpload).toHaveBeenCalledTimes(1);

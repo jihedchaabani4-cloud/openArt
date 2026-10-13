@@ -219,16 +219,16 @@ export function EditNavbar({
                                 <GoogleIcon iconName="more_vert" className="text-[13px]" />
                             </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="start" className="min-w-[180px] p-2">
+                        <DropdownMenuContent align="start" className="w-52 p-1.5">
                             <DropdownMenuItem onClick={() => nameRef.current?.startEditing()}>
-                                <GoogleIcon iconName="edit" className="text-[20px]" />
+                                <GoogleIcon iconName="edit" className="text-[18px]" />
                                 Renommer
                             </DropdownMenuItem>
                             <DropdownMenuItem 
                                 variant="destructive"
                                 onClick={() => setIsDeleteDialogOpen(true)}
                             >
-                                <GoogleIcon iconName="delete" className="text-[20px]" />
+                                <GoogleIcon iconName="delete" className="text-[18px]" />
                                 Placer dans la corbeille
                             </DropdownMenuItem>
                         </DropdownMenuContent>

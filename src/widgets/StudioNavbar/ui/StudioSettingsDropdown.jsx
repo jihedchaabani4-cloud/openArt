@@ -137,11 +137,11 @@ export function StudioSettingsDropdown(props) {
                 e.preventDefault()
                 setShowUploadedMedia(!showUploadedMedia)
               }}
-              className="flex items-center justify-between cursor-pointer py-1.5 px-2.5 min-h-[48px] rounded-[12px] hover:bg-[var(--mat-menu-item-hover-state-layer-color,var(--foreground-state-10))]"
+              className="flex items-center justify-between cursor-pointer py-1.5 px-2.5 min-h-[38px] rounded-[12px] hover:bg-[var(--mat-menu-item-hover-state-layer-color,var(--foreground-state-10))]"
             >
-              <div className="flex items-center gap-3">
-                <GoogleIcon iconName="upload" className="text-[20px] text-[var(--foreground-neutral-000,#fff)]" />
-                <span className="text-[14px] font-medium text-[var(--foreground-neutral-000,#fff)]">
+              <div className="flex items-center gap-2.5">
+                <GoogleIcon iconName="upload" className="text-[18px] text-[var(--foreground-neutral-000,#fff)]" />
+                <span className="text-[13px] font-medium text-[var(--foreground-neutral-000,#fff)]">
                   Médias importés
                 </span>
               </div>
@@ -155,11 +155,11 @@ export function StudioSettingsDropdown(props) {
                 e.preventDefault()
                 setShowTileDetails(!showTileDetails)
               }}
-              className="flex items-center justify-between cursor-pointer py-1.5 px-2.5 min-h-[48px] rounded-[12px] hover:bg-[var(--mat-menu-item-hover-state-layer-color,var(--foreground-state-10))]"
+              className="flex items-center justify-between cursor-pointer py-1.5 px-2.5 min-h-[38px] rounded-[12px] hover:bg-[var(--mat-menu-item-hover-state-layer-color,var(--foreground-state-10))]"
             >
-              <div className="flex items-center gap-3">
-                <GoogleIcon iconName="visibility" className="text-[20px] text-[var(--foreground-neutral-000,#fff)]" />
-                <span className="text-[14px] font-medium text-[var(--foreground-neutral-000,#fff)]">
+              <div className="flex items-center gap-2.5">
+                <GoogleIcon iconName="visibility" className="text-[18px] text-[var(--foreground-neutral-000,#fff)]" />
+                <span className="text-[13px] font-medium text-[var(--foreground-neutral-000,#fff)]">
                   Détails des blocs
                 </span>
               </div>
@@ -173,11 +173,11 @@ export function StudioSettingsDropdown(props) {
                 e.preventDefault()
                 setSoundOnHover(!soundOnHover)
               }}
-              className="flex items-center justify-between cursor-pointer py-1.5 px-2.5 min-h-[48px] rounded-[12px] hover:bg-[var(--mat-menu-item-hover-state-layer-color,var(--foreground-state-10))]"
+              className="flex items-center justify-between cursor-pointer py-1.5 px-2.5 min-h-[38px] rounded-[12px] hover:bg-[var(--mat-menu-item-hover-state-layer-color,var(--foreground-state-10))]"
             >
-              <div className="flex items-center gap-3">
-                <GoogleIcon iconName="volume_up" className="text-[20px] text-[var(--foreground-neutral-000,#fff)]" />
-                <span className="text-[14px] font-medium text-[var(--foreground-neutral-000,#fff)]">
+              <div className="flex items-center gap-2.5">
+                <GoogleIcon iconName="volume_up" className="text-[18px] text-[var(--foreground-neutral-000,#fff)]" />
+                <span className="text-[13px] font-medium text-[var(--foreground-neutral-000,#fff)]">
                   Son au survol
                 </span>
               </div>
@@ -191,11 +191,11 @@ export function StudioSettingsDropdown(props) {
                 e.preventDefault()
                 setClearPromptOnSubmit(!clearPromptOnSubmit)
               }}
-              className="flex items-center justify-between cursor-pointer py-2 px-3 min-h-[48px] rounded-[12px] hover:bg-[var(--mat-menu-item-hover-state-layer-color,var(--foreground-state-10))]"
+              className="flex items-center justify-between cursor-pointer py-1.5 px-2.5 min-h-[38px] rounded-[12px] hover:bg-[var(--mat-menu-item-hover-state-layer-color,var(--foreground-state-10))]"
             >
-              <div className="flex items-center gap-3">
-                <GoogleIcon iconName="backspace" className="text-[20px] text-[var(--foreground-neutral-000,#fff)]" />
-                <span className="text-[14px] font-medium text-[var(--foreground-neutral-000,#fff)]">
+              <div className="flex items-center gap-2.5">
+                <GoogleIcon iconName="backspace" className="text-[18px] text-[var(--foreground-neutral-000,#fff)]" />
+                <span className="text-[13px] font-medium text-[var(--foreground-neutral-000,#fff)]">
                   Effacer le prompt
                 </span>
               </div>

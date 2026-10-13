@@ -289,7 +289,7 @@ export function StudioNavbarLeft({
                         <GoogleIcon iconName="more_vert" className="text-[16px]" />
                     </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="min-w-[160px]">
+                <DropdownMenuContent align="start" className="w-52 p-1.5">
                     {isCollectionPage && (
                         <>
                             <DropdownMenuItem onClick={handleToggleLike}>

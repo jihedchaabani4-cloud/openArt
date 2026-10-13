@@ -53,7 +53,7 @@ function ContextMenuSubTrigger({
       data-slot="context-menu-sub-trigger"
       data-inset={inset}
       className={cn(
-        "flex cursor-pointer items-center gap-3 rounded-[var(--mat-sys-corner-medium,12px)] px-3.5 py-2 min-h-[48px] text-[14px] leading-5 font-medium outline-hidden select-none font-sans antialiased",
+        "flex cursor-pointer items-center gap-2.5 rounded-[var(--mat-sys-corner-medium,12px)] px-2.5 py-1.5 min-h-[38px] text-[13px] leading-5 font-medium outline-hidden select-none font-sans antialiased",
         "text-[var(--mat-menu-item-label-text-color,var(--foreground-neutral-000,#fff))] hover:bg-[var(--mat-menu-item-hover-state-layer-color,var(--foreground-state-10))] hover:text-white focus:bg-[var(--mat-menu-item-focus-state-layer-color,var(--foreground-state-15))] focus:text-white",
         "data-[state=open]:bg-[var(--foreground-state-15)] data-[state=open]:text-white transition-all duration-150",
         "[&_svg:not([class*='text-'])]:text-white/70 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-5",
@@ -86,7 +86,7 @@ function ContextMenuSubContent({
         ...style,
       }}
       className={cn(
-        "z-50 min-w-[12rem] origin-(--radix-context-menu-content-transform-origin) overflow-hidden p-1.5 flex flex-col gap-0.5 font-sans antialiased",
+        "z-50 w-52 min-w-[12rem] origin-(--radix-context-menu-content-transform-origin) overflow-hidden p-1.5 flex flex-col gap-0.5 font-sans antialiased",
         "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
         className
       )}
@@ -115,7 +115,7 @@ function ContextMenuContent({
         }}
         className={cn(
           // Layout & shape
-          "z-50 min-w-[12rem] overflow-hidden p-1.5 flex flex-col gap-0.5 font-sans antialiased",
+          "z-50 w-52 min-w-[12rem] overflow-hidden p-1.5 flex flex-col gap-0.5 font-sans antialiased",
           // Animations
           "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
           className
@@ -138,7 +138,7 @@ function ContextMenuItem({
       data-variant={variant}
       className={cn(
         // Layout
-        "relative flex cursor-pointer items-center gap-3 rounded-[var(--mat-sys-corner-medium,12px)] px-3.5 py-2 min-h-[48px] text-[14px] leading-5 font-medium outline-hidden select-none font-sans antialiased",
+        "relative flex cursor-pointer items-center gap-2.5 rounded-[var(--mat-sys-corner-medium,12px)] px-2.5 py-1.5 min-h-[38px] text-[13px] leading-5 font-medium outline-hidden select-none font-sans antialiased",
         // Theme defaults: on-surface text, state layers for hover & focus
         "text-[var(--mat-menu-item-label-text-color,var(--foreground-neutral-000,#fff))] hover:bg-[var(--mat-menu-item-hover-state-layer-color,var(--foreground-state-10))] hover:text-white focus:bg-[var(--mat-menu-item-focus-state-layer-color,var(--foreground-state-15))] focus:text-white active:bg-[var(--foreground-state-25)] transition-all duration-150",
         // Icon defaults
