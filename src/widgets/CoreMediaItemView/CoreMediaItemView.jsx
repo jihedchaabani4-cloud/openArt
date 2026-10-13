@@ -35,6 +35,7 @@ export function CoreMediaItemView({
   // Media source props
   workflow,
   item = null,
+  mediaId = null,
   core: propCore = null,
   src: propSrc = null,
   isVideo: propIsVideo = null,
@@ -96,7 +97,7 @@ export function CoreMediaItemView({
 }) {
   // Use media core hook to resolve metadata, sizing, and media state
   const shouldAutoPlay = autoPlay && !playOnHover;
-  const localCore = useMediaViewerCore({ workflow, item, autoPlay: shouldAutoPlay });
+  const localCore = useMediaViewerCore({ workflow, item, mediaId, autoPlay: shouldAutoPlay });
   const core = propCore || localCore;
   const internalVideoRef = useRef(null);
   const videoRef = externalVideoRef || core.videoRef || internalVideoRef;

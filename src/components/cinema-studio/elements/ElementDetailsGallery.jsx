@@ -1,25 +1,22 @@
 "use client";
 
 import React, { useRef } from "react";
-import { Loader2, Star, Trash2 } from "lucide-react";
+import { Loader2, Star } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
-import { ButtonGroup } from "@/shared/ui/button-group";
-import { ActionBtn } from "@/widgets/StudioLayout/GenerationsStudio/MediaGridItem/ActionBtn";
-import { CoreMediaItemView } from "@/widgets/CoreMediaItemView";
-import { getItemMetadata } from "@/shared/lib/displayUtils";
 import { cn } from "@/shared/lib/utils";
-import { FlowCharacterImagePreview } from "../characters/FlowCharacterImagePreview";
+import { MediaGridItem } from "@/widgets/StudioLayout/GenerationsStudio/MediaGridItem";
 
 /**
  * ElementDetailsGallery
  * Right stage for the Element edit view:
- * - Studio-aligned media grid built on CoreMediaItemView
- * - Neutral glass ActionBtn ButtonGroup for hover actions (set cover, delete)
- * - Couverture badge for primary cover photo
- * - Empty state preview with direct upload & project import buttons
+ * - Clean header with counter and compact actions (no big button)
+ * - Grid of 1 to 6 reference photos powered by MediaGridItem
+ * - Direct mediaId support on cards with authentic ratio and cover badge
+ * - Sleek minimal add tile and empty state
  */
 export function ElementDetailsGallery({
+  workflow = null,
   items = [],
   primaryMediaId = null,
   pendingUrls = [],
@@ -30,6 +27,8 @@ export function ElementDetailsGallery({
   onDeleteImage,
   onSetCover,
   isSettingCover = false,
+  projectId = null,
+  className,
 }) {
   const fileInputRef = useRef(null);
 
@@ -45,18 +44,11 @@ export function ElementDetailsGallery({
 
   const isFull = items.length >= maxAllowed;
 
-  // Filter out items without valid URLs
-  const validItems = items.filter((m) => Boolean(m.url || m.file_url || m.asset?.file_url));
+  // Filter out items without valid URLs or identifiers
+  const validItems = items.filter((m) => Boolean(m.url || m.file_url || m.asset?.file_url || m.id || m.name));
 
   return (
-    <div
-      className={cn(
-        "w-full h-full flex flex-col gap-4",
-        validItems.length > 0
-          ? "p-1"
-          : "items-center justify-center p-0"
-      )}
-    >
+    <div className={cn("w-full h-full flex flex-col gap-4", className)}>
       <input
         ref={fileInputRef}
         type="file"
@@ -66,166 +58,174 @@ export function ElementDetailsGallery({
         onChange={handleFileChange}
       />
 
-      {validItems.length > 0 ? (
-        <>
-          {/* Header Bar with Counter and Action Buttons */}
-          <div className="flex items-center justify-between px-1 py-1 w-full shrink-0">
-            <div className="flex items-center gap-2">
-              <span className="text-[13px] font-medium font-sans antialiased text-white/70">
-                Photos de référence
-              </span>
-              <span className="text-[11.5px] px-2 py-0.5 rounded-full bg-white/10 text-white/60 font-medium">
-                {validItems.length} / {maxAllowed}
-              </span>
-            </div>
+      {/* ── Gallery Header: Title, Counter & Action Buttons ── */}
+      <div className="flex items-center justify-between pb-3 border-b border-white/5 w-full shrink-0">
+        <div className="flex items-center gap-2.5">
+          <span className="text-sm font-semibold text-white/90 tracking-wide">
+            Images de référence
+          </span>
+          <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-white/5 text-white/50 border border-white/5">
+            {validItems.length} / {maxAllowed}
+          </span>
+        </div>
 
-            <div className="flex items-center gap-2">
-              {/* Button 1: Importer (Upload from device) */}
+        {!isFull && (
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={() => fileInputRef.current?.click()}
+              className="h-8 px-3 rounded-lg text-xs font-medium flex items-center gap-1.5 cursor-pointer"
+              title="Importer depuis l'ordinateur"
+            >
+              <GoogleIcon iconName="upload" className="text-[16px]" />
+              <span>Importer</span>
+            </Button>
+
+            {onOpenAssets && (
               <Button
                 type="button"
-                variant="blur"
+                variant="ghost"
                 size="sm"
-                disabled={isFull}
-                onClick={() => fileInputRef.current?.click()}
-                className="h-8 px-3.5 rounded-full text-[12px] gap-1.5 font-medium bg-white/10 hover:bg-white/15 text-white transition-all shadow-sm cursor-pointer disabled:pointer-events-none disabled:opacity-50"
-                title="Importer une image depuis l'ordinateur"
+                onClick={onOpenAssets}
+                className="h-8 px-3 rounded-lg text-xs font-medium flex items-center gap-1.5 text-white/70 hover:text-white hover:bg-white/10 cursor-pointer"
+                title="Ajouter à partir du projet"
               >
-                <GoogleIcon iconName="upload" className="text-[17px]" />
-                <span>Importer</span>
+                <GoogleIcon iconName="add" className="text-[16px]" />
+                <span>Depuis le projet</span>
               </Button>
-
-              {/* Button 2: Depuis le projet (Assets) */}
-              <Button
-                type="button"
-                variant="blur"
-                size="sm"
-                disabled={isFull}
-                onClick={() => onOpenAssets && onOpenAssets()}
-                className="h-8 px-3 rounded-full text-[12px] gap-1.5 font-medium bg-white/5 hover:bg-white/10 text-white/70 transition-all cursor-pointer disabled:pointer-events-none disabled:opacity-50"
-                title="Ajouter depuis les assets du projet"
-              >
-                <GoogleIcon iconName="add" className="text-[17px]" />
-                <span className="hidden sm:inline">Projet</span>
-              </Button>
-            </div>
+            )}
           </div>
+        )}
+      </div>
 
-          {/* Reference Images Grid Powered by CoreMediaItemView */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full p-1">
-            {validItems.map((item, idx) => {
-              const src = item.url || item.file_url || item.asset?.file_url;
-              const mediaId = item.id || item.name;
-              const isCover =
-                (primaryMediaId && (mediaId === primaryMediaId || item.asset_id === primaryMediaId)) ||
-                idx === 0;
-              const isDeletingThis = deletingMediaId === mediaId;
-              const isAddingThis = pendingUrls.includes(src);
-              const isLoadingThis = isDeletingThis || isAddingThis;
+      {/* ── Gallery Body: Media Grid or Minimal Empty State ── */}
+      {validItems.length > 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 w-full overflow-y-auto custom-scrollbar p-1">
+          {validItems.map((item, idx) => {
+            const mediaId = item.id || item.name || item.asset_id;
+            const isCover =
+              (primaryMediaId && (mediaId === primaryMediaId || item.asset_id === primaryMediaId)) ||
+              idx === 0;
+            const isDeletingThis = deletingMediaId === mediaId;
+            const isAddingThis = pendingUrls.includes(item.url || item.file_url);
+            const isLoadingThis = isDeletingThis || isAddingThis;
 
-              const meta = getItemMetadata(item);
-              const aspect = meta?.aspect && meta.aspect !== "auto" ? meta.aspect : "3/4";
+            const customMenuItems = [
+              ...(!isCover && onSetCover
+                ? [
+                    {
+                      key: "set-cover",
+                      label: "Définir comme couverture",
+                      icon: "star",
+                      onClick: () => onSetCover(mediaId),
+                    },
+                  ]
+                : []),
+              ...(onDeleteImage
+                ? [
+                    {
+                      key: "delete-img",
+                      label: "Supprimer l'image",
+                      icon: "delete",
+                      variant: "destructive",
+                      onClick: () => onDeleteImage(item),
+                    },
+                  ]
+                : []),
+            ];
 
-              return (
-                <CoreMediaItemView
-                  key={mediaId || src || idx}
+            return (
+              <div
+                key={mediaId || idx}
+                className="relative group/elem-tile rounded-xl overflow-hidden aspect-[4/3] bg-zinc-900 shadow-md"
+              >
+                <MediaGridItem
+                  workflow={workflow}
                   item={item}
-                  src={src}
-                  status={item.status || "completed"}
-                  aspect={aspect}
-                  fit="cover"
-                  className="rounded-xl border-none shadow-xl transition-all duration-300 group hover:shadow-2xl overflow-hidden bg-black/40"
-                  style={{
-                    aspectRatio: aspect,
-                  }}
+                  mediaId={mediaId}
+                  projectId={projectId}
+                  aspect="4/3"
+                  className="w-full h-full rounded-xl border-none shadow-none"
+                  menuItems={customMenuItems}
                   topLeft={
                     isCover ? (
-                      <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/60 border border-white/15 text-white/90 text-[10.5px] font-medium shadow-sm backdrop-blur-md">
+                      <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/60 border border-white/15 text-white/90 text-[10.5px] font-medium shadow-sm backdrop-blur-md select-none pointer-events-none">
                         <Star className="size-3 text-amber-400 fill-amber-400" />
                         <span>Couverture</span>
                       </div>
                     ) : null
                   }
-                  topRight={
-                    !isLoadingThis ? (
-                      <div className="opacity-0 group-hover:opacity-100 transition-opacity pointer-events-auto">
-                        <ButtonGroup className="bg-white/60 backdrop-blur-md rounded-lg border-0 border-none scale-90 origin-top-right">
-                          {!isCover && onSetCover && (
-                            <ActionBtn
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                onSetCover(mediaId);
-                              }}
-                              disabled={isSettingCover}
-                              title="Définir comme image principale"
-                            >
-                              <Star className="size-3.5 text-[#303031]" />
-                            </ActionBtn>
-                          )}
-                          {onDeleteImage && (
-                            <ActionBtn
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                onDeleteImage(item);
-                              }}
-                              title="Supprimer l'image"
-                            >
-                              <Trash2 className="size-3.5 text-[#303031] hover:text-red-500" />
-                            </ActionBtn>
-                          )}
-                        </ButtonGroup>
-                      </div>
-                    ) : null
-                  }
-                  overlay={
-                    isLoadingThis ? (
-                      <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] z-30 flex items-center justify-center pointer-events-auto">
-                        <Loader2 className="size-6 text-white animate-spin" />
-                      </div>
-                    ) : null
-                  }
                 />
-              );
-            })}
 
-            {/* "+ Add more image" Studio Dashed Card */}
-            {!isFull && (
-              <div
-                className="group/addcard relative overflow-hidden rounded-xl border border-dashed border-white/15 hover:border-white/30 bg-white/[0.02] hover:bg-white/[0.04] transition-all w-full flex flex-col items-center justify-center gap-2.5 p-3 text-center select-none shadow-xl"
-                style={{ aspectRatio: "3/4" }}
-              >
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="w-full max-w-[155px]"
-                  title="Importer depuis l'ordinateur"
-                >
-                  <GoogleIcon iconName="upload" className="text-[18px]" />
-                  <span>Importer</span>
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => onOpenAssets && onOpenAssets()}
-                  className="w-full max-w-[155px]"
-                  title="Ajouter à partir du projet"
-                >
-                  <GoogleIcon iconName="add" className="text-[16px]" />
-                  <span>Depuis le projet</span>
-                </Button>
+                {/* Loading overlay for pending / deleting */}
+                {isLoadingThis && (
+                  <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] z-30 flex items-center justify-center rounded-xl">
+                    <Loader2 className="size-6 text-white animate-spin" />
+                  </div>
+                )}
               </div>
+            );
+          })}
+
+          {/* "+ Add" dashed tile inside grid */}
+          {!isFull && (
+            <div
+              onClick={() => fileInputRef.current?.click()}
+              className="group/addtile relative rounded-xl border border-dashed border-white/15 hover:border-white/30 bg-white/[0.02] hover:bg-white/[0.05] transition-all aspect-[4/3] flex flex-col items-center justify-center gap-2 cursor-pointer select-none"
+              title="Ajouter une image de référence"
+            >
+              <div className="w-10 h-10 rounded-full bg-white/5 group-hover/addtile:bg-white/10 flex items-center justify-center transition-colors">
+                <GoogleIcon
+                  iconName="add"
+                  className="text-[20px] text-white/50 group-hover/addtile:text-white"
+                />
+              </div>
+              <span className="text-xs font-medium text-white/50 group-hover/addtile:text-white transition-colors">
+                Ajouter une image
+              </span>
+            </div>
+          )}
+        </div>
+      ) : (
+        /* Minimal sleek studio empty state (no big clumsy banner) */
+        <div className="w-full flex-1 flex flex-col items-center justify-center py-16 px-4 text-center">
+          <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-4 text-white/40 shadow-inner">
+            <GoogleIcon iconName="photo_library" className="text-[28px]" />
+          </div>
+          <h4 className="text-base font-medium text-white/80 mb-1">
+            Aucune image de référence
+          </h4>
+          <p className="text-xs text-white/40 max-w-sm mb-6 leading-relaxed">
+            Ajoutez jusqu'à 6 images pour définir les caractéristiques visuelles, matériaux et angles de cet élément.
+          </p>
+          <div className="flex items-center gap-3">
+            <Button
+              type="button"
+              variant="studio-white"
+              size="sm"
+              onClick={() => fileInputRef.current?.click()}
+              className="h-9 px-4 rounded-full text-xs font-medium flex items-center gap-2 cursor-pointer border-none"
+            >
+              <GoogleIcon iconName="upload" className="text-[16px]" />
+              <span>Importer</span>
+            </Button>
+
+            {onOpenAssets && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={onOpenAssets}
+                className="h-9 px-4 rounded-full text-xs font-medium flex items-center gap-2 text-white/70 hover:text-white hover:bg-white/10 cursor-pointer"
+              >
+                <GoogleIcon iconName="add" className="text-[16px]" />
+                <span>Depuis le projet</span>
+              </Button>
             )}
           </div>
-        </>
-      ) : (
-        <FlowCharacterImagePreview
-          onUpload={() => !isFull && fileInputRef.current?.click()}
-          onSelectProject={() => !isFull && onOpenAssets && onOpenAssets()}
-          isUploading={pendingUrls.length > 0}
-          text="Ajoutez des images de référence pour votre élément"
-        />
+        </div>
       )}
     </div>
   );

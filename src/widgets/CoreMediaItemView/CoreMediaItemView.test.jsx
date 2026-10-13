@@ -196,5 +196,28 @@ describe("CoreMediaItemView - Liked top-left indicator badge", () => {
       expect(card.style.aspectRatio).toBe("9/16");
     });
   });
+
+  describe("Direct mediaId support", () => {
+    it("resolves target item by mediaId from workflow.items when mediaId prop is passed", () => {
+      const workflow = {
+        id: "wf-1",
+        items: [
+          { id: "item-1", url: "https://example.com/1.png", prompt: "first item" },
+          { id: "item-2", url: "https://example.com/2.png", prompt: "second target item" },
+        ],
+      };
+      render(
+        <CoreMediaItemView
+          workflow={workflow}
+          mediaId="item-2"
+          status="completed"
+        />
+      );
+
+      const img = screen.getByAltText("second target item");
+      expect(img).toBeDefined();
+      expect(img.getAttribute("src")).toBe("https://example.com/2.png");
+    });
+  });
 });
 

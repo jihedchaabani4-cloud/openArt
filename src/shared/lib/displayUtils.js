@@ -282,6 +282,7 @@ function extractRawRatio(item, group) {
     aspect,
     ratioStr,
     status: normalizeStatus(item.status || item.media_status, url, item.error, itemCreatedAt),
+    prompt: item.params?.prompt ?? item.prompt ?? '',
   };
 }
 

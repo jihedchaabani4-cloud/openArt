@@ -34,8 +34,11 @@ export function useWorkflowActions(workflow, item = null) {
   const { mutate: removeWorkflow } = useRemoveWorkflow();
   const { mutate: removeAsset } = useRemoveAsset();
 
-  // If item is provided, use it. Otherwise, use the primary item of the workflow.
-  const targetItem = item || getPrimaryMedia(workflow);
+  // If item is provided, use it (or resolve by id if it's a mediaId string). Otherwise, use the primary item of the workflow.
+  const effectiveMediaId = typeof item === "string" ? item : (item?.id || item?.name || item?.asset_id);
+  const targetItem = (typeof item === "object" && item !== null)
+    ? item
+    : (workflow?.items?.find((i) => (i.id || i.name || i.asset_id) === effectiveMediaId) || (effectiveMediaId ? { id: effectiveMediaId } : null) || getPrimaryMedia(workflow));
   // When there's no media yet (placeholder workflow), treat as processing so the
   // UI shows a spinner rather than a blank or disappearing card.
   const metadata = targetItem 

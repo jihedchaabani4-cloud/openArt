@@ -1,9 +1,77 @@
-import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { describe, it, expect, vi, afterEach } from "vitest";
+import { render, screen, cleanup } from "@testing-library/react";
 import React from "react";
 import { ElementDetailsGallery } from "./ElementDetailsGallery";
 
+// Mock router
+vi.mock("next/navigation", () => ({
+  usePathname: () => "/cinema-studio/proj-1/elements/wf-1",
+  useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
+  useParams: () => ({ projectId: "proj-1", workflowId: "wf-1" }),
+}));
+
+// Mock store
+vi.mock("@/features/workflows", () => ({
+  useWorkflowsStore: (selector) =>
+    selector?.({
+      selectedProjectId: "proj-1",
+      isNavbarHidden: false,
+      showTileDetails: false,
+    }),
+  useToggleWorkflowLike: () => ({ mutate: vi.fn() }),
+  useRemoveWorkflow: () => ({ mutate: vi.fn() }),
+  useRemoveAsset: () => ({ mutate: vi.fn() }),
+  useUpdateWorkflow: () => ({ mutateAsync: vi.fn() }),
+}));
+
+const { mockPromptStore } = vi.hoisted(() => {
+  const store = Object.assign(
+    (selector) => (selector ? selector({ isDraggingGalleryItem: false }) : { isDraggingGalleryItem: false }),
+    {
+      getState: () => ({
+        setIsDraggingGalleryItem: vi.fn(),
+        setDraggedItem: vi.fn(),
+        isDraggingGalleryItem: false,
+      }),
+    }
+  );
+  return { mockPromptStore: store };
+});
+
+vi.mock("@/features/studio", () => ({
+  usePromptStore: mockPromptStore,
+  useStudioItemDrag: () => ({
+    isDraggingThis: false,
+    dragTarget: null,
+    justDraggedRef: { current: false },
+    handlePointerDown: vi.fn(),
+  }),
+}));
+
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+const createTestQueryClient = () =>
+  new QueryClient({
+    defaultOptions: {
+      queries: { retry: false },
+      mutations: { retry: false },
+    },
+  });
+
+function renderWithClient(ui) {
+  const queryClient = createTestQueryClient();
+  return render(
+    <QueryClientProvider client={queryClient}>
+      {ui}
+    </QueryClientProvider>
+  );
+}
+
 describe("ElementDetailsGallery - Studio Media Grid Form", () => {
+  afterEach(() => {
+    cleanup();
+  });
+
   const mockItems = [
     {
       id: "item-1",
@@ -20,39 +88,22 @@ describe("ElementDetailsGallery - Studio Media Grid Form", () => {
   ];
 
   it("renders cards conforming to studio form without border-white/10", () => {
-    const { container } = render(
+    const { container } = renderWithClient(
       <ElementDetailsGallery
         items={mockItems}
         primaryMediaId="item-1"
       />
     );
 
-    const cards = container.querySelectorAll(".group\\/card, .group");
+    const cards = container.querySelectorAll(".group\\/elem-tile, .group");
     expect(cards.length).toBeGreaterThan(0);
-    // All media item cards should not have the old border border-white/10
     cards.forEach((card) => {
       expect(card.className).not.toContain("border-white/10");
     });
   });
 
-  it("renders studio action button group with bg-white/60 backdrop-blur-md on media cards", () => {
-    const { container } = render(
-      <ElementDetailsGallery
-        items={mockItems}
-        primaryMediaId="item-1"
-        onSetCover={vi.fn()}
-        onDeleteImage={vi.fn()}
-      />
-    );
-
-    const buttonGroup = container.querySelector(".bg-white\\/60");
-    expect(buttonGroup).not.toBeNull();
-    expect(buttonGroup.className).toContain("backdrop-blur-md");
-    expect(buttonGroup.className).toContain("rounded-lg");
-  });
-
   it("renders couverture badge for the primary media", () => {
-    render(
+    renderWithClient(
       <ElementDetailsGallery
         items={mockItems}
         primaryMediaId="item-1"
@@ -61,5 +112,32 @@ describe("ElementDetailsGallery - Studio Media Grid Form", () => {
 
     const badges = screen.getAllByText("Couverture");
     expect(badges.length).toBeGreaterThan(0);
+  });
+
+  it("renders sleek header with compact action buttons and counter", () => {
+    renderWithClient(
+      <ElementDetailsGallery
+        items={mockItems}
+        primaryMediaId="item-1"
+        onOpenAssets={vi.fn()}
+      />
+    );
+
+    expect(screen.getByText("Images de référence")).toBeDefined();
+    expect(screen.getByText("2 / 6")).toBeDefined();
+    expect(screen.getByTitle("Importer depuis l'ordinateur")).toBeDefined();
+    expect(screen.getByTitle("Ajouter à partir du projet")).toBeDefined();
+  });
+
+  it("renders minimal empty state without big clumsy banner when items is empty", () => {
+    const { container } = renderWithClient(
+      <ElementDetailsGallery
+        items={[]}
+        onOpenAssets={vi.fn()}
+      />
+    );
+
+    expect(screen.getByText("Aucune image de référence")).toBeDefined();
+    expect(container.querySelector("[data-component='flow-character-image-preview']")).toBeNull();
   });
 });

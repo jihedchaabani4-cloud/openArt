@@ -26,6 +26,7 @@ const EMPTY_IMG = typeof window !== 'undefined' ? (() => {
 const WorkflowMediaGridItem = React.memo(function WorkflowMediaGridItem({
   workflow,
   item: propItem = null,
+  mediaId = null,
   aspect: propAspect = null,
   className,
   onClick    = () => {},
@@ -34,17 +35,25 @@ const WorkflowMediaGridItem = React.memo(function WorkflowMediaGridItem({
   width:  albumWidth  = null,
   height: albumHeight = null,
   menuItems: propMenuItems = null,
+  topLeft = null,
+  topRight: customTopRight = null,
+  ...props
 }) {
   // ─────────────────────────────────────────────────────────────────────────
   // ALL HOOKS UNCONDITIONALLY AT THE TOP — React Rules of Hooks §1
   // No early returns, conditionals, or loops above this section.
   // ─────────────────────────────────────────────────────────────────────────
 
+  const effectiveMediaId = mediaId || (typeof propItem === "string" ? propItem : null);
+  const resolvedItem = (typeof propItem === "object" && propItem !== null)
+    ? propItem
+    : (workflow?.items?.find((i) => (i.id || i.name || i.asset_id) === effectiveMediaId) || (effectiveMediaId ? { id: effectiveMediaId } : null));
+
   const {
     handleLike, handleDelete, handleDownload,
     handleReuseSettings, handleAnimate, handleAddToPrompt,
     isVideo, url, isLiked, status, aspect, prompt, item, canDelete, canReuseSettings, canAddToPrompt,
-  } = useWorkflowActions(workflow, propItem);
+  } = useWorkflowActions(workflow, resolvedItem);
 
   // ── State ──────────────────────────────────────────────────────────────
   const [isDropdownOpen,      setIsDropdownOpen]      = useState(false);
@@ -359,6 +368,7 @@ const WorkflowMediaGridItem = React.memo(function WorkflowMediaGridItem({
       <CoreMediaItemView
         workflow={workflow}
         item={item}
+        mediaId={effectiveMediaId}
         src={url}
         isVideo={isVideo}
         status={status}
@@ -403,33 +413,36 @@ const WorkflowMediaGridItem = React.memo(function WorkflowMediaGridItem({
           className
         )}
         style={cardStyle}
+        topLeft={topLeft}
         topRight={
-          isDone && (
-            <div className={cn(
-              "transition-opacity duration-200 pointer-events-auto",
-              isDropdownOpen ? "opacity-100" : "opacity-0 group-hover:opacity-100"
-            )}>
-              <ButtonGroup className="bg-white/60 backdrop-blur-md rounded-lg border-0 border-none">
-                <ActionBtn onClick={(e) => { e.stopPropagation(); handleLike(); }}>
-                  <GoogleIcon 
-                    iconName="favorite" 
-                    fill={isLiked}
-                    className="text-[13px] text-[#303031]" 
-                  />
-                </ActionBtn>
-                {canReuse && (
-                  <ActionBtn onClick={(e) => { e.stopPropagation(); handleReuseSettings(); }}>
-                    <GoogleIcon iconName="history" className="text-[13px] text-[#303031]" />
-                  </ActionBtn>
-                )}
-                <StudioItemDropdownMenu
-                  open={isDropdownOpen}
-                  onOpenChange={setIsDropdownOpen}
-                  items={menuItems}
-                />
-              </ButtonGroup>
-            </div>
-          )
+          customTopRight !== null
+            ? customTopRight
+            : (isDone && (
+                <div className={cn(
+                  "transition-opacity duration-200 pointer-events-auto",
+                  isDropdownOpen ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                )}>
+                  <ButtonGroup className="bg-white/60 backdrop-blur-md rounded-lg border-0 border-none">
+                    <ActionBtn onClick={(e) => { e.stopPropagation(); handleLike(); }}>
+                      <GoogleIcon 
+                        iconName="favorite" 
+                        fill={isLiked}
+                        className="text-[13px] text-[#303031]" 
+                      />
+                    </ActionBtn>
+                    {canReuse && (
+                      <ActionBtn onClick={(e) => { e.stopPropagation(); handleReuseSettings(); }}>
+                        <GoogleIcon iconName="history" className="text-[13px] text-[#303031]" />
+                      </ActionBtn>
+                    )}
+                    <StudioItemDropdownMenu
+                      open={isDropdownOpen}
+                      onOpenChange={setIsDropdownOpen}
+                      items={menuItems}
+                    />
+                  </ButtonGroup>
+                </div>
+              ))
         }
         bottomLeft={
           displayName && !isRenaming && (

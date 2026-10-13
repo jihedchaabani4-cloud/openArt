@@ -96,15 +96,10 @@ export default function ElementWorkflowEditPage() {
 
             {/* Right Main Stage: Reference Photos Gallery */}
             <div className="lg:col-span-9 xl:col-span-9 flex flex-col gap-3 relative">
-              <div
-                className={cn(
-                  "relative w-full flex items-center justify-center transition-all duration-300",
-                  items.length === 0
-                    ? "bg-transparent p-0"
-                    : "rounded-2xl bg-black/40 border border-white/5 min-h-[460px] p-5"
-                )}
-              >
+              <div className="relative w-full rounded-2xl overflow-hidden bg-black/40 border border-white/5 min-h-[460px] p-5">
                 <ElementDetailsGallery
+                  workflow={workflow}
+                  projectId={projectId}
                   items={items}
                   primaryMediaId={primaryMediaId}
                   pendingUrls={[]}

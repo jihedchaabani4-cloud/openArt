@@ -38,8 +38,21 @@ export function formatMediaDuration(seconds) {
  * Core hook providing all state, sizing, video playback controls,
  * and metadata resolution for media viewers (EditMediaView, MediaGridItem, etc.).
  */
-export function useMediaViewerCore({ workflow, item: propItem = null, autoPlay = true }) {
-  const targetItem = propItem || (workflow ? getPrimaryMedia(workflow) : null);
+export function useMediaViewerCore({ workflow, item: propItem = null, mediaId = null, autoPlay = true }) {
+  const effectiveMediaId = mediaId || (typeof propItem === "string" ? propItem : null);
+  const targetItem = useMemo(() => {
+    if (typeof propItem === "object" && propItem !== null) return propItem;
+    if (workflow?.items && effectiveMediaId) {
+      const found = workflow.items.find(
+        (i) => (i.id || i.name || i.asset_id) === effectiveMediaId
+      );
+      if (found) return found;
+    }
+    if (workflow) return getPrimaryMedia(workflow);
+    if (effectiveMediaId) return { id: effectiveMediaId };
+    return null;
+  }, [propItem, workflow, effectiveMediaId]);
+
   const metadata = useMemo(() => {
     return targetItem
       ? getItemMetadata(targetItem, workflow)
