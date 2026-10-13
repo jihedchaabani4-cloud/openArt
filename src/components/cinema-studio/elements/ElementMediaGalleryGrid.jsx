@@ -192,10 +192,7 @@ export function ElementMediaGalleryGrid({
                       <GoogleIcon
                         iconName="bookmark"
                         fill={isCover}
-                        className={cn(
-                          "text-[14px]",
-                          isCover ? "text-amber-500 fill-amber-500" : "text-[#303031]"
-                        )}
+                        className="text-[14px] text-[#303031]"
                       />
                     </ActionBtn>
                   )}

@@ -218,6 +218,10 @@ describe("ElementDetailsGallery - Studio Media Grid Form", () => {
     const coverBtns = screen.getAllByTitle(/couverture/i);
     expect(coverBtns.length).toBeGreaterThan(0);
     expect(coverBtns[0].textContent).toContain("bookmark");
+    const coverIcon = coverBtns[0].querySelector("[role='img']");
+    expect(coverIcon?.className).not.toContain("text-amber-500");
+    expect(coverIcon?.className).not.toContain("fill-amber-500");
+    expect(coverIcon?.className).toContain("text-[#303031]");
 
     const deleteBtns = screen.getAllByTitle(/supprimer/i);
     expect(deleteBtns.length).toBeGreaterThan(0);
