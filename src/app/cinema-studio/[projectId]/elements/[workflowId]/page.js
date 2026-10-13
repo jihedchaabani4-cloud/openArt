@@ -65,13 +65,38 @@ export default function ElementWorkflowEditPage() {
     isLoading,
   } = useElementEdit({ projectId, workflowId });
 
+  const fileInputRef = React.useRef(null);
+
+  const handleFileInputChange = (e) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length > 0 && handleUploadFiles) {
+      handleUploadFiles(files);
+    }
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
   if (isLoading) return <LoadingScreen />;
   if (!workflow) return null;
 
   return (
     <div className="flex flex-col h-full w-full bg-studio-dark text-white overflow-hidden">
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        multiple
+        className="hidden"
+        onChange={handleFileInputChange}
+      />
+
       {/* ── Top Navbar ── */}
-      <ElementEditNavbar onDeleteElement={handleDeleteWorkflow} />
+      <ElementEditNavbar
+        onDeleteElement={handleDeleteWorkflow}
+        onUpload={() => fileInputRef.current?.click()}
+        onOpenAssets={() => setIsAssetsOpen(true)}
+      />
 
       {/* ── Scrollable Body ── */}
       <div className="flex-1 overflow-y-auto overflow-x-hidden pt-[80px] pb-16 custom-scrollbar">
@@ -110,6 +135,7 @@ export default function ElementWorkflowEditPage() {
                   onDeleteImage={handleDeleteImage}
                   onSetCover={handleSetCover}
                   isSettingCover={isSettingCover}
+                  showTopActions={false}
                 />
               </div>
             </div>
