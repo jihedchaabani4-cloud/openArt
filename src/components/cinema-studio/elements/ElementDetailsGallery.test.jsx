@@ -197,7 +197,7 @@ describe("ElementDetailsGallery - Studio Media Grid Form", () => {
     expect(photoAlbum).not.toBeNull();
   });
 
-  it("renders a ButtonGroup with star and delete icon action buttons on cards", () => {
+  it("renders a ButtonGroup with bookmark (save) and delete icon action buttons on cards", () => {
     const onSetCover = vi.fn();
     const onDeleteImage = vi.fn();
 
@@ -214,12 +214,14 @@ describe("ElementDetailsGallery - Studio Media Grid Form", () => {
     const buttonGroup = container.querySelector(".bg-white\\/60");
     expect(buttonGroup).not.toBeNull();
 
-    // Check Star icon and Delete icon buttons
-    const starBtns = screen.getAllByTitle(/couverture/i);
-    expect(starBtns.length).toBeGreaterThan(0);
+    // Check Cover (bookmark/save) icon and Delete icon buttons
+    const coverBtns = screen.getAllByTitle(/couverture/i);
+    expect(coverBtns.length).toBeGreaterThan(0);
+    expect(coverBtns[0].textContent).toContain("bookmark");
 
     const deleteBtns = screen.getAllByTitle(/supprimer/i);
     expect(deleteBtns.length).toBeGreaterThan(0);
+    expect(deleteBtns[0].textContent).toContain("delete");
   });
 
   it("renders cards with rounded-xl border radius matching media item standard", () => {

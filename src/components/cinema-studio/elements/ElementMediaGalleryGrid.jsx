@@ -135,7 +135,7 @@ export function ElementMediaGalleryGrid({
               {
                 key: "set-cover",
                 label: isCover ? "Image de couverture" : "Définir comme couverture",
-                icon: "star",
+                icon: "bookmark",
                 fill: isCover,
                 disabled: isCover,
                 onClick: !isCover ? () => onSetCover(mediaId) : undefined,
@@ -190,7 +190,7 @@ export function ElementMediaGalleryGrid({
                       aria-label="Couverture"
                     >
                       <GoogleIcon
-                        iconName="star"
+                        iconName="bookmark"
                         fill={isCover}
                         className={cn(
                           "text-[14px]",
