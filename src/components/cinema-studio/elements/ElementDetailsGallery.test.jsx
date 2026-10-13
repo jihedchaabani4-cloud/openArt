@@ -221,4 +221,19 @@ describe("ElementDetailsGallery - Studio Media Grid Form", () => {
     const deleteBtns = screen.getAllByTitle(/supprimer/i);
     expect(deleteBtns.length).toBeGreaterThan(0);
   });
+
+  it("renders cards with rounded-xl border radius matching media item standard", () => {
+    const { container } = renderWithClient(
+      <ElementMediaGalleryGrid
+        items={mockItems}
+      />
+    );
+
+    const cards = container.querySelectorAll(".rounded-xl");
+    expect(cards.length).toBeGreaterThan(0);
+    cards.forEach((card) => {
+      expect(card.className).toContain("rounded-xl");
+      expect(card.className).not.toContain("rounded-2xl");
+    });
+  });
 });

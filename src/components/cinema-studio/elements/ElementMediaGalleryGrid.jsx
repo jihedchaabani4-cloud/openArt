@@ -130,73 +130,73 @@ export function ElementMediaGalleryGrid({
       const isLoadingThis = isDeletingThis || isAddingThis;
 
       return (
-        <div
+        <MediaItemView
           key={photo.key}
-          style={{ width, height }}
-          className="group relative rounded-xl overflow-hidden bg-zinc-900/80 shadow-md flex items-center justify-center"
-        >
-          <MediaItemView
-            workflow={workflow}
-            item={item}
-            mediaId={mediaId}
-            src={photo.src}
-            fit="cover"
-            style={{ width, height, aspectRatio: `${width} / ${height}` }}
-            className="w-full h-full rounded-xl border-none shadow-none"
-            showLikedBadge={false}
-            showVideoBadge={false}
-            showMenu={false}
-            showHoverOverlay={false}
-            topLeft={null}
-            topRight={
-              (onSetCover || onDeleteImage) ? (
-                <div className="opacity-0 group-hover:opacity-100 transition-opacity pointer-events-auto">
-                  <ButtonGroup className="bg-white/60 backdrop-blur-md rounded-lg border-0 border-none">
-                    {onSetCover && (
-                      <ActionBtn
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onSetCover(mediaId);
-                        }}
-                        title={isCover ? "Image de couverture" : "Définir comme couverture"}
-                        aria-label="Couverture"
-                      >
-                        <GoogleIcon
-                          iconName="star"
-                          fill={isCover}
-                          className={cn(
-                            "text-[14px]",
-                            isCover ? "text-amber-500 fill-amber-500" : "text-[#303031]"
-                          )}
-                        />
-                      </ActionBtn>
-                    )}
-                    {onDeleteImage && (
-                      <ActionBtn
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onDeleteImage(item);
-                        }}
-                        title="Supprimer l'image"
-                        aria-label="Supprimer"
-                        className="hover:text-red-600"
-                      >
-                        <GoogleIcon iconName="delete" className="text-[14px] text-[#303031]" />
-                      </ActionBtn>
-                    )}
-                  </ButtonGroup>
-                </div>
-              ) : null
-            }
-            overlay={
-              isLoadingThis ? (
-                <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] z-30 flex items-center justify-center rounded-xl">
-                  <Loader2 className="size-6 text-white animate-spin" />
-                </div>
-              ) : null
-            }
-          />
-        </div>
+          workflow={workflow}
+          item={item}
+          mediaId={mediaId}
+          src={photo.src}
+          fit="cover"
+          style={{
+            width,
+            height,
+            aspectRatio: `${width} / ${height}`,
+            transform: "translateZ(0)",
+          }}
+          className="group relative rounded-xl overflow-hidden bg-[#0a0a0a] border-none shadow-xl flex items-center justify-center"
+          showLikedBadge={false}
+          showVideoBadge={false}
+          showMenu={false}
+          showHoverOverlay={false}
+          topLeft={null}
+          topRight={
+            (onSetCover || onDeleteImage) ? (
+              <div className="opacity-0 group-hover:opacity-100 transition-opacity pointer-events-auto">
+                <ButtonGroup className="bg-white/60 backdrop-blur-md rounded-lg border-0 border-none">
+                  {onSetCover && (
+                    <ActionBtn
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onSetCover(mediaId);
+                      }}
+                      title={isCover ? "Image de couverture" : "Définir comme couverture"}
+                      aria-label="Couverture"
+                    >
+                      <GoogleIcon
+                        iconName="star"
+                        fill={isCover}
+                        className={cn(
+                          "text-[14px]",
+                          isCover ? "text-amber-500 fill-amber-500" : "text-[#303031]"
+                        )}
+                      />
+                    </ActionBtn>
+                  )}
+                  {onDeleteImage && (
+                    <ActionBtn
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDeleteImage(item);
+                      }}
+                      title="Supprimer l'image"
+                      aria-label="Supprimer"
+                      className="hover:text-red-600"
+                    >
+                      <GoogleIcon iconName="delete" className="text-[14px] text-[#303031]" />
+                    </ActionBtn>
+                  )}
+                </ButtonGroup>
+              </div>
+            ) : null
+          }
+          overlay={
+            isLoadingThis ? (
+              <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] z-30 flex items-center justify-center rounded-xl">
+                <Loader2 className="size-6 text-white animate-spin" />
+              </div>
+            ) : null
+          }
+        />
       );
     },
     [
