@@ -75,12 +75,10 @@ export function getStudioMenuItems({
 }) {
   const {
     handleAddToPrompt,
-    handleAnimate,
     handleLike,
     handleReuseSettings,
     handleDownload,
     handleCopy,
-    handleShare,
     handleSetCover,
     handleReport,
     handlePublishYoutube,
@@ -118,15 +116,7 @@ export function getStudioMenuItems({
     onClick: handleReuseSettings,
   };
 
-  // 3. Animate / Add to scene
-  const itemAnimate = {
-    key: "animate",
-    icon: isVideo ? "play_movies" : "movie",
-    label: isVideo ? "Ajouter à la scène" : "Animer",
-    onClick: handleAnimate,
-  };
-
-  // 4. Add to prompt
+  // 3. Add to prompt
   const itemAddToPrompt = {
     key: "add",
     icon: "add_2",
@@ -135,7 +125,7 @@ export function getStudioMenuItems({
     onClick: handleAddToPrompt,
   };
 
-  // 5. Download
+  // 4. Download
   const itemDownload = {
     key: "download",
     icon: "download",
@@ -143,7 +133,7 @@ export function getStudioMenuItems({
     onClick: handleDownload,
   };
 
-  // 6. Copy
+  // 5. Copy
   const itemCopy = {
     key: "copy",
     icon: "content_copy",
@@ -155,7 +145,7 @@ export function getStudioMenuItems({
     }),
   };
 
-  // 7. Rename
+  // 6. Rename
   const itemRename = {
     key: "rename",
     icon: "edit",
@@ -163,23 +153,7 @@ export function getStudioMenuItems({
     onClick: onRename,
   };
 
-  // 8. Share
-  const itemShare = {
-    key: "share",
-    icon: "share",
-    label: "Partager",
-    onClick: handleShare || (() => {
-      if (typeof navigator !== "undefined") {
-        if (navigator.share && mediaUrl) {
-          navigator.share({ title: workflow?.prompt || "Media", url: mediaUrl }).catch(() => {});
-        } else if (mediaUrl) {
-          navigator.clipboard?.writeText?.(mediaUrl);
-        }
-      }
-    }),
-  };
-
-  // 9. Publish to YouTube (video only)
+  // 7. Publish to YouTube (video only)
   const itemPublishYoutube = {
     key: "youtube",
     icon: "video_library",
@@ -187,7 +161,7 @@ export function getStudioMenuItems({
     onClick: handlePublishYoutube,
   };
 
-  // 10. Set project cover
+  // 8. Set project cover
   const itemSetCover = {
     key: "cover",
     icon: "photo_library",
@@ -195,7 +169,7 @@ export function getStudioMenuItems({
     onClick: handleSetCover,
   };
 
-  // 11. Report result
+  // 9. Report result
   const itemReport = {
     key: "report",
     icon: "flag",
@@ -203,7 +177,7 @@ export function getStudioMenuItems({
     onClick: handleReport,
   };
 
-  // 12. Tile details (optional toggle)
+  // 10. Tile details (optional toggle)
   const itemTileDetails = {
     key: "tileDetails",
     icon: showTileDetails ? "visibility_off" : "visibility",
@@ -211,7 +185,7 @@ export function getStudioMenuItems({
     onClick: toggleTileDetails,
   };
 
-  // 13. Delete
+  // 11. Delete
   const itemDelete = (label = "Placer dans la corbeille") => ({
     key: "delete",
     icon: "delete",
@@ -234,8 +208,6 @@ export function getStudioMenuItems({
         itemAddToPrompt,
         ...(handleDownload ? [itemDownload] : []),
         ...(onRename ? [itemRename] : []),
-        itemShare,
-        separator("share"),
         ...(handleSetCover ? [itemSetCover, separator("cover")] : []),
         ...(toggleTileDetails ? [itemTileDetails, separator("details")] : []),
         itemDelete("Placer dans la corbeille"),
@@ -246,13 +218,10 @@ export function getStudioMenuItems({
       rawItems = [
         itemLike,
         separator("fav"),
-        ...(handleAnimate ? [itemAnimate, separator("animate")] : []),
         itemAddToPrompt,
         ...(handleDownload ? [itemDownload] : []),
         ...(onRename ? [itemRename] : []),
-        itemShare,
         ...(isVideo && handlePublishYoutube ? [itemPublishYoutube] : []),
-        separator("share"),
         ...(handleSetCover ? [itemSetCover, separator("cover")] : []),
         ...(handleReport ? [itemReport, separator("report")] : []),
         ...(toggleTileDetails ? [itemTileDetails, separator("details")] : []),
@@ -266,13 +235,10 @@ export function getStudioMenuItems({
         itemLike,
         ...(canReuse || handleReuseSettings ? [itemReuse] : []),
         separator("fav-reuse"),
-        ...(handleAnimate ? [itemAnimate, separator("animate")] : []),
         itemAddToPrompt,
         ...(handleDownload ? [itemDownload] : []),
         ...(onRename ? [itemRename] : []),
-        itemShare,
         ...(isVideo && handlePublishYoutube ? [itemPublishYoutube] : []),
-        separator("share"),
         ...(handleSetCover ? [itemSetCover, separator("cover")] : []),
         ...(handleReport ? [itemReport, separator("report")] : []),
         ...(toggleTileDetails ? [itemTileDetails, separator("details")] : []),
