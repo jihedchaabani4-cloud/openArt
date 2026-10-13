@@ -72,7 +72,7 @@ export function useWorkflowActions(workflow, item = null) {
 
   const isEntity = isElementSheet || isCharacter;
   const canAcceptEntity = isEntity ? canAnyModelAcceptEntity(workflow || targetItem, models) : true;
-  const canAddToPrompt = canUseAsInput && canAcceptEntity;
+  const canAddToPrompt = canUseAsInput && canAcceptEntity && !isVideo;
 
   const handleLike = () => {
     if (workflow.id || workflow.name) {

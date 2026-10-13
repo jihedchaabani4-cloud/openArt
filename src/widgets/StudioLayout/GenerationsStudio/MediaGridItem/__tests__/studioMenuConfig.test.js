@@ -84,13 +84,14 @@ describe("studioMenuConfig - Per-type menu list & animate exclusions", () => {
     expect(keys).not.toContain("animate");
   });
 
-  it("does NOT include 'animate' or 'Ajouter à la scène' when isVideo is true", () => {
+  it("does NOT include 'animate', 'Ajouter à la scène', or 'add' (Ajouter au prompt) when isVideo is true", () => {
     const handleAnimate = vi.fn();
+    const handleAddToPrompt = vi.fn();
     const items = getStudioMenuItems({
       type: "generation",
       actions: {
         handleAnimate,
-        handleAddToPrompt: vi.fn(),
+        handleAddToPrompt,
         handleLike: vi.fn(),
         onDelete: vi.fn(),
       },
@@ -103,6 +104,27 @@ describe("studioMenuConfig - Per-type menu list & animate exclusions", () => {
     const labels = items.map((i) => i.label);
     expect(keys).not.toContain("animate");
     expect(labels).not.toContain("Ajouter à la scène");
+    expect(keys).not.toContain("add");
+    expect(labels).not.toContain("Ajouter au prompt");
+  });
+
+  it("does NOT include 'add' (Ajouter au prompt) for upload items when isVideo is true", () => {
+    const items = getStudioMenuItems({
+      type: "upload",
+      actions: {
+        handleAddToPrompt: vi.fn(),
+        handleLike: vi.fn(),
+        onDelete: vi.fn(),
+      },
+      state: {
+        isVideo: true,
+      },
+    });
+
+    const keys = items.map((i) => i.key);
+    const labels = items.map((i) => i.label);
+    expect(keys).not.toContain("add");
+    expect(labels).not.toContain("Ajouter au prompt");
   });
 
   it("provides dedicated menu list for folder / collection items", () => {
