@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, cleanup } from "@testing-library/react";
+import { render, screen, cleanup, fireEvent } from "@testing-library/react";
 import React from "react";
 import { ElementDetailsGallery } from "./ElementDetailsGallery";
 import { ElementMediaGalleryGrid } from "./ElementMediaGalleryGrid";
@@ -235,5 +235,28 @@ describe("ElementDetailsGallery - Studio Media Grid Form", () => {
       expect(card.className).toContain("rounded-xl");
       expect(card.className).not.toContain("rounded-2xl");
     });
+  });
+
+  it("provides right-click context menu containing cover and delete actions", () => {
+    const onSetCover = vi.fn();
+    const onDeleteImage = vi.fn();
+
+    const { container } = renderWithClient(
+      <ElementMediaGalleryGrid
+        items={mockItems}
+        primaryMediaId="item-1"
+        onSetCover={onSetCover}
+        onDeleteImage={onDeleteImage}
+      />
+    );
+
+    const cards = container.querySelectorAll(".group");
+    expect(cards.length).toBeGreaterThan(1);
+
+    // Right-click on second item (item-2, which is not cover)
+    fireEvent.contextMenu(cards[1]);
+
+    expect(screen.getByText("Définir comme couverture")).toBeDefined();
+    expect(screen.getByText("Supprimer l'image")).toBeDefined();
   });
 });

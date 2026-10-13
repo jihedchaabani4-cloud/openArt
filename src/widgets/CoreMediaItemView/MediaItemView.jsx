@@ -42,6 +42,8 @@ export function MediaItemView({
   center = null,
   bottom = null,
   overlay = null,
+  contextMenuItems = null,
+  contextMenuContent = null,
   children,
   onClick,
   ...props
@@ -70,6 +72,8 @@ export function MediaItemView({
       center={center}
       bottom={bottom}
       overlay={overlay}
+      contextMenuItems={contextMenuItems}
+      contextMenuContent={contextMenuContent}
       onClick={onClick}
       {...props}
     >

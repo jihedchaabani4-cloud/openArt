@@ -129,6 +129,32 @@ export function ElementMediaGalleryGrid({
       const isAddingThis = pendingUrls.includes(item?.url || item?.file_url);
       const isLoadingThis = isDeletingThis || isAddingThis;
 
+      const contextMenuItems = [
+        ...(onSetCover
+          ? [
+              {
+                key: "set-cover",
+                label: isCover ? "Image de couverture" : "Définir comme couverture",
+                icon: "star",
+                fill: isCover,
+                disabled: isCover,
+                onClick: !isCover ? () => onSetCover(mediaId) : undefined,
+              },
+            ]
+          : []),
+        ...(onDeleteImage
+          ? [
+              {
+                key: "delete-image",
+                label: "Supprimer l'image",
+                icon: "delete",
+                variant: "destructive",
+                onClick: () => onDeleteImage(item),
+              },
+            ]
+          : []),
+      ];
+
       return (
         <MediaItemView
           key={photo.key}
@@ -149,6 +175,7 @@ export function ElementMediaGalleryGrid({
           showMenu={false}
           showHoverOverlay={false}
           topLeft={null}
+          contextMenuItems={contextMenuItems}
           topRight={
             (onSetCover || onDeleteImage) ? (
               <div className="opacity-0 group-hover:opacity-100 transition-opacity pointer-events-auto">
