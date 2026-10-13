@@ -22,7 +22,7 @@ function renderWithClient(ui) {
 }
 
 describe("ElementEditNavbar", () => {
-  it("renders upload and import from assets action buttons in the navbar", () => {
+  it("renders a unified dropdown for upload and project assets with both menu items", () => {
     const onUpload = vi.fn();
     const onOpenAssets = vi.fn();
 
@@ -30,13 +30,26 @@ describe("ElementEditNavbar", () => {
       <ElementEditNavbar
         onUpload={onUpload}
         onOpenAssets={onOpenAssets}
+        importMenuOpen={true}
       />
     );
 
-    const uploadBtn = screen.getByTitle("Importer depuis l'ordinateur");
-    const assetsBtn = screen.getByTitle("Ajouter à partir du projet");
-    expect(uploadBtn).toBeDefined();
-    expect(assetsBtn).toBeDefined();
+    // Dropdown trigger is rendered
+    const trigger = screen.getByTestId("import-dropdown-trigger");
+    expect(trigger).toBeDefined();
+
+    // Both options are in the dropdown menu
+    const uploadItem = screen.getByText("Importer depuis l'ordinateur");
+    const assetsItem = screen.getByText("Depuis le projet");
+    expect(uploadItem).toBeDefined();
+    expect(assetsItem).toBeDefined();
+
+    // Clicking options triggers callbacks
+    fireEvent.click(uploadItem);
+    expect(onUpload).toHaveBeenCalledTimes(1);
+
+    fireEvent.click(assetsItem);
+    expect(onOpenAssets).toHaveBeenCalledTimes(1);
   });
 
   it("renders a simple white icon-only delete button without text and without danger red styling", () => {
