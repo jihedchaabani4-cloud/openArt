@@ -53,9 +53,9 @@ function ContextMenuSubTrigger({
       data-slot="context-menu-sub-trigger"
       data-inset={inset}
       className={cn(
-        "flex cursor-pointer items-center gap-3 rounded-[var(--mat-sys-corner-medium,12px)] px-3 py-2 min-h-[48px] text-[14px] leading-5 font-medium outline-hidden select-none font-sans antialiased",
+        "flex cursor-pointer items-center gap-3 rounded-[16px] pl-3 pr-4 py-2 min-h-[2.125rem] text-[14px] leading-5 font-medium outline-hidden select-none font-sans antialiased",
         "text-[var(--mat-menu-item-label-text-color,var(--foreground-neutral-000,#fff))] hover:bg-[var(--mat-menu-item-hover-state-layer-color,var(--foreground-state-10))] hover:text-white focus:bg-[var(--mat-menu-item-focus-state-layer-color,var(--foreground-state-15))] focus:text-white",
-        "data-[state=open]:bg-[var(--foreground-state-15)] data-[state=open]:text-white transition-all duration-150",
+        "data-[state=open]:bg-[var(--foreground-state-15)] data-[state=open]:text-white transition-colors duration-100 ease-in-out",
         "[&_svg:not([class*='text-'])]:text-white/70 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-5",
         "data-[inset]:pl-8",
         className
@@ -138,9 +138,9 @@ function ContextMenuItem({
       data-variant={variant}
       className={cn(
         // Layout
-        "relative flex cursor-pointer items-center gap-3 rounded-[var(--mat-sys-corner-medium,12px)] px-3 py-2 min-h-[48px] text-[14px] leading-5 font-medium outline-hidden select-none font-sans antialiased",
+        "relative flex cursor-pointer items-center gap-3 rounded-[16px] pl-3 pr-4 py-2 min-h-[2.125rem] text-[14px] leading-5 font-medium outline-hidden select-none font-sans antialiased",
         // Theme defaults: on-surface text, state layers for hover & focus
-        "text-[var(--mat-menu-item-label-text-color,var(--foreground-neutral-000,#fff))] hover:bg-[var(--mat-menu-item-hover-state-layer-color,var(--foreground-state-10))] hover:text-white focus:bg-[var(--mat-menu-item-focus-state-layer-color,var(--foreground-state-15))] focus:text-white active:bg-[var(--foreground-state-25)] transition-all duration-150",
+        "text-[var(--mat-menu-item-label-text-color,var(--foreground-neutral-000,#fff))] hover:bg-[var(--mat-menu-item-hover-state-layer-color,var(--foreground-state-10))] hover:text-white focus:bg-[var(--mat-menu-item-focus-state-layer-color,var(--foreground-state-15))] focus:text-white active:bg-[var(--foreground-state-25)] transition-colors duration-100 ease-in-out",
         // Icon defaults
         "[&_svg:not([class*='text-'])]:text-[var(--mat-menu-item-icon-color,var(--foreground-neutral-000,#fff))] [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-5",
         "[&_.google-symbols]:text-[var(--mat-menu-item-icon-color,var(--foreground-neutral-000,#fff))] [&_mat-icon]:text-[var(--mat-menu-item-icon-color,var(--foreground-neutral-000,#fff))] [&_.google-symbols]:text-[20px] [&_mat-icon]:text-[20px]",

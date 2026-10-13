@@ -863,21 +863,25 @@ mat-icon {
 .mat-mdc-menu-item,
 .flow-internal-menu-item,
 flow-menu-item {
-  min-height: 48px !important;
-  height: 48px !important;
-  padding: 0 0.75rem !important;
-  gap: var(--mat-menu-item-spacing, 0.75rem) !important;
-  border-radius: var(--mat-sys-corner-medium, 12px) !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  min-height: 2.125rem !important;
+  padding: 0.5rem 1rem !important;
+  padding-inline-start: 0.75rem !important;
+  gap: 0.75rem !important;
+  border-radius: 16px !important;
   color: var(--mat-menu-item-label-text-color, var(--foreground-neutral-000, #fff)) !important;
-  font-family: var(--mat-menu-item-label-text-font, 'Google Sans Text', 'Google Sans', sans-serif) !important;
-  font-size: var(--mat-menu-item-label-text-size, 0.875rem) !important;
-  font-weight: var(--mat-menu-item-label-text-weight, 500) !important;
-  line-height: var(--mat-menu-item-label-text-line-height, 1.25rem) !important;
-  letter-spacing: var(--mat-menu-item-label-text-tracking, 0) !important;
+  font-family: var(--mat-menu-item-label-text-font, var(--mat-sys-label-large-font, 'Google Sans Text', 'Google Sans', sans-serif)) !important;
+  font-size: var(--mat-menu-item-label-text-size, var(--mat-sys-label-large-size, 0.875rem)) !important;
+  font-weight: var(--mat-menu-item-label-text-weight, var(--mat-sys-label-large-weight, 500)) !important;
+  line-height: var(--mat-menu-item-label-text-line-height, var(--mat-sys-label-large-line-height, 1.25rem)) !important;
+  letter-spacing: var(--mat-menu-item-label-text-tracking, var(--mat-sys-label-large-tracking, 0)) !important;
+  user-select: none !important;
   -webkit-font-smoothing: antialiased !important;
   -moz-osx-font-smoothing: grayscale !important;
   text-rendering: optimizeLegibility !important;
-  transition: background-color 0.15s ease, color 0.15s ease !important;
+  transition: background-color 0.1s ease-in-out, color 0.1s ease-in-out !important;
 }
 
 .mat-mdc-menu-item-text {
@@ -1147,38 +1151,39 @@ flow-credit-cost-label {
 flow-menu-item {
   display: block !important;
   width: 100% !important;
-  min-height: 48px !important;
-  height: 48px !important;
+  min-height: 2.125rem !important;
   box-sizing: border-box !important;
 }
 
 .flow-internal-menu-item,
 .mat-mdc-menu-item {
   display: flex !important;
+  flex-direction: row !important;
   align-items: center !important;
   width: 100% !important;
-  min-height: 48px !important;
-  height: 48px !important;
-  padding: 0 0.75rem !important;
-  border-radius: var(--mat-sys-corner-medium, 12px) !important;
+  min-height: 2.125rem !important;
+  padding: 0.5rem 1rem !important;
+  padding-inline-start: 0.75rem !important;
+  gap: 0.75rem !important;
+  border-radius: 16px !important;
   border: none !important;
   outline: none !important;
   background: transparent;
   color: var(--mat-menu-item-label-text-color, var(--foreground-neutral-000, #ffffff)) !important;
-  font-family: var(--mat-menu-item-label-text-font, 'Google Sans Text', 'Google Sans', sans-serif) !important;
-  font-size: var(--mat-menu-item-label-text-size, 0.875rem) !important;
-  font-weight: var(--mat-menu-item-label-text-weight, 500) !important;
-  line-height: var(--mat-menu-item-label-text-line-height, 1.25rem) !important;
-  letter-spacing: var(--mat-menu-item-label-text-tracking, 0) !important;
-  -webkit-font-smoothing: antialiased !important;
-  -moz-osx-font-smoothing: grayscale !important;
-  text-rendering: optimizeLegibility !important;
+  font-family: var(--mat-menu-item-label-text-font, var(--mat-sys-label-large-font)) !important;
+  font-size: var(--mat-menu-item-label-text-size, var(--mat-sys-label-large-size)) !important;
+  font-weight: var(--mat-menu-item-label-text-weight, var(--mat-sys-label-large-weight)) !important;
+  line-height: var(--mat-menu-item-label-text-line-height, var(--mat-sys-label-large-line-height)) !important;
+  letter-spacing: var(--mat-menu-item-label-text-tracking, var(--mat-sys-label-large-tracking)) !important;
   cursor: pointer !important;
   text-align: left !important;
   user-select: none !important;
-  transition: background-color 0.15s ease, color 0.15s ease;
+  transition: background-color 0.1s ease-in-out !important;
   position: relative !important;
   box-sizing: border-box !important;
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
+  text-rendering: optimizeLegibility !important;
 }
 
 .flow-internal-menu-item:hover,

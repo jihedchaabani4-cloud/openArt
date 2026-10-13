@@ -167,7 +167,7 @@ export function ElementInfoSidebar({
                     setTypeOpen(false);
                   }}
                   className={cn(
-                    "flex items-center gap-3 px-3 py-2 min-h-[48px] text-[14px] rounded-[12px] cursor-pointer transition-colors",
+                    "flex items-center gap-3 pl-3 pr-4 py-2 min-h-[2.125rem] text-[14px] leading-5 font-medium rounded-[16px] cursor-pointer transition-colors duration-100 ease-in-out",
                     isSelected ? "text-white bg-white/10" : "text-white/70 hover:text-white hover:bg-white/5"
                   )}
                 >
