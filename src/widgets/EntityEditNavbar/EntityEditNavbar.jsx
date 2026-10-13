@@ -53,10 +53,13 @@ export function EntityEditNavbar({
 
           {onDelete && (
             <NavbarAction
-              variant="danger"
+              variant="ghost"
               icon="delete"
-              label={deleteLabel}
+              size="icon"
+              title={deleteLabel}
+              aria-label={deleteLabel}
               onClick={onDelete}
+              className="text-white hover:text-white hover:bg-white/10 rounded-full h-8 w-8 transition-colors cursor-pointer"
             />
           )}
 

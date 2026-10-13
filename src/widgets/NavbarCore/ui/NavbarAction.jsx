@@ -59,7 +59,7 @@ export function NavbarAction({
       return <IconComponent className="w-4 h-4 shrink-0" />;
     }
     return null;
-  }, [icon, loading, variant]);
+  }, [icon, loading, variant, size]);
 
   return (
     <Button

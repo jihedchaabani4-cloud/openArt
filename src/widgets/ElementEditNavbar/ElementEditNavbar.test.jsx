@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import React from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ElementEditNavbar } from "./ElementEditNavbar";
@@ -37,5 +37,28 @@ describe("ElementEditNavbar", () => {
     const assetsBtn = screen.getByTitle("Ajouter à partir du projet");
     expect(uploadBtn).toBeDefined();
     expect(assetsBtn).toBeDefined();
+  });
+
+  it("renders a simple white icon-only delete button without text and without danger red styling", () => {
+    const onDelete = vi.fn();
+
+    renderWithClient(
+      <ElementEditNavbar
+        onDeleteElement={onDelete}
+      />
+    );
+
+    // Should NOT have visible "Delete" text
+    expect(screen.queryByText("Delete")).toBeNull();
+
+    // Should have delete button with icon and title/aria-label
+    const deleteBtn = screen.getByTitle("Delete");
+    expect(deleteBtn).toBeDefined();
+    expect(deleteBtn.textContent).toContain("delete");
+    expect(deleteBtn.className).toContain("text-white");
+    expect(deleteBtn.className).not.toContain("foreground-color-danger");
+
+    fireEvent.click(deleteBtn);
+    expect(onDelete).toHaveBeenCalledTimes(1);
   });
 });
