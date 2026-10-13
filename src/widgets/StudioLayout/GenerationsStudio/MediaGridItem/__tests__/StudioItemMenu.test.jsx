@@ -45,6 +45,11 @@ describe("StudioItemDropdownMenu & StudioContextMenuContent Material Flow stylin
     const trashMenuItem = trashItem.closest('[data-slot="dropdown-menu-item"]');
     expect(trashMenuItem.classList.contains("delete-button")).toBe(true);
 
+    // Verify reduced width classes
+    const menuContent = favItem.closest('[data-slot="dropdown-menu-content"]');
+    expect(menuContent.classList.contains("w-52")).toBe(true);
+    expect(menuContent.classList.contains("min-w-[12rem]")).toBe(true);
+
     // Verify click handler triggers
     fireEvent.click(favItem);
     expect(sampleItems[0].onClick).toHaveBeenCalled();

@@ -25,7 +25,7 @@ export function StudioItemDropdownMenu({
   onOpenChange,
   trigger,
   align = "end",
-  className = "w-64",
+  className = "w-52",
 }) {
   if (!items || items.length === 0) {
     return (
@@ -46,7 +46,7 @@ export function StudioItemDropdownMenu({
           </ActionBtn>
         )}
       </DropdownMenuTrigger>
-      <DropdownMenuContent align={align} className={cn("p-1.5 min-w-[15rem] w-64 flow-menu-panel mat-mdc-menu-panel", className)}>
+      <DropdownMenuContent align={align} className={cn("p-1.5 min-w-[12rem] w-52 flow-menu-panel mat-mdc-menu-panel", className)}>
         {items.map((m, i) => {
           if (m.key === "separator" || m.type === "separator") {
             return <DropdownMenuSeparator key={m.key || `sep-${i}`} className="my-1.5" />;
@@ -99,10 +99,10 @@ export function StudioItemDropdownMenu({
  */
 export function StudioContextMenuContent({
   items = [],
-  className = "w-64",
+  className = "w-52",
 }) {
   return (
-    <ContextMenuContent className={cn("p-1.5 min-w-[15rem] w-64 flow-menu-panel mat-mdc-menu-panel", className)}>
+    <ContextMenuContent className={cn("p-1.5 min-w-[12rem] w-52 flow-menu-panel mat-mdc-menu-panel", className)}>
       {items.map((m, i) => {
         if (m.key === "separator" || m.type === "separator") {
           return <ContextMenuSeparator key={m.key || `ctx-sep-${i}`} className="my-1.5" />;
