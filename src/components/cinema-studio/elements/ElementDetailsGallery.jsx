@@ -1,17 +1,22 @@
 "use client";
 
 import React, { useRef } from "react";
-import { Loader2, X, Star } from "lucide-react";
+import { Loader2, Star, Trash2 } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
+import { ButtonGroup } from "@/shared/ui/button-group";
+import { ActionBtn } from "@/widgets/StudioLayout/GenerationsStudio/MediaGridItem/ActionBtn";
+import { CoreMediaItemView } from "@/widgets/CoreMediaItemView";
+import { getItemMetadata } from "@/shared/lib/displayUtils";
 import { cn } from "@/shared/lib/utils";
 import { FlowCharacterImagePreview } from "../characters/FlowCharacterImagePreview";
 
 /**
  * ElementDetailsGallery
  * Right stage for the Element edit view:
- * - Grid of 1 to 6 reference photos with hover actions (delete, set cover)
- * - Cover badge styled with neutral studio glass (no purple)
+ * - Studio-aligned media grid built on CoreMediaItemView
+ * - Neutral glass ActionBtn ButtonGroup for hover actions (set cover, delete)
+ * - Couverture badge for primary cover photo
  * - Empty state preview with direct upload & project import buttons
  */
 export function ElementDetailsGallery({
@@ -46,9 +51,9 @@ export function ElementDetailsGallery({
   return (
     <div
       className={cn(
-        "w-full h-full flex flex-col gap-3",
+        "w-full h-full flex flex-col gap-4",
         validItems.length > 0
-          ? "overflow-y-auto custom-scrollbar p-1 max-h-[580px]"
+          ? "p-1"
           : "items-center justify-center p-0"
       )}
     >
@@ -62,108 +67,158 @@ export function ElementDetailsGallery({
       />
 
       {validItems.length > 0 ? (
-        /* Reference Images Grid */
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 w-full p-1 overflow-y-auto custom-scrollbar">
-          {validItems.map((item, idx) => {
-            const src = item.url || item.file_url || item.asset?.file_url;
-            const mediaId = item.id || item.name;
-            const isCover =
-              (primaryMediaId && (mediaId === primaryMediaId || item.asset_id === primaryMediaId)) ||
-              idx === 0;
-            const isDeletingThis = deletingMediaId === mediaId;
-            const isAddingThis = pendingUrls.includes(src);
-            const isLoadingThis = isDeletingThis || isAddingThis;
+        <>
+          {/* Header Bar with Counter and Action Buttons */}
+          <div className="flex items-center justify-between px-1 py-1 w-full shrink-0">
+            <div className="flex items-center gap-2">
+              <span className="text-[13px] font-medium font-sans antialiased text-white/70">
+                Photos de référence
+              </span>
+              <span className="text-[11.5px] px-2 py-0.5 rounded-full bg-white/10 text-white/60 font-medium">
+                {validItems.length} / {maxAllowed}
+              </span>
+            </div>
 
-            return (
-              <div
-                key={mediaId || src || idx}
-                className="group/card relative overflow-hidden rounded-xl bg-zinc-900 border border-white/10 w-full aspect-[4/3] flex items-center justify-center shrink-0 shadow-md"
-              >
-                <img
-                  src={src}
-                  alt={`Element reference ${idx + 1}`}
-                  className="w-full h-full object-cover transition-transform duration-300 group-hover/card:scale-105 rounded-xl"
-                />
-                <div className="absolute inset-0 bg-black/0 group-hover/card:bg-black/30 transition-colors duration-200" />
-
-                {/* Primary / Cover Badge — Neutral Studio Glass */}
-                {isCover && (
-                  <div className="absolute top-2 left-2 z-20 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/60 border border-white/15 text-white/90 text-[10.5px] font-medium shadow-sm backdrop-blur-md">
-                    <Star className="size-3 text-amber-400 fill-amber-400" />
-                    <span>Couverture</span>
-                  </div>
-                )}
-
-                {/* Hover Actions: Set as Cover & Delete */}
-                {!isLoadingThis && (
-                  <div className="absolute top-2 right-2 z-20 flex items-center gap-1.5 opacity-0 group-hover/card:opacity-100 transition-opacity">
-                    {!isCover && onSetCover && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        onClick={() => onSetCover(mediaId)}
-                        disabled={isSettingCover}
-                        className="h-7 px-2.5 rounded-lg bg-black/60 hover:bg-black/80 text-white/80 hover:text-white text-[11px] font-medium flex items-center gap-1.5 transition-all backdrop-blur-md border border-white/10 cursor-pointer"
-                        title="Définir comme image principale"
-                      >
-                        <Star className="size-3" />
-                        <span className="hidden sm:inline">Couverture</span>
-                      </Button>
-                    )}
-
-                    {onDeleteImage && (
-                      <Button
-                        type="button"
-                        variant="studio-overlay-icon"
-                        size="icon-xs"
-                        onClick={() => onDeleteImage(item)}
-                        className="size-7 rounded-lg bg-black/60 hover:bg-red-500/80 text-white/80 hover:text-white transition-colors cursor-pointer"
-                        title="Supprimer l'image"
-                      >
-                        <X className="size-3.5 stroke-[2.5]" />
-                      </Button>
-                    )}
-                  </div>
-                )}
-
-                {/* Loading spinner overlay */}
-                {isLoadingThis && (
-                  <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] z-30 flex items-center justify-center">
-                    <Loader2 className="size-6 text-white animate-spin" />
-                  </div>
-                )}
-              </div>
-            );
-          })}
-
-          {/* "+ Add more image" dashed card */}
-          {!isFull && (
-            <div className="group/addcard relative overflow-hidden rounded-xl border border-dashed border-white/15 hover:border-white/30 bg-white/[0.02] hover:bg-white/[0.04] transition-all w-full aspect-[4/3] flex flex-col items-center justify-center gap-2.5 p-3 text-center select-none">
+            <div className="flex items-center gap-2">
+              {/* Button 1: Importer (Upload from device) */}
               <Button
                 type="button"
-                variant="secondary"
+                variant="blur"
                 size="sm"
+                disabled={isFull}
                 onClick={() => fileInputRef.current?.click()}
-                className="w-full max-w-[155px]"
-                title="Importer depuis l'ordinateur"
+                className="h-8 px-3.5 rounded-full text-[12px] gap-1.5 font-medium bg-white/10 hover:bg-white/15 text-white transition-all shadow-sm cursor-pointer disabled:pointer-events-none disabled:opacity-50"
+                title="Importer une image depuis l'ordinateur"
               >
-                <GoogleIcon iconName="upload" className="text-[18px]" />
+                <GoogleIcon iconName="upload" className="text-[17px]" />
                 <span>Importer</span>
               </Button>
+
+              {/* Button 2: Depuis le projet (Assets) */}
               <Button
                 type="button"
-                variant="ghost"
+                variant="blur"
                 size="sm"
+                disabled={isFull}
                 onClick={() => onOpenAssets && onOpenAssets()}
-                className="w-full max-w-[155px]"
-                title="Ajouter à partir du projet"
+                className="h-8 px-3 rounded-full text-[12px] gap-1.5 font-medium bg-white/5 hover:bg-white/10 text-white/70 transition-all cursor-pointer disabled:pointer-events-none disabled:opacity-50"
+                title="Ajouter depuis les assets du projet"
               >
-                <GoogleIcon iconName="add" className="text-[16px]" />
-                <span>Depuis le projet</span>
+                <GoogleIcon iconName="add" className="text-[17px]" />
+                <span className="hidden sm:inline">Projet</span>
               </Button>
             </div>
-          )}
-        </div>
+          </div>
+
+          {/* Reference Images Grid Powered by CoreMediaItemView */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full p-1">
+            {validItems.map((item, idx) => {
+              const src = item.url || item.file_url || item.asset?.file_url;
+              const mediaId = item.id || item.name;
+              const isCover =
+                (primaryMediaId && (mediaId === primaryMediaId || item.asset_id === primaryMediaId)) ||
+                idx === 0;
+              const isDeletingThis = deletingMediaId === mediaId;
+              const isAddingThis = pendingUrls.includes(src);
+              const isLoadingThis = isDeletingThis || isAddingThis;
+
+              const meta = getItemMetadata(item);
+              const aspect = meta?.aspect && meta.aspect !== "auto" ? meta.aspect : "3/4";
+
+              return (
+                <CoreMediaItemView
+                  key={mediaId || src || idx}
+                  item={item}
+                  src={src}
+                  status={item.status || "completed"}
+                  aspect={aspect}
+                  fit="cover"
+                  className="rounded-xl border-none shadow-xl transition-all duration-300 group hover:shadow-2xl overflow-hidden bg-black/40"
+                  style={{
+                    aspectRatio: aspect,
+                  }}
+                  topLeft={
+                    isCover ? (
+                      <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/60 border border-white/15 text-white/90 text-[10.5px] font-medium shadow-sm backdrop-blur-md">
+                        <Star className="size-3 text-amber-400 fill-amber-400" />
+                        <span>Couverture</span>
+                      </div>
+                    ) : null
+                  }
+                  topRight={
+                    !isLoadingThis ? (
+                      <div className="opacity-0 group-hover:opacity-100 transition-opacity pointer-events-auto">
+                        <ButtonGroup className="bg-white/60 backdrop-blur-md rounded-lg border-0 border-none scale-90 origin-top-right">
+                          {!isCover && onSetCover && (
+                            <ActionBtn
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onSetCover(mediaId);
+                              }}
+                              disabled={isSettingCover}
+                              title="Définir comme image principale"
+                            >
+                              <Star className="size-3.5 text-[#303031]" />
+                            </ActionBtn>
+                          )}
+                          {onDeleteImage && (
+                            <ActionBtn
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onDeleteImage(item);
+                              }}
+                              title="Supprimer l'image"
+                            >
+                              <Trash2 className="size-3.5 text-[#303031] hover:text-red-500" />
+                            </ActionBtn>
+                          )}
+                        </ButtonGroup>
+                      </div>
+                    ) : null
+                  }
+                  overlay={
+                    isLoadingThis ? (
+                      <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] z-30 flex items-center justify-center pointer-events-auto">
+                        <Loader2 className="size-6 text-white animate-spin" />
+                      </div>
+                    ) : null
+                  }
+                />
+              );
+            })}
+
+            {/* "+ Add more image" Studio Dashed Card */}
+            {!isFull && (
+              <div
+                className="group/addcard relative overflow-hidden rounded-xl border border-dashed border-white/15 hover:border-white/30 bg-white/[0.02] hover:bg-white/[0.04] transition-all w-full flex flex-col items-center justify-center gap-2.5 p-3 text-center select-none shadow-xl"
+                style={{ aspectRatio: "3/4" }}
+              >
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-full max-w-[155px]"
+                  title="Importer depuis l'ordinateur"
+                >
+                  <GoogleIcon iconName="upload" className="text-[18px]" />
+                  <span>Importer</span>
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => onOpenAssets && onOpenAssets()}
+                  className="w-full max-w-[155px]"
+                  title="Ajouter à partir du projet"
+                >
+                  <GoogleIcon iconName="add" className="text-[16px]" />
+                  <span>Depuis le projet</span>
+                </Button>
+              </div>
+            )}
+          </div>
+        </>
       ) : (
         <FlowCharacterImagePreview
           onUpload={() => !isFull && fileInputRef.current?.click()}

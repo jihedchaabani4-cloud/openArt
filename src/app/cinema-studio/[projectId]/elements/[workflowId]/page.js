@@ -101,7 +101,7 @@ export default function ElementWorkflowEditPage() {
                   "relative w-full flex items-center justify-center transition-all duration-300",
                   items.length === 0
                     ? "bg-transparent p-0"
-                    : "rounded-2xl overflow-hidden bg-black/60 min-h-[460px] max-h-[580px] p-4"
+                    : "rounded-2xl bg-black/40 border border-white/5 min-h-[460px] p-5"
                 )}
               >
                 <ElementDetailsGallery
