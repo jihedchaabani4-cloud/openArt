@@ -170,8 +170,9 @@ export function ElementInfoSidebar({
           value={draftDesc}
           onChange={(e) => setDraftDesc(e.target.value)}
           onBlur={() => onSaveDescription(draftDesc)}
-          minHeight={190}
-          maxHeight={380}
+          rows={3}
+          minHeight={90}
+          maxHeight={240}
           hint="Le modèle utilisera cette description pour intégrer fidèlement l'élément dans vos prompts."
         />
       </div>
