@@ -122,4 +122,27 @@ describe("ElementEditNavbar", () => {
     expect(screen.queryByRole("button", { name: /open user menu/i })).toBeNull();
     expect(container.querySelector(".animate-pulse")).toBeNull();
   });
+
+  it("uses the global button border radius CSS variable across all navbar buttons including Done", () => {
+    const { container } = renderWithClient(
+      <ElementEditNavbar
+        onDeleteElement={() => {}}
+        onUpload={() => {}}
+        onToggleLike={() => {}}
+        onDone={() => {}}
+      />
+    );
+
+    const doneBtn = container.querySelector("button[data-variant='white']");
+    expect(doneBtn.className).toContain("var(--button-border-radius");
+
+    const deleteBtn = container.querySelector("button[title='Delete']");
+    expect(deleteBtn.className).toContain("var(--button-border-radius");
+
+    const likeBtn = container.querySelector("[data-testid='like-element-button']");
+    expect(likeBtn.className).toContain("var(--button-border-radius");
+
+    const addBtn = container.querySelector("[data-testid='import-dropdown-trigger']");
+    expect(addBtn.className).toContain("var(--button-border-radius");
+  });
 });

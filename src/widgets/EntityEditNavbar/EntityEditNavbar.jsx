@@ -61,7 +61,7 @@ export function EntityEditNavbar({
               title={deleteLabel}
               aria-label={deleteLabel}
               onClick={onDelete}
-              className="text-white hover:text-white hover:bg-white/10 rounded-full h-8 w-8 transition-colors cursor-pointer"
+              className="text-white hover:text-white hover:bg-white/10 rounded-[var(--button-border-radius,9999px)] h-8 w-8 transition-colors cursor-pointer"
             />
           )}
 

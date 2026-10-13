@@ -191,6 +191,7 @@ mat-icon {
   --radius-2xl: var(--mat-dialog-container-shape, 24px);
   --radius-3xl: var(--mat-sys-corner-extra-large, 28px);
   --radius-full: var(--mat-sys-corner-full, 9999px);
+  --radius-button: var(--button-border-radius, 9999px);
 
   /* Custom UI Tokens */
   --background-base-pri:rgba(22, 23, 24, 0.9);
@@ -217,6 +218,9 @@ mat-icon {
   --background-base-primary: #000000;
   --packages-bg: rgb(43, 43, 43, 0.8);
   --radius: 0.625rem;
+  --button-border-radius: 9999px;
+  --button-radius: var(--button-border-radius, 9999px);
+  --mat-button-border-radius: var(--button-border-radius, 9999px);
 
   /* Google Flow Design Tokens */
   --prompt-box-settings-width: 17.5rem;
