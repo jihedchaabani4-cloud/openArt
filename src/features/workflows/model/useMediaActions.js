@@ -204,7 +204,7 @@ export function useWorkflowActions(workflow, item = null) {
     const media = targetItem || workflow;
     const handled = animateMedia({ media });
     if (!handled) {
-      if (projectId && !pathname?.includes("/assets") && !pathname?.includes("/generations")) {
+      if (projectId && !pathname?.includes("/assets") && !pathname?.includes("/generations") && !pathname?.includes("/collection")) {
         setPendingPromptAction({ type: "animate", media, projectId });
         router.push(`/cinema-studio/${projectId}/assets`);
         return;
@@ -223,6 +223,16 @@ export function useWorkflowActions(workflow, item = null) {
           is_video: false
         }, "start");
       }
+    }
+
+    if (typeof window !== "undefined") {
+      requestAnimationFrame(() => {
+        const editor = document.querySelector('[contenteditable="true"]') || document.querySelector('textarea[name="prompt"]');
+        if (editor) {
+          editor.focus();
+          editor.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }
+      });
     }
   };
 

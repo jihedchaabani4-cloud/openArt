@@ -75,6 +75,7 @@ export function getStudioMenuItems({
 }) {
   const {
     handleAddToPrompt,
+    handleAnimate,
     handleLike,
     handleReuseSettings,
     handleDownload,
@@ -116,7 +117,15 @@ export function getStudioMenuItems({
     onClick: handleReuseSettings,
   };
 
-  // 3. Add to prompt
+  // 3. Animate (Image to Video start frame)
+  const itemAnimate = {
+    key: "animate",
+    icon: "movie",
+    label: "Animer",
+    onClick: handleAnimate,
+  };
+
+  // 4. Add to prompt
   const itemAddToPrompt = {
     key: "add",
     icon: "add_2",
@@ -125,7 +134,7 @@ export function getStudioMenuItems({
     onClick: handleAddToPrompt,
   };
 
-  // 4. Download
+  // 5. Download
   const itemDownload = {
     key: "download",
     icon: "download",
@@ -133,7 +142,7 @@ export function getStudioMenuItems({
     onClick: handleDownload,
   };
 
-  // 5. Copy
+  // 6. Copy
   const itemCopy = {
     key: "copy",
     icon: "content_copy",
@@ -145,7 +154,7 @@ export function getStudioMenuItems({
     }),
   };
 
-  // 6. Rename
+  // 7. Rename
   const itemRename = {
     key: "rename",
     icon: "edit",
@@ -153,7 +162,7 @@ export function getStudioMenuItems({
     onClick: onRename,
   };
 
-  // 7. Publish to YouTube (video only)
+  // 8. Publish to YouTube (video only)
   const itemPublishYoutube = {
     key: "youtube",
     icon: "video_library",
@@ -161,7 +170,7 @@ export function getStudioMenuItems({
     onClick: handlePublishYoutube,
   };
 
-  // 8. Set project cover
+  // 9. Set project cover
   const itemSetCover = {
     key: "cover",
     icon: "photo_library",
@@ -169,7 +178,7 @@ export function getStudioMenuItems({
     onClick: handleSetCover,
   };
 
-  // 9. Report result
+  // 10. Report result
   const itemReport = {
     key: "report",
     icon: "flag",
@@ -177,7 +186,7 @@ export function getStudioMenuItems({
     onClick: handleReport,
   };
 
-  // 10. Tile details (optional toggle)
+  // 11. Tile details (optional toggle)
   const itemTileDetails = {
     key: "tileDetails",
     icon: showTileDetails ? "visibility_off" : "visibility",
@@ -185,7 +194,7 @@ export function getStudioMenuItems({
     onClick: toggleTileDetails,
   };
 
-  // 11. Delete
+  // 12. Delete
   const itemDelete = (label = "Placer dans la corbeille") => ({
     key: "delete",
     icon: "delete",
@@ -205,6 +214,7 @@ export function getStudioMenuItems({
       rawItems = [
         itemLike,
         separator("fav"),
+        ...(handleAnimate && !isVideo ? [itemAnimate, separator("animate")] : []),
         itemAddToPrompt,
         ...(handleDownload ? [itemDownload] : []),
         ...(onRename ? [itemRename] : []),
@@ -218,6 +228,7 @@ export function getStudioMenuItems({
       rawItems = [
         itemLike,
         separator("fav"),
+        ...(handleAnimate && !isVideo ? [itemAnimate, separator("animate")] : []),
         itemAddToPrompt,
         ...(handleDownload ? [itemDownload] : []),
         ...(onRename ? [itemRename] : []),
@@ -235,6 +246,7 @@ export function getStudioMenuItems({
         itemLike,
         ...(canReuse || handleReuseSettings ? [itemReuse] : []),
         separator("fav-reuse"),
+        ...(handleAnimate && !isVideo ? [itemAnimate, separator("animate")] : []),
         itemAddToPrompt,
         ...(handleDownload ? [itemDownload] : []),
         ...(onRename ? [itemRename] : []),
