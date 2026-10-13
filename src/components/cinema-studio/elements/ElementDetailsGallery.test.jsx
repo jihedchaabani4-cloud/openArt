@@ -114,7 +114,7 @@ describe("ElementDetailsGallery - Studio Media Grid Form", () => {
     expect(screen.queryByTitle("Video")).toBeNull();
   });
 
-  it("renders couverture badge for the primary media", () => {
+  it("does not render the top-left 'Couverture' badge, keeping the media card clean", () => {
     renderWithClient(
       <ElementDetailsGallery
         items={mockItems}
@@ -122,8 +122,7 @@ describe("ElementDetailsGallery - Studio Media Grid Form", () => {
       />
     );
 
-    const badges = screen.getAllByText("Couverture");
-    expect(badges.length).toBeGreaterThan(0);
+    expect(screen.queryByText("Couverture")).toBeNull();
   });
 
   it("renders sleek header with compact action buttons and counter", () => {

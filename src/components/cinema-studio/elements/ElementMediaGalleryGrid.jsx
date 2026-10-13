@@ -3,7 +3,7 @@
 import React, { useRef, useMemo, useCallback } from "react";
 import { RowsPhotoAlbum } from "react-photo-album";
 import "react-photo-album/rows.css";
-import { Loader2, Star } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { cn } from "@/shared/lib/utils";
 import { ButtonGroup } from "@/shared/ui/button-group";
@@ -147,14 +147,7 @@ export function ElementMediaGalleryGrid({
             showVideoBadge={false}
             showMenu={false}
             showHoverOverlay={false}
-            topLeft={
-              isCover ? (
-                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/70 border border-white/15 text-white/90 text-[10.5px] font-medium shadow-sm backdrop-blur-md select-none pointer-events-none">
-                  <Star className="size-3 text-amber-400 fill-amber-400" />
-                  <span>Couverture</span>
-                </div>
-              ) : null
-            }
+            topLeft={null}
             topRight={
               (onSetCover || onDeleteImage) ? (
                 <div className="opacity-0 group-hover:opacity-100 transition-opacity pointer-events-auto">
