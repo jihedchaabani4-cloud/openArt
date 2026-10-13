@@ -86,17 +86,14 @@ export function ElementEditNavbar({
               variant="ghost"
               data-testid="like-element-button"
               onClick={onToggleLike}
-              className={cn(
-                "rounded-full h-8 w-8 p-0 cursor-pointer transition-colors outline-none flex items-center justify-center bg-transparent hover:bg-white/10",
-                isLiked ? "text-red-500 hover:text-red-400" : "text-white hover:text-white"
-              )}
+              className="rounded-full h-8 w-8 p-0 cursor-pointer transition-colors outline-none flex items-center justify-center bg-transparent hover:bg-white/10 text-white hover:text-white"
               title={isLiked ? "Retirer des favoris" : "Ajouter aux favoris"}
               aria-label={isLiked ? "Retirer des favoris" : "Ajouter aux favoris"}
             >
               <GoogleIcon
                 iconName="favorite"
                 fill={isLiked}
-                className={isLiked ? "text-[20px] text-red-500 fill-red-500" : "text-[20px] text-white"}
+                className="text-[20px] text-white"
               />
             </Button>
           )}

@@ -100,7 +100,7 @@ describe("ElementEditNavbar", () => {
     fireEvent.click(likeBtn);
     expect(onToggleLike).toHaveBeenCalledTimes(1);
 
-    // When liked: filled / red
+    // When liked: filled heart in white, never red
     rerender(
       <ElementEditNavbar
         isLiked={true}
@@ -108,7 +108,11 @@ describe("ElementEditNavbar", () => {
       />
     );
     const likedBtn = screen.getByTestId("like-element-button");
-    expect(likedBtn.className).toContain("text-red-500");
+    expect(likedBtn.className).toContain("text-white");
+    expect(likedBtn.className).not.toContain("text-red-500");
+    const likedIcon = likedBtn.querySelector("span[data-mat-icon-type='font']");
+    expect(likedIcon.className).toContain("text-white");
+    expect(likedIcon.className).not.toContain("text-red-500");
   });
 
   it("does not render the user dropdown or user button in edit navbar", () => {
