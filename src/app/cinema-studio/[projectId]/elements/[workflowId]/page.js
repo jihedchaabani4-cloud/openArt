@@ -63,6 +63,10 @@ export default function ElementWorkflowEditPage() {
 
     // Status
     isLoading,
+
+    // Like / favorite
+    isLiked,
+    handleToggleLike,
   } = useElementEdit({ projectId, workflowId });
 
   const fileInputRef = React.useRef(null);
@@ -96,6 +100,8 @@ export default function ElementWorkflowEditPage() {
         onDeleteElement={handleDeleteWorkflow}
         onUpload={() => fileInputRef.current?.click()}
         onOpenAssets={() => setIsAssetsOpen(true)}
+        isLiked={isLiked}
+        onToggleLike={handleToggleLike}
       />
 
       {/* ── Scrollable Body ── */}

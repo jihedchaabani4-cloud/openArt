@@ -3,7 +3,11 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useElement } from "./useElementComposer";
-import { useProjectData, useSetPrimaryMedia } from "@/features/workflows/api/workflowsApi";
+import {
+  useProjectData,
+  useSetPrimaryMedia,
+  useToggleWorkflowLike,
+} from "@/features/workflows/api/workflowsApi";
 
 /**
  * useElementEdit
@@ -45,6 +49,18 @@ export function useElementEdit({ projectId, workflowId }) {
 
   const { data: projectData } = useProjectData(projectId);
   const setPrimaryMediaMutation = useSetPrimaryMedia();
+  const toggleWorkflowLikeMutation = useToggleWorkflowLike();
+
+  const isLiked = Boolean(
+    workflow?.metadata?.favorited || workflow?.favorited || workflow?.is_liked
+  );
+
+  const handleToggleLike = useCallback(() => {
+    const targetId = workflow?.id || workflowId;
+    if (targetId) {
+      toggleWorkflowLikeMutation.mutate({ workflowId: targetId, projectId });
+    }
+  }, [workflow?.id, workflowId, projectId, toggleWorkflowLikeMutation]);
 
   // Local draft states
   const [draftTitle, setDraftTitle] = useState("");
@@ -238,6 +254,10 @@ export function useElementEdit({ projectId, workflowId }) {
 
     // Status
     isLoading,
+
+    // Like / favorite
+    isLiked,
+    handleToggleLike,
   };
 }
 

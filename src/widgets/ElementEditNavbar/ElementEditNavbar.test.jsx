@@ -14,11 +14,13 @@ function renderWithClient(ui) {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
-  return render(
-    <QueryClientProvider client={queryClient}>
-      {ui}
-    </QueryClientProvider>
-  );
+  return render(ui, {
+    wrapper: ({ children }) => (
+      <QueryClientProvider client={queryClient}>
+        {children}
+      </QueryClientProvider>
+    ),
+  });
 }
 
 describe("ElementEditNavbar", () => {
@@ -77,5 +79,35 @@ describe("ElementEditNavbar", () => {
 
     fireEvent.click(deleteBtn);
     expect(onDelete).toHaveBeenCalledTimes(1);
+  });
+
+  it("renders like button that toggles favorite state when clicked", () => {
+    const onToggleLike = vi.fn();
+
+    const { rerender } = renderWithClient(
+      <ElementEditNavbar
+        isLiked={false}
+        onToggleLike={onToggleLike}
+      />
+    );
+
+    const likeBtn = screen.getByTestId("like-element-button");
+    expect(likeBtn).toBeDefined();
+    expect(likeBtn.textContent).toContain("favorite");
+    // When unliked: outline / white
+    expect(likeBtn.className).toContain("text-white");
+
+    fireEvent.click(likeBtn);
+    expect(onToggleLike).toHaveBeenCalledTimes(1);
+
+    // When liked: filled / red
+    rerender(
+      <ElementEditNavbar
+        isLiked={true}
+        onToggleLike={onToggleLike}
+      />
+    );
+    const likedBtn = screen.getByTestId("like-element-button");
+    expect(likedBtn.className).toContain("text-red-500");
   });
 });
