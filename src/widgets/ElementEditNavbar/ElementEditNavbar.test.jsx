@@ -56,8 +56,8 @@ describe("ElementEditNavbar", () => {
     expect(menuContent.className).not.toContain("min-w-[210px]");
 
     const uploadMenuItem = uploadItem.closest('[data-slot="dropdown-menu-item"]');
-    expect(uploadMenuItem.className).toContain("min-h-[38px]");
-    expect(uploadMenuItem.className).toContain("text-[13px]");
+    expect(uploadMenuItem.className).toContain("min-h-[48px]");
+    expect(uploadMenuItem.className).toContain("text-[14px]");
 
     // Clicking options triggers callbacks
     fireEvent.click(uploadItem);

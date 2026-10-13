@@ -14,8 +14,8 @@ import {
   ContextMenuItem,
 } from "@/shared/ui/context-menu";
 
-describe("Unified compact menu styling", () => {
-  it("renders DropdownMenu with standardized width w-52 and compact item height min-h-[38px]", () => {
+describe("Google Flow menu styling matching user tokens and DOM", () => {
+  it("renders DropdownMenu with width w-52, blur, bg, and item height min-h-[48px] with text-[14px]", () => {
     render(
       <DropdownMenu open={true}>
         <DropdownMenuTrigger>Open</DropdownMenuTrigger>
@@ -28,15 +28,18 @@ describe("Unified compact menu styling", () => {
     const item = screen.getByText("Option 1");
     const menuItem = item.closest('[data-slot="dropdown-menu-item"]');
     expect(menuItem).not.toBeNull();
-    expect(menuItem.className).toContain("min-h-[38px]");
-    expect(menuItem.className).toContain("text-[13px]");
+    expect(menuItem.className).toContain("min-h-[48px]");
+    expect(menuItem.className).toContain("text-[14px]");
 
     const content = item.closest('[data-slot="dropdown-menu-content"]');
     expect(content).not.toBeNull();
     expect(content.className).toContain("w-52");
+    expect(content.style.borderRadius).toBe("var(--mat-menu-container-shape, 24px)");
+    expect(content.style.backgroundColor).toBe("var(--mat-menu-container-color, rgba(22, 23, 24, 0.9))");
+    expect(content.style.backdropFilter).toContain("blur(100px)");
   });
 
-  it("renders ContextMenu with standardized width w-52 and compact item height min-h-[38px]", () => {
+  it("renders ContextMenu with width w-52, blur, bg, and item height min-h-[48px] with text-[14px]", () => {
     render(
       <ContextMenu>
         <ContextMenuTrigger>Right click</ContextMenuTrigger>
@@ -46,8 +49,6 @@ describe("Unified compact menu styling", () => {
       </ContextMenu>
     );
 
-    // In Radix ContextMenu with open={true} or when rendered
-    // Content gets rendered into portal
     const trigger = screen.getByText("Right click");
     expect(trigger).toBeDefined();
   });

@@ -61,18 +61,18 @@ export function ElementEditNavbar({
                 {onUpload && (
                   <DropdownMenuItem
                     onSelect={() => onUpload()}
-                    className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-[12px] min-h-[38px] text-[13px] cursor-pointer text-white/80 hover:text-white hover:bg-white/10 transition-colors"
+                    className="flex items-center gap-3 px-3 py-2 rounded-[12px] min-h-[48px] text-[14px] cursor-pointer text-white/90 hover:text-white hover:bg-white/10 transition-colors"
                   >
-                    <GoogleIcon iconName="upload" className="text-[18px] text-white/70 shrink-0" />
+                    <GoogleIcon iconName="upload" className="text-[20px] text-white/80 shrink-0" />
                     <span className="font-medium">Importer depuis l'ordinateur</span>
                   </DropdownMenuItem>
                 )}
                 {onOpenAssets && (
                   <DropdownMenuItem
                     onSelect={() => onOpenAssets()}
-                    className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-[12px] min-h-[38px] text-[13px] cursor-pointer text-white/80 hover:text-white hover:bg-white/10 transition-colors"
+                    className="flex items-center gap-3 px-3 py-2 rounded-[12px] min-h-[48px] text-[14px] cursor-pointer text-white/90 hover:text-white hover:bg-white/10 transition-colors"
                   >
-                    <GoogleIcon iconName="perm_media" className="text-[18px] text-white/70 shrink-0" />
+                    <GoogleIcon iconName="perm_media" className="text-[20px] text-white/80 shrink-0" />
                     <span className="font-medium">Depuis le projet</span>
                   </DropdownMenuItem>
                 )}

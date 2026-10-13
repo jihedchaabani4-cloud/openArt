@@ -167,14 +167,14 @@ export function ElementInfoSidebar({
                     setTypeOpen(false);
                   }}
                   className={cn(
-                    "flex items-center gap-2.5 px-2.5 py-1.5 min-h-[38px] text-[13px] rounded-[12px] cursor-pointer transition-colors",
+                    "flex items-center gap-3 px-3 py-2 min-h-[48px] text-[14px] rounded-[12px] cursor-pointer transition-colors",
                     isSelected ? "text-white bg-white/10" : "text-white/70 hover:text-white hover:bg-white/5"
                   )}
                 >
                   <GoogleIcon
                     iconName={type.googleIcon}
                     className={cn(
-                      "text-[18px] shrink-0",
+                      "text-[20px] shrink-0",
                       isSelected ? "text-white" : "text-white/50"
                     )}
                   />
