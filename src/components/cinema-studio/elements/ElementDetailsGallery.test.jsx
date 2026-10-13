@@ -197,4 +197,29 @@ describe("ElementDetailsGallery - Studio Media Grid Form", () => {
     const photoAlbum = container.querySelector(".react-photo-album, .react-photo-album--rows");
     expect(photoAlbum).not.toBeNull();
   });
+
+  it("renders a ButtonGroup with star and delete icon action buttons on cards", () => {
+    const onSetCover = vi.fn();
+    const onDeleteImage = vi.fn();
+
+    const { container } = renderWithClient(
+      <ElementMediaGalleryGrid
+        items={mockItems}
+        primaryMediaId="item-1"
+        onSetCover={onSetCover}
+        onDeleteImage={onDeleteImage}
+      />
+    );
+
+    // ButtonGroup with studio glassmorphic styling
+    const buttonGroup = container.querySelector(".bg-white\\/60");
+    expect(buttonGroup).not.toBeNull();
+
+    // Check Star icon and Delete icon buttons
+    const starBtns = screen.getAllByTitle(/couverture/i);
+    expect(starBtns.length).toBeGreaterThan(0);
+
+    const deleteBtns = screen.getAllByTitle(/supprimer/i);
+    expect(deleteBtns.length).toBeGreaterThan(0);
+  });
 });

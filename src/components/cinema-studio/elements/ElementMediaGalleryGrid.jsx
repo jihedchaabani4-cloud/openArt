@@ -6,6 +6,8 @@ import "react-photo-album/rows.css";
 import { Loader2, Star } from "lucide-react";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { cn } from "@/shared/lib/utils";
+import { ButtonGroup } from "@/shared/ui/button-group";
+import { ActionBtn } from "@/widgets/StudioLayout/GenerationsStudio/MediaGridItem/ActionBtn";
 import { MediaItemView } from "@/widgets/CoreMediaItemView";
 import { getCachedImageDimensions } from "@/shared/lib/generationUtils";
 import { getItemMetadata } from "@/shared/lib/displayUtils";
@@ -154,35 +156,44 @@ export function ElementMediaGalleryGrid({
               ) : null
             }
             topRight={
-              <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                {!isCover && onSetCover && (
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onSetCover(mediaId);
-                    }}
-                    className="h-7 px-2 rounded-lg bg-black/70 hover:bg-black/90 border border-white/15 text-white/80 hover:text-white text-[11px] font-medium flex items-center gap-1.5 transition-colors cursor-pointer backdrop-blur-sm"
-                    title="Définir comme couverture"
-                  >
-                    <Star className="size-3 text-white/70" />
-                    <span>Couverture</span>
-                  </button>
-                )}
-                {onDeleteImage && (
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onDeleteImage(item);
-                    }}
-                    className="w-7 h-7 rounded-lg bg-black/70 hover:bg-red-500/80 border border-white/15 text-white/80 hover:text-white flex items-center justify-center transition-colors cursor-pointer backdrop-blur-sm"
-                    title="Supprimer l'image"
-                  >
-                    <GoogleIcon iconName="delete" className="text-[16px]" />
-                  </button>
-                )}
-              </div>
+              (onSetCover || onDeleteImage) ? (
+                <div className="opacity-0 group-hover:opacity-100 transition-opacity pointer-events-auto">
+                  <ButtonGroup className="bg-white/60 backdrop-blur-md rounded-lg border-0 border-none">
+                    {onSetCover && (
+                      <ActionBtn
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onSetCover(mediaId);
+                        }}
+                        title={isCover ? "Image de couverture" : "Définir comme couverture"}
+                        aria-label="Couverture"
+                      >
+                        <GoogleIcon
+                          iconName="star"
+                          fill={isCover}
+                          className={cn(
+                            "text-[14px]",
+                            isCover ? "text-amber-500 fill-amber-500" : "text-[#303031]"
+                          )}
+                        />
+                      </ActionBtn>
+                    )}
+                    {onDeleteImage && (
+                      <ActionBtn
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onDeleteImage(item);
+                        }}
+                        title="Supprimer l'image"
+                        aria-label="Supprimer"
+                        className="hover:text-red-600"
+                      >
+                        <GoogleIcon iconName="delete" className="text-[14px] text-[#303031]" />
+                      </ActionBtn>
+                    )}
+                  </ButtonGroup>
+                </div>
+              ) : null
             }
             overlay={
               isLoadingThis ? (
