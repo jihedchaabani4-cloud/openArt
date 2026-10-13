@@ -21,6 +21,8 @@ import { getItemMetadata } from "@/shared/lib/displayUtils";
  * Preserves the authentic aspect ratio of every media item without forcing
  * arbitrary 1:1 or uniform ratios, zero crop, and with clean MediaItemView defaults.
  */
+export const DEFAULT_ELEMENT_ROW_HEIGHT = 300;
+
 export function ElementMediaGalleryGrid({
   workflow = null,
   items = [],
@@ -28,6 +30,7 @@ export function ElementMediaGalleryGrid({
   pendingUrls = [],
   deletingMediaId = null,
   maxAllowed = 6,
+  targetRowHeight = DEFAULT_ELEMENT_ROW_HEIGHT,
   onUploadFiles,
   onDeleteImage,
   onSetCover,
@@ -250,10 +253,10 @@ export function ElementMediaGalleryGrid({
 
       <RowsPhotoAlbum
         photos={photos}
-        defaultContainerWidth={800}
-        targetRowHeight={200}
-        spacing={14}
-        rowConstraints={{ singleRowMaxHeight: 260 }}
+        defaultContainerWidth={900}
+        targetRowHeight={targetRowHeight}
+        spacing={16}
+        rowConstraints={{ singleRowMaxHeight: Math.round(targetRowHeight * 1.35) }}
         render={albumRender}
       />
     </div>

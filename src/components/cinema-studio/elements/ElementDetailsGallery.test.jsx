@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, cleanup, fireEvent } from "@testing-library/react";
 import React from "react";
 import { ElementDetailsGallery } from "./ElementDetailsGallery";
-import { ElementMediaGalleryGrid } from "./ElementMediaGalleryGrid";
+import { ElementMediaGalleryGrid, DEFAULT_ELEMENT_ROW_HEIGHT } from "./ElementMediaGalleryGrid";
 
 // Mock router
 vi.mock("next/navigation", () => ({
@@ -212,6 +212,10 @@ describe("ElementDetailsGallery - Studio Media Grid Form", () => {
     // Verify it renders RowsPhotoAlbum just like the studio media grid
     const photoAlbum = container.querySelector(".react-photo-album, .react-photo-album--rows");
     expect(photoAlbum).not.toBeNull();
+  });
+
+  it("configures RowsPhotoAlbum with larger grid size (DEFAULT_ELEMENT_ROW_HEIGHT >= 300)", () => {
+    expect(DEFAULT_ELEMENT_ROW_HEIGHT).toBeGreaterThanOrEqual(300);
   });
 
   it("renders a ButtonGroup with bookmark (save) and delete icon action buttons on cards", () => {

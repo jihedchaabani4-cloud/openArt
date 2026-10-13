@@ -27,6 +27,7 @@ export function ElementDetailsGallery({
   onSetCover,
   isSettingCover = false,
   projectId = null,
+  targetRowHeight,
   className,
 }) {
   const fileInputRef = useRef(null);
@@ -99,6 +100,7 @@ export function ElementDetailsGallery({
           onDeleteImage={onDeleteImage}
           onSetCover={onSetCover}
           isSettingCover={isSettingCover}
+          targetRowHeight={targetRowHeight}
         />
       ) : (
         /* Minimal sleek studio empty state (no big clumsy banner) */
