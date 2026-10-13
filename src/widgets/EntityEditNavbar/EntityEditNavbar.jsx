@@ -27,6 +27,7 @@ export function EntityEditNavbar({
   doneLabel = "Done",
   left,
   actions,
+  showUserDropdown = false,
 }) {
   const { projectId } = useParams();
   const router = useRouter();
@@ -47,6 +48,7 @@ export function EntityEditNavbar({
       onBack={() => router.push(defaultBackUrl)}
       backLabel={`Back to ${entityPlural}`}
       left={left}
+      showUserDropdown={showUserDropdown}
       right={
         <>
           {actions}

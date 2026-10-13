@@ -12,6 +12,7 @@ export function CharacterEditNavbar({
   onDone,
   actions,
   children,
+  showUserDropdown = false,
 }) {
   return (
     <EntityEditNavbar
@@ -20,6 +21,7 @@ export function CharacterEditNavbar({
       onDone={onDone}
       actions={actions}
       left={children}
+      showUserDropdown={showUserDropdown}
     />
   );
 }

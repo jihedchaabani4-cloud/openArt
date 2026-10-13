@@ -27,6 +27,7 @@ export function ElementEditNavbar({
   children,
   importMenuOpen,
   onImportMenuOpenChange,
+  showUserDropdown = false,
 }) {
   const [internalOpen, setInternalOpen] = React.useState(false);
   const isOpen = importMenuOpen !== undefined ? importMenuOpen : internalOpen;
@@ -39,6 +40,7 @@ export function ElementEditNavbar({
       entityType="element"
       onDelete={onDeleteElement}
       onDone={onDone}
+      showUserDropdown={showUserDropdown}
       actions={
         <>
           {hasImportOptions && (

@@ -110,4 +110,12 @@ describe("ElementEditNavbar", () => {
     const likedBtn = screen.getByTestId("like-element-button");
     expect(likedBtn.className).toContain("text-red-500");
   });
+
+  it("does not render the user dropdown or user button in edit navbar", () => {
+    const { container } = renderWithClient(<ElementEditNavbar />);
+
+    expect(screen.queryByRole("button", { name: /login/i })).toBeNull();
+    expect(screen.queryByRole("button", { name: /open user menu/i })).toBeNull();
+    expect(container.querySelector(".animate-pulse")).toBeNull();
+  });
 });

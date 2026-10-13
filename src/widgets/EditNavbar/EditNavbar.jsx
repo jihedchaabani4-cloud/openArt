@@ -9,7 +9,6 @@ import { getPrimaryMediaConfig } from "@/shared/lib/generationUtils"
 import { EditableDisplayName } from "@/shared/ui/EditableDisplayName"
 import { useUpdateWorkflow, useDeleteMedia } from "@/features/workflows/api/workflowsApi"
 import { useProjectFolders } from "@/features/folders"
-import { UserDropdown } from "@/widgets/StudioNavbar/ui/UserDropdown"
 import { NavbarCore, NavbarAction } from "@/widgets/NavbarCore"
 import { ConfirmDeleteDialog } from "@/widgets/dialogs/ConfirmDeleteDialog"
 import {
@@ -124,6 +123,7 @@ export function EditNavbar({
     onToggleHistory = () => {},
     fallbackBackUrl = null,
     fallbackBackLabel = null,
+    showUserDropdown = false,
 }) {
     const { projectId } = useParams()
     const router = useRouter()
@@ -199,6 +199,7 @@ export function EditNavbar({
         <NavbarCore
             onBack={() => router.push(backDestination)}
             backLabel={backLabel}
+            showUserDropdown={showUserDropdown}
             left={
                 <>
                     <EditableDisplayName
