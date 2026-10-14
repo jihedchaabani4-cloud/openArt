@@ -43,7 +43,8 @@ export function CharacterInfoSidebar({
 
       {/* Character Info Box */}
       <Textarea
-        label="Character Info"
+        variant="personality"
+        label="Character info"
         labelExtra="(optional)"
         placeholder="Describe how your character acts..."
         value={draftDesc}

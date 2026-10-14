@@ -542,9 +542,18 @@ mat-icon {
   --color-black: #000;
   --color-black-50: rgba(0,0,0,0.5);
   --color-grey-90: rgba(22,23,24,0.9);
+  --color-grey-75: rgba(22,23,24,0.75);
+  --color-blue-500: #2b6ad2;
 
   /* UI Component Colors */
   --tile-scrim-gradient: linear-gradient(180deg,transparent,rgba(0,0,0,0.04) 20%,rgba(0,0,0,0.12) 40%,rgba(0,0,0,0.25) 60%,rgba(0,0,0,0.4) 80%,rgba(0,0,0,0.5));
+  --collection-empty-thumbnail-background: linear-gradient(1deg,#333 0.49%,#4e4e4e 99.15%);
+  --error-page-foreground: rgba(255,255,255,0.9);
+  --error-page-primary-button-background: #ba8bfc;
+  --error-page-primary-button-foreground: #000;
+  --error-page-action-button-background: rgba(255,255,255,0.05);
+  --error-page-action-button-border: rgba(255,255,255,0.15);
+  --error-page-scrim-background: linear-gradient(180deg,rgba(0,0,0,1),rgba(0,0,0,0.3) 50%,rgba(0,0,0,0));
   --snackbar-foreground-accent-color: #989aff;
   --snackbar-foreground-error-color: #fe6e6e;
   --snackbar-foreground-warning-color: #f6c024;
@@ -560,8 +569,14 @@ mat-icon {
   --shadow-color-harsh: rgba(0,0,0,0.5);
   --banner-warning-background: rgba(35,44,0,1);
   --banner-warning-border: rgba(183,163,93,1);
+  --banner-warning-button-border: rgba(68,77,37,1);
   --banner-error-background: rgba(32, 33, 36, 0.95);
   --banner-error-border: rgba(179,110,108,1);
+  --banner-error-button-border: rgba(179,110,108,1);
+  --z-index-tile-header: 5;
+  --z-index-overlay: calc(var(--z-index-tile-header) + 1);
+  --z-index-docked-tool-panel: var(--z-index-overlay);
+  --z-index-drag-preview: calc(var(--z-index-overlay) + 1);
 
   /* Foreground & Background Color Scales */
   --foreground-color-100: #f1f3f4;
@@ -1333,6 +1348,128 @@ flow-menu-item.selected .mat-mdc-menu-item,
 .settings-summary .google-symbols {
   font-size: 15px;
   line-height: 1;
+}
+
+/* ── Google Flow Personality Section & Flow Textarea ── */
+.personality-section {
+  box-sizing: border-box;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  flex-direction: column;
+  gap: 0.5rem;
+  -webkit-box-flex: 1;
+  flex: 1;
+  width: 100%;
+  font: var(--mat-sys-body-large, 400 1rem/1.5rem 'Google Sans Text', sans-serif);
+  color: var(--color-white, #fff);
+  -webkit-font-smoothing: antialiased;
+}
+
+.personality-section .label-row,
+.label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.personality-section .field-label,
+.field-label {
+  font: var(--mat-sys-label-large, 500 0.875rem/1.25rem 'Google Sans Text', sans-serif);
+  color: var(--mat-sys-on-surface, #e3e3e3);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.personality-section .field-label-optional,
+.field-label-optional {
+  font: var(--mat-sys-body-small, 400 0.75rem/1rem 'Google Sans Text', sans-serif);
+  color: var(--mat-sys-on-surface-variant, #8e918f);
+}
+
+/* Standalone Flow Personality Textarea */
+.personality-textarea,
+.flow-textarea {
+  box-sizing: border-box;
+  display: block;
+  width: 100%;
+  border-radius: var(--mat-sys-corner-large, 16px);
+  background-color: var(--foreground-state-05, rgba(218, 220, 224, 0.05));
+  color: var(--mat-sys-on-surface, var(--color-white, #fff));
+  font-family: var(--mat-sys-body-large-font, 'Google Sans Text', 'Google Sans', sans-serif);
+  font-size: var(--mat-sys-body-large-size, 1rem);
+  line-height: var(--mat-sys-body-large-line-height, 1.5rem);
+  letter-spacing: var(--mat-sys-body-large-tracking, 0);
+  font-weight: var(--mat-sys-body-large-weight, 400);
+  border: 1px solid var(--mat-sys-outline-variant, rgba(255, 255, 255, 0.08));
+  outline: none;
+  resize: none;
+  padding: 0.875rem 1rem;
+  transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+  -webkit-font-smoothing: antialiased;
+}
+
+.personality-textarea:hover,
+.flow-textarea:hover {
+  background-color: var(--foreground-state-10, rgba(218, 220, 224, 0.1));
+}
+
+.personality-textarea:focus,
+.personality-textarea:focus-visible,
+.flow-textarea:focus,
+.flow-textarea:focus-visible {
+  background-color: var(--foreground-state-15, rgba(218, 220, 224, 0.15));
+  border-color: var(--mat-sys-primary, #a8c7fa);
+}
+
+.personality-textarea::placeholder,
+.flow-textarea::placeholder {
+  color: var(--mat-sys-on-surface-variant, rgba(218, 220, 224, 0.5));
+  opacity: 1;
+}
+
+/* Personality Textarea Wrapper (for auto-resizing & custom scrollbar) */
+.personality-textarea-wrapper {
+  position: relative;
+  width: 100%;
+  border-radius: var(--mat-sys-corner-large, 16px);
+  background-color: var(--foreground-state-05, rgba(218, 220, 224, 0.05));
+  border: 1px solid var(--mat-sys-outline-variant, rgba(255, 255, 255, 0.08));
+  padding: 0.75rem 1rem;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+  -webkit-font-smoothing: antialiased;
+}
+
+.personality-textarea-wrapper:hover {
+  background-color: var(--foreground-state-10, rgba(218, 220, 224, 0.1));
+}
+
+.personality-textarea-wrapper:focus-within {
+  background-color: var(--foreground-state-15, rgba(218, 220, 224, 0.15));
+  border-color: var(--mat-sys-primary, #a8c7fa);
+}
+
+.personality-textarea-wrapper .personality-textarea {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Disclaimer text below textarea */
+.disclaimer-overflow {
+  overflow: hidden;
+  padding-top: 0.125rem;
+}
+
+.disclaimer-text {
+  font: var(--mat-sys-body-small, 400 0.75rem/1rem 'Google Sans Text', sans-serif);
+  color: var(--mat-sys-on-surface-variant, #8e918f);
+  line-height: 1.25rem;
+  display: block;
 }
 
 /* ── Google Flow Ingredient Chips (Reference Button View) ── */
