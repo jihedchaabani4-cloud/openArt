@@ -73,12 +73,25 @@ export function createPromptBarStore(overrides = {}) {
       let nextValues = parameterValues;
       let reconciliationLog = [];
 
-      if (nextModelId) {
+      if (nextModelId && nextModelId !== selectedModelId) {
         const prevDefs = selectedModelId ? (modelsMap[selectedModelId]?.parameters || {}) : {};
         const nextDefs = nextModelsMap[nextModelId]?.parameters || {};
         const result = reconcile(parameterValues, prevDefs, nextDefs);
-        nextValues = result.nextValues;
+        nextValues = {
+          ...parameterValues,
+          ...result.nextValues,
+        };
         reconciliationLog = result.changes;
+      } else if (nextModelId && !selectedModelId) {
+        const nextDefs = nextModelsMap[nextModelId]?.parameters || {};
+        const result = reconcile(parameterValues, {}, nextDefs);
+        nextValues = {
+          ...parameterValues,
+          ...result.nextValues,
+        };
+        reconciliationLog = result.changes;
+      } else {
+        nextValues = parameterValues;
       }
 
       set({ modelsMap: nextModelsMap, rawModelsMap, selectedModelId: nextModelId, parameterValues: nextValues, reconciliationLog });

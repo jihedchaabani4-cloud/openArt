@@ -19,7 +19,6 @@ export default function ElementWorkflowEditPage() {
 
     const hydrateElementDraft = useElementStore((state) => state.hydrateElementDraft);
     const resetElementStore = useElementStore((state) => state.resetElementStore);
-    const resetPromptStore = usePromptStore((state) => state.resetPromptStore);
     const setGenerationMode = usePromptStore((state) => state.setGenerationMode);
     const setModelId = usePromptStore((state) => state.setModelId);
     const setRatio = usePromptStore((state) => state.setRatio);
@@ -87,7 +86,6 @@ export default function ElementWorkflowEditPage() {
 
         return () => {
             resetElementStore();
-            resetPromptStore();
         };
     }, [
         workflow,
@@ -95,7 +93,6 @@ export default function ElementWorkflowEditPage() {
         hydrateElementDraft,
         projectId,
         resetElementStore,
-        resetPromptStore,
         setGenerationMode,
         setModelId,
         setQuality,

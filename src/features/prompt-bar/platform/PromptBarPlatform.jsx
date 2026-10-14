@@ -55,10 +55,25 @@ import {
  * Platform MUST NOT call setParameter(slot.role, val) — must always resolve role to
  * backend key via featureConfig.resolveParameterMapping first.
  */
-export function PromptBarPlatform({ type, featureConfig, models = [], onGenerate, className, store, hideBackground = false, isGenerating = false, renderRightActions }) {
-  if (store) {
+export function PromptBarPlatform({
+  type,
+  featureConfig,
+  models = [],
+  onGenerate,
+  className,
+  store,
+  hideBackground = false,
+  isGenerating = false,
+  renderRightActions,
+  persist = true,
+  persistKey = "studio-prompt-bar",
+}) {
+  const contextStore = useContext(PromptBarStoreContext);
+  const activeStore = store || contextStore;
+
+  if (activeStore) {
     return (
-      <PromptBarStoreContext.Provider value={store}>
+      <PromptBarStoreContext.Provider value={activeStore}>
         <PromptBarPlatformInner
           type={type}
           featureConfig={featureConfig}
@@ -74,7 +89,12 @@ export function PromptBarPlatform({ type, featureConfig, models = [], onGenerate
   }
 
   return (
-    <PromptBarStoreProvider type={type} initialModels={models}>
+    <PromptBarStoreProvider
+      type={type}
+      initialModels={models}
+      persist={persist}
+      persistKey={persistKey}
+    >
       <PromptBarPlatformInner
         type={type}
         featureConfig={featureConfig}
@@ -300,8 +320,16 @@ function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, class
   // T011 / FR-SLOT-04: Mode-switch cleanup — when composition changes, clear any slot
   // values keyed by backend keys that are no longer part of the active composition.
   // Dynamically collects all possible slot keys from featureConfig without hardcoding any.
+  const prevModeRef = useRef({ mode: activeMode, subMode: activeSubMode });
   useEffect(() => {
     if (!featureConfig?.COMPOSITION_REQUIREMENTS) return;
+    if (!currentModel) return;
+
+    const prev = prevModeRef.current;
+    if (prev.mode === activeMode && prev.subMode === activeSubMode) {
+      return;
+    }
+    prevModeRef.current = { mode: activeMode, subMode: activeSubMode };
 
     // Collect all possible backend keys across all modes in this featureConfig
     const allConfiguredKeys = new Set();
@@ -339,7 +367,7 @@ function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, class
       }
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeMode, activeSubMode, featureConfig, activeSlots]);
+  }, [activeMode, activeSubMode, featureConfig, activeSlots, currentModel]);
 
   // T010 / FR-SLOT-06: Keyframe swap handler — reads/writes backend keys (not role names).
   // Swap is only enabled when BOTH start and end frames are filled (FR-SLOT-06).
