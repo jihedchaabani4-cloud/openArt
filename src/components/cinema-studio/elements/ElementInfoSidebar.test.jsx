@@ -56,4 +56,48 @@ describe("ElementInfoSidebar", () => {
       screen.queryByText("Le modèle utilisera cette description pour intégrer fidèlement l'élément dans vos prompts.")
     ).toBeNull();
   });
+
+  it("renders unified styling with global CSS tokens, rounded-12px, blur variant, and balanced col-span-4", () => {
+    const { container } = render(
+      <ElementInfoSidebar
+        draftTitle="Cyberpunk City"
+        setDraftTitle={vi.fn()}
+        onSaveTitle={vi.fn()}
+        draftDesc="Futuristic neon metropolis"
+        setDraftDesc={vi.fn()}
+        onSaveDescription={vi.fn()}
+        elementType="style"
+        onSaveElementType={vi.fn()}
+        draftGuidelines="Keep lighting dark"
+        setDraftGuidelines={vi.fn()}
+        onSaveGuidelines={vi.fn()}
+      />
+    );
+
+    // 1. Sidebar column container matches CharacterInfoSidebar
+    const sidebar = container.firstChild;
+    expect(sidebar.className).toContain("lg:col-span-4");
+    expect(sidebar.className).toContain("xl:col-span-4");
+    expect(sidebar.className).toContain("gap-5");
+
+    // 2. Select trigger for Element Type uses blur variant and rounded-12px
+    const selectTrigger = screen.getByRole("combobox");
+    expect(selectTrigger).toBeDefined();
+    expect(selectTrigger.getAttribute("data-variant")).toBe("blur");
+    expect(selectTrigger.className).toContain("rounded-[var(--mat-sys-corner-medium,12px)]");
+    expect(selectTrigger.textContent).toContain("Style");
+
+    // 3. Textareas use blur variant and rounded-12px
+    const descTextarea = screen.getByPlaceholderText(/Décrivez les spécificités/i);
+    const descWrapper = descTextarea.parentElement;
+    expect(descWrapper.className).toContain("rounded-[var(--mat-sys-corner-medium,12px)]");
+    expect(descWrapper.className).toContain("border-none");
+    expect(descWrapper.style.backgroundColor).toContain("var(--foreground-state-10");
+
+    const guidelinesTextarea = screen.getByPlaceholderText(/Règles à respecter/i);
+    const guidelinesWrapper = guidelinesTextarea.parentElement;
+    expect(guidelinesWrapper.className).toContain("rounded-[var(--mat-sys-corner-medium,12px)]");
+    expect(guidelinesWrapper.className).toContain("border-none");
+    expect(guidelinesWrapper.style.backgroundColor).toContain("var(--foreground-state-10");
+  });
 });

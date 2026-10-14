@@ -7,11 +7,12 @@ import { Button } from "@/shared/ui/button";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { ELEMENT_TYPES } from "@/features/workflows/model/elementSheetConfig";
 import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from "@/shared/ui/dropdown-menu";
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectItem,
+  SelectValue,
+} from "@/shared/ui/select";
 import {
   HoverCard,
   HoverCardTrigger,
@@ -24,6 +25,7 @@ import { cn } from "@/shared/lib/utils";
  * InputInfoHover
  * Sleek, subtle hover trigger button that presents contextual input descriptions
  * on hover without cluttering the sidebar layout with static text blocks.
+ * Conforms to global Google Flow / Material 3 styling tokens.
  */
 export function InputInfoHover({ content, title, testId }) {
   const [open, setOpen] = useState(false);
@@ -38,8 +40,8 @@ export function InputInfoHover({ content, title, testId }) {
             setOpen((prev) => !prev);
           }}
           className={cn(
-            "inline-flex items-center justify-center size-4 rounded-full text-white/40 hover:text-white hover:bg-white/10 transition-colors cursor-pointer outline-none shrink-0",
-            open && "text-white bg-white/15"
+            "inline-flex items-center justify-center size-4 rounded-full text-[var(--mat-sys-on-surface-variant,#8e918f)] hover:text-[var(--mat-sys-on-surface,#e3e3e3)] hover:bg-[var(--foreground-state-10)] transition-colors cursor-pointer outline-none shrink-0",
+            open && "text-[var(--mat-sys-on-surface,#e3e3e3)] bg-[var(--foreground-state-15)]"
           )}
           aria-label={title || content}
           title={content}
@@ -52,7 +54,7 @@ export function InputInfoHover({ content, title, testId }) {
         side="top"
         align="start"
         sideOffset={6}
-        className="z-50 w-64 rounded-xl border border-white/10 bg-[#1e1e1f] backdrop-blur-xl p-3 text-[11.5px] text-white/80 shadow-2xl leading-relaxed"
+        className="z-50 w-64 rounded-[var(--mat-menu-container-shape,16px)] border border-[var(--mat-sys-outline-variant,rgba(255,255,255,0.08))] bg-[var(--mat-menu-container-color,var(--background-state-90))] backdrop-blur-xl p-3 text-[11.5px] text-[var(--mat-sys-on-surface,#e3e3e3)] shadow-[var(--mat-menu-container-elevation-shadow)] leading-relaxed"
       >
         {content}
       </HoverCardContent>
@@ -64,9 +66,15 @@ export function InputInfoHover({ content, title, testId }) {
  * ElementInfoSidebar
  * Left sidebar for the Element edit view:
  * - Editable Element Name with "@" prefix
- * - Element Type selector (Dropdown: Object, Style, Font, Logo) — bg-white/5, no border, neutral blur style
- * - Element Description / Notes textarea with Vision AI quick-trigger (neutral styling)
- * - Directives de rendu editable textarea with copy button
+ * - Element Type selector via Select component (variant="blur") with global CSS tokens
+ * - Element Description / Notes textarea (variant="blur") with Vision AI trigger
+ * - Directives de rendu editable textarea (variant="blur") with copy action
+ *
+ * Fully unified styling:
+ * - Rounded corners: rounded-[var(--mat-sys-corner-medium,12px)]
+ * - Background: var(--foreground-state-10) with blur(80px)
+ * - Padding: unified SaaS scale (p-3 / px-3.5)
+ * - Harmonious global CSS tokens across all fields
  */
 export function ElementInfoSidebar({
   draftTitle,
@@ -85,7 +93,6 @@ export function ElementInfoSidebar({
   className,
 }) {
   const [copied, setCopied] = useState(false);
-  const [typeOpen, setTypeOpen] = useState(false);
 
   const copyGuidelines = () => {
     if (!draftGuidelines) return;
@@ -100,7 +107,7 @@ export function ElementInfoSidebar({
     ) || ELEMENT_TYPES[0];
 
   return (
-    <div className={cn("lg:col-span-3 xl:col-span-3 flex flex-col gap-4", className)}>
+    <div className={cn("lg:col-span-4 xl:col-span-4 flex flex-col gap-5", className)}>
       {/* 1. Editable Element Name */}
       <div className="flex flex-col gap-1">
         <Input
@@ -119,82 +126,59 @@ export function ElementInfoSidebar({
         />
       </div>
 
-      {/* 2. Element Type Dropdown — style matches DropdownSegmented (bg-white/5, no border, blur) */}
-      <div className="flex flex-col gap-1.5">
+      {/* 2. Element Type Selector — Unified Select with variant="blur" */}
+      <div className="flex flex-col gap-1.5 w-full">
         <div className="flex items-center gap-1.5">
-          <span className="text-xs font-semibold text-white/70">Type d'élément</span>
+          <span className="text-xs font-semibold text-[var(--mat-sys-on-surface,#e3e3e3)]">Type d'élément</span>
           <InputInfoHover
             content="Définit la catégorie de référence (Objet, Style, Police ou Logo) pour guider la génération."
             title="Info type"
             testId="type-info-hover"
           />
         </div>
-        <DropdownMenu open={typeOpen} onOpenChange={setTypeOpen}>
-          <DropdownMenuTrigger asChild>
-            <Button
-              type="button"
-              variant="ghost"
-              className={cn(
-                "flex items-center gap-2.5 w-full h-auto px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-left outline-none select-none justify-start cursor-pointer",
-                "bg-white/5 text-white hover:bg-white/[0.08] hover:text-white",
-                typeOpen && "bg-white/[0.08]"
-              )}
-            >
+        <Select
+          value={currentType.id}
+          onValueChange={(val) => onSaveElementType && onSaveElementType(val)}
+        >
+          <SelectTrigger
+            variant="blur"
+            className="w-full h-11 px-3.5 rounded-[var(--mat-sys-corner-medium,12px)] text-sm font-medium"
+          >
+            <div className="flex items-center gap-2.5 min-w-0">
               <GoogleIcon
                 iconName={currentType.googleIcon}
-                className="text-[18px] text-white/60 shrink-0"
+                className="text-[18px] text-[var(--mat-sys-on-surface-variant,#8e918f)] shrink-0"
               />
-              <span className="flex-1 text-white/90">{currentType.label}</span>
-              <GoogleIcon
-                iconName="expand_more"
-                className={cn(
-                  "text-[18px] text-white/40 shrink-0 transition-transform duration-200",
-                  typeOpen && "rotate-180"
-                )}
-              />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" sideOffset={6} className="w-52 p-1.5">
-            {ELEMENT_TYPES.map((type) => {
-              const isSelected =
-                type.id.toLowerCase() ===
-                (elementType || "object").toLowerCase();
-              return (
-                <DropdownMenuItem
-                  key={type.id}
-                  onSelect={() => {
-                    onSaveElementType && onSaveElementType(type.id);
-                    setTypeOpen(false);
-                  }}
-                  className={cn(
-                    "flex items-center gap-3 pl-3 pr-4 py-2 min-h-[2.125rem] text-[14px] leading-5 font-medium rounded-[16px] cursor-pointer transition-colors duration-100 ease-in-out",
-                    isSelected ? "text-white bg-white/10" : "text-white/70 hover:text-white hover:bg-white/5"
-                  )}
-                >
+              <SelectValue placeholder="Type d'élément">
+                {currentType.label}
+              </SelectValue>
+            </div>
+          </SelectTrigger>
+          <SelectContent align="start" className="w-[var(--radix-select-trigger-width)]">
+            {ELEMENT_TYPES.map((type) => (
+              <SelectItem
+                key={type.id}
+                value={type.id}
+                icon={
                   <GoogleIcon
                     iconName={type.googleIcon}
-                    className={cn(
-                      "text-[20px] shrink-0",
-                      isSelected ? "text-white" : "text-white/50"
-                    )}
+                    className="text-[18px]"
                   />
-                  <span className="flex-1">{type.label}</span>
-                  {isSelected && (
-                    <Check className="size-3.5 text-white/70 ml-auto" />
-                  )}
-                </DropdownMenuItem>
-              );
-            })}
-          </DropdownMenuContent>
-        </DropdownMenu>
+                }
+              >
+                {type.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* 3. Element Description / Notes */}
-      <div className="flex flex-col gap-1">
-        <div className="flex items-center justify-between pb-1">
+      <div className="flex flex-col gap-1.5 w-full">
+        <div className="flex items-center justify-between pb-0.5">
           <div className="flex items-center gap-1.5">
-            <span className="text-xs font-semibold text-white/70">Description / Contexte</span>
-            <span className="text-[11px] text-white/40">(optionnel)</span>
+            <span className="text-xs font-semibold text-[var(--mat-sys-on-surface,#e3e3e3)]">Description / Contexte</span>
+            <span className="text-[11px] text-[var(--mat-sys-on-surface-variant,#8e918f)]">(optionnel)</span>
             <InputInfoHover
               content="Le modèle utilisera cette description pour intégrer fidèlement l'élément dans vos prompts."
               title="Info description"
@@ -209,13 +193,13 @@ export function ElementInfoSidebar({
               size="sm"
               disabled={isAnalyzingVision}
               onClick={onAnalyzeVision}
-              className="h-6 px-2 text-[11px] text-white/60 hover:text-white hover:bg-white/10 gap-1.5 rounded-lg transition-colors cursor-pointer"
+              className="h-6 px-2.5 text-[11px] text-[var(--mat-sys-on-surface-variant,#8e918f)] hover:text-[var(--mat-sys-on-surface,#e3e3e3)] hover:bg-[var(--foreground-state-10)] gap-1.5 rounded-[var(--button-border-radius,12px)] transition-colors cursor-pointer font-medium"
               title="Analyser automatiquement les images avec Vision AI"
             >
               {isAnalyzingVision ? (
-                <Loader2 className="size-3 animate-spin text-white/60" />
+                <Loader2 className="size-3 animate-spin text-[var(--mat-sys-primary,#a8c7fa)]" />
               ) : (
-                <Sparkles className="size-3 text-white/60" />
+                <Sparkles className="size-3 text-[var(--mat-sys-primary,#a8c7fa)]" />
               )}
               <span>{isAnalyzingVision ? "Analyse…" : "Vision AI"}</span>
             </Button>
@@ -223,6 +207,7 @@ export function ElementInfoSidebar({
         </div>
 
         <Textarea
+          variant="blur"
           placeholder="Décrivez les spécificités, matériaux, et style de cet élément..."
           value={draftDesc}
           onChange={(e) => setDraftDesc(e.target.value)}
@@ -234,11 +219,11 @@ export function ElementInfoSidebar({
       </div>
 
       {/* 4. Directives de rendu (Guidelines) */}
-      <div className="flex flex-col gap-1 pt-1.5 border-t border-white/5">
-        <div className="flex items-center justify-between pb-1">
+      <div className="flex flex-col gap-1.5 w-full pt-2 border-t border-[var(--mat-sys-outline-variant,rgba(255,255,255,0.08))]">
+        <div className="flex items-center justify-between pb-0.5">
           <div className="flex items-center gap-1.5">
-            <span className="text-xs font-semibold text-white/70">Directives de rendu</span>
-            <span className="text-[11px] text-white/40">(règles d'utilisation)</span>
+            <span className="text-xs font-semibold text-[var(--mat-sys-on-surface,#e3e3e3)]">Directives de rendu</span>
+            <span className="text-[11px] text-[var(--mat-sys-on-surface-variant,#8e918f)]">(règles d'utilisation)</span>
             <InputInfoHover
               content="Consignes et règles spécifiques que l'IA doit suivre lors de l'utilisation de cet élément."
               title="Info directives"
@@ -252,11 +237,11 @@ export function ElementInfoSidebar({
               variant="ghost"
               size="icon-xs"
               onClick={copyGuidelines}
-              className="text-white/40 hover:text-white"
+              className="text-[var(--mat-sys-on-surface-variant,#8e918f)] hover:text-[var(--mat-sys-on-surface,#e3e3e3)] hover:bg-[var(--foreground-state-10)] rounded-[var(--button-border-radius,12px)] transition-colors"
               title="Copier les directives"
             >
               {copied ? (
-                <Check className="size-3.5 text-emerald-400" />
+                <Check className="size-3.5 text-[var(--mat-sys-success,#80da88)]" />
               ) : (
                 <Copy className="size-3.5" />
               )}
@@ -265,6 +250,7 @@ export function ElementInfoSidebar({
         </div>
 
         <Textarea
+          variant="blur"
           placeholder="Règles à respecter (ex: Maintenir un éclairage doux, éviter les reflets intenses, ne pas modifier la texture...)"
           value={draftGuidelines}
           onChange={(e) => setDraftGuidelines && setDraftGuidelines(e.target.value)}
