@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import { render, act } from "@testing-library/react";
 import * as React from "react";
 import {
@@ -183,5 +183,43 @@ describe("PromptBar cross-page persistence", () => {
     expect(mountedStore.getState().characters).toEqual([{ id: "char-1", name: "hero" }]);
     expect(mountedStore.getState().activeMode).toBe("video");
     expect(mountedStore.getState().activeSubMode).toBe("frames");
+  });
+
+  it("does not trigger setState during render when reusing a persistent store with initialModels", () => {
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    try {
+      // 1. Initial mount
+      const { unmount } = render(
+        <PromptBarStoreProvider
+          type={testType}
+          initialModels={mockModels}
+          persistKey="test-no-render-setstate"
+        >
+          <TestConsumer />
+        </PromptBarStoreProvider>
+      );
+
+      unmount();
+
+      // 2. Remount with models — must not update state synchronously during render phase
+      render(
+        <PromptBarStoreProvider
+          type={testType}
+          initialModels={mockModels}
+          persistKey="test-no-render-setstate"
+        >
+          <TestConsumer />
+        </PromptBarStoreProvider>
+      );
+
+      // Verify no React warning was emitted
+      const setStateInRenderCalls = errorSpy.mock.calls.filter(([msg]) =>
+        typeof msg === "string" && msg.includes("Cannot update a component")
+      );
+      expect(setStateInRenderCalls).toHaveLength(0);
+    } finally {
+      errorSpy.mockRestore();
+    }
   });
 });

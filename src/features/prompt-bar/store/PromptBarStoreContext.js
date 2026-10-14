@@ -102,10 +102,6 @@ export function PromptBarStoreProvider({
     if (effectiveKey && persistentStoreRegistry.has(effectiveKey)) {
       // 1. Reuse existing store instance in memory across page navigation
       storeRef.current = persistentStoreRegistry.get(effectiveKey);
-
-      if (initialModels && initialModels.length > 0) {
-        storeRef.current.getState().setModels(initialModels);
-      }
     } else {
       // 2. Initialize from modelsMap + savedState
       const modelsMap = {};
@@ -142,11 +138,22 @@ export function PromptBarStoreProvider({
   // Register active store instance
   setActivePromptBarStore(storeRef.current);
 
-  // Subscribe to changes and persist to sessionStorage
+  // Subscribe to changes and persist to sessionStorage, and safely sync models in effect
   React.useEffect(() => {
     setActivePromptBarStore(storeRef.current);
 
-    if (!effectiveKey || !storeRef.current) return undefined;
+    if (!storeRef.current) return undefined;
+
+    // Safely sync initialModels if any new models arrived without violating React render phase
+    if (initialModels && initialModels.length > 0) {
+      const currentModelsMap = storeRef.current.getState().modelsMap || {};
+      const hasMissingModel = initialModels.some((m) => !currentModelsMap[m.id]);
+      if (hasMissingModel) {
+        storeRef.current.getState().setModels(initialModels);
+      }
+    }
+
+    if (!effectiveKey) return undefined;
 
     const unsub = storeRef.current.subscribe((state) => {
       saveState(effectiveKey, state);
@@ -155,7 +162,7 @@ export function PromptBarStoreProvider({
     return () => {
       unsub();
     };
-  }, [effectiveKey]);
+  }, [effectiveKey, initialModels]);
 
   return React.createElement(PromptBarStoreContext.Provider, { value: storeRef.current }, children);
 }
