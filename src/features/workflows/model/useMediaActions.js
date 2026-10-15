@@ -5,8 +5,7 @@ import { downloadFile } from "@/shared/lib/utils";
 import { useRemoveAsset } from "@/features/media/api/mediaApi";
 import { usePathname, useRouter } from "next/navigation";
 import { useElementStore } from "@/features/prompt-bar/model/useElementStore";
-import { usePromptStore } from "@/features/prompt-bar/model/usePromptStore";
-import { buildElementSheetDraft } from "./elementSheetConfig";
+import { buildElementSheetDraft, syncElementDraft } from "./elementSheetConfig";
 import { canAnyModelAcceptEntity } from "@/features/studio";
 import { promptBarService } from "@/features/prompt-bar/api/promptBarService";
 import { useRealBackendModels } from "@/features/prompt-bar/core/useRealBackendModels";
@@ -103,22 +102,10 @@ export function useWorkflowActions(workflow, item = null) {
       if (!draft) return;
 
       const elementStore = useElementStore.getState();
-      const promptStore = usePromptStore.getState();
-
-      elementStore.hydrateElementDraft({
-        mode: draft.mode,
-        prompt: draft.prompt,
-        references: draft.references,
-        features: draft.features,
+      syncElementDraft(draft, {
+        elementStore,
+        projectId,
       });
-
-      promptStore.setGenerationMode(draft.isVideo ? "keyframe" : "image");
-      if (draft.promptConfig.model) promptStore.setModelId(draft.promptConfig.model);
-      if (draft.promptConfig.ratio) promptStore.setRatio(draft.promptConfig.ratio);
-      if (draft.promptConfig.quality) promptStore.setQuality(draft.promptConfig.quality);
-      if (draft.promptConfig.videoResolution) {
-        promptStore.setVideoResolution(draft.promptConfig.videoResolution);
-      }
       return;
     }
 

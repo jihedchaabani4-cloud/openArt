@@ -13,10 +13,10 @@ Inventory of all consumers of `usePromptStore`, `useCharacterStore`, and `useEle
 
 | Consumer File | Store | Field / Action | Duplicates Instance Store? | Class | Notes |
 |---|---|---|---|---|---|
-| `src/features/workflows/model/useMediaActions.js:169-181` | `usePromptStore` | `setGenerationMode`, `setPrompt`, `setModelId`, `setRatio`, `setReferenceImages`, `setQuality`, `setVideoResolution`, `setDuration`, `setMotion`, `setCount` | YES | **MIGRATE** | Dual-write site in `handleReuseSettings`. Duplicates writes already sent to `activeBarStore`. |
-| `src/features/workflows/model/useMediaActions.js:217-227` | `usePromptStore` | `setGenerationMode`, `clearReferences`, `addReference` | YES | **MIGRATE** | Fallback in `handleAnimate` when `animateMedia` returns false. |
-| `src/features/workflows/model/useMediaActions.js:263` | `usePromptStore` | `addReference` | YES | **MIGRATE** | Fallback in `handleUseAsReference`. |
-| `src/app/cinema-studio/[projectId]/elements/edit/[workflowId]/page.js:22-26` | `usePromptStore` | `setGenerationMode`, `setModelId`, `setRatio`, `setQuality`, `setVideoResolution` | YES | **MIGRATE** | Presets generation parameters upon loading element edit page. |
+| `src/features/workflows/model/useMediaActions.js:169-181` | `usePromptStore` | `setGenerationMode`, `setPrompt`, `setModelId`, `setRatio`, `setReferenceImages`, `setQuality`, `setVideoResolution`, `setDuration`, `setMotion`, `setCount` | YES | **MIGRATED (P5)** | Migrated in X4 to `promptBarService.applyGeneration(...)` & `focus()`. |
+| `src/features/workflows/model/useMediaActions.js:217-227` | `usePromptStore` | `setGenerationMode`, `clearReferences`, `addReference` | YES | **MIGRATED (P5)** | Migrated in X4 to `promptBarService.animateMedia(...)`. |
+| `src/features/workflows/model/useMediaActions.js:263` | `usePromptStore` | `addReference` | YES | **MIGRATED (P5)** | Migrated in X4 to `promptBarService.addReference(...)`. |
+| `src/app/cinema-studio/[projectId]/elements/edit/[workflowId]/page.js:22-26` | `usePromptStore` | `setGenerationMode`, `setModelId`, `setRatio`, `setQuality`, `setVideoResolution` | YES | **MIGRATED (P5)** | Migrated in X5 to `syncElementDraft(...)` calling `promptBarService.applyGeneration(...)`. |
 | `src/features/workflows/model/useMediaActions.js:110-112` | `useElementStore` | `setPrompt`, `features` | NO | **KEEP** | Updates element prompt & traits during element action. |
 | `src/app/cinema-studio/[projectId]/elements/edit/[workflowId]/page.js:20-21` | `useElementStore` | `hydrateElementDraft`, `resetElementStore` | NO | **KEEP** | Element turnaround sheet & draft hydration. |
 | `src/app/cinema-studio/[projectId]/characters/new/page.js:124` | `useCharacterStore` | `setPrompt` | NO | **KEEP** | Sets prompt from archetype selection. Character prompt bar is locked (PB-D-18). |

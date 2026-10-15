@@ -87,8 +87,6 @@ describe("X4: Migration of useMediaActions to promptBarService", () => {
   it("handleReuseSettings delegates to promptBarService without legacy store writes or querySelector", () => {
     const querySelectorSpy = vi.spyOn(document, "querySelector");
     const legacyPromptState = usePromptStore.getState();
-    const legacySetPromptSpy = vi.spyOn(legacyPromptState, "setPrompt");
-    const legacySetModelIdSpy = vi.spyOn(legacyPromptState, "setModelId");
 
     const { result } = renderHook(() => useWorkflowActions(mockWorkflow));
 
@@ -122,22 +120,19 @@ describe("X4: Migration of useMediaActions to promptBarService", () => {
     // 4. Must NOT call getActivePromptBarStore
     expect(mockGetActivePromptBarStore).not.toHaveBeenCalled();
 
-    // 5. Must NOT write duplicated fields to legacy usePromptStore
-    expect(legacySetPromptSpy).not.toHaveBeenCalled();
-    expect(legacySetModelIdSpy).not.toHaveBeenCalled();
+    // 5. Duplicated fields must NOT exist on legacy store
+    expect(legacyPromptState.setPrompt).toBeUndefined();
+    expect(legacyPromptState.setModelId).toBeUndefined();
 
     // 6. Must NOT query the DOM for editor focus
     expect(querySelectorSpy).not.toHaveBeenCalled();
 
     querySelectorSpy.mockRestore();
-    legacySetPromptSpy.mockRestore();
-    legacySetModelIdSpy.mockRestore();
   });
 
   it("handleAnimate delegates to promptBarService.animateMedia and focus", () => {
     const querySelectorSpy = vi.spyOn(document, "querySelector");
     const legacyPromptState = usePromptStore.getState();
-    const legacyAddReferenceSpy = vi.spyOn(legacyPromptState, "addReference");
 
     const { result } = renderHook(() => useWorkflowActions(mockWorkflow));
 
@@ -155,12 +150,11 @@ describe("X4: Migration of useMediaActions to promptBarService", () => {
     expect(mockFocus).toHaveBeenCalledTimes(1);
 
     expect(mockGetActivePromptBarStore).not.toHaveBeenCalled();
-    expect(legacyAddReferenceSpy).not.toHaveBeenCalled();
+    expect(legacyPromptState.addReference).toBeUndefined();
     expect(querySelectorSpy).not.toHaveBeenCalled();
     expect(mockPush).not.toHaveBeenCalled();
 
     querySelectorSpy.mockRestore();
-    legacyAddReferenceSpy.mockRestore();
   });
 
   it("handleAnimate navigates to assets page when unmounted (queued) and outside assets", () => {
@@ -185,7 +179,6 @@ describe("X4: Migration of useMediaActions to promptBarService", () => {
 
   it("handleAddToPrompt delegates to promptBarService.addReference", () => {
     const legacyPromptState = usePromptStore.getState();
-    const legacyAddReferenceSpy = vi.spyOn(legacyPromptState, "addReference");
 
     const { result } = renderHook(() => useWorkflowActions(mockWorkflow));
 
@@ -200,8 +193,6 @@ describe("X4: Migration of useMediaActions to promptBarService", () => {
       })
     );
     expect(mockAddReference).toHaveBeenCalledTimes(1);
-    expect(legacyAddReferenceSpy).not.toHaveBeenCalled();
-
-    legacyAddReferenceSpy.mockRestore();
+    expect(legacyPromptState.addReference).toBeUndefined();
   });
 });
