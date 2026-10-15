@@ -24,6 +24,8 @@ import { cleanTagsForAsset, getAssetId } from "../core/tagsService.js";
 import { registry } from "./registry.js";
 import { switchMode as switchModeCommand } from "./commands/switchMode.js";
 import { selectModel as selectModelCommand } from "./commands/selectModel.js";
+import { attachMedia as attachMediaCommand } from "./commands/attachMedia.js";
+import { removeMedia as removeMediaCommand } from "./commands/removeMedia.js";
 
 /**
  * Creates a new isolated PromptBar Zustand vanilla store.
@@ -298,6 +300,32 @@ export function createPromptBarStore(overrides = {}, initialDeps = {}) {
     setTemplate: (template) => {
       deps.template = template;
       set({ template });
+    },
+
+    /**
+     * Attach media to a composition slot per PB-D-03.
+     * @param {object} args - { role, value }
+     * @returns {import("../core/commandResult.js").CommandResult}
+     */
+    attachMedia: (args) => {
+      const res = attachMediaCommand(get(), args, deps);
+      if (res.ok && res.patch) {
+        set(res.patch);
+      }
+      return res;
+    },
+
+    /**
+     * Remove media from a composition slot or list per PB-D-03.
+     * @param {object} args - { role, value }
+     * @returns {import("../core/commandResult.js").CommandResult}
+     */
+    removeMedia: (args) => {
+      const res = removeMediaCommand(get(), args, deps);
+      if (res.ok && res.patch) {
+        set(res.patch);
+      }
+      return res;
     },
 
     /** Clears media references (images, reference_images, elements, characters) and cleans prompt tags */

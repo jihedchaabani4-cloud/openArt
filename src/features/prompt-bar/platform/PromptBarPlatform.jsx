@@ -171,6 +171,8 @@ function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, class
   const removeElement    = usePromptBarStore((s) => s.removeElement);
   const addCharacter     = usePromptBarStore((s) => s.addCharacter);
   const removeCharacter  = usePromptBarStore((s) => s.removeCharacter);
+  const attachMedia      = usePromptBarStore((s) => s.attachMedia);
+  const removeMedia      = usePromptBarStore((s) => s.removeMedia);
 
 
   // Sync incoming models into the store
@@ -585,44 +587,11 @@ function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, class
 
     // Case 1: Triggered from a slot click
     if (activeDialogSlot) {
-      const cap = getModelReferenceCapability(currentModel);
-      const resolvedKey = featureConfig?.resolveParameterMapping
-        ? featureConfig.resolveParameterMapping(currentModel, activeDialogSlot.role) || (activeDialogSlot.role === "reference" ? (cap.backendKey || "images") : activeDialogSlot.role)
-        : (activeDialogSlot.role === "reference" ? (cap.backendKey || "images") : activeDialogSlot.role);
-
-      if (resolvedKey) {
-        if (activeDialogSlot.role === "reference") {
-          const maxImages = getSlotMaxRefs(activeDialogSlot) || cap.maxRefs || 4;
-          let currentList = Array.isArray(paramValues[resolvedKey])
-            ? [...paramValues[resolvedKey]]
-            : (paramValues[resolvedKey] ? [paramValues[resolvedKey]] : []);
-
-          normalizedItems.forEach((norm) => {
-            const check = canAddReference(currentList, norm, maxImages);
-            if (check.canAdd) {
-              const alreadyHas = currentList.some((c) => (c.workflow_id || c.id) === (norm.workflow_id || norm.id));
-              if (!alreadyHas) {
-                currentList.push(norm);
-                if (norm.type === "element") {
-                  addElement(norm);
-                } else if (norm.type === "character") {
-                  addCharacter(norm);
-                }
-              }
-            }
-          });
-
-          setParameter(resolvedKey, maxImages === 1 ? currentList[0] : currentList);
-        } else {
-          // Keyframe slots (start, end)
-          setParameter(resolvedKey, normalizedItems[0]);
-          if (normalizedItems[0]?.type === "element") {
-            addElement(normalizedItems[0]);
-          } else if (normalizedItems[0]?.type === "character") {
-            addCharacter(normalizedItems[0]);
-          }
+      normalizedItems.forEach((norm) => {
+        if (typeof attachMedia === "function") {
+          attachMedia({ role: activeDialogSlot.role, value: norm });
         }
-      }
+      });
     } 
     // Case 2: Triggered from @ mention
     else if (mentionCallback) {
@@ -651,82 +620,19 @@ function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, class
 
     setDialogOpen(false);
     setActiveDialogSlot(null);
-  }, [activeDialogSlot, mentionCallback, featureConfig, currentModel, setParameter, activeSlots, paramValues, addElement, addCharacter]);
+  }, [activeDialogSlot, mentionCallback, attachMedia, addElement, addCharacter, activeSlots, paramValues, featureConfig, currentModel, setParameter]);
 
-  const handleRemoveReferenceItem = useCallback((itemToRemove, backendKey) => {
-    const idToRemove = itemToRemove.workflow_id || itemToRemove.id;
-    if (!idToRemove) return;
-
-    // 1. Remove from paramValues across possible keys
-    const targetKey = backendKey || "images";
-    ["images", "input_image", "reference_images", targetKey].forEach((key) => {
-      const currentVal = paramValues[key];
-      if (Array.isArray(currentVal)) {
-        const nextArr = currentVal.filter((r) => (r.workflow_id || r.id) !== idToRemove);
-        setParameter(key, nextArr.length > 0 ? nextArr : undefined);
-      } else if (currentVal && (currentVal.workflow_id || currentVal.id) === idToRemove) {
-        setParameter(key, undefined);
-      }
-    });
-
-    // 2. Cascade remove from elements/characters in store
-    removeElement(idToRemove);
-    removeCharacter(idToRemove);
-
-    // 3. Cascade prompt tags cleanup ONLY IF not used in any other slot
-    const stillUsedInSlot = activeSlots.some((s) => {
-      const key = featureConfig?.resolveParameterMapping
-        ? featureConfig.resolveParameterMapping(currentModel, s.role) || s.role
-        : s.role;
-      const val = paramValues[key];
-      if (!val) return false;
-      if (Array.isArray(val)) {
-        return val.some((v) => (v.workflow_id || v.id) === idToRemove);
-      }
-      return (val.workflow_id || val.id) === idToRemove;
-    });
-
-    if (!stillUsedInSlot) {
-      const cleaned = cleanTagsForAsset(prompt, idToRemove);
-      if (cleaned !== prompt) {
-        setPrompt(cleaned);
-      }
+  const handleRemoveReferenceItem = useCallback((itemToRemove) => {
+    if (typeof removeMedia === "function") {
+      removeMedia({ role: "reference", value: itemToRemove });
     }
-  }, [paramValues, prompt, setParameter, setPrompt, removeElement, removeCharacter, activeSlots, featureConfig, currentModel]);
+  }, [removeMedia]);
 
   const handleRemoveSlot = useCallback((slot) => {
-    const backendKey = featureConfig?.resolveParameterMapping
-      ? featureConfig.resolveParameterMapping(currentModel, slot.role) || slot.role
-      : slot.role;
-    const currentVal = paramValues[backendKey];
-    const assetId = getAssetId(currentVal);
-
-    // 1. Remove from store
-    setParameter(backendKey, undefined);
-
-    // 2. Cascade: remove all tags referring to this asset from prompt ONLY IF not present in another slot
-    if (assetId) {
-      const stillUsedElsewhere = activeSlots.some((s) => {
-        if (s.role === slot.role) return false;
-        const key = featureConfig?.resolveParameterMapping
-          ? featureConfig.resolveParameterMapping(currentModel, s.role) || s.role
-          : s.role;
-        const val = paramValues[key];
-        if (!val) return false;
-        if (Array.isArray(val)) {
-          return val.some((v) => getAssetId(v) === assetId);
-        }
-        return getAssetId(val) === assetId;
-      });
-
-      if (!stillUsedElsewhere) {
-        const cleaned = cleanTagsForAsset(prompt, assetId);
-        if (cleaned !== prompt) {
-          setPrompt(cleaned);
-        }
-      }
+    if (typeof removeMedia === "function") {
+      removeMedia({ role: slot.role });
     }
-  }, [featureConfig, currentModel, paramValues, prompt, setParameter, setPrompt, activeSlots]);
+  }, [removeMedia]);
 
   // Calculate real images quota for references
   const currentRefBackendKey = useMemo(() => {
