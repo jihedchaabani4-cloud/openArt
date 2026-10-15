@@ -23,6 +23,7 @@ import { getModelReferenceCapability } from "../core/modelManagement.js";
 import { cleanTagsForAsset, getAssetId } from "../core/tagsService.js";
 import { registry } from "./registry.js";
 import { switchMode as switchModeCommand } from "./commands/switchMode.js";
+import { selectModel as selectModelCommand } from "./commands/selectModel.js";
 
 /**
  * Creates a new isolated PromptBar Zustand vanilla store.
@@ -182,120 +183,10 @@ export function createPromptBarStore(overrides = {}, initialDeps = {}) {
      * @param {string} modelId
      */
     selectModel: (modelId) => {
-      const { modelsMap, parameterValues, selectedModelId, prompt, elements = [], characters = [] } = get();
-      if (modelId === null) {
-        if (selectedModelId === null) return;
-        set({ selectedModelId: null, parameterValues: {}, reconciliationLog: [] });
-        return;
+      const res = selectModelCommand(get(), modelId, deps);
+      if (res.ok && res.patch) {
+        set(res.patch);
       }
-      if (!modelsMap[modelId] || modelId === selectedModelId) return;
-
-      const prevModel = modelsMap[selectedModelId];
-      const nextModel = modelsMap[modelId];
-      const prevDefs = prevModel?.parameters || {};
-      const nextDefs = nextModel?.parameters || {};
-      const { nextValues, changes } = reconcile(parameterValues, prevDefs, nextDefs);
-
-      let currentPrompt = prompt || "";
-      let nextElements = [...elements];
-      let nextCharacters = [...characters];
-
-      const nextCap = getModelReferenceCapability(nextModel);
-      const targetKey = nextCap?.backendKey || "images";
-      const idsToClean = new Set();
-
-      // 1. Collect IDs from parameters removed or reset during reconciliation
-      changes.forEach((c) => {
-        if ((c.action === "removed" || c.action === "reset") && c.previousValue) {
-          const vals = Array.isArray(c.previousValue) ? c.previousValue : [c.previousValue];
-          vals.forEach((v) => {
-            const id = getAssetId(v);
-            if (id) idsToClean.add(id);
-            if (v?.workflow_id) idsToClean.add(v.workflow_id);
-            if (v?.workflowId) idsToClean.add(v.workflowId);
-            if (v?.id) idsToClean.add(v.id);
-            if (v?.asset_id) idsToClean.add(v.asset_id);
-            if (v?.name) idsToClean.add(v.name);
-            if (v?.displayName) idsToClean.add(v.displayName);
-          });
-        }
-      });
-
-      // 2. Reference capability enforcement (trim or remove references and orphan tags)
-      if (!nextCap.supports || nextCap.maxRefs === 0) {
-        delete nextValues.images;
-        delete nextValues.reference_images;
-
-        const oldRefItems = [
-          ...(Array.isArray(parameterValues.images) ? parameterValues.images : parameterValues.images ? [parameterValues.images] : []),
-          ...(Array.isArray(parameterValues.reference_images) ? parameterValues.reference_images : parameterValues.reference_images ? [parameterValues.reference_images] : []),
-          ...nextElements,
-          ...nextCharacters,
-        ];
-
-        oldRefItems.forEach((v) => {
-          const id = getAssetId(v);
-          if (id) idsToClean.add(id);
-          if (v?.workflow_id) idsToClean.add(v.workflow_id);
-          if (v?.workflowId) idsToClean.add(v.workflowId);
-          if (v?.id) idsToClean.add(v.id);
-          if (v?.asset_id) idsToClean.add(v.asset_id);
-          if (v?.name) idsToClean.add(v.name);
-          if (v?.displayName) idsToClean.add(v.displayName);
-        });
-
-        nextElements = [];
-        nextCharacters = [];
-      } else {
-        const rawVal = nextValues[targetKey] || (targetKey === "images" ? nextValues.reference_images : nextValues.images);
-        const currentArr = Array.isArray(rawVal) ? rawVal : (rawVal ? [rawVal] : []);
-
-        let runningUsed = 0;
-        const kept = [];
-        const removed = [];
-
-        for (const item of currentArr) {
-          const count = getEntityImageCount(item);
-          if (runningUsed + count <= nextCap.maxRefs) {
-            kept.push(item);
-            runningUsed += count;
-          } else {
-            removed.push(item);
-          }
-        }
-
-        if (removed.length > 0) {
-          nextValues[targetKey] = nextCap.maxRefs === 1 ? kept[0] : (kept.length > 0 ? kept : undefined);
-
-          removed.forEach((v) => {
-            const id = getAssetId(v);
-            if (id) idsToClean.add(id);
-            if (v?.workflow_id) idsToClean.add(v.workflow_id);
-            if (v?.workflowId) idsToClean.add(v.workflowId);
-            if (v?.id) idsToClean.add(v.id);
-            if (v?.asset_id) idsToClean.add(v.asset_id);
-            if (v?.name) idsToClean.add(v.name);
-            if (v?.displayName) idsToClean.add(v.displayName);
-          });
-
-          nextElements = nextElements.filter((e) => !idsToClean.has(e.id) && !idsToClean.has(e.workflow_id));
-          nextCharacters = nextCharacters.filter((c) => !idsToClean.has(c.id) && !idsToClean.has(c.workflow_id));
-        }
-      }
-
-      // 3. Clean orphan tags from prompt text directly
-      if (idsToClean.size > 0) {
-        currentPrompt = cleanTagsForAsset(currentPrompt, Array.from(idsToClean));
-      }
-
-      set({
-        selectedModelId: modelId,
-        parameterValues: nextValues,
-        prompt: currentPrompt,
-        elements: nextElements,
-        characters: nextCharacters,
-        reconciliationLog: changes,
-      });
     },
 
     /** Update prompt text. */

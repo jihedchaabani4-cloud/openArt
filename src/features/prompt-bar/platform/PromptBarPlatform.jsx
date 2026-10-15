@@ -447,59 +447,6 @@ function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, class
     setDialogOpen(true);
   }, []);
 
-  // Model switch reference trimming: when switching models, trim references to new model's maxRefs (reduce images, never models)
-  const prevModelIdRef = useRef(selectedId);
-  useEffect(() => {
-    if (prevModelIdRef.current === selectedId) return;
-    prevModelIdRef.current = selectedId;
-
-    if (!currentModel) return;
-
-    const cap = getModelReferenceCapability(currentModel);
-    const targetKey = cap.backendKey || "images";
-
-    if (!cap.supports || cap.maxRefs === 0) {
-      // Model does not support references: remove reference parameters only
-      // NOTE: NEVER touch paramValues.input_image or paramValues.last_frame (they belong to video keyframes)
-      if (paramValues.images) setParameter("images", undefined);
-      if (paramValues.reference_images) setParameter("reference_images", undefined);
-    } else {
-      // Model supports references up to cap.maxRefs real images.
-      // STRICT ISOLATION: only read reference parameters (targetKey / images / reference_images).
-      // NEVER fall back to input_image or last_frame!
-      const rawVal = paramValues[targetKey] || (targetKey === "images" ? paramValues.reference_images : paramValues.images);
-      const currentArr = Array.isArray(rawVal) ? rawVal : (rawVal ? [rawVal] : []);
-
-      let runningUsed = 0;
-      const kept = [];
-      const removed = [];
-
-      for (const item of currentArr) {
-        const count = getEntityImageCount(item);
-        if (runningUsed + count <= cap.maxRefs) {
-          kept.push(item);
-          runningUsed += count;
-        } else {
-          removed.push(item);
-        }
-      }
-
-      if (removed.length > 0) {
-        setParameter(targetKey, cap.maxRefs === 1 ? kept[0] : (kept.length > 0 ? kept : undefined));
-
-        removed.forEach((item) => {
-          const id = item?.workflow_id || item?.id;
-          if (id) {
-            removeElement(id);
-            removeCharacter(id);
-            const cleaned = cleanTagsForAsset(prompt, id);
-            if (cleaned !== prompt) setPrompt(cleaned);
-          }
-        });
-      }
-    }
-  }, [selectedId, currentModel, paramValues, prompt, setParameter, setPrompt, removeElement, removeCharacter]);
-
   const getSlotMaxRefs = useCallback((slot) => {
     return resolveSlotMaxRefs({
       slot,
