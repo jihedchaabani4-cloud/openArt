@@ -100,6 +100,22 @@ The automated test suite is 100% hermetic (runs with no real clock, no backend, 
     npm run lint
     ```
   - **Expected Result**: Production build completes with zero errors; no lint errors in `src/features/prompt-bar`.
+- [ ] **6. Character Page Prompt Minimum Length**:
+  - Open browser at `http://localhost:3000/cinema-studio/<projectId>/characters/new`.
+  - Type prompt under 10 characters (e.g. `"Robot"`): Generate button is disabled.
+  - Type 10 or more characters (e.g. `"Robot in rain"`): Generate button becomes enabled.
+- [ ] **7. Character Reference Slot Constraints**:
+  - On `/cinema-studio/<projectId>/characters/new`, click the Reference slot:
+  - **Expected Result**: Accepts images and elements only; does not accept video files.
+- [ ] **8. Character Traits Form Synchronization**:
+  - On `/cinema-studio/<projectId>/characters/new`, pick a trait from the traits form:
+  - **Expected Result**: The trait is added to the prompt bar editor. Editing prompt tags synchronizes with the traits form.
+- [ ] **9. Character Prompt Bar Layout Rules**:
+  - On `/cinema-studio/<projectId>/characters/new`, inspect the prompt bar:
+  - **Expected Result**: No model selector and no mode toggle (image/video) are displayed.
+- [ ] **10. Console Cleanliness on Refresh**:
+  - Refresh the page at `/cinema-studio/<projectId>/characters/new`:
+  - **Expected Result**: Zero console errors or warnings in developer tools.
 
 ---
 
