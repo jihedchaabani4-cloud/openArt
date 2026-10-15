@@ -27,6 +27,7 @@ import {
 } from "../core/tagsService.js";
 import { calculateModelCredits } from "../core/creditCalculationService.js";
 import { getModelReferenceCapability, resolveModelIcon } from "../core/modelManagement.js";
+import { getActiveSlots, getSlotMaxRefs as resolveSlotMaxRefs } from "../core/media.js";
 import {
   calculateUsedImages,
   getEntityImageCount,
@@ -280,29 +281,14 @@ function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, class
   // 3. Active slot definitions — driven by featureConfig.COMPOSITION_REQUIREMENTS and currentModel.
   //    If the selected model does not support image inputs (text only), the Reference button is NOT shown!
   const activeSlots = useMemo(() => {
-    if (!featureConfig) return referenceSlots; // fallback for no-config usage
-    if (!hasModes) return referenceSlots;
-    const req = featureConfig.COMPOSITION_REQUIREMENTS;
-    const modeSlots = req?.[activeMode];
-    if (!modeSlots) return [];
-    // If modeSlots is an array, it's a flat mode (e.g. image)
-    const slots = Array.isArray(modeSlots) ? modeSlots : (modeSlots[activeSubMode] ?? []);
-
-    // Filter out slots that currentModel does not support:
-    if (currentModel) {
-      return slots.filter((slot) => {
-        if (slot.role === "reference") {
-          const cap = getModelReferenceCapability(currentModel);
-          return cap.supports;
-        }
-        if (featureConfig.resolveParameterMapping) {
-          const key = featureConfig.resolveParameterMapping(currentModel, slot.role);
-          return Boolean(key);
-        }
-        return true;
-      });
-    }
-    return slots;
+    return getActiveSlots({
+      featureConfig,
+      hasModes,
+      referenceSlots,
+      mode: activeMode,
+      subMode: activeSubMode,
+      model: currentModel,
+    });
   }, [featureConfig, hasModes, referenceSlots, activeMode, activeSubMode, currentModel]);
 
   const hasStart = activeSlots.some((s) => s.role === "start");
@@ -535,28 +521,11 @@ function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, class
   }, [selectedId, currentModel, paramValues, prompt, setParameter, setPrompt, removeElement, removeCharacter]);
 
   const getSlotMaxRefs = useCallback((slot) => {
-    if (!slot || !currentModel) return 0;
-
-    const backendKey = featureConfig?.resolveParameterMapping
-      ? featureConfig.resolveParameterMapping(currentModel, slot.role) || slot.role
-      : slot.role;
-
-    const paramDef = currentModel.parameters?.[backendKey];
-    if (paramDef) {
-      if (typeof paramDef.max === "number" && paramDef.max > 0) return paramDef.max;
-      if (typeof paramDef.max_count === "number" && paramDef.max_count > 0) return paramDef.max_count;
-      if (typeof paramDef.maxCount === "number" && paramDef.maxCount > 0) return paramDef.maxCount;
-      if (paramDef.type === "image[]" || paramDef.type === "array") return 4;
-    }
-
-    if (slot.role === "reference") {
-      const cap = getModelReferenceCapability(currentModel);
-      return cap.maxRefs || 4;
-    }
-
-    if (paramDef && paramDef.type === "image") return 1;
-
-    return 1;
+    return resolveSlotMaxRefs({
+      slot,
+      model: currentModel,
+      featureConfig,
+    });
   }, [currentModel, featureConfig]);
 
   // Merges reference parameter items with elements and characters into a unified, deduplicated list
