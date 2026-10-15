@@ -21,6 +21,7 @@ import {
 } from "../core/entityService.js";
 import { getModelReferenceCapability } from "../core/modelManagement.js";
 import { cleanTagsForAsset, getAssetId } from "../core/tagsService.js";
+import { registry } from "./registry.js";
 
 /**
  * Creates a new isolated PromptBar Zustand vanilla store.
@@ -45,6 +46,7 @@ export function createPromptBarStore(overrides = {}) {
     activeMode: overrides.activeMode || "image",
     activeSubMode: overrides.activeSubMode || "frames",
     pendingHydration: overrides.pendingHydration || null,
+    identity: overrides.identity || null,
     ...overrides,
 
     // ── Actions ────────────────────────────────────────────────────────────
@@ -296,7 +298,39 @@ export function createPromptBarStore(overrides = {}) {
       set((state) => ({ parameterValues: { ...state.parameterValues, [key]: value } })),
 
     /** Update generation loading state without touching prompt or parameterValues (FR-CORE-07). */
-    setIsGenerating: (isGenerating) => set({ isGenerating }),
+    setIsGenerating: (isGenerating) => set({ isGenerating: Boolean(isGenerating) }),
+
+    /**
+     * Begins submit lifecycle tracking.
+     * Sets isGenerating true and registers with external registry tracking.
+     * @returns {string|null} token
+     */
+    beginSubmit: () => {
+      const { identity } = get();
+      let token = null;
+      if (identity) {
+        token = registry.beginSubmit(identity);
+      }
+      set({ isGenerating: true });
+      return token;
+    },
+
+    /**
+     * Ends submit lifecycle tracking.
+     * Validates in-flight token; if token is old or unrecognized, does nothing.
+     * Sets isGenerating false when successful.
+     * @param {string} [token]
+     * @returns {boolean}
+     */
+    endSubmit: (token) => {
+      const { identity } = get();
+      if (identity && token) {
+        const ended = registry.endSubmit(identity, token);
+        if (!ended) return false;
+      }
+      set({ isGenerating: false });
+      return true;
+    },
 
     /** Feature-level Entities (Elements & Characters) */
     addElement: (element) =>

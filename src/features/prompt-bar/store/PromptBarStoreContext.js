@@ -103,7 +103,7 @@ export function PromptBarStoreProvider({
 }) {
   const resolvedProjectId = resolveProjectId();
   const effectiveTemplateId = templateId || type?.id || "default";
-  const effectiveInstanceId = instanceId || persistKey || "default";
+  const effectiveInstanceId = instanceId || (persistKey && persistKey !== "studio-prompt-bar" ? persistKey : "default");
 
   const identity = React.useMemo(() => ({
     templateId: effectiveTemplateId,
@@ -127,6 +127,7 @@ export function PromptBarStoreProvider({
     const { selectedModelId: defaultModelId, parameterValues: defaultParams } = initializeFromType(type, modelsMap);
 
     return createPromptBarStore({
+      identity,
       modelsMap,
       selectedModelId: defaultModelId,
       parameterValues: defaultParams,
@@ -140,6 +141,15 @@ export function PromptBarStoreProvider({
 
   // 2. Mount lifecycle, hydration and debounced persistence
   React.useEffect(() => {
+    // Reset stale isGenerating on mount if no active submit is in flight
+    if (store.getState().isGenerating && !registry.isSubmitting(identity)) {
+      if (typeof store.getState().setIsGenerating === "function") {
+        store.getState().setIsGenerating(false);
+      } else if (typeof store.setState === "function") {
+        store.setState({ isGenerating: false });
+      }
+    }
+
     registry.markMounted(identity);
     registry.pruneOtherProjects(resolvedProjectId);
 

@@ -155,6 +155,8 @@ function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, class
   const serializeAndEmit = usePromptBarStore((s) => s.serialize);
   const setModels        = usePromptBarStore((s) => s.setModels);
   const setIsGenerating  = usePromptBarStore((s) => s.setIsGenerating);
+  const beginSubmit      = usePromptBarStore((s) => s.beginSubmit);
+  const endSubmit        = usePromptBarStore((s) => s.endSubmit);
   const elements         = usePromptBarStore((s) => s.elements);
   const characters       = usePromptBarStore((s) => s.characters);
   const addElement       = usePromptBarStore((s) => s.addElement);
@@ -381,16 +383,18 @@ function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, class
 
   const handleGenerate = useCallback(async () => {
     if (isGenerateDisabled || isGenerating) return;
-    setIsGenerating(true);
+    const token = typeof beginSubmit === "function" ? beginSubmit() : null;
     try {
       const result = serializeAndEmit();
       await onGenerate?.(result);
-    } catch (err) {
-      console.error("[PromptBar] Generation error:", err);
     } finally {
-      setIsGenerating(false);
+      if (typeof endSubmit === "function") {
+        endSubmit(token);
+      } else {
+        setIsGenerating(false);
+      }
     }
-  }, [isGenerateDisabled, isGenerating, serializeAndEmit, onGenerate, setIsGenerating]);
+  }, [isGenerateDisabled, isGenerating, beginSubmit, endSubmit, serializeAndEmit, onGenerate, setIsGenerating]);
 
 
   // Active references list for tags & mentions
