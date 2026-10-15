@@ -5,7 +5,7 @@ import {
   isReferenceModel,
   filterEligibleModels,
   resolveParameterMapping,
-} from "../features/generated-media/generatedMedia.config.js";
+} from "../templates/generatedMedia.template.js";
 
 const testModels = [
   {

@@ -1,4 +1,4 @@
-import { extractFeaturesFromPrompt, getFeatureInfoFromLabel } from "@/features/studio/feature-constants";
+import { extractFeaturesFromPrompt, getFeatureInfoFromLabel } from "@/features/prompt-bar/model/feature-constants";
 import { getPrimaryMedia, getPrimaryMediaConfig, getItemMetadata } from "@/shared/lib/generationUtils";
 import { promptBarService } from "@/features/prompt-bar/api/promptBarService";
 

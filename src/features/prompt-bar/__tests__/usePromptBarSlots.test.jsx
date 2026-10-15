@@ -8,7 +8,7 @@ import {
   COMPOSITION_REQUIREMENTS,
   filterEligibleModels,
   resolveParameterMapping,
-} from "../features/generated-media/generatedMedia.config.js";
+} from "../templates/generatedMedia.template.js";
 
 const featureConfig = {
   COMPOSITION_REQUIREMENTS,

@@ -13,9 +13,9 @@ import {
   COMPOSITION_REQUIREMENTS,
   filterEligibleModels,
   resolveParameterMapping,
-} from "../features/generated-media/generatedMedia.config.js";
+  generatedMediaType,
+} from "../templates/generatedMedia.template.js";
 import { createPromptBarType } from "../composition/createPromptBarType.js";
-import { generatedMediaType } from "../composition/generatedMedia.type.js";
 import { characterType } from "../composition/character.type.js";
 import {
   normalizedFramesModel,

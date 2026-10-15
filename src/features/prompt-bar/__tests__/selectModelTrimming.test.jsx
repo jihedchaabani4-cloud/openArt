@@ -29,12 +29,12 @@ vi.mock("../ui/common/editor/PromptEditor.jsx", () => ({
 
 import { createPromptBarStore } from "../store/createPromptBarStore.js";
 import { PromptBarPlatform } from "../platform/PromptBarPlatform.jsx";
-import { generatedMediaType } from "../composition/generatedMedia.type.js";
 import {
+  generatedMediaType,
   COMPOSITION_REQUIREMENTS,
   filterEligibleModels,
   resolveParameterMapping,
-} from "../features/generated-media/generatedMedia.config.js";
+} from "../templates/generatedMedia.template.js";
 import { clearPersistentPromptBarStores } from "../store/PromptBarStoreContext.js";
 
 const featureConfig = {

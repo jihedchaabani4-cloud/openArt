@@ -5,7 +5,6 @@
 import { describe, it, expect } from "vitest";
 import { defineTemplate } from "../core/templateContract.js";
 import { generatedMediaTemplate } from "../templates/generatedMedia.template.js";
-import * as generatedMediaConfig from "../features/generated-media/generatedMedia.config.js";
 import {
   rawFramesModel,
   rawImagesListModel,
@@ -106,31 +105,30 @@ describe("C4: templateContract & generatedMedia.template", () => {
       ]);
     });
 
-    it("filterEligibleModels and resolveParameterMapping produce identical results to generatedMediaConfig", () => {
+    it("filterEligibleModels and resolveParameterMapping produce expected results on test models", () => {
       const models = [rawFramesModel, rawImagesListModel, rawPromptOnlyModel];
 
       // Video frames eligibility
       const templateFrames = generatedMediaTemplate.filterEligibleModels(models, "video", "frames");
-      const configFrames = generatedMediaConfig.filterEligibleModels(models, "video", "frames");
-      expect(templateFrames).toEqual(configFrames);
+      expect(templateFrames.map((m) => m.id)).toEqual(["seedance_2_5"]);
 
       // Video reference eligibility
-      const templateRefs = generatedMediaTemplate.filterEligibleModels(models, "video", "reference");
-      const configRefs = generatedMediaConfig.filterEligibleModels(models, "video", "reference");
-      expect(templateRefs).toEqual(configRefs);
+      const videoRefModel = { id: "runway_gen3", domain: "video", parameters: { images: { type: "array" } } };
+      const templateRefs = generatedMediaTemplate.filterEligibleModels([...models, videoRefModel], "video", "reference");
+      expect(templateRefs.map((m) => m.id)).toEqual(["runway_gen3"]);
 
       // Mapping parity
       expect(
         generatedMediaTemplate.resolveParameterMapping(normalizedFramesModel, "start")
-      ).toBe(generatedMediaConfig.resolveParameterMapping(normalizedFramesModel, "start"));
+      ).toBe("input_image");
 
       expect(
         generatedMediaTemplate.resolveParameterMapping(normalizedFramesModel, "end")
-      ).toBe(generatedMediaConfig.resolveParameterMapping(normalizedFramesModel, "end"));
+      ).toBe("last_frame");
 
       expect(
         generatedMediaTemplate.resolveParameterMapping(normalizedImagesListModel, "reference")
-      ).toBe(generatedMediaConfig.resolveParameterMapping(normalizedImagesListModel, "reference"));
+      ).toBe("images");
     });
   });
 });

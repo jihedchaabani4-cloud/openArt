@@ -44,7 +44,7 @@ vi.mock("../ui/common/editor/PromptEditor.jsx", () => ({
 
 import { PromptBarPlatform } from "../platform/PromptBarPlatform.jsx";
 import { generatedMediaTemplate } from "../templates/generatedMedia.template.js";
-import { generatedMediaType } from "../composition/generatedMedia.type.js";
+import { generatedMediaType } from "../templates/generatedMedia.template.js";
 
 describe("X3: Editor Focus without DOM Query", () => {
   let customRegistry;

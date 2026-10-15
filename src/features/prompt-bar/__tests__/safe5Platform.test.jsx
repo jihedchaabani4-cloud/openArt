@@ -39,8 +39,8 @@ import {
   COMPOSITION_REQUIREMENTS,
   filterEligibleModels,
   resolveParameterMapping,
-} from "../features/generated-media/generatedMedia.config.js";
-import { generatedMediaType } from "../composition/generatedMedia.type.js";
+  generatedMediaType,
+} from "../templates/generatedMedia.template.js";
 import { clearPersistentPromptBarStores, getActivePromptBarStore } from "../store/PromptBarStoreContext.js";
 import {
   fixtureModels,

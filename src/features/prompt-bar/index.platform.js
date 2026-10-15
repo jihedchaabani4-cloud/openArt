@@ -12,10 +12,9 @@ export { generatedMediaTemplate } from "./templates/generatedMedia.template.js";
 
 // ── Composition Types & Feature Configs ───────────────────────
 export { createPromptBarType } from "./composition/createPromptBarType.js";
-export { generatedMediaType }  from "./composition/generatedMedia.type.js";
+export { generatedMediaType, filterEligibleModels } from "./templates/generatedMedia.template.js";
 export { characterType }       from "./composition/character.type.js";
-export * as generatedMediaConfig from "./features/generated-media/generatedMedia.config.js";
-export { resolveUI, filterEligibleModels } from "./composition/resolveUI.js";
+export * as generatedMediaConfig from "./templates/generatedMedia.template.js";
 
 // ── Store & Route Policy ──────────────────────────────────
 export { createPromptBarStore }    from "./store/createPromptBarStore.js";

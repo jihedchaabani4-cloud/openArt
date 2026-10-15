@@ -18,11 +18,11 @@
  *    - Unifies media objects into the standard shape expected by PromptBar Platform.
  */
 
-import { autoAssignReference, getAssetId, cleanTagsForAsset } from "./tagsService.js";
+import { autoAssignReference, getAssetId, cleanTagsForAsset } from "@/features/prompt-bar/core/tagsService.js";
 import { promptBarService } from "@/features/prompt-bar/api/promptBarService.js";
-import { getEntityImageCount } from "./entityService.js";
-import { getModelReferenceCapability } from "./modelManagement.js";
-import * as defaultGeneratedMediaConfig from "@/features/prompt-bar/features/generated-media/generatedMedia.config.js";
+import { getEntityImageCount } from "@/features/prompt-bar/core/entityService.js";
+import { getModelReferenceCapability } from "@/features/prompt-bar/core/modelManagement.js";
+import * as defaultGeneratedMediaConfig from "@/features/prompt-bar/templates/generatedMedia.template.js";
 import { enqueuePendingAction } from "@/features/prompt-bar/store/pendingActions.js";
 
 const PENDING_STORAGE_KEY = "openart_pending_prompt_action";
