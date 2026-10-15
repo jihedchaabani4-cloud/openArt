@@ -1,8 +1,8 @@
 # STATE
-Current phase: P1    Current task: V5
+Current phase: P1    Current task: V6
 Updated: 2026-10-15
 Test status: 273 vitest passed (36 files), 47 node:test passed (7 files) - Total prompt-bar tests: 136 passed
-Next step: V6
+Next step: VERDICTS.md and PHASE-P1-GATE
 
 | Task | Status (TODO/DONE/BLOCKED/SKIPPED) | Commit | Report |
 |---|---|---|---|
@@ -17,5 +17,6 @@ Next step: V6
 | V2 | DONE | 4decee1 | reports/V2.md |
 | V3 | DONE | 218ba57 | reports/V3.md |
 | V4 | DONE | 6e1f64f | reports/V4.md |
-| V5 | DONE | pb1(V5) | reports/V5.md |
-| V6 | TODO | | |
+| V5 | DONE | bdcb751 | reports/V5.md |
+| V6 | DONE | pb1(V6) | reports/V6.md |
+
