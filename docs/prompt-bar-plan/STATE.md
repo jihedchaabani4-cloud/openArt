@@ -1,8 +1,8 @@
 # STATE
-Current phase: P7    Current task: W3
+Current phase: P7    Current task: W4
 Updated: 2026-10-15
 Test status: 468 vitest passed (67 files), 47 node:test passed (7 files) - Total prompt-bar tests: 284 passed
-Next step: W3: template consolidation (generatedMedia.config.js into generatedMedia.template.js)
+Next step: W4: proof that model and mode are optional (PB-D-13)
 
 | Task | Status (TODO/DONE/BLOCKED/SKIPPED) | Commit | Report |
 |---|---|---|---|
@@ -57,6 +57,7 @@ Next step: W3: template consolidation (generatedMedia.config.js into generatedMe
 | P6-GATE | DONE | 8fc6c7d | reports/PHASE-P6-GATE.md |
 | W1 | DONE | f3df10c | reports/W1.md |
 | W2 | DONE | 8ba7875 | reports/W2.md |
+| W3 | DONE | 54bf125 | reports/W3.md |
 
 
 
