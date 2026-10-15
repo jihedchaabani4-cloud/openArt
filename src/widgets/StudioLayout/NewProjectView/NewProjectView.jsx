@@ -3,9 +3,7 @@
 import { motion, AnimatePresence } from "framer-motion"
 import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows"
 import {
-  PromptBarPlatform,
-  generatedMediaType,
-  generatedMediaConfig,
+  GeneratedPromptBar,
   useRealBackendModels,
 } from "@/features/prompt-bar/index.platform"
 
@@ -57,9 +55,8 @@ export function NewProjectView() {
                 </div>
 
                 {/* ── Bottom Floating Prompt Bar (v3) ── */}
-                <PromptBarPlatform
-                    type={generatedMediaType}
-                    featureConfig={generatedMediaConfig}
+                <GeneratedPromptBar
+                    projectId={projectId}
                     models={models}
                     onGenerate={() => {}}
                 />
