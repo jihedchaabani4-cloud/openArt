@@ -23,6 +23,7 @@ import { getActivePromptBarStore } from "../PromptBarStoreContext.js";
 import { getEntityImageCount } from "./entityService.js";
 import { getModelReferenceCapability } from "./modelManagement.js";
 import * as defaultGeneratedMediaConfig from "@/features/prompt-bar/features/generated-media/generatedMedia.config.js";
+import { enqueuePendingAction } from "@/features/prompt-bar/store/pendingActions.js";
 
 const PENDING_STORAGE_KEY = "openart_pending_prompt_action";
 
@@ -31,6 +32,15 @@ const PENDING_STORAGE_KEY = "openart_pending_prompt_action";
  * @param {object} action
  */
 export function setPendingPromptAction(action) {
+  try {
+    enqueuePendingAction(
+      { templateId: "generated-media", projectId: action?.projectId || "global" },
+      { actionName: action?.type || "action", args: [action], payload: action }
+    );
+  } catch (e) {
+    // Ignore queue failure in legacy bridge
+  }
+
   if (typeof window !== "undefined" && window.sessionStorage) {
     try {
       window.sessionStorage.setItem(PENDING_STORAGE_KEY, JSON.stringify(action));
