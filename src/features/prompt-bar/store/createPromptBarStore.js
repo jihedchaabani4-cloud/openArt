@@ -22,14 +22,21 @@ import {
 import { getModelReferenceCapability } from "../core/modelManagement.js";
 import { cleanTagsForAsset, getAssetId } from "../core/tagsService.js";
 import { registry } from "./registry.js";
+import { switchMode as switchModeCommand } from "./commands/switchMode.js";
 
 /**
  * Creates a new isolated PromptBar Zustand vanilla store.
  *
  * @param {Partial<PromptBarInstanceState>} overrides - Optional initial state overrides
+ * @param {object} [initialDeps={}] - Store dependencies (template, models)
  * @returns {ZustandVanillaStore}
  */
-export function createPromptBarStore(overrides = {}) {
+export function createPromptBarStore(overrides = {}, initialDeps = {}) {
+  const deps = { ...initialDeps };
+  if (overrides.template && !deps.template) {
+    deps.template = overrides.template;
+  }
+
   return createStore((set, get) => ({
     // ── State ──────────────────────────────────────────────────────────────
     modelsMap: {},
@@ -47,6 +54,7 @@ export function createPromptBarStore(overrides = {}) {
     activeSubMode: overrides.activeSubMode || "frames",
     pendingHydration: overrides.pendingHydration || null,
     identity: overrides.identity || null,
+    template: overrides.template || deps.template || null,
     ...overrides,
 
     // ── Actions ────────────────────────────────────────────────────────────
@@ -363,9 +371,43 @@ export function createPromptBarStore(overrides = {}) {
 
     clearEntities: () => set({ elements: [], characters: [] }),
 
+    /**
+     * Atomically switches mode and subMode per PB-D-03.
+     * Selects eligible model, reconciles parameters, prunes media, cleans tags, and sets in a single notification.
+     * @param {string|object} modeOrOptions
+     * @param {string} [maybeSubMode]
+     * @returns {import("../core/commandResult.js").CommandResult}
+     */
+    switchMode: (modeOrOptions, maybeSubMode) => {
+      const args =
+        typeof modeOrOptions === "object" && modeOrOptions !== null
+          ? modeOrOptions
+          : { mode: modeOrOptions, subMode: maybeSubMode };
+
+      const res = switchModeCommand(get(), args, deps);
+      if (res.ok && res.patch) {
+        set(res.patch);
+      }
+      return res;
+    },
+
     /** Active Mode & SubMode actions */
     setActiveMode: (activeMode) => set({ activeMode }),
-    setActiveSubMode: (activeSubMode) => set({ activeSubMode }),
+    setActiveSubMode: (activeSubMode) => {
+      const state = get();
+      if (state.activeSubMode === activeSubMode) return;
+      if (typeof state.switchMode === "function") {
+        state.switchMode({ subMode: activeSubMode });
+      } else {
+        set({ activeSubMode });
+      }
+    },
+
+    /** Set or update template reference */
+    setTemplate: (template) => {
+      deps.template = template;
+      set({ template });
+    },
 
     /** Clears media references (images, reference_images, elements, characters) and cleans prompt tags */
     clearMediaReferences: () => {

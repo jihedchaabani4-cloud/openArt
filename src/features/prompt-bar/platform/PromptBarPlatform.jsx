@@ -140,6 +140,8 @@ function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, class
   const storeActiveSubMode = usePromptBarStore((s) => s.activeSubMode);
   const storeSetActiveMode = usePromptBarStore((s) => s.setActiveMode);
   const storeSetActiveSubMode = usePromptBarStore((s) => s.setActiveSubMode);
+  const storeSwitchMode = usePromptBarStore((s) => s.switchMode);
+  const setTemplate = usePromptBarStore((s) => s.setTemplate);
 
   const activeMode    = storeActiveMode || "image";
   const activeSubMode = storeActiveSubMode || "frames";
@@ -264,25 +266,40 @@ function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, class
     });
   }, [featureConfig, allModelsList, activeMode]);
 
+  // Sync template/featureConfig into the store
+  useEffect(() => {
+    if (featureConfig && setTemplate) {
+      setTemplate(featureConfig);
+    }
+  }, [featureConfig, setTemplate]);
+
   const handleModeChange = useCallback((newMode) => {
-    setActiveMode(newMode);
-    if (featureConfig?.filterEligibleModels) {
-      const eligible = featureConfig.filterEligibleModels(allModelsList, newMode, activeSubMode, {});
-      if (eligible.length > 0 && !eligible.some((m) => m.id === selectedId)) {
-        selectModel(eligible[0].id);
+    if (storeSwitchMode) {
+      storeSwitchMode(newMode, activeSubMode);
+    } else {
+      setActiveMode(newMode);
+      if (featureConfig?.filterEligibleModels) {
+        const eligible = featureConfig.filterEligibleModels(allModelsList, newMode, activeSubMode, {});
+        if (eligible.length > 0 && !eligible.some((m) => m.id === selectedId)) {
+          selectModel(eligible[0].id);
+        }
       }
     }
-  }, [featureConfig, allModelsList, activeSubMode, selectedId, selectModel]);
+  }, [storeSwitchMode, activeSubMode, setActiveMode, featureConfig, allModelsList, selectedId, selectModel]);
 
   const handleSubModeChange = useCallback((newSubMode) => {
-    setActiveSubMode(newSubMode);
-    if (featureConfig?.filterEligibleModels) {
-      const eligible = featureConfig.filterEligibleModels(allModelsList, activeMode, newSubMode, {});
-      if (eligible.length > 0 && !eligible.some((m) => m.id === selectedId)) {
-        selectModel(eligible[0].id);
+    if (storeSwitchMode) {
+      storeSwitchMode(activeMode, newSubMode);
+    } else {
+      setActiveSubMode(newSubMode);
+      if (featureConfig?.filterEligibleModels) {
+        const eligible = featureConfig.filterEligibleModels(allModelsList, activeMode, newSubMode, {});
+        if (eligible.length > 0 && !eligible.some((m) => m.id === selectedId)) {
+          selectModel(eligible[0].id);
+        }
       }
     }
-  }, [featureConfig, allModelsList, activeMode, selectedId, selectModel]);
+  }, [storeSwitchMode, activeMode, setActiveSubMode, featureConfig, allModelsList, selectedId, selectModel]);
 
   const currentRatio = paramValues.aspect_ratio || paramValues.ratio || "1:1";
   const currentRatioIcon = getRatioIcon(currentRatio);
@@ -315,59 +332,6 @@ function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, class
       ([, def]) => def.group !== "media" && !def.isPrompt
     );
   }, [parameters]);
-
-
-  // T011 / FR-SLOT-04: Mode-switch cleanup — when composition changes, clear any slot
-  // values keyed by backend keys that are no longer part of the active composition.
-  // Dynamically collects all possible slot keys from featureConfig without hardcoding any.
-  const prevModeRef = useRef({ mode: activeMode, subMode: activeSubMode });
-  useEffect(() => {
-    if (!featureConfig?.COMPOSITION_REQUIREMENTS) return;
-    if (!currentModel) return;
-
-    const prev = prevModeRef.current;
-    if (prev.mode === activeMode && prev.subMode === activeSubMode) {
-      return;
-    }
-    prevModeRef.current = { mode: activeMode, subMode: activeSubMode };
-
-    // Collect all possible backend keys across all modes in this featureConfig
-    const allConfiguredKeys = new Set();
-    const collectKeys = (node) => {
-      if (!node) return;
-      if (Array.isArray(node)) {
-        node.forEach((slot) => {
-          const key = featureConfig.resolveParameterMapping(currentModel, slot.role);
-          if (key) allConfiguredKeys.add(key);
-        });
-      } else if (typeof node === "object") {
-        Object.values(node).forEach(collectKeys);
-      }
-    };
-    collectKeys(featureConfig.COMPOSITION_REQUIREMENTS);
-
-    // Build the set of backend keys for the CURRENT active composition
-    const activeKeys = new Set(
-      activeSlots
-        .map((slot) => featureConfig.resolveParameterMapping(currentModel, slot.role))
-        .filter(Boolean)
-    );
-
-    // Clear any slot values in paramValues that belong to featureConfig slots but are not active
-    allConfiguredKeys.forEach((key) => {
-      if (!activeKeys.has(key) && paramValues[key] !== undefined) {
-        const assetId = getAssetId(paramValues[key]);
-        setParameter(key, undefined);
-        if (assetId) {
-          const cleaned = cleanTagsForAsset(prompt, assetId);
-          if (cleaned !== prompt) {
-            setPrompt(cleaned);
-          }
-        }
-      }
-    });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeMode, activeSubMode, featureConfig, activeSlots, currentModel]);
 
   // T010 / FR-SLOT-06: Keyframe swap handler — reads/writes backend keys (not role names).
   // Swap is only enabled when BOTH start and end frames are filled (FR-SLOT-06).

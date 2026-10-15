@@ -250,13 +250,11 @@ describe("SAFE-5: Platform Integration Harness", () => {
     });
   });
 
-  describe("4. PB-K1 Collision on Image -> Video/Frames Transition", () => {
-    it("pins PB-K1: reference stored in input_image in image mode survives transition to video/frames as Start Frame", () => {
-      // CURRENT BEHAVIOR (known issue PB-K1):
-      // An image model with input_image stores its reference in input_image.
-      // When switching to video/frames, because frames declares input_image as Start Frame,
-      // the mode-switch cleanup does NOT clear input_image.
-      // Thus, the reference silently becomes Start Frame!
+  describe("4. PB-K1 Collision on Image -> Video/Frames Transition (Resolved PB-D-03)", () => {
+    it("verifies PB-K1 resolution: reference stored in input_image is pruned on transition to video/frames", () => {
+      // PB-D-03 resolution:
+      // When switching to video/frames, media parameters are pruned so the reference
+      // does NOT silently become Start Frame.
       const imageModel = {
         id: "img_model_k1",
         name: "Image Model K1",
@@ -286,15 +284,11 @@ describe("SAFE-5: Platform Integration Harness", () => {
 
       // 2. User switches to video mode with frames subMode
       act(() => {
-        store.getState().setActiveMode("video");
-        store.getState().setActiveSubMode("frames");
-        store.getState().selectModel("seedance_2_5");
+        store.getState().switchMode("video", "frames");
       });
 
-      // Verify PB-K1 symptom: input_image is NOT cleared and is now the Start Frame!
-      expect(store.getState().parameterValues.input_image).toEqual({
-        workflow_id: "wf_ref_turned_start",
-      });
+      // Verify PB-K1 resolution: input_image is pruned and absent!
+      expect(store.getState().parameterValues.input_image).toBeUndefined();
     });
   });
 
