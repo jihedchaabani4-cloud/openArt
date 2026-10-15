@@ -8,7 +8,6 @@ import { useCharacterWorkflows, useGenerateCharacterDescriptionMutation, useCrea
 import { useWorkflowsStore } from "@/features/workflows";
 import { useCharacterStore } from "@/features/studio";
 import { CharacterPromptBar, promptBarService } from "@/features/prompt-bar";
-import { useRealBackendModels } from "@/features/prompt-bar/core/useRealBackendModels";
 
 const CHARACTER_ARCHETYPES = [
   {
@@ -127,9 +126,6 @@ export default function NewCharacterPage() {
   const generateDescriptionMutation = useGenerateCharacterDescriptionMutation();
   const createCharacterMutation = useCreateCharacterMutation();
 
-  const { data: modelsData } = useRealBackendModels({ projectId: effectiveProjectId });
-  const models = modelsData?.models || [];
-
   const { workflows: existingSheets } = useCharacterWorkflows(effectiveProjectId);
 
   const goBack = () => {
@@ -143,12 +139,12 @@ export default function NewCharacterPage() {
   const handleGenerate = async (payload) => {
     if (!payload?.prompt?.trim()) return;
     try {
+      const references = payload.references || payload.parameters?.references || [];
       await createCharacterMutation.mutateAsync({
         projectId: effectiveProjectId,
         name: payload.prompt.slice(0, 40),
         prompt: payload.prompt,
-        model: payload.model,
-        parameters: payload.parameters,
+        references,
       });
       router.push(`/cinema-studio/${effectiveProjectId}/characters`);
     } catch (err) {
@@ -233,10 +229,9 @@ export default function NewCharacterPage() {
         </div>
       </main>
 
-      {/* Dedicated Character PromptBar (Platform Architecture) */}
+      {/* Dedicated Character PromptBar (Prompt + Reference, No models, No params) */}
       <CharacterPromptBar
         projectId={effectiveProjectId}
-        models={models}
         onGenerate={handleGenerate}
         isGenerating={createCharacterMutation.isPending}
       />

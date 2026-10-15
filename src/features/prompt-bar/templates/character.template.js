@@ -2,43 +2,48 @@
  * Character Generation Template Definition
  *
  * Source of truth for Character Prompt Bar feature rules:
- *   - Image domain only (no video modes)
- *   - Attachment bar hidden (no reference slots)
- *   - Eligible models filtered strictly to image domain
+ *   - No models (features.models = false, layout.showModelSelector = false)
+ *   - No modes (features.modes = false, layout.showModeSelector = false)
+ *   - No parameter drawer (layout.showParameterDrawer = false)
+ *   - Reference attachment slot (layout.showAttachmentBar = true, role = "reference")
+ *   - Prompt input (layout.showPromptInput = true)
  *   - State persisted across character studio routes
  */
 
 import { defineTemplate } from "../core/templateContract.js";
-import { characterType } from "../composition/character.type.js";
+
+export const CHARACTER_PARAMETERS = {
+  references: { name: "references", type: "image[]", group: "media" },
+};
 
 /**
- * Returns slots for Character generation (none: attachment bar is hidden).
- * @returns {Array}
+ * Returns slots for Character generation (1 Reference slot).
+ * @returns {Array<{ role: string, label: string, accepts: string }>}
  */
 export function getSlots() {
+  return [
+    { role: "reference", label: "Reference", accepts: "image/*" },
+  ];
+}
+
+/**
+ * Character generation has no model selector.
+ * @returns {Array}
+ */
+export function filterEligibleModels() {
   return [];
 }
 
 /**
- * Filters models to only those supporting image generation.
- *
- * @param {Array<object>} [models=[]]
- * @returns {Array<object>}
- */
-export function filterEligibleModels(models = []) {
-  const list = Array.isArray(models) ? models : Object.values(models || {});
-  return list.filter((m) => m && (m.domain === "image" || m.category === "image"));
-}
-
-/**
  * Maps UI slot role to backend parameter key.
- * Characters have no attachment slots, returning null.
+ * Role "reference" maps to "references" parameter in payload.
  *
  * @param {object} _model
- * @param {string} _role
- * @returns {null}
+ * @param {string} role
+ * @returns {string|null}
  */
-export function resolveParameterMapping(_model, _role) {
+export function resolveParameterMapping(_model, role) {
+  if (role === "reference") return "references";
   return null;
 }
 
@@ -53,26 +58,28 @@ export function createActions(_core) {
 }
 
 export const characterTemplate = defineTemplate({
-  id: characterType.id || "character",
+  id: "character",
   persistRoutes: [
     "/cinema-studio/:projectId/characters*",
     "/cinema-studio/:projectId/characters/new*",
   ],
   layout: {
     showPromptInput: true,
-    showModelSelector: true,
-    showParameterDrawer: true,
-    showAttachmentBar: false,
+    showModelSelector: false,
+    showParameterDrawer: false,
+    showAttachmentBar: true,
     showModeSelector: false,
   },
   features: {
-    models: true,
+    models: false,
     modes: false,
   },
   defaultState: {
     activeMode: "image",
     activeSubMode: "frames",
   },
+  mediaLimit: 4,
+  parameters: CHARACTER_PARAMETERS,
   getSlots,
   filterEligibleModels,
   resolveParameterMapping,
