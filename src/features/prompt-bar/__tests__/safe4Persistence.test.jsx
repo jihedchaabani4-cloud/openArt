@@ -11,9 +11,9 @@
  *    (b) blob: URLs in parameterValues are written to sessionStorage as is
  */
 
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { describe, it, expect, beforeEach } from "vitest";
 import { render, act } from "@testing-library/react";
-import * as React from "react";
+import { useEffect } from "react";
 import {
   PromptBarStoreProvider,
   usePromptBarStoreInstance,
@@ -35,7 +35,7 @@ const testType = createPromptBarType({
 
 function StoreCapture({ onStore }) {
   const store = usePromptBarStoreInstance();
-  React.useEffect(() => {
+  useEffect(() => {
     if (onStore) onStore(store);
   }, [store, onStore]);
   return <div data-testid="store-capture" />;

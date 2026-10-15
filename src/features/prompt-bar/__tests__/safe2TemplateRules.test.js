@@ -11,8 +11,6 @@
 import { describe, it, expect } from "vitest";
 import {
   COMPOSITION_REQUIREMENTS,
-  isFrameModel,
-  isReferenceModel,
   filterEligibleModels,
   resolveParameterMapping,
 } from "../features/generated-media/generatedMedia.config.js";

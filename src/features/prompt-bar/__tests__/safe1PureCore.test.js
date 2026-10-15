@@ -12,11 +12,8 @@ import { describe, it, expect } from "vitest";
 import { reconcile } from "../core/reconciliation.js";
 import { serialize } from "../core/serialization.js";
 import { cleanTagsForAsset } from "../core/tagsService.js";
-import { adaptBackendParameter, adaptBackendModel } from "../core/modelManagement.js";
+import { adaptBackendParameter } from "../core/modelManagement.js";
 import {
-  rawFramesModel,
-  rawImagesListModel,
-  rawPromptOnlyModel,
   normalizedFramesModel,
   normalizedImagesListModel,
   normalizedPromptOnlyModel,

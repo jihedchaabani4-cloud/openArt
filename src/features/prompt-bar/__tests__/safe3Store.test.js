@@ -13,9 +13,7 @@ import { describe, it, expect } from "vitest";
 import { createPromptBarStore } from "../store/createPromptBarStore.js";
 import {
   fixtureModels,
-  normalizedFramesModel,
   normalizedImagesListModel,
-  normalizedPromptOnlyModel,
 } from "./fixtures/models.fixture.js";
 
 describe("SAFE-3: Store Characterization", () => {

@@ -16,7 +16,6 @@
 
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { render, act, fireEvent, screen, cleanup } from "@testing-library/react";
-import * as React from "react";
 
 // Mock unavoidable DOM/routing dependencies
 vi.mock("next/navigation", () => ({
@@ -46,7 +45,6 @@ import { clearPersistentPromptBarStores, getActivePromptBarStore } from "../stor
 import {
   fixtureModels,
   normalizedFramesModel,
-  normalizedImagesListModel,
   normalizedPromptOnlyModel,
 } from "./fixtures/models.fixture.js";
 
@@ -321,7 +319,7 @@ describe("SAFE-5: Platform Integration Harness", () => {
   describe("6. Generate Disabled on isGenerating", () => {
     it("Generate button is disabled while isGenerating is true", () => {
       const onGenerateSpy = vi.fn();
-      const { store, renderResult } = mountPromptBar({
+      const { store } = mountPromptBar({
         onGenerate: onGenerateSpy,
         isGenerating: true,
       });
