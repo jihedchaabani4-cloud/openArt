@@ -105,7 +105,13 @@ export function serialize(modelId, prompt = "", definitions = {}, values = {}, e
         def?.type === "video[]";
 
       if (isMedia) {
-        parameters[name] = normalizeMediaParamValue(val);
+        const norm = normalizeMediaParamValue(val);
+        const isArrayType = def?.type === "image[]" || def?.type === "video[]" || def?.type === "array";
+        if (isArrayType && norm !== undefined && norm !== null && !Array.isArray(norm)) {
+          parameters[name] = [norm];
+        } else {
+          parameters[name] = norm;
+        }
       } else if (Array.isArray(val)) {
         parameters[name] = val.map((v) =>
           typeof v === "object" && v !== null
