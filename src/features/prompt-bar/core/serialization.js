@@ -12,15 +12,16 @@
  */
 
 import { validateParameter } from "./reconciliation.js";
+import { PARAM } from "./parameterKeys.js";
 
 const MEDIA_PARAM_NAMES = new Set([
-  "images",
-  "reference_images",
-  "input_image",
-  "last_frame",
-  "input_video",
-  "start_frame",
-  "end_frame",
+  PARAM.IMAGES,
+  PARAM.REFERENCE_IMAGES,
+  PARAM.INPUT_IMAGE,
+  PARAM.LAST_FRAME,
+  PARAM.INPUT_VIDEO,
+  PARAM.START_FRAME,
+  PARAM.END_FRAME,
 ]);
 
 /**

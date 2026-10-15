@@ -6,6 +6,7 @@
  */
 
 import { normalizeParameterDefinition } from "./types.js";
+import { PARAM } from "./parameterKeys.js";
 
 /**
  * Infers the parameter type and metadata from raw backend parameter definition.
@@ -23,25 +24,25 @@ export function adaptBackendParameter(paramName, rawParam = {}) {
   let group = "generation";
 
   // 1. Media type inference
-  if (paramName === "input_image" || paramName === "start_frame" || paramName === "image_url") {
+  if (paramName === PARAM.INPUT_IMAGE || paramName === PARAM.START_FRAME || paramName === PARAM.IMAGE_URL) {
     type = "image";
-    role = "start_frame";
+    role = PARAM.START_FRAME;
     group = "media";
-  } else if (paramName === "last_frame" || paramName === "end_frame" || paramName === "mask") {
+  } else if (paramName === PARAM.LAST_FRAME || paramName === PARAM.END_FRAME || paramName === PARAM.MASK) {
     type = "image";
-    role = paramName === "mask" ? "mask" : "end_frame";
+    role = paramName === PARAM.MASK ? PARAM.MASK : PARAM.END_FRAME;
     group = "media";
-  } else if (paramName === "reference_images" || paramName === "images" || (rawType === "array" && paramName.includes("image"))) {
+  } else if (paramName === PARAM.REFERENCE_IMAGES || paramName === PARAM.IMAGES || (rawType === "array" && paramName.includes("image"))) {
     type = "image[]";
-    role = "reference_images";
+    role = PARAM.REFERENCE_IMAGES;
     group = "media";
-  } else if (paramName === "input_video" || (rawType === "string" && paramName.includes("video"))) {
+  } else if (paramName === PARAM.INPUT_VIDEO || (rawType === "string" && paramName.includes("video"))) {
     type = "video";
     role = "reference_video";
     group = "media";
-  } else if (paramName === "reference_videos" || (rawType === "array" && paramName.includes("video"))) {
+  } else if (paramName === PARAM.REFERENCE_VIDEOS || (rawType === "array" && paramName.includes("video"))) {
     type = "video[]";
-    role = "reference_videos";
+    role = PARAM.REFERENCE_VIDEOS;
     group = "media";
   } else if (hasValues) {
     type = "select";
@@ -76,9 +77,9 @@ export function adaptBackendParameter(paramName, rawParam = {}) {
   // Deterministic render order
   let order = 50;
   if (paramName === "resolution" || paramName === "target_resolution") order = 10;
-  else if (paramName === "aspect_ratio" || paramName === "ratio") order = 20;
+  else if (paramName === PARAM.ASPECT_RATIO || paramName === PARAM.RATIO) order = 20;
   else if (paramName === "quality") order = 30;
-  else if (paramName === "duration") order = 40;
+  else if (paramName === PARAM.DURATION) order = 40;
   else if (paramName === "style") order = 45;
 
   const normalized = normalizeParameterDefinition(paramName, {
@@ -171,23 +172,23 @@ export function adaptBackendModel(rawModel = {}) {
     tags: rawModel.tags || [],
     capabilities: {
       ...(rawModel.capabilities || {}),
-      input_image: Boolean(
-        rawModel.capabilities?.input_image ||
-        rawParams.input_image ||
-        rawParams.images ||
-        rawParams.reference_images ||
-        definitions.input_image
+      [PARAM.INPUT_IMAGE]: Boolean(
+        rawModel.capabilities?.[PARAM.INPUT_IMAGE] ||
+        rawParams[PARAM.INPUT_IMAGE] ||
+        rawParams[PARAM.IMAGES] ||
+        rawParams[PARAM.REFERENCE_IMAGES] ||
+        definitions[PARAM.INPUT_IMAGE]
       ),
-      last_frame: Boolean(
-        rawModel.capabilities?.last_frame ||
-        rawParams.last_frame ||
-        rawParams.end_frame ||
-        definitions.last_frame
+      [PARAM.LAST_FRAME]: Boolean(
+        rawModel.capabilities?.[PARAM.LAST_FRAME] ||
+        rawParams[PARAM.LAST_FRAME] ||
+        rawParams[PARAM.END_FRAME] ||
+        definitions[PARAM.LAST_FRAME]
       ),
-      input_video: Boolean(
-        rawModel.capabilities?.input_video ||
-        rawParams.input_video ||
-        definitions.input_video
+      [PARAM.INPUT_VIDEO]: Boolean(
+        rawModel.capabilities?.[PARAM.INPUT_VIDEO] ||
+        rawParams[PARAM.INPUT_VIDEO] ||
+        definitions[PARAM.INPUT_VIDEO]
       ),
     },
     parameters: definitions,
@@ -225,37 +226,37 @@ export function getModelReferenceCapability(model) {
   // Video models ONLY support references if they explicitly declare `images` or `reference_images`.
   // `input_image` and `last_frame` in video models are KEYFRAMES (start and end frame), NEVER references!
   if (isVideo) {
-    if (params.images) {
-      const max = params.images.max || params.images.max_count || topMax || 4;
-      return { supports: true, maxRefs: max, backendKey: "images" };
+    if (params[PARAM.IMAGES]) {
+      const max = params[PARAM.IMAGES].max || params[PARAM.IMAGES].max_count || topMax || 4;
+      return { supports: true, maxRefs: max, backendKey: PARAM.IMAGES };
     }
-    if (params.reference_images) {
-      const max = params.reference_images.max || params.reference_images.max_count || topMax || 4;
-      return { supports: true, maxRefs: max, backendKey: "reference_images" };
+    if (params[PARAM.REFERENCE_IMAGES]) {
+      const max = params[PARAM.REFERENCE_IMAGES].max || params[PARAM.REFERENCE_IMAGES].max_count || topMax || 4;
+      return { supports: true, maxRefs: max, backendKey: PARAM.REFERENCE_IMAGES };
     }
     return { supports: false, maxRefs: 0, backendKey: null };
   }
 
   // 1. Array / multi-image parameters
-  if (params.images) {
-    const max = params.images.max || params.images.max_count || topMax || (typeof support.references === "object" ? support.references?.max : null) || 4;
-    return { supports: true, maxRefs: max, backendKey: "images" };
+  if (params[PARAM.IMAGES]) {
+    const max = params[PARAM.IMAGES].max || params[PARAM.IMAGES].max_count || topMax || (typeof support.references === "object" ? support.references?.max : null) || 4;
+    return { supports: true, maxRefs: max, backendKey: PARAM.IMAGES };
   }
-  if (params.reference_images) {
-    const max = params.reference_images.max || params.reference_images.max_count || topMax || (typeof support.references === "object" ? support.references?.max : null) || 4;
-    return { supports: true, maxRefs: max, backendKey: "reference_images" };
+  if (params[PARAM.REFERENCE_IMAGES]) {
+    const max = params[PARAM.REFERENCE_IMAGES].max || params[PARAM.REFERENCE_IMAGES].max_count || topMax || (typeof support.references === "object" ? support.references?.max : null) || 4;
+    return { supports: true, maxRefs: max, backendKey: PARAM.REFERENCE_IMAGES };
   }
 
   // 2. Model capabilities or support flags (v1 compatibility: support.references)
   if (support.references) {
     const max = typeof support.references === "object" ? support.references.max || 4 : (topMax || 4);
-    return { supports: true, maxRefs: max, backendKey: "images" };
+    return { supports: true, maxRefs: max, backendKey: PARAM.IMAGES };
   }
 
   // 3. Image domain models with single input_image (legacy img2img):
-  if (params.input_image || caps.input_image) {
-    const max = params.input_image?.max || topMax || 1;
-    return { supports: true, maxRefs: max, backendKey: "input_image" };
+  if (params[PARAM.INPUT_IMAGE] || caps[PARAM.INPUT_IMAGE]) {
+    const max = params[PARAM.INPUT_IMAGE]?.max || topMax || 1;
+    return { supports: true, maxRefs: max, backendKey: PARAM.INPUT_IMAGE };
   }
 
   // Text-only model (no image input parameters accepted)

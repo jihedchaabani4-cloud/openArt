@@ -5,6 +5,8 @@
  * No React, no DOM, no feature-specific imports.
  */
 
+import { PARAM, MEDIA_TYPES, isMediaType } from "./parameterKeys.js";
+
 /**
  * Supported parameter types. Controls in ParameterControl.jsx map these to UI components.
  * image[] and video[] are handled by composition reference slots — ParameterControl skips them.
@@ -14,10 +16,10 @@ export const SUPPORTED_PARAMETER_TYPES = Object.freeze([
   "number",
   "boolean",
   "text",
-  "image",
-  "video",
-  "image[]",
-  "video[]",
+  MEDIA_TYPES.IMAGE,
+  MEDIA_TYPES.VIDEO,
+  MEDIA_TYPES.IMAGE_ARRAY,
+  MEDIA_TYPES.VIDEO_ARRAY,
 ]);
 
 /**
@@ -49,15 +51,15 @@ export function normalizeParameterDefinition(name, rawParam = {}) {
   // Role
   let role = rawParam.role;
   if (!role) {
-    if (type === "image" && (name === "last_frame" || name === "end_frame")) {
-      role = "end_frame";
-    } else if (type === "image" && (name === "input_image" || name === "start_frame")) {
-      role = "start_frame";
-    } else if (type === "image[]") {
-      role = "reference_images";
-    } else if (type === "video[]") {
-      role = "reference_videos";
-    } else if (type === "video") {
+    if (type === MEDIA_TYPES.IMAGE && (name === PARAM.LAST_FRAME || name === PARAM.END_FRAME)) {
+      role = PARAM.END_FRAME;
+    } else if (type === MEDIA_TYPES.IMAGE && (name === PARAM.INPUT_IMAGE || name === PARAM.START_FRAME)) {
+      role = PARAM.START_FRAME;
+    } else if (type === MEDIA_TYPES.IMAGE_ARRAY) {
+      role = PARAM.REFERENCE_IMAGES;
+    } else if (type === MEDIA_TYPES.VIDEO_ARRAY) {
+      role = PARAM.REFERENCE_VIDEOS;
+    } else if (type === MEDIA_TYPES.VIDEO) {
       role = "reference_video";
     } else {
       role = "parameter";
@@ -67,7 +69,7 @@ export function normalizeParameterDefinition(name, rawParam = {}) {
   // Group
   let group = rawParam.group;
   if (!group) {
-    if (["image", "video", "image[]", "video[]"].includes(type)) {
+    if (isMediaType(type)) {
       group = "media";
     } else if (["seed", "steps", "cfg_scale"].includes(name)) {
       group = "advanced";
