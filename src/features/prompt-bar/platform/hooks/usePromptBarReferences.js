@@ -177,6 +177,19 @@ export function usePromptBarReferences({
     setDialogOpen(true);
   }, []);
 
+  const handleCloseQuickMention = useCallback(() => {
+    setQuickMentionOpen(false);
+    setMentionCallback(null);
+    setMentionQuery("");
+  }, []);
+
+  const handleOpenChangeDialog = useCallback((val) => {
+    setDialogOpen(val);
+    if (!val) {
+      setMentionQuery("");
+    }
+  }, []);
+
   // Close quick mention dropdown on outside click
   useEffect(() => {
     if (!quickMentionOpen) return;
@@ -357,11 +370,13 @@ export function usePromptBarReferences({
     activeDialogMode,
     setActiveDialogMode,
     dialogAnchorRef,
+    quickMentionAnchorRef,
     quickMentionOpen,
     setQuickMentionOpen,
     mentionQuery,
     setMentionQuery,
-    quickMentionAnchorRef,
+    handleCloseQuickMention,
+    handleOpenChangeDialog,
     handleOpenDialog,
     getSlotMaxRefs,
     handleTriggerMentionDialog,

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect, useCallback, useMemo, useContext } from "react";
+import React, { useState, useRef, useEffect, useCallback, useContext } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/shared/lib/utils";
 
@@ -102,7 +102,6 @@ function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, class
   const store = useContext(PromptBarStoreContext);
   const [drawerOpen, setDrawerOpen] = useState(false); // Collapsed by default (FR-COMP-04)
   const containerRef = useRef(null);
-  const textareaRef = useRef(null);
   const tuneButtonRef = useRef(null);
   const settingsOverlayRef = useRef(null);
 
@@ -152,13 +151,6 @@ function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, class
     activeSubMode,
   });
 
-  // Auto-expand textarea
-  useEffect(() => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = "auto";
-      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
-    }
-  }, [prompt]);
 
   // Sync template/featureConfig into the store
   useEffect(() => {
@@ -247,6 +239,8 @@ function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, class
     mentionQuery,
     setMentionQuery,
     quickMentionAnchorRef,
+    handleCloseQuickMention,
+    handleOpenChangeDialog,
     handleOpenDialog,
     getSlotMaxRefs,
     handleTriggerMentionDialog,
@@ -278,20 +272,13 @@ function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, class
     <PromptBarTopPanel
       quickMentionOpen={quickMentionOpen}
       quickMentionAnchorRef={quickMentionAnchorRef}
-      onCloseQuickMention={() => {
-        setQuickMentionOpen(false);
-        setMentionCallback(null);
-        setMentionQuery("");
-      }}
+      onCloseQuickMention={handleCloseQuickMention}
       activeReferences={activeReferences}
       onSelectReference={handleSelectExistingReference}
       onOpenMediaLibrary={handleOpenMediaLibraryFromMention}
       mentionQuery={mentionQuery}
       dialogOpen={dialogOpen}
-      onOpenChangeDialog={(val) => {
-        setDialogOpen(val);
-        if (!val) setMentionQuery("");
-      }}
+      onOpenChangeDialog={handleOpenChangeDialog}
       dialogAnchorRef={dialogAnchorRef}
       activeSlotAllowedType={activeSlotAllowedType}
       activeSlotMaxAllowed={activeSlotMaxAllowed}

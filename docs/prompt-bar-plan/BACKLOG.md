@@ -9,3 +9,4 @@ Format: `- [Severity] path/file.js:123 | what is wrong in one line | found durin
 - [Low] src/features/studio/core/mediaReferenceService.js:27 | setPendingPromptAction stores single object in sessionStorage rather than queue | found during V4
 - [Medium] src/features/prompt-bar/store/PromptBarStoreContext.js:30 | clearPersistentPromptBarStores never called in production leading to persistentStoreRegistry memory leak | found during V5
 - [Medium] src/features/prompt-bar/ui/common/MediaInput.jsx:51 | Temporary blob: URLs saved to sessionStorage and broken upon reload | found during V5
+- [Medium] FlowPromptBoxSettings.jsx | hardcoded mode/ratio blocks should be driven by the template | found during H6
