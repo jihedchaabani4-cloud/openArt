@@ -17,10 +17,11 @@ export { characterType }       from "./composition/character.type.js";
 export * as generatedMediaConfig from "./features/generated-media/generatedMedia.config.js";
 export { resolveUI, filterEligibleModels } from "./composition/resolveUI.js";
 
-// ── Store ─────────────────────────────────────────────────
+// ── Store & Route Policy ──────────────────────────────────
 export { createPromptBarStore }    from "./store/createPromptBarStore.js";
 export { PromptBarStoreProvider, PromptBarStoreContext } from "./store/PromptBarStoreContext.js";
 export { usePromptBarStore }       from "./store/usePromptBarStore.js";
+export { matchRoute, isPathAllowed, normalizePathSegments } from "./store/routePolicy.js";
 
 // ── Core (for testing / advanced use) ────────────────────
 export { reconcile, validateParameter } from "./core/reconciliation.js";
