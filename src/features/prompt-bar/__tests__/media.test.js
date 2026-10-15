@@ -7,7 +7,12 @@ import {
   getActiveSlots,
   getSlotMaxRefs,
   getModelReferenceCapability,
+  countUsedRefs,
+  remainingQuota,
+  allowedTypeForSlot,
+  canAttach,
 } from "../core/media.js";
+import { REASONS } from "../core/commandResult.js";
 import { generatedMediaTemplate } from "../templates/generatedMedia.template.js";
 import {
   normalizedFramesModel,
@@ -115,4 +120,149 @@ describe("C5: media.js slots and limits contract", () => {
       expect(imagesCap.maxRefs).toBe(14);
     });
   });
+
+  describe("countUsedRefs", () => {
+    it("counts raw parameter media items correctly", () => {
+      const paramValues = {
+        images: [{ workflow_id: "img1" }, { workflow_id: "img2" }],
+      };
+      expect(countUsedRefs(paramValues)).toBe(2);
+    });
+
+    it("counts multi-image turnaround element entities according to their image count", () => {
+      const paramValues = { images: [{ workflow_id: "img1" }] };
+      const entities = [
+        { workflow_id: "char1", is_character: true, images_count: 3 },
+      ];
+      expect(countUsedRefs(paramValues, [], entities)).toBe(4);
+    });
+
+    it("deduplicates identical media between parameters and entities", () => {
+      const paramValues = { images: [{ workflow_id: "shared1" }] };
+      const entities = [{ workflow_id: "shared1", type: "element" }];
+      expect(countUsedRefs(paramValues, [], entities)).toBe(1);
+    });
+  });
+
+  describe("remainingQuota", () => {
+    it("calculates remaining quota accurately", () => {
+      expect(
+        remainingQuota({
+          model: normalizedImagesListModel,
+          used: 10,
+          template: generatedMediaTemplate,
+        })
+      ).toBe(4);
+
+      expect(
+        remainingQuota({
+          model: normalizedImagesListModel,
+          used: 14,
+          template: generatedMediaTemplate,
+        })
+      ).toBe(0);
+
+      expect(
+        remainingQuota({
+          model: normalizedImagesListModel,
+          used: 16,
+          template: generatedMediaTemplate,
+        })
+      ).toBe(0);
+    });
+  });
+
+  describe("allowedTypeForSlot", () => {
+    it("returns 'image' for start and end keyframe slots", () => {
+      expect(allowedTypeForSlot({ slot: { role: "start" } })).toBe("image");
+      expect(allowedTypeForSlot({ slot: { role: "end" } })).toBe("image");
+    });
+
+    it("returns 'image' for reference slot in video mode", () => {
+      expect(allowedTypeForSlot({ mode: "video", slot: { role: "reference" } })).toBe("image");
+    });
+
+    it("returns image, character, element array for reference slot in image mode", () => {
+      expect(allowedTypeForSlot({ mode: "image", slot: { role: "reference" } })).toEqual([
+        "image",
+        "character",
+        "element",
+      ]);
+    });
+
+    it("respects explicit accepts strings", () => {
+      expect(allowedTypeForSlot({ slot: { role: "custom", accepts: "video/*" } })).toBe("video");
+      expect(allowedTypeForSlot({ slot: { role: "custom", accepts: "image/*" } })).toBe("image");
+    });
+
+    it("returns custom fallback if provided and slot is unknown", () => {
+      expect(allowedTypeForSlot({ slot: { role: "custom" }, fallback: "video" })).toBe("video");
+    });
+  });
+
+  describe("canAttach", () => {
+    it("allows attachment when quota is available and types match", () => {
+      const res = canAttach({
+        model: normalizedImagesListModel,
+        slot: { role: "reference" },
+        value: { workflow_id: "new_img" },
+        used: 10,
+        existing: [{ workflow_id: "existing_img" }],
+        template: generatedMediaTemplate,
+      });
+
+      expect(res.ok).toBe(true);
+    });
+
+    it("rejects attachment when max media quota is reached", () => {
+      // exactly at max (used 14, max 14)
+      const resAtMax = canAttach({
+        model: normalizedImagesListModel,
+        slot: { role: "reference" },
+        value: { workflow_id: "overflow_img" },
+        used: 14,
+        template: generatedMediaTemplate,
+      });
+      expect(resAtMax.ok).toBe(false);
+      expect(resAtMax.reason).toBe(REASONS.MAX_MEDIA_REACHED);
+
+      // one above max (used 13, max 14, candidate is a 2-view element sheet)
+      const resAbove = canAttach({
+        model: normalizedImagesListModel,
+        slot: { role: "reference" },
+        value: { workflow_id: "sheet", images_count: 2 },
+        used: 13,
+        template: generatedMediaTemplate,
+      });
+      expect(resAbove.ok).toBe(false);
+      expect(resAbove.reason).toBe(REASONS.MAX_MEDIA_REACHED);
+    });
+
+    it("rejects duplicate media in reference slot", () => {
+      const res = canAttach({
+        model: normalizedImagesListModel,
+        slot: { role: "reference" },
+        value: { workflow_id: "dup_123" },
+        used: 2,
+        existing: [{ workflow_id: "dup_123" }],
+        template: generatedMediaTemplate,
+      });
+
+      expect(res.ok).toBe(false);
+      expect(res.reason).toBe(REASONS.DUPLICATE_MEDIA);
+    });
+
+    it("rejects video attachment into image-only slots", () => {
+      const res = canAttach({
+        model: normalizedFramesModel,
+        slot: { role: "start" },
+        value: { workflow_id: "vid_1", type: "video" },
+        template: generatedMediaTemplate,
+      });
+
+      expect(res.ok).toBe(false);
+      expect(res.reason).toBe(REASONS.TYPE_NOT_ALLOWED);
+    });
+  });
 });
+

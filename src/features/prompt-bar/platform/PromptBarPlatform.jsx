@@ -26,8 +26,14 @@ import {
   getAssetId,
 } from "../core/tagsService.js";
 import { calculateModelCredits } from "../core/creditCalculationService.js";
-import { getModelReferenceCapability, resolveModelIcon } from "../core/modelManagement.js";
-import { getActiveSlots, getSlotMaxRefs as resolveSlotMaxRefs } from "../core/media.js";
+import { resolveModelIcon } from "../core/modelManagement.js";
+import {
+  getActiveSlots,
+  getSlotMaxRefs as resolveSlotMaxRefs,
+  getModelReferenceCapability,
+  remainingQuota,
+  allowedTypeForSlot,
+} from "../core/media.js";
 import {
   calculateUsedImages,
   getEntityImageCount,
@@ -811,35 +817,26 @@ function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, class
     return getReferenceItems(currentRefBackendKey);
   }, [getReferenceItems, currentRefBackendKey]);
 
-  const modelRefCap = useMemo(() => {
-    return getModelReferenceCapability(currentModel);
-  }, [currentModel]);
-
   const usedImagesCount = useMemo(() => {
     return calculateUsedImages(currentRefList);
   }, [currentRefList]);
 
   const remainingImagesQuota = useMemo(() => {
     const refSlot = activeSlots.find((s) => s.role === "reference");
-    const maxRefs = refSlot ? getSlotMaxRefs(refSlot) : (modelRefCap.maxRefs || 4);
-    return Math.max(0, maxRefs - usedImagesCount);
-  }, [activeSlots, getSlotMaxRefs, modelRefCap.maxRefs, usedImagesCount]);
+    return remainingQuota({
+      model: currentModel,
+      used: usedImagesCount,
+      slot: refSlot,
+      featureConfig,
+    });
+  }, [activeSlots, currentModel, featureConfig, usedImagesCount]);
 
   const activeSlotAllowedType = useMemo(() => {
-    if (!activeDialogSlot) return "all";
-    if (activeDialogSlot.role === "start" || activeDialogSlot.role === "end") return "image";
-    if (activeDialogSlot.role === "reference") {
-      if (activeMode === "video") return "image";
-      return ["image", "character", "element"];
-    }
-    const accepts = activeDialogSlot.accepts;
-    if (typeof accepts === "string") {
-      if (accepts.includes("video") && !accepts.includes("image")) return "video";
-      if (accepts.includes("image") && !accepts.includes("video")) return "image";
-    }
-    if (activeDialogSlot.role === "character") return "character";
-    if (activeDialogSlot.role === "element") return "element";
-    return activeDialogMode || "all";
+    return allowedTypeForSlot({
+      mode: activeMode,
+      slot: activeDialogSlot,
+      fallback: activeDialogMode || "all",
+    });
   }, [activeDialogSlot, activeMode, activeDialogMode]);
 
   const activeSlotMaxAllowed = useMemo(() => {
