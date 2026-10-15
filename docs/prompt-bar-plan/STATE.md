@@ -59,8 +59,8 @@ Next step: human reviews P7-SUMMARY.md and writes the final summary request (09_
 | W2 | DONE | 8ba7875 | reports/W2.md |
 | W3 | DONE | 54bf125 | reports/W3.md |
 | W4 | DONE | 2f8489a | reports/W4.md |
-| W5 | DONE | [pending] | reports/P7-SUMMARY.md |
-| P7-GATE | DONE | [pending] | reports/PHASE-P7-GATE.md |
+| W5 | DONE | 89ff498 | reports/P7-SUMMARY.md |
+| P7-GATE | DONE | 89ff498 | reports/PHASE-P7-GATE.md |
 
 
 
