@@ -22,16 +22,8 @@ import { removeSaved } from "./persistence.js";
  * @param {Storage} [options.storage] - Optional storage override (defaults to instance storage)
  */
 export function usePromptBarRouteWatcher(options = {}) {
-  // Gracefully handle environments without Next.js navigation context
-  let nextPathname = null;
-  try {
-    nextPathname = usePathname();
-  } catch {
-    // safe fallback when outside Router
-    nextPathname = null;
-  }
-
-  const pathname = options.pathname !== undefined ? options.pathname : nextPathname;
+  const routerPathname = usePathname();
+  const pathname = options.pathname !== undefined ? options.pathname : routerPathname;
   const reg = options.registry || defaultRegistry;
   const customStorage = options.storage;
 
