@@ -1,5 +1,6 @@
 import { extractFeaturesFromPrompt, getFeatureInfoFromLabel } from "@/features/studio/feature-constants";
 import { getPrimaryMedia, getPrimaryMediaConfig, getItemMetadata } from "@/shared/lib/generationUtils";
+import { promptBarService } from "@/features/prompt-bar/api/promptBarService";
 
 const ELEMENT_MODE_BY_DNA_TYPE = {
   CHARACTER: "character",
@@ -145,3 +146,57 @@ export function buildElementSheetDraft(workflow, targetItem = null) {
     },
   };
 }
+
+/**
+ * Synchronizes an element sheet draft to prompt bar state and element store.
+ * Replaces legacy usePromptStore calls with promptBarService.
+ *
+ * @param {object|null} draft - Draft returned from buildElementSheetDraft
+ * @param {object} options
+ * @param {object} [options.elementStore] - Element store (for hydrateElementDraft / resetElementStore)
+ * @param {string} [options.projectId] - Active project id
+ * @param {Function} [options.serviceFactory] - promptBarService factory
+ */
+export function syncElementDraft(
+  draft,
+  {
+    elementStore,
+    projectId,
+    serviceFactory = promptBarService,
+  } = {}
+) {
+  if (draft) {
+    if (elementStore?.hydrateElementDraft) {
+      elementStore.hydrateElementDraft({
+        mode: draft.mode,
+        prompt: "",
+        references: draft.references,
+        features: draft.features,
+      });
+    }
+
+    if (serviceFactory) {
+      const service = serviceFactory({
+        templateId: "generated-media",
+        projectId: projectId || "global",
+      });
+      service.applyGeneration({
+        mode: draft.isVideo ? "video" : "image",
+        subMode: "frames",
+        modelId: draft.promptConfig?.model,
+        prompt: "",
+        parameters: {
+          ratio: draft.promptConfig?.ratio,
+          aspect_ratio: draft.promptConfig?.ratio,
+          quality: draft.promptConfig?.quality,
+          videoResolution: draft.promptConfig?.videoResolution,
+        },
+      });
+    }
+  } else {
+    if (elementStore?.resetElementStore) {
+      elementStore.resetElementStore();
+    }
+  }
+}
+

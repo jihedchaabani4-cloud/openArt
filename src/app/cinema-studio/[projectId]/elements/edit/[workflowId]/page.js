@@ -8,8 +8,7 @@ import { EditMediaView } from "@/widgets/EditMediaView";
 import { WorkflowMediaGallery } from "@/features/workflows/ui/WorkflowMediaGallery";
 import { EditNavbar } from "@/widgets/EditNavbar/EditNavbar";
 import { useElementStore } from "@/features/prompt-bar/model/useElementStore";
-import { usePromptStore } from "@/features/prompt-bar/model/usePromptStore";
-import { buildElementSheetDraft } from "@/features/workflows/model/elementSheetConfig";
+import { buildElementSheetDraft, syncElementDraft } from "@/features/workflows/model/elementSheetConfig";
 import { getPrimaryMedia, getItemMetadata } from "@/shared/lib/generationUtils";
 import { LoadingScreen } from "@/shared/ui/LoadingScreen";
 
@@ -19,11 +18,6 @@ export default function ElementWorkflowEditPage() {
 
     const hydrateElementDraft = useElementStore((state) => state.hydrateElementDraft);
     const resetElementStore = useElementStore((state) => state.resetElementStore);
-    const setGenerationMode = usePromptStore((state) => state.setGenerationMode);
-    const setModelId = usePromptStore((state) => state.setModelId);
-    const setRatio = usePromptStore((state) => state.setRatio);
-    const setQuality = usePromptStore((state) => state.setQuality);
-    const setVideoResolution = usePromptStore((state) => state.setVideoResolution);
     const setPrimaryMediaMutation = useSetPrimaryMedia();
 
     const { data: projectData, isLoading } = useProjectData(projectId);
@@ -67,22 +61,10 @@ export default function ElementWorkflowEditPage() {
 
         const draft = buildElementSheetDraft(workflow, currentItem);
 
-        if (draft) {
-            hydrateElementDraft({
-                mode: draft.mode,
-                prompt: "",
-                references: draft.references,
-                features: draft.features,
-            });
-
-            setGenerationMode(draft.isVideo ? "video" : "image");
-            if (draft.promptConfig.model) setModelId(draft.promptConfig.model);
-            if (draft.promptConfig.ratio) setRatio(draft.promptConfig.ratio);
-            if (draft.promptConfig.quality) setQuality(draft.promptConfig.quality);
-            if (draft.promptConfig.videoResolution) setVideoResolution(draft.promptConfig.videoResolution);
-        } else {
-            resetElementStore();
-        }
+        syncElementDraft(draft, {
+            elementStore: { hydrateElementDraft, resetElementStore },
+            projectId,
+        });
 
         return () => {
             resetElementStore();
@@ -93,11 +75,6 @@ export default function ElementWorkflowEditPage() {
         hydrateElementDraft,
         projectId,
         resetElementStore,
-        setGenerationMode,
-        setModelId,
-        setQuality,
-        setRatio,
-        setVideoResolution,
     ]);
 
     if (isLoading) {
