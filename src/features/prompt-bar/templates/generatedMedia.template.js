@@ -20,6 +20,8 @@ import { attachMedia } from "../store/commands/attachMedia.js";
 import { isPersistableMedia } from "../core/mediaRef.js";
 import { ok, fail, REASONS } from "../core/commandResult.js";
 
+import { PARAM } from "../core/parameterKeys.js";
+
 // ── 1. COMPOSITION_REQUIREMENTS ─────────────────────────────────────────────
 //
 // Flat map: mode → subMode → SlotDef[]
@@ -54,8 +56,8 @@ export function isFrameModel(model) {
   const isVideo = model.domain === "video" || model.category === "video";
   if (!isVideo) return false;
   const params = model.parameters || {};
-  const hasStart = Boolean(params.input_image || params.start_frame || model.capabilities?.input_image);
-  const hasEnd = Boolean(params.last_frame || params.last_image || params.end_frame || model.capabilities?.last_frame);
+  const hasStart = Boolean(params[PARAM.INPUT_IMAGE] || params[PARAM.START_FRAME] || model.capabilities?.[PARAM.INPUT_IMAGE]);
+  const hasEnd = Boolean(params[PARAM.LAST_FRAME] || params.last_image || params[PARAM.END_FRAME] || model.capabilities?.[PARAM.LAST_FRAME]);
   return hasStart && hasEnd;
 }
 
@@ -69,9 +71,9 @@ export function isFrameModel(model) {
 export function isReferenceModel(model) {
   if (!model) return false;
   const params = model.parameters || {};
-  if (params.images || params.reference_images) return true;
+  if (params[PARAM.IMAGES] || params[PARAM.REFERENCE_IMAGES]) return true;
   // In image domain, legacy img2img models with single input_image also accept an image input
-  if ((model.domain === "image" || model.category === "image") && (params.input_image || model.capabilities?.input_image)) {
+  if ((model.domain === "image" || model.category === "image") && (params[PARAM.INPUT_IMAGE] || model.capabilities?.[PARAM.INPUT_IMAGE])) {
     return true;
   }
   return false;
@@ -95,11 +97,11 @@ export function filterEligibleModels(models = [], mode = "image", subMode = null
     const imageDomainModels = list.filter((m) => m.domain === "image" || m.category === "image");
     // Dynamic eligibility: if references are currently in the store, narrow to reference-capable models
     const hasReference = Boolean(
-      (Array.isArray(parameterValues?.images) && parameterValues.images.length > 0) ||
-      (Array.isArray(parameterValues?.reference_images) && parameterValues.reference_images.length > 0) ||
-      parameterValues?.images ||
-      parameterValues?.reference_images ||
-      parameterValues?.input_image
+      (Array.isArray(parameterValues?.[PARAM.IMAGES]) && parameterValues[PARAM.IMAGES].length > 0) ||
+      (Array.isArray(parameterValues?.[PARAM.REFERENCE_IMAGES]) && parameterValues[PARAM.REFERENCE_IMAGES].length > 0) ||
+      parameterValues?.[PARAM.IMAGES] ||
+      parameterValues?.[PARAM.REFERENCE_IMAGES] ||
+      parameterValues?.[PARAM.INPUT_IMAGE]
     );
     if (hasReference) {
       return imageDomainModels.filter(isReferenceModel);
@@ -142,26 +144,25 @@ export function resolveParameterMapping(model, role) {
   const params = model?.parameters || {};
 
   if (role === "start") {
-    if (params.input_image) return "input_image";
-    if (params.start_frame) return "start_frame";
-    return "input_image";
+    if (params[PARAM.INPUT_IMAGE]) return PARAM.INPUT_IMAGE;
+    if (params[PARAM.START_FRAME]) return PARAM.START_FRAME;
+    return PARAM.INPUT_IMAGE;
   }
 
   if (role === "end") {
-    if (params.last_frame) return "last_frame";
+    if (params[PARAM.LAST_FRAME]) return PARAM.LAST_FRAME;
     if (params.last_image) return "last_image";
-    if (params.end_frame) return "end_frame";
-    return params.last_frame ? "last_frame" : null;
+    if (params[PARAM.END_FRAME]) return PARAM.END_FRAME;
+    return null;
   }
 
   if (role === "reference") {
-    // If model has `images` parameter, map to `images`!
-    if (params.images) return "images";
-    if (params.reference_images) return "reference_images";
-    if (params.input_image && (model?.domain === "image" || model?.category === "image")) {
-      return "input_image";
+    if (params[PARAM.IMAGES]) return PARAM.IMAGES;
+    if (params[PARAM.REFERENCE_IMAGES]) return PARAM.REFERENCE_IMAGES;
+    if (params[PARAM.INPUT_IMAGE] && (model?.domain === "image" || model?.category === "image")) {
+      return PARAM.INPUT_IMAGE;
     }
-    return params.images ? "images" : null;
+    return null;
   }
 
   return null;
