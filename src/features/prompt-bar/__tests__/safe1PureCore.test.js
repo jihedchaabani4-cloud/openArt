@@ -185,16 +185,15 @@ describe("SAFE-1: Pure Core Characterization", () => {
       });
     });
 
-    it("pins PB-K2: serialize appends undeclared media parameters present in values", () => {
-      // CURRENT BEHAVIOR (known issue PB-K2):
-      // Even when the selected model is promptOnly (declaring no input_image),
-      // serialize lines 122-129 appends any media parameter found in state.values
-      // into parameters and references.
+    it("satisfies PB-D-12 (updated from PB-K2): serialize omits undeclared media parameters", () => {
+      // PB-D-12: When the selected model is promptOnly (declaring no input_image or last_frame),
+      // serialize must NOT leak undeclared media parameters into parameters or references.
       const prompt = "A minimalist painting";
       const values = {
         resolution: "1K",
         aspect_ratio: "1:1",
         input_image: { workflow_id: "wf_leaked_input" },
+        last_frame: { workflow_id: "wf_leaked_end" },
       };
 
       const payload = serialize(
@@ -204,19 +203,74 @@ describe("SAFE-1: Pure Core Characterization", () => {
         values
       );
 
-      // Verify PB-K2 symptom:
-      expect(payload.parameters.input_image).toBe("wf_leaked_input");
-      expect(payload.references).toContain("wf_leaked_input");
+      // Verify undeclared media parameters are NOT present:
+      expect(payload.parameters.input_image).toBeUndefined();
+      expect(payload.parameters.last_frame).toBeUndefined();
+      expect(payload.references).toEqual([]);
       expect(payload).toEqual({
         model: "seedream_v5",
         prompt: "A minimalist painting",
         parameters: {
           resolution: "1K",
           aspect_ratio: "1:1",
-          input_image: "wf_leaked_input",
         },
-        references: ["wf_leaked_input"],
+        references: [],
       });
+    });
+
+    it("satisfies PB-D-12: state holds stale images while model declares only input_image: images is omitted", () => {
+      const prompt = "Frame generation test";
+      const values = {
+        input_image: { workflow_id: "wf_start_frame" },
+        images: [{ workflow_id: "wf_stale_ref" }],
+        duration: 5,
+      };
+
+      // Model declaring only input_image (no images)
+      const modelWithInputImageOnly = {
+        id: "frame_only_model",
+        parameters: {
+          input_image: { type: "image", group: "media" },
+          duration: { type: "number", default: 5 },
+        },
+      };
+
+      const payload = serialize(
+        modelWithInputImageOnly.id,
+        prompt,
+        modelWithInputImageOnly.parameters,
+        values
+      );
+
+      expect(payload.parameters.input_image).toBe("wf_start_frame");
+      expect(payload.parameters.images).toBeUndefined();
+      expect(payload.references).toEqual(["wf_start_frame"]);
+    });
+
+    it("satisfies PB-D-12: elements and characters contract fields remain intact", () => {
+      const prompt = "Portrait with elements";
+      const values = {
+        resolution: "1K",
+        aspect_ratio: "1:1",
+      };
+
+      const payload = serialize(
+        normalizedPromptOnlyModel.id,
+        prompt,
+        normalizedPromptOnlyModel.parameters,
+        values,
+        {
+          elements: [{ id: "elem_1", workflow_id: "wf_elem1" }],
+          characters: [{ id: "char_1", workflow_id: "wf_char1" }],
+          references: ["wf_extra_ref"],
+        }
+      );
+
+      expect(payload.elements).toEqual(["wf_elem1"]);
+      expect(payload.characters).toEqual(["wf_char1"]);
+      expect(payload.references).toContain("wf_elem1");
+      expect(payload.references).toContain("wf_char1");
+      expect(payload.references).toContain("wf_extra_ref");
     });
   });
 

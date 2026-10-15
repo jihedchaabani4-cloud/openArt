@@ -120,15 +120,6 @@ export function serialize(modelId, prompt = "", definitions = {}, values = {}, e
     }
   }
 
-  // Include media parameters present in values even if omitted from model definitions
-  for (const [name, val] of Object.entries(values)) {
-    if (parameters[name] !== undefined) continue;
-    if (val === undefined || val === null || val === "" || (Array.isArray(val) && val.length === 0)) continue;
-    if (MEDIA_PARAM_NAMES.has(name)) {
-      parameters[name] = normalizeMediaParamValue(val);
-    }
-  }
-
   // Collect all active workflow IDs for root `references` field (required by backend contract)
   const referenceIdSet = new Set();
 
@@ -139,9 +130,9 @@ export function serialize(modelId, prompt = "", definitions = {}, values = {}, e
     }
   }
 
-  // 1. From media parameters in parameters / values
+  // 1. From media parameters declared and emitted in parameters
   for (const k of MEDIA_PARAM_NAMES) {
-    const val = parameters[k] !== undefined ? parameters[k] : values[k];
+    const val = parameters[k];
     if (Array.isArray(val)) {
       val.forEach(collectId);
     } else if (val) {

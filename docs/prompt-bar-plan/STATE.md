@@ -1,8 +1,8 @@
 # STATE
-Current phase: P3    Current task: P3-GATE
+Current phase: P4    Current task: T1
 Updated: 2026-10-15
-Test status: 363 vitest passed (47 files), 47 node:test passed (7 files) - Total prompt-bar tests: 226 passed
-Next step: human runs smoke items 1,2,6,7 and CONFIRMS PB-D-03 in DECISIONS.md, then gives P4 (05_P4_atomic_transitions_and_payload.md)
+Test status: 365 vitest passed (47 files), 47 node:test passed (7 files) - Total prompt-bar tests: 228 passed
+Next step: T2
 
 | Task | Status (TODO/DONE/BLOCKED/SKIPPED) | Commit | Report |
 |---|---|---|---|
@@ -33,4 +33,5 @@ Next step: human runs smoke items 1,2,6,7 and CONFIRMS PB-D-03 in DECISIONS.md, 
 | S4 | DONE | 3cffe6b | reports/S4.md |
 | S5 | DONE | e4e507e | reports/S5.md |
 | S6 | DONE | b04b06b | reports/S6.md |
-| P3-GATE | DONE | pb3(GATE) | reports/PHASE-P3-GATE.md |
+| P3-GATE | DONE | 67d1055 | reports/PHASE-P3-GATE.md |
+| T1 | DONE | pb4(T1) | reports/T1.md |
