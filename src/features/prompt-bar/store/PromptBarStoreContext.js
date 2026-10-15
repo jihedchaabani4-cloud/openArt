@@ -13,6 +13,7 @@ import { createPromptBarStore } from "./createPromptBarStore.js";
 import { initializeFromType } from "../core/initialization.js";
 import { registry, identityKey } from "./registry.js";
 import { loadSaved, createSaver, removeSaved, selectPersistable } from "./persistence.js";
+import { drainPendingActions } from "./pendingActions.js";
 
 /**
  * @deprecated Documented no-op. Prompt bar stores are managed per instance via registry.
@@ -188,6 +189,16 @@ export function PromptBarStoreProvider({
       if (hasMissingModel) {
         store.getState().setModels(initialModels);
       }
+    }
+
+    const hasModels = Object.keys(store.getState().modelsMap || {}).length > 0;
+    const expectsModels = initialModels && initialModels.length > 0;
+    if (hasModels || !expectsModels) {
+      drainPendingActions(identity, {
+        registry,
+        storage,
+        currentProjectId: resolvedProjectId,
+      });
     }
 
     return () => {

@@ -39,11 +39,6 @@ import {
   getEntityImageCount,
   canAddReference,
 } from "../core/entityService.js";
-import {
-  consumePendingPromptAction,
-  addMediaToPrompt,
-  animateMedia,
-} from "@/features/studio";
 
 /**
  * PromptBarPlatform
@@ -182,23 +177,6 @@ function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, class
       setModels(models);
     }
   }, [models, setModels]);
-
-  // Consume any cross-page pending prompt action (e.g. from Characters / Elements / Library)
-  const executedPendingRef = useRef(false);
-  useEffect(() => {
-    if (!store || executedPendingRef.current) return;
-    if (models && models.length > 0 && Object.keys(modelsMap).length === 0) return;
-
-    const pending = consumePendingPromptAction();
-    if (!pending) return;
-
-    executedPendingRef.current = true;
-    if (pending.type === "animate") {
-      animateMedia({ store, media: pending.media, featureConfig });
-    } else {
-      addMediaToPrompt({ store, media: pending.media, featureConfig });
-    }
-  }, [store, featureConfig, models, modelsMap]);
 
   // Auto-expand textarea
   useEffect(() => {

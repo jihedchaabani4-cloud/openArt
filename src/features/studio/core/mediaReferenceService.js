@@ -19,7 +19,7 @@
  */
 
 import { autoAssignReference, getAssetId, cleanTagsForAsset } from "./tagsService.js";
-import { getActivePromptBarStore } from "../PromptBarStoreContext.js";
+import { promptBarService } from "@/features/prompt-bar/api/promptBarService.js";
 import { getEntityImageCount } from "./entityService.js";
 import { getModelReferenceCapability } from "./modelManagement.js";
 import * as defaultGeneratedMediaConfig from "@/features/prompt-bar/features/generated-media/generatedMedia.config.js";
@@ -222,164 +222,33 @@ export function normalizeMediaAsset(media, defaultRole = "reference") {
  * sub-mode, and model configuration.
  *
  * @param {object} options
- * @param {object} [options.store] - PromptBar store instance (defaults to getActivePromptBarStore())
+ * @param {object} [options.store] - PromptBar store instance (optional, defaults to promptBarService)
  * @param {object} options.media - Media item to add
  * @param {object} [options.featureConfig] - Feature config (e.g. generatedMediaConfig)
  * @returns {boolean} Whether the item was successfully assigned
  */
 export function addMediaToPrompt({
-  store = getActivePromptBarStore(),
+  store,
   media,
   featureConfig = defaultGeneratedMediaConfig,
+  projectId,
 } = {}) {
-  if (!store || !media) return false;
-
-  const state = store.getState();
-  const {
-    activeMode = "image",
-    activeSubMode = "frames",
-    selectedModelId,
-    modelsMap = {},
-    parameterValues = {},
-    setParameter,
-    selectModel,
-    addElement,
-    addCharacter,
-  } = state;
-
-  const asset = normalizeMediaAsset(media);
-  if (!asset || !asset.url) return false;
-
-  const isEntity = asset.type === "character" || asset.type === "element";
-  const requiredCount = getEntityImageCount(asset);
-
-  // If character or element, ensure prompt bar is in Image mode
-  let effectiveMode = activeMode;
-  if (isEntity && activeMode !== "image") {
-    if (state.setActiveMode) {
-      state.setActiveMode("image");
-    }
-    effectiveMode = "image";
-  }
-
-  let currentModel = selectedModelId ? modelsMap[selectedModelId] : null;
-  const currentCap = getModelReferenceCapability(currentModel);
-
-  // If adding character/element entity, ensure model has enough capacity (maxRefs >= requiredCount).
-  // If current model does not fit all images or is not image domain, switch to the model with max capacity.
-  if (isEntity) {
-    if (!currentCap.supports || (currentCap.maxRefs || 0) < requiredCount || currentModel?.domain !== "image") {
-      const allModels = Object.values(modelsMap);
-      const bestModel = findBestModelForEntity(asset, allModels);
-      if (bestModel) {
-        selectModel(bestModel.id);
-        currentModel = bestModel;
-      }
+  if (!media) return false;
+  if (store && typeof store.getState === "function") {
+    const s = store.getState();
+    if (typeof s.addReference === "function") {
+      const res = s.addReference(media);
+      return res?.ok !== false;
     }
   }
 
-  // 1. Resolve composition slots for current mode and subMode
-  const req = featureConfig?.COMPOSITION_REQUIREMENTS?.[effectiveMode];
-  let slots = [];
-  if (Array.isArray(req)) {
-    slots = req;
-  } else if (req && typeof req === "object") {
-    slots = req[activeSubMode] || [];
-  }
-
-  // 2. Ensure model eligibility if slots require media inputs but model has none
-  const needsMedia = slots.some((s) => s.role === "reference" || s.role === "start");
-  if (needsMedia && currentModel) {
-    const hasMediaSupport =
-      currentModel.parameters?.input_image ||
-      currentModel.parameters?.images ||
-      currentModel.parameters?.reference_images;
-
-    if (!hasMediaSupport && featureConfig?.filterEligibleModels) {
-      const allModels = Object.values(modelsMap);
-      const eligible = featureConfig.filterEligibleModels(allModels, effectiveMode, activeSubMode, {
-        input_image: true,
-      });
-      if (eligible.length > 0) {
-        selectModel(eligible[0].id);
-        currentModel = eligible[0];
-      }
-    }
-  }
-
-  // Register entity if Character or Element
-  if (asset.type === "character" && addCharacter) {
-    addCharacter(asset);
-  } else if (asset.type === "element" && addElement) {
-    addElement(asset);
-  }
-
-  // 3. Case A: Active composition has "reference" slot
-  const refSlot = slots.find((s) => s.role === "reference");
-  if (refSlot) {
-    const backendKey = featureConfig?.resolveParameterMapping
-      ? featureConfig.resolveParameterMapping(currentModel, "reference")
-      : "images";
-    const targetKey = backendKey || "images";
-
-    const currentVal = parameterValues[targetKey];
-    if (targetKey === "images" || targetKey === "reference_images") {
-      const list = Array.isArray(currentVal) ? [...currentVal] : currentVal ? [currentVal] : [];
-      const alreadyHas = list.some(
-        (i) => (i.workflow_id || i.id) === (asset.workflow_id || asset.id)
-      );
-      if (!alreadyHas) {
-        list.push(asset);
-        setParameter(targetKey, list);
-        return true;
-      }
-      return false; // already added
-    } else {
-      // Single image parameter (e.g. input_image in image mode)
-      setParameter(targetKey, asset);
-      return true;
-    }
-  }
-
-  // 4. Case B: Active composition has "start" / "end" frame slots (Video Frames)
-  const startSlot = slots.find((s) => s.role === "start");
-  const endSlot = slots.find((s) => s.role === "end");
-
-  if (startSlot || endSlot) {
-    const startKey = featureConfig?.resolveParameterMapping
-      ? featureConfig.resolveParameterMapping(currentModel, "start") || "input_image"
-      : "input_image";
-    const endKey = featureConfig?.resolveParameterMapping
-      ? featureConfig.resolveParameterMapping(currentModel, "end") || "last_frame"
-      : "last_frame";
-
-    const currentStart = startKey ? parameterValues[startKey] : null;
-    const currentEnd = endKey ? parameterValues[endKey] : null;
-
-    if (!currentStart && startKey) {
-      setParameter(startKey, asset);
-      return true;
-    } else if (currentStart && !currentEnd && endKey && currentModel?.parameters?.[endKey]) {
-      setParameter(endKey, asset);
-      return true;
-    } else if (startKey) {
-      // Overwrite start frame
-      setParameter(startKey, asset);
-      return true;
-    }
-  }
-
-  // 5. Case C: Fallback to autoAssignReference
-  return Boolean(
-    autoAssignReference({
-      asset,
-      activeSlots: slots,
-      paramValues: parameterValues,
-      featureConfig,
-      currentModel,
-      setParameter,
-    }).assigned
-  );
+  const targetProjectId = projectId || store?.getState?.()?.identity?.projectId || "global";
+  const service = promptBarService({
+    templateId: "generated-media",
+    projectId: targetProjectId,
+  });
+  const res = service.addReference(media);
+  return Boolean(res.ok);
 }
 
 /**
@@ -391,106 +260,31 @@ export function addMediaToPrompt({
  * - Clears End Frame (last_frame).
  *
  * @param {object} options
- * @param {object} [options.store] - PromptBar store instance (defaults to getActivePromptBarStore())
+ * @param {object} [options.store] - PromptBar store instance (optional, defaults to promptBarService)
  * @param {object} options.media - Media item to animate
  * @param {object} [options.featureConfig] - Feature config (e.g. generatedMediaConfig)
  * @returns {boolean}
  */
 export function animateMedia({
-  store = getActivePromptBarStore(),
+  store,
   media,
   featureConfig = defaultGeneratedMediaConfig,
+  projectId,
 } = {}) {
-  if (!store || !media) return false;
-
-  const state = store.getState();
-  const {
-    modelsMap = {},
-    selectedModelId,
-    parameterValues = {},
-    selectModel,
-    setActiveMode,
-    setActiveSubMode,
-    setParameter,
-    clearMediaReferences,
-    setPrompt,
-    prompt = "",
-  } = state;
-
-  const asset = normalizeMediaAsset(media, "start");
-  if (!asset || !asset.url) return false;
-
-  // 1. Transition PromptBar mode to Video Frames
-  if (setActiveMode) {
-    setActiveMode("video");
-  }
-  if (setActiveSubMode) {
-    setActiveSubMode("frames");
-  }
-
-  // 2. Wipe media references
-  if (clearMediaReferences) {
-    clearMediaReferences();
-  } else {
-    const nextValues = { ...parameterValues };
-    const allOld = [
-      ...(Array.isArray(parameterValues.images)
-        ? parameterValues.images
-        : parameterValues.images
-        ? [parameterValues.images]
-        : []),
-      ...(Array.isArray(parameterValues.reference_images)
-        ? parameterValues.reference_images
-        : parameterValues.reference_images
-        ? [parameterValues.reference_images]
-        : []),
-      ...(state.elements || []),
-      ...(state.characters || []),
-    ];
-    delete nextValues.images;
-    delete nextValues.reference_images;
-    const ids = allOld.flatMap((i) => [getAssetId(i), i?.workflow_id, i?.id]).filter(Boolean);
-    const cleanedPrompt = ids.length > 0 ? cleanTagsForAsset(prompt, ids) : prompt;
-    if (setPrompt && cleanedPrompt !== prompt) {
-      setPrompt(cleanedPrompt);
-    }
-    setParameter("images", undefined);
-    setParameter("reference_images", undefined);
-  }
-
-  // 3. Ensure eligible video model
-  const currentModel = selectedModelId ? modelsMap[selectedModelId] : null;
-  const isEligible =
-    currentModel &&
-    currentModel.domain === "video" &&
-    Boolean(currentModel.parameters?.input_image);
-
-  let targetModel = currentModel;
-  if (!isEligible) {
-    const allModels = Object.values(modelsMap);
-    const eligibleVideoModels = featureConfig?.filterEligibleModels
-      ? featureConfig.filterEligibleModels(allModels, "video", "frames", {})
-      : allModels.filter((m) => m.domain === "video" && Boolean(m.parameters?.input_image));
-
-    if (eligibleVideoModels.length > 0) {
-      targetModel = eligibleVideoModels[0];
-      selectModel(targetModel.id);
+  if (!media) return false;
+  if (store && typeof store.getState === "function") {
+    const s = store.getState();
+    if (typeof s.animateMedia === "function") {
+      const res = s.animateMedia(media);
+      return res?.ok !== false;
     }
   }
 
-  // 4. Resolve start & end keys
-  const startKey = featureConfig?.resolveParameterMapping
-    ? featureConfig.resolveParameterMapping(targetModel, "start") || "input_image"
-    : "input_image";
-  const endKey = featureConfig?.resolveParameterMapping
-    ? featureConfig.resolveParameterMapping(targetModel, "end") || "last_frame"
-    : "last_frame";
-
-  // 5. Set start frame, clear end frame
-  setParameter(startKey, asset);
-  if (endKey) {
-    setParameter(endKey, undefined);
-  }
-
-  return true;
+  const targetProjectId = projectId || store?.getState?.()?.identity?.projectId || "global";
+  const service = promptBarService({
+    templateId: "generated-media",
+    projectId: targetProjectId,
+  });
+  const res = service.animateMedia(media);
+  return Boolean(res.ok);
 }

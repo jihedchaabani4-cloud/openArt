@@ -7,13 +7,8 @@ import { usePathname, useRouter } from "next/navigation";
 import { useElementStore } from "@/features/prompt-bar/model/useElementStore";
 import { usePromptStore } from "@/features/prompt-bar/model/usePromptStore";
 import { buildElementSheetDraft } from "./elementSheetConfig";
-import {
-  addMediaToPrompt,
-  animateMedia,
-  setPendingPromptAction,
-  canAnyModelAcceptEntity,
-  getActivePromptBarStore,
-} from "@/features/studio";
+import { canAnyModelAcceptEntity } from "@/features/studio";
+import { promptBarService } from "@/features/prompt-bar/api/promptBarService";
 import { useRealBackendModels } from "@/features/prompt-bar/core/useRealBackendModels";
 
 /**
@@ -146,49 +141,28 @@ export function useWorkflowActions(workflow, item = null) {
 
     const effectivePrompt = prompt || config.prompt || params.prompt || targetItem?.prompt || workflow?.prompt || "";
 
-    // 1. Sync with Platform PromptBar store (if active on screen)
-      const activeBarStore = getActivePromptBarStore();
-      if (activeBarStore) {
-        const barState = activeBarStore.getState();
-        if (effectivePrompt && barState.setPrompt) {
-          barState.setPrompt(effectivePrompt);
-        }
-        if (modelName && barState.selectModel) {
-          barState.selectModel(modelName);
-        }
-        if (ratioVal && barState.setParameter) {
-          barState.setParameter("ratio", ratioVal);
-          barState.setParameter("aspect_ratio", ratioVal);
-        }
-        if (barState.setActiveMode) {
-          barState.setActiveMode(isVideo ? "video" : "image");
-        }
-      }
+    const service = promptBarService({
+      templateId: "generated-media",
+      projectId: projectId || "global",
+    });
 
-      // 2. Sync with Legacy / Global Prompt store
-      const promptStore = usePromptStore.getState();
-      promptStore.setGenerationMode(isVideo ? "keyframe" : "image");
-      if (effectivePrompt) promptStore.setPrompt(effectivePrompt);
-      if (modelName) promptStore.setModelId(modelName);
-      if (ratioVal) promptStore.setRatio(ratioVal);
-      if (refs.length) promptStore.setReferenceImages(refs);
+    service.applyGeneration({
+      mode: isVideo ? "video" : "image",
+      subMode: "frames",
+      modelId: modelName,
+      prompt: effectivePrompt,
+      parameters: {
+        ratio: ratioVal,
+        aspect_ratio: ratioVal,
+        quality: qualityVal,
+        videoResolution: videoResVal,
+        duration: durationVal,
+        motion: motionVal,
+        count: countVal,
+      },
+    });
 
-      if (promptStore.setQuality) promptStore.setQuality(qualityVal || "2K");
-      if (promptStore.setVideoResolution) promptStore.setVideoResolution(videoResVal || "1080p");
-      if (promptStore.setDuration) promptStore.setDuration(durationVal || "5s");
-      if (promptStore.setMotion) promptStore.setMotion(motionVal ?? 50);
-      if (promptStore.setCount) promptStore.setCount(countVal);
-
-      // 3. Smooth scroll and focus on prompt bar input for instant visual feedback
-      if (typeof window !== "undefined") {
-        requestAnimationFrame(() => {
-          const editor = document.querySelector('[contenteditable="true"]') || document.querySelector('textarea[name="prompt"]');
-          if (editor) {
-            editor.focus();
-            editor.scrollIntoView({ behavior: "smooth", block: "nearest" });
-          }
-        });
-      }
+    service.focus();
   };
 
   const handleEdit = () => {
@@ -205,63 +179,45 @@ export function useWorkflowActions(workflow, item = null) {
   const handleAnimate = () => {
     if (!canUseAsInput) return;
     const media = targetItem || workflow;
-    const handled = animateMedia({ media });
-    if (!handled) {
-      if (projectId && !pathname?.includes("/assets") && !pathname?.includes("/generations") && !pathname?.includes("/collection")) {
-        setPendingPromptAction({ type: "animate", media, projectId });
+    const service = promptBarService({
+      templateId: "generated-media",
+      projectId: projectId || "global",
+    });
+
+    const res = service.animateMedia(media);
+    if (!res.ok) {
+      if (
+        projectId &&
+        !pathname?.includes("/assets") &&
+        !pathname?.includes("/generations") &&
+        !pathname?.includes("/collection")
+      ) {
         router.push(`/cinema-studio/${projectId}/assets`);
         return;
       }
-      const assetId = targetItem?.asset_id || targetItem?.name || targetItem?.id || "";
-      if (!isEditPage) {
-        const promptStore = usePromptStore.getState();
-        promptStore.setGenerationMode("keyframe");
-        promptStore.clearReferences();
-        const workflowId = workflow?.id || targetItem?.workflow_id || targetItem?.workflowId || null;
-        promptStore.addReference({
-          url,
-          workflow_id: workflowId,
-          asset_id: workflowId || assetId,
-          id: workflowId || assetId,
-          is_video: false
-        }, "start");
-      }
     }
 
-    if (typeof window !== "undefined") {
-      requestAnimationFrame(() => {
-        const editor = document.querySelector('[contenteditable="true"]') || document.querySelector('textarea[name="prompt"]');
-        if (editor) {
-          editor.focus();
-          editor.scrollIntoView({ behavior: "smooth", block: "nearest" });
-        }
-      });
-    }
+    service.focus();
   };
 
   const handleAddToPrompt = () => {
     if (!canAddToPrompt) return;
     const media = targetItem || workflow;
-    const handled = addMediaToPrompt({ media });
-    if (!handled) {
-      if (projectId && !pathname?.includes("/assets") && !pathname?.includes("/generations")) {
-        setPendingPromptAction({ type: "add_reference", media, projectId });
+    const service = promptBarService({
+      templateId: "generated-media",
+      projectId: projectId || "global",
+    });
+
+    const res = service.addReference(media);
+    if (!res.ok) {
+      if (
+        projectId &&
+        !pathname?.includes("/assets") &&
+        !pathname?.includes("/generations")
+      ) {
         router.push(`/cinema-studio/${projectId}/assets`);
         return;
       }
-      const workflowId = workflow?.id || targetItem?.workflow_id || targetItem?.workflowId || null;
-      const assetId = targetItem?.asset_id || targetItem?.name || targetItem?.id || "";
-      const asset = { 
-        url,
-        workflow_id: workflowId,
-        asset_id: workflowId || assetId,
-        id: workflowId || assetId,
-        is_video: isVideo,
-        workflow_type: workflow?.workflow_type
-      };
-      
-      const activeStore = usePromptStore.getState();
-      activeStore.addReference(asset, "normal");
     }
   };
 

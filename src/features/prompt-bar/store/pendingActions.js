@@ -182,6 +182,10 @@ export function drainPendingActions(
         }
       } else if (entry.actionName === "focus" && typeof state.requestFocus === "function") {
         state.requestFocus();
+      } else if (entry.actionName === "animate" && typeof state.animateMedia === "function") {
+        state.animateMedia(entry.args?.[0]?.media || entry.args?.[0]);
+      } else if (entry.actionName === "add_reference" && typeof state.addReference === "function") {
+        state.addReference(entry.args?.[0]?.media || entry.args?.[0]);
       } else if (typeof state[entry.actionName] === "function") {
         state[entry.actionName](...entry.args);
       }
