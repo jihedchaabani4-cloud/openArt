@@ -13,9 +13,7 @@ import { useUploadMedia } from "@/features/media";
 import { queryKeys } from "@/shared/api/queryKeys";
 import { cn } from "@/shared/lib/utils";
 import {
-  PromptBarPlatform,
-  generatedMediaType,
-  generatedMediaConfig,
+  GeneratedPromptBar,
   useRealBackendModels,
 } from "@/features/prompt-bar/index.platform";
 import { RowsPhotoAlbum } from "react-photo-album";
@@ -469,9 +467,8 @@ export default function CollectionDetailPage({ params }) {
         </div>
 
         {/* Dedicated Generations PromptBar (Platform Architecture) */}
-        <PromptBarPlatform
-          type={generatedMediaType}
-          featureConfig={generatedMediaConfig}
+        <GeneratedPromptBar
+          projectId={projectId}
           models={realModels}
           onGenerate={handleGenerate}
           isGenerating={isGeneratingMutation}
