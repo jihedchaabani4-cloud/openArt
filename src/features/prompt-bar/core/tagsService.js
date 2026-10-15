@@ -16,17 +16,8 @@
  */
 export const TAG_REGEX = /<(?:character|element|MediaAsset|media|ref|reference):\s*([^>]+)>/gi;
 
-/**
- * Extracts canonical asset ID from any media asset object or string.
- *
- * @param {object|string} asset
- * @returns {string|null}
- */
-export function getAssetId(asset) {
-  if (!asset) return null;
-  if (typeof asset === "string") return asset;
-  return asset.workflow_id || asset.workflowId || asset.id || asset.asset_id || asset.ref_media_id || asset.url || null;
-}
+import { getAssetId } from "./mediaRef.js";
+export { getAssetId };
 
 /**
  * Cleanses all tags associated with one or more asset IDs from the prompt.
