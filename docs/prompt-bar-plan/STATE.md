@@ -1,8 +1,8 @@
 # STATE
-Current phase: P6    Current task: P6-GATE
+Current phase: P7    Current task: W2
 Updated: 2026-10-15
-Test status: 445 vitest passed (64 files), 47 node:test passed (7 files) - Total prompt-bar tests: 308 passed
-Next step: human runs the full smoke checklist and compares the look of the bar, then gives P7 (08_P7_wrappers_routes_templates.md) (waiting for the human)
+Test status: 449 vitest passed (65 files), 47 node:test passed (7 files) - Total prompt-bar tests: 265 passed
+Next step: W2: persistRoutes and the route watcher (PB-D-14) (W2a: pure route matching, W2b: the watcher and reset)
 
 | Task | Status (TODO/DONE/BLOCKED/SKIPPED) | Commit | Report |
 |---|---|---|---|
@@ -54,7 +54,8 @@ Next step: human runs the full smoke checklist and compares the look of the bar,
 | H4 | DONE | 40cb0c7 | reports/H4.md |
 | H5 | DONE | ec44c6d | reports/H5.md |
 | H6 | DONE | 9481923 | reports/H6.md |
-| P6-GATE | DONE | pb6(GATE) | reports/PHASE-P6-GATE.md |
+| P6-GATE | DONE | 8fc6c7d | reports/PHASE-P6-GATE.md |
+| W1 | DONE | f3df10c | reports/W1.md |
 
 
 
