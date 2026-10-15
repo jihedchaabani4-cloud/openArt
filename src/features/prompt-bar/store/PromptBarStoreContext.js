@@ -96,13 +96,14 @@ export function PromptBarStoreProvider({
   type,
   templateId,
   instanceId,
+  projectId,
   initialModels = [],
   persist = true,
   persistKey = "studio-prompt-bar",
   storage = typeof window !== "undefined" ? window.sessionStorage : null,
   children,
 }) {
-  const resolvedProjectId = resolveProjectId();
+  const resolvedProjectId = projectId || resolveProjectId();
   const effectiveTemplateId = templateId || type?.id || "default";
   const effectiveInstanceId = instanceId || (persistKey && persistKey !== "studio-prompt-bar" ? persistKey : "default");
 

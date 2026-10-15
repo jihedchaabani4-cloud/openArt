@@ -5,8 +5,10 @@
  * Does NOT re-export the existing production prompt bar.
  */
 
-// ── Renderer ─────────────────────────────────────────────
+// ── Renderer & Wrappers ──────────────────────────────────
 export { PromptBarPlatform } from "./platform/PromptBarPlatform.jsx";
+export { GeneratedPromptBar } from "./templates/GeneratedPromptBar.jsx";
+export { generatedMediaTemplate } from "./templates/generatedMedia.template.js";
 
 // ── Composition Types & Feature Configs ───────────────────────
 export { createPromptBarType } from "./composition/createPromptBarType.js";

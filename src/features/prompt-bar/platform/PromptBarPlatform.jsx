@@ -51,6 +51,7 @@ export function PromptBarPlatform({
   persistKey = "studio-prompt-bar",
   templateId,
   instanceId,
+  projectId,
   storage,
 }) {
   const contextStore = useContext(PromptBarStoreContext);
@@ -78,6 +79,7 @@ export function PromptBarPlatform({
       type={type}
       templateId={templateId}
       instanceId={instanceId}
+      projectId={projectId}
       initialModels={models}
       persist={persist}
       persistKey={persistKey}
