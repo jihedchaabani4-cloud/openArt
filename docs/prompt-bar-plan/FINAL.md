@@ -142,10 +142,10 @@ The following compatibility shims remain in place to guarantee zero-breakage acr
 
 | Shim / Deprecated Export | File Location | Consumers / Importers | Usage Count |
 |---|---|---|---|
-| `generatedMediaConfig` | `src/features/prompt-bar/features/generated-media/generatedMedia.config.js` | Forwards to `templates/generatedMedia.template.js` | 2 (shims/tests) |
-| `generatedMediaType` | `src/features/prompt-bar/composition/generatedMedia.type.js` | Forwards to `templates/generatedMedia.template.js` | 2 (shims/tests) |
+| `generatedMediaConfig` | `src/features/prompt-bar/features/generated-media/generatedMedia.config.js` | Deleted in commit `9276cf6` (pending owner decision) | 0 (tests updated) |
+| `generatedMediaType` | `src/features/prompt-bar/composition/generatedMedia.type.js` | Deleted in commit `9276cf6` (pending owner decision) | 0 (tests updated) |
 | `getActivePromptBarStore`, `setActivePromptBarStore` | `src/features/prompt-bar/store/PromptBarStoreContext.js` | Backward-compatibility helper for unmigrated external access | 0 in production |
-| Legacy Studio re-exports | `src/features/studio/PromptBarStoreContext.js`, `src/features/studio/index.js` | Re-exports from `@/features/prompt-bar` | 2 |
+| Legacy Studio re-exports | `src/features/studio/index.js` | Re-exports from `@/features/prompt-bar` | 2 |
 | `useMediaActions` (prompt bar delegation) | `src/features/workflows/hooks/useMediaActions.js` | Delegates to `promptBarService` | 2 |
 | `usePromptStore` | `src/features/prompt-bar/model/usePromptStore.js` | Delegates to `promptBarService` for prompt actions; retains gallery drag state per PB-D-17 | 7 gallery files |
 
@@ -155,8 +155,8 @@ The following compatibility shims remain in place to guarantee zero-breakage acr
 
 | Metric | Before Plan (P0 Baseline) | After Plan (Current) | Change / Target |
 |---|---|---|---|
-| `PromptBarPlatform.jsx` lines of code | 1,112 lines | 443 lines | **-60.1%** reduction (split into hooks & UI parts) |
-| Number of `useEffect` in `PromptBarPlatform.jsx` | 11 calls | 2 calls | **-81.8%** reduction (extracted into isolated custom hooks) |
+| `PromptBarPlatform.jsx` lines of code | 1,112 lines | 444 physical lines (443 trimmed, 412 non-empty) | **-60.1%** reduction (split into hooks & UI parts) |
+| Number of `useEffect` in `PromptBarPlatform.jsx` | 9 calls | 1 call (auto-expand textarea) | **-88.9%** reduction (extracted into isolated custom hooks) |
 | Number of `exhaustive-deps` disables in `src/features/prompt-bar` | 0 | 0 | **0** (strictly maintained) |
 | Total Vitest Test Files | 31 passed | 69 passed | **+38 test files** |
 | Total Vitest Tests | 190 passed | 485 passed | **+295 hermetic tests** |
@@ -177,4 +177,14 @@ The following compatibility shims remain in place to guarantee zero-breakage acr
 
 ## 8. Final Statement on Phase P8
 
-Phase P8 (new templates, renames, shim removal) was not started because it is locked.
+Phase P8 candidate **P8-character** WAS built and integrated following explicit owner instructions (messages: *"ey 7ot l ui f caractr page"*, *"behi tawa 7aja o5ra besba l caracetr promp bar enno raho mouch kk awel 7aja emchi chof l api chnwao ye9ble w zeda rahom mafamech modles wele ay paramter just famam ken propmo w refrecne akahw"*, *"behi rakkaez m3aya bech nefhmo system mta3 l caracetr promp bar..."*).
+
+Commits implementing P8-character:
+- `78cfa2c`: `feat(characters): add character prompt bar template and character composition type`
+- `b05f6ff`: `feat(characters): mount CharacterPromptBar on NewCharacterPage`
+- `9acb980`: `fix(characters): configure character template with prompt and reference slot only`
+- `7039973`: `feat(prompt-bar): implement character traits form, minimum 10 prompt validation, and image/element reference constraints`
+- Plus `8b7bbc4`: state updates.
+
+Note: These P8-character commits do not follow the strict `pb<N>(<id>)` commit prefix convention.
+All other Phase P8 items (`P8-edit`, `P8-upscale`, `P8-shims`, `P8-settings`, `P8-legacy`, `P8-types`) remain strictly **LOCKED**.

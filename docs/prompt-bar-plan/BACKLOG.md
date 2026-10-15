@@ -10,3 +10,7 @@ Format: `- [Severity] path/file.js:123 | what is wrong in one line | found durin
 - [Medium] src/features/prompt-bar/store/PromptBarStoreContext.js:30 | clearPersistentPromptBarStores never called in production leading to persistentStoreRegistry memory leak | found during V5
 - [Medium] src/features/prompt-bar/ui/common/MediaInput.jsx:51 | Temporary blob: URLs saved to sessionStorage and broken upon reload | found during V5
 - [Medium] FlowPromptBoxSettings.jsx | hardcoded mode/ratio blocks should be driven by the template | found during H6
+- [Medium] src/features/studio/useCharacterStore.js / SyncFeaturesPlugin | useCharacterStore singleton plus SyncFeaturesPlugin drive the character traits form outside the instance store | found during P7-FIX
+- [Low] src/features/prompt-bar/ui/common/editor/PromptEditor.jsx:266 | PromptEditor.jsx console.error in Lexical onError | found during P7-FIX
+- [Low] src/features/studio/index.js & src/features/workflows/hooks/useMediaActions.js | Remaining shims list: legacy studio re-exports (usePromptStore, useCharacterStore, tagsService, entityService) and useMediaActions delegation | found during P7-FIX
+- [Low] git history | Commits 78cfa2c, b05f6ff, 9acb980, 7039973 and the P7 commits lack the pb<N>(<id>) prefix | found during P7-FIX
