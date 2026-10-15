@@ -5,9 +5,7 @@ import { motion } from "framer-motion";
 
 // ── v3 ────────────────────────────────────────────────────────────────────────
 import {
-  PromptBarPlatform,
-  generatedMediaType,
-  generatedMediaConfig,
+  GeneratedPromptBar,
   useRealBackendModels,
 } from "@/features/prompt-bar/index.platform";
 
@@ -51,9 +49,8 @@ function V3Panel({ instanceLabel, color }) {
       </div>
 
       <div className="relative">
-        <PromptBarPlatform
-          type={generatedMediaType}
-          featureConfig={generatedMediaConfig}
+        <GeneratedPromptBar
+          instanceId={instanceLabel}
           models={models}
           onGenerate={(r) =>
             setPayloads((p) => [...p.slice(-4), { time: new Date().toLocaleTimeString(), payload: r }])
