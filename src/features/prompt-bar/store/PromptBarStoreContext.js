@@ -126,9 +126,10 @@ export function PromptBarStoreProvider({
     legacyKey,
   }), [type?.persistRoutes, persist, storage, canonicalKey, legacyKey]);
 
-  // 1. Store creation is allowed ONLY through registry.getOrCreate and must not read storage.
+  // 1. Store creation is allowed ONLY through registry.getOrCreate on the client and must not read storage.
+  // On the server (typeof window === "undefined"), create an ephemeral non-registered store to prevent SSR memory leaks.
   // The first render (server and client) uses defaults plus initialConfig only (PB-D-06).
-  const store = registry.getOrCreate(identity, () => {
+  const createStore = () => {
     const modelsMap = {};
     for (const m of initialModels) {
       modelsMap[m.id] = m;
@@ -146,7 +147,11 @@ export function PromptBarStoreProvider({
       activeMode: "image",
       activeSubMode: "frames",
     });
-  }, instanceMeta);
+  };
+
+  const store = typeof window === "undefined"
+    ? createStore()
+    : registry.getOrCreate(identity, createStore, instanceMeta);
 
   // 2. Mount lifecycle, hydration and debounced persistence
   React.useEffect(() => {
