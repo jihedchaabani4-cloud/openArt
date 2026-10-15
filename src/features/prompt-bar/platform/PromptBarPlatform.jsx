@@ -13,16 +13,16 @@ import { SwapIcon, ReferenceButton, ViewReference } from "../ui/common/Reference
 import { ImportMediaPopover } from "@/widgets/ImportMediaDialog/ImportMediaPopover";
 import { PromptEditor } from "../ui/common/editor/PromptEditor.jsx";
 import { AtMentionMenu } from "../ui/common/editor/AtMentionMenu.jsx";
-import { FlowPromptBoxSettings, getRatioIcon } from "../ui/common/selectors/FlowPromptBoxSettings.jsx";
+import { FlowPromptBoxSettings } from "../ui/common/selectors/FlowPromptBoxSettings.jsx";
 import { Button } from "@/shared/ui/button";
 
 // Platform Architecture
 import { PromptBarStoreProvider, PromptBarStoreContext } from "../store/PromptBarStoreContext.js";
 import { usePromptBarStore } from "../store/usePromptBarStore.js";
-import { calculateModelCredits } from "../core/creditCalculationService.js";
 import { usePromptBarModels } from "./hooks/usePromptBarModels.js";
 import { usePromptBarSlots } from "./hooks/usePromptBarSlots.js";
 import { usePromptBarReferences } from "./hooks/usePromptBarReferences.js";
+import { usePromptBarGenerate } from "./hooks/usePromptBarGenerate.js";
 
 /**
  * PromptBarPlatform
@@ -130,16 +130,10 @@ function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, class
   const prompt         = usePromptBarStore((s) => s.prompt);
   const paramValues    = usePromptBarStore((s) => s.parameterValues);
   const validationErrs = usePromptBarStore((s) => s.validationErrors);
-  const storeIsGenerating = usePromptBarStore((s) => s.isGenerating);
-  const isGenerating = Boolean(propIsGenerating || storeIsGenerating);
 
   // Store actions
   const setPrompt        = usePromptBarStore((s) => s.setPrompt);
   const setParameter     = usePromptBarStore((s) => s.setParameter);
-  const serializeAndEmit = usePromptBarStore((s) => s.serialize);
-  const setIsGenerating  = usePromptBarStore((s) => s.setIsGenerating);
-  const beginSubmit      = usePromptBarStore((s) => s.beginSubmit);
-  const endSubmit        = usePromptBarStore((s) => s.endSubmit);
   const focusRequest     = usePromptBarStore((s) => s.focusRequest);
 
   // Model state and synchronization (H1)
@@ -205,14 +199,6 @@ function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, class
     }
   }, [storeSwitchMode, activeMode, setActiveSubMode, featureConfig, allModelsList, selectedId, selectModel]);
 
-  const currentRatio = paramValues.aspect_ratio || paramValues.ratio || "1:1";
-  const currentRatioIcon = getRatioIcon(currentRatio);
-  const currentCount = Number(paramValues.count || paramValues.variations) || 1;
-
-  const estimatedCredits = useMemo(() => {
-    return calculateModelCredits(currentModel, paramValues, currentCount);
-  }, [currentModel, paramValues, currentCount]);
-
   // Active slots, drawer parameters, and swap handler (H2)
   const {
     activeSlots,
@@ -230,24 +216,25 @@ function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, class
     parameters,
   });
 
-  // FR-SLOT-05: Generate is disabled in Frames mode if the Start Frame slot is empty, or if no eligible model is active.
-  const isFramesMode = activeMode === "video" && activeSubMode === "frames";
-  const isGenerateDisabled = isGenerating || !selectedId || !isCurrentEligible || (isFramesMode && !startVal);
-
-  const handleGenerate = useCallback(async () => {
-    if (isGenerateDisabled || isGenerating) return;
-    const token = typeof beginSubmit === "function" ? beginSubmit() : null;
-    try {
-      const result = serializeAndEmit();
-      await onGenerate?.(result);
-    } finally {
-      if (typeof endSubmit === "function") {
-        endSubmit(token);
-      } else {
-        setIsGenerating(false);
-      }
-    }
-  }, [isGenerateDisabled, isGenerating, beginSubmit, endSubmit, serializeAndEmit, onGenerate, setIsGenerating]);
+  // Generation credits, ratios, and submission lifecycle (H4)
+  const {
+    currentRatio,
+    currentRatioIcon,
+    currentCount,
+    estimatedCredits,
+    isGenerateDisabled,
+    isGenerating,
+    handleGenerate,
+  } = usePromptBarGenerate({
+    currentModel,
+    selectedId,
+    isCurrentEligible,
+    activeMode,
+    activeSubMode,
+    startVal,
+    onGenerate,
+    isGenerating: propIsGenerating,
+  });
 
 
   // References, dialogs, media quotas, and outside-click listeners (H3)
