@@ -24,11 +24,13 @@ export function getActiveSlots({
   hasModes = true,
 } = {}) {
   const config = template || featureConfig;
-  if (!config || !hasModes) return referenceSlots;
+  if (!config) return referenceSlots;
 
   let slots = [];
   if (typeof config.getSlots === "function") {
     slots = config.getSlots(mode, subMode, model);
+  } else if (!hasModes) {
+    return referenceSlots;
   } else if (config.COMPOSITION_REQUIREMENTS) {
     const req = config.COMPOSITION_REQUIREMENTS;
     const modeSlots = req?.[mode];
@@ -38,8 +40,8 @@ export function getActiveSlots({
     return referenceSlots;
   }
 
+  const resolveMapping = config.resolveParameterMapping;
   if (model) {
-    const resolveMapping = config.resolveParameterMapping;
     return slots.filter((slot) => {
       if (slot.role === "reference") {
         const cap = getModelReferenceCapability(model);
@@ -50,6 +52,13 @@ export function getActiveSlots({
         return Boolean(key);
       }
       return true;
+    });
+  }
+
+  if (resolveMapping) {
+    return slots.filter((slot) => {
+      const key = resolveMapping(null, slot.role);
+      return Boolean(key);
     });
   }
 
@@ -64,7 +73,8 @@ export function getSlotMaxRefs({
   template,
   featureConfig,
 } = {}) {
-  if (!slot || !model) return 0;
+  if (!slot) return 0;
+  if (!model && !template && !featureConfig && !parameterDef) return 0;
 
   const config = template || featureConfig;
   const resolveMapping = config?.resolveParameterMapping;
@@ -72,20 +82,27 @@ export function getSlotMaxRefs({
     ? resolveMapping(model, slot.role) || slot.role
     : slot.role;
 
-  const paramDef = parameterDef || model.parameters?.[backendKey];
+  const paramDef = parameterDef || (model?.parameters?.[backendKey] || config?.parameters?.[backendKey]);
   if (paramDef) {
     if (typeof paramDef.max === "number" && paramDef.max > 0) return paramDef.max;
     if (typeof paramDef.max_count === "number" && paramDef.max_count > 0) return paramDef.max_count;
     if (typeof paramDef.maxCount === "number" && paramDef.maxCount > 0) return paramDef.maxCount;
     if (paramDef.type === "image[]" || paramDef.type === "array") return 4;
+    if (paramDef.type === "image") return 1;
   }
+
+  if (typeof slot.maxCount === "number" && slot.maxCount > 0) return slot.maxCount;
+  if (typeof slot.max === "number" && slot.max > 0) return slot.max;
 
   if (slot.role === "reference") {
-    const cap = getModelReferenceCapability(model);
-    return cap.maxRefs || 4;
+    if (model) {
+      const cap = getModelReferenceCapability(model);
+      return cap.maxRefs || 4;
+    }
+    return config?.mediaLimit || 4;
   }
 
-  if (paramDef && paramDef.type === "image") return 1;
+  if (config?.mediaLimit) return config.mediaLimit;
 
   return 1;
 }

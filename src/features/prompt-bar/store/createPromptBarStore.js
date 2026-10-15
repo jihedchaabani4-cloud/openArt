@@ -39,6 +39,8 @@ export function createPromptBarStore(overrides = {}, initialDeps = {}) {
   if (overrides.template && !deps.template) {
     deps.template = overrides.template;
   }
+  const effectiveTemplate = overrides.template || deps.template || null;
+  const initialParams = overrides.parameterValues || (effectiveTemplate?.parameters ? initializeValues(effectiveTemplate.parameters) : {});
 
   return createStore((set, get) => ({
     // ── State ──────────────────────────────────────────────────────────────
@@ -46,7 +48,7 @@ export function createPromptBarStore(overrides = {}, initialDeps = {}) {
     rawModelsMap: {},
     selectedModelId: null,
     prompt: "",
-    parameterValues: {},
+    parameterValues: initialParams,
     elements: [],
     characters: [],
     reconciliationLog: [],
@@ -369,8 +371,8 @@ export function createPromptBarStore(overrides = {}, initialDeps = {}) {
      * @returns {{ model: string, prompt: string, parameters: Record<string, any>, elements?: string[], characters?: string[] }}
      */
     serialize: () => {
-      const { selectedModelId, prompt, modelsMap, parameterValues, elements, characters } = get();
-      const definitions = modelsMap[selectedModelId]?.parameters || {};
+      const { selectedModelId, prompt, modelsMap, parameterValues, elements, characters, template } = get();
+      const definitions = (selectedModelId ? modelsMap[selectedModelId]?.parameters : null) || template?.parameters || {};
       const result = serialize(selectedModelId, prompt, definitions, parameterValues, {
         elements,
         characters,
@@ -381,8 +383,8 @@ export function createPromptBarStore(overrides = {}, initialDeps = {}) {
 
     /** Reset prompt, parameters, and entities to model defaults. */
     reset: () => {
-      const { modelsMap, selectedModelId } = get();
-      const definitions = modelsMap[selectedModelId]?.parameters || {};
+      const { modelsMap, selectedModelId, template } = get();
+      const definitions = (selectedModelId ? modelsMap[selectedModelId]?.parameters : null) || template?.parameters || {};
       const parameterValues = initializeValues(definitions);
       set({
         prompt: "",

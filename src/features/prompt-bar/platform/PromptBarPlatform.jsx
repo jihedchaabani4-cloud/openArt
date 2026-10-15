@@ -224,6 +224,7 @@ function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, class
     startVal,
     onGenerate,
     isGenerating: propIsGenerating,
+    hasModels: (type?.features?.models ?? featureConfig?.features?.models) !== false && type?.layout?.showModelSelector !== false,
   });
 
 

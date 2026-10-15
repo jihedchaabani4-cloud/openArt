@@ -131,12 +131,21 @@ export function serialize(modelId, prompt = "", definitions = {}, values = {}, e
   }
 
   // 1. From media parameters declared and emitted in parameters
-  for (const k of MEDIA_PARAM_NAMES) {
-    const val = parameters[k];
-    if (Array.isArray(val)) {
-      val.forEach(collectId);
-    } else if (val) {
-      collectId(val);
+  for (const [k, val] of Object.entries(parameters)) {
+    const def = definitions[k];
+    const isMedia =
+      MEDIA_PARAM_NAMES.has(k) ||
+      def?.group === "media" ||
+      def?.type === "image" ||
+      def?.type === "image[]" ||
+      def?.type === "video" ||
+      def?.type === "video[]";
+    if (isMedia) {
+      if (Array.isArray(val)) {
+        val.forEach(collectId);
+      } else if (val) {
+        collectId(val);
+      }
     }
   }
 
@@ -156,7 +165,7 @@ export function serialize(modelId, prompt = "", definitions = {}, values = {}, e
   }
 
   const result = {
-    model: modelId,
+    ...(modelId ? { model: modelId } : {}),
     prompt: typeof prompt === "string" ? prompt.trim() : "",
     parameters,
     references: Array.from(referenceIdSet),

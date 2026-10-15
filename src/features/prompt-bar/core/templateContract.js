@@ -74,6 +74,8 @@ export function defineTemplate(def) {
     getSlots: def.getSlots,
     filterEligibleModels: def.filterEligibleModels,
     resolveParameterMapping: def.resolveParameterMapping,
+    parameters: Object.freeze({ ...(def.parameters || {}) }),
+    mediaLimit: typeof def.mediaLimit === "number" ? def.mediaLimit : undefined,
     createActions: def.createActions || null,
   };
 

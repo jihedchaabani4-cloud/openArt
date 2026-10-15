@@ -27,6 +27,7 @@ export function usePromptBarGenerate({
   startVal,
   onGenerate,
   isGenerating: propIsGenerating = false,
+  hasModels = true,
 } = {}) {
   const paramValues        = usePromptBarStore((s) => s.parameterValues);
   const storeIsGenerating  = usePromptBarStore((s) => s.isGenerating);
@@ -47,7 +48,8 @@ export function usePromptBarGenerate({
 
   // FR-SLOT-05: Generate is disabled in Frames mode if the Start Frame slot is empty, or if no eligible model is active.
   const isFramesMode = activeMode === "video" && activeSubMode === "frames";
-  const isGenerateDisabled = isGenerating || !selectedId || !isCurrentEligible || (isFramesMode && !startVal);
+  const modelNotReady = hasModels && (!selectedId || !isCurrentEligible);
+  const isGenerateDisabled = isGenerating || modelNotReady || (isFramesMode && !startVal);
 
   const handleGenerate = useCallback(async () => {
     if (isGenerateDisabled || isGenerating) return;

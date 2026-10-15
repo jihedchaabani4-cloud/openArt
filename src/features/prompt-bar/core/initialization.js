@@ -15,6 +15,11 @@ import { initializeValues, getActiveDefinitions } from "./parameterState.js";
  * @returns {{ selectedModelId: string|null, parameterValues: Record<string, any> }}
  */
 export function initializeFromType(typeConfig, modelsMap = {}) {
+  if (typeConfig?.features?.models === false) {
+    const parameterValues = initializeValues(typeConfig?.parameters || {});
+    return { selectedModelId: null, parameterValues };
+  }
+
   const { defaultModelId, supportedDomains } = typeConfig || {};
 
   // Filter models by supported domains

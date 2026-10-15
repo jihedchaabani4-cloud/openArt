@@ -48,7 +48,7 @@ export function attachMedia(state, { role, value } = {}, deps = {}) {
   const resolveMapping = template?.resolveParameterMapping;
   const targetKey = resolveMapping ? resolveMapping(currentModel, role) || role : role;
 
-  const paramDef = currentModel?.parameters?.[targetKey];
+  const paramDef = currentModel?.parameters?.[targetKey] || template?.parameters?.[targetKey];
   const isList = paramDef?.type === "image[]" || paramDef?.type === "video[]" || role === "reference";
 
   // 3. Existing values and validation
