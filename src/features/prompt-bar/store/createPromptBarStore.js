@@ -58,6 +58,7 @@ export function createPromptBarStore(overrides = {}, initialDeps = {}) {
     pendingHydration: overrides.pendingHydration || null,
     identity: overrides.identity || null,
     template: overrides.template || deps.template || null,
+    focusRequest: overrides.focusRequest || 0,
     ...overrides,
 
     // ── Actions ────────────────────────────────────────────────────────────
@@ -391,7 +392,15 @@ export function createPromptBarStore(overrides = {}, initialDeps = {}) {
         reconciliationLog: [],
         validationErrors: {},
         lastSerializedRequest: null,
+        focusRequest: 0,
       });
+    },
+
+    /** Requests focus on the prompt editor without DOM query. */
+    requestFocus: () => {
+      set((state) => ({
+        focusRequest: (state.focusRequest || 0) + 1,
+      }));
     },
 
     /**

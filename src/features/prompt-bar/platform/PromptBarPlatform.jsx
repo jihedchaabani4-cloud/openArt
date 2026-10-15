@@ -173,6 +173,7 @@ function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, class
   const removeCharacter  = usePromptBarStore((s) => s.removeCharacter);
   const attachMedia      = usePromptBarStore((s) => s.attachMedia);
   const removeMedia      = usePromptBarStore((s) => s.removeMedia);
+  const focusRequest     = usePromptBarStore((s) => s.focusRequest);
 
 
   // Sync incoming models into the store
@@ -912,6 +913,7 @@ function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, class
             onMentionQueryChange={setMentionQuery}
             mentionOpen={quickMentionOpen || dialogOpen}
             placeholder="Describe what you want to create..."
+            focusRequest={focusRequest}
           />
         </div>
       )}

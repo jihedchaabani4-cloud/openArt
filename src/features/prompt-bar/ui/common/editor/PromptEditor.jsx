@@ -224,6 +224,24 @@ function AtShortcutPlugin({ onTriggerMentionDialog, onMentionQueryChange, mentio
   return null;
 }
 
+// ── Focus when focusRequest changes ──────────────────────────────────────────
+function FocusPlugin({ focusRequest }) {
+  const [editor] = useLexicalComposerContext();
+  const isFirstRender = React.useRef(true);
+
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    if (focusRequest > 0) {
+      editor.focus();
+    }
+  }, [focusRequest, editor]);
+
+  return null;
+}
+
 // ── Main Component ───────────────────────────────────────────────────────────
 export function PromptEditor({
   value,
@@ -235,6 +253,7 @@ export function PromptEditor({
   onMentionQueryChange,
   mentionOpen = false,
   placeholder = "Describe the scene you imagine...",
+  focusRequest = 0,
 }) {
   // Move nodes inside to participate in HMR correctly
   const EDITOR_NODES = React.useMemo(() => [MentionNode, FeatureNode], [MentionNode, FeatureNode]);
@@ -288,6 +307,7 @@ export function PromptEditor({
         <TextTagConverterPlugin referenceImages={referenceImages} />
         <OnChangePlugin onChange={handleLexicalChange} />
         <SubmissionPlugin onSubmit={onSubmit} externalValue={value} disabled={mentionOpen} />
+        <FocusPlugin focusRequest={focusRequest} />
       </div>
     </LexicalComposer>
   );
