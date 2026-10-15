@@ -1,8 +1,8 @@
 # STATE
-Current phase: P7    Current task: W4
+Current phase: P7    Current task: W5
 Updated: 2026-10-15
-Test status: 468 vitest passed (67 files), 47 node:test passed (7 files) - Total prompt-bar tests: 284 passed
-Next step: W4: proof that model and mode are optional (PB-D-13)
+Test status: 473 vitest passed (68 files), 47 node:test passed (7 files) - Total prompt-bar tests: 289 passed
+Next step: W5: documentation and final regression
 
 | Task | Status (TODO/DONE/BLOCKED/SKIPPED) | Commit | Report |
 |---|---|---|---|
@@ -58,7 +58,7 @@ Next step: W4: proof that model and mode are optional (PB-D-13)
 | W1 | DONE | f3df10c | reports/W1.md |
 | W2 | DONE | 8ba7875 | reports/W2.md |
 | W3 | DONE | 54bf125 | reports/W3.md |
-
+| W4 | DONE | 2f8489a | reports/W4.md |
 
 
 
