@@ -9,7 +9,7 @@ import { getModelReferenceCapability } from "./modelManagement.js";
 import { getAssetId, sameAsset } from "./mediaRef.js";
 import { getEntityImageCount } from "./entityService.js";
 import { ok, fail, REASONS } from "./commandResult.js";
-import { PARAM } from "./parameterKeys.js";
+import { PARAM, isMediaType } from "./parameterKeys.js";
 
 export { getModelReferenceCapability };
 
@@ -228,3 +228,120 @@ export function canAttach({
 
   return ok({ value });
 }
+
+/**
+ * Extracts asset IDs from a media parameter value (single item or array).
+ *
+ * @param {any} val
+ * @returns {string[]}
+ */
+function extractAssetIds(val) {
+  if (!val) return [];
+  if (Array.isArray(val)) {
+    return val.map((v) => getAssetId(v)).filter(Boolean);
+  }
+  const id = getAssetId(val);
+  return id ? [id] : [];
+}
+
+/**
+ * Prunes media parameters during transitions per PB-D-03.
+ *
+ * @param {object} options
+ * @param {Record<string, any>} [options.parameterValues] - Current parameter values
+ * @param {object} [options.prevModel] - Previous model definition
+ * @param {object} [options.nextModel] - Next model definition
+ * @param {"mode-change"|"model-change"} [options.reason="model-change"] - Reason for transition
+ * @returns {{ parameterValues: Record<string, any>, removed: Array<{ key: string, assetIds: string[] }> }}
+ */
+export function pruneMedia({
+  parameterValues = {},
+  prevModel = null,
+  nextModel = null,
+  reason = "model-change",
+} = {}) {
+  const nextValues = { ...parameterValues };
+  const removed = [];
+
+  const prevParams = prevModel?.parameters || {};
+  const nextParams = nextModel?.parameters || {};
+
+  if (reason === "mode-change") {
+    // Mode-change: remove every parameter whose declared type is a media type in EITHER model
+    const candidateMediaKeys = new Set();
+    for (const [key, def] of Object.entries(prevParams)) {
+      if (isMediaType(def?.type)) candidateMediaKeys.add(key);
+    }
+    for (const [key, def] of Object.entries(nextParams)) {
+      if (isMediaType(def?.type)) candidateMediaKeys.add(key);
+    }
+
+    for (const key of candidateMediaKeys) {
+      if (nextValues[key] !== undefined) {
+        const assetIds = extractAssetIds(nextValues[key]);
+        delete nextValues[key];
+        if (assetIds.length > 0) {
+          removed.push({ key, assetIds });
+        }
+      }
+    }
+  } else {
+    // Model-change (same mode):
+    // Keep a media parameter only if nextModel declares the same key with a compatible type.
+    // Trim lists to nextModel's max; drop everything else.
+    const allMediaKeys = new Set();
+    for (const [key, def] of Object.entries(prevParams)) {
+      if (isMediaType(def?.type)) allMediaKeys.add(key);
+    }
+    for (const [key, def] of Object.entries(nextParams)) {
+      if (isMediaType(def?.type)) allMediaKeys.add(key);
+    }
+
+    for (const key of allMediaKeys) {
+      if (nextValues[key] === undefined) continue;
+
+      const prevDef = prevParams[key];
+      const nextDef = nextParams[key];
+      const prevType = prevDef?.type;
+      const nextType = nextDef?.type;
+
+      // If nextModel doesn't declare the key, or declared type is not media, or types incompatible:
+      if (!nextDef || !isMediaType(nextType) || (prevType && prevType !== nextType)) {
+        const assetIds = extractAssetIds(nextValues[key]);
+        delete nextValues[key];
+        if (assetIds.length > 0) {
+          removed.push({ key, assetIds });
+        }
+        continue;
+      }
+
+      // If compatible media array, check and trim list
+      if (nextType === "image[]" || nextType === "video[]") {
+        const val = nextValues[key];
+        if (Array.isArray(val)) {
+          const max =
+            typeof nextDef.max === "number" && nextDef.max > 0
+              ? nextDef.max
+              : typeof nextDef.max_count === "number" && nextDef.max_count > 0
+              ? nextDef.max_count
+              : typeof nextDef.maxCount === "number" && nextDef.maxCount > 0
+              ? nextDef.maxCount
+              : 4;
+
+          if (val.length > max) {
+            const kept = val.slice(0, max);
+            const trimmed = val.slice(max);
+            nextValues[key] = kept;
+            const assetIds = extractAssetIds(trimmed);
+            if (assetIds.length > 0) {
+              removed.push({ key, assetIds });
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return { parameterValues: nextValues, removed };
+}
+
