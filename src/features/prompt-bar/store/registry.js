@@ -70,7 +70,7 @@ export function createRegistry() {
     return entries.get(key);
   }
 
-  function getOrCreate(identity, factory) {
+  function getOrCreate(identity, factory, meta = {}) {
     const key = resolveKey(identity);
     let entry = entries.get(key);
     if (!entry) {
@@ -82,11 +82,14 @@ export function createRegistry() {
         key,
         identity: typeof identity === "object" ? { ...identity } : parseKey(key),
         store,
+        meta: meta ? { ...meta } : {},
         mountCount: 0,
         currentSubmitToken: null,
         submitCounter: 0,
       };
       entries.set(key, entry);
+    } else if (meta && Object.keys(meta).length > 0) {
+      entry.meta = { ...(entry.meta || {}), ...meta };
     }
     return entry.store;
   }
@@ -123,17 +126,30 @@ export function createRegistry() {
     return entries.delete(key);
   }
 
+  function setMeta(identity, meta = {}) {
+    const entry = getEntry(identity);
+    if (entry && meta) {
+      entry.meta = { ...(entry.meta || {}), ...meta };
+    }
+  }
+
+  function getMeta(identity) {
+    const entry = getEntry(identity);
+    return entry?.meta ? { ...entry.meta } : {};
+  }
+
   function list() {
     return Array.from(entries.values()).map((entry) => ({
       key: entry.key,
       identity: { ...entry.identity },
       store: entry.store,
+      meta: { ...(entry.meta || {}) },
       mountCount: entry.mountCount,
       isMounted: entry.mountCount > 0,
     }));
   }
 
-  function markMounted(identity) {
+  function markMounted(identity, meta = {}) {
     const key = resolveKey(identity);
     let entry = entries.get(key);
     if (!entry) {
@@ -141,11 +157,14 @@ export function createRegistry() {
         key,
         identity: typeof identity === "object" ? { ...identity } : parseKey(key),
         store: null,
+        meta: meta ? { ...meta } : {},
         mountCount: 0,
         currentSubmitToken: null,
         submitCounter: 0,
       };
       entries.set(key, entry);
+    } else if (meta && Object.keys(meta).length > 0) {
+      entry.meta = { ...(entry.meta || {}), ...meta };
     }
     entry.mountCount = (entry.mountCount || 0) + 1;
     return entry.mountCount;
@@ -223,6 +242,8 @@ export function createRegistry() {
     reset,
     dispose,
     list,
+    setMeta,
+    getMeta,
     markMounted,
     markUnmounted,
     isMounted,

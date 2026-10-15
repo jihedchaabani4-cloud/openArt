@@ -13,6 +13,7 @@ import { LoadingScreen } from "@/shared/ui/LoadingScreen"
 import { ProjectError } from "@/shared/ui/ProjectError"
 import { queryKeys } from "@/shared/api/queryKeys"
 import { useDragAutoScroll } from "@/features/studio"
+import { usePromptBarRouteWatcher } from "@/features/prompt-bar/index.platform"
 
 /**
  * [FSD Layer: widgets/StudioLayout]
@@ -25,6 +26,7 @@ import { useDragAutoScroll } from "@/features/studio"
  */
 export default function StudioLayout({ children }) {
     useDragAutoScroll();
+    usePromptBarRouteWatcher();
     const pathname = usePathname()
     const { projectId } = useParams()
     const queryClient = useQueryClient()

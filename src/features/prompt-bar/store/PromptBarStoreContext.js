@@ -119,6 +119,13 @@ export function PromptBarStoreProvider({
     [persist, persistKey, resolvedProjectId]
   );
 
+  const instanceMeta = React.useMemo(() => ({
+    persistRoutes: type?.persistRoutes || null,
+    storage: persist ? storage : null,
+    canonicalKey,
+    legacyKey,
+  }), [type?.persistRoutes, persist, storage, canonicalKey, legacyKey]);
+
   // 1. Store creation is allowed ONLY through registry.getOrCreate and must not read storage.
   // The first render (server and client) uses defaults plus initialConfig only (PB-D-06).
   const store = registry.getOrCreate(identity, () => {
@@ -139,7 +146,7 @@ export function PromptBarStoreProvider({
       activeMode: "image",
       activeSubMode: "frames",
     });
-  });
+  }, instanceMeta);
 
   // 2. Mount lifecycle, hydration and debounced persistence
   React.useEffect(() => {
@@ -152,7 +159,7 @@ export function PromptBarStoreProvider({
       }
     }
 
-    registry.markMounted(identity);
+    registry.markMounted(identity, instanceMeta);
     registry.pruneOtherProjects(resolvedProjectId);
 
     let saver = null;

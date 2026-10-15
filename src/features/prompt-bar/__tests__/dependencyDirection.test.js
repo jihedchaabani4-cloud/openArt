@@ -13,6 +13,7 @@ import path from "node:path";
 const ALLOWED_EXCEPTIONS = {
   "PromptBarStoreContext.js": "React Context provider bridging Zustand vanilla store to React tree",
   "usePromptBarStore.js": "React hook selector for consuming vanilla store in React components",
+  "usePromptBarRouteWatcher.js": "React hook watching Next.js route navigation to reset store registry instances (PB-D-14)",
   "useRealBackendModels.js": "PB-D-02 backwards-compatibility shim re-exporting from adapters",
 };
 

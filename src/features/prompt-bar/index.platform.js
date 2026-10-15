@@ -22,6 +22,7 @@ export { createPromptBarStore }    from "./store/createPromptBarStore.js";
 export { PromptBarStoreProvider, PromptBarStoreContext } from "./store/PromptBarStoreContext.js";
 export { usePromptBarStore }       from "./store/usePromptBarStore.js";
 export { matchRoute, isPathAllowed, normalizePathSegments } from "./store/routePolicy.js";
+export { usePromptBarRouteWatcher } from "./store/usePromptBarRouteWatcher.js";
 
 // ── Core (for testing / advanced use) ────────────────────
 export { reconcile, validateParameter } from "./core/reconciliation.js";

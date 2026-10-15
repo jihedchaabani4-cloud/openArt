@@ -241,7 +241,10 @@ export const generatedMediaTemplate = defineTemplate({
   id: generatedMediaType.id,
   persistRoutes: [
     "/cinema-studio/:projectId/assets",
-    "/cinema-studio/:projectId/collection/:collectionId",
+    "/cinema-studio/:projectId/collection/*",
+    "/cinema-studio/:projectId/collections/*",
+    "/cinema-studio/new",
+    "/cinema-studio/test/prompt-bar-compare",
   ],
   layout: generatedMediaType.layout,
   features: {
