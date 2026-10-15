@@ -3,16 +3,14 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo, useContext } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/shared/lib/utils";
-import { GoogleIcon } from "@/shared/ui/GoogleIcon";
-import { ArrowRight } from "lucide-react";
 
 // Production UI Components integrated directly
 import { PromptBarShell } from "../ui/common/PromptBarShell.jsx";
 import { PromptEditor } from "../ui/common/editor/PromptEditor.jsx";
 import { FlowPromptBoxSettings } from "../ui/common/selectors/FlowPromptBoxSettings.jsx";
-import { Button } from "@/shared/ui/button";
 import { PromptBarTopPanel } from "./parts/PromptBarTopPanel.jsx";
 import { PromptBarSlotsRow } from "./parts/PromptBarSlotsRow.jsx";
+import { PromptBarControlsRow } from "./parts/PromptBarControlsRow.jsx";
 
 // Platform Architecture
 import { PromptBarStoreProvider, PromptBarStoreContext } from "../store/PromptBarStoreContext.js";
@@ -387,90 +385,32 @@ function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, class
         </div>
       )}
 
-      {/* ── Bottom Row ──────────────────────────────────────── */}
-      <div className="flex items-center justify-between gap-2 w-full">
-        {/* Left side spacer */}
-        <div className="flex items-center gap-1.5 min-w-[32px]" />
-
-        {/* Center: Spacer (model selection is housed exclusively inside settings drawer) */}
-        <div className="flex-1" />
-
-        {/* Right side: Parameter button + generate */}
-        <div className="flex items-center gap-2 shrink-0">
-          {renderRightActions && renderRightActions({ isGenerating })}
-          {((layout.showParameterDrawer && (hasModes || drawerParams.length > 0)) || layout.showModelSelector) && (
-            <Button
-              ref={tuneButtonRef}
-              type="button"
-              variant="blur"
-              aria-label="Déclencheur des paramètres"
-              title="Paramètres de génération et modèles"
-              onClick={() => {
-                setDrawerOpen((v) => {
-                  const next = !v;
-                  if (next) {
-                    setQuickMentionOpen(false);
-                    setDialogOpen(false);
-                  }
-                  return next;
-                });
-              }}
-              className={cn(
-                "settings-trigger-button h-8 px-2.5 rounded-xl flex items-center gap-1.5 transition-all cursor-pointer select-none text-[12px] font-medium text-white",
-                drawerOpen
-                  ? "bg-white/15 border border-white/20 shadow-sm text-white"
-                  : "border-transparent text-white hover:text-white"
-              )}
-            >
-              {currentModel && (
-                <div className="flex items-center gap-1.5 max-w-[150px] truncate">
-                  {currentModelIcon && (
-                    <img
-                      src={currentModelIcon}
-                      alt=""
-                      className="size-3.5 rounded-sm object-contain brightness-0 invert shrink-0"
-                      onError={(e) => {
-                        e.currentTarget.style.display = "none";
-                      }}
-                    />
-                  )}
-                  <span className="font-medium text-[12px] truncate text-white">
-                    {currentModel.name || currentModel.displayName || currentModel.id}
-                  </span>
-                </div>
-              )}
-              <GoogleIcon
-                iconName={currentRatioIcon}
-                className="text-[15px] leading-none shrink-0 text-white"
-              />
-              <span className="leading-none shrink-0 font-medium text-[12px] text-white">
-                x{currentCount}
-              </span>
-            </Button>
-          )}
-
-          <Button
-            type="button"
-            variant="flow-generate"
-            aria-label="Generate"
-            title={estimatedCredits > 0 ? `Generate (${estimatedCredits} cr)` : "Generate"}
-            onClick={handleGenerate}
-            disabled={isGenerateDisabled}
-            className={cn(
-              "size-8 min-w-8 p-0 rounded-full flex items-center justify-center transition-all shrink-0",
-              isGenerateDisabled
-                ? "bg-white/10 text-white/30 cursor-not-allowed"
-                : "bg-white text-black hover:bg-white/90 active:scale-95 shadow-sm"
-            )}
-          >
-            {isGenerating ? (
-              <span className="size-3.5 rounded-full border-2 border-black/30 border-t-black animate-spin" />
-            ) : (
-              <ArrowRight className="size-4 shrink-0" strokeWidth={2.5} />
-            )}
-          </Button>
-        </div>
-      </div>
+      {/* ── Controls Row (H5) ─────────────────────────────────── */}
+      {/* Note: PromptBarControlsRow renders the circular generate button (size-8) with <ArrowRight /> */}
+      <PromptBarControlsRow
+        renderRightActions={renderRightActions}
+        isGenerating={isGenerating}
+        showSettingsButton={((layout.showParameterDrawer && (hasModes || drawerParams.length > 0)) || layout.showModelSelector)}
+        tuneButtonRef={tuneButtonRef}
+        drawerOpen={drawerOpen}
+        onToggleDrawer={() => {
+          setDrawerOpen((v) => {
+            const next = !v;
+            if (next) {
+              setQuickMentionOpen(false);
+              setDialogOpen(false);
+            }
+            return next;
+          });
+        }}
+        currentModel={currentModel}
+        currentModelIcon={currentModelIcon}
+        currentRatioIcon={currentRatioIcon}
+        currentCount={currentCount}
+        estimatedCredits={estimatedCredits}
+        isGenerateDisabled={isGenerateDisabled}
+        handleGenerate={handleGenerate}
+      />
     </PromptBarShell>
   );
 
