@@ -190,5 +190,33 @@ export function promptBarService(
     run(actionName, ...args) {
       return dispatchOrQueue(actionName, args);
     },
+
+    /**
+     * Attaches a reference item.
+     * @param {object} media
+     * @returns {object} CommandResult
+     */
+    addReference(media) {
+      return dispatchOrQueue("addReference", [media]);
+    },
+
+    /**
+     * Animates a media asset (transitions to video/frames and sets input_image).
+     * @param {object} media
+     * @param {object} [options]
+     * @returns {object} CommandResult
+     */
+    animateMedia(media, options) {
+      return dispatchOrQueue("animateMedia", [media, options]);
+    },
+
+    /**
+     * Reuses historic generation settings.
+     * @param {object} old
+     * @returns {object} CommandResult
+     */
+    applyGeneration(old) {
+      return dispatchOrQueue("applyGeneration", [old]);
+    },
   };
 }

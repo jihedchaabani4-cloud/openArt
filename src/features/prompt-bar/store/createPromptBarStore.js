@@ -393,5 +393,51 @@ export function createPromptBarStore(overrides = {}, initialDeps = {}) {
         lastSerializedRequest: null,
       });
     },
+
+    /**
+     * Updates multiple parameter values in batch.
+     * @param {Record<string, any>} newParams
+     */
+    setParametersBatch: (newParams) => {
+      set((state) => ({
+        parameterValues: {
+          ...state.parameterValues,
+          ...newParams,
+        },
+      }));
+    },
+
+    _store: { getState: get, setState: set },
+
+    /** Dynamic actions provided by the template */
+    get actions() {
+      const tmpl = get().template || deps.template;
+      if (tmpl && typeof tmpl.createActions === "function") {
+        return tmpl.createActions({
+          getState: get,
+          setState: set,
+          store: { getState: get, setState: set },
+          switchMode: (mode, subMode) => get().switchMode(mode, subMode),
+          selectModel: (modelId) => get().selectModel(modelId),
+          attachMedia: (args) => get().attachMedia(args),
+          removeMedia: (args) => get().removeMedia(args),
+          setPrompt: (text) => get().setPrompt(text),
+          setParametersBatch: (params) => get().setParametersBatch(params),
+        });
+      }
+      return {};
+    },
+
+    animateMedia: (media, options) => {
+      return get().actions.animateMedia ? get().actions.animateMedia(media, options) : undefined;
+    },
+
+    addReference: (media) => {
+      return get().actions.addReference ? get().actions.addReference(media) : undefined;
+    },
+
+    applyGeneration: (old) => {
+      return get().actions.applyGeneration ? get().actions.applyGeneration(old) : undefined;
+    },
   }));
 }
