@@ -3,36 +3,24 @@
 /**
  * Prompt Bar Platform — Store Context
  *
- * Provides per-instance Zustand vanilla store via React Context.
- * Each <PromptBarStoreProvider> mounts its own isolated store instance.
- * On unmount, the store is garbage-collected — no residual state.
+ * Provides per-instance Zustand vanilla store via React Context backed by store registry.
+ * Zero storage reading or registry mutations during render.
+ * Hydration occurs after mount in useEffect.
  */
 
-import React, { createContext, useContext, useRef } from "react";
+import React, { createContext, useContext } from "react";
 import { createPromptBarStore } from "./createPromptBarStore.js";
 import { initializeFromType } from "../core/initialization.js";
-
-let activePromptBarStoreInstance = null;
-
-export function setActivePromptBarStore(store) {
-  activePromptBarStoreInstance = store;
-}
-
-export function getActivePromptBarStore() {
-  return activePromptBarStoreInstance;
-}
-
-export const PromptBarStoreContext = createContext(null);
-
-// In-memory registry to preserve store instances across page transitions within a project
-const persistentStoreRegistry = new Map();
-
-export function clearPersistentPromptBarStores() {
-  persistentStoreRegistry.clear();
-}
+import { registry, identityKey } from "./registry.js";
+import { loadSaved, createSaver, removeSaved, selectPersistable } from "./persistence.js";
 
 /**
- * Resolves the active project ID from store or window path if available.
+ * @deprecated Documented no-op. Prompt bar stores are managed per instance via registry.
+ */
+export function setActivePromptBarStore() {}
+
+/**
+ * Resolves the active project ID from window path if available.
  */
 function resolveProjectId() {
   if (typeof window !== "undefined") {
@@ -43,128 +31,168 @@ function resolveProjectId() {
 }
 
 /**
- * Loads serialized store state from sessionStorage.
+ * @deprecated Returns the store of the most recently mounted instance if exactly
+ * one instance is mounted for the current project; if more than one is mounted returns null.
  */
-function loadSavedState(key) {
-  if (typeof window === "undefined" || !window.sessionStorage || !key) return null;
+export function getActivePromptBarStore() {
+  const currentProject = resolveProjectId() || "global";
+  const mounted = registry.list().filter(
+    (item) => item.isMounted && (item.identity?.projectId === currentProject || (!item.identity?.projectId && currentProject === "global"))
+  );
+  if (mounted.length === 1) {
+    return mounted[0].store;
+  }
+  return null;
+}
+
+export const PromptBarStoreContext = createContext(null);
+
+/**
+ * Clears all persistent prompt bar stores from registry and storage.
+ *
+ * @param {Storage|object} [storage]
+ */
+export function clearPersistentPromptBarStores(storage = typeof window !== "undefined" ? window.sessionStorage : null) {
+  const items = registry.list();
+  for (const item of items) {
+    registry.dispose(item.key);
+    if (storage) {
+      removeSaved(storage, item.key);
+    }
+  }
+}
+
+function loadAnySaved(storage, canonicalKey, legacyKey) {
+  const fromCanonical = loadSaved(storage, canonicalKey);
+  if (fromCanonical) return fromCanonical;
+  if (!legacyKey || !storage || typeof storage.getItem !== "function") return null;
   try {
-    const raw = window.sessionStorage.getItem(key);
+    const raw = storage.getItem(legacyKey);
     if (!raw) return null;
-    return JSON.parse(raw);
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object") return null;
+    return parsed;
   } catch {
     return null;
   }
 }
 
 /**
- * Saves serialized store state to sessionStorage.
- */
-function saveState(key, state) {
-  if (typeof window === "undefined" || !window.sessionStorage || !key || !state) return;
-  try {
-    const payload = {
-      prompt: state.prompt,
-      selectedModelId: state.selectedModelId,
-      parameterValues: state.parameterValues,
-      elements: state.elements,
-      characters: state.characters,
-      activeMode: state.activeMode,
-      activeSubMode: state.activeSubMode,
-    };
-    window.sessionStorage.setItem(key, JSON.stringify(payload));
-  } catch {
-    // ignore quota errors
-  }
-}
-
-/**
- * Provides a PromptBar store to the component tree.
- * When persist=true (default in studio), the store instance and its state
- * (prompt, parameters, model, and references) are preserved across page changes.
+ * Provides a PromptBar store to the component tree backed by the external registry.
  *
- * @param {{ type: CompositionType, initialModels?: object[], persist?: boolean, persistKey?: string, children: React.ReactNode }} props
+ * @param {{
+ *   type: CompositionType,
+ *   templateId?: string,
+ *   instanceId?: string,
+ *   initialModels?: object[],
+ *   persist?: boolean,
+ *   persistKey?: string,
+ *   storage?: Storage|object,
+ *   children: React.ReactNode
+ * }} props
  */
 export function PromptBarStoreProvider({
   type,
+  templateId,
+  instanceId,
   initialModels = [],
   persist = true,
   persistKey = "studio-prompt-bar",
+  storage = typeof window !== "undefined" ? window.sessionStorage : null,
   children,
 }) {
-  const storeRef = useRef(null);
-
   const resolvedProjectId = resolveProjectId();
-  const effectiveKey = persist
-    ? `${persistKey}_${resolvedProjectId || "global"}`
-    : null;
+  const effectiveTemplateId = templateId || type?.id || "default";
+  const effectiveInstanceId = instanceId || persistKey || "default";
 
-  if (!storeRef.current) {
-    if (effectiveKey && persistentStoreRegistry.has(effectiveKey)) {
-      // 1. Reuse existing store instance in memory across page navigation
-      storeRef.current = persistentStoreRegistry.get(effectiveKey);
-    } else {
-      // 2. Initialize from modelsMap + savedState
-      const modelsMap = {};
-      for (const m of initialModels) {
-        modelsMap[m.id] = m;
+  const identity = React.useMemo(() => ({
+    templateId: effectiveTemplateId,
+    instanceId: effectiveInstanceId,
+    projectId: resolvedProjectId || "global",
+  }), [effectiveTemplateId, effectiveInstanceId, resolvedProjectId]);
+
+  const canonicalKey = React.useMemo(() => identityKey(identity), [identity]);
+  const legacyKey = React.useMemo(
+    () => (persist && persistKey ? `${persistKey}_${resolvedProjectId || "global"}` : null),
+    [persist, persistKey, resolvedProjectId]
+  );
+
+  // 1. Store creation is allowed ONLY through registry.getOrCreate and must not read storage.
+  // The first render (server and client) uses defaults plus initialConfig only (PB-D-06).
+  const store = registry.getOrCreate(identity, () => {
+    const modelsMap = {};
+    for (const m of initialModels) {
+      modelsMap[m.id] = m;
+    }
+    const { selectedModelId: defaultModelId, parameterValues: defaultParams } = initializeFromType(type, modelsMap);
+
+    return createPromptBarStore({
+      modelsMap,
+      selectedModelId: defaultModelId,
+      parameterValues: defaultParams,
+      prompt: "",
+      elements: [],
+      characters: [],
+      activeMode: "image",
+      activeSubMode: "frames",
+    });
+  });
+
+  // 2. Mount lifecycle, hydration and debounced persistence
+  React.useEffect(() => {
+    registry.markMounted(identity);
+    registry.pruneOtherProjects(resolvedProjectId);
+
+    let saver = null;
+    let unsubLegacy = null;
+
+    if (persist && storage) {
+      const saved = loadAnySaved(storage, canonicalKey, legacyKey);
+      if (saved) {
+        store.getState().hydrate(saved);
       }
 
-      const { selectedModelId: defaultModelId, parameterValues: defaultParams } = initializeFromType(type, modelsMap);
-      const savedState = effectiveKey ? loadSavedState(effectiveKey) : null;
-
-      const mergedParams = {
-        ...defaultParams,
-        ...(savedState?.parameterValues || {}),
-      };
-
-      const newStore = createPromptBarStore({
-        modelsMap,
-        selectedModelId: savedState?.selectedModelId || defaultModelId,
-        parameterValues: mergedParams,
-        prompt: savedState?.prompt !== undefined ? savedState.prompt : "",
-        elements: savedState?.elements || [],
-        characters: savedState?.characters || [],
-        activeMode: savedState?.activeMode || "image",
-        activeSubMode: savedState?.activeSubMode || "frames",
+      saver = createSaver({
+        storage,
+        key: canonicalKey,
+        getState: store.getState,
+        subscribe: store.subscribe,
       });
 
-      if (effectiveKey) {
-        persistentStoreRegistry.set(effectiveKey, newStore);
+      if (legacyKey) {
+        unsubLegacy = store.subscribe((state) => {
+          if (storage && typeof storage.setItem === "function") {
+            try {
+              storage.setItem(legacyKey, JSON.stringify(selectPersistable(state)));
+            } catch {
+              // safe ignore
+            }
+          }
+        });
       }
-      storeRef.current = newStore;
     }
-  }
 
-  // Register active store instance
-  setActivePromptBarStore(storeRef.current);
-
-  // Subscribe to changes and persist to sessionStorage, and safely sync models in effect
-  React.useEffect(() => {
-    setActivePromptBarStore(storeRef.current);
-
-    if (!storeRef.current) return undefined;
-
-    // Safely sync initialModels if any new models arrived without violating React render phase
     if (initialModels && initialModels.length > 0) {
-      const currentModelsMap = storeRef.current.getState().modelsMap || {};
+      const currentModelsMap = store.getState().modelsMap || {};
       const hasMissingModel = initialModels.some((m) => !currentModelsMap[m.id]);
       if (hasMissingModel) {
-        storeRef.current.getState().setModels(initialModels);
+        store.getState().setModels(initialModels);
       }
     }
 
-    if (!effectiveKey) return undefined;
-
-    const unsub = storeRef.current.subscribe((state) => {
-      saveState(effectiveKey, state);
-    });
-
     return () => {
-      unsub();
+      if (saver) {
+        saver.flush();
+        saver.stop();
+      }
+      if (unsubLegacy) {
+        unsubLegacy();
+      }
+      registry.markUnmounted(identity);
     };
-  }, [effectiveKey, initialModels]);
+  }, [identity, canonicalKey, legacyKey, persist, storage, initialModels, resolvedProjectId, store]);
 
-  return React.createElement(PromptBarStoreContext.Provider, { value: storeRef.current }, children);
+  return React.createElement(PromptBarStoreContext.Provider, { value: store }, children);
 }
 
 /**

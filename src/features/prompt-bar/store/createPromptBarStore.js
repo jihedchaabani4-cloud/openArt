@@ -15,7 +15,6 @@ import { serialize } from "../core/serialization.js";
 import { initializeValues } from "../core/parameterState.js";
 import {
   addEntity,
-  removeEntity,
   normalizeEntity,
   removeEntityWithPromptClean,
   getEntityImageCount,
@@ -45,9 +44,67 @@ export function createPromptBarStore(overrides = {}) {
     lastSerializedRequest: null,
     activeMode: overrides.activeMode || "image",
     activeSubMode: overrides.activeSubMode || "frames",
+    pendingHydration: overrides.pendingHydration || null,
     ...overrides,
 
     // ── Actions ────────────────────────────────────────────────────────────
+
+    /**
+     * Hydrates persisted state after mount.
+     * If modelsMap is empty, stores as pendingHydration for setModels to consume.
+     * @param {object} saved
+     */
+    hydrate: (saved) => {
+      if (!saved || typeof saved !== "object") return;
+      const { modelsMap, selectedModelId, parameterValues } = get();
+      const hasModels = Object.keys(modelsMap).length > 0;
+
+      if (!hasModels) {
+        set({
+          prompt: saved.prompt !== undefined ? saved.prompt : get().prompt,
+          elements: Array.isArray(saved.elements) ? saved.elements : get().elements,
+          characters: Array.isArray(saved.characters) ? saved.characters : get().characters,
+          activeMode: saved.activeMode || get().activeMode,
+          activeSubMode: saved.activeSubMode || get().activeSubMode,
+          selectedModelId: saved.selectedModelId || selectedModelId,
+          parameterValues: {
+            ...parameterValues,
+            ...(saved.parameterValues || {}),
+          },
+          pendingHydration: saved,
+        });
+        return;
+      }
+
+      let targetModelId = selectedModelId;
+      if (saved.selectedModelId && modelsMap[saved.selectedModelId]) {
+        targetModelId = saved.selectedModelId;
+      }
+
+      const targetDefs = modelsMap[targetModelId]?.parameters || {};
+      const currentDefs = selectedModelId ? (modelsMap[selectedModelId]?.parameters || {}) : {};
+      const savedParams = {
+        ...parameterValues,
+        ...(saved.parameterValues || {}),
+      };
+
+      const { nextValues, changes } = reconcile(savedParams, currentDefs, targetDefs);
+
+      set({
+        prompt: saved.prompt !== undefined ? saved.prompt : get().prompt,
+        selectedModelId: targetModelId,
+        parameterValues: {
+          ...savedParams,
+          ...nextValues,
+        },
+        elements: Array.isArray(saved.elements) ? saved.elements : get().elements,
+        characters: Array.isArray(saved.characters) ? saved.characters : get().characters,
+        activeMode: saved.activeMode || get().activeMode,
+        activeSubMode: saved.activeSubMode || get().activeSubMode,
+        reconciliationLog: changes,
+        pendingHydration: null,
+      });
+    },
 
     /**
      * Replace the available model catalog and reconcile state.
@@ -63,38 +120,51 @@ export function createPromptBarStore(overrides = {}) {
         nextModelsMap[m.id] = m;
       }
 
-      const { selectedModelId, parameterValues, modelsMap } = get();
+      const { selectedModelId, parameterValues, modelsMap, pendingHydration } = get();
       let nextModelId = selectedModelId;
 
-      if (!nextModelId || !nextModelsMap[nextModelId]) {
+      if (pendingHydration?.selectedModelId && nextModelsMap[pendingHydration.selectedModelId]) {
+        nextModelId = pendingHydration.selectedModelId;
+      } else if (!nextModelId || !nextModelsMap[nextModelId]) {
         nextModelId = rawList[0]?.id || null;
       }
 
-      let nextValues = parameterValues;
+      const sourceParams = pendingHydration?.parameterValues
+        ? { ...parameterValues, ...pendingHydration.parameterValues }
+        : parameterValues;
+
+      let nextValues = sourceParams;
       let reconciliationLog = [];
 
       if (nextModelId && nextModelId !== selectedModelId) {
         const prevDefs = selectedModelId ? (modelsMap[selectedModelId]?.parameters || {}) : {};
         const nextDefs = nextModelsMap[nextModelId]?.parameters || {};
-        const result = reconcile(parameterValues, prevDefs, nextDefs);
+        const result = reconcile(sourceParams, prevDefs, nextDefs);
         nextValues = {
-          ...parameterValues,
+          ...sourceParams,
           ...result.nextValues,
         };
         reconciliationLog = result.changes;
       } else if (nextModelId && !selectedModelId) {
         const nextDefs = nextModelsMap[nextModelId]?.parameters || {};
-        const result = reconcile(parameterValues, {}, nextDefs);
+        const result = reconcile(sourceParams, {}, nextDefs);
         nextValues = {
-          ...parameterValues,
+          ...sourceParams,
           ...result.nextValues,
         };
         reconciliationLog = result.changes;
       } else {
-        nextValues = parameterValues;
+        nextValues = sourceParams;
       }
 
-      set({ modelsMap: nextModelsMap, rawModelsMap, selectedModelId: nextModelId, parameterValues: nextValues, reconciliationLog });
+      set({
+        modelsMap: nextModelsMap,
+        rawModelsMap,
+        selectedModelId: nextModelId,
+        parameterValues: nextValues,
+        reconciliationLog,
+        pendingHydration: null,
+      });
     },
 
     /**

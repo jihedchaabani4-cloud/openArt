@@ -237,11 +237,10 @@ describe("SAFE-4: Registry, Key and Persistence Characterization", () => {
     });
   });
 
-  describe("5. Known Issues (CURRENT BEHAVIOR)", () => {
-    it("pins PB-K4a: module-level active store variable is replaced by whichever provider rendered last", () => {
-      // CURRENT BEHAVIOR (known issue PB-K4a):
-      // setActivePromptBarStore() writes to a module-scoped variable activePromptBarStoreInstance.
-      // If two providers are mounted, the second provider unconditionally overwrites the active store!
+  describe("5. Resolved Issues (P3 BEHAVIOR)", () => {
+    it("pins PB-K4a: module-level active store returns null when more than one instance is mounted", () => {
+      // P3 BEHAVIOR (resolved PB-K4a):
+      // getActivePromptBarStore() returns null when more than one instance is mounted for the project.
       let storeA = null;
       let storeB = null;
 
@@ -269,15 +268,14 @@ describe("SAFE-4: Registry, Key and Persistence Characterization", () => {
       expect(storeB).not.toBeNull();
       expect(storeA).not.toBe(storeB);
 
-      // getActivePromptBarStore() returns Provider B's store, overwriting Provider A!
+      // getActivePromptBarStore() returns null because >1 instance is mounted
       const activeInstance = getActivePromptBarStore();
-      expect(activeInstance).toBe(storeB);
-      expect(activeInstance).not.toBe(storeA);
+      expect(activeInstance).toBeNull();
     });
 
-    it("pins PB-K4b: blob: URLs inside parameterValues are written to sessionStorage as is", () => {
-      // CURRENT BEHAVIOR (known issue PB-K4b):
-      // saveState() does not sanitize parameterValues, so blob: URLs are serialized to storage.
+    it("pins PB-K4b: blob: URLs inside parameterValues are safely dropped from sessionStorage", () => {
+      // P3 BEHAVIOR (resolved PB-K4b):
+      // selectPersistable() sanitizes parameterValues, so blob: URLs are dropped.
       window.history.pushState({}, "", "/cinema-studio/proj_blob");
 
       let capturedStore = null;
@@ -300,8 +298,8 @@ describe("SAFE-4: Registry, Key and Persistence Characterization", () => {
       expect(raw).not.toBeNull();
       const parsed = JSON.parse(raw);
 
-      // Confirm blob URL leak into sessionStorage
-      expect(parsed.parameterValues.input_image).toBe(blobUrl);
+      // Confirm blob URL is safely stripped from sessionStorage
+      expect(parsed.parameterValues.input_image).toBeUndefined();
     });
   });
 });
