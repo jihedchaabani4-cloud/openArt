@@ -9,6 +9,9 @@
 export { PromptBarPlatform } from "./platform/PromptBarPlatform.jsx";
 export { GeneratedPromptBar } from "./templates/GeneratedPromptBar.jsx";
 export { generatedMediaTemplate } from "./templates/generatedMedia.template.js";
+export { CharacterPromptBar } from "./templates/CharacterPromptBar.jsx";
+export { characterTemplate } from "./templates/character.template.js";
+export { promptBarService } from "./api/promptBarService.js";
 
 // ── Composition Types & Feature Configs ───────────────────────
 export { createPromptBarType } from "./composition/createPromptBarType.js";
