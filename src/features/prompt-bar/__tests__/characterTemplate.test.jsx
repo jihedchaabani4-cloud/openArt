@@ -1,11 +1,15 @@
 import React from "react";
-import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { describe, it, expect, vi, afterEach } from "vitest";
+import { render, screen, cleanup } from "@testing-library/react";
 import { characterTemplate } from "../templates/character.template.js";
 import { CharacterPromptBar } from "../templates/CharacterPromptBar.jsx";
 import { createPromptBarStore } from "../store/createPromptBarStore.js";
 
 describe("Character Template & CharacterPromptBar", () => {
+  afterEach(() => {
+    cleanup();
+  });
+
   describe("characterTemplate contract (Prompt + Reference, No models, No parameters)", () => {
     it("validates successfully as a canonical TemplateDefinition", () => {
       expect(characterTemplate.id).toBe("character");
@@ -22,9 +26,15 @@ describe("Character Template & CharacterPromptBar", () => {
     it("getSlots returns 1 Reference slot", () => {
       const slots = characterTemplate.getSlots("image");
       expect(slots).toEqual([
-        { role: "reference", label: "Reference", accepts: "image/*" },
+        {
+          role: "reference",
+          label: "Reference",
+          accepts: "image/*,element/*",
+          allowedTypes: ["image", "element"],
+        },
       ]);
     });
+
 
     it("filterEligibleModels returns empty array (no models)", () => {
       expect(characterTemplate.filterEligibleModels()).toEqual([]);
@@ -99,5 +109,107 @@ describe("Character Template & CharacterPromptBar", () => {
       expect(pageFile).toContain("onGenerate={handleGenerate}");
       expect(pageFile).toContain("isGenerating={createCharacterMutation.isPending}");
     });
+
+    it("renders Form button for character characteristics in CharacterPromptBar", () => {
+      render(
+        <CharacterPromptBar
+          projectId="proj-character-test"
+        />
+      );
+
+      // Form button should be rendered
+      const formBtn = screen.getByRole("button", { name: /form/i });
+      expect(formBtn).toBeDefined();
+    });
+  });
+
+  describe("Character constraints: min 10 characters and Image/Element references only", () => {
+    it("characterTemplate declares minPromptLength: 10 and allowedTypes: ['image', 'element']", () => {
+      expect(characterTemplate.minPromptLength).toBe(10);
+      const slots = characterTemplate.getSlots();
+      expect(slots[0].allowedTypes).toEqual(["image", "element"]);
+    });
+
+    it("attaching reference accepts images and elements, but rejects videos and characters", () => {
+      const store = createPromptBarStore(
+        {
+          template: characterTemplate,
+          prompt: "Futuristic neon cyborg character",
+        },
+        { template: characterTemplate }
+      );
+
+      // 1. Image is accepted
+      const imgRes = store.getState().attachMedia({
+        role: "reference",
+        value: { id: "media-img-1", type: "image", url: "https://example.com/face.png" },
+      });
+      expect(imgRes.ok).toBe(true);
+
+      // 2. Element is accepted
+      const elemRes = store.getState().attachMedia({
+        role: "reference",
+        value: { id: "elem-1", type: "element", workflow_type: "ELEMENT_SHEET", url: "https://example.com/elem.png" },
+      });
+      expect(elemRes.ok).toBe(true);
+
+      // 3. Video is rejected
+      const videoRes = store.getState().attachMedia({
+        role: "reference",
+        value: { id: "video-1", type: "video", url: "https://example.com/anim.mp4" },
+      });
+      expect(videoRes.ok).toBe(false);
+      expect(videoRes.reason).toBe("TYPE_NOT_ALLOWED");
+
+      // 4. Character is rejected
+      const charRes = store.getState().attachMedia({
+        role: "reference",
+        value: { id: "char-1", type: "character", workflow_type: "CHARACTER_SHEET", url: "https://example.com/char.png" },
+      });
+      expect(charRes.ok).toBe(false);
+      expect(charRes.reason).toBe("TYPE_NOT_ALLOWED");
+    });
+
+    it("disables generate button when prompt is less than 10 characters", () => {
+      const mockGenerate = vi.fn();
+
+      render(
+        <CharacterPromptBar
+          onGenerate={mockGenerate}
+          projectId="proj-character-test"
+        />
+      );
+
+      // Initially prompt is empty (< 10 chars) -> generate button must be disabled
+      const generateBtn = screen.getByRole("button", { name: /generate/i });
+      expect(generateBtn.disabled || generateBtn.hasAttribute("disabled")).toBe(true);
+    });
+
+    it("enables generate button when prompt has at least 10 characters", () => {
+      const mockGenerate = vi.fn();
+      const testStore = createPromptBarStore(
+        {
+          template: characterTemplate,
+          prompt: "A detailed cinematic character",
+        },
+        { template: characterTemplate }
+      );
+
+      render(
+        <CharacterPromptBar
+          store={testStore}
+          onGenerate={mockGenerate}
+          projectId="proj-character-test"
+        />
+      );
+
+      const generateBtn = screen.getByRole("button", { name: /generate/i });
+      expect(generateBtn.disabled).toBe(false);
+      expect(generateBtn.hasAttribute("disabled")).toBe(false);
+    });
   });
 });
+
+
+
+

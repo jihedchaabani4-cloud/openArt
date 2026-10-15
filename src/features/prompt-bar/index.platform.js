@@ -11,7 +11,10 @@ export { GeneratedPromptBar } from "./templates/GeneratedPromptBar.jsx";
 export { generatedMediaTemplate } from "./templates/generatedMedia.template.js";
 export { CharacterPromptBar } from "./templates/CharacterPromptBar.jsx";
 export { characterTemplate } from "./templates/character.template.js";
+export { CharacterFeatureEditor, ElementFeatureEditor } from "./ui/character/CharacterFeatureEditor.jsx";
+export { useCharacterStore, useElementStore } from "./model/useCharacterStore.js";
 export { promptBarService } from "./api/promptBarService.js";
+
 
 // ── Composition Types & Feature Configs ───────────────────────
 export { createPromptBarType } from "./composition/createPromptBarType.js";

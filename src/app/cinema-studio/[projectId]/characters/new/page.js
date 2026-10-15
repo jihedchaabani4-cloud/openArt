@@ -137,7 +137,8 @@ export default function NewCharacterPage() {
   };
 
   const handleGenerate = async (payload) => {
-    if (!payload?.prompt?.trim()) return;
+    if (!payload?.prompt?.trim() || payload.prompt.trim().length < 10) return;
+
     try {
       const references = payload.references || payload.parameters?.references || [];
       await createCharacterMutation.mutateAsync({

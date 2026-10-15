@@ -305,9 +305,11 @@ export function PromptEditor({
           mentionOpen={mentionOpen}
         />
         <TextTagConverterPlugin referenceImages={referenceImages} />
+        <SyncFeaturesPlugin />
         <OnChangePlugin onChange={handleLexicalChange} />
         <SubmissionPlugin onSubmit={onSubmit} externalValue={value} disabled={mentionOpen} />
         <FocusPlugin focusRequest={focusRequest} />
+
       </div>
     </LexicalComposer>
   );

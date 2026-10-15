@@ -22,7 +22,12 @@ export const CHARACTER_PARAMETERS = {
  */
 export function getSlots() {
   return [
-    { role: "reference", label: "Reference", accepts: "image/*" },
+    {
+      role: "reference",
+      label: "Reference",
+      accepts: "image/*,element/*",
+      allowedTypes: ["image", "element"],
+    },
   ];
 }
 
@@ -79,11 +84,13 @@ export const characterTemplate = defineTemplate({
     activeSubMode: "frames",
   },
   mediaLimit: 4,
+  minPromptLength: 10,
   parameters: CHARACTER_PARAMETERS,
   getSlots,
   filterEligibleModels,
   resolveParameterMapping,
   createActions,
 });
+
 
 export default characterTemplate;

@@ -47,6 +47,7 @@ export function PromptBarPlatform({
   hideBackground = false,
   isGenerating = false,
   renderRightActions,
+  renderPopover,
   persist = true,
   persistKey = "studio-prompt-bar",
   templateId,
@@ -69,6 +70,7 @@ export function PromptBarPlatform({
           hideBackground={hideBackground}
           isGenerating={isGenerating}
           renderRightActions={renderRightActions}
+          renderPopover={renderPopover}
         />
       </PromptBarStoreContext.Provider>
     );
@@ -94,13 +96,15 @@ export function PromptBarPlatform({
         hideBackground={hideBackground}
         isGenerating={isGenerating}
         renderRightActions={renderRightActions}
+        renderPopover={renderPopover}
       />
     </PromptBarStoreProvider>
   );
 }
 
 /** Inner renderer — lives inside the store provider, has access to usePromptBarStore */
-function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, className, hideBackground = false, isGenerating: propIsGenerating = false, renderRightActions }) {
+function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, className, hideBackground = false, isGenerating: propIsGenerating = false, renderRightActions, renderPopover }) {
+
   const store = useContext(PromptBarStoreContext);
   const [drawerOpen, setDrawerOpen] = useState(false); // Collapsed by default (FR-COMP-04)
   const containerRef = useRef(null);
@@ -225,7 +229,9 @@ function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, class
     onGenerate,
     isGenerating: propIsGenerating,
     hasModels: (type?.features?.models ?? featureConfig?.features?.models) !== false && type?.layout?.showModelSelector !== false,
+    template: type || featureConfig,
   });
+
 
 
   // References, dialogs, media quotas, and outside-click listeners (H3)
@@ -336,7 +342,12 @@ function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, class
       hideBackground={true}
       className={cn("w-full", className)}
       innerClassName="w-full flex flex-col gap-1 p-2.5"
-      popover={settingsOverlay}
+      popover={
+        <>
+          {settingsOverlay}
+          {renderPopover ? renderPopover() : null}
+        </>
+      }
     >
 
       {/* ── Reference & Media Slots Row (H5) ─── */}

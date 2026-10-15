@@ -57,6 +57,10 @@ export function defineTemplate(def) {
     problems.push("'createActions' must be a function if provided: (core) => actions.");
   }
 
+  if (def.minPromptLength !== undefined && (typeof def.minPromptLength !== "number" || def.minPromptLength < 0)) {
+    problems.push("'minPromptLength' must be a non-negative number if provided.");
+  }
+
   if (problems.length > 0) {
     throw new Error(`Invalid template definition:\n- ${problems.join("\n- ")}`);
   }
@@ -76,8 +80,10 @@ export function defineTemplate(def) {
     resolveParameterMapping: def.resolveParameterMapping,
     parameters: Object.freeze({ ...(def.parameters || {}) }),
     mediaLimit: typeof def.mediaLimit === "number" ? def.mediaLimit : undefined,
+    minPromptLength: typeof def.minPromptLength === "number" ? def.minPromptLength : undefined,
     createActions: def.createActions || null,
   };
 
   return Object.freeze(template);
 }
+

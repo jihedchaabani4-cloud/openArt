@@ -28,7 +28,10 @@ export function usePromptBarGenerate({
   onGenerate,
   isGenerating: propIsGenerating = false,
   hasModels = true,
+  template,
 } = {}) {
+  const prompt             = usePromptBarStore((s) => s.prompt);
+  const storeTemplate      = usePromptBarStore((s) => s.template);
   const paramValues        = usePromptBarStore((s) => s.parameterValues);
   const storeIsGenerating  = usePromptBarStore((s) => s.isGenerating);
   const serializeAndEmit   = usePromptBarStore((s) => s.serialize);
@@ -36,6 +39,7 @@ export function usePromptBarGenerate({
   const endSubmit          = usePromptBarStore((s) => s.endSubmit);
   const setIsGenerating    = usePromptBarStore((s) => s.setIsGenerating);
 
+  const effectiveTemplate = template || storeTemplate;
   const isGenerating = Boolean(propIsGenerating || storeIsGenerating);
 
   const currentRatio = paramValues.aspect_ratio || paramValues.ratio || "1:1";
@@ -46,10 +50,16 @@ export function usePromptBarGenerate({
     return calculateModelCredits(currentModel, paramValues, currentCount);
   }, [currentModel, paramValues, currentCount]);
 
+  // Mandatory prompt length validation (e.g. min 10 chars for character creation)
+  const cleanPrompt = (typeof prompt === "string" ? prompt : "").trim();
+  const minPromptLength = effectiveTemplate?.minPromptLength ?? (effectiveTemplate?.id === "character" ? 10 : 0);
+  const isPromptTooShort = minPromptLength > 0 && cleanPrompt.length < minPromptLength;
+
   // FR-SLOT-05: Generate is disabled in Frames mode if the Start Frame slot is empty, or if no eligible model is active.
   const isFramesMode = activeMode === "video" && activeSubMode === "frames";
   const modelNotReady = hasModels && (!selectedId || !isCurrentEligible);
-  const isGenerateDisabled = isGenerating || modelNotReady || (isFramesMode && !startVal);
+  const isGenerateDisabled = isGenerating || modelNotReady || (isFramesMode && !startVal) || isPromptTooShort;
+
 
   const handleGenerate = useCallback(async () => {
     if (isGenerateDisabled || isGenerating) return;

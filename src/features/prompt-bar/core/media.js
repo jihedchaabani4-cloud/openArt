@@ -175,6 +175,9 @@ export function remainingQuota({
 /** Resolves the allowed media or entity types for a specific composition slot. */
 export function allowedTypeForSlot({ mode, slot, fallback = "all" } = {}) {
   if (!slot) return "all";
+  if (Array.isArray(slot.allowedTypes) || (typeof slot.allowedTypes === "string" && slot.allowedTypes)) {
+    return slot.allowedTypes;
+  }
   if (slot.role === "start" || slot.role === "end") return "image";
   if (slot.role === "reference") {
     if (mode === "video") return "image";
@@ -208,15 +211,27 @@ export function canAttach({
   const allowed = allowedTypeForSlot({ mode: model?.domain, slot });
   const isVideoValue =
     value.type === "video" ||
+    Boolean(value.is_video) ||
     (typeof value.url === "string" && value.url.includes(".mp4")) ||
     (typeof value === "string" && value.includes(".mp4"));
+  const isCharacterValue =
+    value.type === "character" ||
+    Boolean(value.is_character) ||
+    value.workflow_type === "CHARACTER_SHEET" ||
+    value.workflow_type === "CHARACTER";
 
   if (allowed === "image" && isVideoValue) {
     return fail(REASONS.TYPE_NOT_ALLOWED, { allowed, received: "video" });
   }
-  if (Array.isArray(allowed) && !allowed.includes("video") && isVideoValue) {
-    return fail(REASONS.TYPE_NOT_ALLOWED, { allowed, received: "video" });
+  if (Array.isArray(allowed)) {
+    if (!allowed.includes("video") && isVideoValue) {
+      return fail(REASONS.TYPE_NOT_ALLOWED, { allowed, received: "video" });
+    }
+    if (!allowed.includes("character") && isCharacterValue) {
+      return fail(REASONS.TYPE_NOT_ALLOWED, { allowed, received: "character" });
+    }
   }
+
 
   // 2. Duplicate detection (multi-reference slot)
   if (Array.isArray(existing) && existing.length > 0) {
