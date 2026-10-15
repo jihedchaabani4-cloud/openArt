@@ -1,8 +1,8 @@
 # STATE
-Current phase: P5    Current task: X6
+Current phase: P5    Current task: P5-GATE
 Updated: 2026-10-15
 Test status: 427 vitest passed (57 files), 47 node:test passed (7 files) - Total prompt-bar tests: 290 passed
-Next step: P5-GATE
+Next step: P6 (07_P6_platform_split.md)
 
 | Task | Status (TODO/DONE/BLOCKED/SKIPPED) | Commit | Report |
 |---|---|---|---|
@@ -46,4 +46,6 @@ Next step: P5-GATE
 | X3 | DONE | 1767b2b | reports/X3.md |
 | X4 | DONE | 3d3ee71 | reports/X4.md |
 | X5-elementsEdit | DONE | 4cebadd | reports/X5-elementsEdit.md |
-| X6 | DONE | pb5(X6) | reports/X6.md |
+| X6 | DONE | 7fb7774 | reports/X6.md |
+| P5-GATE | DONE | pb5(GATE) | reports/PHASE-P5-GATE.md |
+
