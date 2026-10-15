@@ -26,7 +26,7 @@ import {
   getAssetId,
 } from "../core/tagsService.js";
 import { calculateModelCredits } from "../core/creditCalculationService.js";
-import { resolveModelIcon } from "../core/modelManagement.js";
+import { usePromptBarModels } from "./hooks/usePromptBarModels.js";
 import {
   getActiveSlots,
   getSlotMaxRefs as resolveSlotMaxRefs,
@@ -144,8 +144,6 @@ function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, class
   const setActiveSubMode = storeSetActiveSubMode || (() => {});
 
   const prompt         = usePromptBarStore((s) => s.prompt);
-  const modelsMap      = usePromptBarStore((s) => s.modelsMap);
-  const selectedId     = usePromptBarStore((s) => s.selectedModelId);
   const paramValues    = usePromptBarStore((s) => s.parameterValues);
   const validationErrs = usePromptBarStore((s) => s.validationErrors);
   const storeIsGenerating = usePromptBarStore((s) => s.isGenerating);
@@ -154,9 +152,7 @@ function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, class
   // Store actions
   const setPrompt        = usePromptBarStore((s) => s.setPrompt);
   const setParameter     = usePromptBarStore((s) => s.setParameter);
-  const selectModel      = usePromptBarStore((s) => s.selectModel);
   const serializeAndEmit = usePromptBarStore((s) => s.serialize);
-  const setModels        = usePromptBarStore((s) => s.setModels);
   const setIsGenerating  = usePromptBarStore((s) => s.setIsGenerating);
   const beginSubmit      = usePromptBarStore((s) => s.beginSubmit);
   const endSubmit        = usePromptBarStore((s) => s.endSubmit);
@@ -170,13 +166,25 @@ function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, class
   const removeMedia      = usePromptBarStore((s) => s.removeMedia);
   const focusRequest     = usePromptBarStore((s) => s.focusRequest);
 
-
-  // Sync incoming models into the store
-  useEffect(() => {
-    if (models && models.length > 0) {
-      setModels(models);
-    }
-  }, [models, setModels]);
+  // Model state and synchronization (H1)
+  const {
+    allModelsList,
+    eligibleModels,
+    currentModel,
+    isCurrentEligible,
+    selectedId,
+    parameters,
+    currentModelIcon,
+    availableModes,
+    availableSubModes,
+    selectModel,
+  } = usePromptBarModels({
+    models,
+    type,
+    featureConfig,
+    activeMode,
+    activeSubMode,
+  });
 
   // Auto-expand textarea
   useEffect(() => {
@@ -185,67 +193,6 @@ function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, class
       textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
     }
   }, [prompt]);
-
-  const allModelsList = useMemo(() => Object.values(modelsMap), [modelsMap]);
-
-  // 1. Capability Filter: featureConfig decides which models are eligible for this mode+subMode.
-  //    Models list is master: adding references NEVER reduces or filters available models.
-  const eligibleModels = useMemo(() => {
-    if (!featureConfig) {
-      // Fallback: no featureConfig provided — show all models
-      if (!hasModes) {
-        if (!supportedDomains.length) return allModelsList;
-        return allModelsList.filter((m) => supportedDomains.includes(m.domain));
-      }
-      return allModelsList;
-    }
-    if (!hasModes) {
-      if (!supportedDomains.length) return allModelsList;
-      return allModelsList.filter((m) => supportedDomains.includes(m.domain));
-    }
-    return featureConfig.filterEligibleModels(allModelsList, activeMode, activeSubMode, {});
-  }, [featureConfig, hasModes, supportedDomains, allModelsList, activeMode, activeSubMode]);
-
-  // Ensure currentModel is strictly an active eligible model.
-  // When 0 models are eligible, currentModel is null and parameters are empty.
-  const isCurrentEligible = useMemo(
-    () => eligibleModels.some((m) => m.id === selectedId),
-    [eligibleModels, selectedId]
-  );
-  const currentModel = isCurrentEligible ? modelsMap[selectedId] : null;
-  const parameters = useMemo(() => currentModel?.parameters || {}, [currentModel]);
-  const currentModelIcon = useMemo(() => {
-    if (!currentModel) return null;
-    return currentModel.icon || resolveModelIcon(currentModel);
-  }, [currentModel]);
-
-  // 2. Auto-select first eligible model when current model does not satisfy mode/subMode parameter requirements
-  useEffect(() => {
-    if (eligibleModels.length > 0) {
-      const isEligible = eligibleModels.some((m) => m.id === selectedId);
-      if (!isEligible) {
-        selectModel(eligibleModels[0].id);
-      }
-    } else {
-      if (selectedId !== null) {
-        selectModel(null);
-      }
-    }
-  }, [eligibleModels, selectedId, selectModel]);
-
-  const availableModes = useMemo(() => {
-    return ["image", "video"].filter((mode) => {
-      if (!featureConfig?.filterEligibleModels) return true;
-      return featureConfig.filterEligibleModels(allModelsList, mode, null, {}).length > 0;
-    });
-  }, [featureConfig, allModelsList]);
-
-  const availableSubModes = useMemo(() => {
-    return ["frames", "reference"].filter((subMode) => {
-      if (!featureConfig?.filterEligibleModels) return true;
-      return featureConfig.filterEligibleModels(allModelsList, activeMode, subMode, {}).length > 0;
-    });
-  }, [featureConfig, allModelsList, activeMode]);
 
   // Sync template/featureConfig into the store
   useEffect(() => {
