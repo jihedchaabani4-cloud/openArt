@@ -1,8 +1,8 @@
 # STATE
-Current phase: P4    Current task: T6
+Current phase: P4    Current task: P4-GATE
 Updated: 2026-10-15
-Test status: 389 vitest passed (52 files), 47 node:test passed (7 files) - Total prompt-bar tests: 252 passed
-Next step: P4-GATE
+Test status: 401 vitest passed (52 files), 47 node:test passed (7 files) - Total prompt-bar tests: 264 passed
+Next step: human runs smoke items 2,3,4 and reviews the transition matrix, then gives P5 (06_P5_service_and_legacy_migration.md)
 
 | Task | Status (TODO/DONE/BLOCKED/SKIPPED) | Commit | Report |
 |---|---|---|---|
@@ -39,4 +39,5 @@ Next step: P4-GATE
 | T3 | DONE | a037992 | reports/T3.md |
 | T4 | DONE | d01c3a2 | reports/T4.md |
 | T5 | DONE | 8724025 | reports/T5.md |
-| T6 | DONE | pb4(T6) | reports/T6.md |
+| T6 | DONE | 0eb8e10 | reports/T6.md |
+| P4-GATE | DONE | pb4(GATE) | reports/PHASE-P4-GATE.md |

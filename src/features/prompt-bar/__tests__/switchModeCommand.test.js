@@ -168,4 +168,106 @@ describe("T3: switchMode Command & Store Action (PB-D-03)", () => {
     // Zero notifications
     expect(listener).toHaveBeenCalledTimes(0);
   });
+
+  describe("Matrix test: 3 models x 4 transitions assert single notification and atomic cleanup", () => {
+    const transitions = [
+      {
+        id: "T1",
+        label: "image -> video/frames",
+        targetMode: "video",
+        targetSubMode: "frames",
+        expectedModelId: normalizedFramesModel.id,
+      },
+      {
+        id: "T2",
+        label: "video/frames -> video/reference",
+        targetMode: "video",
+        targetSubMode: "reference",
+        expectedModelId: videoRefModel.id,
+      },
+      {
+        id: "T3",
+        label: "video/reference -> image",
+        targetMode: "image",
+        targetSubMode: "frames",
+        expectedModelId: normalizedImagesListModel.id,
+      },
+      {
+        id: "T4",
+        label: "video/frames -> image",
+        targetMode: "image",
+        targetSubMode: "frames",
+        expectedModelId: normalizedImagesListModel.id,
+      },
+    ];
+
+    const initialModels = [
+      {
+        model: normalizedFramesModel,
+        initialMode: "video",
+        initialSubMode: "frames",
+        initialParams: { input_image: { workflow_id: "f_start" }, last_frame: { workflow_id: "f_end" }, aspect_ratio: "16:9" },
+        initialPrompt: "From <media:f_start> to <media:f_end>",
+      },
+      {
+        model: normalizedImagesListModel,
+        initialMode: "image",
+        initialSubMode: "frames",
+        initialParams: { images: [{ workflow_id: "img_ref" }], aspect_ratio: "16:9" },
+        initialPrompt: "Image with <media:img_ref>",
+      },
+      {
+        model: normalizedPromptOnlyModel,
+        initialMode: "image",
+        initialSubMode: "frames",
+        initialParams: { aspect_ratio: "16:9" },
+        initialPrompt: "Pure text prompt without media",
+      },
+    ];
+
+    for (const { model, initialMode, initialSubMode, initialParams, initialPrompt } of initialModels) {
+      for (const { id, label, targetMode, targetSubMode, expectedModelId } of transitions) {
+        it(`[Model: ${model.id}] [${id}: ${label}] executes atomically with exactly 1 notification`, () => {
+          const store = createTestStore({
+            activeMode: initialMode,
+            activeSubMode: initialSubMode,
+            selectedModelId: model.id,
+            parameterValues: { ...initialParams },
+            prompt: initialPrompt,
+          });
+
+          const listener = vi.fn();
+          store.subscribe(listener);
+
+          const res = store.getState().switchMode(targetMode, targetSubMode);
+          expect(res.ok).toBe(true);
+          // Asserts exactly ONE store notification
+          expect(listener).toHaveBeenCalledTimes(1);
+
+          const state = store.getState();
+          expect(state.activeMode).toBe(targetMode);
+          expect(state.activeSubMode).toBe(targetSubMode);
+          
+          const expectedTargetModelId =
+            targetMode === "video"
+              ? targetSubMode === "frames"
+                ? normalizedFramesModel.id
+                : videoRefModel.id
+              : model.domain === "image"
+                ? model.id
+                : normalizedImagesListModel.id;
+
+          expect(state.selectedModelId).toBe(expectedTargetModelId);
+          // Asserts media dropped and tags cleaned
+          expect(state.parameterValues.images).toBeUndefined();
+          expect(state.parameterValues.input_image).toBeUndefined();
+          expect(state.parameterValues.last_frame).toBeUndefined();
+          expect(state.prompt).not.toContain("<media:");
+          // Non-media parameters preserved via reconciliation
+          expect(state.parameterValues.aspect_ratio).toBe("16:9");
+        });
+      }
+    }
+  });
 });
+
