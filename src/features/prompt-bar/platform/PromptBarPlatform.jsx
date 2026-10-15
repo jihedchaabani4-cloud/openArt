@@ -27,8 +27,8 @@ import {
 } from "../core/tagsService.js";
 import { calculateModelCredits } from "../core/creditCalculationService.js";
 import { usePromptBarModels } from "./hooks/usePromptBarModels.js";
+import { usePromptBarSlots } from "./hooks/usePromptBarSlots.js";
 import {
-  getActiveSlots,
   getSlotMaxRefs as resolveSlotMaxRefs,
   getModelReferenceCapability,
   remainingQuota,
@@ -237,43 +237,22 @@ function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, class
     return calculateModelCredits(currentModel, paramValues, currentCount);
   }, [currentModel, paramValues, currentCount]);
 
-  // 3. Active slot definitions — driven by featureConfig.COMPOSITION_REQUIREMENTS and currentModel.
-  //    If the selected model does not support image inputs (text only), the Reference button is NOT shown!
-  const activeSlots = useMemo(() => {
-    return getActiveSlots({
-      featureConfig,
-      hasModes,
-      referenceSlots,
-      mode: activeMode,
-      subMode: activeSubMode,
-      model: currentModel,
-    });
-  }, [featureConfig, hasModes, referenceSlots, activeMode, activeSubMode, currentModel]);
-
-  const hasStart = activeSlots.some((s) => s.role === "start");
-  const hasEnd   = activeSlots.some((s) => s.role === "end");
-  const showSwap = activeMode === "video" && activeSubMode === "frames" && hasStart && hasEnd;
-
-  // Separate generation params from media params for drawer display
-  const drawerParams = useMemo(() => {
-    return Object.entries(parameters).filter(
-      ([, def]) => def.group !== "media" && !def.isPrompt
-    );
-  }, [parameters]);
-
-  // T010 / FR-SLOT-06: Keyframe swap handler — reads/writes backend keys (not role names).
-  // Swap is only enabled when BOTH start and end frames are filled (FR-SLOT-06).
-  const startKey = featureConfig?.resolveParameterMapping(currentModel, "start");
-  const endKey   = featureConfig?.resolveParameterMapping(currentModel, "end");
-  const startVal = startKey ? paramValues[startKey] : undefined;
-  const endVal   = endKey ? paramValues[endKey] : undefined;
-  const swapEnabled = Boolean(startVal && endVal); // FR-SLOT-06: both must be filled
-
-  const handleSwapFrames = useCallback(() => {
-    if (!startKey || !endKey) return;
-    setParameter(startKey, endVal);
-    setParameter(endKey, startVal);
-  }, [startKey, endKey, startVal, endVal, setParameter]);
+  // Active slots, drawer parameters, and swap handler (H2)
+  const {
+    activeSlots,
+    showSwap,
+    drawerParams,
+    startVal,
+    swapEnabled,
+    handleSwapFrames,
+  } = usePromptBarSlots({
+    featureConfig,
+    type,
+    activeMode,
+    activeSubMode,
+    currentModel,
+    parameters,
+  });
 
   // FR-SLOT-05: Generate is disabled in Frames mode if the Start Frame slot is empty, or if no eligible model is active.
   const isFramesMode = activeMode === "video" && activeSubMode === "frames";
