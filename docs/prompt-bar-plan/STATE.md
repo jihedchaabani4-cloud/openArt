@@ -1,8 +1,8 @@
 # STATE
-Current phase: P6    Current task: H6
+Current phase: P6    Current task: P6-GATE
 Updated: 2026-10-15
 Test status: 445 vitest passed (64 files), 47 node:test passed (7 files) - Total prompt-bar tests: 308 passed
-Next step: P6-GATE
+Next step: human runs the full smoke checklist and compares the look of the bar, then gives P7 (08_P7_wrappers_routes_templates.md) (waiting for the human)
 
 | Task | Status (TODO/DONE/BLOCKED/SKIPPED) | Commit | Report |
 |---|---|---|---|
@@ -53,7 +53,8 @@ Next step: P6-GATE
 | H3 | DONE | b53ecd7 | reports/H3.md |
 | H4 | DONE | 40cb0c7 | reports/H4.md |
 | H5 | DONE | ec44c6d | reports/H5.md |
-| H6 | DONE | pb6(H6) | reports/H6.md |
+| H6 | DONE | 9481923 | reports/H6.md |
+| P6-GATE | DONE | pb6(GATE) | reports/PHASE-P6-GATE.md |
 
 
 
