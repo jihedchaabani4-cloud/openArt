@@ -50,9 +50,9 @@ export function usePromptBarGenerate({
     return calculateModelCredits(currentModel, paramValues, currentCount);
   }, [currentModel, paramValues, currentCount]);
 
-  // Mandatory prompt length validation (e.g. min 10 chars for character creation)
+  // Mandatory prompt length validation driven directly by template contract (PB-D-19)
   const cleanPrompt = (typeof prompt === "string" ? prompt : "").trim();
-  const minPromptLength = effectiveTemplate?.minPromptLength ?? (effectiveTemplate?.id === "character" ? 10 : 0);
+  const minPromptLength = effectiveTemplate?.minPromptLength ?? 0;
   const isPromptTooShort = minPromptLength > 0 && cleanPrompt.length < minPromptLength;
 
   // FR-SLOT-05: Generate is disabled in Frames mode if the Start Frame slot is empty, or if no eligible model is active.
