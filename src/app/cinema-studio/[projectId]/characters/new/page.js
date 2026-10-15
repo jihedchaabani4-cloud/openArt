@@ -4,9 +4,11 @@ import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { NavbarCore, NavbarTitle } from "@/widgets/NavbarCore";
-import { useCharacterWorkflows, useGenerateCharacterDescriptionMutation } from "@/features/characters";
+import { useCharacterWorkflows, useGenerateCharacterDescriptionMutation, useCreateCharacterMutation } from "@/features/characters";
 import { useWorkflowsStore } from "@/features/workflows";
 import { useCharacterStore } from "@/features/studio";
+import { CharacterPromptBar, promptBarService } from "@/features/prompt-bar";
+import { useRealBackendModels } from "@/features/prompt-bar/core/useRealBackendModels";
 
 const CHARACTER_ARCHETYPES = [
   {
@@ -123,6 +125,10 @@ export default function NewCharacterPage() {
 
   const setPrompt = useCharacterStore((state) => state.setPrompt);
   const generateDescriptionMutation = useGenerateCharacterDescriptionMutation();
+  const createCharacterMutation = useCreateCharacterMutation();
+
+  const { data: modelsData } = useRealBackendModels({ projectId: effectiveProjectId });
+  const models = modelsData?.models || [];
 
   const { workflows: existingSheets } = useCharacterWorkflows(effectiveProjectId);
 
@@ -131,6 +137,22 @@ export default function NewCharacterPage() {
       router.push(`/cinema-studio/${effectiveProjectId}/characters`);
     } else {
       router.push(`/cinema-studio/${effectiveProjectId}/assets`);
+    }
+  };
+
+  const handleGenerate = async (payload) => {
+    if (!payload?.prompt?.trim()) return;
+    try {
+      await createCharacterMutation.mutateAsync({
+        projectId: effectiveProjectId,
+        name: payload.prompt.slice(0, 40),
+        prompt: payload.prompt,
+        model: payload.model,
+        parameters: payload.parameters,
+      });
+      router.push(`/cinema-studio/${effectiveProjectId}/characters`);
+    } catch (err) {
+      console.warn("Character creation error:", err);
     }
   };
 
@@ -144,6 +166,7 @@ export default function NewCharacterPage() {
       });
       if (res?.description) {
         setPrompt(res.description);
+        promptBarService({ templateId: "character", projectId: effectiveProjectId }).setPrompt(res.description);
         setTimeout(() => {
           const textarea = document.querySelector("textarea");
           if (textarea) {
@@ -210,8 +233,13 @@ export default function NewCharacterPage() {
         </div>
       </main>
 
-      {/* CharacterPromptBar removed - TODO: add v2 */}
-      <div className="h-16" />
+      {/* Dedicated Character PromptBar (Platform Architecture) */}
+      <CharacterPromptBar
+        projectId={effectiveProjectId}
+        models={models}
+        onGenerate={handleGenerate}
+        isGenerating={createCharacterMutation.isPending}
+      />
     </div>
   );
 }

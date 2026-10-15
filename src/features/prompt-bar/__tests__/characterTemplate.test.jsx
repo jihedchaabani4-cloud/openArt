@@ -61,5 +61,20 @@ describe("Character Template & CharacterPromptBar", () => {
       expect(screen.queryByText("Reference")).toBeNull();
       expect(screen.queryByText("Start Frame")).toBeNull();
     });
+
+    it("NewCharacterPage embeds CharacterPromptBar with models and onGenerate", () => {
+      const fs = require("fs");
+      const path = require("path");
+      const pageFile = fs.readFileSync(
+        path.resolve(__dirname, "../../../app/cinema-studio/[projectId]/characters/new/page.js"),
+        "utf8"
+      );
+
+      expect(pageFile).toContain("<CharacterPromptBar");
+      expect(pageFile).toContain("projectId={effectiveProjectId}");
+      expect(pageFile).toContain("models={models}");
+      expect(pageFile).toContain("onGenerate={handleGenerate}");
+      expect(pageFile).toContain("isGenerating={createCharacterMutation.isPending}");
+    });
   });
 });
