@@ -74,6 +74,9 @@ export function PromptBarPlatform({
   renderRightActions,
   persist = true,
   persistKey = "studio-prompt-bar",
+  templateId,
+  instanceId,
+  storage,
 }) {
   const contextStore = useContext(PromptBarStoreContext);
   const activeStore = store || contextStore;
@@ -98,9 +101,12 @@ export function PromptBarPlatform({
   return (
     <PromptBarStoreProvider
       type={type}
+      templateId={templateId}
+      instanceId={instanceId}
       initialModels={models}
       persist={persist}
       persistKey={persistKey}
+      storage={storage}
     >
       <PromptBarPlatformInner
         type={type}
