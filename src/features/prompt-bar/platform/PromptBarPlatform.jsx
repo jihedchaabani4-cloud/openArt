@@ -10,11 +10,10 @@ import { ArrowRight } from "lucide-react";
 import { PromptBarShell } from "../ui/common/PromptBarShell.jsx";
 import { MediaInput } from "../ui/common/MediaInput.jsx";
 import { SwapIcon, ReferenceButton, ViewReference } from "../ui/common/ReferenceButton.jsx";
-import { ImportMediaPopover } from "@/widgets/ImportMediaDialog/ImportMediaPopover";
 import { PromptEditor } from "../ui/common/editor/PromptEditor.jsx";
-import { AtMentionMenu } from "../ui/common/editor/AtMentionMenu.jsx";
 import { FlowPromptBoxSettings } from "../ui/common/selectors/FlowPromptBoxSettings.jsx";
 import { Button } from "@/shared/ui/button";
+import { PromptBarTopPanel } from "./parts/PromptBarTopPanel.jsx";
 
 // Platform Architecture
 import { PromptBarStoreProvider, PromptBarStoreContext } from "../store/PromptBarStoreContext.js";
@@ -277,58 +276,35 @@ function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, class
     settingsOverlayRef,
   });
 
-  // ── Top Panel Zone ──────────────────────────────────────────────────────────
-  // Renders above the prompt bar shell: AtMentionMenu (quick mention) or
-  // ImportMediaPopover (panel variant), with unified AnimatePresence transitions.
+  // ── Top Panel Zone (H5) ─────────────────────────────────────────────────────
   const topPanelZone = (
-    <AnimatePresence mode="wait" initial={false}>
-      {quickMentionOpen && (
-        <div ref={quickMentionAnchorRef} className="w-full flex justify-center">
-          <AtMentionMenu
-            open={quickMentionOpen}
-            onClose={() => {
-              setQuickMentionOpen(false);
-              setMentionCallback(null);
-              setMentionQuery("");
-            }}
-            references={activeReferences}
-            onSelectReference={handleSelectExistingReference}
-            onOpenMediaLibrary={handleOpenMediaLibraryFromMention}
-            anchorRef={quickMentionAnchorRef}
-            query={mentionQuery}
-          />
-        </div>
-      )}
-
-      {!quickMentionOpen && dialogOpen && (
-        <motion.div
-          key="import-media-panel"
-          initial={{ opacity: 0, scale: 0.97, y: 10 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.97, y: 8 }}
-          transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-          className="overflow-hidden rounded-[28px] bg-(--background-base-pri) backdrop-blur-[80px] border border-white/5 shadow-[0_24px_80px_rgba(0,0,0,0.58)] pointer-events-auto w-fit max-w-[95vw]"
-        >
-          <ImportMediaPopover
-            variant="panel"
-            open={dialogOpen}
-            onOpenChange={(val) => {
-              setDialogOpen(val);
-              if (!val) setMentionQuery("");
-            }}
-            anchorRef={dialogAnchorRef}
-            allowedType={activeSlotAllowedType}
-            maxAllowed={activeSlotMaxAllowed}
-            remainingImages={activeDialogSlot && activeDialogSlot.role !== "reference" ? undefined : remainingImagesQuota}
-            mode={activeDialogMode}
-            selectedItems={dialogSelectedItems}
-            excludedItems={allSelectedMedia}
-            onSelect={handleSelectMedia}
-            initialSearch={mentionQuery}
-          />
-        </motion.div>
-      )}
-    </AnimatePresence>
+    <PromptBarTopPanel
+      quickMentionOpen={quickMentionOpen}
+      quickMentionAnchorRef={quickMentionAnchorRef}
+      onCloseQuickMention={() => {
+        setQuickMentionOpen(false);
+        setMentionCallback(null);
+        setMentionQuery("");
+      }}
+      activeReferences={activeReferences}
+      onSelectReference={handleSelectExistingReference}
+      onOpenMediaLibrary={handleOpenMediaLibraryFromMention}
+      mentionQuery={mentionQuery}
+      dialogOpen={dialogOpen}
+      onOpenChangeDialog={(val) => {
+        setDialogOpen(val);
+        if (!val) setMentionQuery("");
+      }}
+      dialogAnchorRef={dialogAnchorRef}
+      activeSlotAllowedType={activeSlotAllowedType}
+      activeSlotMaxAllowed={activeSlotMaxAllowed}
+      remainingImagesQuota={remainingImagesQuota}
+      activeDialogSlot={activeDialogSlot}
+      activeDialogMode={activeDialogMode}
+      dialogSelectedItems={dialogSelectedItems}
+      allSelectedMedia={allSelectedMedia}
+      onSelectMedia={handleSelectMedia}
+    />
   );
 
   // ── Outer wrapper + Settings overlay ─────────────────────────────────────
