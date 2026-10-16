@@ -1,8 +1,8 @@
 # STATE
-Current phase: P7-CLEAN (IN PROGRESS)    Current task: CLEAN-1
+Current phase: P7-CLEAN (IN PROGRESS)    Current task: CLEAN-2
 Updated: 2026-10-16
-Test status: 494 vitest passed (72 files)
-Next step: CLEAN-2 (inject template at store creation)
+Test status: 498 vitest passed (73 files)
+Next step: CLEAN-3 (update BACKLOG.md and STATE.md)
 
 | Task | Status (TODO/DONE/BLOCKED/SKIPPED) | Commit | Report |
 |---|---|---|---|
@@ -68,7 +68,8 @@ Next step: CLEAN-2 (inject template at store creation)
 | FIX-4 | DONE | 2627032 | reports/RECONCILE.md |
 | CHECK | DONE | 6fdfb25 | reports/PRE-MERGE-CHECK.md |
 | CLEAN-1a | DONE | e54265f | reports/CLEAN-1.md |
-| CLEAN-1b | DONE | HEAD | reports/CLEAN-1.md |
+| CLEAN-1b | DONE | 18856ef | reports/CLEAN-1.md |
+| CLEAN-2 | DONE | HEAD | reports/CLEAN-2.md |
 
 
 

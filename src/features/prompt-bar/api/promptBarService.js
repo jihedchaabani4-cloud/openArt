@@ -207,7 +207,7 @@ export function promptBarService(
      * @returns {object} CommandResult
      */
     animateMedia(media, options) {
-      return dispatchOrQueue("animateMedia", [media, options]);
+      return dispatchOrQueue("animateMedia", options !== undefined ? [media, options] : [media]);
     },
 
     /**

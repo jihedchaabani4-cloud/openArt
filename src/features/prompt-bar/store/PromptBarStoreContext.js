@@ -94,6 +94,8 @@ function loadAnySaved(storage, canonicalKey, legacyKey) {
  */
 export function PromptBarStoreProvider({
   type,
+  featureConfig,
+  template,
   templateId,
   instanceId,
   projectId,
@@ -103,8 +105,13 @@ export function PromptBarStoreProvider({
   storage = typeof window !== "undefined" ? window.sessionStorage : null,
   children,
 }) {
+  const effectiveTemplate =
+    template ||
+    (featureConfig && type && featureConfig !== type
+      ? { ...type, ...featureConfig }
+      : featureConfig || type || null);
   const resolvedProjectId = projectId || resolveProjectId();
-  const effectiveTemplateId = templateId || type?.id || "default";
+  const effectiveTemplateId = templateId || effectiveTemplate?.id || type?.id || "default";
   const effectiveInstanceId = instanceId || (persistKey && persistKey !== "studio-prompt-bar" ? persistKey : "default");
 
   const identity = React.useMemo(() => ({
@@ -120,33 +127,37 @@ export function PromptBarStoreProvider({
   );
 
   const instanceMeta = React.useMemo(() => ({
-    persistRoutes: type?.persistRoutes || null,
+    persistRoutes: effectiveTemplate?.persistRoutes || type?.persistRoutes || null,
     storage: persist ? storage : null,
     canonicalKey,
     legacyKey,
-  }), [type?.persistRoutes, persist, storage, canonicalKey, legacyKey]);
+  }), [effectiveTemplate?.persistRoutes, type?.persistRoutes, persist, storage, canonicalKey, legacyKey]);
 
   // 1. Store creation is allowed ONLY through registry.getOrCreate on the client and must not read storage.
   // On the server (typeof window === "undefined"), create an ephemeral non-registered store to prevent SSR memory leaks.
-  // The first render (server and client) uses defaults plus initialConfig only (PB-D-06).
+  // The first render (server and client) uses defaults plus initialConfig only (PB-D-06, PB-D-23).
   const createStore = () => {
     const modelsMap = {};
     for (const m of initialModels) {
       modelsMap[m.id] = m;
     }
-    const { selectedModelId: defaultModelId, parameterValues: defaultParams } = initializeFromType(type, modelsMap);
+    const { selectedModelId: defaultModelId, parameterValues: defaultParams } = initializeFromType(effectiveTemplate || type, modelsMap);
 
-    return createPromptBarStore({
-      identity,
-      modelsMap,
-      selectedModelId: defaultModelId,
-      parameterValues: defaultParams,
-      prompt: "",
-      elements: [],
-      characters: [],
-      activeMode: "image",
-      activeSubMode: "frames",
-    });
+    return createPromptBarStore(
+      {
+        identity,
+        template: effectiveTemplate,
+        modelsMap,
+        selectedModelId: defaultModelId,
+        parameterValues: defaultParams,
+        prompt: "",
+        elements: [],
+        characters: [],
+        activeMode: effectiveTemplate?.defaultState?.activeMode || "image",
+        activeSubMode: effectiveTemplate?.defaultState?.activeSubMode || "frames",
+      },
+      { template: effectiveTemplate }
+    );
   };
 
   const store = typeof window === "undefined"

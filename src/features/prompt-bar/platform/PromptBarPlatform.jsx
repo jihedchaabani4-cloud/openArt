@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback, useContext } from "react";
+import { useState, useRef, useCallback, useContext } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/shared/lib/utils";
 
@@ -79,6 +79,7 @@ export function PromptBarPlatform({
   return (
     <PromptBarStoreProvider
       type={type}
+      featureConfig={featureConfig}
       templateId={templateId}
       instanceId={instanceId}
       projectId={projectId}
@@ -119,7 +120,6 @@ function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, class
   const storeSetActiveMode = usePromptBarStore((s) => s.setActiveMode);
   const storeSetActiveSubMode = usePromptBarStore((s) => s.setActiveSubMode);
   const storeSwitchMode = usePromptBarStore((s) => s.switchMode);
-  const setTemplate = usePromptBarStore((s) => s.setTemplate);
 
   const activeMode    = storeActiveMode || "image";
   const activeSubMode = storeActiveSubMode || "frames";
@@ -154,14 +154,6 @@ function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, class
     activeMode,
     activeSubMode,
   });
-
-
-  // Sync template/featureConfig into the store
-  useEffect(() => {
-    if (featureConfig && setTemplate) {
-      setTemplate(featureConfig);
-    }
-  }, [featureConfig, setTemplate]);
 
   const handleModeChange = useCallback((newMode) => {
     if (storeSwitchMode) {

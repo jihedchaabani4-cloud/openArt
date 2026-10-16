@@ -297,8 +297,12 @@ export function createPromptBarStore(overrides = {}, initialDeps = {}) {
       }
     },
 
-    /** Set or update template reference */
+    /** Deprecated shim (PB-D-23): first template wins; ignored if template was already set. */
     setTemplate: (template) => {
+      if (!template) return;
+      if (deps.template || get().template) {
+        return;
+      }
       deps.template = template;
       set({ template });
     },

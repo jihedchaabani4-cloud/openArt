@@ -254,6 +254,7 @@ export function createActions(core) {
       if (!media) {
         return fail(REASONS.INVALID_ARGUMENT, { message: "media is required for animateMedia." });
       }
+      const opts = options || {};
 
       const steps = [
         // 1. Switch to video / frames
@@ -274,17 +275,17 @@ export function createActions(core) {
         },
         // 3. Prompt handling per V4 semantics & options.promptMode
         (draft) => {
-          const mode = options.promptMode || "default";
+          const mode = opts.promptMode || "default";
           let nextPrompt = draft.prompt;
           if (mode === "overwrite") {
-            nextPrompt = options.prompt ?? "";
+            nextPrompt = opts.prompt ?? "";
           } else if (mode === "append") {
             nextPrompt = draft.prompt
-              ? `${draft.prompt} ${options.prompt || ""}`
-              : (options.prompt || "");
+              ? `${draft.prompt} ${opts.prompt || ""}`
+              : (opts.prompt || "");
           } else if (mode === "if-empty") {
-            if (!draft.prompt && options.prompt) {
-              nextPrompt = options.prompt;
+            if (!draft.prompt && opts.prompt) {
+              nextPrompt = opts.prompt;
             }
           }
           return ok({ prompt: nextPrompt });
