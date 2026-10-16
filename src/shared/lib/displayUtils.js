@@ -111,15 +111,10 @@ export function formatPromptForDisplay(prompt) {
 export function getItemMetadata(item, group) {
   if (!item) return { status: 'empty' };
 
-  const normalizeStatus = (rawStatus, resolvedUrl, rawError, createdAt) => {
+  const normalizeStatus = (rawStatus, resolvedUrl, rawError, _createdAt) => {
     const s = (rawStatus || "").toString().toLowerCase();
     if (s === "success" || s === "completed") return "completed";
     if (s === "processing" || s === "pending" || s === "uploading" || s === "queued" || s === "in_progress" || s === "starting") {
-      const createdMs = createdAt ? new Date(createdAt).getTime() : 0;
-      // UX Failsafe: if an item has been stuck processing for > 10 minutes, display as failed
-      if (createdMs > 0 && (Date.now() - createdMs) > 10 * 60 * 1000) {
-        return "failed";
-      }
       return "processing";
     }
     if (s === "rejected") return "rejected";
@@ -134,10 +129,6 @@ export function getItemMetadata(item, group) {
 
     // Backward-compat fallback: if URL exists it's done, otherwise treat as processing.
     if (resolvedUrl) return "completed";
-    const createdMs = createdAt ? new Date(createdAt).getTime() : 0;
-    if (createdMs > 0 && (Date.now() - createdMs) > 10 * 60 * 1000) {
-      return "failed";
-    }
     return "processing";
   };
 

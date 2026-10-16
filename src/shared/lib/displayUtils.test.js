@@ -62,4 +62,20 @@ describe("displayUtils - getItemMetadata aspect ratio resolution", () => {
     const meta = getItemMetadata(item, workflow);
     expect(meta.aspect).toBe("9/16");
   });
+
+  it("preserves processing status even when item was created more than 10 minutes ago", () => {
+    const item = {
+      id: "proc-1",
+      status: "processing",
+      create_time: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
+    };
+    const workflow = {
+      id: "wf-proc",
+      workflow_type: "CHARACTER",
+      status: "processing",
+    };
+
+    const meta = getItemMetadata(item, workflow);
+    expect(meta.status).toBe("processing");
+  });
 });

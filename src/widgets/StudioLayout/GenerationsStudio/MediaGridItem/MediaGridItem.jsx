@@ -170,11 +170,6 @@ const WorkflowMediaGridItem = React.memo(function WorkflowMediaGridItem({
 
   const entityType = getWorkflowEntityType(workflow);
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // SAFE EARLY RETURN — all hooks have already been called above
-  // ─────────────────────────────────────────────────────────────────────────
-  if (!item) return null;
-
   // ── Derived values (pure computation — no hooks) ───────────────────────
   const isDone   = status === "completed" && !!url;
   const isError  = ["rejected", "failed", "error"].includes(status);
@@ -303,6 +298,8 @@ const WorkflowMediaGridItem = React.memo(function WorkflowMediaGridItem({
     lastPos,
   });
 
+  if (!item) return null;
+
   const handleDragStart = (e) => {
     e.dataTransfer.setData("imageUrl",   url);
     e.dataTransfer.setData("assetId",    item?.name || item?.id || workflow?.id || "");
@@ -341,7 +338,9 @@ const WorkflowMediaGridItem = React.memo(function WorkflowMediaGridItem({
   const errorMsg = isError ? (
     item?.error ||
     workflow?.error ||
-    "This prompt might violate our policies about generating sexual content. Please try a different prompt or send feedback."
+    item?.error_message ||
+    workflow?.error_message ||
+    "Generation failed. Please try a different prompt or retry."
   ) : null;
 
   const cardStyle = albumWidth && albumHeight
