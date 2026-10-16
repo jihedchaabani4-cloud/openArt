@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef } from "react";
+import { useRef } from "react";
 import { ReferenceButton, ViewReference } from "./ReferenceButton.jsx";
 import { cn } from "@/shared/lib/utils";
 

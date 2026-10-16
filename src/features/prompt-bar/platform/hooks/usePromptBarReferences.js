@@ -6,7 +6,7 @@ import {
   remainingQuota,
   allowedTypeForSlot,
 } from "../../core/media.js";
-import { calculateUsedImages } from "../../core/entityService.js";
+import { calculateUsedImages, normalizeEntity } from "../../core/entityService.js";
 
 /**
  * usePromptBarReferences
@@ -18,11 +18,6 @@ export function usePromptBarReferences({
   featureConfig,
   currentModel,
   activeMode = "image",
-  drawerOpen = false,
-  setDrawerOpen = () => {},
-  containerRef,
-  tuneButtonRef,
-  settingsOverlayRef,
 } = {}) {
   // Store subscriptions
   const paramValues   = usePromptBarStore((s) => s.parameterValues);
@@ -203,44 +198,6 @@ export function usePromptBarReferences({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [quickMentionOpen]);
 
-  // Close parameter drawer on click outside or Escape key
-  useEffect(() => {
-    if (!drawerOpen) return;
-
-    const handleClickOutside = (event) => {
-      if (containerRef?.current && containerRef.current.contains(event.target)) {
-        return;
-      }
-      if (tuneButtonRef?.current && tuneButtonRef.current.contains(event.target)) {
-        return;
-      }
-      if (settingsOverlayRef?.current && settingsOverlayRef.current.contains(event.target)) {
-        return;
-      }
-      const isPortalClick = event.target.closest?.(
-        "[data-radix-popper-content-wrapper], [role='dialog'], [role='listbox'], .radix-portal, [data-portal]"
-      );
-      if (isPortalClick) {
-        return;
-      }
-
-      setDrawerOpen(false);
-    };
-
-    const handleKeyDown = (event) => {
-      if (event.key === "Escape") {
-        setDrawerOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    window.addEventListener("keydown", handleKeyDown);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [drawerOpen, containerRef, tuneButtonRef, settingsOverlayRef, setDrawerOpen]);
-
   const handleSelectMedia = useCallback((assets) => {
     const items = Array.isArray(assets) ? assets : [assets];
     if (items.length === 0) {
@@ -248,23 +205,9 @@ export function usePromptBarReferences({
       return;
     }
 
-    const normalizedItems = items.map((item) => {
-      const workflowId = item.workflow_id || item.workflowId || item.id || item.asset_id;
-      const isElement = item.type === "element" || item.is_element || String(item.workflow_type || "").toUpperCase().includes("ELEMENT");
-      const isCharacter = item.type === "character" || item.is_character || String(item.workflow_type || "").toUpperCase().includes("CHARACTER");
-      const resolvedType = isCharacter ? "character" : isElement ? "element" : (item.type || (item.is_video ? "video" : "image"));
-
-      return {
-        workflow_id: workflowId,
-        id: workflowId,
-        url: item.url || item.preview || item.file_url,
-        preview: item.url || item.preview || item.file_url,
-        displayName: item.displayName || item.display_name || item.name || activeDialogSlot?.label || "Reference",
-        type: resolvedType,
-        workflow_type: item.workflow_type || (isCharacter ? "CHARACTER_SHEET" : isElement ? "ELEMENT_SHEET" : undefined),
-        image_count: item.image_count || 1,
-      };
-    });
+    const normalizedItems = items
+      .map((item) => normalizeEntity(item, null))
+      .filter(Boolean);
 
     // Case 1: Triggered from a slot click
     if (activeDialogSlot) {

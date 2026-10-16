@@ -3,7 +3,7 @@ import { $getNodeByKey, DecoratorNode } from "lexical";
 import { MentionTag } from "./MentionTag";
 import { useCharacterStore } from "../../../model/useCharacterStore";
 
-function FeatureComponent({ nodeKey, section, traitKey, value, label, mediaLink }) {
+function FeatureComponent({ nodeKey, label, mediaLink }) {
   const [editor] = useLexicalComposerContext();
   const openFeatureEditorForLabel = useCharacterStore((state) => state.openFeatureEditorForLabel);
 
@@ -110,9 +110,6 @@ export class FeatureNode extends DecoratorNode {
     return (
       <FeatureComponent
         nodeKey={this.getKey()}
-        section={this.__section}
-        traitKey={this.__traitKey}
-        value={this.__value}
         label={this.__label}
         mediaLink={this.__mediaLink}
       />

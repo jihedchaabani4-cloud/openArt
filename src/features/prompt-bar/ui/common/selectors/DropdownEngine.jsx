@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useRef, useEffect, useCallback } from "react"
+import { useState, useRef, useEffect, useCallback } from "react"
 import { createPortal } from "react-dom"
 import { cn } from "@/shared/lib/utils"
 import { GoogleIcon } from "@/shared/ui/GoogleIcon"

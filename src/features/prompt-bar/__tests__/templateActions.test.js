@@ -248,4 +248,28 @@ describe("X2: Generated-Media Template Actions (addReference, animateMedia, appl
       expect(store.getState().prompt).toBe(beforePrompt);
     });
   });
+
+  describe("store.actions caching", () => {
+    it("returns identical cached actions reference across multiple accesses", () => {
+      const store = createTestStore();
+      const actions1 = store.actions;
+      const actions2 = store.actions;
+      expect(actions1).toBe(actions2);
+    });
+
+    it("invalidates actions cache when template changes", () => {
+      const store = createTestStore();
+      const actions1 = store.actions;
+
+      const newTemplate = {
+        id: "new-template",
+        createActions: vi.fn(() => ({ customAction: () => {} })),
+      };
+
+      store.setState({ template: newTemplate });
+      const actions2 = store.actions;
+      expect(actions1).not.toBe(actions2);
+      expect(actions2.customAction).toBeDefined();
+    });
+  });
 });

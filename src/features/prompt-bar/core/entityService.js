@@ -6,6 +6,7 @@
  */
 
 import { cleanTagsForAsset } from "./tagsService.js";
+import { resolveMediaUrl } from "./mediaRef.js";
 
 /**
  * Normalizes an entity asset into a consistent canonical shape.
@@ -17,30 +18,49 @@ import { cleanTagsForAsset } from "./tagsService.js";
 export function normalizeEntity(asset, defaultType = "element") {
   if (!asset) return null;
   if (typeof asset === "string") {
+    const s = asset.trim();
+    if (!s) return null;
     return {
-      id: asset,
-      workflow_id: asset,
-      displayName: defaultType === "character" ? "Character" : "Element",
-      url: "",
-      preview: "",
-      type: defaultType,
-      workflow_type: defaultType === "character" ? "CHARACTER_SHEET" : "ELEMENT_SHEET",
+      id: s,
+      workflow_id: s,
+      displayName: defaultType === "character" ? "Character" : defaultType === "element" ? "Element" : "Media",
+      url: s,
+      preview: s,
+      type: defaultType || "image",
+      workflow_type: defaultType === "character" ? "CHARACTER_SHEET" : defaultType === "element" ? "ELEMENT_SHEET" : undefined,
+      image_count: 1,
     };
   }
 
-  const id = asset.workflow_id || asset.workflowId || asset.id || asset.asset_id;
+  const id =
+    asset.workflow_id ||
+    asset.workflowId ||
+    asset.id ||
+    asset.asset_id ||
+    asset.characterId ||
+    asset.elementId;
   if (!id) return null;
 
   const isChar =
     asset.type === "character" ||
     asset.is_character ||
+    Boolean(asset.characterId) ||
+    asset.entity_type === "character" ||
     String(asset.workflow_type || "").toUpperCase().includes("CHARACTER");
   const isElem =
     asset.type === "element" ||
     asset.is_element ||
+    Boolean(asset.elementId) ||
+    asset.entity_type === "element" ||
     String(asset.workflow_type || "").toUpperCase().includes("ELEMENT");
 
-  const resolvedType = isChar ? "character" : isElem ? "element" : defaultType;
+  const resolvedType = isChar
+    ? "character"
+    : isElem
+    ? "element"
+    : defaultType || asset.type || (asset.is_video ? "video" : "image");
+
+  const mediaUrl = resolveMediaUrl(asset);
 
   return {
     id,
@@ -49,13 +69,13 @@ export function normalizeEntity(asset, defaultType = "element") {
       asset.displayName ||
       asset.display_name ||
       asset.name ||
-      (resolvedType === "character" ? "Character" : "Element"),
-    url: asset.url || asset.preview || asset.file_url || "",
-    preview: asset.preview || asset.url || asset.file_url || "",
+      (resolvedType === "character" ? "Character" : resolvedType === "element" ? "Element" : "Reference"),
+    url: mediaUrl,
+    preview: mediaUrl,
     type: resolvedType,
     workflow_type:
       asset.workflow_type ||
-      (resolvedType === "character" ? "CHARACTER_SHEET" : "ELEMENT_SHEET"),
+      (resolvedType === "character" ? "CHARACTER_SHEET" : resolvedType === "element" ? "ELEMENT_SHEET" : undefined),
     image_count:
       typeof asset.image_count === "number" && asset.image_count > 0
         ? asset.image_count

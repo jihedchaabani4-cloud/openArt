@@ -1,7 +1,7 @@
 "use client";
 
-import { useMemo, useState, useRef, useEffect } from "react";
-import { createPortal } from "react-dom";
+import { useMemo, useState } from "react";
+import { Popover } from "radix-ui";
 import { cn } from "@/shared/lib/utils";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { Button } from "@/shared/ui/button";
@@ -51,10 +51,9 @@ export function formatParamLabel(str) {
 
 /**
  * Unified FlowSelect dropdown component
- * Handles trigger button, floating portal placement, outside-click, scroll/resize,
- * and unified Google Flow frosted glass styling.
+ * Powered by collision-aware Radix Popover primitive while preserving Google Flow styling.
  */
-function FlowSelect({
+export function FlowSelect({
   value,
   onChange,
   items = [],
@@ -66,152 +65,78 @@ function FlowSelect({
   ariaLabel,
 }) {
   const [open, setOpen] = useState(false);
-  const triggerRef = useRef(null);
-  const menuRef = useRef(null);
-  const [placement, setPlacement] = useState(null);
-
-  const calculatePlacement = () => {
-    if (!triggerRef.current) return;
-    const rect = triggerRef.current.getBoundingClientRect();
-    const padding = 16;
-
-    const spaceLeft = rect.left;
-    const spaceRight = window.innerWidth - rect.right;
-    const side = spaceLeft >= width + padding || spaceLeft > spaceRight ? "left" : "right";
-
-    const spaceGoingUp = rect.bottom - padding;
-    const spaceGoingDown = window.innerHeight - rect.top - padding;
-
-    let align = "bottom";
-    let maxHeight = maxHeightLimit;
-
-    // Prefer expanding upwards (align = 'bottom') because the settings popover sits near screen bottom.
-    // Only expand downwards if there is ample space below and it is greater than the space above.
-    if (spaceGoingDown >= maxHeightLimit && spaceGoingDown >= spaceGoingUp) {
-      align = "top";
-      maxHeight = Math.min(maxHeightLimit, Math.max(160, spaceGoingDown));
-    } else {
-      align = "bottom";
-      maxHeight = Math.min(maxHeightLimit, Math.max(160, spaceGoingUp));
-    }
-
-    const left = side === "left"
-      ? Math.max(padding, rect.left - width - 8)
-      : Math.min(window.innerWidth - padding - width, rect.right + 8);
-
-    const style = {
-      position: "fixed",
-      left: `${left}px`,
-      width: `${width}px`,
-      maxHeight: `${maxHeight}px`,
-      zIndex: 99999,
-    };
-
-    if (align === "top") {
-      style.top = `${rect.top}px`;
-    } else {
-      style.bottom = `${window.innerHeight - rect.bottom}px`;
-    }
-
-    setPlacement({ side, align, maxHeight, style });
-  };
-
-  const handleToggle = () => {
-    if (!open) {
-      calculatePlacement();
-    }
-    setOpen((v) => !v);
-  };
-
-  useEffect(() => {
-    if (!open) return;
-    calculatePlacement();
-    const handleOutside = (e) => {
-      if (
-        triggerRef.current && !triggerRef.current.contains(e.target) &&
-        menuRef.current && !menuRef.current.contains(e.target)
-      ) {
-        setOpen(false);
-      }
-    };
-    const handleScrollOrResize = (e) => {
-      if (menuRef.current && menuRef.current.contains(e.target)) return;
-      calculatePlacement();
-    };
-    document.addEventListener("mousedown", handleOutside);
-    window.addEventListener("resize", handleScrollOrResize);
-    window.addEventListener("scroll", handleScrollOrResize, true);
-    return () => {
-      document.removeEventListener("mousedown", handleOutside);
-      window.removeEventListener("resize", handleScrollOrResize);
-      window.removeEventListener("scroll", handleScrollOrResize, true);
-    };
-  }, [open]);
 
   return (
-    <div className="relative w-full" ref={triggerRef}>
-      <Button
-        type="button"
-        variant="flow-select-trigger"
-        aria-label={ariaLabel || label || displayValue}
-        onClick={handleToggle}
-        className="w-full h-8 px-2.5 rounded-[12px] bg-[rgba(218,220,224,0.05)] hover:bg-[rgba(218,220,224,0.1)] active:bg-[rgba(218,220,224,0.15)] text-white flex items-center justify-between transition-all cursor-pointer outline-none text-[13px] font-sans antialiased"
-      >
-        <span className="flex items-center gap-1.5 truncate text-white">
-          {icon}
-          {label && <span className="text-white/60 font-normal">{label}:</span>}
-          <span className="truncate text-white font-medium">{displayValue}</span>
-        </span>
-        <GoogleIcon
-          iconName="arrow_drop_down"
-          className={cn("text-[20px] text-white transition-transform shrink-0", open && "rotate-180")}
-        />
-      </Button>
+    <div className="relative w-full">
+      <Popover.Root open={open} onOpenChange={setOpen}>
+        <Popover.Trigger asChild>
+          <Button
+            type="button"
+            variant="flow-select-trigger"
+            aria-label={ariaLabel || label || displayValue}
+            className="w-full h-8 px-2.5 rounded-[12px] bg-[rgba(218,220,224,0.05)] hover:bg-[rgba(218,220,224,0.1)] active:bg-[rgba(218,220,224,0.15)] text-white flex items-center justify-between transition-all cursor-pointer outline-none text-[13px] font-sans antialiased"
+          >
+            <span className="flex items-center gap-1.5 truncate text-white">
+              {icon}
+              {label && <span className="text-white/60 font-normal">{label}:</span>}
+              <span className="truncate text-white font-medium">{displayValue}</span>
+            </span>
+            <GoogleIcon
+              iconName="arrow_drop_down"
+              className={cn("text-[20px] text-white transition-transform shrink-0", open && "rotate-180")}
+            />
+          </Button>
+        </Popover.Trigger>
 
-      {open && placement && typeof document !== "undefined" && createPortal(
-        <div
-          ref={menuRef}
-          data-portal="true"
-          role="listbox"
-          className="fixed rounded-[16px] shadow-2xl p-1 bg-[rgba(22,23,24,0.9)] backdrop-blur-2xl border border-white/10 overflow-y-auto font-sans antialiased"
-          style={{
-            ...placement.style,
-            backgroundColor: "rgba(22, 23, 24, 0.9)",
-            backdropFilter: "blur(60px) saturate(180%) contrast(105%)",
-            WebkitBackdropFilter: "blur(60px) saturate(180%) contrast(105%)",
-          }}
-        >
-          {items.map((item) => {
-            const isSelected = String(value) === String(item.value);
+        <Popover.Portal>
+          <Popover.Content
+            role="listbox"
+            data-portal="true"
+            side="left"
+            align="end"
+            sideOffset={8}
+            collisionPadding={16}
+            avoidCollisions
+            className="z-[99999] rounded-[16px] shadow-2xl p-1 bg-[rgba(22,23,24,0.9)] backdrop-blur-2xl border border-white/10 overflow-y-auto font-sans antialiased outline-none"
+            style={{
+              width: `${width}px`,
+              maxHeight: `${maxHeightLimit}px`,
+              backgroundColor: "rgba(22, 23, 24, 0.9)",
+              backdropFilter: "blur(60px) saturate(180%) contrast(105%)",
+              WebkitBackdropFilter: "blur(60px) saturate(180%) contrast(105%)",
+            }}
+          >
+            {items.map((item) => {
+              const isSelected = String(value) === String(item.value);
 
-            return (
-              <button
-                key={String(item.value)}
-                type="button"
-                className={cn(
-                  "flex items-center justify-between w-full h-8 px-2.5 rounded-[10px] text-[13px] font-sans antialiased text-left transition-colors cursor-pointer",
-                  isSelected
-                    ? "bg-white/15 text-white font-semibold"
-                    : "text-white/80 hover:bg-white/10 hover:text-white font-medium"
-                )}
-                onClick={() => {
-                  onChange?.(item.value);
-                  setOpen(false);
-                }}
-              >
-                <span className="flex items-center gap-2 truncate">
-                  {item.icon}
-                  <span className="truncate">{item.label}</span>
-                </span>
-                {isSelected && (
-                  <GoogleIcon iconName="check" className="text-[16px] text-white shrink-0 ml-1" />
-                )}
-              </button>
-            );
-          })}
-        </div>,
-        document.body
-      )}
+              return (
+                <button
+                  key={String(item.value)}
+                  type="button"
+                  className={cn(
+                    "flex items-center justify-between w-full h-8 px-2.5 rounded-[10px] text-[13px] font-sans antialiased text-left transition-colors cursor-pointer",
+                    isSelected
+                      ? "bg-white/15 text-white font-semibold"
+                      : "text-white/80 hover:bg-white/10 hover:text-white font-medium"
+                  )}
+                  onClick={() => {
+                    onChange?.(item.value);
+                    setOpen(false);
+                  }}
+                >
+                  <span className="flex items-center gap-2 truncate">
+                    {item.icon}
+                    <span className="truncate">{item.label}</span>
+                  </span>
+                  {isSelected && (
+                    <GoogleIcon iconName="check" className="text-[16px] text-white shrink-0 ml-1" />
+                  )}
+                </button>
+              );
+            })}
+          </Popover.Content>
+        </Popover.Portal>
+      </Popover.Root>
     </div>
   );
 }

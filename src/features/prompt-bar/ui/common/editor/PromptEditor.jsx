@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect } from "react";
+import { logger } from "@/shared/lib/logger";
 import { LexicalComposer } from "@lexical/react/LexicalComposer";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
@@ -9,9 +10,8 @@ import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary";
 import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 
-import { MentionNode, $createMentionNode, $isMentionNode } from "./MentionNode";
-import { FeatureNode, $createFeatureNode, $isFeatureNode } from "./FeatureNode";
-import { SyncFeaturesPlugin } from "./plugins/SyncFeaturesPlugin";
+import { MentionNode, $createMentionNode } from "./MentionNode";
+import { FeatureNode } from "./FeatureNode";
 import { TextTagConverterPlugin } from "./plugins/TextTagConverterPlugin";
 import {
   $getSelection,
@@ -219,7 +219,7 @@ function AtShortcutPlugin({ onTriggerMentionDialog, onMentionQueryChange, mentio
       },
       COMMAND_PRIORITY_HIGH
     );
-  }, [editor, onTriggerMentionDialog, onMentionQueryChange]);
+  }, [editor, onTriggerMentionDialog, onMentionQueryChange, mentionOpen]);
 
   return null;
 }
@@ -242,36 +242,39 @@ function FocusPlugin({ focusRequest }) {
   return null;
 }
 
+export function handlePromptEditorError(error) {
+  logger.error("prompt_editor_error", { error });
+}
+
 // ── Main Component ───────────────────────────────────────────────────────────
 export function PromptEditor({
   value,
   onChange,
   onSubmit,
   referenceImages,
-  textareaRef,
+  textareaRef: _textareaRef,
   onTriggerMentionDialog,
   onMentionQueryChange,
   mentionOpen = false,
   placeholder = "Describe the scene you imagine...",
   focusRequest = 0,
+  plugins = null,
 }) {
   // Move nodes inside to participate in HMR correctly
-  const EDITOR_NODES = React.useMemo(() => [MentionNode, FeatureNode], [MentionNode, FeatureNode]);
+  const EDITOR_NODES = React.useMemo(() => [MentionNode, FeatureNode], []);
 
   const initialConfig = React.useMemo(() => ({
     namespace: "PromptEditor",
     theme,
     nodes: EDITOR_NODES,
-    onError: (error) => {
-      console.error(error);
-    },
+    onError: handlePromptEditorError,
   }), [EDITOR_NODES]);
 
   // Generate a key that changes ONLY when the node classes change (HMR)
   // This forces LexicalComposer to remount, preventing "Type mismatch" errors.
   const editorKey = React.useMemo(() => {
     return `editor-${Date.now()}`;
-  }, [MentionNode, FeatureNode]);
+  }, []);
 
   const handleLexicalChange = (editorState) => {
     editorState.read(() => {
@@ -305,7 +308,7 @@ export function PromptEditor({
           mentionOpen={mentionOpen}
         />
         <TextTagConverterPlugin referenceImages={referenceImages} />
-        <SyncFeaturesPlugin />
+        {plugins}
         <OnChangePlugin onChange={handleLexicalChange} />
         <SubmissionPlugin onSubmit={onSubmit} externalValue={value} disabled={mentionOpen} />
         <FocusPlugin focusRequest={focusRequest} />

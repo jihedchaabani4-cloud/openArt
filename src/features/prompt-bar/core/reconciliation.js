@@ -68,7 +68,7 @@ export function validateParameter(definition, value) {
  * @param {Record<string, object>} nextDefinitions     - Definitions of next model
  * @returns {{ nextValues: Record<string, any>, changes: object[] }}
  */
-export function reconcile(previousValues = {}, previousDefinitions = {}, nextDefinitions = {}) {
+export function reconcile(previousValues = {}, _previousDefinitions = {}, nextDefinitions = {}) {
   const nextValues = {};
   const changes = [];
 

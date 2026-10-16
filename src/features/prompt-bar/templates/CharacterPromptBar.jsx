@@ -8,6 +8,7 @@ import { PromptBarPlatform } from "../platform/PromptBarPlatform.jsx";
 import { characterTemplate } from "./character.template.js";
 import { useCharacterStore } from "../model/useCharacterStore.js";
 import { CharacterFeatureEditor } from "../ui/character/CharacterFeatureEditor.jsx";
+import { SyncFeaturesPlugin } from "../ui/common/editor/plugins/SyncFeaturesPlugin.jsx";
 
 /**
  * CharacterPromptBar
@@ -47,6 +48,7 @@ export function CharacterPromptBar({
       instanceId={instanceId}
       persistKey={persistKey}
       projectId={projectId}
+      editorPlugins={<SyncFeaturesPlugin key="character-sync-features" />}
       renderRightActions={(args) => (
         <>
           <Button

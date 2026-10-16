@@ -164,7 +164,7 @@ export function AtMentionMenu({
         item.title.toLowerCase().includes(q) ||
         item.subtitle.toLowerCase().includes(q)
     );
-  }, [q, assetLibrarySubtitle, onOpenMediaLibrary, onClose]);
+  }, [q, assetLibrarySubtitle, onOpenMediaLibrary]);
 
   const referenceItems = useMemo(() => {
     if (!references || references.length === 0) return [];

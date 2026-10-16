@@ -64,7 +64,7 @@ export function calculateModelCredits(model, params = {}, count = 1) {
   }
 
   // 4. Dynamically scan ALL parameter values against table keys
-  for (const [key, val] of Object.entries(resolvedParams)) {
+  for (const val of Object.values(resolvedParams)) {
     if (val === undefined || val === null || val === "") continue;
 
     const strVal = String(val).trim();

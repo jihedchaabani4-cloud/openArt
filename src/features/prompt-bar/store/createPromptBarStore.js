@@ -39,8 +39,40 @@ export function createPromptBarStore(overrides = {}, initialDeps = {}) {
   }
   const effectiveTemplate = overrides.template || deps.template || null;
   const initialParams = overrides.parameterValues || (effectiveTemplate?.parameters ? initializeValues(effectiveTemplate.parameters) : {});
+  let cachedTemplate = null;
+  let cachedActions = null;
+  let storeGet = null;
+  let storeSet = null;
 
-  return createStore((set, get) => ({
+  function getOrComputeActions() {
+    const tmpl = (storeGet ? storeGet().template : null) || deps.template;
+    if (tmpl === cachedTemplate && cachedActions !== null) {
+      return cachedActions;
+    }
+    cachedTemplate = tmpl;
+    if (tmpl && typeof tmpl.createActions === "function" && storeGet && storeSet) {
+      cachedActions = tmpl.createActions({
+        getState: storeGet,
+        setState: storeSet,
+        store: { getState: storeGet, setState: storeSet },
+        switchMode: (mode, subMode) => storeGet().switchMode(mode, subMode),
+        selectModel: (modelId) => storeGet().selectModel(modelId),
+        attachMedia: (args) => storeGet().attachMedia(args),
+        removeMedia: (args) => storeGet().removeMedia(args),
+        setPrompt: (text) => storeGet().setPrompt(text),
+        setParametersBatch: (params) => storeGet().setParametersBatch(params),
+      });
+    } else {
+      cachedActions = {};
+    }
+    return cachedActions;
+  }
+
+  const store = createStore((set, get) => {
+    storeGet = get;
+    storeSet = set;
+
+    return {
     // ── State ──────────────────────────────────────────────────────────────
     modelsMap: {},
     rawModelsMap: {},
@@ -424,33 +456,30 @@ export function createPromptBarStore(overrides = {}, initialDeps = {}) {
 
     /** Dynamic actions provided by the template */
     get actions() {
-      const tmpl = get().template || deps.template;
-      if (tmpl && typeof tmpl.createActions === "function") {
-        return tmpl.createActions({
-          getState: get,
-          setState: set,
-          store: { getState: get, setState: set },
-          switchMode: (mode, subMode) => get().switchMode(mode, subMode),
-          selectModel: (modelId) => get().selectModel(modelId),
-          attachMedia: (args) => get().attachMedia(args),
-          removeMedia: (args) => get().removeMedia(args),
-          setPrompt: (text) => get().setPrompt(text),
-          setParametersBatch: (params) => get().setParametersBatch(params),
-        });
-      }
-      return {};
+      return getOrComputeActions();
     },
 
     animateMedia: (media, options) => {
-      return get().actions.animateMedia ? get().actions.animateMedia(media, options) : undefined;
+      const act = getOrComputeActions();
+      return act.animateMedia ? act.animateMedia(media, options) : undefined;
     },
 
     addReference: (media) => {
-      return get().actions.addReference ? get().actions.addReference(media) : undefined;
+      const act = getOrComputeActions();
+      return act.addReference ? act.addReference(media) : undefined;
     },
 
     applyGeneration: (old) => {
-      return get().actions.applyGeneration ? get().actions.applyGeneration(old) : undefined;
+      const act = getOrComputeActions();
+      return act.applyGeneration ? act.applyGeneration(old) : undefined;
     },
-  }));
+  };
+});
+
+  Object.defineProperty(store, "actions", {
+    get: getOrComputeActions,
+    enumerable: true,
+  });
+
+  return store;
 }

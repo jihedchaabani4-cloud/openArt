@@ -2,7 +2,7 @@ import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext
 import { $getNodeByKey, DecoratorNode } from "lexical";
 import { MentionTag } from "./MentionTag";
 
-function MentionComponent({ nodeKey, imageUrl, imageIndex, imageName, assetId, assetType }) {
+function MentionComponent({ nodeKey, imageUrl, imageIndex, imageName }) {
   const [editor] = useLexicalComposerContext();
 
   const handleRemove = () => {
@@ -117,8 +117,6 @@ export class MentionNode extends DecoratorNode {
         imageUrl={this.__imageUrl}
         imageIndex={this.__imageIndex}
         imageName={this.__imageName}
-        assetId={this.__assetId}
-        assetType={this.__assetType}
       />
     );
   }

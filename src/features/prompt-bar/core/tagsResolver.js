@@ -5,7 +5,6 @@
  * Pure JS, zero DOM, zero React.
  */
 
-import { TAG_REGEX } from "./tagsService.js";
 
 /**
  * Formats an asset ID and optional type into canonical tag syntax.

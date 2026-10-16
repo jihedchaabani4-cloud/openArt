@@ -235,7 +235,7 @@ export function PromptBarStoreProvider({
       }
       registry.markUnmounted(identity);
     };
-  }, [identity, canonicalKey, legacyKey, persist, storage, initialModels, resolvedProjectId, store]);
+  }, [identity, canonicalKey, legacyKey, persist, storage, initialModels, resolvedProjectId, store, instanceMeta]);
 
   return React.createElement(PromptBarStoreContext.Provider, { value: store }, children);
 }

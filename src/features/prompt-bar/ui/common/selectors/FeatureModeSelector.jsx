@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { BaseSelector } from "./BaseSelector";

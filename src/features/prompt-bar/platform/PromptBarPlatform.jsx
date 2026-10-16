@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback, useContext } from "react";
+import { useState, useRef, useCallback, useContext, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/shared/lib/utils";
 
@@ -54,6 +54,7 @@ export function PromptBarPlatform({
   instanceId,
   projectId,
   storage,
+  editorPlugins,
 }) {
   const contextStore = useContext(PromptBarStoreContext);
   const activeStore = store || contextStore;
@@ -71,6 +72,7 @@ export function PromptBarPlatform({
           isGenerating={isGenerating}
           renderRightActions={renderRightActions}
           renderPopover={renderPopover}
+          editorPlugins={editorPlugins}
         />
       </PromptBarStoreContext.Provider>
     );
@@ -98,13 +100,25 @@ export function PromptBarPlatform({
         isGenerating={isGenerating}
         renderRightActions={renderRightActions}
         renderPopover={renderPopover}
+        editorPlugins={editorPlugins}
       />
     </PromptBarStoreProvider>
   );
 }
 
 /** Inner renderer — lives inside the store provider, has access to usePromptBarStore */
-function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, className, hideBackground = false, isGenerating: propIsGenerating = false, renderRightActions, renderPopover }) {
+function PromptBarPlatformInner({
+  type,
+  featureConfig,
+  models,
+  onGenerate,
+  className,
+  hideBackground = false,
+  isGenerating: propIsGenerating = false,
+  renderRightActions,
+  renderPopover,
+  editorPlugins,
+}) {
   const [drawerOpen, setDrawerOpen] = useState(false); // Collapsed by default (FR-COMP-04)
   const containerRef = useRef(null);
   const tuneButtonRef = useRef(null);
@@ -258,12 +272,45 @@ function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, class
     featureConfig,
     currentModel,
     activeMode,
-    drawerOpen,
-    setDrawerOpen,
-    containerRef,
-    tuneButtonRef,
-    settingsOverlayRef,
   });
+
+  // Close parameter drawer on click outside or Escape key
+  useEffect(() => {
+    if (!drawerOpen) return;
+
+    const handleClickOutside = (event) => {
+      if (containerRef?.current && containerRef.current.contains(event.target)) {
+        return;
+      }
+      if (tuneButtonRef?.current && tuneButtonRef.current.contains(event.target)) {
+        return;
+      }
+      if (settingsOverlayRef?.current && settingsOverlayRef.current.contains(event.target)) {
+        return;
+      }
+      const isPortalClick = event.target.closest?.(
+        "[data-radix-popper-content-wrapper], [role='dialog'], [role='listbox'], .radix-portal, [data-portal]"
+      );
+      if (isPortalClick) {
+        return;
+      }
+
+      setDrawerOpen(false);
+    };
+
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        setDrawerOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [drawerOpen]);
 
   // ── Top Panel Zone (H5) ─────────────────────────────────────────────────────
   const topPanelZone = (
@@ -371,6 +418,7 @@ function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, class
             mentionOpen={quickMentionOpen || dialogOpen}
             placeholder="Describe what you want to create..."
             focusRequest={focusRequest}
+            plugins={editorPlugins}
           />
         </div>
       )}

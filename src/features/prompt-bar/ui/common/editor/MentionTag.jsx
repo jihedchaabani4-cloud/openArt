@@ -1,6 +1,4 @@
-import React from 'react';
-
-export function MentionTag({ imageUrl, imageIndex, imageName, onClick, onRemove }) {
+export function MentionTag({ imageUrl, imageIndex: _imageIndex, imageName, onClick, onRemove }) {
   const handleClick = (e) => {
     e.preventDefault();
     e.stopPropagation();

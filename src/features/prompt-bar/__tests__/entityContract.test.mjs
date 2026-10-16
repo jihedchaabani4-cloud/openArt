@@ -9,7 +9,6 @@ import {
   removeEntityWithPromptClean,
 } from "../core/entityService.js";
 import { createPromptBarStore } from "../store/createPromptBarStore.js";
-import { serialize } from "../core/serialization.js";
 
 // ── Unit Tests: entityService ─────────────────────────────────────────────────
 
