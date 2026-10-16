@@ -1,8 +1,8 @@
 # STATE
-Current phase: P7-CLEAN (IN PROGRESS)    Current task: CLEAN-2
+Current phase: P7-CLEAN (DONE)    Current task: CLEAN-3
 Updated: 2026-10-16
 Test status: 498 vitest passed (73 files)
-Next step: CLEAN-3 (update BACKLOG.md and STATE.md)
+Next step: owner runs smoke checklist (HUMAN_GUIDE.md section 6, especially item 4 Animate with the bar not mounted, and the character page), then merges (waiting for the human)
 
 | Task | Status (TODO/DONE/BLOCKED/SKIPPED) | Commit | Report |
 |---|---|---|---|
@@ -69,7 +69,8 @@ Next step: CLEAN-3 (update BACKLOG.md and STATE.md)
 | CHECK | DONE | 6fdfb25 | reports/PRE-MERGE-CHECK.md |
 | CLEAN-1a | DONE | e54265f | reports/CLEAN-1.md |
 | CLEAN-1b | DONE | 18856ef | reports/CLEAN-1.md |
-| CLEAN-2 | DONE | HEAD | reports/CLEAN-2.md |
+| CLEAN-2 | DONE | b1c9d84 | reports/CLEAN-2.md |
+| CLEAN-3 | DONE | HEAD | reports/CLEAN-3.md |
 
 
 
