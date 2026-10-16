@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import React, { act } from "react";
+import { act } from "react";
 import { render, screen, fireEvent, cleanup } from "@testing-library/react";
 import { GeneratedPromptBar } from "../templates/GeneratedPromptBar.jsx";
 import { clearPersistentPromptBarStores, getActivePromptBarStore } from "../store/PromptBarStoreContext.js";

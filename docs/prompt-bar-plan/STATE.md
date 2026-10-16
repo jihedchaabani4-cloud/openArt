@@ -1,8 +1,8 @@
 # STATE
-Current phase: P7-FIX (DONE)    Current task: CHECK
+Current phase: P7-CLEAN (IN PROGRESS)    Current task: CLEAN-1
 Updated: 2026-10-16
 Test status: 494 vitest passed (72 files)
-Next step: owner reads PRE-MERGE-CHECK.md, decides 9276cf6, runs smoke checklist (waiting for the human)
+Next step: CLEAN-2 (inject template at store creation)
 
 | Task | Status (TODO/DONE/BLOCKED/SKIPPED) | Commit | Report |
 |---|---|---|---|
@@ -66,7 +66,9 @@ Next step: owner reads PRE-MERGE-CHECK.md, decides 9276cf6, runs smoke checklist
 | FIX-2 | DONE | 858669a | reports/RECONCILE.md |
 | FIX-3 | DONE | 4e0089b | reports/RECONCILE.md |
 | FIX-4 | DONE | 2627032 | reports/RECONCILE.md |
-| CHECK | DONE | HEAD | reports/PRE-MERGE-CHECK.md |
+| CHECK | DONE | 6fdfb25 | reports/PRE-MERGE-CHECK.md |
+| CLEAN-1a | DONE | e54265f | reports/CLEAN-1.md |
+| CLEAN-1b | DONE | HEAD | reports/CLEAN-1.md |
 
 
 

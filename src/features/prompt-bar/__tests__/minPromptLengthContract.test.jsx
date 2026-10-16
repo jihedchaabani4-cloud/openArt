@@ -1,4 +1,3 @@
-import React from "react";
 import { describe, it, expect, vi } from "vitest";
 import { renderHook } from "@testing-library/react";
 import { usePromptBarGenerate } from "../platform/hooks/usePromptBarGenerate.js";

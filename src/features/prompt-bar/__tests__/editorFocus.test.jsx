@@ -7,7 +7,7 @@
 
 import React from "react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, act } from "@testing-library/react";
+import { render, act } from "@testing-library/react";
 import { createPromptBarStore } from "../store/createPromptBarStore.js";
 import { promptBarService } from "../api/promptBarService.js";
 import { createRegistry } from "../store/registry.js";

@@ -8,7 +8,6 @@ import { describe, it, expect, vi } from "vitest";
 import { createPromptBarStore } from "../store/createPromptBarStore.js";
 import { generatedMediaTemplate } from "../templates/generatedMedia.template.js";
 import {
-  fixtureModels,
   normalizedFramesModel,
   normalizedImagesListModel,
   normalizedPromptOnlyModel,
@@ -226,7 +225,7 @@ describe("T3: switchMode Command & Store Action (PB-D-03)", () => {
     ];
 
     for (const { model, initialMode, initialSubMode, initialParams, initialPrompt } of initialModels) {
-      for (const { id, label, targetMode, targetSubMode, expectedModelId } of transitions) {
+      for (const { id, label, targetMode, targetSubMode } of transitions) {
         it(`[Model: ${model.id}] [${id}: ${label}] executes atomically with exactly 1 notification`, () => {
           const store = createTestStore({
             activeMode: initialMode,

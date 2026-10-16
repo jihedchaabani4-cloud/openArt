@@ -1,5 +1,4 @@
 import { describe, it, expect, vi } from "vitest";
-import React from "react";
 import { render, screen } from "@testing-library/react";
 import { PromptBarTopPanel } from "../platform/parts/PromptBarTopPanel";
 
@@ -22,7 +21,7 @@ vi.mock("@/widgets/ImportMediaDialog/ImportMediaPopover", () => ({
 
 describe("PromptBarTopPanel", () => {
   it("renders null/empty when both quick mention and dialog are closed", () => {
-    const { container } = render(
+    render(
       <PromptBarTopPanel
         quickMentionOpen={false}
         dialogOpen={false}

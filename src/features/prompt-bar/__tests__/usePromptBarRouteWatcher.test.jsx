@@ -1,10 +1,8 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import React, { act } from "react";
 import { render, cleanup } from "@testing-library/react";
 import { usePromptBarRouteWatcher } from "../store/usePromptBarRouteWatcher.js";
 import { createRegistry } from "../store/registry.js";
 import { createPromptBarStore } from "../store/createPromptBarStore.js";
-import { removeSaved } from "../store/persistence.js";
 
 function MockStorage() {
   const store = new Map();
@@ -96,7 +94,7 @@ describe("usePromptBarRouteWatcher (PB-D-14 / W2b)", () => {
   });
 
   it("Allowed to not allowed navigation (/cinema-studio/p1/settings): instance is reset and storage removed; instance without persistRoutes is untouched", () => {
-    const { store: studioStore, canonicalKey: studioKey, identity: studioIdentity } = setupInstance({
+    const { store: studioStore, canonicalKey: studioKey } = setupInstance({
       templateId: "generated-media",
       projectId: "p1",
       initialPrompt: "Studio Draft",

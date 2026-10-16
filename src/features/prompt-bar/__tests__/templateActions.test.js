@@ -9,7 +9,6 @@ import { describe, it, expect, vi } from "vitest";
 import { createPromptBarStore } from "../store/createPromptBarStore.js";
 import { generatedMediaTemplate } from "../templates/generatedMedia.template.js";
 import {
-  fixtureModels,
   normalizedFramesModel,
   normalizedImagesListModel,
   normalizedPromptOnlyModel,

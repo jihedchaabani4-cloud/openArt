@@ -10,7 +10,6 @@
 
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { render, act, screen, cleanup } from "@testing-library/react";
-import React from "react";
 
 // Mock unavoidable DOM/routing dependencies
 vi.mock("next/navigation", () => ({
@@ -69,7 +68,7 @@ describe("W4: Proof that model and mode are optional (PB-D-13)", () => {
   });
 
   it("(a) renders with no model selector and no mode toggle", () => {
-    const { renderResult } = mountPromptOnlyBar();
+    mountPromptOnlyBar();
 
     // Mode toggles must not exist
     expect(screen.queryByRole("radio", { name: /image/i })).toBeNull();

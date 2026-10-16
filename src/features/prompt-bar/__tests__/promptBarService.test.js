@@ -8,11 +8,10 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import fs from "node:fs";
 import path from "node:path";
-import { createRegistry, identityKey } from "../store/registry.js";
+import { createRegistry } from "../store/registry.js";
 import { createPromptBarStore } from "../store/createPromptBarStore.js";
 import { promptBarService } from "../api/promptBarService.js";
 import {
-  enqueuePendingAction,
   drainPendingActions,
   DEFAULT_PENDING_TTL_MS,
 } from "../store/pendingActions.js";
@@ -77,7 +76,7 @@ describe("X1: promptBarService and pendingActions queue", () => {
     const storeB = setupMountedStore(identityB, { prompt: "Prompt B" });
 
     const serviceA = promptBarService(identityA, { registry: customRegistry, storage: mockStorage });
-    const serviceB = promptBarService(identityB, { registry: customRegistry, storage: mockStorage });
+    promptBarService(identityB, { registry: customRegistry, storage: mockStorage });
 
     serviceA.setPrompt("New prompt for A");
 

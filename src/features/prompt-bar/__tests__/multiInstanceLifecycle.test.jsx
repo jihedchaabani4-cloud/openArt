@@ -5,7 +5,6 @@
  * using the SAFE-5 platform test harness.
  */
 
-import React from "react";
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { render, act, fireEvent, screen, cleanup } from "@testing-library/react";
 
