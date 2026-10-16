@@ -98,16 +98,35 @@ export function normalizeRole(role) {
  * @returns {'processing' | 'failed' | 'ready'}
  */
 export function normalizeMediaStatus(status, error = null, url = null) {
-  const s = String(status || "").trim().toLowerCase();
-  if (s === "failed" || s === "error" || s === "rejected" || Boolean(error)) {
+  if (Boolean(error)) {
     return "failed";
   }
-  if (s === "processing" || s === "pending" || s === "uploading" || s === "queued") {
-    return "processing";
+
+  const raw = status !== null && status !== undefined ? String(status).trim().toLowerCase() : "";
+
+  if (raw) {
+    if (raw === "failed" || raw === "error" || raw === "rejected") {
+      return "failed";
+    }
+    if (
+      raw === "processing" ||
+      raw === "pending" ||
+      raw === "uploading" ||
+      raw === "queued" ||
+      raw === "in_progress"
+    ) {
+      return "processing";
+    }
+    if (raw === "ready" || raw === "success" || raw === "completed") {
+      return "ready";
+    }
   }
-  if (s === "ready" || s === "success" || s === "completed" || Boolean(url)) {
+
+  // The presence of a URL is ONLY a fallback when status is null / undefined / empty
+  if (Boolean(url)) {
     return "ready";
   }
+
   return "processing";
 }
 

@@ -100,6 +100,30 @@ describe("core/toMediaItem - Canonical Media Normalizer", () => {
       expect(normalizeMediaStatus("rejected")).toBe("failed");
       expect(normalizeMediaStatus("completed", "Network error")).toBe("failed");
     });
+
+    it("explicit backend status wins over URL presence (ADR 0004 & Fix Item C)", () => {
+      // Backend status is processing, but preview URL is already present -> must remain processing
+      expect(normalizeMediaStatus("processing", null, "https://example.com/preview.png")).toBe("processing");
+      expect(normalizeMediaStatus("pending", null, "https://example.com/thumb.png")).toBe("processing");
+      expect(normalizeMediaStatus("queued", null, "https://example.com/queued.png")).toBe("processing");
+
+      // Backend status is failed with URL -> must be failed
+      expect(normalizeMediaStatus("failed", null, "https://example.com/broken.png")).toBe("failed");
+
+      // URL presence is strictly a fallback when status is null / undefined / empty
+      expect(normalizeMediaStatus(null, null, "https://example.com/ready.png")).toBe("ready");
+      expect(normalizeMediaStatus(undefined, null, "https://example.com/ready.png")).toBe("ready");
+      expect(normalizeMediaStatus("", null, "https://example.com/ready.png")).toBe("ready");
+      expect(normalizeMediaStatus(null, null, null)).toBe("processing");
+
+      // toMediaItem entity normalization integration
+      const item = toMediaItem({
+        id: "m-proc",
+        status: "processing",
+        url: "https://example.com/temp-preview.png",
+      });
+      expect(item.status).toBe("processing");
+    });
   });
 
   describe("role normalization", () => {
