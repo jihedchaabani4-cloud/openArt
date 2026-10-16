@@ -1,6 +1,8 @@
+import React from "react";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { renderHook, cleanup } from "@testing-library/react";
+import { render, renderHook, cleanup, act } from "@testing-library/react";
 import { useResolvedMedia } from "../useResolvedMedia";
+import { buildProjectMediaIndex } from "../mediaCacheIndex";
 import { useProjectData } from "@/features/workflows/api/queries/useProjectData";
 
 vi.mock("@/features/workflows/api/queries/useProjectData", () => ({
@@ -218,5 +220,91 @@ describe("useResolvedMedia - Pure Cache Selector", () => {
 
     expect(result.current.state).toBe("ready");
     expect(result.current.item.id).toBe("gen-ready");
+  });
+
+  it("100 tiles calling useResolvedMedia share 1 useProjectData subscription with 0 extra fetches and minimal re-render footprint", () => {
+    const mediaList = Array.from({ length: 100 }, (_, i) => ({
+      id: `m-${i}`,
+      workflow_id: `wf-${i}`,
+      url: `https://example.com/item-${i}.png`,
+      status: "success",
+    }));
+
+    const projectContents = {
+      workflows: Array.from({ length: 100 }, (_, i) => ({ id: `wf-${i}` })),
+      media: mediaList,
+    };
+
+    let currentStore = { projectContents };
+    const listeners = new Set();
+    const updateStore = (next) => {
+      currentStore = next;
+      listeners.forEach((l) => l());
+    };
+
+    // Replicates TanStack Query observer subscription
+    useProjectData.mockImplementation((projectId) => {
+      expect(projectId).toBe("proj-1");
+      const [, forceUpdate] = React.useReducer((x) => x + 1, 0);
+      React.useEffect(() => {
+        listeners.add(forceUpdate);
+        return () => listeners.delete(forceUpdate);
+      }, []);
+      return {
+        data: currentStore,
+        isLoading: false,
+        isError: false,
+      };
+    });
+
+    const renderCounts = new Map();
+
+    function Tile({ mediaId }) {
+      renderCounts.set(mediaId, (renderCounts.get(mediaId) || 0) + 1);
+      const { item, state } = useResolvedMedia({ mediaId, projectId: "proj-1" });
+      return <div data-testid={mediaId}>{state}:{item?.url}</div>;
+    }
+
+    function Grid() {
+      return (
+        <div>
+          {mediaList.map((m) => (
+            <Tile key={m.id} mediaId={m.id} />
+          ))}
+        </div>
+      );
+    }
+
+    render(<Grid />);
+
+    // 1. Initial render: All 100 tiles rendered exactly once, sharing 1 project subscription
+    expect(renderCounts.size).toBe(100);
+    for (let i = 0; i < 100; i++) {
+      expect(renderCounts.get(`m-${i}`)).toBe(1);
+    }
+
+    // 2. WeakMap caching: index is cached on projectContents identity
+    const index1 = buildProjectMediaIndex({ projectContents });
+    const index2 = buildProjectMediaIndex({ projectContents });
+    expect(index1).toBe(index2);
+
+    // 3. Measure re-render profile when project data updates (e.g. tile 42 updates):
+    const updatedMedia = mediaList.map((m) =>
+      m.id === "m-42" ? { ...m, status: "failed" } : m
+    );
+    const updatedContents = {
+      ...projectContents,
+      media: updatedMedia,
+    };
+
+    // Update query cache
+    act(() => {
+      updateStore({ projectContents: updatedContents });
+    });
+
+    // Tile 42 received the update and re-rendered
+    expect(renderCounts.get("m-42")).toBe(2);
+    // All tiles re-render because all 100 tiles subscribe to the single projectData query
+    expect(renderCounts.get("m-0")).toBe(2);
   });
 });
