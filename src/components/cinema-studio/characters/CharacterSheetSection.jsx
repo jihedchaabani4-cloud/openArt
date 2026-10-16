@@ -1,17 +1,20 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useMemo } from "react";
 import { Loader2, AlertCircle, FolderOpen } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
+import { MediaItemView } from "@/widgets/CoreMediaItemView";
 import { FlowCharacterImagePreview } from "./FlowCharacterImagePreview";
 
 /**
  * CharacterSheetSection
  * Renders View A: The character's 3-view turnaround sheet,
- * including hover action buttons and the empty state preview.
+ * powered by MediaItemView for authentic rendering, context menu, and hover actions.
  */
 export function CharacterSheetSection({
+  workflow = null,
+  item = null,
   activeSheetSrc,
   imageLoadError,
   setImageLoadError,
@@ -34,6 +37,48 @@ export function CharacterSheetSection({
       fileInputRef.current.value = "";
     }
   };
+
+  const contextMenuItems = useMemo(() => {
+    return [
+      ...(onDownload
+        ? [
+            {
+              key: "download",
+              label: "Télécharger",
+              icon: "download",
+              onClick: onDownload,
+            },
+          ]
+        : []),
+      {
+        key: "upload-sheet",
+        label: "Importer une image (Turnaround)",
+        icon: "upload",
+        onClick: () => fileInputRef.current?.click(),
+      },
+      ...(onOpenAssets
+        ? [
+            {
+              key: "from-assets",
+              label: "Sélectionner depuis le projet",
+              icon: "folder_open",
+              onClick: onOpenAssets,
+            },
+          ]
+        : []),
+      ...(onDelete
+        ? [
+            {
+              key: "delete-character",
+              label: "Supprimer le personnage",
+              icon: "delete",
+              variant: "destructive",
+              onClick: onDelete,
+            },
+          ]
+        : []),
+    ];
+  }, [onDownload, onOpenAssets, onDelete]);
 
   return (
     <div className="w-full h-full flex items-center justify-center relative border-none">
@@ -82,61 +127,78 @@ export function CharacterSheetSection({
         </div>
       ) : activeSheetSrc && !imageLoadError ? (
         <div className="w-full h-full flex items-center justify-center relative border-none">
-          <div className="relative inline-flex max-w-full max-h-[520px] rounded-xl overflow-hidden group/sheet border-none">
-            <img
-              src={activeSheetSrc}
-              alt="Character Sheet 3-View Turnaround"
-              onError={() => setImageLoadError(true)}
-              className="w-auto h-auto max-h-[520px] max-w-full object-contain rounded-xl"
-            />
-
-            {isUpdatingSheet && (
-              <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] z-40 flex flex-col items-center justify-center gap-2">
-                <Loader2 className="size-7 text-white animate-spin" />
-                <span className="text-xs text-white/80">Updating…</span>
+          <MediaItemView
+            workflow={workflow}
+            item={item}
+            src={activeSheetSrc}
+            status={item?.status || "completed"}
+            fit="contain"
+            className="group/sheet relative max-w-full max-h-[520px] rounded-xl overflow-hidden border-none shadow-2xl flex items-center justify-center bg-transparent"
+            style={{
+              maxHeight: 520,
+            }}
+            mediaClassName="rounded-xl object-contain max-h-[520px] w-auto h-auto"
+            showLikedBadge={false}
+            showVideoBadge={false}
+            showMenu={false}
+            showHoverOverlay={false}
+            onError={() => setImageLoadError && setImageLoadError(true)}
+            overlay={
+              isUpdatingSheet ? (
+                <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] z-40 flex flex-col items-center justify-center gap-2 rounded-xl">
+                  <Loader2 className="size-7 text-white animate-spin" />
+                  <span className="text-xs text-white/80">Updating…</span>
+                </div>
+              ) : null
+            }
+            topRight={
+              <div className="opacity-0 group-hover:opacity-100 group-hover/sheet:opacity-100 transition-opacity duration-200 pointer-events-auto flex items-center gap-2">
+                <Button
+                  type="button"
+                  variant="flow-overlay-action"
+                  size="icon"
+                  onClick={() => fileInputRef.current?.click()}
+                  title="Importer une image de corps (Turnaround)"
+                >
+                  <GoogleIcon iconName="upload" className="text-[1.25rem]" />
+                </Button>
+                {onOpenAssets && (
+                  <Button
+                    type="button"
+                    variant="flow-overlay-action"
+                    size="icon"
+                    onClick={onOpenAssets}
+                    title="Select Body Sheet from assets"
+                  >
+                    <GoogleIcon iconName="folder_open" className="text-[1.25rem]" />
+                  </Button>
+                )}
+                {onDownload && (
+                  <Button
+                    type="button"
+                    variant="flow-overlay-action"
+                    size="icon"
+                    onClick={onDownload}
+                    title="Download character sheet"
+                  >
+                    <GoogleIcon iconName="download" className="text-[1.25rem]" />
+                  </Button>
+                )}
+                {onDelete && (
+                  <Button
+                    type="button"
+                    variant="flow-overlay-action"
+                    size="icon"
+                    onClick={onDelete}
+                    title="Delete character"
+                  >
+                    <GoogleIcon iconName="delete" className="text-[1.25rem]" />
+                  </Button>
+                )}
               </div>
-            )}
-
-            {/* Top-Right Floating Overlay Action Buttons anchored to image (visible on hover) */}
-            <div className="absolute top-3 right-3 flex items-center gap-2 z-30 opacity-0 group-hover/sheet:opacity-100 transition-opacity duration-200">
-              <Button
-                type="button"
-                variant="flow-overlay-action"
-                size="icon"
-                onClick={() => fileInputRef.current?.click()}
-                title="Importer une image de corps (Turnaround)"
-              >
-                <GoogleIcon iconName="upload" className="text-[1.25rem]" />
-              </Button>
-              <Button
-                type="button"
-                variant="flow-overlay-action"
-                size="icon"
-                onClick={onOpenAssets}
-                title="Select Body Sheet from assets"
-              >
-                <GoogleIcon iconName="folder_open" className="text-[1.25rem]" />
-              </Button>
-              <Button
-                type="button"
-                variant="flow-overlay-action"
-                size="icon"
-                onClick={onDownload}
-                title="Download character sheet"
-              >
-                <GoogleIcon iconName="download" className="text-[1.25rem]" />
-              </Button>
-              <Button
-                type="button"
-                variant="flow-overlay-action"
-                size="icon"
-                onClick={onDelete}
-                title="Delete character"
-              >
-                <GoogleIcon iconName="delete" className="text-[1.25rem]" />
-              </Button>
-            </div>
-          </div>
+            }
+            contextMenuItems={contextMenuItems}
+          />
         </div>
       ) : (
         <FlowCharacterImagePreview

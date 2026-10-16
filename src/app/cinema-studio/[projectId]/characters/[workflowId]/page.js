@@ -153,6 +153,8 @@ export default function CharacterDetailPage() {
               >
                 {activeTab === "sheet" && (
                   <CharacterSheetSection
+                    workflow={workflow}
+                    item={workflow?.items?.find((m) => m.step_id === "character_sheet" || m.step_id === "CAE") || workflow?.items?.[0]}
                     activeSheetSrc={activeSheetSrc}
                     imageLoadError={imageLoadError}
                     setImageLoadError={setImageLoadError}
