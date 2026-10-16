@@ -22,6 +22,7 @@ export default function CharacterDetailPage() {
 
   const {
     workflow,
+    mainMedia,
     prompt,
     features,
     isLoading,
@@ -146,15 +147,13 @@ export default function CharacterDetailPage() {
                     ? (displayDetailImages.length === 0
                         ? "bg-transparent p-0 border-none"
                         : "rounded-2xl overflow-hidden bg-black/40 border-none min-h-[460px] p-5")
-                    : (!activeSheetSrc && !isUpdatingSheet && !isProcessing && !isFailed
-                        ? "bg-transparent p-0 border-none"
-                        : "rounded-2xl overflow-hidden bg-black/60 border-none min-h-[460px] max-h-[580px] p-4")
+                    : "bg-transparent p-0 border-none"
                 )}
               >
                 {activeTab === "sheet" && (
                   <CharacterSheetSection
                     workflow={workflow}
-                    item={workflow?.items?.find((m) => m.step_id === "character_sheet" || m.step_id === "CAE") || workflow?.items?.[0]}
+                    item={mainMedia || workflow?.items?.find((m) => m.step_id === "character_sheet" || m.step_id === "CAE") || workflow?.items?.[0]}
                     activeSheetSrc={activeSheetSrc}
                     imageLoadError={imageLoadError}
                     setImageLoadError={setImageLoadError}

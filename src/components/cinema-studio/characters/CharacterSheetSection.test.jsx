@@ -164,4 +164,18 @@ describe("CharacterSheetSection - MediaItemView Integration", () => {
     expect(sheetCard).not.toBeNull();
     expect(screen.getByTitle("Importer une image de corps (Turnaround)")).toBeDefined();
   });
+
+  it("renders FlowErrorTile with action buttons when media has error or isFailed is true", () => {
+    const { container } = renderWithClient(
+      <CharacterSheetSection
+        activeSheetSrc={null}
+        isFailed={true}
+      />
+    );
+
+    const sheetCard = container.querySelector(".group\\/sheet");
+    expect(sheetCard).not.toBeNull();
+    expect(screen.getByText("Failed")).toBeDefined();
+    expect(screen.getByTitle("Importer une image de corps (Turnaround)")).toBeDefined();
+  });
 });

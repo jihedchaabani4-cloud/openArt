@@ -1,16 +1,22 @@
 "use client";
 
 import { useRef, useMemo } from "react";
-import { Loader2, AlertCircle, FolderOpen } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { MediaItemView } from "@/widgets/CoreMediaItemView";
+import { ProcessingCard } from "@/shared/ui/ProcessingCard";
+import { FlowErrorTile } from "@/shared/ui/FlowErrorTile";
 import { FlowCharacterImagePreview } from "./FlowCharacterImagePreview";
 
 /**
  * CharacterSheetSection
- * Renders View A: The character's 3-view turnaround sheet,
- * powered by MediaItemView for authentic rendering, context menu, and hover actions.
+ * Renders View A: The character's 3-view turnaround sheet.
+ * Simple, status-driven media viewer:
+ * - Error/failed -> FlowErrorTile with actionable recovery
+ * - Processing -> ProcessingCard with aurora blur
+ * - Completed -> MediaItemView with fit="contain" & context menu
+ * - Empty -> FlowCharacterImagePreview empty state
  */
 export function CharacterSheetSection({
   workflow = null,
@@ -80,6 +86,26 @@ export function CharacterSheetSection({
     ];
   }, [onDownload, onOpenAssets, onDelete]);
 
+  // Clean, unambiguous status resolution directly from media and props
+  const isError = Boolean(
+    isFailed ||
+    imageLoadError ||
+    item?.status === "failed" ||
+    item?.status === "error" ||
+    workflow?.status === "failed"
+  );
+
+  const isBusy = Boolean(
+    !isError &&
+    (isProcessing ||
+      item?.status === "processing" ||
+      item?.status === "pending" ||
+      workflow?.status === "processing" ||
+      workflow?.status === "pending")
+  );
+
+  const hasImage = Boolean(activeSheetSrc) && !isError;
+
   return (
     <div className="w-full h-full flex items-center justify-center relative border-none">
       <input
@@ -90,93 +116,101 @@ export function CharacterSheetSection({
         onChange={handleFileChange}
       />
 
-      {isUpdatingSheet && !activeSheetSrc ? (
+      {isUpdatingSheet && !hasImage ? (
         <div className="flex flex-col items-center gap-3 py-16">
           <Loader2 className="size-8 text-violet-400 animate-spin" />
           <p className="text-white/60 text-sm">Updating Body Sheet…</p>
         </div>
-      ) : isProcessing && !activeSheetSrc ? (
-        <div className="w-full h-full flex items-center justify-center relative border-none">
-          <MediaItemView
-            workflow={workflow}
-            item={item}
-            status="processing"
-            aspect="16:9"
-            fit="contain"
-            className="group/sheet relative w-full max-w-[850px] aspect-video rounded-xl overflow-hidden border-none shadow-2xl flex items-center justify-center bg-transparent"
-            showLikedBadge={false}
-            showVideoBadge={false}
-            showMenu={false}
-            showHoverOverlay={false}
-            topRight={
-              <div className="opacity-0 group-hover:opacity-100 group-hover/sheet:opacity-100 transition-opacity duration-200 pointer-events-auto flex items-center gap-2">
-                <Button
-                  type="button"
-                  variant="flow-overlay-action"
-                  size="icon"
-                  onClick={() => fileInputRef.current?.click()}
-                  title="Importer une image de corps (Turnaround)"
-                >
-                  <GoogleIcon iconName="upload" className="text-[1.25rem]" />
-                </Button>
-                {onOpenAssets && (
-                  <Button
-                    type="button"
-                    variant="flow-overlay-action"
-                    size="icon"
-                    onClick={onOpenAssets}
-                    title="Select Body Sheet from assets"
-                  >
-                    <GoogleIcon iconName="folder_open" className="text-[1.25rem]" />
-                  </Button>
-                )}
-                {onDelete && (
-                  <Button
-                    type="button"
-                    variant="flow-overlay-action"
-                    size="icon"
-                    onClick={onDelete}
-                    title="Delete character"
-                  >
-                    <GoogleIcon iconName="delete" className="text-[1.25rem]" />
-                  </Button>
-                )}
-              </div>
-            }
-            contextMenuItems={contextMenuItems}
+      ) : isBusy && !hasImage ? (
+        <div className="relative aspect-video w-full max-w-[850px] mx-auto rounded-2xl overflow-hidden shadow-lg select-none group/sheet">
+          <ProcessingCard
+            progress={item?.progress ?? workflow?.progress}
+            aspectRatio="16/9"
+            className="w-full h-full"
           />
-        </div>
-      ) : isFailed && !activeSheetSrc ? (
-        <div className="flex flex-col items-center justify-center gap-4 py-16 px-6 text-center">
-          <div className="size-12 rounded-full bg-white/10 border border-white/15 flex items-center justify-center">
-            <AlertCircle className="size-6 text-white/70" />
-          </div>
-          <div className="flex flex-col gap-1">
-            <p className="text-white/80 font-medium text-sm">Generation failed</p>
-            <p className="text-white/40 text-xs max-w-xs">
-              You can upload a custom 3-view turnaround sheet or choose an image from your project assets.
-            </p>
-          </div>
-          <div className="flex items-center gap-2.5 mt-2">
+          <div className="absolute top-3 right-3 opacity-0 group-hover/sheet:opacity-100 transition-opacity duration-200 pointer-events-auto flex items-center gap-2 z-30">
             <Button
               type="button"
-              variant="user-menu-filled"
-              size="sm"
-              onClick={onOpenAssets}
-              disabled={isUpdatingSheet}
-              className="h-8 text-xs px-3.5 bg-white/10 hover:bg-white/15 text-white"
+              variant="flow-overlay-action"
+              size="icon"
+              onClick={() => fileInputRef.current?.click()}
+              title="Importer une image de corps (Turnaround)"
             >
-              <FolderOpen className="size-3.5 mr-1.5" /> Select from assets
+              <GoogleIcon iconName="upload" className="text-[1.25rem]" />
             </Button>
+            {onOpenAssets && (
+              <Button
+                type="button"
+                variant="flow-overlay-action"
+                size="icon"
+                onClick={onOpenAssets}
+                title="Select Body Sheet from assets"
+              >
+                <GoogleIcon iconName="folder_open" className="text-[1.25rem]" />
+              </Button>
+            )}
+            {onDelete && (
+              <Button
+                type="button"
+                variant="flow-overlay-action"
+                size="icon"
+                onClick={onDelete}
+                title="Delete character"
+              >
+                <GoogleIcon iconName="delete" className="text-[1.25rem]" />
+              </Button>
+            )}
           </div>
         </div>
-      ) : activeSheetSrc && !imageLoadError ? (
+      ) : isError ? (
+        <div className="relative aspect-video w-full max-w-[850px] mx-auto rounded-2xl overflow-hidden shadow-lg select-none group/sheet">
+          <FlowErrorTile
+            error={item?.error_message || item?.error || "Generation failed. You can upload a custom turnaround sheet or choose from project assets."}
+            onReusePrompt={onOpenAssets}
+            onDelete={onDelete}
+            className="w-full h-full"
+          />
+          <div className="absolute top-3 right-3 opacity-0 group-hover/sheet:opacity-100 transition-opacity duration-200 pointer-events-auto flex items-center gap-2 z-30">
+            <Button
+              type="button"
+              variant="flow-overlay-action"
+              size="icon"
+              onClick={() => fileInputRef.current?.click()}
+              title="Importer une image de corps (Turnaround)"
+            >
+              <GoogleIcon iconName="upload" className="text-[1.25rem]" />
+            </Button>
+            {onOpenAssets && (
+              <Button
+                type="button"
+                variant="flow-overlay-action"
+                size="icon"
+                onClick={onOpenAssets}
+                title="Select Body Sheet from assets"
+              >
+                <GoogleIcon iconName="folder_open" className="text-[1.25rem]" />
+              </Button>
+            )}
+            {onDelete && (
+              <Button
+                type="button"
+                variant="flow-overlay-action"
+                size="icon"
+                onClick={onDelete}
+                title="Delete character"
+              >
+                <GoogleIcon iconName="delete" className="text-[1.25rem]" />
+              </Button>
+            )}
+          </div>
+        </div>
+      ) : hasImage ? (
         <div className="w-full h-full flex items-center justify-center relative border-none">
           <MediaItemView
             workflow={workflow}
             item={item}
             src={activeSheetSrc}
-            status={item?.status || "completed"}
+            status="completed"
             fit="contain"
             className="group/sheet relative max-w-full max-h-[520px] rounded-xl overflow-hidden border-none shadow-2xl flex items-center justify-center bg-transparent"
             style={{
