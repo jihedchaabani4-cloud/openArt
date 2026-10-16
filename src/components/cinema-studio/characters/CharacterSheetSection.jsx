@@ -96,10 +96,55 @@ export function CharacterSheetSection({
           <p className="text-white/60 text-sm">Updating Body Sheet…</p>
         </div>
       ) : isProcessing && !activeSheetSrc ? (
-        <div className="flex flex-col items-center gap-3 py-16">
-          <Loader2 className="size-8 text-violet-400 animate-spin" />
-          <p className="text-white/50 text-sm">Generating character sheet…</p>
-          <p className="text-white/25 text-xs">3-view turnaround in progress</p>
+        <div className="w-full h-full flex items-center justify-center relative border-none">
+          <MediaItemView
+            workflow={workflow}
+            item={item}
+            status="processing"
+            aspect="16:9"
+            fit="contain"
+            className="group/sheet relative w-full max-w-[850px] aspect-video rounded-xl overflow-hidden border-none shadow-2xl flex items-center justify-center bg-transparent"
+            showLikedBadge={false}
+            showVideoBadge={false}
+            showMenu={false}
+            showHoverOverlay={false}
+            topRight={
+              <div className="opacity-0 group-hover:opacity-100 group-hover/sheet:opacity-100 transition-opacity duration-200 pointer-events-auto flex items-center gap-2">
+                <Button
+                  type="button"
+                  variant="flow-overlay-action"
+                  size="icon"
+                  onClick={() => fileInputRef.current?.click()}
+                  title="Importer une image de corps (Turnaround)"
+                >
+                  <GoogleIcon iconName="upload" className="text-[1.25rem]" />
+                </Button>
+                {onOpenAssets && (
+                  <Button
+                    type="button"
+                    variant="flow-overlay-action"
+                    size="icon"
+                    onClick={onOpenAssets}
+                    title="Select Body Sheet from assets"
+                  >
+                    <GoogleIcon iconName="folder_open" className="text-[1.25rem]" />
+                  </Button>
+                )}
+                {onDelete && (
+                  <Button
+                    type="button"
+                    variant="flow-overlay-action"
+                    size="icon"
+                    onClick={onDelete}
+                    title="Delete character"
+                  >
+                    <GoogleIcon iconName="delete" className="text-[1.25rem]" />
+                  </Button>
+                )}
+              </div>
+            }
+            contextMenuItems={contextMenuItems}
+          />
         </div>
       ) : isFailed && !activeSheetSrc ? (
         <div className="flex flex-col items-center justify-center gap-4 py-16 px-6 text-center">

@@ -1,5 +1,4 @@
 import { useCallback, useMemo, useState, useRef, useEffect } from "react";
-import { queryKeys } from "@/shared/api/queryKeys";
 import { useProjectData } from "@/features/workflows/api/queries/useProjectData";
 import { useWorkflowDelete } from "@/features/workflows/model/useWorkflowDelete";
 import { characterService } from "../services/characterService";
@@ -88,7 +87,7 @@ export function useCharacter({ projectId, characterId } = {}) {
   }, [projectData, cleanId]);
 
   const character = workflow?.character || null;
-  const items = workflow?.items || [];
+  const items = useMemo(() => workflow?.items || [], [workflow?.items]);
 
   const primaryMediaId =
     workflow?.primary_media_id ||
@@ -264,7 +263,10 @@ export function useCharacter({ projectId, characterId } = {}) {
   const isProcessing =
     !hasPhotos &&
     !isFailed &&
-    (mainMedia?.status === "processing" || mainMedia?.status === "pending" || !mainMedia?.url);
+    (mainMedia?.status === "processing" ||
+      mainMedia?.status === "pending" ||
+      workflow?.status === "processing" ||
+      workflow?.status === "pending");
 
   // ── Title & Description State Handlers ──
   const [draftTitle, setDraftTitle] = useState(displayTitle);

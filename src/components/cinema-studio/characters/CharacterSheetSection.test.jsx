@@ -152,14 +152,16 @@ describe("CharacterSheetSection - MediaItemView Integration", () => {
     expect(container.querySelector("[data-component='flow-character-image-preview']")).not.toBeNull();
   });
 
-  it("renders loader during sheet generation in progress", () => {
-    renderWithClient(
+  it("renders MediaItemView with processing state and action buttons during sheet generation in progress", () => {
+    const { container } = renderWithClient(
       <CharacterSheetSection
         activeSheetSrc={null}
         isProcessing={true}
       />
     );
 
-    expect(screen.getByText("Generating character sheet…")).toBeDefined();
+    const sheetCard = container.querySelector(".group\\/sheet");
+    expect(sheetCard).not.toBeNull();
+    expect(screen.getByTitle("Importer une image de corps (Turnaround)")).toBeDefined();
   });
 });
