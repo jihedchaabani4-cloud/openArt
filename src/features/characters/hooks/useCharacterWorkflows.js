@@ -2,7 +2,7 @@
 // Body copied VERBATIM from features/characters/hooks/useCharacter.js useCharacterWorkflows.
 import { useMemo } from "react";
 import { useProjectData } from "@/features/workflows/api/queries/useProjectData";
-import { matchMediaId } from "@/features/workflows/lib/cacheHelpers";
+import { resolveMainMedia } from "@/features/workflows/core/resolveMediaRef";
 
 /**
  * useCharacterWorkflows
@@ -24,34 +24,26 @@ export function useCharacterWorkflows(projectId) {
         const wId = w.name || w.id;
         const items = media.filter((m) => m.workflowId === wId || m.workflow_id === wId);
 
-        // Locate main turnaround sheet media
-        const primaryId = w.primary_media_id || w.primaryMediaId || w.metadata?.primaryMediaId;
-        const validItems = items.filter(m => m.step_id !== "character_detail" && Boolean(m.url || m.file_url));
-        const mainMedia =
-          (primaryId && validItems.find((m) => matchMediaId(m, primaryId))) ||
-          validItems.find((m) => m.step_id === "character_sheet" || m.stepId === "character_sheet") ||
-          validItems.find((m) => m.step_id === "CAE") ||
-          validItems[0] ||
-          (primaryId && items.find((m) => matchMediaId(m, primaryId) && m.step_id !== "character_detail")) ||
-          items.find((m) => m.step_id === "character_sheet" || m.stepId === "character_sheet") ||
-          items.find((m) => m.step_id === "CAE") ||
-          items.find((m) => m.step_id !== "character_detail") ||
-          items[0] ||
-          w.main_media ||
-          null;
+        // Canonical main turnaround sheet / cover media resolution
+        const characterWf = {
+          ...w,
+          workflow_type: "CHARACTER",
+        };
+        const resolved = resolveMainMedia(characterWf, items);
+        const mainMedia = resolved?.raw || resolved || null;
 
         let status = "processing";
-        if (mainMedia) {
-          if (mainMedia.status === "failed" || mainMedia.status === "error") {
+        if (resolved) {
+          if (resolved.status === "failed") {
             status = "failed";
-          } else if (mainMedia.status === "success" || mainMedia.status === "completed" || Boolean(mainMedia.url)) {
+          } else if (resolved.status === "ready" || resolved.status === "completed" || Boolean(resolved.url)) {
             status = "completed";
-          } else if (mainMedia.status === "processing" || mainMedia.status === "pending") {
+          } else if (resolved.status === "processing") {
             status = "processing";
           }
         }
 
-        const primaryUrl = mainMedia?.url || mainMedia?.file_url || w.url || null;
+        const primaryUrl = resolved?.url || mainMedia?.url || mainMedia?.file_url || w.url || null;
 
         return {
           ...w,

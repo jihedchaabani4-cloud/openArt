@@ -168,4 +168,47 @@ describe("useCharacter Hook - isProcessing & isFailed status resolution", () => 
     expect(result.current.isProcessing).toBe(false);
     expect(result.current.isFailed).toBe(true);
   });
+
+  it("explicit primary_media_id pin wins as mainMedia even when the asset is a detail image (ADR 0005)", () => {
+    useProjectData.mockReturnValue({
+      data: {
+        projectContents: {
+          workflows: [
+            {
+              id: "char-pin",
+              name: "Pinned Detail Hero",
+              workflow_type: "CHARACTER",
+              primary_media_id: "m-detail-pin",
+            },
+          ],
+          media: [
+            {
+              id: "m-sheet",
+              workflow_id: "char-pin",
+              step_id: "character_sheet",
+              role: "sheet",
+              status: "completed",
+              url: "https://example.com/sheet.png",
+            },
+            {
+              id: "m-detail-pin",
+              workflow_id: "char-pin",
+              step_id: "character_detail",
+              role: "detail",
+              status: "completed",
+              url: "https://example.com/pinned-detail.png",
+            },
+          ],
+        },
+      },
+      isLoading: false,
+    });
+
+    const { result } = renderHook(() =>
+      useCharacter({ projectId: "proj-1", characterId: "char-pin" })
+    );
+
+    expect(result.current.mainMedia).toBeDefined();
+    expect(result.current.mainMedia.id).toBe("m-detail-pin");
+  });
 });

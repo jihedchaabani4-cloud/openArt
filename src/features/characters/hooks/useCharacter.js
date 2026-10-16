@@ -8,6 +8,7 @@ import { useSetCharacterSheetMedia } from "./useSetCharacterSheetMedia";
 import { useAddMediaToCharacter } from "./useAddMediaToCharacter";
 import { useRemoveMediaFromCharacter } from "./useRemoveMediaFromCharacter";
 import { useGenerateCharacterSheetMutation } from "./useGenerateCharacterSheetMutation";
+import { resolveMainMedia } from "@/features/workflows/core/resolveMediaRef";
 
 // ─── Shared constants (moved outside class hook to keep it usable) ───────────
 const MAX_DETAIL_IMAGES = 5;
@@ -15,7 +16,11 @@ const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12
 const isValidUUID = (id) => id && UUID_REGEX.test(id);
 
 const isDetailMedia = (m) =>
-  m?.role === "detail" || m?.mediaRole === "detail" || m?.step_id === "character_detail";
+  m?.role === "detail" ||
+  m?.mediaRole === "detail" ||
+  m?.step_id === "character_detail" ||
+  m?.raw?.role === "detail" ||
+  m?.raw?.step_id === "character_detail";
 
 const isSheetMedia = (m) =>
   m?.role === "sheet" ||
@@ -143,21 +148,13 @@ export function useCharacter({ projectId, characterId } = {}) {
   }, [items, primaryMediaId]);
 
   const mainMedia = useMemo(() => {
-    if (primaryMediaId) {
-      const match = items.find(
-        (m) => matchMediaId(m, primaryMediaId) && !isDetailMedia(m) && Boolean(m.url || m.file_url)
-      );
-      if (match) return match;
-    }
-    return (
-      items.find((m) => isSheetMedia(m) && Boolean(m.url || m.file_url)) ||
-      items.find((m) => !isDetailMedia(m) && Boolean(m.url || m.file_url)) ||
-      items.find((m) => isSheetMedia(m)) ||
-      items.find((m) => !isDetailMedia(m)) ||
-      items[0] ||
-      null
-    );
-  }, [items, primaryMediaId]);
+    const characterWf = {
+      ...workflow,
+      workflow_type: "CHARACTER",
+      primary_media_id: primaryMediaId,
+    };
+    return resolveMainMedia(characterWf, items);
+  }, [workflow, primaryMediaId, items]);
 
   const activeSheetSrc = useMemo(() => {
     if (optimisticSheetUrl) return optimisticSheetUrl;
