@@ -62,7 +62,7 @@ export function CharacterDetailsGallery({
   );
 
   return (
-    <div className={cn("w-full h-full flex flex-col gap-4", className)}>
+    <div className={cn("w-full h-full flex flex-col gap-4 border-none", className)}>
       <input
         ref={fileInputRef}
         type="file"

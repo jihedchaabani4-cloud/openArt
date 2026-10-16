@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { Button } from "@/shared/ui/button";
 import { cn } from "@/shared/lib/utils";
@@ -27,7 +26,7 @@ export function FlowCharacterImagePreview({
     <div
       data-component="flow-character-image-preview"
       className={cn(
-        "relative aspect-video w-full max-w-[850px] mx-auto rounded-[28px] bg-[rgba(218,220,224,0.1)] backdrop-blur-[80px] shadow-lg flex flex-col items-center justify-center p-6 sm:p-10 select-none",
+        "relative aspect-video w-full max-w-[850px] mx-auto rounded-[28px] bg-[rgba(218,220,224,0.1)] backdrop-blur-[80px] shadow-lg flex flex-col items-center justify-center p-6 sm:p-10 select-none border-none",
         className
       )}
     >

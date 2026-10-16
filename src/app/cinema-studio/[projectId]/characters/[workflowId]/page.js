@@ -138,17 +138,17 @@ export default function CharacterDetailPage() {
             />
 
             {/* Right Main Stage: Sheet or Details */}
-            <div className="lg:col-span-8 xl:col-span-8 flex flex-col gap-3 relative">
+            <div className="lg:col-span-8 xl:col-span-8 flex flex-col gap-3 relative border-none">
               <div
                 className={cn(
                   "relative w-full flex items-center justify-center transition-all duration-300",
                   activeTab === "details"
                     ? (displayDetailImages.length === 0
-                        ? "bg-transparent p-0"
-                        : "rounded-2xl overflow-hidden bg-black/40 border border-white/5 min-h-[460px] p-5")
+                        ? "bg-transparent p-0 border-none"
+                        : "rounded-2xl overflow-hidden bg-black/40 border-none min-h-[460px] p-5")
                     : (!activeSheetSrc && !isUpdatingSheet && !isProcessing && !isFailed
-                        ? "bg-transparent p-0"
-                        : "rounded-2xl overflow-hidden bg-black/60 min-h-[460px] max-h-[580px] p-4")
+                        ? "bg-transparent p-0 border-none"
+                        : "rounded-2xl overflow-hidden bg-black/60 border-none min-h-[460px] max-h-[580px] p-4")
                 )}
               >
                 {activeTab === "sheet" && (

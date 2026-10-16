@@ -192,7 +192,7 @@ export function CharacterMediaGalleryGrid({
   const albumRender = useMemo(() => ({ photo: renderPhoto }), [renderPhoto]);
 
   return (
-    <div className={cn("w-full overflow-y-auto custom-scrollbar p-1", className)}>
+    <div className={cn("w-full overflow-y-auto custom-scrollbar p-1 border-none", className)}>
       <RowsPhotoAlbum
         photos={photos}
         defaultContainerWidth={900}

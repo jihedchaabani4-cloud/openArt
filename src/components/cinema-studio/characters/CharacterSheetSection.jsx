@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef } from "react";
+import { useRef } from "react";
 import { Loader2, AlertCircle, FolderOpen } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
@@ -36,7 +36,7 @@ export function CharacterSheetSection({
   };
 
   return (
-    <div className="w-full h-full flex items-center justify-center relative">
+    <div className="w-full h-full flex items-center justify-center relative border-none">
       <input
         ref={fileInputRef}
         type="file"
@@ -81,8 +81,8 @@ export function CharacterSheetSection({
           </div>
         </div>
       ) : activeSheetSrc && !imageLoadError ? (
-        <div className="w-full h-full flex items-center justify-center relative">
-          <div className="relative inline-flex max-w-full max-h-[520px] rounded-xl overflow-hidden group/sheet">
+        <div className="w-full h-full flex items-center justify-center relative border-none">
+          <div className="relative inline-flex max-w-full max-h-[520px] rounded-xl overflow-hidden group/sheet border-none">
             <img
               src={activeSheetSrc}
               alt="Character Sheet 3-View Turnaround"
