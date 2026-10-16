@@ -95,16 +95,27 @@ export function useCharacter({ projectId, characterId } = {}) {
     workflow?.metadata?.primaryMediaId;
 
   // Sheet photos: strictly prioritize primary turnaround body sheet media with valid URLs
+  // Sheet photos: strictly prioritize primary turnaround body sheet media with valid URLs
   const sheetPhotos = useMemo(() => {
     // 1. Filter to valid items with URLs, ignoring detail images and failed empty placeholders
     const validItems = items.filter(
-      (m) => m.step_id !== "character_detail" && Boolean(m.url || m.file_url || m.asset?.file_url)
+      (m) =>
+        m.step_id !== "character_detail" &&
+        m.role !== "detail" &&
+        m.mediaRole !== "detail" &&
+        Boolean(m.url || m.file_url || m.asset?.file_url)
     );
 
     // 2. Identify explicit sheet items
     const explicitSheets = validItems.filter((m) => {
       if (primaryMediaId && matchMediaId(m, primaryMediaId)) return true;
-      return m.step_id === "character_sheet" || m.step_id === "CAE" || m.step_id === "upload";
+      return (
+        m.role === "sheet" ||
+        m.mediaRole === "sheet" ||
+        m.step_id === "character_sheet" ||
+        m.step_id === "CAE" ||
+        m.step_id === "upload"
+      );
     });
 
     const targetList = explicitSheets.length > 0 ? explicitSheets : validItems;
@@ -135,15 +146,38 @@ export function useCharacter({ projectId, characterId } = {}) {
   const mainMedia = useMemo(() => {
     if (primaryMediaId) {
       const match = items.find(
-        (m) => matchMediaId(m, primaryMediaId) && m.step_id !== "character_detail" && Boolean(m.url || m.file_url)
+        (m) =>
+          matchMediaId(m, primaryMediaId) &&
+          m.step_id !== "character_detail" &&
+          m.role !== "detail" &&
+          m.mediaRole !== "detail" &&
+          Boolean(m.url || m.file_url)
       );
       if (match) return match;
     }
     return (
-      items.find((m) => (m.step_id === "character_sheet" || m.step_id === "CAE") && Boolean(m.url || m.file_url)) ||
-      items.find((m) => m.step_id !== "character_detail" && Boolean(m.url || m.file_url)) ||
-      items.find((m) => m.step_id === "character_sheet" || m.step_id === "CAE") ||
-      items.find((m) => m.step_id !== "character_detail") ||
+      items.find(
+        (m) =>
+          (m.role === "sheet" || m.mediaRole === "sheet" || m.step_id === "character_sheet" || m.step_id === "CAE") &&
+          Boolean(m.url || m.file_url)
+      ) ||
+      items.find(
+        (m) =>
+          m.step_id !== "character_detail" &&
+          m.role !== "detail" &&
+          m.mediaRole !== "detail" &&
+          Boolean(m.url || m.file_url)
+      ) ||
+      items.find(
+        (m) =>
+          m.role === "sheet" || m.mediaRole === "sheet" || m.step_id === "character_sheet" || m.step_id === "CAE"
+      ) ||
+      items.find(
+        (m) =>
+          m.step_id !== "character_detail" &&
+          m.role !== "detail" &&
+          m.mediaRole !== "detail"
+      ) ||
       items[0] ||
       null
     );
@@ -153,7 +187,13 @@ export function useCharacter({ projectId, characterId } = {}) {
     if (optimisticSheetUrl) return optimisticSheetUrl;
     if (sheetPhotos[0]?.src) return sheetPhotos[0].src;
     const fallbackUrl = mainMedia?.url || mainMedia?.file_url;
-    if (fallbackUrl && mainMedia?.step_id !== "character_detail") return fallbackUrl;
+    if (
+      fallbackUrl &&
+      mainMedia?.step_id !== "character_detail" &&
+      mainMedia?.role !== "detail" &&
+      mainMedia?.mediaRole !== "detail"
+    )
+      return fallbackUrl;
     return null;
   }, [optimisticSheetUrl, sheetPhotos, mainMedia]);
 
@@ -171,7 +211,12 @@ export function useCharacter({ projectId, characterId } = {}) {
 
   // Server detail images
   const serverDetailImages = useMemo(() => {
-    return items.filter((m) => m.step_id === "character_detail");
+    return items.filter(
+      (m) =>
+        m.role === "detail" ||
+        m.mediaRole === "detail" ||
+        m.step_id === "character_detail"
+    );
   }, [items]);
 
   // Combined & deduplicated display detail images
@@ -370,7 +415,7 @@ export function useCharacter({ projectId, characterId } = {}) {
     async (selectedItems) => {
       if (!selectedItems || !selectedItems.length || !cleanId) return;
       const item = selectedItems[0];
-      const mediaId = item.id || item.workflow_id || item.workflowId;
+      const workflowId = item.workflow_id || item.workflowId || item.id;
       const fallbackUrl = item.url || item.file_url || item.src || item.image?.url;
 
       setIsUpdatingSheet(true);
@@ -380,7 +425,7 @@ export function useCharacter({ projectId, characterId } = {}) {
       try {
         const payload = {
           characterId: cleanId,
-          ...(mediaId ? { mediaId } : {}),
+          ...(workflowId ? { workflowId, mediaId: workflowId } : {}),
           ...(fallbackUrl ? { imageUrl: fallbackUrl } : {}),
           projectId,
         };
@@ -476,9 +521,9 @@ export function useCharacter({ projectId, characterId } = {}) {
 
       const itemsToAdd = selectedItems.slice(0, remaining);
       for (const item of itemsToAdd) {
-        const mediaId = item.id || item.workflow_id || item.workflowId;
+        const workflowId = item.workflow_id || item.workflowId || item.id;
         const fallbackUrl = item.url || item.file_url || item.src || item.image?.url;
-        if (!mediaId && !fallbackUrl) continue;
+        if (!workflowId && !fallbackUrl) continue;
 
         const tempId = `temp_asset_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
         const optimisticAsset = {
@@ -487,19 +532,25 @@ export function useCharacter({ projectId, characterId } = {}) {
           file_url: fallbackUrl,
           status: "processing",
           step_id: "character_detail",
+          role: "detail",
+          mediaRole: "detail",
         };
         setAddedDetailImages((prev) => [optimisticAsset, ...prev]);
 
         try {
           const res = await addMediaMutation.mutateAsync({
             characterId: cleanId,
-            ...(mediaId ? { mediaId } : {}),
+            ...(workflowId ? { workflowId, mediaId: workflowId } : {}),
             ...(fallbackUrl ? { imageUrl: fallbackUrl } : {}),
             projectId,
           });
           if (res?.media) {
             setAddedDetailImages((prev) =>
-              prev.map((r) => (r.id === tempId ? { ...res.media, status: "success" } : r))
+              prev.map((r) =>
+                r.id === tempId
+                  ? { ...res.media, status: "success", role: "detail", mediaRole: "detail" }
+                  : r
+              )
             );
           } else {
             setAddedDetailImages((prev) => prev.filter((r) => r.id !== tempId));

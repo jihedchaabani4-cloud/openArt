@@ -123,10 +123,10 @@ export function useElementEdit({ projectId, workflowId }) {
     async (selectedAssets) => {
       if (!selectedAssets || selectedAssets.length === 0) return;
       for (const asset of selectedAssets) {
-        const mediaId = asset.id || asset.asset_id || asset.name;
+        const workflowId = asset.workflow_id || asset.workflowId || asset.id || asset.asset_id || asset.name;
         const imageUrl = asset.url || asset.file_url || asset.asset?.file_url;
         try {
-          await addImage({ mediaId, imageUrl });
+          await addImage({ mediaId: workflowId, workflowId, imageUrl });
         } catch (err) {
           console.error("Failed to add media from assets:", err);
         }

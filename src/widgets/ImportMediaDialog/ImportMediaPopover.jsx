@@ -927,6 +927,9 @@ export function ImportMediaPopover({
                                   toggleSelection(item);
                                 }
                               }}
+                              onDoubleClick={() => {
+                                handleSelectDirect(item);
+                              }}
                             />
                           );
                         },

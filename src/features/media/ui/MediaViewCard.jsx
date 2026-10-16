@@ -19,6 +19,7 @@ export const MediaViewCard = React.forwardRef(function MediaViewCard({
   isHighlighted = false,
   isDisabled = false,
   onSelect,
+  onDoubleClick,
   width,
   height,
   aspectRatio,
@@ -86,6 +87,11 @@ export const MediaViewCard = React.forwardRef(function MediaViewCard({
       onClick={() => {
         if (!isDisabled && onSelect) {
           onSelect(item);
+        }
+      }}
+      onDoubleClick={() => {
+        if (!isDisabled && onDoubleClick) {
+          onDoubleClick(item);
         }
       }}
       disabled={isDisabled}

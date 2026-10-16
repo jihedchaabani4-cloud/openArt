@@ -23,7 +23,7 @@ export function useAddImageToElement() {
         body.append("file", file);
         if (projectId) body.append("projectId", projectId);
       } else {
-        body = { imageUrl, mediaId, projectId };
+        body = { imageUrl, mediaId, workflowId: mediaId, projectId };
       }
       const res = await api.post(`/v2/elements/${elementId}/images`, body, { headers });
       return res;
@@ -58,6 +58,7 @@ export function useAddImageToElement() {
         status: "processing",
         step_id: "element_reference",
         role: "detail",
+        mediaRole: "detail",
         feed_type: "upload",
         workflowId: elementId,
         workflow_id: elementId,
@@ -91,6 +92,10 @@ export function useAddImageToElement() {
                       url: media.url || m.url,
                       file_url: media.url || m.file_url,
                       status: "success",
+                      role: "detail",
+                      mediaRole: "detail",
+                      workflowId: variables.elementId,
+                      workflow_id: variables.elementId,
                     }
                   : m
               ),

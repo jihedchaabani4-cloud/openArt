@@ -111,7 +111,7 @@ describe("Optimistic Detail Media Insertion and Success Transition", () => {
       expect(settledItem.url).toBe("https://storage.openart.ai/char-sheets/real.png");
     });
 
-    it("optimistically adds detail media when selected from project assets (imageUrl)", async () => {
+    it("optimistically adds detail media when selected from project assets (imageUrl and workflowId)", async () => {
       const { queryClient, wrapper } = createWrapper();
       const pKey = queryKeys.projectData.byProject("proj-1");
 
@@ -122,13 +122,19 @@ describe("Optimistic Detail Media Insertion and Success Transition", () => {
         },
       });
 
-      characterService.addDetailMedia.mockResolvedValueOnce({
-        ok: true,
-        media: {
-          id: "real-media-from-asset",
-          url: "https://storage.openart.ai/existing.png",
-          status: "success",
-        },
+      let receivedParams = null;
+      characterService.addDetailMedia.mockImplementationOnce(async (params) => {
+        receivedParams = params;
+        return {
+          ok: true,
+          media: {
+            id: "real-media-from-asset",
+            url: "https://storage.openart.ai/existing.png",
+            status: "success",
+            role: "detail",
+            mediaRole: "detail",
+          },
+        };
       });
 
       const { result } = renderHook(() => useAddMediaToCharacter(), { wrapper });
@@ -137,15 +143,17 @@ describe("Optimistic Detail Media Insertion and Success Transition", () => {
         await result.current.mutateAsync({
           characterId: "char-1",
           imageUrl: "https://storage.openart.ai/existing.png",
-          mediaId: "existing-media-id",
+          workflowId: "wf-source-123",
           projectId: "proj-1",
         });
       });
 
+      expect(receivedParams.workflowId).toBe("wf-source-123");
       const cache = queryClient.getQueryData(pKey);
       expect(cache.projectContents.media).toHaveLength(1);
       expect(cache.projectContents.media[0].status).toBe("success");
       expect(cache.projectContents.media[0].url).toBe("https://storage.openart.ai/existing.png");
+      expect(cache.projectContents.media[0].role).toBe("detail");
     });
   });
 
@@ -188,6 +196,7 @@ describe("Optimistic Detail Media Insertion and Success Transition", () => {
       const optimisticItem = inFlightCache.projectContents.media[0];
       expect(optimisticItem.status).toBe("processing");
       expect(optimisticItem.step_id).toBe("element_reference");
+      expect(optimisticItem.role).toBe("detail");
       expect(optimisticItem.workflow_id).toBe("el-1");
       expect(optimisticItem.url).toBe("blob:mock-preview-url");
 
@@ -200,6 +209,7 @@ describe("Optimistic Detail Media Insertion and Success Transition", () => {
             url: "https://storage.openart.ai/elements/real-el.png",
             status: "success",
             step_id: "element_reference",
+            role: "detail",
             workflow_id: "el-1",
           },
         });
@@ -213,7 +223,52 @@ describe("Optimistic Detail Media Insertion and Success Transition", () => {
       );
       expect(settledItem).toBeDefined();
       expect(settledItem.status).toBe("success");
+      expect(settledItem.role).toBe("detail");
       expect(settledItem.url).toBe("https://storage.openart.ai/elements/real-el.png");
+    });
+
+    it("sends workflowId when adding element reference from assets", async () => {
+      const { queryClient, wrapper } = createWrapper();
+      const pKey = queryKeys.projectData.byProject("proj-1");
+
+      queryClient.setQueryData(pKey, {
+        projectContents: {
+          media: [],
+          elements: [{ id: "el-1", workflow_id: "el-1" }],
+        },
+      });
+
+      let postPayload = null;
+      api.post.mockImplementationOnce((url, body) => {
+        postPayload = body;
+        return Promise.resolve({
+          status: "created",
+          media: {
+            id: "real-prop-media",
+            url: "https://storage.openart.ai/elements/prop.png",
+            status: "success",
+            role: "detail",
+            workflow_id: "el-1",
+          },
+        });
+      });
+
+      const { result } = renderHook(() => useAddImageToElement(), { wrapper });
+
+      await act(async () => {
+        await result.current.mutateAsync({
+          elementId: "el-1",
+          mediaId: "wf-prop-asset",
+          imageUrl: "https://storage.openart.ai/elements/prop.png",
+          projectId: "proj-1",
+        });
+      });
+
+      expect(postPayload.workflowId).toBe("wf-prop-asset");
+      expect(postPayload.mediaId).toBe("wf-prop-asset");
+      const cache = queryClient.getQueryData(pKey);
+      expect(cache.projectContents.media[0].status).toBe("success");
+      expect(cache.projectContents.media[0].role).toBe("detail");
     });
   });
 });
