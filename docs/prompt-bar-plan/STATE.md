@@ -1,8 +1,8 @@
 # STATE
-Current phase: P7-FIX (DONE)    Current task: P7-FIX
-Updated: 2026-10-15
+Current phase: P7-FIX (DONE)    Current task: CHECK
+Updated: 2026-10-16
 Test status: 494 vitest passed (72 files)
-Next step: owner reads RECONCILE.md, decides 9276cf6, runs smoke checklist (waiting for the human)
+Next step: owner reads PRE-MERGE-CHECK.md, decides 9276cf6, runs smoke checklist (waiting for the human)
 
 | Task | Status (TODO/DONE/BLOCKED/SKIPPED) | Commit | Report |
 |---|---|---|---|
@@ -66,6 +66,7 @@ Next step: owner reads RECONCILE.md, decides 9276cf6, runs smoke checklist (wait
 | FIX-2 | DONE | 858669a | reports/RECONCILE.md |
 | FIX-3 | DONE | 4e0089b | reports/RECONCILE.md |
 | FIX-4 | DONE | 2627032 | reports/RECONCILE.md |
+| CHECK | DONE | HEAD | reports/PRE-MERGE-CHECK.md |
 
 
 
