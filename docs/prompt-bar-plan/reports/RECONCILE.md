@@ -72,6 +72,41 @@ The table below provides the single authoritative, verified value for every cont
    - 13 files modified (+34 / -86 lines): 9 test files updated to modern import paths, `src/features/studio/index.js`, `src/features/studio/core/mediaReferenceService.js`, `src/features/prompt-bar/index.platform.js`, `src/features/workflows/model/elementSheetConfig.js`.
    - **0 tests were deleted**.
 
+   | # | Status | File Path | Lines (+/-) | Importers at Parent (`9276cf6^`) | Referenced at HEAD (`rg`) |
+   |---|---|---|---|---|---|
+   | 1 | **M** | `src/features/prompt-bar/__tests__/editorFocus.test.jsx` | +1 / -1 | Test file | Import updated to `generatedMedia.template.js` |
+   | 2 | **M** | `src/features/prompt-bar/__tests__/modelEligibilityContract.test.mjs` | +1 / -1 | Test file | Import updated to `generatedMedia.template.js` |
+   | 3 | **M** | `src/features/prompt-bar/__tests__/multiInstanceLifecycle.test.jsx` | +2 / -2 | Test file | Import updated to `generatedMedia.template.js` |
+   | 4 | **M** | `src/features/prompt-bar/__tests__/safe2TemplateRules.test.js` | +2 / -2 | Test file | Import updated to `generatedMedia.template.js` |
+   | 5 | **M** | `src/features/prompt-bar/__tests__/safe5Platform.test.jsx` | +2 / -2 | Test file | Import updated to `generatedMedia.template.js` |
+   | 6 | **M** | `src/features/prompt-bar/__tests__/selectModelTrimming.test.jsx` | +2 / -2 | Test file | Import updated to `generatedMedia.template.js` |
+   | 7 | **M** | `src/features/prompt-bar/__tests__/templateContract.test.js` | +8 / -10 | Test file | Import updated to `generatedMedia.template.js` |
+   | 8 | **M** | `src/features/prompt-bar/__tests__/usePromptBarReferences.test.jsx` | +1 / -1 | Test file | Import updated to `generatedMedia.template.js` |
+   | 9 | **M** | `src/features/prompt-bar/__tests__/usePromptBarSlots.test.jsx` | +1 / -1 | Test file | Import updated to `generatedMedia.template.js` |
+   | 10 | **D** | `src/features/prompt-bar/composition/generatedMedia.type.js` | +0 / -8 | `index.platform.js`, 4 test files | 0 references |
+   | 11 | **D** | `src/features/prompt-bar/composition/resolveUI.js` | +0 / -32 | 0 importers | 0 references |
+   | 12 | **D** | `src/features/prompt-bar/features/generated-media/generatedMedia.config.js` | +0 / -14 | `index.platform.js`, `elementSheetConfig.js`, 9 tests | 0 references |
+   | 13 | **M** | `src/features/prompt-bar/index.platform.js` | +2 / -3 | Barrel file | Re-exports from `generatedMedia.template.js` |
+   | 14 | **D** | `src/features/prompt-bar/model/core/promptBarState.js` | +0 / -39 | 0 importers | 0 references |
+   | 15 | **D** | `src/features/studio/PromptBarStoreContext.js` | +0 / -15 | `studio/index.js` | 0 references (`studio/index.js` points to `@/features/prompt-bar`) |
+   | 16 | **D** | `src/features/studio/core/entityService.js` | +0 / -224 | `studio/index.js`, `mediaReferenceService.js` | 0 references |
+   | 17 | **D** | `src/features/studio/core/initialization.js` | +0 / -40 | `studio/createPromptBarStore.js` | 0 references |
+   | 18 | **M** | `src/features/studio/core/mediaReferenceService.js` | +4 / -4 | `studio/index.js`, `usePromptStore.js` | Imports from `@/features/prompt-bar/core/*` |
+   | 19 | **D** | `src/features/studio/core/modelManagement.js` | +0 / -244 | `studio/index.js`, `mediaReferenceService.js` | 0 references |
+   | 20 | **D** | `src/features/studio/core/parameterState.js` | +0 / -47 | `studio/createPromptBarStore.js` | 0 references |
+   | 21 | **D** | `src/features/studio/core/promptBarRules.js` | +0 / -119 | `studio/core/reconciliation.js` | 0 references |
+   | 22 | **D** | `src/features/studio/core/promptBarState.js` | +0 / -39 | 0 importers | 0 references |
+   | 23 | **D** | `src/features/studio/core/reconciliation.js` | +0 / -103 | `studio/createPromptBarStore.js` | 0 references |
+   | 24 | **D** | `src/features/studio/core/serialization.js` | +0 / -93 | `studio/createPromptBarStore.js` | 0 references |
+   | 25 | **D** | `src/features/studio/core/tagsService.js` | +0 / -260 | `studio/index.js`, `mediaReferenceService.js` | 0 references |
+   | 26 | **D** | `src/features/studio/core/types.js` | +0 / -145 | JSDoc only | 0 references |
+   | 27 | **D** | `src/features/studio/createPromptBarStore.js` | +0 / -319 | `studio/PromptBarStoreContext.js` | 0 references |
+   | 28 | **D** | `src/features/studio/feature-constants.js` | +0 / -524 | `studio/useCharacterStore.js` | 0 references |
+   | 29 | **M** | `src/features/studio/index.js` | +7 / -7 | Studio barrel | Exports byte-identical to parent, routed to `@/features/prompt-bar` |
+   | 30 | **D** | `src/features/studio/useCharacterStore.js` | +0 / -242 | `studio/index.js` | 0 references (`studio/index.js` points to `@/features/prompt-bar/model/useCharacterStore`) |
+   | 31 | **D** | `src/features/studio/useLibraryFilter.js` | +0 / -196 | `studio/index.js` | 0 references (`studio/index.js` points to `@/features/prompt-bar/model/useLibraryFilter`) |
+   | 32 | **M** | `src/features/workflows/model/elementSheetConfig.js` | +1 / -1 | Workflow config | Import updated to `generatedMedia.template.js` |
+
 2. **Importers at Parent Commit (`9276cf6^`) vs HEAD**:
    - Every file deleted was either:
      - (a) A dead duplicate under `src/features/studio/core/` that had zero external callers outside `studio/index.js` (which was already re-exporting from `@/features/prompt-bar`).
