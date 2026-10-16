@@ -5,7 +5,7 @@
  * Zero React, zero DOM, zero store mutation.
  */
 
-import { ok, fail, REASONS } from "../../core/commandResult.js";
+import { ok } from "../../core/commandResult.js";
 import { reconcile } from "../../core/reconciliation.js";
 import { pruneMedia } from "../../core/media.js";
 import { cleanTagsForAsset, getAssetId } from "../../core/tagsService.js";

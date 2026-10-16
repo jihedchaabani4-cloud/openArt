@@ -40,7 +40,7 @@ export function promptBarService(
     typeof identity === "string" ? { templateId: identity } : { ...identity };
 
   const targetIdentity = targetInstanceIdentity || cleanIdentity;
-  const targetKey = identityKey(targetIdentity);
+  identityKey(targetIdentity);
 
   function checkProjectGuard() {
     const requestedProject = cleanIdentity.projectId;

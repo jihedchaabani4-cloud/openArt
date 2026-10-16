@@ -18,7 +18,6 @@
  *    - Unifies media objects into the standard shape expected by PromptBar Platform.
  */
 
-import { autoAssignReference, getAssetId, cleanTagsForAsset } from "@/features/prompt-bar/core/tagsService.js";
 import { promptBarService } from "@/features/prompt-bar/api/promptBarService.js";
 import { getEntityImageCount } from "@/features/prompt-bar/core/entityService.js";
 import { getModelReferenceCapability } from "@/features/prompt-bar/core/modelManagement.js";
@@ -37,7 +36,7 @@ export function setPendingPromptAction(action) {
       { templateId: "generated-media", projectId: action?.projectId || "global" },
       { actionName: action?.type || "action", args: [action], payload: action }
     );
-  } catch (e) {
+  } catch {
     // Ignore queue failure in legacy bridge
   }
 
@@ -230,7 +229,7 @@ export function normalizeMediaAsset(media, defaultRole = "reference") {
 export function addMediaToPrompt({
   store,
   media,
-  featureConfig = defaultGeneratedMediaConfig,
+  featureConfig: _featureConfig = defaultGeneratedMediaConfig,
   projectId,
 } = {}) {
   if (!media) return false;
@@ -268,7 +267,7 @@ export function addMediaToPrompt({
 export function animateMedia({
   store,
   media,
-  featureConfig = defaultGeneratedMediaConfig,
+  featureConfig: _featureConfig = defaultGeneratedMediaConfig,
   projectId,
 } = {}) {
   if (!media) return false;

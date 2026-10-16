@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { registry as defaultRegistry } from "./registry.js";
 import { isPathAllowed } from "./routePolicy.js";

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect, useCallback, useContext } from "react";
+import { useState, useRef, useEffect, useCallback, useContext } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/shared/lib/utils";
 
@@ -104,8 +104,6 @@ export function PromptBarPlatform({
 
 /** Inner renderer — lives inside the store provider, has access to usePromptBarStore */
 function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, className, hideBackground = false, isGenerating: propIsGenerating = false, renderRightActions, renderPopover }) {
-
-  const store = useContext(PromptBarStoreContext);
   const [drawerOpen, setDrawerOpen] = useState(false); // Collapsed by default (FR-COMP-04)
   const containerRef = useRef(null);
   const tuneButtonRef = useRef(null);
@@ -212,7 +210,6 @@ function PromptBarPlatformInner({ type, featureConfig, models, onGenerate, class
 
   // Generation credits, ratios, and submission lifecycle (H4)
   const {
-    currentRatio,
     currentRatioIcon,
     currentCount,
     estimatedCredits,

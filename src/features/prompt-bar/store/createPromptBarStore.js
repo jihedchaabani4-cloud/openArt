@@ -17,9 +17,7 @@ import {
   addEntity,
   normalizeEntity,
   removeEntityWithPromptClean,
-  getEntityImageCount,
 } from "../core/entityService.js";
-import { getModelReferenceCapability } from "../core/modelManagement.js";
 import { cleanTagsForAsset, getAssetId } from "../core/tagsService.js";
 import { registry } from "./registry.js";
 import { switchMode as switchModeCommand } from "./commands/switchMode.js";

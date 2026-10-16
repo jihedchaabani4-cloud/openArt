@@ -1,4 +1,3 @@
-import React from "react";
 import { cn } from "@/shared/lib/utils";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { ArrowRight } from "lucide-react";

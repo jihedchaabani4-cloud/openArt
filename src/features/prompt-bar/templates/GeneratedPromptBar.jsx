@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { PromptBarPlatform } from "../platform/PromptBarPlatform.jsx";
 import { generatedMediaTemplate } from "./generatedMedia.template.js";
 

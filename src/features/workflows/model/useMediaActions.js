@@ -20,9 +20,6 @@ import { useRealBackendModels } from "@/features/prompt-bar/core/useRealBackendM
 export function useWorkflowActions(workflow, item = null) {
   const pathname = usePathname();
   const router = useRouter();
-  const isEditPage =
-    pathname?.includes("/generations/edit/") ||
-    pathname?.includes("/elements/edit/");
 
   const { mutate: toggleLike } = useToggleWorkflowLike();
   const { mutate: removeWorkflow } = useRemoveWorkflow();
@@ -120,11 +117,6 @@ export function useWorkflowActions(workflow, item = null) {
     const durationVal = config.duration || params.duration;
     const motionVal = config.motion || params.motion;
     const countVal = config.count || params.count || params.num_images || 1;
-    
-    const refs = (config.references || []).map(r => ({
-      ...r,
-      type: r.url?.match(/\.(mp4|webm|mov)$/i) ? "video" : "image"
-    }));
 
     const effectivePrompt = prompt || config.prompt || params.prompt || targetItem?.prompt || workflow?.prompt || "";
 
