@@ -116,3 +116,33 @@ export function patchFolderName(folder, name) {
   if (!folder) return folder;
   return { ...folder, name };
 }
+
+/**
+ * Update all media items matching `mediaId` in the list (e.g. across duplicate workflow_media rows).
+ * Returns the SAME array reference if nothing matched.
+ * @param {Array|null|undefined} list
+ * @param {string|null|undefined} mediaId
+ * @param {object|((item: object) => object)} updater
+ * @returns {Array|null|undefined}
+ */
+export function updateMediaById(list, mediaId, updater) {
+  if (!Array.isArray(list) || isBlank(mediaId)) return list;
+  let changed = false;
+  const next = list.map((item) => {
+    if (!item || typeof item !== "object") return item;
+    const matches =
+      item.id === mediaId ||
+      item.name === mediaId ||
+      item.asset_id === mediaId ||
+      stripWorkflowPrefix(item.id) === stripWorkflowPrefix(mediaId);
+
+    if (matches) {
+      changed = true;
+      const patch = typeof updater === "function" ? updater(item) : updater;
+      return { ...item, ...patch };
+    }
+    return item;
+  });
+  return changed ? next : list;
+}
+

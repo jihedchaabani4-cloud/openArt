@@ -1,7 +1,6 @@
-// [FSD Layer: features/media/api/lib] — Download media item helper (pure utility).
-// Body copied VERBATIM from features/media/api/mediaApi.js downloadMediaItem.
 import { api } from '@/shared/api/client';
 import { downloadBlob } from '@/shared/lib/utils';
+import { logger } from '@/shared/lib/logger';
 
 /**
  * Downloads a single media item.
@@ -13,8 +12,15 @@ export async function downloadMediaItem(url, filename) {
     const blob = await api.getBlob(url);
     downloadBlob(blob, filename);
   } catch (error) {
-    console.error("❌ Download failed:", error);
+    logger.error('download_failed', {
+      filename,
+      error,
+    });
     // Fallback: just open in new tab if blob fetch fails (e.g. CORS)
-    window.open(url, "_blank");
+    if (typeof window !== 'undefined') {
+      window.open(url, '_blank');
+    }
   }
 }
+
+

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState, useCallback } from "react";
+import { useRef, useState, useCallback, useEffect } from "react";
 import { Play, Pause, Volume2, VolumeX, Maximize } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/button";
@@ -22,8 +22,21 @@ function VideoControlsBar({
   duration,
   toggleFullscreen,
 }) {
-  const [isSeeking, setIsSeeking] = useState(false);
+  const [_isSeeking, setIsSeeking] = useState(false);
   const trackRef = useRef(null);
+  const activeListenersRef = useRef(null);
+
+  const cleanupListeners = useCallback(() => {
+    if (activeListenersRef.current) {
+      window.removeEventListener("pointermove", activeListenersRef.current.onMove);
+      window.removeEventListener("pointerup", activeListenersRef.current.onUp);
+      activeListenersRef.current = null;
+    }
+  }, []);
+
+  useEffect(() => {
+    return cleanupListeners;
+  }, [cleanupListeners]);
 
   const handlePointerDown = useCallback((e) => {
     if (!trackRef.current) return;
@@ -38,16 +51,18 @@ function VideoControlsBar({
 
     update(e.clientX);
 
+    cleanupListeners();
+
     const onMove = (ev) => update(ev.clientX);
     const onUp = () => {
       setIsSeeking(false);
-      window.removeEventListener("pointermove", onMove);
-      window.removeEventListener("pointerup", onUp);
+      cleanupListeners();
     };
 
+    activeListenersRef.current = { onMove, onUp };
     window.addEventListener("pointermove", onMove);
     window.addEventListener("pointerup", onUp);
-  }, [seek]);
+  }, [seek, cleanupListeners]);
 
   return (
     <div className="p-3 w-full transition-opacity duration-300">

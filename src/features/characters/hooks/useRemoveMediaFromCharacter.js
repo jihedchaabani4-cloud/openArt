@@ -22,13 +22,15 @@ export function useRemoveMediaFromCharacter() {
     getCacheKeys: ({ projectId }) =>
       projectId ? [queryKeys.projectData.byProject(projectId)] : [],
 
-    applyOptimistic: (oldData, { mediaId }) => {
+    applyOptimistic: (oldData, { mediaId, characterId }) => {
       if (!oldData?.projectContents?.media) return oldData;
       return {
         ...oldData,
         projectContents: {
           ...oldData.projectContents,
-          media: oldData.projectContents.media.filter((m) => m.id !== mediaId),
+          media: oldData.projectContents.media.filter(
+            (m) => !(m.id === mediaId && (!characterId || !m.workflow_id || m.workflow_id === characterId || m.workflowId === characterId))
+          ),
         },
       };
     },

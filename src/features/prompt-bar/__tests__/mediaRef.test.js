@@ -8,9 +8,31 @@ import {
   sameAsset,
   isPersistableMedia,
   describeMedia,
+  resolveMediaUrl,
 } from "../core/mediaRef.js";
 
 describe("C2: mediaRef Contract", () => {
+  describe("resolveMediaUrl", () => {
+    it("extracts URL from string", () => {
+      expect(resolveMediaUrl("https://example.com/a.png")).toBe("https://example.com/a.png");
+    });
+
+    it("extracts URL from various object shapes", () => {
+      expect(resolveMediaUrl({ url: "https://example.com/url.png" })).toBe("https://example.com/url.png");
+      expect(resolveMediaUrl({ preview: "https://example.com/prev.png" })).toBe("https://example.com/prev.png");
+      expect(resolveMediaUrl({ file_url: "https://example.com/file.png" })).toBe("https://example.com/file.png");
+      expect(resolveMediaUrl({ thumbnail: "https://example.com/thumb.png" })).toBe("https://example.com/thumb.png");
+      expect(resolveMediaUrl({ image: { url: "https://example.com/img.png" } })).toBe("https://example.com/img.png");
+      expect(resolveMediaUrl({ video: { url: "https://example.com/vid.mp4" } })).toBe("https://example.com/vid.mp4");
+      expect(resolveMediaUrl({ rawValue: { preview: "https://example.com/raw.png" } })).toBe("https://example.com/raw.png");
+    });
+
+    it("returns empty string for null, undefined, or empty object", () => {
+      expect(resolveMediaUrl(null)).toBe("");
+      expect(resolveMediaUrl(undefined)).toBe("");
+      expect(resolveMediaUrl({})).toBe("");
+    });
+  });
   describe("getAssetId", () => {
     it("extracts ID from string", () => {
       expect(getAssetId("wf_123")).toBe("wf_123");

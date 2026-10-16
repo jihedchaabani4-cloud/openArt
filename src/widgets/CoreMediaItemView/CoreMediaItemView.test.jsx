@@ -93,23 +93,25 @@ describe("CoreMediaItemView - Liked top-left indicator badge", () => {
     expect(likedBadge).toBeNull();
   });
 
-  it("automatically suppresses liked badge when current pathname is an edit route", () => {
-    const originalPath = window.location.pathname;
-    try {
-      window.history.pushState({}, "", "/cinema-studio/proj-1/assets/edit/wf-123");
-      render(
-        <CoreMediaItemView
-          src="https://example.com/test.png"
-          status="completed"
-          isLiked={true}
-        />
-      );
+  it("renders CoreMediaItemPresenter directly when core prop is supplied", () => {
+    const mockCore = {
+      url: "https://example.com/test.png",
+      status: "completed",
+      isVideo: false,
+      isMediaLoaded: true,
+      displayAspect: "1/1",
+    };
 
-      const likedBadge = screen.queryByTitle("Liked");
-      expect(likedBadge).toBeNull();
-    } finally {
-      window.history.pushState({}, "", originalPath);
-    }
+    render(
+      <CoreMediaItemView
+        core={mockCore}
+        isLiked={true}
+        showLikedBadge={true}
+      />
+    );
+
+    const likedBadge = screen.getByTitle("Liked");
+    expect(likedBadge).toBeDefined();
   });
 
   it("uses rounded-xl border radius instead of rounded-2xl to subtly reduce corner curvature", () => {

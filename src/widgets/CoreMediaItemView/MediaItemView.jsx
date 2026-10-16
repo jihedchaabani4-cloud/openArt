@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { CoreMediaItemView } from "./CoreMediaItemView";
 
 /**
@@ -10,7 +9,7 @@ import { CoreMediaItemView } from "./CoreMediaItemView";
  * Supports direct `mediaId` lookup from workflow or project contents.
  * 
  * Design & Behavior:
- * - Simple & clean: No default like button, no default video badge, no default menu ("ma8ir 7atta chay").
+ * - Simple & clean: No default like button, no default video badge, no default menu (minimal defaults).
  * - Authentic aspect ratio: Preserves the natural/intrinsic ratio of the media without forcing a 1:1 fallback.
  * - Customizable slots: Designated slots (topLeft, topRight, etc.) available for context-specific actions.
  */

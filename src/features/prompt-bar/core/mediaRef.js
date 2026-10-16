@@ -1,6 +1,7 @@
 /**
  * Canonical media reference helpers for PromptBar.
  */
+import { resolveMediaUrl as canonicalResolveMediaUrl } from "@/features/workflows/core/toMediaItem";
 
 /** Extracts the canonical asset ID from any media asset object or string. */
 export function getAssetId(asset) {
@@ -85,6 +86,11 @@ export function isPersistableMedia(value) {
   }
 
   return false;
+}
+
+/** Resolves the canonical display or preview URL from any media asset object or string. */
+export function resolveMediaUrl(media) {
+  return canonicalResolveMediaUrl(media) || "";
 }
 
 /** Returns a safe log descriptor (kind:id) for a media value without exposing private or signed URLs. */

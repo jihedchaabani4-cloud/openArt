@@ -6,6 +6,7 @@ import {
   patchWorkflowFolder,
   patchFolderParent,
   patchFolderName,
+  updateMediaById,
 } from "./cacheOps";
 
 describe("matchWorkflowId", () => {
@@ -147,5 +148,30 @@ describe("patchFolderName", () => {
     const once = patchFolderName({ id: "f1" }, "N");
     expect(patchFolderName(once, "N")).toEqual(once);
     expect(patchFolderName(null, "N")).toBeNull();
+  });
+});
+
+describe("updateMediaById", () => {
+  it("updates ALL duplicate rows of the same mediaId in the array", () => {
+    const list = [
+      { id: "m-1", workflow_id: "wf-home", status: "processing", role: "output" },
+      { id: "m-2", workflow_id: "wf-2", status: "processing", role: "output" },
+      { id: "m-1", workflow_id: "wf-character", status: "processing", role: "detail" },
+    ];
+
+    const updated = updateMediaById(list, "m-1", { status: "ready" });
+
+    expect(updated).toHaveLength(3);
+    // Both occurrences of m-1 must be updated to status: 'ready'
+    expect(updated[0]).toEqual({ id: "m-1", workflow_id: "wf-home", status: "ready", role: "output" });
+    expect(updated[2]).toEqual({ id: "m-1", workflow_id: "wf-character", status: "ready", role: "detail" });
+    // Other items untouched
+    expect(updated[1].status).toBe("processing");
+  });
+
+  it("returns the same reference if no item matches", () => {
+    const list = [{ id: "m-1" }, { id: "m-2" }];
+    const res = updateMediaById(list, "m-999", { status: "ready" });
+    expect(res).toBe(list);
   });
 });

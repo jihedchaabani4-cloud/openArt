@@ -8,6 +8,7 @@ import {
   useSetPrimaryMedia,
   useToggleWorkflowLike,
 } from "@/features/workflows/api/workflowsApi";
+import { logger } from "@/shared/lib/logger";
 
 /**
  * useElementEdit
@@ -123,12 +124,12 @@ export function useElementEdit({ projectId, workflowId }) {
     async (selectedAssets) => {
       if (!selectedAssets || selectedAssets.length === 0) return;
       for (const asset of selectedAssets) {
-        const workflowId = asset.workflow_id || asset.workflowId || asset.id || asset.asset_id || asset.name;
+        const workflowId = asset.workflow_id || asset.workflowId || asset.id || asset.asset_id;
         const imageUrl = asset.url || asset.file_url || asset.asset?.file_url;
         try {
           await addImage({ mediaId: workflowId, workflowId, imageUrl });
         } catch (err) {
-          console.error("Failed to add media from assets:", err);
+          logger.error("Failed to add media from assets", { error: err?.message || String(err) });
         }
       }
       setIsAssetsOpen(false);

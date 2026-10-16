@@ -1,7 +1,7 @@
 "use client";
+/* eslint-disable @next/next/no-img-element */
 
-import React, { useRef, useState, useCallback, useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useRef, useState, useCallback } from "react";
 import { cn } from "@/shared/lib/utils";
 import { ProcessingCard } from "@/shared/ui/ProcessingCard";
 import { FlowErrorTile } from "@/shared/ui/FlowErrorTile";
@@ -11,32 +11,14 @@ import { useMediaViewerCore } from "@/features/workflows/core/useMediaViewerCore
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 
 /**
- * CoreMediaItemView
- * 
- * Simple, flexible core layout component for rendering any media item.
- * Provides designated slots for buttons, overlays, and a toggleable menu.
- * 
- * Slots:
- * - topLeft: e.g. status tags, liked indicator, badges
- * - topRight: e.g. action buttons, like, history
- * - bottomLeft: e.g. title pill, prompt text
- * - bottomRight: e.g. entity badge, format pill
- * - bottom: e.g. video scrubber bar, timeline controls
- * - center: e.g. play button or centered icon
- * - overlay: custom elements rendered over the media
- * 
- * Menu Configuration:
- * - showMenu / activeMenu (boolean): whether to display the menu trigger
- * - menuItems (array): list of items [{ key, label, icon, onClick, variant, disabled }]
- * - menuTrigger (ReactNode): custom trigger element (defaults to 3-dots ActionBtn)
- * - menuPosition ("topRight" | "topLeft" | "bottomRight" | "bottomLeft"): default "topRight"
+ * CoreMediaItemPresenter - Pure presentational layout component for rendering media.
+ * Does NOT call useMediaViewerCore; accepts normalized data and callbacks directly.
  */
-export function CoreMediaItemView({
-  // Media source props
+export function CoreMediaItemPresenter({
   workflow,
   item = null,
-  mediaId = null,
-  core: propCore = null,
+  mediaId: _mediaId = null,
+  core = {},
   src: propSrc = null,
   isVideo: propIsVideo = null,
   status: propStatus = null,
@@ -45,7 +27,7 @@ export function CoreMediaItemView({
   progress: propProgress = null,
 
   // Display configuration
-  fit = "contain", // "contain" for full uncropped view, "cover" for grid tiles
+  fit = "contain",
   className,
   style: propStyle = {},
   mediaClassName,
@@ -54,7 +36,7 @@ export function CoreMediaItemView({
   onDragEnd,
   onClick,
 
-  // Slots for buttons & actions ("b9aya3 l button places")
+  // Slots for buttons and actions
   topLeft,
   topRight,
   bottomLeft,
@@ -62,9 +44,10 @@ export function CoreMediaItemView({
   bottom,
   center,
   overlay,
+  menuSlot = null,
   children,
 
-  // Menu activation & items ("fazet l active w deactive l menu")
+  // Menu activation and items
   showMenu = false,
   activeMenu = false,
   menuItems = [],
@@ -73,12 +56,12 @@ export function CoreMediaItemView({
   isMenuOpen: controlledMenuOpen,
   onMenuOpenChange: controlledOnMenuOpenChange,
 
-  // Context Menu (Right-click menu)
+  // Context Menu
   contextMenuItems = null,
   contextMenuContent = null,
 
   // Video options & callbacks
-  autoPlay = true,
+  autoPlay: _autoPlay = true,
   playOnHover = false,
   videoRef: externalVideoRef,
   onVideoTimeUpdate,
@@ -95,10 +78,6 @@ export function CoreMediaItemView({
   showVideoBadge = true,
   ...props
 }) {
-  // Use media core hook to resolve metadata, sizing, and media state
-  const shouldAutoPlay = autoPlay && !playOnHover;
-  const localCore = useMediaViewerCore({ workflow, item, mediaId, autoPlay: shouldAutoPlay });
-  const core = propCore || localCore;
   const internalVideoRef = useRef(null);
   const videoRef = externalVideoRef || core.videoRef || internalVideoRef;
 
@@ -122,14 +101,8 @@ export function CoreMediaItemView({
         workflow?.metadata?.favorited
       );
 
-  // Automatically hide liked badge on edit pages unless explicitly forced
-  let isEditRoute = false;
-  try {
-    if (typeof window !== "undefined" && window.location?.pathname?.includes("/edit")) {
-      isEditRoute = true;
-    }
-  } catch {}
-  const effectiveShowLikedBadge = Boolean(showLikedBadge) && !isEditRoute;
+  // Directly respect showLikedBadge (no route-sniffing hazard)
+  const effectiveShowLikedBadge = Boolean(showLikedBadge);
   const effectiveShowVideoBadge = Boolean(showVideoBadge) && Boolean(isVideo) && Boolean(url) && !isProcessing && !isFailed;
 
   // Local or controlled menu open state
@@ -137,7 +110,7 @@ export function CoreMediaItemView({
   const isMenuOpen = controlledMenuOpen !== undefined ? controlledMenuOpen : internalMenuOpen;
   const setMenuOpen = controlledOnMenuOpenChange || setInternalMenuOpen;
 
-  const isMenuActive = Boolean(showMenu || activeMenu);
+  const isMenuActive = Boolean(showMenu || activeMenu || menuSlot);
 
   // Local hover state for overlay visibility
   const [isHovered, setIsHovered] = useState(false);
@@ -160,23 +133,38 @@ export function CoreMediaItemView({
   }, [playOnHover, videoRef, propOnMouseLeave]);
 
   const handleVideoLoaded = useCallback((e) => {
-    core.handleVideoLoadedMetadata(e);
+    core.handleVideoLoadedMetadata?.(e);
     onVideoLoadedMetadata?.(e);
   }, [core, onVideoLoadedMetadata]);
 
   const handleVideoTime = useCallback((e) => {
-    core.handleVideoTimeUpdate(e);
+    core.handleVideoTimeUpdate?.(e);
     onVideoTimeUpdate?.(e);
   }, [core, onVideoTimeUpdate]);
 
   const handleCardClick = useCallback((e) => {
     if (onClick) {
-      onClick(e, { workflow, item: core.targetItem, url });
+      onClick(e, { workflow, item: core.targetItem || item, url });
     }
-  }, [onClick, workflow, core.targetItem, url]);
+  }, [onClick, workflow, core.targetItem, item, url]);
 
   const isContain = fit === "contain";
   const hasContextMenu = Boolean((contextMenuItems && contextMenuItems.length > 0) || contextMenuContent);
+
+  const renderDropdownMenu = () => {
+    if (menuSlot) return menuSlot;
+    if (isMenuActive) {
+      return (
+        <StudioItemDropdownMenu
+          items={menuItems}
+          open={isMenuOpen}
+          onOpenChange={setMenuOpen}
+          trigger={menuTrigger}
+        />
+      );
+    }
+    return null;
+  };
 
   const cardElement = (
     <div
@@ -207,7 +195,7 @@ export function CoreMediaItemView({
             loop
             playsInline
             preload="metadata"
-            muted={core.isMuted}
+            muted={core.isMuted ?? true}
             onTimeUpdate={handleVideoTime}
             onLoadedMetadata={handleVideoLoaded}
             onClick={onVideoClick || core.togglePlay}
@@ -222,19 +210,19 @@ export function CoreMediaItemView({
 
         {isCompleted && !isVideo && (
           <div className={cn("relative flex items-center justify-center", isContain ? "w-fit h-fit max-w-full max-h-full" : "w-full h-full")}>
-            {!core.isMediaLoaded && (
+            {core.isMediaLoaded === false && (
               <div className="absolute inset-0 bg-[#15161a] animate-pulse rounded-xl" />
             )}
             <img
               src={url}
-              alt={core.prompt || "Media"}
+              alt={core.prompt || item?.name || "Media"}
               decoding="async"
               onLoad={(e) => {
                 const img = e.currentTarget;
                 if (img?.naturalWidth && img?.naturalHeight) {
-                  core.handleIntrinsicDimensions(img.naturalWidth, img.naturalHeight);
+                  core.handleIntrinsicDimensions?.(img.naturalWidth, img.naturalHeight);
                 }
-                core.onMediaLoaded();
+                core.onMediaLoaded?.();
               }}
               onError={core.onMediaError}
               className={cn(
@@ -242,7 +230,7 @@ export function CoreMediaItemView({
                 isContain
                   ? "max-w-full max-h-full w-auto h-auto block object-contain"
                   : "w-full h-full object-cover",
-                core.isMediaLoaded ? "opacity-100" : "opacity-0",
+                core.isMediaLoaded === false ? "opacity-0" : "opacity-100",
                 mediaClassName
               )}
             />
@@ -323,27 +311,13 @@ export function CoreMediaItemView({
               </div>
             )}
             {topLeft}
-            {isMenuActive && menuPosition === "topLeft" && (
-              <StudioItemDropdownMenu
-                items={menuItems}
-                open={isMenuOpen}
-                onOpenChange={setMenuOpen}
-                trigger={menuTrigger}
-              />
-            )}
+            {isMenuActive && menuPosition === "topLeft" && renderDropdownMenu()}
           </div>
 
           {/* Top Right Slot */}
           <div className="pointer-events-auto flex items-center gap-1.5 ml-auto">
             {topRight}
-            {isMenuActive && menuPosition === "topRight" && (
-              <StudioItemDropdownMenu
-                items={menuItems}
-                open={isMenuOpen}
-                onOpenChange={setMenuOpen}
-                trigger={menuTrigger}
-              />
-            )}
+            {isMenuActive && menuPosition === "topRight" && renderDropdownMenu()}
           </div>
         </div>
 
@@ -352,27 +326,13 @@ export function CoreMediaItemView({
           {/* Bottom Left Slot */}
           <div className="pointer-events-auto flex items-center gap-2 min-w-0">
             {bottomLeft}
-            {isMenuActive && menuPosition === "bottomLeft" && (
-              <StudioItemDropdownMenu
-                items={menuItems}
-                open={isMenuOpen}
-                onOpenChange={setMenuOpen}
-                trigger={menuTrigger}
-              />
-            )}
+            {isMenuActive && menuPosition === "bottomLeft" && renderDropdownMenu()}
           </div>
 
           {/* Bottom Right Slot */}
           <div className="pointer-events-auto flex items-center gap-2 ml-auto shrink-0">
             {bottomRight}
-            {isMenuActive && menuPosition === "bottomRight" && (
-              <StudioItemDropdownMenu
-                items={menuItems}
-                open={isMenuOpen}
-                onOpenChange={setMenuOpen}
-                trigger={menuTrigger}
-              />
-            )}
+            {isMenuActive && menuPosition === "bottomRight" && renderDropdownMenu()}
           </div>
         </div>
       </div>
@@ -407,6 +367,32 @@ export function CoreMediaItemView({
   }
 
   return cardElement;
+}
+
+/**
+ * Connected wrapper that unconditionally runs useMediaViewerCore when no external core is passed.
+ */
+function CoreMediaItemConnected(props) {
+  const shouldAutoPlay = props.autoPlay && !props.playOnHover;
+  const core = useMediaViewerCore({
+    workflow: props.workflow,
+    item: props.item,
+    mediaId: props.mediaId,
+    autoPlay: shouldAutoPlay,
+  });
+
+  return <CoreMediaItemPresenter {...props} core={core} />;
+}
+
+/**
+ * CoreMediaItemView container.
+ * If `core` is passed, delegates directly to CoreMediaItemPresenter without allocating hook state.
+ */
+export function CoreMediaItemView(props) {
+  if (props.core) {
+    return <CoreMediaItemPresenter {...props} />;
+  }
+  return <CoreMediaItemConnected {...props} />;
 }
 
 export default CoreMediaItemView;

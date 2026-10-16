@@ -65,6 +65,33 @@ describe("Phase 5 known bugs", () => {
       await act(async () => { resolveApi({ ok: true }); });
     });
 
+    it("preserves source media in other workflows when unlinking from character", async () => {
+      const { queryClient, wrapper } = createWrapper();
+      const pKey = queryKeys.projectData.byProject("proj-1");
+      queryClient.setQueryData(pKey, {
+        projectContents: {
+          media: [
+            { id: "m-1", workflow_id: "source-wf-1", role: "output" },
+            { id: "m-1", workflow_id: "char-1", role: "detail" },
+            { id: "m-2", workflow_id: "char-1", role: "detail" },
+          ],
+        },
+      });
+      characterService.removeDetailMedia.mockResolvedValueOnce({ ok: true });
+
+      const { result } = renderHook(() => useRemoveMediaFromCharacter(), { wrapper });
+      act(() => {
+        result.current.mutate({ characterId: "char-1", mediaId: "m-1", projectId: "proj-1" });
+      });
+
+      await waitFor(() => {
+        const media = queryClient.getQueryData(pKey).projectContents.media;
+        expect(media).toHaveLength(2);
+        expect(media.find((m) => m.id === "m-1" && m.workflow_id === "source-wf-1")).toBeDefined();
+        expect(media.find((m) => m.id === "m-1" && m.workflow_id === "char-1")).toBeUndefined();
+      });
+    });
+
     it("restores the media if the API fails", async () => {
       const { queryClient, wrapper } = createWrapper();
       const pKey = queryKeys.projectData.byProject("proj-1");

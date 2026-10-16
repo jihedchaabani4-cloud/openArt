@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Play, Image, ArrowLeftRight, Plus } from "lucide-react";
+import { Play, ArrowLeftRight, Plus } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
+import { resolveMediaUrl } from "../../core/mediaRef.js";
 
 const VARIANTS = {
   start:  { word: "Start",  HoverContent: () => <Plus size={15} strokeWidth={1.5} className="text-[rgba(218,220,224,0.7)]" /> },
@@ -109,30 +110,21 @@ export function ViewReference({
 
   const isCharacter =
     media.type === "character" ||
-    media.workflow_type === "CHARACTER_SHEET" ||
+    media.is_character ||
     Boolean(media.characterId) ||
-    media.entity_type === "character";
+    media.entity_type === "character" ||
+    String(media.workflow_type || "").toUpperCase().includes("CHARACTER");
 
   const isElement =
     media.type === "element" ||
-    media.workflow_type === "ELEMENT_SHEET" ||
+    media.is_element ||
     Boolean(media.elementId) ||
-    media.entity_type === "element";
+    media.entity_type === "element" ||
+    String(media.workflow_type || "").toUpperCase().includes("ELEMENT");
 
-  const isVideo = media.type === "video" || media.is_video || media.isVideo;
+  const isVideo = media.type === "video" || Boolean(media.is_video) || Boolean(media.isVideo);
 
-  const src =
-    media.url ||
-    media.preview ||
-    media.file_url ||
-    media.thumbnail ||
-    media.image_url ||
-    media.image?.url ||
-    media.video?.url ||
-    media.src ||
-    media.rawValue?.url ||
-    media.rawValue?.preview ||
-    media.rawValue?.file_url;
+  const src = resolveMediaUrl(media);
 
   const tooltipText =
     media.displayName ||

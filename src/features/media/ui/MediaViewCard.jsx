@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable @next/next/no-img-element */
 
 import React, { useRef, useEffect } from "react";
 import { motion, useMotionValue, useTransform } from "framer-motion";
@@ -48,20 +49,58 @@ export const MediaViewCard = React.forwardRef(function MediaViewCard({
     ["ELEMENT", "ELEMENT_SHEET"].includes(String(item?.workflow_type || item?.workflowType || "").toUpperCase())
   );
 
-  // Video scrub rAF loop to track progress while hovering
+  // Video scrub progress tracking: driven by video play/pause/ended and timeupdate events
   useEffect(() => {
     if (!effectiveIsVideo) return;
+    const video = videoRef.current;
+    if (!video) return;
 
-    let frame;
-    const tick = () => {
-      const v = videoRef.current;
-      if (v && !v.paused && v.duration) {
-        progress.set((v.currentTime / v.duration) * 100);
+    let frameId = null;
+
+    const updateProgress = () => {
+      if (video.duration) {
+        progress.set((video.currentTime / video.duration) * 100);
       }
-      frame = requestAnimationFrame(tick);
     };
-    frame = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(frame);
+
+    const cancelLoop = () => {
+      if (frameId !== null) {
+        cancelAnimationFrame(frameId);
+        frameId = null;
+      }
+    };
+
+    const tick = () => {
+      updateProgress();
+      if (!video.paused && !video.ended) {
+        frameId = requestAnimationFrame(tick);
+      } else {
+        frameId = null;
+      }
+    };
+
+    const handlePlay = () => {
+      cancelLoop();
+      frameId = requestAnimationFrame(tick);
+    };
+
+    const handlePauseOrEnd = () => {
+      cancelLoop();
+      updateProgress();
+    };
+
+    video.addEventListener("play", handlePlay);
+    video.addEventListener("pause", handlePauseOrEnd);
+    video.addEventListener("ended", handlePauseOrEnd);
+    video.addEventListener("timeupdate", updateProgress);
+
+    return () => {
+      cancelLoop();
+      video.removeEventListener("play", handlePlay);
+      video.removeEventListener("pause", handlePauseOrEnd);
+      video.removeEventListener("ended", handlePauseOrEnd);
+      video.removeEventListener("timeupdate", updateProgress);
+    };
   }, [effectiveIsVideo, progress]);
 
   const handleMouseEnter = () => {
