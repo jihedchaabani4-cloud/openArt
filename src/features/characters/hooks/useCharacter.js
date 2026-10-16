@@ -428,6 +428,8 @@ export function useCharacter({ projectId, characterId } = {}) {
           id: `temp_${Date.now()}_${idx}`,
           url: previewUrl,
           file_url: previewUrl,
+          status: "processing",
+          step_id: "character_detail",
           file,
         };
       });
@@ -448,7 +450,7 @@ export function useCharacter({ projectId, characterId } = {}) {
             setAddedDetailImages((prev) =>
               prev.map((r) =>
                 r.url === item.url || r.file_url === item.url || r.id === item.id
-                  ? { ...r, id: res.media.id, url: uploadedUrl, file_url: uploadedUrl }
+                  ? { ...r, id: res.media.id, url: uploadedUrl, file_url: uploadedUrl, status: "success" }
                   : r
               )
             );
@@ -478,6 +480,16 @@ export function useCharacter({ projectId, characterId } = {}) {
         const fallbackUrl = item.url || item.file_url || item.src || item.image?.url;
         if (!mediaId && !fallbackUrl) continue;
 
+        const tempId = `temp_asset_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+        const optimisticAsset = {
+          id: tempId,
+          url: fallbackUrl,
+          file_url: fallbackUrl,
+          status: "processing",
+          step_id: "character_detail",
+        };
+        setAddedDetailImages((prev) => [optimisticAsset, ...prev]);
+
         try {
           const res = await addMediaMutation.mutateAsync({
             characterId: cleanId,
@@ -486,10 +498,15 @@ export function useCharacter({ projectId, characterId } = {}) {
             projectId,
           });
           if (res?.media) {
-            setAddedDetailImages((prev) => [res.media, ...prev]);
+            setAddedDetailImages((prev) =>
+              prev.map((r) => (r.id === tempId ? { ...res.media, status: "success" } : r))
+            );
+          } else {
+            setAddedDetailImages((prev) => prev.filter((r) => r.id !== tempId));
           }
         } catch (err) {
           console.error("Failed to add detail asset:", err);
+          setAddedDetailImages((prev) => prev.filter((r) => r.id !== tempId));
         }
       }
     },
