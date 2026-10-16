@@ -21,6 +21,48 @@ const EMPTY_INDEX = Object.freeze({
 });
 
 /**
+ * Determines whether a media row represents the media's origin/home workflow.
+ *
+ * @param {Object} m
+ * @param {string} workflowId
+ * @returns {boolean}
+ */
+export function isHomeWorkflowMedia(m, workflowId) {
+  if (!m || !workflowId) return false;
+  const targetWfId = String(workflowId).trim();
+
+  // 1. Explicit home/origin/source workflow ID on the media row
+  const homeWfId =
+    m.home_workflow_id ||
+    m.homeWorkflowId ||
+    m.origin_workflow_id ||
+    m.originWorkflowId ||
+    m.source_workflow_id ||
+    m.sourceWorkflowId ||
+    m.media_workflow_id ||
+    m.mediaWorkflowId ||
+    m.media?.workflow_id ||
+    m.media?.workflowId ||
+    m.raw?.workflow_id ||
+    null;
+
+  if (homeWfId) {
+    return String(homeWfId).trim() === targetWfId;
+  }
+
+  // 2. Role-based heuristics: 'output' and 'original' are intrinsic origin/home roles
+  const role = m.role || m.mediaRole;
+  if (role === "output" || role === "original") {
+    return true;
+  }
+  if (role === "detail" || role === "reference") {
+    return false;
+  }
+
+  return true;
+}
+
+/**
  * Builds or retrieves the memoized index for a projectData payload.
  *
  * @param {Object|null|undefined} projectData
@@ -44,6 +86,7 @@ export function buildProjectMediaIndex(projectData) {
   const byCompositeKey = new Map();
   const byMediaId = new Map();
   const byWorkflowId = new Map();
+  const homeResolvedSet = new Map();
 
   const rawWorkflows = Array.isArray(contents.workflows) ? contents.workflows : [];
   const rawMedia = Array.isArray(contents.media) ? contents.media : [];
@@ -61,16 +104,20 @@ export function buildProjectMediaIndex(projectData) {
       role: m.role || m.mediaRole,
     });
 
-    // 1. Composite lookup
+    // 1. Composite lookup: role is a property of the (workflowId, mediaId) placement
     if (rawWorkflowId) {
       const compKey = `${rawWorkflowId}:${rawId}`;
       byCompositeKey.set(compKey, normalized);
     }
 
-    // 2. MediaId lookup: primary home workflow entry (first seen) wins;
-    // subsequent secondary linked relations cannot overwrite it.
+    // 2. MediaId lookup: home workflow entry wins, NEVER array order.
+    const isHome = isHomeWorkflowMedia(m, rawWorkflowId);
     if (!byMediaId.has(rawId)) {
       byMediaId.set(rawId, normalized);
+      homeResolvedSet.set(rawId, isHome);
+    } else if (!homeResolvedSet.get(rawId) && isHome) {
+      byMediaId.set(rawId, normalized);
+      homeResolvedSet.set(rawId, true);
     }
 
     // 3. Workflow media list
