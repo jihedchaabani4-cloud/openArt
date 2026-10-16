@@ -80,11 +80,32 @@ export default function CharacterDetailPage() {
     }
   }, [isLoading, workflow, projectData, router, projectId]);
 
+  const fileInputRef = React.useRef(null);
+
+  const handleFileInputChange = (e) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length > 0 && uploadDetailFiles) {
+      uploadDetailFiles(files);
+    }
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
   if (isLoading) return <LoadingScreen />;
   if (!workflow) return null;
 
   return (
     <div className="flex flex-col h-full w-full bg-studio-dark text-white overflow-hidden">
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        multiple
+        className="hidden"
+        onChange={handleFileInputChange}
+      />
+
       <CharacterEditNavbar
         workflow={workflow}
         onDeleteCharacter={() =>
@@ -94,6 +115,8 @@ export default function CharacterDetailPage() {
             workflowType: "CHARACTER",
           })
         }
+        onUpload={() => fileInputRef.current?.click()}
+        onOpenAssets={() => setIsAssetsOpen(true)}
       />
 
       {/* ── SCROLLABLE BODY ── */}

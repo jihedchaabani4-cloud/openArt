@@ -5,14 +5,14 @@ import { Button } from "@/shared/ui/button";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { cn } from "@/shared/lib/utils";
 import { CharacterMediaGalleryGrid } from "./CharacterMediaGalleryGrid";
+import { FlowCharacterImagePreview } from "./FlowCharacterImagePreview";
 
 /**
  * CharacterDetailsGallery
  * Right stage for the Character detail reference photos view:
- * - Clean header with compact action buttons conforming to studio standard
- * - Grid of reference photos powered by CharacterMediaGalleryGrid & MediaItemView
- * - Authentic aspect ratio with zero crop, RowsPhotoAlbum layout, and hover action buttons
- * - Sleek minimal studio empty state
+ * - Clean display powered by CharacterMediaGalleryGrid & MediaItemView (authentic aspect ratio, RowsPhotoAlbum)
+ * - Empty state uses FlowCharacterImagePreview for selecting details
+ * - Actions (Upload & Assets) reside cleanly in CharacterEditNavbar matching ElementEditNavbar
  */
 export function CharacterDetailsGallery({
   workflow = null,
@@ -24,7 +24,7 @@ export function CharacterDetailsGallery({
   deletingMediaId = null,
   maxAllowed = 5,
   targetRowHeight,
-  showTopActions = true,
+  showTopActions = false,
   onUploadFiles,
   onOpenAssets,
   onDeleteImage,
@@ -72,7 +72,7 @@ export function CharacterDetailsGallery({
         onChange={handleFileChange}
       />
 
-      {/* ── Gallery Action Buttons ── */}
+      {/* ── Optional Top Action Buttons (hidden by default since actions live in Navbar) ── */}
       {showTopActions && (
         <div className="flex items-center justify-end gap-2 w-full shrink-0">
           <Button
@@ -103,7 +103,7 @@ export function CharacterDetailsGallery({
         </div>
       )}
 
-      {/* ── Gallery Body: Character Media Gallery Grid or Minimal Empty State ── */}
+      {/* ── Gallery Body: Character Media Gallery Grid or FlowCharacterImagePreview ── */}
       {validItems.length > 0 ? (
         <CharacterMediaGalleryGrid
           workflow={workflow}
@@ -119,43 +119,11 @@ export function CharacterDetailsGallery({
           targetRowHeight={targetRowHeight}
         />
       ) : (
-        /* Minimal sleek studio empty state (no big clumsy banner) */
-        <div className="w-full flex-1 flex flex-col items-center justify-center py-16 px-4 text-center">
-          <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-4 text-white/40 shadow-inner">
-            <GoogleIcon iconName="photo_library" className="text-[28px]" />
-          </div>
-          <h4 className="text-base font-medium text-white/80 mb-1">
-            Aucune image de référence
-          </h4>
-          <p className="text-xs text-white/40 max-w-sm mb-6 leading-relaxed">
-            Ajoutez jusqu'à {maxAllowed} images pour définir les caractéristiques visuelles, vêtements et angles de ce personnage.
-          </p>
-          <div className="flex items-center gap-3">
-            <Button
-              type="button"
-              variant="studio-white"
-              size="sm"
-              onClick={() => fileInputRef.current?.click()}
-              className="h-9 px-4 rounded-full text-xs font-medium flex items-center gap-2 cursor-pointer border-none"
-            >
-              <GoogleIcon iconName="upload" className="text-[16px]" />
-              <span>Importer</span>
-            </Button>
-
-            {onOpenAssets && (
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={onOpenAssets}
-                className="h-9 px-4 rounded-full text-xs font-medium flex items-center gap-2 text-white/70 hover:text-white hover:bg-white/10 cursor-pointer"
-              >
-                <GoogleIcon iconName="add" className="text-[16px]" />
-                <span>Depuis le projet</span>
-              </Button>
-            )}
-          </div>
-        </div>
+        <FlowCharacterImagePreview
+          onUpload={() => fileInputRef.current?.click()}
+          onSelectProject={() => onOpenAssets && onOpenAssets()}
+          isUploading={pendingUrls.length > 0}
+        />
       )}
     </div>
   );

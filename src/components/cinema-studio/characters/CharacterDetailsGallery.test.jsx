@@ -124,27 +124,28 @@ describe("CharacterDetailsGallery - Studio Media Grid Form", () => {
     expect(screen.queryByText("Couverture")).toBeNull();
   });
 
-  it("renders sleek header with compact action buttons and without counter badge", () => {
-    const sixItems = [
-      ...mockItems,
-      { id: "item-3", url: "https://example.com/3.png" },
-      { id: "item-4", url: "https://example.com/4.png" },
-      { id: "item-5", url: "https://example.com/5.png" },
-      { id: "item-6", url: "https://example.com/6.png" },
-    ];
-
+  it("does not render top action buttons by default, keeping actions cleanly in navbar", () => {
     renderWithClient(
       <CharacterDetailsGallery
-        items={sixItems}
+        items={mockItems}
         primaryMediaId="item-1"
         onOpenAssets={vi.fn()}
       />
     );
 
-    // No legacy clumsy counter badge or 'Photos de référence' text
-    expect(screen.queryByText("Photos de référence")).toBeNull();
-    expect(screen.queryByText(/6 \/ 5/)).toBeNull();
-    expect(screen.queryByText(/\d+ \/ \d+/)).toBeNull();
+    expect(screen.queryByTitle("Importer depuis l'ordinateur")).toBeNull();
+    expect(screen.queryByTitle("Ajouter à partir du projet")).toBeNull();
+  });
+
+  it("renders sleek header with compact action buttons when showTopActions is explicitly true", () => {
+    renderWithClient(
+      <CharacterDetailsGallery
+        items={mockItems}
+        primaryMediaId="item-1"
+        showTopActions={true}
+        onOpenAssets={vi.fn()}
+      />
+    );
 
     // 2 action buttons (Upload and Select Assets) with blur variant must be present
     const uploadBtn = screen.getByTitle("Importer depuis l'ordinateur");
@@ -154,7 +155,7 @@ describe("CharacterDetailsGallery - Studio Media Grid Form", () => {
     expect(uploadBtn.className).toContain("rounded-full");
   });
 
-  it("renders minimal empty state without big clumsy banner when items is empty", () => {
+  it("renders FlowCharacterImagePreview for selecting details when items is empty", () => {
     const { container } = renderWithClient(
       <CharacterDetailsGallery
         items={[]}
@@ -162,8 +163,7 @@ describe("CharacterDetailsGallery - Studio Media Grid Form", () => {
       />
     );
 
-    expect(screen.getByText("Aucune image de référence")).toBeDefined();
-    expect(container.querySelector("[data-component='flow-character-image-preview']")).toBeNull();
+    expect(container.querySelector("[data-component='flow-character-image-preview']")).not.toBeNull();
   });
 
   it("CharacterMediaGalleryGrid renders reference items cleanly without forced 1:1 or 4:3 aspect ratio", () => {
