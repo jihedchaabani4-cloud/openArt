@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import React from "react";
 import { render, screen } from "@testing-library/react";
-import { PromptEditor, handlePromptEditorError } from "../ui/common/editor/PromptEditor.jsx";
+import { PromptEditor, handlePromptEditorError, MODULE_VERSION } from "../ui/common/editor/PromptEditor.jsx";
 import { logger } from "@/shared/lib/logger";
 
 describe("PromptEditor Clean Code & Logger", () => {
@@ -51,7 +51,9 @@ describe("PromptEditor Clean Code & Logger", () => {
     rerender(<PromptEditor value="updated" onChange={() => {}} />);
     const contentEditableSecond = container.querySelector('[contenteditable="true"]');
 
-    // With a stable editorKey (useId), LexicalComposer does not remount on re-renders
+    // With a stable editorKey (useId + MODULE_VERSION), LexicalComposer does not remount on re-renders
     expect(contentEditableSecond).toBe(contentEditableFirst);
+    expect(typeof MODULE_VERSION).toBe("number");
+    expect(MODULE_VERSION).toBeGreaterThan(0);
   });
 });

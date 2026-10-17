@@ -246,6 +246,11 @@ export function handlePromptEditorError(error) {
   logger.error("prompt_editor_error", { error });
 }
 
+// Module-level reload timestamp: evaluated once when the module loads.
+// Stable across ordinary re-renders; changes on HMR module reload so LexicalComposer
+// remounts with fresh node classes to prevent Lexical "Type mismatch" errors.
+export const MODULE_VERSION = Date.now();
+
 // ── Main Component ───────────────────────────────────────────────────────────
 export function PromptEditor({
   value,
@@ -270,9 +275,9 @@ export function PromptEditor({
     onError: handlePromptEditorError,
   }), [EDITOR_NODES]);
 
-  // Generate a key that is deterministic and stable across SSR hydration per instance
+  // Generate a key that is deterministic per instance and updates when module reloads (HMR)
   const editorId = React.useId();
-  const editorKey = `editor-${editorId}`;
+  const editorKey = `editor-${editorId}-${MODULE_VERSION}`;
 
   const handleLexicalChange = (editorState) => {
     editorState.read(() => {
