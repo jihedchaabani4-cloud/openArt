@@ -8,8 +8,8 @@ import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows"
 import { useCharacterWorkflows } from "@/features/characters"
 import { Plus } from "lucide-react"
 import { usePromptStore } from "@/features/studio";
-import { getPrimaryMedia } from "@/shared/lib/generationUtils"
-import { getItemMetadata as getDisplayMeta, getStudioGridDensity, getCachedImageDimensions, setCachedImageDimensions } from "@/shared/lib/displayUtils"
+import { resolveMainMedia } from "@/features/workflows"
+import { getStudioGridDensity, getCachedImageDimensions, setCachedImageDimensions } from "@/shared/lib/displayUtils"
 import { LoadingScreen } from "@/shared/ui/LoadingScreen"
 
 import { RowsPhotoAlbum } from 'react-photo-album'
@@ -70,10 +70,9 @@ export default function CharactersPage({ params }) {
     // Probe and cache authentic natural dimensions for character images
     React.useEffect(() => {
         visibleSheets.forEach((workflow) => {
-            const primaryItem = getPrimaryMedia(workflow);
+            const primaryItem = resolveMainMedia(workflow);
             if (!primaryItem) return;
-            const meta = getDisplayMeta(primaryItem, workflow);
-            const url = meta?.url || primaryItem?.url || primaryItem?.file_url;
+            const url = primaryItem.url || primaryItem.thumbUrl;
             if (!url || url.startsWith("data:image/gif")) return;
 
             if (getCachedImageDimensions(url)) return;
@@ -95,11 +94,10 @@ export default function CharactersPage({ params }) {
     const photos = React.useMemo(() => {
         void dimensionsVersion;
         return visibleSheets.reduce((acc, workflow, i) => {
-            const primaryItem = getPrimaryMedia(workflow);
+            const primaryItem = resolveMainMedia(workflow);
             if (!primaryItem) return acc;
 
-            const meta = getDisplayMeta(primaryItem, workflow);
-            const url = meta?.url || "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
+            const url = primaryItem.url || primaryItem.thumbUrl || "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
 
             // 1. Highest priority: verified authentic image dimensions
             let natural = getCachedImageDimensions(url);
@@ -108,9 +106,9 @@ export default function CharactersPage({ params }) {
             let wNum = natural?.width;
             let hNum = natural?.height;
 
-            // 2. Second priority: If natural dimensions not yet available, use metadata aspect
+            // 2. Second priority: If natural dimensions not yet available, use canonical aspectRatio
             if (!wNum || !hNum) {
-                const rawAspect = meta?.aspect;
+                const rawAspect = primaryItem.aspectRatio;
                 if (rawAspect && rawAspect !== "auto") {
                     const [wStr, hStr] = String(rawAspect).split("/");
                     const pw = parseFloat(wStr);
@@ -141,6 +139,7 @@ export default function CharactersPage({ params }) {
                 aspect,
                 key:      workflow.id || workflow.name || String(i),
                 workflow,
+                item:     primaryItem.raw || primaryItem,
             });
             return acc;
         }, []);
@@ -207,6 +206,7 @@ export default function CharactersPage({ params }) {
             <MediaGridItem
                 key={photo.key}
                 workflow={photo.workflow}
+                item={photo.item}
                 onClick={handleWorkflowClick}
                 className="rounded-xl border-none shadow-xl"
                 width={width}
