@@ -3,7 +3,7 @@ import { getPrimaryMedia } from "../displayUtils";
 
 describe("Characterization: Current Primary Media Resolution Behavior", () => {
   describe("Element cover resolution in displayUtils", () => {
-    it("CHARACTERIZATION [BUG]: element cover uses string character hash modulo, ignoring primary_media_id", () => {
+    it("element cover respects primary_media_id (hash modulo abolished)", () => {
       const elementWorkflow = {
         id: "element-alpha",
         workflow_type: "ELEMENT_SHEET",
@@ -18,13 +18,10 @@ describe("Characterization: Current Primary Media Resolution Behavior", () => {
         ],
       };
 
-      // Hash of "element-alpha":
-      // 'e'(101)+'l'(108)+'e'(101)+'m'(109)+'e'(101)+'n'(110)+'t'(116)+'-'(45)+'a'(97)+'l'(108)+'p'(112)+'h'(104)+'a'(97) = 1309
-      // 1309 % 3 = 1 -> picks item[1] ("elem-media-1"), IGNORING primary_media_id ("elem-media-2")
       const result = getPrimaryMedia(elementWorkflow);
 
-      expect(result.id).toBe("elem-media-1");
-      expect(result.id).not.toBe(elementWorkflow.primary_media_id);
+      expect(result.id).toBe("elem-media-2");
+      expect(result.id).toBe(elementWorkflow.primary_media_id);
     });
   });
 

@@ -1,5 +1,6 @@
 // src/shared/lib/displayUtils.js
 // ✅ Pure UI helpers — no business logic, no side effects
+import { resolveMainMedia } from "@/features/workflows/core/resolveMediaRef";
 
 export const STUDIO_GRID_CONFIG = {
   sm: {
@@ -341,89 +342,15 @@ export function intrinsicSizeToCssAspect(width, height) {
 export function getPrimaryMedia(workflow) {
   if (!workflow) return null;
 
-  const wType = String(workflow.workflow_type || workflow.workflowType || "").toUpperCase();
-  const isChar = wType === "CHARACTER" || wType === "CHARACTER_SHEET" || Boolean(workflow.is_character) || workflow.entity_type === "character" || Boolean(workflow.characterId) || Boolean(workflow.character);
-  const isElem = wType === "ELEMENT" || wType === "ELEMENT_SHEET" || Boolean(workflow.is_element) || workflow.entity_type === "element" || Boolean(workflow.elementId) || Boolean(workflow.element);
-
-  // 1. Character: Prioritize Body View (turnaround sheet)
-  if (isChar) {
-    const primaryId = workflow.primary_media_id || workflow.primaryMediaId || workflow.metadata?.primaryMediaId;
-    if (primaryId) {
-      const match = workflow.items?.find(i => (i.id === primaryId || i.name === primaryId) && Boolean(i.url || i.file_url));
-      if (match) return match;
-    }
-
-    const bodyItem = workflow.items?.find(i => 
-      i.status !== 'deleted' && 
-      Boolean(i.url || i.file_url) && (
-        i.step_id === "character_sheet" || 
-        i.stepId === "character_sheet" || 
-        i.role === "character_sheet" || 
-        i.is_sheet === true
-      )
-    );
-    if (bodyItem) return bodyItem;
-
-    const validNonDetail = workflow.items?.find(i => 
-      i.status !== 'deleted' && 
-      i.step_id !== "character_detail" && 
-      Boolean(i.url || i.file_url)
-    );
-    if (validNonDetail) return validNonDetail;
-
-    const primaryMediaUrl = workflow.primary_media_url;
-    if (primaryMediaUrl) {
-      return {
-        id: workflow.id || workflow.name,
-        url: primaryMediaUrl,
-        status: workflow.status === "failed" ? "failed" : "completed",
-        is_sheet: true,
-        dimensions: workflow.dimensions || (workflow.width && workflow.height ? { width: workflow.width, height: workflow.height } : null),
-      };
-    }
-
-    const firstValid = workflow.items?.find(i => i.status !== 'deleted' && Boolean(i.url || i.file_url)) || workflow.items?.[0];
-    if (firstValid) return firstValid;
-  }
-
-  // 2. Element: Pick one random/deterministic image from element images
-  if (isElem) {
-    const validItems = (workflow.items || []).filter(i => i.status !== 'deleted' && (i.url || i.file_url || i.image?.url));
-    if (validItems.length > 0) {
-      const hash = String(workflow.id || workflow.name || '').split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
-      return validItems[hash % validItems.length];
-    }
-
-    const rawImgs = workflow.images || workflow.reference_images || workflow.element?.images || [];
-    if (Array.isArray(rawImgs) && rawImgs.length > 0) {
-      const hash = String(workflow.id || workflow.name || '').split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
-      const picked = rawImgs[hash % rawImgs.length];
-      const pickedUrl = typeof picked === 'string' ? picked : (picked?.url || picked?.file_url || picked?.src);
-      if (pickedUrl) {
-        return {
-          id: workflow.id || workflow.name,
-          url: pickedUrl,
-          status: workflow.status === "failed" ? "failed" : "completed",
-        };
-      }
-    }
-  }
-
-  if (workflow.items && workflow.items.length > 0) {
-    const primaryId = workflow.metadata?.primaryMediaId;
-    if (primaryId) {
-      const target = workflow.items.find(i => (i.id === primaryId || i.name === primaryId) && i.status !== 'deleted');
-      if (target) return target;
-    }
-    
-    const firstValid = workflow.items.find(i => i.status !== 'deleted') || workflow.items[0];
-    if (firstValid) return firstValid;
+  const resolved = resolveMainMedia(workflow);
+  if (resolved) {
+    return resolved.raw || resolved;
   }
 
   // Fallback for workflows without attached items: return dummy primary item so card renders in grid
   return {
     id: workflow.id || workflow.name,
-    status: workflow.status || 'processing',
+    status: workflow.status || "processing",
     url: null,
   };
 }

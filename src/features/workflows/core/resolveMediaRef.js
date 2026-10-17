@@ -244,7 +244,14 @@ export const PICKERS = Object.freeze({
 export function resolveMainMedia(workflow, items = null) {
   if (!workflow && (!items || items.length === 0)) return null;
 
-  const candidateItems = items ?? workflow?.items ?? workflow?.media ?? [];
+  const candidateItems =
+    items ??
+    workflow?.items ??
+    workflow?.media ??
+    workflow?.images ??
+    workflow?.reference_images ??
+    workflow?.element?.images ??
+    [];
   const normalizedItems = candidateItems
     .map((item) =>
       item && item.kind && item.status
