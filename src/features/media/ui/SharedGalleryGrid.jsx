@@ -88,9 +88,6 @@ export function resolveCachedWorkflowMediaItem(workflow) {
     { workflowId: wfId }
   );
 
-  if (fallback) {
-    WORKFLOW_MEDIA_CACHE.set(workflow, fallback);
-  }
   return fallback;
 }
 

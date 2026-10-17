@@ -1,0 +1,765 @@
+{
+  "projectName": "8 oct., 19:07",
+  "projectId": "59035219-0453-454e-851d-54cf969995fc",
+  "sessions": [],
+  "workflows": [
+    {
+      "id": "862407d1-3f9d-4434-8f8f-b66298f9eab9",
+      "name": "862407d1-3f9d-4434-8f8f-b66298f9eab9",
+      "display_name": "element_692",
+      "projectId": "59035219-0453-454e-851d-54cf969995fc",
+      "workflow_type": "ELEMENT_SHEET",
+      "folder_id": null,
+      "folderId": null,
+      "primary_media_id": "2b0c442e-3807-4b28-bcfc-d919a2f7a00f",
+      "primaryMediaId": "2b0c442e-3807-4b28-bcfc-d919a2f7a00f",
+      "metadata": {
+        "displayName": "element_692",
+        "createTime": "2026-10-17T15:36:05.24176+00:00",
+        "primaryMediaId": "2b0c442e-3807-4b28-bcfc-d919a2f7a00f",
+        "sessionId": null,
+        "favorited": false,
+        "folder_id": null,
+        "folderId": null
+      }
+    },
+    {
+      "id": "a190d6ef-c2c4-4f72-be2b-bd023b267190",
+      "name": "a190d6ef-c2c4-4f72-be2b-bd023b267190",
+      "display_name": "cf047bd229767a95cc2636ca0986b050.jpg",
+      "projectId": "59035219-0453-454e-851d-54cf969995fc",
+      "workflow_type": "UPLOAD",
+      "folder_id": null,
+      "folderId": null,
+      "primary_media_id": "297af188-cfb3-4dc2-8f06-fb47358e66f4",
+      "primaryMediaId": "297af188-cfb3-4dc2-8f06-fb47358e66f4",
+      "metadata": {
+        "displayName": "cf047bd229767a95cc2636ca0986b050.jpg",
+        "createTime": "2026-10-17T13:48:07.262606+00:00",
+        "primaryMediaId": "297af188-cfb3-4dc2-8f06-fb47358e66f4",
+        "sessionId": null,
+        "favorited": false,
+        "folder_id": null,
+        "folderId": null
+      }
+    },
+    {
+      "id": "d6cf8eef-162d-4dc4-9942-4b2c791c3b62",
+      "name": "d6cf8eef-162d-4dc4-9942-4b2c791c3b62",
+      "display_name": "A figure of impossible geometry, possess",
+      "projectId": "59035219-0453-454e-851d-54cf969995fc",
+      "workflow_type": "CHARACTER_SHEET",
+      "folder_id": null,
+      "folderId": null,
+      "primary_media_id": "",
+      "primaryMediaId": "",
+      "metadata": {
+        "displayName": "A figure of impossible geometry, possess",
+        "createTime": "2026-10-17T13:45:55.653401+00:00",
+        "primaryMediaId": "",
+        "sessionId": null,
+        "favorited": false,
+        "folder_id": null,
+        "folderId": null
+      }
+    },
+    {
+      "id": "88fb3c5e-651b-4a3f-bb16-f8d4254fc51c",
+      "name": "88fb3c5e-651b-4a3f-bb16-f8d4254fc51c",
+      "display_name": "A figure of impossible geometry, possess",
+      "projectId": "59035219-0453-454e-851d-54cf969995fc",
+      "workflow_type": "CHARACTER_SHEET",
+      "folder_id": null,
+      "folderId": null,
+      "primary_media_id": "",
+      "primaryMediaId": "",
+      "metadata": {
+        "displayName": "A figure of impossible geometry, possess",
+        "createTime": "2026-10-17T13:30:40.359162+00:00",
+        "primaryMediaId": "",
+        "sessionId": null,
+        "favorited": false,
+        "folder_id": null,
+        "folderId": null
+      }
+    },
+    {
+      "id": "7423d23d-7ace-44e7-a165-3582de09f88c",
+      "name": "7423d23d-7ace-44e7-a165-3582de09f88c",
+      "display_name": "element_500",
+      "projectId": "59035219-0453-454e-851d-54cf969995fc",
+      "workflow_type": "ELEMENT_SHEET",
+      "folder_id": null,
+      "folderId": null,
+      "primary_media_id": "77223ae4-d182-4c7a-8e0e-2698e6823383",
+      "primaryMediaId": "77223ae4-d182-4c7a-8e0e-2698e6823383",
+      "metadata": {
+        "displayName": "element_500",
+        "createTime": "2026-10-17T13:29:06.484171+00:00",
+        "primaryMediaId": "77223ae4-d182-4c7a-8e0e-2698e6823383",
+        "sessionId": null,
+        "favorited": false,
+        "folder_id": null,
+        "folderId": null
+      }
+    },
+    {
+      "id": "78862069-fa3c-4e0e-8876-ac24c368ffd7",
+      "name": "78862069-fa3c-4e0e-8876-ac24c368ffd7",
+      "display_name": "pngtree-friendly-boy-light-olive-skin-dark-brown-eyes-top-bun-pixar-png-image_18977402.webp",
+      "projectId": "59035219-0453-454e-851d-54cf969995fc",
+      "workflow_type": "UPLOAD",
+      "folder_id": null,
+      "folderId": null,
+      "primary_media_id": "e61ca05d-9c4e-4db1-9f7e-ccf69270f5cd",
+      "primaryMediaId": "e61ca05d-9c4e-4db1-9f7e-ccf69270f5cd",
+      "metadata": {
+        "displayName": "pngtree-friendly-boy-light-olive-skin-dark-brown-eyes-top-bun-pixar-png-image_18977402.webp",
+        "createTime": "2026-10-17T13:28:47.734904+00:00",
+        "primaryMediaId": "e61ca05d-9c4e-4db1-9f7e-ccf69270f5cd",
+        "sessionId": null,
+        "favorited": false,
+        "folder_id": null,
+        "folderId": null
+      }
+    },
+    {
+      "id": "b43940c7-1d24-44bf-a676-7dcc105c7228",
+      "name": "b43940c7-1d24-44bf-a676-7dcc105c7228",
+      "display_name": "image.png_20261012170334.jpg",
+      "projectId": "59035219-0453-454e-851d-54cf969995fc",
+      "workflow_type": "UPLOAD",
+      "folder_id": null,
+      "folderId": null,
+      "primary_media_id": "d3dfa0d2-1bc6-4b61-92bd-50724f8adaa9",
+      "primaryMediaId": "d3dfa0d2-1bc6-4b61-92bd-50724f8adaa9",
+      "metadata": {
+        "displayName": "image.png_20261012170334.jpg",
+        "createTime": "2026-10-17T13:28:33.579035+00:00",
+        "primaryMediaId": "d3dfa0d2-1bc6-4b61-92bd-50724f8adaa9",
+        "sessionId": null,
+        "favorited": false,
+        "folder_id": null,
+        "folderId": null
+      }
+    },
+    {
+      "id": "bc1a8a5b-8ffb-4c56-bf7e-e290305d9677",
+      "name": "bc1a8a5b-8ffb-4c56-bf7e-e290305d9677",
+      "display_name": "image.png_20261012165309.jpg",
+      "projectId": "59035219-0453-454e-851d-54cf969995fc",
+      "workflow_type": "UPLOAD",
+      "folder_id": null,
+      "folderId": null,
+      "primary_media_id": "52d5735f-263c-4b8e-aebd-0e1d5a918a14",
+      "primaryMediaId": "52d5735f-263c-4b8e-aebd-0e1d5a918a14",
+      "metadata": {
+        "displayName": "image.png_20261012165309.jpg",
+        "createTime": "2026-10-17T12:38:48.792627+00:00",
+        "primaryMediaId": "52d5735f-263c-4b8e-aebd-0e1d5a918a14",
+        "sessionId": null,
+        "favorited": false,
+        "folder_id": null,
+        "folderId": null
+      }
+    }
+  ],
+  "media": [
+    {
+      "name": "2b0c442e-3807-4b28-bcfc-d919a2f7a00f",
+      "id": "2b0c442e-3807-4b28-bcfc-d919a2f7a00f",
+      "url": "https://mock-storage.local/media-asset.jpg",
+      "file_url": "https://mock-storage.local/media-asset.jpg",
+      "status": "success",
+      "error": null,
+      "projectId": "59035219-0453-454e-851d-54cf969995fc",
+      "workflowId": null,
+      "workflow_id": null,
+      "folder_id": null,
+      "folderId": null,
+      "role": null,
+      "mediaRole": null,
+      "step_id": "element_sheet",
+      "workflowStepId": "element_sheet",
+      "create_time": "2026-10-17T15:36:06.525096+00:00",
+      "createTime": "2026-10-17T15:36:06.525096+00:00",
+      "generationConfig": null,
+      "mediaMetadata": {
+        "createTime": "2026-10-17T15:36:06.525096+00:00",
+        "requestData": {
+          "promptInputs": [],
+          "clientPlatform": "CLIENT_PLATFORM_WEB"
+        },
+        "visibility": "PRIVATE"
+      },
+      "image": {
+        "generatedImage": null,
+        "userUploadedImage": {
+          "aspectRatio": "9:16"
+        },
+        "dimensions": {
+          "width": 736,
+          "height": 1308
+        }
+      },
+      "width": 736,
+      "height": 1308,
+      "aspectRatio": "9:16",
+      "ratio": "9:16",
+      "dimensions": {
+        "width": 736,
+        "height": 1308
+      },
+      "params": {
+        "ratio": "9:16",
+        "aspectRatio": "9:16",
+        "width": 736,
+        "height": 1308
+      }
+    },
+    {
+      "name": "297af188-cfb3-4dc2-8f06-fb47358e66f4",
+      "id": "297af188-cfb3-4dc2-8f06-fb47358e66f4",
+      "url": "https://mock-storage.local/media-asset.jpg",
+      "file_url": "https://mock-storage.local/media-asset.jpg",
+      "status": "success",
+      "error": null,
+      "projectId": "59035219-0453-454e-851d-54cf969995fc",
+      "workflowId": null,
+      "workflow_id": null,
+      "folder_id": null,
+      "folderId": null,
+      "role": null,
+      "mediaRole": null,
+      "step_id": "upload",
+      "workflowStepId": "upload",
+      "create_time": "2026-10-17T13:48:07.502533+00:00",
+      "createTime": "2026-10-17T13:48:07.502533+00:00",
+      "generationConfig": null,
+      "mediaMetadata": {
+        "createTime": "2026-10-17T13:48:07.502533+00:00",
+        "requestData": {
+          "promptInputs": [],
+          "clientPlatform": "CLIENT_PLATFORM_WEB"
+        },
+        "visibility": "PRIVATE"
+      },
+      "image": {
+        "generatedImage": null,
+        "userUploadedImage": {
+          "aspectRatio": "4:5"
+        },
+        "dimensions": {
+          "width": 736,
+          "height": 921
+        }
+      },
+      "width": 736,
+      "height": 921,
+      "aspectRatio": "4:5",
+      "ratio": "4:5",
+      "dimensions": {
+        "width": 736,
+        "height": 921
+      },
+      "params": {
+        "ratio": "4:5",
+        "aspectRatio": "4:5",
+        "width": 736,
+        "height": 921
+      }
+    },
+    {
+      "name": "fb2703f1-e783-464f-b2bc-023dcf9be863",
+      "id": "fb2703f1-e783-464f-b2bc-023dcf9be863",
+      "url": null,
+      "file_url": null,
+      "status": "processing",
+      "error": null,
+      "projectId": "59035219-0453-454e-851d-54cf969995fc",
+      "workflowId": null,
+      "workflow_id": null,
+      "folder_id": null,
+      "folderId": null,
+      "role": null,
+      "mediaRole": null,
+      "step_id": "character_sheet",
+      "workflowStepId": "character_sheet",
+      "create_time": "2026-10-17T13:45:56.218947+00:00",
+      "createTime": "2026-10-17T13:45:56.218947+00:00",
+      "generationConfig": null,
+      "mediaMetadata": {
+        "createTime": "2026-10-17T13:45:56.218947+00:00",
+        "requestData": {
+          "promptInputs": [],
+          "clientPlatform": "CLIENT_PLATFORM_WEB"
+        },
+        "visibility": "PRIVATE"
+      },
+      "image": {
+        "generatedImage": null,
+        "userUploadedImage": {
+          "aspectRatio": "16:9"
+        },
+        "dimensions": {
+          "width": 1344,
+          "height": 768
+        }
+      },
+      "width": 1344,
+      "height": 768,
+      "aspectRatio": "16:9",
+      "ratio": "16:9",
+      "dimensions": {
+        "width": 1344,
+        "height": 768
+      },
+      "params": {
+        "ratio": "16:9",
+        "aspectRatio": "16:9",
+        "width": 1344,
+        "height": 768
+      }
+    },
+    {
+      "name": "00337638-a23a-4dbb-9c5e-a31943bd55b2",
+      "id": "00337638-a23a-4dbb-9c5e-a31943bd55b2",
+      "url": null,
+      "file_url": null,
+      "status": "processing",
+      "error": null,
+      "projectId": "59035219-0453-454e-851d-54cf969995fc",
+      "workflowId": "88fb3c5e-651b-4a3f-bb16-f8d4254fc51c",
+      "workflow_id": "88fb3c5e-651b-4a3f-bb16-f8d4254fc51c",
+      "folder_id": null,
+      "folderId": null,
+      "role": "sheet",
+      "mediaRole": "sheet",
+      "step_id": "character_sheet",
+      "workflowStepId": "character_sheet",
+      "create_time": "2026-10-17T13:30:40.797216+00:00",
+      "createTime": "2026-10-17T13:30:40.797216+00:00",
+      "generationConfig": null,
+      "mediaMetadata": {
+        "createTime": "2026-10-17T13:30:40.797216+00:00",
+        "requestData": {
+          "promptInputs": [],
+          "clientPlatform": "CLIENT_PLATFORM_WEB"
+        },
+        "visibility": "PRIVATE"
+      },
+      "image": {
+        "generatedImage": null,
+        "userUploadedImage": {
+          "aspectRatio": "16:9"
+        },
+        "dimensions": {
+          "width": 1344,
+          "height": 768
+        }
+      },
+      "width": 1344,
+      "height": 768,
+      "aspectRatio": "16:9",
+      "ratio": "16:9",
+      "dimensions": {
+        "width": 1344,
+        "height": 768
+      },
+      "params": {
+        "ratio": "16:9",
+        "aspectRatio": "16:9",
+        "width": 1344,
+        "height": 768
+      }
+    },
+    {
+      "name": "77223ae4-d182-4c7a-8e0e-2698e6823383",
+      "id": "77223ae4-d182-4c7a-8e0e-2698e6823383",
+      "url": "https://mock-storage.local/media-asset.jpg",
+      "file_url": "https://mock-storage.local/media-asset.jpg",
+      "status": "success",
+      "error": null,
+      "projectId": "59035219-0453-454e-851d-54cf969995fc",
+      "workflowId": "7423d23d-7ace-44e7-a165-3582de09f88c",
+      "workflow_id": "7423d23d-7ace-44e7-a165-3582de09f88c",
+      "folder_id": null,
+      "folderId": null,
+      "role": "detail",
+      "mediaRole": "detail",
+      "step_id": "element_sheet",
+      "workflowStepId": "element_sheet",
+      "create_time": "2026-10-17T13:29:07.367887+00:00",
+      "createTime": "2026-10-17T13:29:07.367887+00:00",
+      "generationConfig": null,
+      "mediaMetadata": {
+        "createTime": "2026-10-17T13:29:07.367887+00:00",
+        "requestData": {
+          "promptInputs": [],
+          "clientPlatform": "CLIENT_PLATFORM_WEB"
+        },
+        "visibility": "PRIVATE"
+      },
+      "image": {
+        "generatedImage": null,
+        "userUploadedImage": {
+          "aspectRatio": "16:9"
+        },
+        "dimensions": {
+          "width": 1376,
+          "height": 768
+        }
+      },
+      "width": 1376,
+      "height": 768,
+      "aspectRatio": "16:9",
+      "ratio": "16:9",
+      "dimensions": {
+        "width": 1376,
+        "height": 768
+      },
+      "params": {
+        "ratio": "16:9",
+        "aspectRatio": "16:9",
+        "width": 1376,
+        "height": 768
+      }
+    },
+    {
+      "name": "e61ca05d-9c4e-4db1-9f7e-ccf69270f5cd",
+      "id": "e61ca05d-9c4e-4db1-9f7e-ccf69270f5cd",
+      "url": "https://mock-storage.local/media-asset.jpg",
+      "file_url": "https://mock-storage.local/media-asset.jpg",
+      "status": "success",
+      "error": null,
+      "projectId": "59035219-0453-454e-851d-54cf969995fc",
+      "workflowId": "78862069-fa3c-4e0e-8876-ac24c368ffd7",
+      "workflow_id": "78862069-fa3c-4e0e-8876-ac24c368ffd7",
+      "folder_id": null,
+      "folderId": null,
+      "role": "original",
+      "mediaRole": "original",
+      "step_id": "upload",
+      "workflowStepId": "upload",
+      "create_time": "2026-10-17T13:28:47.884865+00:00",
+      "createTime": "2026-10-17T13:28:47.884865+00:00",
+      "generationConfig": null,
+      "mediaMetadata": {
+        "createTime": "2026-10-17T13:28:47.884865+00:00",
+        "requestData": {
+          "promptInputs": [],
+          "clientPlatform": "CLIENT_PLATFORM_WEB"
+        },
+        "visibility": "PRIVATE"
+      },
+      "image": {
+        "generatedImage": null,
+        "userUploadedImage": {
+          "aspectRatio": "1:1"
+        },
+        "dimensions": {
+          "width": 360,
+          "height": 360
+        }
+      },
+      "width": 360,
+      "height": 360,
+      "aspectRatio": "1:1",
+      "ratio": "1:1",
+      "dimensions": {
+        "width": 360,
+        "height": 360
+      },
+      "params": {
+        "ratio": "1:1",
+        "aspectRatio": "1:1",
+        "width": 360,
+        "height": 360
+      }
+    },
+    {
+      "name": "e61ca05d-9c4e-4db1-9f7e-ccf69270f5cd",
+      "id": "e61ca05d-9c4e-4db1-9f7e-ccf69270f5cd",
+      "url": "https://mock-storage.local/media-asset.jpg",
+      "file_url": "https://mock-storage.local/media-asset.jpg",
+      "status": "success",
+      "error": null,
+      "projectId": "59035219-0453-454e-851d-54cf969995fc",
+      "workflowId": "7423d23d-7ace-44e7-a165-3582de09f88c",
+      "workflow_id": "7423d23d-7ace-44e7-a165-3582de09f88c",
+      "folder_id": null,
+      "folderId": null,
+      "role": "detail",
+      "mediaRole": "detail",
+      "step_id": "character_detail",
+      "workflowStepId": "character_detail",
+      "create_time": "2026-10-17T13:28:47.884865+00:00",
+      "createTime": "2026-10-17T13:28:47.884865+00:00",
+      "generationConfig": null,
+      "mediaMetadata": {
+        "createTime": "2026-10-17T13:28:47.884865+00:00",
+        "requestData": {
+          "promptInputs": [],
+          "clientPlatform": "CLIENT_PLATFORM_WEB"
+        },
+        "visibility": "PRIVATE"
+      },
+      "image": {
+        "generatedImage": null,
+        "userUploadedImage": {
+          "aspectRatio": "1:1"
+        },
+        "dimensions": {
+          "width": 360,
+          "height": 360
+        }
+      },
+      "width": 360,
+      "height": 360,
+      "aspectRatio": "1:1",
+      "ratio": "1:1",
+      "dimensions": {
+        "width": 360,
+        "height": 360
+      },
+      "params": {
+        "ratio": "1:1",
+        "aspectRatio": "1:1",
+        "width": 360,
+        "height": 360
+      }
+    },
+    {
+      "name": "d3dfa0d2-1bc6-4b61-92bd-50724f8adaa9",
+      "id": "d3dfa0d2-1bc6-4b61-92bd-50724f8adaa9",
+      "url": "https://mock-storage.local/media-asset.jpg",
+      "file_url": "https://mock-storage.local/media-asset.jpg",
+      "status": "success",
+      "error": null,
+      "projectId": "59035219-0453-454e-851d-54cf969995fc",
+      "workflowId": "b43940c7-1d24-44bf-a676-7dcc105c7228",
+      "workflow_id": "b43940c7-1d24-44bf-a676-7dcc105c7228",
+      "folder_id": null,
+      "folderId": null,
+      "role": "original",
+      "mediaRole": "original",
+      "step_id": "upload",
+      "workflowStepId": "upload",
+      "create_time": "2026-10-17T13:28:33.833285+00:00",
+      "createTime": "2026-10-17T13:28:33.833285+00:00",
+      "generationConfig": null,
+      "mediaMetadata": {
+        "createTime": "2026-10-17T13:28:33.833285+00:00",
+        "requestData": {
+          "promptInputs": [],
+          "clientPlatform": "CLIENT_PLATFORM_WEB"
+        },
+        "visibility": "PRIVATE"
+      },
+      "image": {
+        "generatedImage": null,
+        "userUploadedImage": {
+          "aspectRatio": "16:9"
+        },
+        "dimensions": {
+          "width": 1376,
+          "height": 768
+        }
+      },
+      "width": 1376,
+      "height": 768,
+      "aspectRatio": "16:9",
+      "ratio": "16:9",
+      "dimensions": {
+        "width": 1376,
+        "height": 768
+      },
+      "params": {
+        "ratio": "16:9",
+        "aspectRatio": "16:9",
+        "width": 1376,
+        "height": 768
+      }
+    },
+    {
+      "name": "d3dfa0d2-1bc6-4b61-92bd-50724f8adaa9",
+      "id": "d3dfa0d2-1bc6-4b61-92bd-50724f8adaa9",
+      "url": "https://mock-storage.local/media-asset.jpg",
+      "file_url": "https://mock-storage.local/media-asset.jpg",
+      "status": "success",
+      "error": null,
+      "projectId": "59035219-0453-454e-851d-54cf969995fc",
+      "workflowId": "7423d23d-7ace-44e7-a165-3582de09f88c",
+      "workflow_id": "7423d23d-7ace-44e7-a165-3582de09f88c",
+      "folder_id": null,
+      "folderId": null,
+      "role": "detail",
+      "mediaRole": "detail",
+      "step_id": "character_detail",
+      "workflowStepId": "character_detail",
+      "create_time": "2026-10-17T13:28:33.833285+00:00",
+      "createTime": "2026-10-17T13:28:33.833285+00:00",
+      "generationConfig": null,
+      "mediaMetadata": {
+        "createTime": "2026-10-17T13:28:33.833285+00:00",
+        "requestData": {
+          "promptInputs": [],
+          "clientPlatform": "CLIENT_PLATFORM_WEB"
+        },
+        "visibility": "PRIVATE"
+      },
+      "image": {
+        "generatedImage": null,
+        "userUploadedImage": {
+          "aspectRatio": "16:9"
+        },
+        "dimensions": {
+          "width": 1376,
+          "height": 768
+        }
+      },
+      "width": 1376,
+      "height": 768,
+      "aspectRatio": "16:9",
+      "ratio": "16:9",
+      "dimensions": {
+        "width": 1376,
+        "height": 768
+      },
+      "params": {
+        "ratio": "16:9",
+        "aspectRatio": "16:9",
+        "width": 1376,
+        "height": 768
+      }
+    },
+    {
+      "name": "52d5735f-263c-4b8e-aebd-0e1d5a918a14",
+      "id": "52d5735f-263c-4b8e-aebd-0e1d5a918a14",
+      "url": "https://mock-storage.local/media-asset.jpg",
+      "file_url": "https://mock-storage.local/media-asset.jpg",
+      "status": "success",
+      "error": null,
+      "projectId": "59035219-0453-454e-851d-54cf969995fc",
+      "workflowId": null,
+      "workflow_id": null,
+      "folder_id": null,
+      "folderId": null,
+      "role": null,
+      "mediaRole": null,
+      "step_id": "upload",
+      "workflowStepId": "upload",
+      "create_time": "2026-10-17T12:38:48.943626+00:00",
+      "createTime": "2026-10-17T12:38:48.943626+00:00",
+      "generationConfig": null,
+      "mediaMetadata": {
+        "createTime": "2026-10-17T12:38:48.943626+00:00",
+        "requestData": {
+          "promptInputs": [],
+          "clientPlatform": "CLIENT_PLATFORM_WEB"
+        },
+        "visibility": "PRIVATE"
+      },
+      "image": {
+        "generatedImage": null,
+        "userUploadedImage": {
+          "aspectRatio": "4:3"
+        },
+        "dimensions": {
+          "width": 1200,
+          "height": 896
+        }
+      },
+      "width": 1200,
+      "height": 896,
+      "aspectRatio": "4:3",
+      "ratio": "4:3",
+      "dimensions": {
+        "width": 1200,
+        "height": 896
+      },
+      "params": {
+        "ratio": "4:3",
+        "aspectRatio": "4:3",
+        "width": 1200,
+        "height": 896
+      }
+    }
+  ],
+  "elements": [
+    {
+      "id": "7b5aee4a-ded9-4667-88cc-834dc25854be",
+      "workflow_id": "7423d23d-7ace-44e7-a165-3582de09f88c",
+      "name": "element_500",
+      "description": "Please provide the reference images you would like me to analyze. Once the images are uploaded, I will immediately generate the JSON profile for you.",
+      "source_images": [
+        "77223ae4-d182-4c7a-8e0e-2698e6823383",
+        "d3dfa0d2-1bc6-4b61-92bd-50724f8adaa9",
+        "e61ca05d-9c4e-4db1-9f7e-ccf69270f5cd"
+      ],
+      "create_time": "2026-10-17T13:29:07.935111+00:00",
+      "element_type": "object",
+      "guidelines": ""
+    },
+    {
+      "id": "bd0f7979-da3b-49a8-8a85-353506c609bb",
+      "workflow_id": "862407d1-3f9d-4434-8f8f-b66298f9eab9",
+      "name": "element_692",
+      "description": "Please provide the reference images you would like me to analyze. Once you upload or attach the images, I will immediately generate the JSON profile following your exact specifications.",
+      "source_images": [
+        "2b0c442e-3807-4b28-bcfc-d919a2f7a00f"
+      ],
+      "create_time": "2026-10-17T15:36:07.249473+00:00",
+      "element_type": "object",
+      "guidelines": ""
+    }
+  ],
+  "characters": [
+    {
+      "id": "88fb3c5e-651b-4a3f-bb16-f8d4254fc51c",
+      "user_id": "7d40bff4-7cac-4f2d-8994-2642c90e40e4",
+      "project_id": "59035219-0453-454e-851d-54cf969995fc",
+      "workflow_id": "88fb3c5e-651b-4a3f-bb16-f8d4254fc51c",
+      "name": "A figure of impossible geometry, possess",
+      "title": "A figure of impossible geometry, possess",
+      "description": "A figure of impossible geometry, possessing a sharp, angular jawline dusted with iridescent, mica-flecked skin that reveals faint, glowing sub-dermal circuitry beneath the temples. They wear a towering, gravity-defying headpiece constructed from oxidized copper filigree and preserved moth wings, paired with a structured coat of heavy, charcoal-grey felted wool featuring razor-sharp, exaggerated architectural shoulders. The ensemble is cinched with a corset of translucent, liquid-glass panels, while the character maintains a regal, slightly detached posture bathed in the dramatic, high-contrast chiaroscuro of a flickering amber spotlight.",
+      "archetype": null,
+      "gender": null,
+      "style": "cinematic",
+      "traits": {},
+      "keywords": [],
+      "guidelines": [],
+      "avatar_url": null,
+      "turnaround_url": null,
+      "reference_images": [],
+      "is_favorited": false,
+      "status": "ready",
+      "created_at": "2026-10-17T13:30:40.603379+00:00",
+      "updated_at": "2026-10-17T13:30:38.73+00:00",
+      "character_info": "A figure of impossible geometry, possessing a sharp, angular jawline dusted with iridescent, mica-flecked skin that reveals faint, glowing sub-dermal circuitry beneath the temples. They wear a towering, gravity-defying headpiece constructed from oxidized copper filigree and preserved moth wings, paired with a structured coat of heavy, charcoal-grey felted wool featuring razor-sharp, exaggerated architectural shoulders. The ensemble is cinched with a corset of translucent, liquid-glass panels, while the character maintains a regal, slightly detached posture bathed in the dramatic, high-contrast chiaroscuro of a flickering amber spotlight."
+    },
+    {
+      "id": "d6cf8eef-162d-4dc4-9942-4b2c791c3b62",
+      "user_id": "7d40bff4-7cac-4f2d-8994-2642c90e40e4",
+      "project_id": "59035219-0453-454e-851d-54cf969995fc",
+      "workflow_id": "d6cf8eef-162d-4dc4-9942-4b2c791c3b62",
+      "name": "A figure of impossible geometry, possess",
+      "title": "A figure of impossible geometry, possess",
+      "description": "A figure of impossible geometry, possessing a sharp, angular jawline dusted with iridescent, mica-flecked skin that reveals faint, glowing sub-dermal circuitry beneath the temples. They wear a towering, gravity-defying headpiece constructed from oxidized copper filigree and preserved moth wings, paired with a structured coat of heavy, charcoal-grey felted wool featuring razor-sharp, exaggerated architectural shoulders. The ensemble is cinched with a corset of translucent, liquid-glass panels, while the character maintains a regal, slightly detached posture bathed in the dramatic, high-contrast chiaroscuro of a flickering amber spotlight.",
+      "archetype": null,
+      "gender": null,
+      "style": "cinematic",
+      "traits": {},
+      "keywords": [],
+      "guidelines": [],
+      "avatar_url": null,
+      "turnaround_url": null,
+      "reference_images": [],
+      "is_favorited": false,
+      "status": "ready",
+      "created_at": "2026-10-17T13:45:55.94661+00:00",
+      "updated_at": "2026-10-17T13:45:54.12+00:00",
+      "character_info": "A figure of impossible geometry, possessing a sharp, angular jawline dusted with iridescent, mica-flecked skin that reveals faint, glowing sub-dermal circuitry beneath the temples. They wear a towering, gravity-defying headpiece constructed from oxidized copper filigree and preserved moth wings, paired with a structured coat of heavy, charcoal-grey felted wool featuring razor-sharp, exaggerated architectural shoulders. The ensemble is cinched with a corset of translucent, liquid-glass panels, while the character maintains a regal, slightly detached posture bathed in the dramatic, high-contrast chiaroscuro of a flickering amber spotlight."
+    }
+  ]
+}

@@ -1,4 +1,4 @@
-﻿import { useMemo } from 'react';
+import { useMemo } from 'react';
 import { useProjectData } from '../api/workflowsApi';
 import { useWorkflowsStore } from './useWorkflowsStore';
 import { getGenerationConfig } from '@/shared/lib/referenceUtils';
@@ -11,7 +11,7 @@ import { getGenerationConfig } from '@/shared/lib/referenceUtils';
  * يحول array → object بـ key محدد
  * بدل ما نلف كل مرة على array كاملة
  */
-function indexBy(arr, key) {
+function _indexBy(arr, key) {
   const map = {};
   for (const item of arr) {
     if (item[key] != null) map[item[key]] = item;
@@ -66,7 +66,7 @@ function resolveConfig(wfItems) {
 /**
  * يبني الـ input_assets من references
  */
-function buildInputAssets(references = []) {
+function _buildInputAssets(references = []) {
   return references
     .filter(r => r?.url)
     .map(r => ({ url: r.url, asset_id: r.asset_id ?? null, role: r.role ?? null }));
@@ -124,11 +124,19 @@ export function useFilteredWorkflows(projectId) {
       if (wType === "ELEMENT_SHEET" || wType === "ELEMENT" || wType === "CHARACTER" || wType === "CHARACTER_SHEET") return false;
 
       const cleanWfId = String(wf.name || wf.id || '').replace(/^workflows\//, '');
-      const wfMedia = (wf.items?.length > 0 ? wf.items : (wf.media?.length > 0 ? wf.media : null)) 
+      const primaryId = wf.primary_media_id || wf.primaryMediaId || wf.metadata?.primaryMediaId;
+      let wfMedia = (wf.items?.length > 0 ? wf.items : (wf.media?.length > 0 ? wf.media : null)) 
         ?? mediaByWorkflow[wf.name] 
         ?? mediaByWorkflow[wf.id] 
         ?? mediaByWorkflow[cleanWfId] 
         ?? [];
+
+      if (wfMedia.length === 0 && primaryId) {
+        const matched = rawMedia.find((m) => (m.id || m.name) === primaryId);
+        if (matched) {
+          wfMedia = [matched];
+        }
+      }
       const { config, model, isUpload } = resolveConfig(wfMedia);
       
       const isWfUpload = 
@@ -178,12 +186,20 @@ export function useFilteredWorkflows(projectId) {
     // 3. Flatten and attach metadata
     return filtered.map(wf => {
       const cleanWfId = String(wf.name || wf.id || '').replace(/^workflows\//, '');
-      const wfItems = (wf.items?.length > 0 ? wf.items : (wf.media?.length > 0 ? wf.media : null)) 
+      const primaryId = wf.primary_media_id || wf.primaryMediaId || wf.metadata?.primaryMediaId;
+      let wfItems = (wf.items?.length > 0 ? wf.items : (wf.media?.length > 0 ? wf.media : null)) 
         ?? mediaByWorkflow[wf.name] 
         ?? mediaByWorkflow[wf.id] 
         ?? mediaByWorkflow[cleanWfId] 
         ?? [];
-      const { config, model, isUpload } = resolveConfig(wfItems);
+
+      if (wfItems.length === 0 && primaryId) {
+        const matched = rawMedia.find((m) => (m.id || m.name) === primaryId);
+        if (matched) {
+          wfItems = [matched];
+        }
+      }
+      const { config, model: _model, isUpload } = resolveConfig(wfItems);
 
       return {
         ...wf,
@@ -203,6 +219,7 @@ export function useFilteredWorkflows(projectId) {
     });
   }, [
     rawWorkflows,
+    rawMedia,
     mediaByWorkflow,
     modelLookup,
     filters,
