@@ -66,8 +66,6 @@ export function getWorkflowPrimaryMediaId(workflow) {
     workflow.primary_media_id ??
     workflow.primaryMediaId ??
     workflow.metadata?.primaryMediaId ??
-    workflow.element?.primary_media_id ??
-    workflow.element?.primaryMediaId ??
     workflow.character?.primary_media_id ??
     workflow.character?.primaryMediaId ??
     null;

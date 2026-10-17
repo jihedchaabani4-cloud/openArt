@@ -28,14 +28,28 @@ describe("Workflow Type Normalization", () => {
 });
 
 describe("Primary Media ID Extraction", () => {
-  it("extracts primary media id from workflow and sidecars", () => {
+  it("extracts primary media id from workflow and character sidecar while ignoring legacy element sidecar pointer", async () => {
     expect(getWorkflowPrimaryMediaId({ primary_media_id: "m-1" })).toBe("m-1");
     expect(getWorkflowPrimaryMediaId({ primaryMediaId: "m-2" })).toBe("m-2");
     expect(getWorkflowPrimaryMediaId({ metadata: { primaryMediaId: "m-3" } })).toBe("m-3");
-    expect(getWorkflowPrimaryMediaId({ element: { primary_media_id: "m-elem" } })).toBe("m-elem");
+    expect(getWorkflowPrimaryMediaId({ element: { primary_media_id: "m-elem" } })).toBeNull();
+    expect(getWorkflowPrimaryMediaId({ element: { primaryMediaId: "m-elem" } })).toBeNull();
     expect(getWorkflowPrimaryMediaId({ character: { primary_media_id: "m-char" } })).toBe("m-char");
     expect(getWorkflowPrimaryMediaId({})).toBeNull();
     expect(getWorkflowPrimaryMediaId(null)).toBeNull();
+
+    const { elementService } = await import("@/features/elements/services/elementService");
+    expect(
+      elementService.transformResponse({
+        element: { id: "el-1", workflow_id: "wf-1", primary_media_id: "legacy-el-media" },
+      }).primaryMediaId
+    ).toBeNull();
+    expect(
+      elementService.transformResponse({
+        element: { id: "el-1", workflow_id: "wf-1" },
+        workflow: { id: "wf-1", primary_media_id: "wf-primary-1" },
+      }).primaryMediaId
+    ).toBe("wf-primary-1");
   });
 });
 
@@ -140,7 +154,7 @@ describe("ELEMENT Picker (Abolished Hash Modulo)", () => {
     expect(picked.id).toBe("elem-cover");
   });
 
-  it("respects element sidecar primary_media_id", () => {
+  it("ignores legacy element sidecar pointer and uses sheet/non-detail ladder when workflow.primary_media_id is not set", () => {
     const wf = {
       id: "elem-wf",
       workflow_type: "ELEMENT",
@@ -151,7 +165,7 @@ describe("ELEMENT Picker (Abolished Hash Modulo)", () => {
       toMediaItem({ id: "sidecar-cover", url: "https://example.com/cover.png" }),
     ];
     const picked = elemPicker(wf, items);
-    expect(picked.id).toBe("sidecar-cover");
+    expect(picked.id).toBe("elem-1");
   });
 
   it("never computes character-code hash modulo when no primary is set", () => {

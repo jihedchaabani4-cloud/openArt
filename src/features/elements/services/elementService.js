@@ -140,7 +140,7 @@ export const elementService = {
     return {
       elementId: res.element?.id || res.id,
       workflowId: res.element?.workflow_id || res.workflow_id || res.id,
-      primaryMediaId: res.element?.primary_media_id,
+      primaryMediaId: res.workflow?.primary_media_id || res.primary_media_id || null,
       primaryMediaUrl: res.element?.primary_media_url || res.primary_media_url,
     };
   },
