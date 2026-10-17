@@ -7,19 +7,20 @@ import { cn } from "@/shared/lib/utils";
 /**
  * MediaTile - Compact selectable tile for sidebars, pickers, and asset trays.
  */
-export const MediaTile = React.forwardRef(function MediaTile(
-  {
-    item,
-    isSelected = false,
-    badge,
-    onSelect,
-    onClick,
-    aspectRatio = "1/1",
-    className,
-    ...rendererProps
-  },
-  ref
-) {
+export const MediaTile = React.memo(
+  React.forwardRef(function MediaTile(
+    {
+      item,
+      isSelected = false,
+      badge,
+      onSelect,
+      onClick,
+      aspectRatio = "1/1",
+      className,
+      ...rendererProps
+    },
+    ref
+  ) {
   const handleClick = (e) => {
     if (onSelect) {
       onSelect(item, e);
@@ -65,6 +66,8 @@ export const MediaTile = React.forwardRef(function MediaTile(
       )}
     </div>
   );
-});
+})
+);
+MediaTile.displayName = "MediaTile";
 
 export default MediaTile;

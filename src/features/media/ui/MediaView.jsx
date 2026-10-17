@@ -19,23 +19,24 @@ import { cn } from "@/shared/lib/utils";
  * - The UI never branches on `workflow_type`.
  * - Orchestrates lifecycle states: 'loading', 'empty', 'notFound', 'processing', 'failed', 'ready'.
  */
-export const MediaView = React.forwardRef(function MediaView(
-  {
-    mediaId,
-    workflowId,
-    projectId,
-    variant = "renderer",
-    loadingFallback,
-    emptyFallback,
-    notFoundFallback,
-    failedFallback,
-    processingFallback,
-    children,
-    className,
-    ...restProps
-  },
-  ref
-) {
+export const MediaView = React.memo(
+  React.forwardRef(function MediaView(
+    {
+      mediaId,
+      workflowId,
+      projectId,
+      variant = "renderer",
+      loadingFallback,
+      emptyFallback,
+      notFoundFallback,
+      failedFallback,
+      processingFallback,
+      children,
+      className,
+      ...restProps
+    },
+    ref
+  ) {
   const { item, state } = useResolvedMedia({ mediaId, workflowId, projectId });
 
   // Custom render-prop escape hatch
@@ -140,6 +141,8 @@ export const MediaView = React.forwardRef(function MediaView(
     default:
       return <MediaRenderer ref={ref} item={item} className={className} {...restProps} />;
   }
-});
+})
+);
+MediaView.displayName = "MediaView";
 
 export default MediaView;

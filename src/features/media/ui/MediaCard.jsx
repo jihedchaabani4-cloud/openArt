@@ -8,21 +8,22 @@ import { cn } from "@/shared/lib/utils";
  * MediaCard - Standard card container for feed and studio views.
  * Wraps MediaRenderer with header, action, overlay, and footer projection slots.
  */
-export const MediaCard = React.forwardRef(function MediaCard(
-  {
-    item,
-    headerSlot,
-    actionSlot,
-    overlaySlot,
-    footerSlot,
-    isSelected = false,
-    className,
-    onClick,
-    onDoubleClick,
-    ...rendererProps
-  },
-  ref
-) {
+export const MediaCard = React.memo(
+  React.forwardRef(function MediaCard(
+    {
+      item,
+      headerSlot,
+      actionSlot,
+      overlaySlot,
+      footerSlot,
+      isSelected = false,
+      className,
+      onClick,
+      onDoubleClick,
+      ...rendererProps
+    },
+    ref
+  ) {
   return (
     <div
       ref={ref}
@@ -74,6 +75,8 @@ export const MediaCard = React.forwardRef(function MediaCard(
       )}
     </div>
   );
-});
+})
+);
+MediaCard.displayName = "MediaCard";
 
 export default MediaCard;

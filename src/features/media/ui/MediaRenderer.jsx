@@ -28,11 +28,12 @@ function normalizeAspectRatio(ar) {
  * Consumes a normalized MediaItem (or explicit overrides) and renders <img>, <video>,
  * or accessible fallback placeholders for processing, failed, and empty states.
  */
-export const MediaRenderer = React.forwardRef(function MediaRenderer(
-  {
-    item,
-    url: propUrl,
-    thumbUrl: propThumbUrl,
+export const MediaRenderer = React.memo(
+  React.forwardRef(function MediaRenderer(
+    {
+      item,
+      url: propUrl,
+      thumbUrl: propThumbUrl,
     kind: propKind,
     status: propStatus,
     error: propError,
@@ -186,6 +187,8 @@ export const MediaRenderer = React.forwardRef(function MediaRenderer(
       />
     </div>
   );
-});
+  })
+);
+MediaRenderer.displayName = "MediaRenderer";
 
 export default MediaRenderer;

@@ -116,4 +116,55 @@ describe("mediaCacheIndex - Primary Workflow Ownership", () => {
     expect(charPlacement.role).toBe("detail");
     expect(charPlacement.workflowId).toBe("wf-char");
   });
+
+  it("preserves MediaItem reference stability across index rebuilds for unchanged media objects", () => {
+    const m1 = {
+      id: "media-1",
+      workflow_id: "wf-1",
+      role: "output",
+      url: "https://example.com/1.png",
+    };
+    const m2 = {
+      id: "media-2",
+      workflow_id: "wf-2",
+      role: "output",
+      url: "https://example.com/2.png",
+    };
+
+    const projectData1 = {
+      projectContents: {
+        workflows: [{ id: "wf-1" }, { id: "wf-2" }],
+        media: [m1, m2],
+      },
+    };
+
+    const index1 = buildProjectMediaIndex(projectData1);
+    const item1_first = index1.byMediaId.get("media-1");
+    const item2_first = index1.byMediaId.get("media-2");
+
+    // Rebuild with a new container object, but unchanged m1 and an updated m2_new
+    const m2_new = {
+      id: "media-2",
+      workflow_id: "wf-2",
+      role: "output",
+      url: "https://example.com/2-updated.png",
+    };
+    const projectData2 = {
+      projectContents: {
+        workflows: [{ id: "wf-1" }, { id: "wf-2" }],
+        media: [m1, m2_new],
+      },
+    };
+
+    const index2 = buildProjectMediaIndex(projectData2);
+    const item1_second = index2.byMediaId.get("media-1");
+    const item2_second = index2.byMediaId.get("media-2");
+
+    // m1 was unchanged in memory -> exact same MediaItem reference returned
+    expect(item1_second).toBe(item1_first);
+    // m2 was updated -> new MediaItem reference
+    expect(item2_second).not.toBe(item2_first);
+    expect(item2_second.url).toBe("https://example.com/2-updated.png");
+  });
 });
+

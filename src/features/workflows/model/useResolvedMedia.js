@@ -10,7 +10,7 @@
  * - When workflowId is provided, resolves the main media of that workflow.
  */
 
-import { useMemo } from "react";
+import { useMemo, useRef } from "react";
 import { useProjectData } from "@/features/workflows/api/queries/useProjectData";
 import { resolveMediaRef } from "@/features/workflows/core/resolveMediaRef";
 import { buildProjectMediaIndex } from "./mediaCacheIndex";
@@ -50,7 +50,7 @@ export function useResolvedMedia({ mediaId, workflowId, projectId } = {}) {
     return buildProjectMediaIndex(projectData);
   }, [projectData]);
 
-  return useMemo(() => {
+  const rawResult = useMemo(() => {
     if (!projectId) {
       return { item: null, state: "notFound" };
     }
@@ -101,6 +101,20 @@ export function useResolvedMedia({ mediaId, workflowId, projectId } = {}) {
 
     return { item: null, state: "notFound" };
   }, [projectId, isLoading, isError, cleanMediaId, cleanWorkflowId, index]);
+
+  const stableRef = useRef({ item: null, state: "loading", result: rawResult });
+  if (
+    stableRef.current.item === rawResult.item &&
+    stableRef.current.state === rawResult.state
+  ) {
+    return stableRef.current.result;
+  }
+  stableRef.current = {
+    item: rawResult.item,
+    state: rawResult.state,
+    result: rawResult,
+  };
+  return rawResult;
 }
 
 export default useResolvedMedia;

@@ -40,6 +40,8 @@ export function isHomeWorkflowMedia(m, workflowId) {
   return false;
 }
 
+const RAW_ITEM_CACHE = new WeakMap();
+
 /**
  * Builds or retrieves the memoized index for a projectData payload.
  *
@@ -77,10 +79,14 @@ export function buildProjectMediaIndex(projectData) {
 
     const rawWorkflowId = String(m.workflowId || m.workflow_id || "");
 
-    const normalized = toMediaItem(m, {
-      workflowId: rawWorkflowId,
-      role: m.role || m.mediaRole,
-    });
+    let normalized = RAW_ITEM_CACHE.get(m);
+    if (!normalized || normalized.workflowId !== rawWorkflowId) {
+      normalized = toMediaItem(m, {
+        workflowId: rawWorkflowId,
+        role: m.role || m.mediaRole,
+      });
+      RAW_ITEM_CACHE.set(m, normalized);
+    }
 
     // 1. Composite lookup: role is a property of the (workflowId, mediaId) placement
     if (rawWorkflowId) {
