@@ -1,3 +1,5 @@
+import { resolveMainMedia } from "@/features/workflows/core/resolveMediaRef";
+
 const DATE_HEADING_FORMATTER = new Intl.DateTimeFormat("en-US", {
   month: "long",
   day: "numeric",
@@ -10,8 +12,59 @@ export function isVideoUrl(url = "") {
   return /\.(mp4|webm|mov)$/i.test(url);
 }
 
+/**
+ * Resolves the display media for a library entry:
+ * 1. If `entry.primary_media` is explicitly present (user pin), return it.
+ * 2. Otherwise resolve from `entry.candidates` / `entry.workflow_media` / `entry.workflow.items`
+ *    using the canonical `resolveMainMedia(entry.workflow, candidates)` ladder.
+ *
+ * @param {Object|null} entry
+ * @returns {Object}
+ */
+export function resolveLibraryEntryMedia(entry) {
+  if (!entry || typeof entry !== "object") return {};
+
+  const primary = entry.primary_media;
+  if (
+    primary &&
+    typeof primary === "object" &&
+    Boolean(primary.url || primary.id || primary.status)
+  ) {
+    return primary;
+  }
+
+  const candidates =
+    entry.candidates ||
+    entry.workflow_media ||
+    entry.workflow?.items ||
+    entry.workflow?.media ||
+    [];
+
+  if (!Array.isArray(candidates) || candidates.length === 0) {
+    return {};
+  }
+
+  const resolved = resolveMainMedia(entry.workflow || {}, candidates);
+  if (!resolved) {
+    return {};
+  }
+
+  const raw = resolved.raw || {};
+  return {
+    ...resolved,
+    id: resolved.id || raw.id || null,
+    url: resolved.url || null,
+    status: raw.status || resolved.status || null,
+    width: resolved.width ?? raw.width ?? null,
+    height: resolved.height ?? raw.height ?? null,
+    error_message: raw.error_message ?? resolved.error ?? null,
+    create_time: raw.create_time ?? raw.created_at ?? resolved.createdAt ?? null,
+  };
+}
+
 export function getEntryTimestamp(entry) {
-  return entry?.primary_media?.create_time || entry?.workflow?.create_time || null;
+  const media = resolveLibraryEntryMedia(entry);
+  return media?.create_time || media?.created_at || entry?.workflow?.create_time || entry?.workflow?.created_at || null;
 }
 
 export function formatDateHeading(value) {
@@ -44,7 +97,7 @@ export function filterLibraryItems(items = [], { searchQuery = "", mediaFilter =
 
   return items.filter((entry) => {
     const workflow = entry?.workflow || {};
-    const media = entry?.primary_media || {};
+    const media = resolveLibraryEntryMedia(entry);
     const isVideo = isVideoUrl(media.url);
     const category = resolveLibraryCategory(entry);
     const searchableText = [
@@ -70,7 +123,7 @@ export function buildGroupedPhotos(items = []) {
   const groups = new Map();
 
   items.forEach((entry, index) => {
-    const media = entry?.primary_media || {};
+    const media = resolveLibraryEntryMedia(entry);
     if (!media.url) return;
 
     const width = Number(media.width) || 3;
@@ -100,7 +153,7 @@ export function buildGroupedPhotos(items = []) {
 }
 
 export function buildDownloadFilename(entry) {
-  const media = entry?.primary_media || {};
+  const media = resolveLibraryEntryMedia(entry);
   const workflow = entry?.workflow || {};
   const rawUrl = media.url || "";
   const extensionMatch = rawUrl.match(/\.([a-z0-9]+)(?:[?#].*)?$/i);

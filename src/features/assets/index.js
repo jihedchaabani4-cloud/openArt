@@ -14,6 +14,7 @@ export {
   getEntryTimestamp,
   isVideoUrl,
   resolveLibraryCategory,
+  resolveLibraryEntryMedia,
 } from "./model/assetsLibrary";
 export { useAssetsSelection } from "./model/useAssetsSelection";
 export { AssetsGroupSection } from "./ui/AssetsGroupSection";

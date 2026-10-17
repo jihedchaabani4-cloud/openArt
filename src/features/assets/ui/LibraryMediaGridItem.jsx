@@ -11,6 +11,7 @@ import { ButtonGroup } from "@/shared/ui/button-group";
 import { Button } from "@/shared/ui/button";
 import { ConfirmDeleteDialog } from "@/widgets/dialogs/ConfirmDeleteDialog";
 import { ActionBtn } from "@/widgets/StudioLayout/GenerationsStudio/MediaGridItem/ActionBtn";
+import { resolveLibraryEntryMedia } from "../model/assetsLibrary";
 
 function isVideoUrl(url = "") {
   return /\.(mp4|webm|mov)$/i.test(url);
@@ -19,7 +20,7 @@ function isVideoUrl(url = "") {
 function normalizeMediaStatus(status, url) {
   const value = (status || "").toString().toLowerCase();
 
-  if (value === "success" || value === "completed") return "completed";
+  if (value === "success" || value === "completed" || value === "ready") return "completed";
   if (["processing", "pending", "uploading", "queued", "in_progress", "starting"].includes(value)) {
     return "processing";
   }
@@ -43,7 +44,7 @@ export function LibraryMediaGridItem({
   const { mutate: removeWorkflow } = useRemoveWorkflow();
 
   const workflow = entry?.workflow || {};
-  const media = entry?.primary_media || {};
+  const media = useMemo(() => resolveLibraryEntryMedia(entry), [entry]);
 
   const isVideo = useMemo(() => isVideoUrl(media.url), [media.url]);
   const isLiked = !!workflow.favorited;

@@ -102,8 +102,17 @@ function matchesId(item, targetId) {
 function isSheetMedia(item) {
   if (!item) return false;
   if (item.role === "sheet" || item.role === "turnaround") return true;
-  const rawRole = item.raw?.role || item.raw?.step_id || item.raw?.mediaRole;
-  if (rawRole === "sheet" || rawRole === "turnaround" || rawRole === "character_sheet") return true;
+  const rawRole = String(
+    item.raw?.role || item.raw?.step_id || item.raw?.mediaRole || item.raw?.workflowStepId || ""
+  ).trim().toLowerCase();
+  if (
+    rawRole === "sheet" ||
+    rawRole === "turnaround" ||
+    rawRole === "character_sheet" ||
+    rawRole === "cae"
+  ) {
+    return true;
+  }
   return false;
 }
 
@@ -116,9 +125,45 @@ function isSheetMedia(item) {
 function isDetailMedia(item) {
   if (!item) return false;
   if (item.role === "detail") return true;
-  const rawRole = item.raw?.role || item.raw?.step_id || item.raw?.mediaRole;
+  const rawRole = String(
+    item.raw?.role || item.raw?.step_id || item.raw?.mediaRole || item.raw?.workflowStepId || ""
+  ).trim().toLowerCase();
   if (rawRole === "detail" || rawRole === "character_detail") return true;
   return false;
+}
+
+/**
+ * Stably orders candidate MediaItems by created_at / create_time ascending when timestamps exist.
+ *
+ * @param {Array<MediaItem>} items
+ * @returns {Array<MediaItem>}
+ */
+function orderByCreatedAtAsc(items = []) {
+  if (!Array.isArray(items) || items.length <= 1) return items;
+
+  const withIndex = items.map((item, index) => {
+    const rawTs =
+      item?.raw?.created_at ??
+      item?.raw?.create_time ??
+      item?.raw?.createdAt ??
+      item?.createdAt ??
+      null;
+    const ts = rawTs ? Date.parse(rawTs) : NaN;
+    return { item, index, ts: Number.isFinite(ts) ? ts : null };
+  });
+
+  if (!withIndex.some((entry) => entry.ts !== null)) {
+    return items;
+  }
+
+  return withIndex
+    .sort((a, b) => {
+      if (a.ts !== null && b.ts !== null && a.ts !== b.ts) {
+        return a.ts - b.ts;
+      }
+      return a.index - b.index;
+    })
+    .map((entry) => entry.item);
 }
 
 /**
@@ -143,7 +188,7 @@ export function pickUploadPrimaryMedia(workflow, items = []) {
 
 /**
  * GENERATION primary media picker:
- * Rule: primary_media_id -> first ready item with valid URL -> first ready item -> items[0].
+ * Rule: primary_media_id -> earliest non-detail ready item with valid URL -> first ready item -> items[0].
  *
  * @param {Object} workflow
  * @param {Array<MediaItem>} items
@@ -158,18 +203,22 @@ export function pickGenerationPrimaryMedia(workflow, items = []) {
     if (match) return match;
   }
 
-  const readyItemWithUrl = items.find((i) => i.status === "ready" && Boolean(i.url));
+  const ordered = orderByCreatedAtAsc(items);
+  const nonDetailItems = ordered.filter((i) => !isDetailMedia(i));
+  const pool = nonDetailItems.length > 0 ? nonDetailItems : ordered;
+
+  const readyItemWithUrl = pool.find((i) => i.status === "ready" && Boolean(i.url));
   if (readyItemWithUrl) return readyItemWithUrl;
 
-  const readyItem = items.find((i) => i.status === "ready");
+  const readyItem = pool.find((i) => i.status === "ready");
   if (readyItem) return readyItem;
 
-  return items.find((i) => Boolean(i.url)) || items[0] || null;
+  return pool.find((i) => Boolean(i.url)) || pool[0] || items[0] || null;
 }
 
 /**
  * ELEMENT primary media picker:
- * Rule: primary_media_id -> first item with valid URL -> items[0].
+ * Rule: primary_media_id -> sheet/non-detail item with valid URL -> first item with valid URL -> items[0].
  * Hash modulo is completely abolished.
  *
  * @param {Object} workflow
@@ -185,7 +234,14 @@ export function pickElementPrimaryMedia(workflow, items = []) {
     if (match) return match;
   }
 
-  return items.find((i) => Boolean(i.url)) || items[0] || null;
+  const ordered = orderByCreatedAtAsc(items);
+  const sheetWithUrl = ordered.find((i) => isSheetMedia(i) && Boolean(i.url));
+  if (sheetWithUrl) return sheetWithUrl;
+
+  const nonDetailWithUrl = ordered.find((i) => !isDetailMedia(i) && Boolean(i.url));
+  if (nonDetailWithUrl) return nonDetailWithUrl;
+
+  return ordered.find((i) => Boolean(i.url)) || ordered[0] || null;
 }
 
 /**
