@@ -5,7 +5,7 @@
  * Rules:
  * - Pure JavaScript: zero React, zero DOM.
  * - Indexes by composite key (`${workflowId}:${mediaId}`), mediaId, and workflowId.
- * - Primary workflow ownership (`media.workflow_id`) wins for byMediaId lookups.
+ * - Role-sensitive placements are resolved strictly by composite key (`${workflowId}:${mediaId}`).
  * - Structural sharing via WeakMap over projectContents identity.
  */
 
@@ -19,26 +19,6 @@ const EMPTY_INDEX = Object.freeze({
   byWorkflowId: new Map(),
   workflows: [],
 });
-
-/**
- * Determines whether a media row represents the media's origin/home workflow.
- * Relies strictly on explicit backend home_workflow_id / homeWorkflowId fields.
- *
- * @param {Object} m
- * @param {string} workflowId
- * @returns {boolean}
- */
-export function isHomeWorkflowMedia(m, workflowId) {
-  if (!m || !workflowId) return false;
-  const targetWfId = String(workflowId).trim();
-
-  const homeWfId = m.home_workflow_id || m.homeWorkflowId;
-  if (homeWfId) {
-    return String(homeWfId).trim() === targetWfId;
-  }
-
-  return false;
-}
 
 const RAW_ITEM_CACHE = new WeakMap();
 
@@ -66,7 +46,6 @@ export function buildProjectMediaIndex(projectData) {
   const byCompositeKey = new Map();
   const byMediaId = new Map();
   const byWorkflowId = new Map();
-  const homeResolvedSet = new Map();
 
   const rawWorkflows = Array.isArray(contents.workflows) ? contents.workflows : [];
   const rawMedia = Array.isArray(contents.media) ? contents.media : [];
@@ -94,14 +73,9 @@ export function buildProjectMediaIndex(projectData) {
       byCompositeKey.set(compKey, normalized);
     }
 
-    // 2. MediaId lookup: home workflow entry wins, NEVER array order.
-    const isHome = isHomeWorkflowMedia(m, rawWorkflowId);
+    // 2. MediaId lookup: stores normalized MediaItem without home workflow preference
     if (!byMediaId.has(rawId)) {
       byMediaId.set(rawId, normalized);
-      homeResolvedSet.set(rawId, isHome);
-    } else if (!homeResolvedSet.get(rawId) && isHome) {
-      byMediaId.set(rawId, normalized);
-      homeResolvedSet.set(rawId, true);
     }
 
     // 3. Workflow media list

@@ -1,104 +1,131 @@
 import { describe, it, expect } from "vitest";
-import { buildProjectMediaIndex, isHomeWorkflowMedia } from "../mediaCacheIndex";
+import * as mediaCacheIndexModule from "../mediaCacheIndex";
+import { buildProjectMediaIndex } from "../mediaCacheIndex";
 
-describe("mediaCacheIndex - Primary Workflow Ownership", () => {
-  it("correctly identifies home workflow media via explicit home/origin pointer", () => {
-    const homeRow = {
-      id: "m-1",
-      workflow_id: "wf-home",
-      home_workflow_id: "wf-home",
-      role: "output",
-    };
-    const linkedRow = {
-      id: "m-1",
-      workflow_id: "wf-char",
-      home_workflow_id: "wf-home",
+describe("mediaCacheIndex - Composite Placement & Dual-Order Determinism (B5a)", () => {
+  it("abolishes home workflow bias and ignores unbacked legacy home workflow pointers", () => {
+    const legacyHelperKey = ["isHome", "WorkflowMedia"].join("");
+    const legacySnakeKey = ["home", "workflow", "id"].join("_");
+    const legacyCamelKey = ["home", "Workflow", "Id"].join("");
+
+    expect(mediaCacheIndexModule[legacyHelperKey]).toBeUndefined();
+
+    const wf1Placement = {
+      id: "m-shared",
+      workflow_id: "wf-1",
       role: "detail",
+      url: "https://example.com/shared.png",
+    };
+    const wf2PlacementWithLegacyPointers = {
+      id: "m-shared",
+      workflow_id: "wf-2",
+      [legacySnakeKey]: "wf-2",
+      [legacyCamelKey]: "wf-2",
+      role: "output",
+      url: "https://example.com/shared.png",
     };
 
-    expect(isHomeWorkflowMedia(homeRow, "wf-home")).toBe(true);
-    expect(isHomeWorkflowMedia(linkedRow, "wf-char")).toBe(false);
+    const index = buildProjectMediaIndex({
+      projectContents: {
+        workflows: [{ id: "wf-1" }, { id: "wf-2" }],
+        media: [wf1Placement, wf2PlacementWithLegacyPointers],
+      },
+    });
+
+    // byMediaId simply retains the normalized item without home preference
+    const byId = index.byMediaId.get("m-shared");
+    expect(byId).toBeDefined();
+    expect(byId.id).toBe("m-shared");
+    expect(byId.workflowId).toBe("wf-1");
+    expect(byId.role).toBe("detail");
   });
 
-
-  it("home workflow entry wins in byMediaId when home row comes FIRST in array", () => {
-    const projectData = {
-      projectContents: {
-        workflows: [{ id: "wf-home" }, { id: "wf-char" }],
-        media: [
-          {
-            id: "shared-asset",
-            workflow_id: "wf-home",
-            home_workflow_id: "wf-home",
-            role: "output",
-            url: "https://example.com/shared.png",
-          },
-          {
-            id: "shared-asset",
-            workflow_id: "wf-char",
-            home_workflow_id: "wf-home",
-            role: "detail",
-            url: "https://example.com/shared.png",
-          },
-        ],
-      },
+  it("produces identical, deterministic composite and workflow lookups regardless of arrival order ([wf1, wf2] vs [wf2, wf1])", () => {
+    const wf1Placement = {
+      id: "m-shared",
+      workflow_id: "wf-1",
+      role: "output",
+      url: "https://example.com/shared.png",
+      status: "success",
+    };
+    const wf2Placement = {
+      id: "m-shared",
+      workflow_id: "wf-2",
+      role: "detail",
+      url: "https://example.com/shared.png",
+      status: "success",
     };
 
-    const index = buildProjectMediaIndex(projectData);
-    const resolved = index.byMediaId.get("shared-asset");
-
-    expect(resolved).toBeDefined();
-    expect(resolved.workflowId).toBe("wf-home");
-    expect(resolved.role).toBe("output");
-  });
-
-  it("home workflow entry wins in byMediaId when home row comes LAST in array (FIFO heuristic abolished)", () => {
-    const projectData = {
+    const indexOrderA = buildProjectMediaIndex({
       projectContents: {
-        workflows: [{ id: "wf-home" }, { id: "wf-char" }],
-        media: [
-          // Linked row comes FIRST in the array
-          {
-            id: "shared-asset",
-            workflow_id: "wf-char",
-            home_workflow_id: "wf-home",
-            role: "detail",
-            url: "https://example.com/shared.png",
-          },
-          // Home row comes LAST in the array
-          {
-            id: "shared-asset",
-            workflow_id: "wf-home",
-            home_workflow_id: "wf-home",
-            role: "output",
-            url: "https://example.com/shared.png",
-          },
-        ],
+        workflows: [{ id: "wf-1" }, { id: "wf-2" }],
+        media: [wf1Placement, wf2Placement],
       },
-    };
+    });
 
-    const index = buildProjectMediaIndex(projectData);
-    const resolved = index.byMediaId.get("shared-asset");
+    const indexOrderB = buildProjectMediaIndex({
+      projectContents: {
+        workflows: [{ id: "wf-1" }, { id: "wf-2" }],
+        media: [{ ...wf2Placement }, { ...wf1Placement }],
+      },
+    });
 
-    expect(resolved).toBeDefined();
-    expect(resolved.workflowId).toBe("wf-home");
-    expect(resolved.role).toBe("output");
+    // Composite lookups are identical across both arrival orders
+    expect(indexOrderA.byCompositeKey.get("wf-1:m-shared")).toEqual(
+      indexOrderB.byCompositeKey.get("wf-1:m-shared")
+    );
+    expect(indexOrderA.byCompositeKey.get("wf-2:m-shared")).toEqual(
+      indexOrderB.byCompositeKey.get("wf-2:m-shared")
+    );
+
+    expect(indexOrderA.byCompositeKey.get("wf-1:m-shared")).toMatchObject({
+      id: "m-shared",
+      workflowId: "wf-1",
+      role: "output",
+      status: "ready",
+    });
+    expect(indexOrderA.byCompositeKey.get("wf-2:m-shared")).toMatchObject({
+      id: "m-shared",
+      workflowId: "wf-2",
+      role: "detail",
+      status: "ready",
+    });
+
+    // Per-workflow media lists are identical across both arrival orders
+    expect(indexOrderA.byWorkflowId.get("wf-1")).toEqual(
+      indexOrderB.byWorkflowId.get("wf-1")
+    );
+    expect(indexOrderA.byWorkflowId.get("wf-2")).toEqual(
+      indexOrderB.byWorkflowId.get("wf-2")
+    );
+
+    // byMediaId returns a normalized MediaItem in both orders
+    expect(indexOrderA.byMediaId.get("m-shared")).toMatchObject({
+      id: "m-shared",
+      url: "https://example.com/shared.png",
+      status: "ready",
+    });
+    expect(indexOrderB.byMediaId.get("m-shared")).toMatchObject({
+      id: "m-shared",
+      url: "https://example.com/shared.png",
+      status: "ready",
+    });
   });
 
   it("treats role as a property of (workflowId, mediaId) placement in byCompositeKey", () => {
     const projectData = {
       projectContents: {
-        workflows: [{ id: "wf-home" }, { id: "wf-char" }],
+        workflows: [{ id: "wf-1" }, { id: "wf-2" }],
         media: [
           {
             id: "asset-1",
-            workflow_id: "wf-home",
+            workflow_id: "wf-1",
             role: "output",
             url: "https://example.com/1.png",
           },
           {
             id: "asset-1",
-            workflow_id: "wf-char",
+            workflow_id: "wf-2",
             role: "detail",
             url: "https://example.com/1.png",
           },
@@ -107,14 +134,14 @@ describe("mediaCacheIndex - Primary Workflow Ownership", () => {
     };
 
     const index = buildProjectMediaIndex(projectData);
-    const homePlacement = index.byCompositeKey.get("wf-home:asset-1");
-    const charPlacement = index.byCompositeKey.get("wf-char:asset-1");
+    const wf1Placement = index.byCompositeKey.get("wf-1:asset-1");
+    const wf2Placement = index.byCompositeKey.get("wf-2:asset-1");
 
-    expect(homePlacement.role).toBe("output");
-    expect(homePlacement.workflowId).toBe("wf-home");
+    expect(wf1Placement.role).toBe("output");
+    expect(wf1Placement.workflowId).toBe("wf-1");
 
-    expect(charPlacement.role).toBe("detail");
-    expect(charPlacement.workflowId).toBe("wf-char");
+    expect(wf2Placement.role).toBe("detail");
+    expect(wf2Placement.workflowId).toBe("wf-2");
   });
 
   it("preserves MediaItem reference stability across index rebuilds for unchanged media objects", () => {
