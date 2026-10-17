@@ -26,9 +26,13 @@ export function useWorkflowActions(workflow, item = null) {
   const { mutate: removeAsset } = useRemoveAsset();
 
   // If item is provided, use it (or resolve by id if it's a mediaId string). Otherwise, use the primary item of the workflow.
-  const effectiveMediaId = typeof item === "string" ? item : (item?.id || item?.name || item?.asset_id);
-  const targetItem = (typeof item === "object" && item !== null)
-    ? item
+  const isNormalizedMediaItem = Boolean(
+    item && typeof item === "object" && item.kind && item.status && "raw" in item
+  );
+  const rawOrItem = isNormalizedMediaItem ? (item.raw || item) : item;
+  const effectiveMediaId = typeof rawOrItem === "string" ? rawOrItem : (rawOrItem?.id || rawOrItem?.name || rawOrItem?.asset_id);
+  const targetItem = (typeof rawOrItem === "object" && rawOrItem !== null)
+    ? rawOrItem
     : (workflow?.items?.find((i) => (i.id || i.name || i.asset_id) === effectiveMediaId) || (effectiveMediaId ? { id: effectiveMediaId } : null) || getPrimaryMedia(workflow));
   // When there's no media yet (placeholder workflow), treat as processing so the
   // UI shows a spinner rather than a blank or disappearing card.
@@ -80,7 +84,7 @@ export function useWorkflowActions(workflow, item = null) {
   const handleDelete = () => {
     if (!canDelete) return;
     const projectId = workflow.projectId || workflow.project_id;
-    if (item) {
+    if (item && !isNormalizedMediaItem) {
       removeAsset({ assetId: item.name || item.id, projectId });
     } else {
       removeWorkflow({ workflowId: workflow.name || workflow.id, projectId });

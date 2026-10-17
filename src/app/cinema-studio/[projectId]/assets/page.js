@@ -14,15 +14,13 @@ import {
   GeneratedPromptBar,
   useRealBackendModels,
 } from "@/features/prompt-bar/index.platform"
-import { RowsPhotoAlbum } from 'react-photo-album'
-import 'react-photo-album/rows.css'
+import { SharedGalleryGrid } from "@/features/media"
 import { MediaGridItem } from "@/widgets/StudioLayout/GenerationsStudio/MediaGridItem"
-import { GoogleIcon } from "@/shared/ui/GoogleIcon"
 
 import { usePromptStore } from "@/features/prompt-bar/model/usePromptStore";
-import { getPrimaryMedia } from "@/shared/lib/generationUtils";
-import { getItemMetadata as getDisplayMeta, getStudioGridDensity, buildCollectionCoverById } from "@/shared/lib/displayUtils";
+import { buildCollectionCoverById } from "@/shared/lib/displayUtils";
 import { LoadingScreen } from "@/shared/ui/LoadingScreen";
+import { logger } from "@/shared/lib/logger";
 
 const PAGE_SIZE = 30;
 
@@ -94,7 +92,7 @@ export default function AssetsPage({ params }) {
                     queryClient.invalidateQueries({ queryKey: queryKeys.projectData.byProject(finalProj) });
                 }
             } catch (err) {
-                console.error("Generation execution failed:", err);
+                logger.error("generation_execution_failed", { error: err });
             }
         },
         [projectId, realModels, runGenerate, queryClient]
@@ -229,76 +227,6 @@ export default function AssetsPage({ params }) {
         }
     }, [hasMore, loadMore, visibleItems.length]);
 
-    const density = getStudioGridDensity(gridSize);
-
-    const renderPhoto = React.useCallback(
-        (_, { photo, width, height }) => {
-            return (
-                <MediaGridItem
-                    key={photo.key}
-                    collection={photo.collection}
-                    workflow={photo.workflow}
-                    itemType={photo.itemType}
-                    coverUrl={photo.coverUrl}
-                    coverIsVideo={photo.coverIsVideo}
-                    projectId={projectId}
-                    onClick={photo.itemType === "collection" ? handleCollectionClick : handleWorkflowClick}
-                    className="rounded-xl border-none shadow-xl"
-                    width={width}
-                    height={height}
-                />
-            );
-        },
-        [handleCollectionClick, handleWorkflowClick, projectId]
-    );
-
-    const albumRender = React.useMemo(() => ({
-        photo: renderPhoto,
-    }), [renderPhoto]);
-
-    const photos = React.useMemo(() => {
-        return visibleItems.reduce((acc, item, i) => {
-            if (item.type === "collection") {
-                acc.push({
-                    src: "data:image/svg+xml;charset=utf-8,<svg xmlns='http://www.w3.org/2000/svg'/>",
-                    width: 1200,
-                    height: 1200,
-                    key: item.key,
-                    itemType: "collection",
-                    collection: item.data,
-                    coverUrl: collectionCoverById.get(item.data?.id)?.url || null,
-                    coverIsVideo: collectionCoverById.get(item.data?.id)?.isVideo || false,
-                });
-                return acc;
-            }
-
-            const workflow = item.data;
-            const primaryItem = getPrimaryMedia(workflow);
-            if (!primaryItem) return acc;
-
-            const meta = getDisplayMeta(primaryItem, workflow);
-            const aspect = meta?.aspect ?? "3/4";
-            const [wStr, hStr] = aspect.split("/");
-            const wNum = parseFloat(wStr) || 3;
-            const hNum = parseFloat(hStr) || 4;
-            const BASE = 1200;
-            const width  = Math.round(BASE * (wNum / Math.max(wNum, hNum)));
-            const height = Math.round(BASE * (hNum / Math.max(wNum, hNum)));
-
-            const url = meta?.url || "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
-
-            acc.push({
-                src:      url,
-                width,
-                height,
-                key:      workflow.id || workflow.name || String(i),
-                itemType: "workflow",
-                workflow,
-            });
-            return acc;
-        }, []);
-    }, [visibleItems, collectionCoverById]);
-
     if ((isLoading || isFoldersLoading) && combinedItems.length === 0) {
         return <LoadingScreen message="Loading assets" />
     }
@@ -329,12 +257,15 @@ export default function AssetsPage({ params }) {
                                 transition={{ duration: 0.15 }}
                                 className="flex flex-col gap-6 w-full pb-32"
                             >
-                                <RowsPhotoAlbum
-                                    photos={photos}
-                                    targetRowHeight={density.targetRowHeight}
-                                    spacing={density.spacing}
-                                    rowConstraints={{ singleRowMaxHeight: density.targetRowHeight * density.maxRowHeightMultiplier }}
-                                    render={albumRender}
+                                <SharedGalleryGrid
+                                    entries={visibleItems}
+                                    collectionCoverById={collectionCoverById}
+                                    gridSize={gridSize}
+                                    projectId={projectId}
+                                    CardComponent={MediaGridItem}
+                                    onWorkflowClick={handleWorkflowClick}
+                                    onCollectionClick={handleCollectionClick}
+                                    itemClassName="rounded-xl border-none shadow-xl"
                                 />
                                 {hasMore && (
                                     <div className="flex justify-center pt-2 text-sm text-white/45">

@@ -1,8 +1,9 @@
 import React from "react";
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { render, act } from "@testing-library/react";
 import { MediaTile } from "../MediaTile";
 import { MediaCard } from "../MediaCard";
+import { SharedGalleryGrid } from "../SharedGalleryGrid";
 import { buildProjectMediaIndex } from "@/features/workflows/model/mediaCacheIndex";
 
 describe("Media Presentation Memoization & Re-renders (100 Tiles)", () => {
@@ -90,6 +91,118 @@ describe("Media Presentation Memoization & Re-renders (100 Tiles)", () => {
       if (i !== 42) {
         expect(renderCounts[`media-${i}`]).toBe(1);
       }
+    }
+  });
+
+  it("SharedGalleryGrid resolves normalized MediaItems from workflow entries with zero HTTP fetches and only re-renders 1 of 100 tiles when 1 workflow changes", () => {
+    const fetchSpy = vi.fn();
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = fetchSpy;
+    const clientWidthSpy = vi
+      .spyOn(HTMLElement.prototype, "clientWidth", "get")
+      .mockReturnValue(1200);
+
+    try {
+      const workflows = Array.from({ length: 100 }, (_, i) => ({
+        id: `wf-${i}`,
+        workflow_type: "GENERATION",
+        items: [
+          {
+            id: `media-${i}`,
+            workflow_id: `wf-${i}`,
+            url: `https://example.com/wf-asset-${i}.png`,
+            role: "output",
+            status: "completed",
+            width: 1024,
+            height: 1024,
+          },
+        ],
+      }));
+
+      const entries = workflows.map((w) => ({
+        type: "workflow",
+        data: w,
+        key: w.id,
+      }));
+
+      const renderCounts = {};
+      const receivedItems = {};
+
+      const MonitoredStudioCard = React.memo(function MonitoredStudioCard({ item, workflow, width, height }) {
+        const key = workflow?.id || item?.id;
+        renderCounts[key] = (renderCounts[key] || 0) + 1;
+        receivedItems[key] = item;
+        return <MediaCard item={item} style={{ width, height }} />;
+      });
+
+      const { rerender } = render(
+        <SharedGalleryGrid
+          entries={entries}
+          gridSize="md"
+          CardComponent={MonitoredStudioCard}
+        />
+      );
+
+      // Verify zero background HTTP fetches
+      expect(fetchSpy).not.toHaveBeenCalled();
+
+      // Verify all 100 cards rendered once and received normalized MediaItem objects
+      expect(Object.keys(renderCounts)).toHaveLength(100);
+      for (let i = 0; i < 100; i++) {
+        expect(renderCounts[`wf-${i}`]).toBe(1);
+        expect(receivedItems[`wf-${i}`]).toMatchObject({
+          id: `media-${i}`,
+          workflowId: `wf-${i}`,
+          kind: "image",
+          status: "ready",
+          url: `https://example.com/wf-asset-${i}.png`,
+        });
+      }
+
+      // Mutate strictly 1 workflow (wf-42), keeping the other 99 workflow objects unchanged in memory
+      const updatedWorkflows = workflows.map((w, idx) => {
+        if (idx === 42) {
+          return {
+            ...w,
+            items: [
+              {
+                ...w.items[0],
+                url: "https://example.com/wf-asset-42-updated.png",
+              },
+            ],
+          };
+        }
+        return w;
+      });
+
+      const updatedEntries = updatedWorkflows.map((w) => ({
+        type: "workflow",
+        data: w,
+        key: w.id,
+      }));
+
+      act(() => {
+        rerender(
+          <SharedGalleryGrid
+            entries={updatedEntries}
+            gridSize="md"
+            CardComponent={MonitoredStudioCard}
+          />
+        );
+      });
+
+      expect(fetchSpy).not.toHaveBeenCalled();
+      expect(renderCounts["wf-42"]).toBe(2);
+      expect(receivedItems["wf-42"].url).toBe("https://example.com/wf-asset-42-updated.png");
+
+      for (let i = 0; i < 100; i++) {
+        if (i !== 42) {
+          expect(renderCounts[`wf-${i}`]).toBe(1);
+        }
+      }
+    } finally {
+      clientWidthSpy.mockRestore();
+      globalThis.fetch = originalFetch;
     }
   });
 
