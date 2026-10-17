@@ -8,7 +8,7 @@ import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows"
 import { useCharacterWorkflows } from "@/features/characters"
 import { Plus } from "lucide-react"
 import { usePromptStore } from "@/features/studio";
-import { resolveMainMedia } from "@/features/workflows"
+import { resolveMainMedia } from "@/features/workflows/core/resolveMediaRef"
 import { getStudioGridDensity, getCachedImageDimensions, setCachedImageDimensions } from "@/shared/lib/displayUtils"
 import { LoadingScreen } from "@/shared/ui/LoadingScreen"
 
