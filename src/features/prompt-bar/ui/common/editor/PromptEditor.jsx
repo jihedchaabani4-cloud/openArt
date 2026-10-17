@@ -270,11 +270,9 @@ export function PromptEditor({
     onError: handlePromptEditorError,
   }), [EDITOR_NODES]);
 
-  // Generate a key that changes ONLY when the node classes change (HMR)
-  // This forces LexicalComposer to remount, preventing "Type mismatch" errors.
-  const editorKey = React.useMemo(() => {
-    return `editor-${Date.now()}`;
-  }, []);
+  // Generate a key that is deterministic and stable across SSR hydration per instance
+  const editorId = React.useId();
+  const editorKey = `editor-${editorId}`;
 
   const handleLexicalChange = (editorState) => {
     editorState.read(() => {

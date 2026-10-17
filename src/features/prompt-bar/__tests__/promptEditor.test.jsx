@@ -40,4 +40,18 @@ describe("PromptEditor Clean Code & Logger", () => {
     expect(screen.getByTestId("custom-test-plugin")).toBeDefined();
     expect(pluginMounted).toBe(true);
   });
+
+  it("preserves LexicalComposer DOM node and editor instance across re-renders (no remount)", () => {
+    const { rerender, container } = render(
+      <PromptEditor value="initial" onChange={() => {}} />
+    );
+    const contentEditableFirst = container.querySelector('[contenteditable="true"]');
+    expect(contentEditableFirst).toBeDefined();
+
+    rerender(<PromptEditor value="updated" onChange={() => {}} />);
+    const contentEditableSecond = container.querySelector('[contenteditable="true"]');
+
+    // With a stable editorKey (useId), LexicalComposer does not remount on re-renders
+    expect(contentEditableSecond).toBe(contentEditableFirst);
+  });
 });
