@@ -57,4 +57,34 @@ describe("useCharacterWorkflows", () => {
     expect(charWf.status).toBe("completed");
     expect(charWf.primary_media_url).toBe("https://example.com/detail.png");
   });
+
+  it("prioritizes processing status over url presence for in-flight character sheets", () => {
+    useProjectData.mockReturnValue({
+      data: {
+        projectContents: {
+          workflows: [
+            {
+              id: "char-in-flight",
+              workflow_type: "CHARACTER",
+            },
+          ],
+          media: [
+            {
+              id: "m-preview",
+              workflow_id: "char-in-flight",
+              role: "sheet",
+              url: "https://example.com/preview-frame.png",
+              status: "processing",
+            },
+          ],
+        },
+      },
+      isLoading: false,
+      isError: false,
+    });
+
+    const { result } = renderHook(() => useCharacterWorkflows("proj-1"));
+    expect(result.current.workflows).toHaveLength(1);
+    expect(result.current.workflows[0].status).toBe("processing");
+  });
 });

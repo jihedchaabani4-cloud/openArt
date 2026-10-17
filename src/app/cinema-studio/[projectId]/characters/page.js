@@ -106,17 +106,23 @@ export default function CharactersPage({ params }) {
             let wNum = natural?.width;
             let hNum = natural?.height;
 
-            // 2. Second priority: If natural dimensions not yet available, use canonical aspectRatio
+            // 2. Second priority: If natural dimensions not yet available, use primaryItem dimensions or aspectRatio
             if (!wNum || !hNum) {
-                const rawAspect = primaryItem.aspectRatio;
-                if (rawAspect && rawAspect !== "auto") {
-                    const [wStr, hStr] = String(rawAspect).split("/");
-                    const pw = parseFloat(wStr);
-                    const ph = parseFloat(hStr);
-                    if (pw && ph && !isNaN(pw) && !isNaN(ph)) {
-                        wNum = pw;
-                        hNum = ph;
-                        aspect = rawAspect;
+                if (primaryItem.width && primaryItem.height) {
+                    wNum = primaryItem.width;
+                    hNum = primaryItem.height;
+                    aspect = `${wNum}/${hNum}`;
+                } else {
+                    const rawAspect = primaryItem.aspectRatio || primaryItem.raw?.aspectRatio;
+                    if (rawAspect && rawAspect !== "auto") {
+                        const [wStr, hStr] = String(rawAspect).split("/");
+                        const pw = parseFloat(wStr);
+                        const ph = parseFloat(hStr);
+                        if (pw && ph && !isNaN(pw) && !isNaN(ph)) {
+                            wNum = pw;
+                            hNum = ph;
+                            aspect = rawAspect;
+                        }
                     }
                 }
             }

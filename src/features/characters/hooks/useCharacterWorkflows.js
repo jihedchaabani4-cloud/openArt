@@ -11,10 +11,12 @@ import { resolveMainMedia } from "@/features/workflows/core/resolveMediaRef";
  */
 export function useCharacterWorkflows(projectId) {
   const { data, isLoading, isError } = useProjectData(projectId);
-  const workflows = data?.projectContents?.workflows ?? [];
-  const media = data?.projectContents?.media ?? [];
+  const projectContents = data?.projectContents;
 
   const characterWorkflows = useMemo(() => {
+    const workflows = projectContents?.workflows || [];
+    const media = projectContents?.media || [];
+
     return workflows
       .filter((w) => {
         const type = String(w.workflow_type || "").toUpperCase();
@@ -36,10 +38,10 @@ export function useCharacterWorkflows(projectId) {
         if (resolved) {
           if (resolved.status === "failed") {
             status = "failed";
-          } else if (resolved.status === "ready" || resolved.status === "completed" || Boolean(resolved.url)) {
-            status = "completed";
           } else if (resolved.status === "processing") {
             status = "processing";
+          } else if (resolved.status === "ready" || resolved.status === "completed" || Boolean(resolved.url)) {
+            status = "completed";
           }
         }
 
@@ -54,7 +56,7 @@ export function useCharacterWorkflows(projectId) {
           isMultiMedia: items.length > 1,
         };
       });
-  }, [workflows, media]);
+  }, [projectContents]);
 
   return { workflows: characterWorkflows, isLoading, isError };
 }
