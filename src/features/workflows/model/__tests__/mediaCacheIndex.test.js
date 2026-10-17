@@ -20,13 +20,6 @@ describe("mediaCacheIndex - Primary Workflow Ownership", () => {
     expect(isHomeWorkflowMedia(linkedRow, "wf-char")).toBe(false);
   });
 
-  it("correctly identifies home workflow media via role ('output' / 'original' vs 'detail' / 'reference')", () => {
-    const outputRow = { id: "m-1", workflow_id: "wf-home", role: "output" };
-    const detailRow = { id: "m-1", workflow_id: "wf-char", role: "detail" };
-
-    expect(isHomeWorkflowMedia(outputRow, "wf-home")).toBe(true);
-    expect(isHomeWorkflowMedia(detailRow, "wf-char")).toBe(false);
-  });
 
   it("home workflow entry wins in byMediaId when home row comes FIRST in array", () => {
     const projectData = {

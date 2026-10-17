@@ -22,6 +22,7 @@ const EMPTY_INDEX = Object.freeze({
 
 /**
  * Determines whether a media row represents the media's origin/home workflow.
+ * Relies strictly on explicit backend home_workflow_id / homeWorkflowId fields.
  *
  * @param {Object} m
  * @param {string} workflowId
@@ -31,35 +32,12 @@ export function isHomeWorkflowMedia(m, workflowId) {
   if (!m || !workflowId) return false;
   const targetWfId = String(workflowId).trim();
 
-  // 1. Explicit home/origin/source workflow ID on the media row
-  const homeWfId =
-    m.home_workflow_id ||
-    m.homeWorkflowId ||
-    m.origin_workflow_id ||
-    m.originWorkflowId ||
-    m.source_workflow_id ||
-    m.sourceWorkflowId ||
-    m.media_workflow_id ||
-    m.mediaWorkflowId ||
-    m.media?.workflow_id ||
-    m.media?.workflowId ||
-    m.raw?.workflow_id ||
-    null;
-
+  const homeWfId = m.home_workflow_id || m.homeWorkflowId;
   if (homeWfId) {
     return String(homeWfId).trim() === targetWfId;
   }
 
-  // 2. Role-based heuristics: 'output' and 'original' are intrinsic origin/home roles
-  const role = m.role || m.mediaRole;
-  if (role === "output" || role === "original") {
-    return true;
-  }
-  if (role === "detail" || role === "reference") {
-    return false;
-  }
-
-  return true;
+  return false;
 }
 
 /**
