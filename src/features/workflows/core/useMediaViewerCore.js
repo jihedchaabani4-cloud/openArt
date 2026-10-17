@@ -3,11 +3,11 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import {
   getItemMetadata,
-  getPrimaryMedia,
   intrinsicSizeToCssAspect,
   getCachedImageDimensions,
   setCachedImageDimensions,
 } from "@/shared/lib/generationUtils";
+import { resolveMainMedia } from "./resolveMediaRef";
 
 // Module-level cache: src → true once the media has loaded once
 const MAX_LOADED_CACHE = 800;
@@ -48,7 +48,15 @@ export function useMediaViewerCore({ workflow, item: propItem = null, mediaId = 
       );
       if (found) return found;
     }
-    if (workflow) return getPrimaryMedia(workflow);
+    if (workflow) {
+      const resolved = resolveMainMedia(workflow);
+      if (resolved) return resolved.raw || resolved;
+      return {
+        id: workflow.id || workflow.name,
+        status: workflow.status || "processing",
+        url: null,
+      };
+    }
     if (effectiveMediaId) return { id: effectiveMediaId };
     return null;
   }, [propItem, workflow, effectiveMediaId]);

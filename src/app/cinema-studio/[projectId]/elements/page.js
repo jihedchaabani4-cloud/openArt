@@ -11,7 +11,7 @@ import { Plus } from "lucide-react"
 import { Button } from "@/shared/ui/button";
 import { usePromptStore } from "@/features/studio";
 import { LoadingScreen } from "@/shared/ui/LoadingScreen";
-import { getPrimaryMedia } from "@/shared/lib/generationUtils";
+import { resolveMainMedia } from "@/features/workflows/core/resolveMediaRef";
 import { getItemMetadata as getDisplayMeta, getStudioGridDensity, getCachedImageDimensions, setCachedImageDimensions } from "@/shared/lib/displayUtils";
 
 import { RowsPhotoAlbum } from 'react-photo-album';
@@ -24,7 +24,16 @@ import { NewElementDialog } from "@/widgets/NewElementDialog";
 
 const PAGE_SIZE = 30;
 
-
+function resolvePrimaryRawMedia(workflow) {
+    if (!workflow) return null;
+    const resolved = resolveMainMedia(workflow);
+    if (resolved) return resolved.raw || resolved;
+    return {
+        id: workflow.id || workflow.name,
+        status: workflow.status || "processing",
+        url: null,
+    };
+}
 
 export default function ElementsPage({ params }) {
     const { projectId } = React.use(params)
@@ -78,7 +87,7 @@ export default function ElementsPage({ params }) {
     // Probe and cache authentic natural dimensions for element images
     React.useEffect(() => {
         visibleSheets.forEach((workflow) => {
-            const primaryItem = getPrimaryMedia(workflow);
+            const primaryItem = resolvePrimaryRawMedia(workflow);
             if (!primaryItem) return;
             const meta = getDisplayMeta(primaryItem, workflow);
             const url = meta?.url || primaryItem?.url || primaryItem?.file_url;
@@ -103,7 +112,7 @@ export default function ElementsPage({ params }) {
     const photos = React.useMemo(() => {
         void dimensionsVersion;
         return visibleSheets.reduce((acc, workflow, i) => {
-            const primaryItem = getPrimaryMedia(workflow);
+            const primaryItem = resolvePrimaryRawMedia(workflow);
             if (!primaryItem) return acc;
 
             const meta = getDisplayMeta(primaryItem, workflow);

@@ -5,7 +5,7 @@ import { useParams, useRouter, useSearchParams } from "next/navigation"
 import { GoogleIcon } from "@/shared/ui/GoogleIcon"
 import { Button } from "@/shared/ui/button"
 import { downloadFile } from "@/shared/lib/utils"
-import { getPrimaryMediaConfig } from "@/shared/lib/generationUtils"
+import { resolveMainMedia } from "@/features/workflows/core/resolveMediaRef"
 import { EditableDisplayName } from "@/shared/ui/EditableDisplayName"
 import { useUpdateWorkflow, useDeleteMedia } from "@/features/workflows/api/workflowsApi"
 import { useProjectFolders } from "@/features/folders"
@@ -25,7 +25,9 @@ function toTitleCase(value) {
 }
 
 function buildCleanWorkflowTitle(workflow) {
-    const primaryConfig = getPrimaryMediaConfig(workflow) || {}
+    const primaryMedia = resolveMainMedia(workflow)
+    const primaryRaw = primaryMedia?.raw || primaryMedia
+    const primaryConfig = primaryRaw?.generationConfig || {}
     const rawTitle =
         workflow?.display_name ||
         workflow?.metadata?.displayName ||

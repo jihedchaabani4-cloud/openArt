@@ -332,14 +332,7 @@ export function intrinsicSizeToCssAspect(width, height) {
   return `${Math.round(width)} / ${Math.round(height)}`;
 }
 
-/**
- * Returns the primary media item for a workflow (CAE or upload).
- * Fallback to the first item if no CAE/upload found.
- * 
- * @param {Object} workflow - The workflow object containing items
- * @returns {Object|null} - The primary media item
- */
-export function getPrimaryMedia(workflow) {
+function resolvePrimaryRawMedia(workflow) {
   if (!workflow) return null;
 
   const resolved = resolveMainMedia(workflow);
@@ -356,13 +349,26 @@ export function getPrimaryMedia(workflow) {
 }
 
 /**
+ * Returns the primary media item for a workflow (CAE or upload).
+ * Fallback to the first item if no CAE/upload found.
+ *
+ * @deprecated Use `resolveMainMedia` from `@/features/workflows/core/resolveMediaRef` instead.
+ * @param {Object} workflow - The workflow object containing items
+ * @returns {Object|null} - The primary media item
+ */
+export function getPrimaryMedia(workflow) {
+  return resolvePrimaryRawMedia(workflow);
+}
+
+/**
  * Returns the generation configuration of the primary media.
- * 
+ *
+ * @deprecated Use `resolveMainMedia` from `@/features/workflows/core/resolveMediaRef` instead.
  * @param {Object} workflow - The workflow object
  * @returns {Object|null} - The generation configuration
  */
 export function getPrimaryMediaConfig(workflow) {
-  const primary = getPrimaryMedia(workflow);
+  const primary = resolvePrimaryRawMedia(workflow);
   return primary?.generationConfig || null;
 }
 
@@ -420,7 +426,7 @@ export function getWorkflowFolderId(workflow) {
 }
 
 function getWorkflowMediaTime(workflow) {
-  const media = getPrimaryMedia(workflow);
+  const media = resolvePrimaryRawMedia(workflow);
   const raw =
     media?.updated_at ||
     media?.updatedAt ||
@@ -446,7 +452,7 @@ export function buildCollectionCoverById(workflows) {
     const folderId = getWorkflowFolderId(workflow);
     if (!folderId) return;
 
-    const media = getPrimaryMedia(workflow);
+    const media = resolvePrimaryRawMedia(workflow);
     const meta = getItemMetadata(media, workflow);
     if (!meta?.url || meta.status !== "completed") return;
 

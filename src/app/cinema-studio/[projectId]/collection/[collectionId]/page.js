@@ -23,9 +23,10 @@ import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { Button } from "@/shared/ui/button";
 
 import { usePromptStore } from "@/features/prompt-bar/model/usePromptStore";
-import { getPrimaryMedia } from "@/shared/lib/generationUtils";
+import { resolveMainMedia } from "@/features/workflows/core/resolveMediaRef";
 import { getItemMetadata as getDisplayMeta, getStudioGridDensity, buildCollectionCoverById } from "@/shared/lib/displayUtils";
 import { LoadingScreen } from "@/shared/ui/LoadingScreen";
+import { logger } from "@/shared/lib/logger";
 
 const PAGE_SIZE = 30;
 
@@ -220,7 +221,7 @@ export default function CollectionDetailPage({ params }) {
     try {
       await uploadMedia(files, { collectionId });
     } catch (err) {
-      console.error("Collection upload failed:", err);
+      logger.error("Collection upload failed", { message: err?.message });
     } finally {
       if (fileInputRef.current) fileInputRef.current.value = "";
     }
@@ -256,7 +257,7 @@ export default function CollectionDetailPage({ params }) {
           queryClient.invalidateQueries({ queryKey: queryKeys.projectData.byProject(finalProj) });
         }
       } catch (err) {
-        console.error("Generation failed:", err);
+        logger.error("Generation failed", { message: err?.message });
       }
     },
     [projectId, collectionId, realModels, runGenerate, queryClient]
@@ -301,7 +302,15 @@ export default function CollectionDetailPage({ params }) {
       }
 
       const workflow = item.data;
-      const primaryItem = getPrimaryMedia(workflow);
+      if (!workflow) return acc;
+      const resolved = resolveMainMedia(workflow);
+      const primaryItem = resolved
+        ? (resolved.raw || resolved)
+        : {
+            id: workflow.id || workflow.name,
+            status: workflow.status || "processing",
+            url: null,
+          };
       if (!primaryItem) return acc;
 
       const meta = getDisplayMeta(primaryItem, workflow);

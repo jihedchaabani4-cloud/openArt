@@ -1,6 +1,18 @@
 import { extractFeaturesFromPrompt, getFeatureInfoFromLabel } from "@/features/prompt-bar/model/feature-constants";
-import { getPrimaryMedia, getPrimaryMediaConfig, getItemMetadata } from "@/shared/lib/generationUtils";
+import { getItemMetadata } from "@/shared/lib/generationUtils";
+import { resolveMainMedia } from "@/features/workflows/core/resolveMediaRef";
 import { promptBarService } from "@/features/prompt-bar/api/promptBarService";
+
+function resolvePrimaryRawMedia(workflow) {
+  if (!workflow) return null;
+  const resolved = resolveMainMedia(workflow);
+  if (resolved) return resolved.raw || resolved;
+  return {
+    id: workflow.id || workflow.name,
+    status: workflow.status || "processing",
+    url: null,
+  };
+}
 
 const ELEMENT_MODE_BY_DNA_TYPE = {
   CHARACTER: "character",
@@ -110,11 +122,11 @@ export function buildElementPrompt(basePrompt = "", traits = []) {
 }
 
 export function buildElementSheetDraft(workflow, targetItem = null) {
-  const currentItem = targetItem || getPrimaryMedia(workflow);
+  const primaryMedia = resolvePrimaryRawMedia(workflow);
+  const currentItem = targetItem || primaryMedia;
   if (!workflow || !currentItem) return null;
 
-  const primaryMedia = getPrimaryMedia(workflow);
-  const primaryConfig = getPrimaryMediaConfig(workflow) || {};
+  const primaryConfig = primaryMedia?.generationConfig || {};
   const meta = getItemMetadata(currentItem);
   const primaryMeta = getItemMetadata(primaryMedia);
   const workflowPrompt = primaryConfig.prompt || currentItem?.params?.prompt || meta.prompt || "";

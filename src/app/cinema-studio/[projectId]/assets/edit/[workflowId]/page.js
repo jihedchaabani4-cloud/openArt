@@ -6,7 +6,8 @@ import { useFilteredWorkflows } from "@/features/workflows/model/useFilteredWork
 import { EditMediaView } from "@/widgets/EditMediaView"
 import { WorkflowMediaGallery } from "@/features/workflows/ui/WorkflowMediaGallery"
 import { EditNavbar } from "@/widgets/EditNavbar/EditNavbar"
-import { getPrimaryMedia, getItemMetadata } from "@/shared/lib/generationUtils"
+import { getItemMetadata } from "@/shared/lib/generationUtils"
+import { resolveMainMedia } from "@/features/workflows/core/resolveMediaRef"
 import { useSetPrimaryMedia } from "@/features/workflows/api/workflowsApi"
 import { LoadingScreen } from "@/shared/ui/LoadingScreen"
 
@@ -44,7 +45,15 @@ export default function AssetEditPage() {
     // Sync activeItem when workflow is loaded
     React.useEffect(() => {
         if (workflow) {
-            const currentItem = activeItem || getPrimaryMedia(workflow);
+            const resolved = resolveMainMedia(workflow);
+            const primaryItem = resolved
+                ? (resolved.raw || resolved)
+                : {
+                    id: workflow.id || workflow.name,
+                    status: workflow.status || "processing",
+                    url: null,
+                };
+            const currentItem = activeItem || primaryItem;
             if (!activeItem) setActiveItem(currentItem);
         }
     }, [workflow, activeItem]);

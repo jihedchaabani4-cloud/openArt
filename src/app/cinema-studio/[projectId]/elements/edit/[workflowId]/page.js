@@ -9,7 +9,8 @@ import { WorkflowMediaGallery } from "@/features/workflows/ui/WorkflowMediaGalle
 import { EditNavbar } from "@/widgets/EditNavbar/EditNavbar";
 import { useElementStore } from "@/features/prompt-bar/model/useElementStore";
 import { buildElementSheetDraft, syncElementDraft } from "@/features/workflows/model/elementSheetConfig";
-import { getPrimaryMedia, getItemMetadata } from "@/shared/lib/generationUtils";
+import { getItemMetadata } from "@/shared/lib/generationUtils";
+import { resolveMainMedia } from "@/features/workflows/core/resolveMediaRef";
 import { LoadingScreen } from "@/shared/ui/LoadingScreen";
 
 export default function ElementWorkflowEditPage() {
@@ -55,7 +56,15 @@ export default function ElementWorkflowEditPage() {
     React.useEffect(() => {
         if (!workflow) return undefined;
 
-        const currentItem = activeItem || getPrimaryMedia(workflow);
+        const resolved = resolveMainMedia(workflow);
+        const primaryItem = resolved
+            ? (resolved.raw || resolved)
+            : {
+                id: workflow.id || workflow.name,
+                status: workflow.status || "processing",
+                url: null,
+            };
+        const currentItem = activeItem || primaryItem;
         if (!currentItem) return undefined;
         if (!activeItem) setActiveItem(currentItem);
 

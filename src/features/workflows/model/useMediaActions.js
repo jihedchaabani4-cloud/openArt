@@ -1,6 +1,7 @@
 import { useWorkflowsStore } from "./useWorkflowsStore";
 import { useToggleWorkflowLike, useRemoveWorkflow } from "../api/workflowsApi";
-import { getItemMetadata, getPrimaryMedia, getPrimaryMediaConfig, getGenerationConfig } from "@/shared/lib/generationUtils";
+import { getItemMetadata, getGenerationConfig } from "@/shared/lib/generationUtils";
+import { resolveMainMedia } from "../core/resolveMediaRef";
 import { downloadFile } from "@/shared/lib/utils";
 import { useRemoveAsset } from "@/features/media/api/mediaApi";
 import { usePathname, useRouter } from "next/navigation";
@@ -9,6 +10,17 @@ import { buildElementSheetDraft, syncElementDraft } from "./elementSheetConfig";
 import { canAnyModelAcceptEntity } from "@/features/studio";
 import { promptBarService } from "@/features/prompt-bar/api/promptBarService";
 import { useRealBackendModels } from "@/features/prompt-bar/core/useRealBackendModels";
+
+function resolvePrimaryRawMedia(workflow) {
+  if (!workflow) return null;
+  const resolved = resolveMainMedia(workflow);
+  if (resolved) return resolved.raw || resolved;
+  return {
+    id: workflow.id || workflow.name,
+    status: workflow.status || "processing",
+    url: null,
+  };
+}
 
 /**
  * useWorkflowActions
@@ -33,7 +45,7 @@ export function useWorkflowActions(workflow, item = null) {
   const effectiveMediaId = typeof rawOrItem === "string" ? rawOrItem : (rawOrItem?.id || rawOrItem?.name || rawOrItem?.asset_id);
   const targetItem = (typeof rawOrItem === "object" && rawOrItem !== null)
     ? rawOrItem
-    : (workflow?.items?.find((i) => (i.id || i.name || i.asset_id) === effectiveMediaId) || (effectiveMediaId ? { id: effectiveMediaId } : null) || getPrimaryMedia(workflow));
+    : (workflow?.items?.find((i) => (i.id || i.name || i.asset_id) === effectiveMediaId) || (effectiveMediaId ? { id: effectiveMediaId } : null) || resolvePrimaryRawMedia(workflow));
   // When there's no media yet (placeholder workflow), treat as processing so the
   // UI shows a spinner rather than a blank or disappearing card.
   const metadata = targetItem 

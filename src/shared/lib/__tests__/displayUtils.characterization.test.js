@@ -104,4 +104,45 @@ describe("Characterization: Current Primary Media Resolution Behavior", () => {
       expect(result.id).toBe("empty-wf-1");
     });
   });
+
+  describe("B5b: legacy getPrimaryMedia callers migrated to resolveMainMedia", () => {
+    it("marks getPrimaryMedia and getPrimaryMediaConfig as @deprecated shims in displayUtils.js with zero internal callers", async () => {
+      const fs = await import("node:fs");
+      const path = await import("node:path");
+      const displayUtilsPath = path.resolve(__dirname, "../displayUtils.js");
+      const source = fs.readFileSync(displayUtilsPath, "utf8");
+
+      expect(source).toContain("@deprecated");
+      const matches = source.match(/\bgetPrimaryMedia\s*\(/g) || [];
+      // Only the export function getPrimaryMedia(workflow) declaration itself should match
+      expect(matches).toHaveLength(1);
+    });
+
+    it("migrates all 10 external legacy caller modules off getPrimaryMedia and getPrimaryMediaConfig", async () => {
+      const fs = await import("node:fs");
+      const path = await import("node:path");
+      const srcRoot = path.resolve(__dirname, "../../..");
+
+      const migratedFiles = [
+        "app/cinema-studio/[projectId]/assets/edit/[workflowId]/page.js",
+        "app/cinema-studio/[projectId]/assets/page.js",
+        "app/cinema-studio/[projectId]/collection/[collectionId]/page.js",
+        "app/cinema-studio/[projectId]/elements/edit/[workflowId]/page.js",
+        "app/cinema-studio/[projectId]/elements/page.js",
+        "features/elements/hooks/useNewElement.js",
+        "features/workflows/core/useMediaViewerCore.js",
+        "features/workflows/model/elementSheetConfig.js",
+        "features/workflows/model/useMediaActions.js",
+        "widgets/EditNavbar/EditNavbar.jsx",
+      ];
+
+      for (const relPath of migratedFiles) {
+        const fullPath = path.join(srcRoot, relPath);
+        const content = fs.readFileSync(fullPath, "utf8");
+        expect(content, `${relPath} should not reference getPrimaryMedia`).not.toMatch(/\bgetPrimaryMedia\b/);
+        expect(content, `${relPath} should not reference getPrimaryMediaConfig`).not.toMatch(/\bgetPrimaryMediaConfig\b/);
+      }
+    });
+  });
 });
+

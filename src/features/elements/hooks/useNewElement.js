@@ -6,7 +6,7 @@ import { useCreateElementSheetMutation } from "./useCreateElementSheetMutation";
 import { useElementSheetWorkflows } from "./useElementSheetWorkflows";
 import { useProjectData } from "@/features/workflows/api/workflowsApi";
 import { useWorkflowsStore } from "@/features/workflows";
-import { getPrimaryMedia } from "@/shared/lib/generationUtils";
+import { resolveMainMedia } from "@/features/workflows/core/resolveMediaRef";
 import { getItemMetadata } from "@/shared/lib/displayUtils";
 import { getWorkflowDomainType, DOMAIN_TYPES } from "@/features/workflows/model/domainNormalizer";
 import { elementService } from "../services/elementService";
@@ -65,7 +65,8 @@ export function useNewElement() {
           .filter((m) => m.workflowId === wf.name || m.workflowId === wf.id)
           .map((m) => ({ ...m, id: m.id || m.name }));
         const withItems = { ...wf, items };
-        const primary = getPrimaryMedia(withItems);
+        const resolved = resolveMainMedia(withItems);
+        const primary = resolved ? (resolved.raw || resolved) : null;
         if (!primary) return acc;
 
         const meta = getItemMetadata(primary, withItems);
