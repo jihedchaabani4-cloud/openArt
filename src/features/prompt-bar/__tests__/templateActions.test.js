@@ -247,6 +247,40 @@ describe("X2: Generated-Media Template Actions (addReference, animateMedia, appl
       expect(res.reason).toBe(REASONS.UNKNOWN_MODEL);
       expect(store.getState().prompt).toBe(beforePrompt);
     });
+
+    it("replaces prior parameters and restores workflow-id references for reuse", () => {
+      const store = createTestStore({
+        prompt: "Stale prompt",
+        parameterValues: {
+          resolution: "2K",
+          aspect_ratio: "9:16",
+          images: [{ workflow_id: "stale-workflow" }],
+          stale_parameter: "remove me",
+        },
+      });
+
+      const actions = generatedMediaTemplate.createActions(store.getState());
+      const result = actions.applyGeneration({
+        mode: "image",
+        modelId: normalizedImagesListModel.id,
+        prompt: "Restored prompt",
+        parameters: { aspect_ratio: "16:9" },
+        references: [{ workflow_id: "reference-workflow", role: "reference" }],
+        replaceParameters: true,
+      });
+
+      expect(result.ok).toBe(true);
+      expect(store.getState().prompt).toBe("Restored prompt");
+      expect(store.getState().parameterValues).toEqual({
+        resolution: "1K",
+        aspect_ratio: "16:9",
+        images: [{ workflow_id: "reference-workflow" }],
+      });
+      expect(store.getState().serialize()).toMatchObject({
+        parameters: { images: ["reference-workflow"] },
+        references: ["reference-workflow"],
+      });
+    });
   });
 
   describe("store.actions caching", () => {

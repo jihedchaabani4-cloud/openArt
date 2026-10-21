@@ -105,6 +105,7 @@ export function getStudioMenuItems({
     showTileDetails = false,
     canDelete = true,
     canReuse = false,
+    showReuse = false,
     canAddToPrompt = true,
   } = state;
 
@@ -125,6 +126,7 @@ export function getStudioMenuItems({
     key: "reuse",
     icon: "keyboard_return",
     label: "Réutiliser le prompt",
+    disabled: !canReuse,
     onClick: handleReuseSettings,
   };
 
@@ -259,6 +261,7 @@ export function getStudioMenuItems({
     case "character":
       rawItems = [
         itemLike,
+        ...(showReuse ? [itemReuse] : []),
         separator("fav"),
         ...(!isVideo ? [itemAddToPrompt] : []),
         ...(handleDownload ? [itemDownload] : []),
@@ -272,6 +275,7 @@ export function getStudioMenuItems({
     case "element":
       rawItems = [
         itemLike,
+        ...(showReuse ? [itemReuse] : []),
         separator("fav"),
         ...(!isVideo ? [itemAddToPrompt] : []),
         ...(handleDownload ? [itemDownload] : []),
@@ -302,7 +306,7 @@ export function getStudioMenuItems({
     default:
       rawItems = [
         itemLike,
-        ...(canReuse || handleReuseSettings ? [itemReuse] : []),
+        ...(showReuse ? [itemReuse] : []),
         separator("fav-reuse"),
         ...(handleAnimate && !isVideo ? [itemAnimate, separator("animate")] : []),
         ...(!isVideo ? [itemAddToPrompt] : []),

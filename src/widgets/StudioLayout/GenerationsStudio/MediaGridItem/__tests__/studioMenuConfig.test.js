@@ -26,6 +26,16 @@ describe("studioMenuConfig - Per-type menu list & animate exclusions", () => {
     expect(handleAnimate).toHaveBeenCalledTimes(1);
   });
 
+  it("keeps reuse visible and disabled when generated primary media has no saved config", () => {
+    const items = getStudioMenuItems({
+      type: "generation",
+      actions: { handleLike: vi.fn(), handleReuseSettings: vi.fn(), onDelete: vi.fn() },
+      state: { showReuse: true, canReuse: false },
+    });
+
+    expect(items.find((item) => item.key === "reuse")).toMatchObject({ disabled: true });
+  });
+
   it("includes 'Animer' for non-video upload items", () => {
     const handleAnimate = vi.fn();
     const items = getStudioMenuItems({

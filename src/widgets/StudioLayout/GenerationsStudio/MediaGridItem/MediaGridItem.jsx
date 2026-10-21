@@ -52,7 +52,7 @@ const WorkflowMediaGridItem = React.memo(function WorkflowMediaGridItem({
   const {
     handleLike, handleDelete, handleDownload,
     handleReuseSettings, handleAnimate, handleAddToPrompt,
-    isVideo, url, isLiked, status, aspect, prompt, item, canDelete, canReuseSettings, canAddToPrompt,
+    isVideo, url, isLiked, status, aspect, prompt, item, canDelete, canReuseSettings, showReuseSettings, canAddToPrompt,
   } = useWorkflowActions(workflow, resolvedItem);
 
   // ── State ──────────────────────────────────────────────────────────────
@@ -176,12 +176,8 @@ const WorkflowMediaGridItem = React.memo(function WorkflowMediaGridItem({
   
   const isCharacter = entityType === "character";
   const isElement = entityType === "element";
-  const isUploadType = entityType === "upload";
-  const isGeneratedMedia = entityType === "generation";
 
-  // Stricter check for generated content: must have generation config and strictly be generated media
-  const hasConfig = !!(item?.generationConfig || workflow?.metadata?.generationConfig);
-  const canReuse = hasConfig && isGeneratedMedia;
+  const canReuse = canReuseSettings;
   const isElementSheet = isElement;
   const isDraggable = isDone && !isElementSheet && !isCharacter;
 
@@ -276,6 +272,7 @@ const WorkflowMediaGridItem = React.memo(function WorkflowMediaGridItem({
       showTileDetails,
       canDelete,
       canReuse,
+      showReuse: showReuseSettings,
       canAddToPrompt,
     },
   });
@@ -429,8 +426,8 @@ const WorkflowMediaGridItem = React.memo(function WorkflowMediaGridItem({
                         className="text-[13px] text-[#303031]" 
                       />
                     </ActionBtn>
-                    {canReuse && (
-                      <ActionBtn onClick={(e) => { e.stopPropagation(); handleReuseSettings(); }}>
+                    {showReuseSettings && (
+                      <ActionBtn disabled={!canReuse} onClick={(e) => { e.stopPropagation(); handleReuseSettings(); }}>
                         <GoogleIcon iconName="history" className="text-[13px] text-[#303031]" />
                       </ActionBtn>
                     )}

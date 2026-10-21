@@ -27,16 +27,22 @@ vi.mock("@/features/prompt-bar/core/useRealBackendModels", () => ({
 const mockAnimateMedia = vi.fn();
 const mockAddReference = vi.fn();
 const mockApplyGeneration = vi.fn();
+const mockReuseGeneration = vi.fn();
 const mockFocus = vi.fn();
+const mockResolveReusableGeneration = vi.fn();
+const mockHasGeneratedPrimaryMedia = vi.fn();
 const mockPromptBarService = vi.fn(() => ({
   animateMedia: mockAnimateMedia,
   addReference: mockAddReference,
   applyGeneration: mockApplyGeneration,
+  reuseGeneration: mockReuseGeneration,
   focus: mockFocus,
 }));
 
 vi.mock("@/features/prompt-bar/api/promptBarService", () => ({
   promptBarService: (...args) => mockPromptBarService(...args),
+  resolveReusableGeneration: (...args) => mockResolveReusableGeneration(...args),
+  hasGeneratedPrimaryMedia: (...args) => mockHasGeneratedPrimaryMedia(...args),
 }));
 
 // Mock getActivePromptBarStore to verify it is NOT called
@@ -60,7 +66,10 @@ describe("X4: Migration of useMediaActions to promptBarService", () => {
     mockAnimateMedia.mockReturnValue({ ok: true });
     mockAddReference.mockReturnValue({ ok: true });
     mockApplyGeneration.mockReturnValue({ ok: true });
+    mockReuseGeneration.mockReturnValue({ ok: true });
     mockFocus.mockReturnValue({ ok: true });
+    mockResolveReusableGeneration.mockReturnValue({ modelId: "test-model-id" });
+    mockHasGeneratedPrimaryMedia.mockReturnValue(true);
   });
 
   const mockWorkflow = {
@@ -79,6 +88,11 @@ describe("X4: Migration of useMediaActions to promptBarService", () => {
           quality: "4K",
           duration: "5s",
           num_images: 1,
+        },
+        generationConfig: {
+          model: "test-model-id",
+          prompt: "A beautiful cinematic shot",
+          aspect_ratio: "16:9",
         },
       },
     ],
@@ -99,20 +113,13 @@ describe("X4: Migration of useMediaActions to promptBarService", () => {
       expect.objectContaining({
         templateId: "generated-media",
         projectId: "proj_abc",
-      })
+      }),
+      expect.objectContaining({ resolveWorkflow: expect.any(Function) })
     );
 
-    // 2. Must call applyGeneration with parsed settings
-    expect(mockApplyGeneration).toHaveBeenCalledWith(
-      expect.objectContaining({
-        mode: "image",
-        modelId: "test-model-id",
-        prompt: "A beautiful cinematic shot",
-        parameters: expect.objectContaining({
-          aspect_ratio: "16:9",
-        }),
-      })
-    );
+    // 2. The card gives the service only its workflow ID; the resolver owns config lookup.
+    expect(mockReuseGeneration).toHaveBeenCalledWith("wf_123");
+    expect(mockApplyGeneration).not.toHaveBeenCalled();
 
     // 3. Must request focus through the service
     expect(mockFocus).toHaveBeenCalledTimes(1);

@@ -1,14 +1,15 @@
-import { useWorkflowsStore } from "./useWorkflowsStore";
 import { useToggleWorkflowLike, useRemoveWorkflow } from "../api/workflowsApi";
-import { getItemMetadata, getGenerationConfig } from "@/shared/lib/generationUtils";
+import { getItemMetadata } from "@/shared/lib/generationUtils";
 import { resolveMainMedia } from "../core/resolveMediaRef";
 import { downloadFile } from "@/shared/lib/utils";
 import { useRemoveAsset } from "@/features/media/api/mediaApi";
 import { usePathname, useRouter } from "next/navigation";
-import { useElementStore } from "@/features/prompt-bar/model/useElementStore";
-import { buildElementSheetDraft, syncElementDraft } from "./elementSheetConfig";
 import { canAnyModelAcceptEntity } from "@/features/studio";
-import { promptBarService } from "@/features/prompt-bar/api/promptBarService";
+import {
+  hasGeneratedPrimaryMedia,
+  promptBarService,
+  resolveReusableGeneration,
+} from "@/features/prompt-bar/api/promptBarService";
 import { useRealBackendModels } from "@/features/prompt-bar/core/useRealBackendModels";
 
 function resolvePrimaryRawMedia(workflow) {
@@ -54,8 +55,6 @@ export function useWorkflowActions(workflow, item = null) {
   const { isVideo, url } = metadata;
 
   const isInProgress = ["processing", "pending", "uploading"].includes(metadata?.status);
-  const isFailed = ["failed", "rejected", "error"].includes(metadata?.status);
-
   const prompt = targetItem?.params?.prompt 
                 || targetItem?.prompt
                 || targetItem?.mediaMetadata?.requestData?.promptInputs?.[0]?.textInput 
@@ -67,9 +66,10 @@ export function useWorkflowActions(workflow, item = null) {
                 || workflow?.metadata?.displayName 
                 || "";
 
-  const isUpload = targetItem?.workflowStepId === "upload" || (!isFailed && !targetItem?.generationConfig && !workflow?.metadata?.generationConfig && !prompt);
   const canUseAsInput = metadata?.status === "completed" && !!url;
-  const canReuseSettings = !isInProgress && !isUpload;
+  const reusableGeneration = resolveReusableGeneration(workflow);
+  const showReuseSettings = hasGeneratedPrimaryMedia(workflow);
+  const canReuseSettings = !isInProgress && Boolean(reusableGeneration);
   const canEnterEdit = metadata?.status === "completed" || isInProgress;
   // Delete is allowed in UI (server enforces auth separately);
   // only block while a job is in progress to avoid race/confusion.
@@ -109,55 +109,19 @@ export function useWorkflowActions(workflow, item = null) {
 
   const handleReuseSettings = () => {
     if (!canReuseSettings) return;
-
-    if (isElementSheet) {
-      const draft = buildElementSheetDraft(workflow, targetItem);
-      if (!draft) return;
-
-      const elementStore = useElementStore.getState();
-      syncElementDraft(draft, {
-        elementStore,
-        projectId,
-      });
-      return;
-    }
-
-    const config = getGenerationConfig(targetItem, workflow) || {};
-    const params = targetItem?.params || {};
-    const modelName = config.model_name || config.model || params.model_name || params.model || "";
-    
-    // Extract other settings from both config and params
-    const ratioVal = config.ratio || config.aspectRatio || config.aspect_ratio || params.ratio || params.aspectRatio || params.aspect_ratio || "1:1";
-    const qualityVal = config.quality || params.quality;
-    const videoResVal = config.videoResolution || params.videoResolution;
-    const durationVal = config.duration || params.duration;
-    const motionVal = config.motion || params.motion;
-    const countVal = config.count || params.count || params.num_images || 1;
-
-    const effectivePrompt = prompt || config.prompt || params.prompt || targetItem?.prompt || workflow?.prompt || "";
+    const workflowId = workflow?.id || workflow?.name;
+    if (!workflowId) return;
 
     const service = promptBarService({
       templateId: "generated-media",
       projectId: projectId || "global",
+    }, {
+      resolveWorkflow: (requestedWorkflowId) =>
+        String(requestedWorkflowId) === String(workflowId) ? workflow : null,
     });
 
-    service.applyGeneration({
-      mode: isVideo ? "video" : "image",
-      subMode: "frames",
-      modelId: modelName,
-      prompt: effectivePrompt,
-      parameters: {
-        ratio: ratioVal,
-        aspect_ratio: ratioVal,
-        quality: qualityVal,
-        videoResolution: videoResVal,
-        duration: durationVal,
-        motion: motionVal,
-        count: countVal,
-      },
-    });
-
-    service.focus();
+    const reuseResult = service.reuseGeneration(workflowId);
+    if (reuseResult?.ok || reuseResult?.reason === "NOT_MOUNTED") service.focus();
   };
 
   const handleEdit = () => {
@@ -231,6 +195,7 @@ export function useWorkflowActions(workflow, item = null) {
     handleSetParameters,
     canDelete,
     canReuseSettings,
+    showReuseSettings,
     canAddToPrompt,
     isVideo,
     url,

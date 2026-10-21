@@ -19,6 +19,7 @@ import { selectModel } from "../store/commands/selectModel.js";
 import { attachMedia } from "../store/commands/attachMedia.js";
 import { isPersistableMedia } from "../core/mediaRef.js";
 import { ok, fail, REASONS } from "../core/commandResult.js";
+import { initializeValues } from "../core/parameterState.js";
 
 import { PARAM } from "../core/parameterKeys.js";
 
@@ -311,7 +312,7 @@ export function createActions(core) {
         return fail(REASONS.INVALID_ARGUMENT, { message: "Invalid generation object." });
       }
 
-      const { mode, subMode, modelId, prompt, parameters } = old;
+      const { mode, subMode, modelId, prompt, parameters, references, replaceParameters = false } = old;
       const state = getState();
       const modelsMap = state.modelsMap || {};
       const targetModel = modelsMap[modelId];
@@ -350,7 +351,9 @@ export function createActions(core) {
         // 4. Filter declared parameters and validate media values
         (draft) => {
           const declaredParams = targetModel.parameters || {};
-          const nextParams = { ...draft.parameterValues };
+          const nextParams = replaceParameters
+            ? initializeValues(declaredParams)
+            : { ...draft.parameterValues };
 
           if (parameters && typeof parameters === "object") {
             for (const [key, value] of Object.entries(parameters)) {
@@ -372,6 +375,26 @@ export function createActions(core) {
                 }
               } else {
                 nextParams[key] = value;
+              }
+            }
+          }
+
+          if (Array.isArray(references)) {
+            for (const reference of references) {
+              if (!isPersistableMedia(reference)) continue;
+
+              const role = reference.role || "reference";
+              const key = resolveParameterMapping(targetModel, role);
+              if (!key || !declaredParams[key]) continue;
+
+              const type = declaredParams[key]?.type;
+              if (type === "image[]" || type === "video[]") {
+                const current = Array.isArray(nextParams[key]) ? nextParams[key] : [];
+                if (!current.some((entry) => entry?.workflow_id === reference.workflow_id)) {
+                  nextParams[key] = [...current, { workflow_id: reference.workflow_id }];
+                }
+              } else {
+                nextParams[key] = { workflow_id: reference.workflow_id };
               }
             }
           }
