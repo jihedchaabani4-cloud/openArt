@@ -391,11 +391,12 @@ const WorkflowMediaGridItem = React.memo(function WorkflowMediaGridItem({
           onClick(workflow, e);
         } : undefined}
         showHoverOverlay={false}
-        contextMenuItems={isDone ? menuItems : null}
+        contextMenuItems={isDone || isError ? menuItems : null}
         onRetry={(e) => {
           e?.stopPropagation();
           handleReuseSettings();
         }}
+        canReusePrompt={canReuse}
         onDelete={(e) => {
           e?.stopPropagation();
           setIsDeleteConfirmOpen(true);

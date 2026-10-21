@@ -69,6 +69,7 @@ export function CoreMediaItemPresenter({
   onVideoClick,
   showHoverOverlay = true,
   onRetry = null,
+  canReusePrompt = true,
   onDelete = null,
   onMouseEnter: propOnMouseEnter,
   onMouseLeave: propOnMouseLeave,
@@ -250,6 +251,7 @@ export function CoreMediaItemPresenter({
           <FlowErrorTile
             error={error}
             onReusePrompt={onRetry}
+            canReusePrompt={canReusePrompt}
             onDelete={onDelete}
           />
         )}

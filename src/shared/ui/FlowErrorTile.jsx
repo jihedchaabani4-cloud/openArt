@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { cn } from "@/shared/lib/utils";
 
 /**
@@ -11,8 +10,8 @@ import { cn } from "@/shared/lib/utils";
  */
 export function FlowErrorTile({
   error,
-  onRetry,
   onReusePrompt,
+  canReusePrompt = true,
   onDelete,
   className,
 }) {
@@ -87,6 +86,7 @@ export function FlowErrorTile({
                   mat-ripple-loader-centered=""
                   aria-label="Reuse prompt"
                   title="Reuse prompt"
+                  disabled={!canReusePrompt}
                   style={{
                     width: "34px",
                     height: "34px",
@@ -104,8 +104,10 @@ export function FlowErrorTile({
                     padding: 0,
                   }}
                   onClick={(e) => {
-                    e.stopPropagation();
-                    onReusePrompt?.(e);
+                    if (canReusePrompt) {
+                      e.stopPropagation();
+                      onReusePrompt?.(e);
+                    }
                   }}
                 >
                   <span className="mat-mdc-button-persistent-ripple mdc-icon-button__ripple" />
