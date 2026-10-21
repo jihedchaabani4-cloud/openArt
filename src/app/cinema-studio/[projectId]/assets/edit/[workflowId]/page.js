@@ -10,6 +10,8 @@ import { getItemMetadata } from "@/shared/lib/generationUtils"
 import { resolveMainMedia } from "@/features/workflows/core/resolveMediaRef"
 import { useSetPrimaryMedia } from "@/features/workflows/api/workflowsApi"
 import { LoadingScreen } from "@/shared/ui/LoadingScreen"
+import { VideoEditCard } from "@/components/cinema-studio/common/VideoEditCard"
+import { downloadFile } from "@/shared/lib/utils"
 
 /**
  * Asset Edit Page
@@ -41,6 +43,22 @@ export default function AssetEditPage() {
 
     const [activeItem, setActiveItem] = React.useState(null)
     const [showHistory, setShowHistory] = React.useState(true)
+
+    // Detect whether the active item is a video
+    const isVideoItem = activeItem?.kind === "video"
+
+    // Export: download the signed URL directly
+    const handleExport = React.useCallback(() => {
+        const url = activeItem?.url ?? activeItem?.file_url ?? null
+        if (!url) return
+        const filename = workflow?.display_name ?? workflow?.name ?? "video"
+        downloadFile(url, filename)
+    }, [activeItem, workflow])
+
+    // Re-generate: navigate back to the assets list so the user can trigger a new run
+    const handleRegenerate = React.useCallback(() => {
+        router.push(`/cinema-studio/${projectId}/assets`)
+    }, [router, projectId])
 
     // Sync activeItem when workflow is loaded
     React.useEffect(() => {
@@ -79,10 +97,20 @@ export default function AssetEditPage() {
                     
                     {/* Left Side - Preview (Flexible Width) */}
                     <div className="flex-1 flex items-center justify-center relative h-full overflow-hidden">
-                        <EditMediaView
-                            workflow={workflow}
-                            item={activeItem}
-                        />
+                        {isVideoItem ? (
+                            <VideoEditCard
+                                title={workflow?.display_name ?? workflow?.name ?? "Untitled"}
+                                src={activeItem?.url ?? null}
+                                onExport={handleExport}
+                                onRegenerate={handleRegenerate}
+                                className="w-full max-w-3xl"
+                            />
+                        ) : (
+                            <EditMediaView
+                                workflow={workflow}
+                                item={activeItem}
+                            />
+                        )}
                     </div>
 
                     {/* Right Side - Gallery Sidebar */}
