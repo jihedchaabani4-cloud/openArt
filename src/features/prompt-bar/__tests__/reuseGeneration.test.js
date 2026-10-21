@@ -81,4 +81,38 @@ describe("Reuse generation config", () => {
     expect(service.reuseGeneration("workflow_1").ok).toBe(false);
     expect(applyGeneration).not.toHaveBeenCalled();
   });
+
+  it("reuses a failed primary media's params when no generationConfig was written", () => {
+    const applyGeneration = vi.fn(() => ({ ok: true }));
+    const registry = createRegistry();
+    registry.getOrCreate(identity, () => ({
+      getState: () => ({ applyGeneration }),
+    }));
+    registry.markMounted(identity);
+
+    const service = promptBarService(identity, {
+      registry,
+      resolveWorkflow: () => ({
+        id: "failed-workflow",
+        workflow_type: "GENERATION",
+        items: [{
+          id: "failed-primary",
+          is_primary: true,
+          status: "failed",
+          params: {
+            model_name: "saved-model",
+            prompt: "Saved before failure",
+            aspect_ratio: "16:9",
+          },
+        }],
+      }),
+    });
+
+    expect(service.reuseGeneration("failed-workflow")).toEqual({ ok: true });
+    expect(applyGeneration).toHaveBeenCalledWith(expect.objectContaining({
+      modelId: "saved-model",
+      prompt: "Saved before failure",
+      parameters: expect.objectContaining({ aspect_ratio: "16:9" }),
+    }));
+  });
 });

@@ -73,14 +73,18 @@ function configFromPrimaryMedia(primary) {
   if (directConfig && typeof directConfig === "object") return directConfig;
 
   const requestData = primary?.mediaMetadata?.requestData;
-  if (!requestData || typeof requestData !== "object") return null;
-  const settings = asObject(requestData.settings);
-  return {
-    ...settings,
-    prompt: requestData.promptInputs?.[0]?.textInput ?? settings.prompt,
-    model: requestData.modelId ?? requestData.modelName ?? settings.model,
-    references: requestData.references ?? settings.references ?? settings.input_assets,
-  };
+  if (requestData && typeof requestData === "object") {
+    const settings = asObject(requestData.settings);
+    return {
+      ...settings,
+      prompt: requestData.promptInputs?.[0]?.textInput ?? settings.prompt,
+      model: requestData.modelId ?? requestData.modelName ?? settings.model,
+      references: requestData.references ?? settings.references ?? settings.input_assets,
+    };
+  }
+
+  const savedParams = asObject(primary?.params ?? primary?.parameters);
+  return Object.keys(savedParams).length > 0 ? savedParams : null;
 }
 
 function savedParameters(config) {
