@@ -9,6 +9,7 @@ import {
   hasGeneratedPrimaryMedia,
   promptBarService,
   resolveReusableGeneration,
+  withPrimaryMediaFallback,
 } from "@/features/prompt-bar/api/promptBarService";
 import { useRealBackendModels } from "@/features/prompt-bar/core/useRealBackendModels";
 
@@ -67,8 +68,9 @@ export function useWorkflowActions(workflow, item = null) {
                 || "";
 
   const canUseAsInput = metadata?.status === "completed" && !!url;
-  const reusableGeneration = resolveReusableGeneration(workflow);
-  const showReuseSettings = hasGeneratedPrimaryMedia(workflow);
+  const reuseWorkflow = withPrimaryMediaFallback(workflow, targetItem);
+  const reusableGeneration = resolveReusableGeneration(reuseWorkflow);
+  const showReuseSettings = hasGeneratedPrimaryMedia(reuseWorkflow);
   const canReuseSettings = !isInProgress && Boolean(reusableGeneration);
   const canEnterEdit = metadata?.status === "completed" || isInProgress;
   // Delete is allowed in UI (server enforces auth separately);
@@ -117,7 +119,7 @@ export function useWorkflowActions(workflow, item = null) {
       projectId: projectId || "global",
     }, {
       resolveWorkflow: (requestedWorkflowId) =>
-        String(requestedWorkflowId) === String(workflowId) ? workflow : null,
+        String(requestedWorkflowId) === String(workflowId) ? reuseWorkflow : null,
     });
 
     const reuseResult = service.reuseGeneration(workflowId);

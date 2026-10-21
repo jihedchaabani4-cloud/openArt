@@ -31,6 +31,7 @@ const mockReuseGeneration = vi.fn();
 const mockFocus = vi.fn();
 const mockResolveReusableGeneration = vi.fn();
 const mockHasGeneratedPrimaryMedia = vi.fn();
+const mockWithPrimaryMediaFallback = vi.fn((workflow) => workflow);
 const mockPromptBarService = vi.fn(() => ({
   animateMedia: mockAnimateMedia,
   addReference: mockAddReference,
@@ -43,6 +44,7 @@ vi.mock("@/features/prompt-bar/api/promptBarService", () => ({
   promptBarService: (...args) => mockPromptBarService(...args),
   resolveReusableGeneration: (...args) => mockResolveReusableGeneration(...args),
   hasGeneratedPrimaryMedia: (...args) => mockHasGeneratedPrimaryMedia(...args),
+  withPrimaryMediaFallback: (...args) => mockWithPrimaryMediaFallback(...args),
 }));
 
 // Mock getActivePromptBarStore to verify it is NOT called

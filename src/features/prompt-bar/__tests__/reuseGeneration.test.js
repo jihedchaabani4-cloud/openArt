@@ -1,6 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
 import { createRegistry } from "../store/registry.js";
-import { promptBarService } from "../api/promptBarService.js";
+import {
+  promptBarService,
+  resolveReusableGeneration,
+  withPrimaryMediaFallback,
+} from "../api/promptBarService.js";
 
 describe("Reuse generation config", () => {
   const identity = {
@@ -114,5 +118,30 @@ describe("Reuse generation config", () => {
       prompt: "Saved before failure",
       parameters: expect.objectContaining({ aspect_ratio: "16:9" }),
     }));
+  });
+
+  it("uses the failed card media when its workflow has not attached the primary item yet", () => {
+    const failedCardMedia = {
+      id: "failed-primary",
+      status: "failed",
+      generationConfig: {
+        model: "gpt_image_2",
+        prompt: "Saved prompt before the generation failed",
+        parameters: { quality: "medium", aspect_ratio: "16:9" },
+      },
+    };
+
+    const workflow = withPrimaryMediaFallback({
+      id: "failed-workflow",
+      workflow_type: "GENERATION",
+      primary_media_id: "failed-primary",
+      items: [],
+    }, failedCardMedia);
+
+    expect(resolveReusableGeneration(workflow)).toMatchObject({
+      modelId: "gpt_image_2",
+      prompt: "Saved prompt before the generation failed",
+      parameters: { quality: "medium", aspect_ratio: "16:9" },
+    });
   });
 });

@@ -64,6 +64,39 @@ function resolvePrimaryMedia(workflow) {
   return primary?.raw ?? primary;
 }
 
+function isDeclaredPrimaryMedia(workflow, media) {
+  const declaredPrimaryId =
+    workflow.primary_media_id ??
+    workflow.primaryMediaId ??
+    workflow.metadata?.primaryMediaId ??
+    null;
+  if (declaredPrimaryId) return String(declaredPrimaryId) === mediaIdOf(media);
+  return Boolean(media.is_primary || media.isPrimary);
+}
+
+/**
+ * Preserves primary-only reuse when the cache has not yet attached the card media.
+ */
+export function withPrimaryMediaFallback(workflow, media) {
+  if (!workflow || !media) return workflow;
+
+  const primaryMedia = media.raw ?? media;
+  const primaryMediaId = mediaIdOf(primaryMedia);
+  if (!primaryMediaId || !isDeclaredPrimaryMedia(workflow, primaryMedia)) {
+    return workflow;
+  }
+
+  const items = Array.isArray(workflow.items) ? workflow.items : [];
+  if (items.some((item) => mediaIdOf(item) === primaryMediaId)) {
+    return workflow;
+  }
+
+  return {
+    ...workflow,
+    items: [primaryMedia, ...items],
+  };
+}
+
 function configFromPrimaryMedia(primary) {
   const directConfig =
     primary?.generationConfig ??
