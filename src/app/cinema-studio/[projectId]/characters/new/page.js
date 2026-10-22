@@ -8,6 +8,7 @@ import { useCharacterWorkflows, useGenerateCharacterDescriptionMutation, useCrea
 import { useWorkflowsStore } from "@/features/workflows";
 import { useCharacterStore } from "@/features/studio";
 import { CharacterPromptBar, promptBarService } from "@/features/prompt-bar";
+import { ShineText } from "@/shared/ui/ShineText";
 
 const CHARACTER_ARCHETYPES = [
   {
@@ -104,9 +105,9 @@ function ArchetypeCard({ archetype, onClick, index, isGenerating, isDisabled }) 
           {archetype.description}
         </span>
         {isGenerating && (
-          <span className="text-[0.6875rem] font-medium text-white/90 animate-pulse pt-0.5">
+          <ShineText className="text-[0.6875rem] font-medium pt-0.5">
             Génération du prompt...
-          </span>
+          </ShineText>
         )}
       </div>
     </motion.button>
