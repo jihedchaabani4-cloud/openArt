@@ -10,4 +10,5 @@ export { MediaViewCard } from "./ui/MediaViewCard";
 export { SharedGalleryGrid } from "./ui/SharedGalleryGrid";
 export { AssetListItem } from "./ui/AssetListItem";
 export * from "./api/mediaApi";
+export * from "./uploadPolicy";
 
