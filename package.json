@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "vitest run"
+    "test": "vitest run",
+    "ui:check": "node scripts/ui-check.cjs",
+    "ui:inventory": "node scripts/ui-inventory.cjs"
   },
   "dependencies": {
     "@diceui/mention": "^0.8.0",
