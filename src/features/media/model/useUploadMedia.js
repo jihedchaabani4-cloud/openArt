@@ -4,6 +4,63 @@ import { useWorkflowsStore } from "@/features/workflows";
 import { useBatchUploadAssets } from "../api/mediaApi";
 import { intrinsicSizeToRatioLabel } from "@/shared/lib/displayUtils";
 import { validateFilesAgainstPolicy, DEFAULT_UPLOAD_POLICY } from "../uploadPolicy";
+import { api } from "@/shared/api/client";
+
+/**
+ * Standalone direct media upload helper.
+ * Validates against DEFAULT_UPLOAD_POLICY and uploads via POST /api/assets/upload.
+ * Used by MediaInput and non-hook call sites without requiring React Query context.
+ */
+export async function uploadMediaAsset(file, { projectId, folderId } = {}) {
+  const pId = projectId || useWorkflowsStore.getState?.()?.selectedProjectId;
+  if (!pId) throw new Error("Project ID is required for asset uploads.");
+
+  const validation = validateFilesAgainstPolicy(file, DEFAULT_UPLOAD_POLICY);
+  if (!validation.valid) {
+    throw new Error(validation.message || "File validation failed");
+  }
+
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("project_id", pId);
+  formData.append("workflow_type", "UPLOAD");
+  formData.append("workflowType", "UPLOAD");
+  formData.append("type", "upload");
+  formData.append("source", "upload");
+  if (folderId) formData.append("folder_id", folderId);
+
+  const res = await api.postForm("/api/assets/upload", formData);
+  const data = res?.data || res;
+  const returned = Array.isArray(data) ? data[0] : (data?.asset || data);
+  const wfId = returned?.workflow_id || returned?.workflowId || returned?.asset_id || returned?.media_id || returned?.id;
+  const isVid = returned?.type === "video" || file?.type?.startsWith("video/");
+  const width = returned?.width || (isVid ? 1280 : 1024);
+  const height = returned?.height || (isVid ? 720 : 1024);
+  const ratio = returned?.ratio && returned?.ratio !== "IMAGE_ASPECT_RATIO_UNSPECIFIED"
+    ? returned.ratio
+    : intrinsicSizeToRatioLabel(width, height);
+
+  return {
+    ...returned,
+    id: wfId,
+    workflow_id: wfId,
+    workflowId: wfId,
+    asset_id: returned?.asset_id || returned?.media_id || wfId,
+    media_id: returned?.media_id || wfId,
+    url: returned?.url,
+    preview: returned?.url,
+    displayName: file?.name || "Uploaded Media",
+    name: file?.name || "Uploaded Media",
+    type: isVid ? "video" : "image",
+    workflow_type: returned?.workflow_type || "UPLOAD",
+    is_upload: true,
+    width,
+    height,
+    ratio,
+    aspectRatio: ratio,
+    image_count: 1,
+  };
+}
 
 /**
  * useUploadMedia
