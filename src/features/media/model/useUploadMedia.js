@@ -3,6 +3,7 @@ import { useParams, useSearchParams, usePathname } from "next/navigation";
 import { useWorkflowsStore } from "@/features/workflows";
 import { useBatchUploadAssets } from "../api/mediaApi";
 import { intrinsicSizeToRatioLabel } from "@/shared/lib/displayUtils";
+import { validateFilesAgainstPolicy, DEFAULT_UPLOAD_POLICY } from "../uploadPolicy";
 
 /**
  * useUploadMedia
@@ -50,6 +51,12 @@ export function useUploadMedia(overrideProjectId) {
       if (files.length === 0) return isArray ? [] : null;
       if (!effectiveProjectId) {
         throw new Error("Project ID is required for asset uploads.");
+      }
+
+      // Pre-flight UX validation against DEFAULT_UPLOAD_POLICY (ADR-0012, Ticket 08)
+      const validation = validateFilesAgainstPolicy(files, DEFAULT_UPLOAD_POLICY);
+      if (!validation.valid) {
+        throw new Error(validation.message || "Invalid files for media upload.");
       }
 
       // Check if options explicitly defined folderId / collectionId (null is preserved)

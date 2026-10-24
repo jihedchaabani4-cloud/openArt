@@ -9,6 +9,11 @@ import { useAddMediaToCharacter } from "./useAddMediaToCharacter";
 import { useRemoveMediaFromCharacter } from "./useRemoveMediaFromCharacter";
 import { useGenerateCharacterSheetMutation } from "./useGenerateCharacterSheetMutation";
 import { resolveMainMedia } from "@/features/workflows/core/resolveMediaRef";
+import {
+  validateFilesAgainstPolicy,
+  CHARACTER_SHEET_UPLOAD_POLICY,
+  CHARACTER_DETAIL_UPLOAD_POLICY,
+} from "@/features/media";
 
 // ─── Shared constants (moved outside class hook to keep it usable) ───────────
 const MAX_DETAIL_IMAGES = 5;
@@ -17,17 +22,27 @@ const isValidUUID = (id) => id && UUID_REGEX.test(id);
 
 const isDetailMedia = (m) =>
   m?.role === "detail" ||
+  m?.role === "reference" ||
   m?.mediaRole === "detail" ||
-  m?.step_id === "character_detail" ||
+  m?.mediaRole === "reference" ||
   m?.raw?.role === "detail" ||
-  m?.raw?.step_id === "character_detail";
+  m?.raw?.role === "reference" ||
+  (!m?.role && !m?.mediaRole && !m?.raw?.role && (
+    m?.step_id === "character_detail" ||
+    m?.raw?.step_id === "character_detail"
+  ));
 
 const isSheetMedia = (m) =>
   m?.role === "sheet" ||
+  m?.role === "turnaround" ||
   m?.mediaRole === "sheet" ||
-  m?.step_id === "character_sheet" ||
-  m?.step_id === "CAE" ||
-  m?.step_id === "upload";
+  m?.mediaRole === "turnaround" ||
+  m?.raw?.role === "sheet" ||
+  m?.raw?.role === "turnaround" ||
+  (!m?.role && !m?.mediaRole && !m?.raw?.role && (
+    m?.step_id === "character_sheet" ||
+    m?.raw?.step_id === "character_sheet"
+  ));
 
 /**
  * useCharacter
@@ -344,6 +359,12 @@ export function useCharacter({ projectId, characterId } = {}) {
   const uploadSheetFile = useCallback(
     async (file) => {
       if (!file || !cleanId) return;
+
+      const validation = validateFilesAgainstPolicy([file], CHARACTER_SHEET_UPLOAD_POLICY);
+      if (!validation.valid) {
+        throw new Error(validation.message || "Invalid character sheet file.");
+      }
+
       setIsUpdatingSheet(true);
       setImageLoadError(false);
 
@@ -377,7 +398,7 @@ export function useCharacter({ projectId, characterId } = {}) {
     async (selectedItems) => {
       if (!selectedItems || !selectedItems.length || !cleanId) return;
       const item = selectedItems[0];
-      const workflowId = item.workflow_id || item.workflowId || item.id;
+      const mediaId = item.mediaId || item.media_id || item.id || item.workflow_id || item.workflowId;
       const fallbackUrl = item.url || item.file_url || item.src || item.image?.url;
 
       setIsUpdatingSheet(true);
@@ -387,8 +408,9 @@ export function useCharacter({ projectId, characterId } = {}) {
       try {
         const payload = {
           characterId: cleanId,
-          ...(workflowId ? { workflowId, mediaId: workflowId } : {}),
-          ...(fallbackUrl ? { imageUrl: fallbackUrl } : {}),
+          ...(mediaId && !String(mediaId).startsWith("http") && !String(mediaId).startsWith("blob:")
+            ? { mediaId }
+            : (fallbackUrl ? { imageUrl: fallbackUrl } : {})),
           projectId,
         };
         const res = await setSheetMediaMutation.mutateAsync(payload);
@@ -428,6 +450,14 @@ export function useCharacter({ projectId, characterId } = {}) {
       const remaining = MAX_DETAIL_IMAGES - displayDetailImages.length;
       if (remaining <= 0) return;
 
+      // Pre-flight UX validation against CHARACTER_DETAIL_UPLOAD_POLICY (ADR-0012, Ticket 08)
+      const validation = validateFilesAgainstPolicy(files, CHARACTER_DETAIL_UPLOAD_POLICY, {
+        maxFiles: remaining,
+      });
+      if (!validation.valid) {
+        throw new Error(validation.message || "Invalid character detail file(s).");
+      }
+
       const filesToProcess = files.slice(0, remaining);
       const itemsToUpload = filesToProcess.map((file, idx) => {
         const previewUrl = URL.createObjectURL(file);
@@ -436,7 +466,9 @@ export function useCharacter({ projectId, characterId } = {}) {
           url: previewUrl,
           file_url: previewUrl,
           status: "processing",
-          step_id: "character_detail",
+          step_id: "upload",
+          role: "detail",
+          mediaRole: "detail",
           file,
         };
       });
@@ -483,9 +515,9 @@ export function useCharacter({ projectId, characterId } = {}) {
 
       const itemsToAdd = selectedItems.slice(0, remaining);
       for (const item of itemsToAdd) {
-        const workflowId = item.workflow_id || item.workflowId || item.id;
+        const mediaId = item.mediaId || item.media_id || item.id || item.workflow_id || item.workflowId;
         const fallbackUrl = item.url || item.file_url || item.src || item.image?.url;
-        if (!workflowId && !fallbackUrl) continue;
+        if (!mediaId && !fallbackUrl) continue;
 
         const tempId = `temp_asset_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
         const optimisticAsset = {
@@ -493,7 +525,7 @@ export function useCharacter({ projectId, characterId } = {}) {
           url: fallbackUrl,
           file_url: fallbackUrl,
           status: "processing",
-          step_id: "character_detail",
+          step_id: "upload",
           role: "detail",
           mediaRole: "detail",
         };
@@ -502,8 +534,9 @@ export function useCharacter({ projectId, characterId } = {}) {
         try {
           const res = await addMediaMutation.mutateAsync({
             characterId: cleanId,
-            ...(workflowId ? { workflowId, mediaId: workflowId } : {}),
-            ...(fallbackUrl ? { imageUrl: fallbackUrl } : {}),
+            ...(mediaId && !String(mediaId).startsWith("http") && !String(mediaId).startsWith("blob:")
+              ? { mediaId }
+              : (fallbackUrl ? { imageUrl: fallbackUrl } : {})),
             projectId,
           });
           if (res?.media) {
@@ -588,6 +621,9 @@ export function useCharacter({ projectId, characterId } = {}) {
     pendingUrls,
     deletingMediaId,
     maxDetailImages: MAX_DETAIL_IMAGES,
+    canAddDetail: displayDetailImages.length < MAX_DETAIL_IMAGES,
+    isAtDetailLimit: displayDetailImages.length >= MAX_DETAIL_IMAGES,
+    isAddDisabled: displayDetailImages.length >= MAX_DETAIL_IMAGES,
     uploadDetailFiles,
     addDetailFromAssets,
     removeDetailImage,

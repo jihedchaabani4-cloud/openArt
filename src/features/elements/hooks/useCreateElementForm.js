@@ -4,16 +4,17 @@ import { useState, useRef, useCallback } from "react";
 import { useCreateElementSheetMutation } from "./useCreateElementSheetMutation";
 import { elementService } from "../services/elementService";
 import { useWorkflowsStore } from "@/features/workflows";
-import { useBatchUploadAssets } from "@/features/media/api/mediaApi";
+import { validateFilesAgainstPolicy, ELEMENT_REFERENCE_UPLOAD_POLICY } from "@/features/media";
 
 /**
  * useCreateElementForm
  * Controller hook for CreateElementModal.
- * Encapsulates batch image uploads, input validation, and submission logic.
+ * Encapsulates direct image uploads via FormData / mediaId, input validation,
+ * and decoupled creation & image attachment (eliminates /api/assets/upload double-upload).
  */
 export function useCreateElementForm({ projectId, onCreated, onClose }) {
   const [name, setName] = useState("");
-  const [sourceImages, setSourceImages] = useState([]);
+  const [referenceImages, setReferenceImages] = useState([]);
   const [error, setError] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
@@ -25,48 +26,54 @@ export function useCreateElementForm({ projectId, onCreated, onClose }) {
     },
   });
 
-  const { mutateAsync: uploadBatchToServer } = useBatchUploadAssets();
-
   const selectedProjectId = useWorkflowsStore((s) => s.selectedProjectId);
   const effectiveProjectId = projectId || selectedProjectId;
 
   const handleRemoveImage = useCallback((index) => {
-    setSourceImages((prev) => prev.filter((_, i) => i !== index));
+    setReferenceImages((prev) => {
+      const item = prev[index];
+      if (item?.previewUrl && typeof URL !== "undefined" && URL.revokeObjectURL) {
+        URL.revokeObjectURL(item.previewUrl);
+      }
+      return prev.filter((_, i) => i !== index);
+    });
   }, []);
 
-  const uploadFiles = useCallback(
-    async (files) => {
-      if (sourceImages.length + files.length > 6) {
-        setError("Maximum 6 reference images allowed");
+  const addFiles = useCallback(
+    (files) => {
+      if (!files || files.length === 0) return;
+      const remainingSlots = Math.max(0, 6 - referenceImages.length);
+
+      // Pre-flight UX validation against ELEMENT_REFERENCE_UPLOAD_POLICY
+      const validation = validateFilesAgainstPolicy(files, ELEMENT_REFERENCE_UPLOAD_POLICY, {
+        maxFiles: remainingSlots,
+      });
+
+      if (!validation.valid) {
+        setError(validation.message || "Invalid reference image(s).");
         return;
       }
+
       setError(null);
-      setIsUploading(true);
-      try {
-        const results = await uploadBatchToServer({
-          files,
-          projectId: effectiveProjectId,
-        });
-        const newUrls = results.map((r) => r.url).filter(Boolean);
-        setSourceImages((prev) => [...prev, ...newUrls]);
-      } catch (err) {
-        console.error("Upload error:", err);
-        setError("Failed to upload image(s).");
-      } finally {
-        setIsUploading(false);
-      }
+      const newItems = Array.from(files).map((file) => ({
+        file,
+        previewUrl: typeof URL !== "undefined" && URL.createObjectURL ? URL.createObjectURL(file) : "",
+        name: file.name,
+      }));
+
+      setReferenceImages((prev) => [...prev, ...newItems]);
     },
-    [sourceImages.length, uploadBatchToServer, effectiveProjectId]
+    [referenceImages.length]
   );
 
   const handleFileChange = useCallback(
-    async (e) => {
+    (e) => {
       const files = Array.from(e.target.files || []);
       if (files.length === 0) return;
-      await uploadFiles(files);
+      addFiles(files);
       if (fileInputRef.current) fileInputRef.current.value = "";
     },
-    [uploadFiles]
+    [addFiles]
   );
 
   const handleDragOver = useCallback((e) => {
@@ -79,15 +86,15 @@ export function useCreateElementForm({ projectId, onCreated, onClose }) {
   }, []);
 
   const handleDrop = useCallback(
-    async (e) => {
+    (e) => {
       e.preventDefault();
       setIsDragging(false);
       const files = Array.from(e.dataTransfer.files || []);
       if (files.length > 0) {
-        await uploadFiles(files);
+        addFiles(files);
       }
     },
-    [uploadFiles]
+    [addFiles]
   );
 
   const handleCreate = useCallback(async () => {
@@ -95,42 +102,70 @@ export function useCreateElementForm({ projectId, onCreated, onClose }) {
       setError("Element name is required");
       return;
     }
-    if (sourceImages.length === 0) {
+    if (referenceImages.length === 0) {
       setError("At least 1 reference image is required");
       return;
     }
-    if (sourceImages.length > 6) {
+    if (referenceImages.length > 6) {
       setError("Maximum 6 reference images allowed");
       return;
     }
 
     setError(null);
+    setIsUploading(true);
 
     try {
       const payload = elementService.buildCreatePayload({
         name: name.trim(),
-        sourceImages,
         projectId: effectiveProjectId,
       });
 
       const result = await runCreateElement({ payload });
+      const elementId =
+        result?.element?.id ||
+        result?.id ||
+        result?.workflow?.id ||
+        result?.workflow?.name ||
+        result?.element?.workflow_id ||
+        result?.name;
+
+      if (elementId && referenceImages.length > 0) {
+        // Direct upload: Files go via FormData, Project Cache assets via { mediaId }
+        const itemsToAttach = referenceImages.map((item) => {
+          if (item?.file) return { file: item.file };
+          if (item?.mediaId) return { mediaId: item.mediaId };
+          if (typeof item === "string") return item;
+          return item;
+        });
+        await elementService.attachImages(elementId, itemsToAttach, { projectId: effectiveProjectId });
+      }
 
       if (onCreated) onCreated(result);
 
+      // Clean up object URLs
+      referenceImages.forEach((item) => {
+        if (item?.previewUrl && typeof URL !== "undefined" && URL.revokeObjectURL) {
+          URL.revokeObjectURL(item.previewUrl);
+        }
+      });
+
       setName("");
-      setSourceImages([]);
+      setReferenceImages([]);
       setError(null);
       if (onClose) onClose();
     } catch (err) {
       console.error("[useCreateElementForm] Error:", err);
       setError(err.message || "Failed to create element");
+    } finally {
+      setIsUploading(false);
     }
-  }, [name, sourceImages, effectiveProjectId, runCreateElement, onCreated, onClose]);
+  }, [name, referenceImages, effectiveProjectId, runCreateElement, onCreated, onClose]);
 
   return {
     name,
     setName,
-    sourceImages,
+    referenceImages,
+    sourceImages: referenceImages, // compatibility alias
     error,
     setError,
     isUploading,

@@ -21,6 +21,7 @@ export function CharacterEditNavbar({
   onDone,
   onUpload,
   onOpenAssets,
+  isAddDisabled = false,
   isLiked = false,
   onToggleLike,
   actions,
@@ -44,15 +45,16 @@ export function CharacterEditNavbar({
       actions={
         <>
           {hasImportOptions && (
-            <DropdownMenu open={isOpen} onOpenChange={setOpen}>
+            <DropdownMenu open={isAddDisabled ? false : isOpen} onOpenChange={isAddDisabled ? undefined : setOpen}>
               <DropdownMenuTrigger asChild>
                 <Button
                   type="button"
                   variant="ghost"
                   data-testid="import-dropdown-trigger"
-                  className="rounded-[var(--button-border-radius,12px)] h-8 w-8 p-0 text-white hover:text-white hover:bg-white/10 bg-transparent cursor-pointer transition-colors outline-none flex items-center justify-center"
-                  title="Ajouter des images"
-                  aria-label="Ajouter des images"
+                  disabled={isAddDisabled}
+                  className="rounded-[var(--button-border-radius,12px)] h-8 w-8 p-0 text-white hover:text-white hover:bg-white/10 bg-transparent cursor-pointer transition-colors outline-none flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed"
+                  title={isAddDisabled ? "Maximum 5 images de détail autorisées" : "Ajouter des images"}
+                  aria-label={isAddDisabled ? "Maximum 5 images de détail autorisées" : "Ajouter des images"}
                 >
                   <GoogleIcon iconName="add" className="text-[20px] text-white" />
                 </Button>

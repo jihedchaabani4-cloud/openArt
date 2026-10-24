@@ -10,6 +10,7 @@ import { resolveMainMedia } from "@/features/workflows/core/resolveMediaRef";
 import { getItemMetadata } from "@/shared/lib/displayUtils";
 import { getWorkflowDomainType, DOMAIN_TYPES } from "@/features/workflows/model/domainNormalizer";
 import { elementService } from "../services/elementService";
+import { validateFilesAgainstPolicy, ELEMENT_REFERENCE_UPLOAD_POLICY } from "@/features/media";
 
 const generateDefaultElementName = () => "element" + Math.floor(100 + Math.random() * 900);
 
@@ -80,7 +81,9 @@ export function useNewElement() {
           src: primaryUrl,
           key: wf.id || wf.name || String(i),
           workflow: withItems,
+          primaryMediaId: primary?.id || primary?.media_id || primary?.name,
           primaryMediaUrl: primaryUrl,
+          mediaId: primary?.id || primary?.media_id || primary?.name,
           label,
           domainType,
         });
@@ -101,19 +104,22 @@ export function useNewElement() {
         const elementName = name.trim() || generateDefaultElementName();
         const payload = elementService.buildCreatePayload({
           name: elementName,
-          sourceImages: urls.slice(0, 6),
           projectId: effectiveProjectId,
           elementType,
         });
 
         const res = await runCreateElement({ payload });
         const elementId =
+          res?.element?.id ||
+          res?.id ||
           res?.workflow?.id ||
           res?.workflow?.name ||
           res?.element?.workflow_id ||
-          res?.element?.id ||
-          res?.id ||
           res?.name;
+
+        if (elementId && urls.length > 0) {
+          await elementService.attachImages(elementId, urls.slice(0, 6), { projectId: effectiveProjectId });
+        }
 
         if (elementId && effectiveProjectId) {
           router.push(`/cinema-studio/${effectiveProjectId}/elements/${elementId}`);
@@ -127,20 +133,27 @@ export function useNewElement() {
     [effectiveProjectId, name, elementType, runCreateElement, router]
   );
 
-  // Upload files using elementService
+  // Upload files using elementService (FormData direct upload, no Base64)
   const uploadFiles = useCallback(
     async (files) => {
       if (!files || !files.length) return;
       setError(null);
+
+      // Pre-flight UX validation against ELEMENT_REFERENCE_UPLOAD_POLICY (ADR-0012, Ticket 08)
+      const validation = validateFilesAgainstPolicy(files, ELEMENT_REFERENCE_UPLOAD_POLICY, { maxFiles: 6 });
+      if (!validation.valid) {
+        setError(validation.message || "Invalid reference image(s).");
+        return;
+      }
+
       setIsUploading(true);
       try {
-        const valid = await elementService.readFilesAsDataUrls(files);
-        if (!valid.length) {
-          setError("Failed to read image file(s).");
-          return;
-        }
-        setPreviewImages((prev) => [...prev, ...valid]);
-        await createAndRedirect(valid);
+        const fileList = Array.from(files).slice(0, 6);
+        const previewUrls = fileList.map((f) =>
+          typeof URL !== "undefined" && URL.createObjectURL ? URL.createObjectURL(f) : ""
+        );
+        setPreviewImages((prev) => [...prev, ...previewUrls]);
+        await createAndRedirect(fileList);
       } catch (err) {
         setError(err?.message || "Failed to create element.");
       } finally {
@@ -156,7 +169,9 @@ export function useNewElement() {
       setLoadingWorkflowId(wf.id || wf.name);
       setError(null);
       try {
-        await createAndRedirect([thumbUrl]);
+        const mediaId = wf.primary_media_id || wf.primaryMediaId;
+        const target = mediaId ? [{ mediaId }] : [{ imageUrl: thumbUrl }];
+        await createAndRedirect(target);
       } catch (err) {
         setError(err?.message || "Failed to create element.");
       } finally {
@@ -169,11 +184,24 @@ export function useNewElement() {
   const handleSelectAssets = useCallback(
     async (selectedItems) => {
       if (!selectedItems || !selectedItems.length) return;
-      const urls = selectedItems.map((i) => i.url || i.file_url || i.src).filter(Boolean);
-      if (!urls.length) return;
+      const items = selectedItems
+        .map((i) => {
+          const mediaId = i.mediaId || i.media_id || i.id || i.primaryMediaId;
+          const fallbackUrl = i.url || i.file_url || i.src || i.primaryMediaUrl;
+          if (mediaId && !String(mediaId).startsWith("http") && !String(mediaId).startsWith("blob:")) {
+            return { mediaId };
+          }
+          if (fallbackUrl) {
+            return { imageUrl: fallbackUrl };
+          }
+          return null;
+        })
+        .filter(Boolean);
+
+      if (!items.length) return;
       setIsUploading(true);
       try {
-        await createAndRedirect(urls);
+        await createAndRedirect(items);
       } catch (err) {
         setError(err?.message || "Failed to create element.");
       } finally {
@@ -205,9 +233,7 @@ export function useNewElement() {
     async (e) => {
       e.preventDefault();
       setIsDragging(false);
-      const files = Array.from(e.dataTransfer.files || []).filter((f) =>
-        f.type.startsWith("image/")
-      );
+      const files = Array.from(e.dataTransfer.files || []);
       if (files.length) await uploadFiles(files);
     },
     [uploadFiles]

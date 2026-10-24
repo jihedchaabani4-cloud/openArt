@@ -118,6 +118,7 @@ export default function CharacterDetailPage() {
         }
         onUpload={() => fileInputRef.current?.click()}
         onOpenAssets={() => setIsAssetsOpen(true)}
+        isAddDisabled={(displayDetailImages?.length ?? 0) >= 5}
       />
 
       {/* ── SCROLLABLE BODY ── */}
@@ -182,6 +183,7 @@ export default function CharacterDetailPage() {
                     pendingUrls={[]}
                     deletingMediaId={deletingMediaId}
                     maxAllowed={maxDetailImages}
+                    isAddDisabled={(displayDetailImages?.length ?? 0) >= 5}
                     onUploadFiles={uploadDetailFiles}
                     onOpenAssets={() => setIsAssetsOpen(true)}
                     onDeleteImage={removeDetailImage}

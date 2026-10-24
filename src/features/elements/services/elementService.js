@@ -1,3 +1,4 @@
+import { api } from "@/shared/api/client";
 import { WORKFLOW_TYPES, MEDIA_STATUS } from "@/shared/constants/workflowTypes";
 
 /**
@@ -10,7 +11,7 @@ export const elementService = {
   /**
    * Validate inputs before sending element creation request.
    */
-  validateCreate({ name, sourceImages, projectId, project_id }) {
+  validateCreate({ name, projectId, project_id }) {
     const pId = projectId || project_id;
     if (!pId) {
       throw new Error("projectId is required to create an element");
@@ -18,26 +19,19 @@ export const elementService = {
     if (!name?.trim()) {
       throw new Error("Element name is required");
     }
-    if (!Array.isArray(sourceImages) || sourceImages.length === 0) {
-      throw new Error("At least 1 reference image is required");
-    }
-    if (sourceImages.length > 6) {
-      throw new Error("Maximum 6 reference images allowed");
-    }
   },
 
   /**
-   * Format API payload for element creation.
+   * Format API payload for element creation (no sourceImages - creation is decoupled from image attachment).
    */
-  buildCreatePayload({ name, sourceImages, description = "", elementType = "object", projectId, project_id }) {
+  buildCreatePayload({ name, description = "", elementType = "object", projectId, project_id }) {
     const pId = projectId || project_id;
-    this.validateCreate({ name, sourceImages, projectId: pId });
+    this.validateCreate({ name, projectId: pId });
 
     return {
       projectId: pId,
       project_id: pId,
       name: name.trim().replace(/^@+/, ""),
-      sourceImages,
       description: description?.trim() || "",
       element_type: elementType,
       type: elementType,
@@ -45,9 +39,86 @@ export const elementService = {
   },
 
   /**
+   * Upload or attach a single reference image to an element via POST /v2/elements/:id/images.
+   * Supports:
+   * - File or Blob -> FormData with field 'file'
+   * - Object with { file: File } -> FormData with field 'file'
+   * - Object with { mediaId } -> JSON payload
+   * - String or object with { imageUrl } -> JSON payload (legacy)
+   */
+  async addReferenceImage(elementId, item, { projectId } = {}) {
+    if (!elementId) throw new Error("elementId is required to add an image");
+    const pId = projectId || item?.projectId;
+
+    const isFile = typeof File !== "undefined" && item instanceof File;
+    const isBlob = !isFile && typeof Blob !== "undefined" && item instanceof Blob;
+    const hasFileProp = item && typeof File !== "undefined" && item.file instanceof File;
+
+    if (isFile || isBlob || hasFileProp) {
+      const file = isFile || isBlob ? item : item.file;
+      const formData = new FormData();
+      formData.append("file", file);
+      if (pId) formData.append("projectId", pId);
+      return api.post(`/v2/elements/${elementId}/images`, formData);
+    }
+
+    if (item && item.mediaId) {
+      return api.post(`/v2/elements/${elementId}/images`, { mediaId: item.mediaId, projectId: pId });
+    }
+
+    const payload = typeof item === "string" ? { imageUrl: item, projectId: pId } : { ...item, projectId: pId };
+    return api.post(`/v2/elements/${elementId}/images`, payload);
+  },
+
+  /**
+   * Upload or attach reference images to an element via canonical endpoint POST /v2/elements/:id/images.
+   * Dispatches each item through addReferenceImage (FormData for Files, JSON mediaId for existing assets).
+   */
+  async attachImages(elementId, images = [], { projectId } = {}) {
+    if (!elementId || !Array.isArray(images) || images.length === 0) {
+      return [];
+    }
+    if (images.length > 6) {
+      throw new Error("Maximum 6 reference images allowed per element");
+    }
+    const results = [];
+    const errors = [];
+    for (const img of images) {
+      try {
+        const res = await this.addReferenceImage(elementId, img, { projectId });
+        results.push(res);
+      } catch (err) {
+        errors.push(err);
+      }
+    }
+    if (results.length === 0 && errors.length > 0) {
+      throw new Error(errors[0]?.message || "Failed to attach reference images to element");
+    }
+    return results;
+  },
+
+  /**
+   * Explicitly set, switch, or clear the element cover / primary media via PATCH /v2/elements/:id.
+   * Pass mediaId as a string to set, or null to clear.
+   */
+  async setElementCover(elementId, mediaId) {
+    if (!elementId) {
+      throw new Error("elementId is required to set element cover");
+    }
+    return api.patch(`/v2/elements/${elementId}`, { primaryMediaId: mediaId, coverMediaId: mediaId });
+  },
+
+  /**
+   * Generic primary media setter alias for elements.
+   */
+  async setElementPrimaryMedia(elementId, mediaId) {
+    return this.setElementCover(elementId, mediaId);
+  },
+
+  /**
    * Format API patch payload for element updates (partial).
    */
-  buildPatchPayload({ name, description, guidelines, elementType }) {
+  buildPatchPayload({ name, description, guidelines, elementType, primaryMediaId }) {
     const payload = {};
     if (name !== undefined) {
       payload.name = String(name || "").trim().replace(/^@+/, "");
@@ -60,6 +131,9 @@ export const elementService = {
     }
     if (elementType !== undefined) {
       payload.element_type = elementType;
+    }
+    if (primaryMediaId !== undefined) {
+      payload.primaryMediaId = primaryMediaId;
     }
     return payload;
   },
@@ -117,6 +191,18 @@ export const elementService = {
         favorited: false,
       },
     };
+  },
+
+  /**
+   * Remove a single reference image from an element via the canonical endpoint
+   * DELETE /v2/elements/:elementId/images/:mediaId.
+   * This only removes the association; the media row is deleted only when no
+   * associations remain anywhere (orphan cleanup handled server-side).
+   */
+  async removeImage(elementId, mediaId) {
+    if (!elementId) throw new Error("elementId is required to remove an element image");
+    if (!mediaId) throw new Error("mediaId is required to remove an element image");
+    return api.delete(`/v2/elements/${elementId}/images/${mediaId}`);
   },
 
   /**

@@ -6,6 +6,7 @@ import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { cn } from "@/shared/lib/utils";
 import { CharacterMediaGalleryGrid } from "./CharacterMediaGalleryGrid";
 import { FlowCharacterImagePreview } from "./FlowCharacterImagePreview";
+import { getAcceptedMimeTypes, CHARACTER_DETAIL_UPLOAD_POLICY } from "@/features/media";
 
 /**
  * CharacterDetailsGallery
@@ -23,6 +24,7 @@ export function CharacterDetailsGallery({
   pendingUrls = [],
   deletingMediaId = null,
   maxAllowed = 5,
+  isAddDisabled = false,
   targetRowHeight,
   showTopActions = false,
   onUploadFiles,
@@ -61,12 +63,14 @@ export function CharacterDetailsGallery({
     [resolvedItems]
   );
 
+  const atLimit = isAddDisabled || validItems.length >= maxAllowed;
+
   return (
     <div className={cn("w-full h-full flex flex-col gap-4 border-none", className)}>
       <input
         ref={fileInputRef}
         type="file"
-        accept="image/*"
+        accept={getAcceptedMimeTypes(CHARACTER_DETAIL_UPLOAD_POLICY)}
         multiple
         className="hidden"
         onChange={handleFileChange}
@@ -79,9 +83,10 @@ export function CharacterDetailsGallery({
             type="button"
             variant="blur"
             size="sm"
+            disabled={atLimit}
             onClick={() => fileInputRef.current?.click()}
-            className="h-8 px-3.5 rounded-full text-[12px] gap-1.5 font-medium bg-white/10 hover:bg-white/15 text-white transition-all shadow-sm cursor-pointer"
-            title="Importer depuis l'ordinateur"
+            className="h-8 px-3.5 rounded-full text-[12px] gap-1.5 font-medium bg-white/10 hover:bg-white/15 text-white transition-all shadow-sm cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+            title={atLimit ? "Maximum 5 images autorisées" : "Importer depuis l'ordinateur"}
           >
             <GoogleIcon iconName="upload" className="text-[17px]" />
             <span>Importer</span>
@@ -92,9 +97,10 @@ export function CharacterDetailsGallery({
               type="button"
               variant="blur"
               size="sm"
+              disabled={atLimit}
               onClick={onOpenAssets}
-              className="h-8 px-3 rounded-full text-[12px] gap-1.5 font-medium bg-white/5 hover:bg-white/10 text-white/70 transition-all cursor-pointer"
-              title="Ajouter à partir du projet"
+              className="h-8 px-3 rounded-full text-[12px] gap-1.5 font-medium bg-white/5 hover:bg-white/10 text-white/70 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+              title={atLimit ? "Maximum 5 images autorisées" : "Ajouter à partir du projet"}
             >
               <GoogleIcon iconName="add" className="text-[17px]" />
               <span>Depuis le projet</span>

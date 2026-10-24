@@ -9,6 +9,7 @@ import {
   useToggleWorkflowLike,
 } from "@/features/workflows/api/workflowsApi";
 import { logger } from "@/shared/lib/logger";
+import { validateFilesAgainstPolicy, ELEMENT_REFERENCE_UPLOAD_POLICY } from "@/features/media";
 
 /**
  * useElementEdit
@@ -101,29 +102,45 @@ export function useElementEdit({ projectId, workflowId }) {
 
   // Primary cover image ID
   const primaryMediaId = useMemo(() => {
-    return workflow?.primary_media_id || items[0]?.id || items[0]?.name || null;
+    const primaryItem = items.find((it) => it.is_primary || it.isPrimary);
+    const fromItem = primaryItem?.id || primaryItem?.asset_id || primaryItem?.name;
+    return workflow?.primaryMediaId || workflow?.primary_media_id || fromItem || null;
   }, [workflow, items]);
 
-  // Upload multiple files handler
+  // Upload multiple files handler (clamped to max 6 reference images)
   const handleUploadFiles = useCallback(
     async (files) => {
       if (!files || files.length === 0) return;
-      for (const file of files) {
+      const remainingSlots = Math.max(0, 6 - items.length);
+      if (remainingSlots <= 0) return;
+
+      const validation = validateFilesAgainstPolicy(files, ELEMENT_REFERENCE_UPLOAD_POLICY, {
+        maxFiles: remainingSlots,
+      });
+      if (!validation.valid) {
+        logger.warn("Element image upload rejected by policy", { message: validation.message });
+        return;
+      }
+
+      const filesToUpload = files.slice(0, remainingSlots);
+      for (const file of filesToUpload) {
         try {
           await addImage({ file });
         } catch (err) {
-          console.error("Failed to upload element image:", err);
+          logger.error("Failed to upload element image", { error: err?.message || String(err) });
         }
       }
     },
-    [addImage]
+    [addImage, items.length]
   );
 
-  // Add media from library assets handler
+  // Add media from library assets handler (clamped to max 6 reference images)
   const handleAddFromAssets = useCallback(
     async (selectedAssets) => {
       if (!selectedAssets || selectedAssets.length === 0) return;
-      for (const asset of selectedAssets) {
+      const remainingSlots = Math.max(0, 6 - items.length);
+      const assetsToAdd = selectedAssets.slice(0, remainingSlots);
+      for (const asset of assetsToAdd) {
         const workflowId = asset.workflow_id || asset.workflowId || asset.id || asset.asset_id;
         const imageUrl = asset.url || asset.file_url || asset.asset?.file_url;
         try {
@@ -134,7 +151,7 @@ export function useElementEdit({ projectId, workflowId }) {
       }
       setIsAssetsOpen(false);
     },
-    [addImage]
+    [addImage, items.length]
   );
 
   // Set primary cover photo handler
@@ -146,12 +163,13 @@ export function useElementEdit({ projectId, workflowId }) {
         await setPrimaryMediaMutation.mutateAsync({
           workflowId: targetWfId,
           mediaId,
+          projectId,
         });
       } catch (err) {
-        console.error("Failed to set primary cover:", err);
+        logger.error("Failed to set primary cover", { error: err?.message || String(err) });
       }
     },
-    [workflow, setPrimaryMediaMutation]
+    [workflow, projectId, setPrimaryMediaMutation]
   );
 
   // Delete reference image handler

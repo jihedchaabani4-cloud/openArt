@@ -25,6 +25,7 @@ import { useCreateElementSheetMutation } from "@/features/elements/hooks/useElem
 import { useWorkflowsStore } from "@/features/workflows";
 import { useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/shared/api/queryKeys";
+import { validateFilesAgainstPolicy, getAcceptedMimeTypes, ELEMENT_REFERENCE_UPLOAD_POLICY } from "@/features/media";
 
 const CATEGORY_OPTIONS = [
   { id: "auto", label: "Auto", googleIcon: "auto_awesome" },
@@ -86,40 +87,30 @@ export function NewElementDialog({ open, onOpenChange, projectId: propProjectId 
     [onOpenChange, resetForm]
   );
 
-  // Process dropped or selected files
+  // Process dropped or selected files (FormData upload, no Base64, images only)
   const processFiles = useCallback(
-    async (files) => {
+    (files) => {
       if (!files || !files.length) return;
       setError(null);
 
-      const validFiles = Array.from(files).filter(
-        (f) => f.type.startsWith("image/") || f.type.startsWith("video/")
-      );
+      const remainingSlots = Math.max(0, 6 - mediaItems.length);
+      const validation = validateFilesAgainstPolicy(files, ELEMENT_REFERENCE_UPLOAD_POLICY, {
+        maxFiles: remainingSlots,
+      });
 
-      if (!validFiles.length) {
-        setError("Veuillez sélectionner un fichier image ou vidéo valide.");
+      if (!validation.valid) {
+        setError(validation.message || "Fichier(s) non valide(s) pour l'élément.");
         return;
       }
 
       try {
-        const remainingSlots = 6 - mediaItems.length;
-        if (remainingSlots <= 0) {
-          setError("Maximum 6 fichiers autorisés.");
-          return;
-        }
-
-        const filesToProcess = validFiles.slice(0, remainingSlots);
-        const newItems = await Promise.all(
-          filesToProcess.map(async (file) => {
-            const url = await elementService.readFileAsDataUrl(file);
-            return {
-              url,
-              isVideo: file.type.startsWith("video/"),
-              name: file.name,
-              file,
-            };
-          })
-        );
+        const filesToProcess = Array.from(files).slice(0, remainingSlots);
+        const newItems = filesToProcess.map((file) => ({
+          url: typeof URL !== "undefined" && URL.createObjectURL ? URL.createObjectURL(file) : "",
+          isVideo: false,
+          name: file.name,
+          file,
+        }));
 
         setMediaItems((prev) => {
           const next = [...prev, ...newItems].slice(0, 6);
@@ -172,6 +163,10 @@ export function NewElementDialog({ open, onOpenChange, projectId: propProjectId 
     (index, e) => {
       e?.stopPropagation();
       setMediaItems((prev) => {
+        const item = prev[index];
+        if (item?.url && typeof URL !== "undefined" && URL.revokeObjectURL && item.file) {
+          URL.revokeObjectURL(item.url);
+        }
         const next = prev.filter((_, i) => i !== index);
         if (activePreviewIndex >= next.length) {
           setActivePreviewIndex(Math.max(0, next.length - 1));
@@ -185,7 +180,7 @@ export function NewElementDialog({ open, onOpenChange, projectId: propProjectId 
   // Submit creation
   const handleCreate = useCallback(async () => {
     if (!mediaItems.length) {
-      setError("Veuillez ajouter au moins une image ou vidéo.");
+      setError("Veuillez ajouter au moins une image.");
       return;
     }
 
@@ -200,11 +195,10 @@ export function NewElementDialog({ open, onOpenChange, projectId: propProjectId 
     try {
       const finalName = name.trim() || `element_${Math.floor(100 + Math.random() * 900)}`;
       const resolvedType = category === "auto" ? "object" : category;
-      const sourceImages = mediaItems.map((m) => m.url);
+      const imagesToAttach = mediaItems.map((m) => (m.file ? { file: m.file } : m));
 
       const payload = elementService.buildCreatePayload({
         name: finalName,
-        sourceImages,
         description: description.trim(),
         elementType: resolvedType,
         projectId: effectiveProjectId,
@@ -212,12 +206,23 @@ export function NewElementDialog({ open, onOpenChange, projectId: propProjectId 
 
       const res = await runCreateElement({ payload });
       const elementId =
+        res?.element?.id ||
+        res?.id ||
         res?.workflow?.id ||
         res?.workflow?.name ||
         res?.element?.workflow_id ||
-        res?.element?.id ||
-        res?.id ||
         res?.name;
+
+      if (elementId && imagesToAttach.length > 0) {
+        await elementService.attachImages(elementId, imagesToAttach, { projectId: effectiveProjectId });
+      }
+
+      // Revoke preview object URLs
+      mediaItems.forEach((m) => {
+        if (m?.url && typeof URL !== "undefined" && URL.revokeObjectURL && m.file) {
+          URL.revokeObjectURL(m.url);
+        }
+      });
 
       if (effectiveProjectId) {
         queryClient.invalidateQueries({
@@ -276,7 +281,7 @@ export function NewElementDialog({ open, onOpenChange, projectId: propProjectId 
           ref={fileInputRef}
           type="file"
           multiple
-          accept="image/*,video/*"
+          accept={getAcceptedMimeTypes(ELEMENT_REFERENCE_UPLOAD_POLICY)}
           className="hidden"
           onChange={handleFileChange}
         />

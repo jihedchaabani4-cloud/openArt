@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogTitle } from "@/shared/ui/dialog";
 import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";
 import { useCreateElementForm } from "@/features/elements";
+import { getAcceptedMimeTypes, ELEMENT_REFERENCE_UPLOAD_POLICY } from "@/features/media";
 
 /**
  * CreateElementModal Component
@@ -17,7 +18,7 @@ export function CreateElementModal({ isOpen, onClose, projectId, onCreated }) {
   const {
     name,
     setName,
-    sourceImages,
+    referenceImages,
     error,
     setError,
     isUploading,
@@ -75,7 +76,7 @@ export function CreateElementModal({ isOpen, onClose, projectId, onCreated }) {
           <div className="flex flex-col gap-2">
             <div className="flex flex-col">
               <Label className="text-xs font-bold uppercase tracking-wider text-white/70">
-                Source Images
+                Reference Images
               </Label>
               <span className="text-xs text-white/40 mt-1">
                 Upload 1 to 6 images from different angles for better results
@@ -98,7 +99,7 @@ export function CreateElementModal({ isOpen, onClose, projectId, onCreated }) {
                 ref={fileInputRef}
                 type="file"
                 multiple
-                accept="image/*"
+                accept={getAcceptedMimeTypes(ELEMENT_REFERENCE_UPLOAD_POLICY)}
                 className="hidden"
                 onChange={handleFileChange}
               />
@@ -129,32 +130,35 @@ export function CreateElementModal({ isOpen, onClose, projectId, onCreated }) {
             </div>
 
             {/* Image Thumbnails Grid */}
-            {sourceImages.length > 0 && (
+            {referenceImages.length > 0 && (
               <div className="border border-white/10 rounded-2xl p-3 bg-zinc-900/20 mt-2">
                 <div className="grid grid-cols-3 gap-3">
-                  {sourceImages.map((url, idx) => (
-                    <div key={idx} className="relative group aspect-square rounded-xl overflow-hidden border border-white/15 bg-zinc-900">
-                      <img src={url} alt={`Ref ${idx}`} className="w-full h-full object-cover" />
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon-xs"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleRemoveImage(idx);
-                        }}
-                        className="absolute top-2 right-2 bg-white/90 hover:bg-white text-zinc-800 rounded-lg p-1.5 opacity-0 group-hover:opacity-100 transition-all duration-200 cursor-pointer shadow-md"
-                      >
-                        <Trash2 className="w-4 h-4 text-zinc-600 hover:text-red-600" />
-                      </Button>
-                    </div>
-                  ))}
+                  {referenceImages.map((img, idx) => {
+                    const src = typeof img === "string" ? img : (img?.previewUrl || img?.url || "");
+                    return (
+                      <div key={idx} className="relative group aspect-square rounded-xl overflow-hidden border border-white/15 bg-zinc-900">
+                        <img src={src} alt={`Ref ${idx}`} className="w-full h-full object-cover" />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon-xs"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRemoveImage(idx);
+                          }}
+                          className="absolute top-2 right-2 bg-white/90 hover:bg-white text-zinc-800 rounded-lg p-1.5 opacity-0 group-hover:opacity-100 transition-all duration-200 cursor-pointer shadow-md"
+                        >
+                          <Trash2 className="w-4 h-4 text-zinc-600 hover:text-red-600" />
+                        </Button>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             )}
 
             <p className="text-[10px] text-white/30 mt-1">
-              {sourceImages.length}/6 photos added. First image will be used as cover thumbnail.
+              {referenceImages.length}/6 photos added. First image will be used as cover thumbnail.
             </p>
           </div>
 

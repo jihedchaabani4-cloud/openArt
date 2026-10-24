@@ -65,8 +65,9 @@ export const characterService = {
       status: "pending",
       projectId,
       workflowId,
-      workflowStepId: "character_sheet",
-      step_id: "character_sheet",
+      role: "sheet",
+      mediaRole: "sheet",
+      step_id: "image_generation",
       mediaMetadata: {
         createTime: new Date().toISOString(),
         visibility: "PRIVATE",

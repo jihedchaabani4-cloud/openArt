@@ -5,6 +5,7 @@ import { Button } from "@/shared/ui/button";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { cn } from "@/shared/lib/utils";
 import { ElementMediaGalleryGrid } from "./ElementMediaGalleryGrid";
+import { getAcceptedMimeTypes, ELEMENT_REFERENCE_UPLOAD_POLICY } from "@/features/media";
 
 /**
  * ElementDetailsGallery
@@ -35,8 +36,10 @@ export function ElementDetailsGallery({
 
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files || []);
-    if (files.length > 0 && onUploadFiles) {
-      onUploadFiles(files);
+    const remainingSlots = Math.max(0, maxAllowed - items.length);
+    const filesToUpload = files.slice(0, remainingSlots);
+    if (filesToUpload.length > 0 && onUploadFiles) {
+      onUploadFiles(filesToUpload);
     }
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
@@ -53,7 +56,7 @@ export function ElementDetailsGallery({
       <input
         ref={fileInputRef}
         type="file"
-        accept="image/*"
+        accept={getAcceptedMimeTypes(ELEMENT_REFERENCE_UPLOAD_POLICY)}
         multiple
         className="hidden"
         onChange={handleFileChange}
@@ -66,8 +69,14 @@ export function ElementDetailsGallery({
             type="button"
             variant="blur"
             size="sm"
-            onClick={() => fileInputRef.current?.click()}
-            className="h-8 px-3.5 rounded-full text-[12px] gap-1.5 font-medium bg-white/10 hover:bg-white/15 text-white transition-all shadow-sm cursor-pointer"
+            disabled={isFull}
+            onClick={() => !isFull && fileInputRef.current?.click()}
+            className={cn(
+              "h-8 px-3.5 rounded-full text-[12px] gap-1.5 font-medium transition-all shadow-sm cursor-pointer",
+              isFull
+                ? "bg-white/5 text-white/30 cursor-not-allowed opacity-50"
+                : "bg-white/10 hover:bg-white/15 text-white"
+            )}
             title="Importer depuis l'ordinateur"
           >
             <GoogleIcon iconName="upload" className="text-[17px]" />
@@ -79,8 +88,14 @@ export function ElementDetailsGallery({
               type="button"
               variant="blur"
               size="sm"
-              onClick={onOpenAssets}
-              className="h-8 px-3 rounded-full text-[12px] gap-1.5 font-medium bg-white/5 hover:bg-white/10 text-white/70 transition-all cursor-pointer"
+              disabled={isFull}
+              onClick={!isFull ? onOpenAssets : undefined}
+              className={cn(
+                "h-8 px-3 rounded-full text-[12px] gap-1.5 font-medium transition-all cursor-pointer",
+                isFull
+                  ? "bg-white/5 text-white/20 cursor-not-allowed opacity-50"
+                  : "bg-white/5 hover:bg-white/10 text-white/70"
+              )}
               title="Ajouter à partir du projet"
             >
               <GoogleIcon iconName="add" className="text-[17px]" />
