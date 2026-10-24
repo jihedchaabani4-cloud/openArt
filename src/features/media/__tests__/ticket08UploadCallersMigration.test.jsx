@@ -1,9 +1,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import React from "react";
-import { render, screen, cleanup } from "@testing-library/react";
+import { render, screen, cleanup, renderHook } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { elementService } from "@/features/elements/services/elementService";
 import { characterService } from "@/features/characters/services/characterService";
+import { useUploadMedia } from "../model/useUploadMedia";
 import {
   validateFilesAgainstPolicy,
   ELEMENT_REFERENCE_UPLOAD_POLICY,
@@ -15,6 +16,14 @@ import {
 import { CharacterDetailsGallery } from "@/components/cinema-studio/characters/CharacterDetailsGallery";
 import { CharacterEditNavbar } from "@/widgets/CharacterEditNavbar/CharacterEditNavbar";
 import { api } from "@/shared/api/client";
+
+const mockBatchUploadAsync = vi.fn();
+vi.mock("../api/mediaApi", () => ({
+  useBatchUploadAssets: () => ({
+    mutateAsync: mockBatchUploadAsync,
+    isPending: false,
+  }),
+}));
 
 vi.mock("next/navigation", () => ({
   useParams: () => ({ projectId: "proj-test", workflowId: "wf-test" }),
@@ -280,6 +289,36 @@ describe("Ticket 08: Frontend Upload Callers Migration to FormData and mediaId",
       // Non-destructive read invariant: all 7 media cards / images are present
       const cards = container.querySelectorAll(".group");
       expect(cards.length).toBe(7);
+    });
+  });
+
+  describe("5. useUploadMedia batch multi-file pre-flight validation", () => {
+    it("allows batch multi-file upload by validating each file individually against DEFAULT_UPLOAD_POLICY", async () => {
+      mockBatchUploadAsync.mockResolvedValueOnce([
+        { id: "wf-1", url: "https://example.com/1.png" },
+        { id: "wf-2", url: "https://example.com/2.png" },
+      ]);
+
+      const queryClient = new QueryClient({
+        defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+      });
+      const wrapper = ({ children }) => (
+        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+      );
+
+      const { result } = renderHook(() => useUploadMedia("proj-test"), { wrapper });
+
+      const file1 = new File(["bytes1"], "f1.png", { type: "image/png" });
+      const file2 = new File(["bytes2"], "f2.png", { type: "image/png" });
+
+      const uploaded = await result.current.uploadMedia([file1, file2]);
+      expect(uploaded).toHaveLength(2);
+      expect(mockBatchUploadAsync).toHaveBeenCalledWith(
+        expect.objectContaining({
+          files: [file1, file2],
+          projectId: "proj-test",
+        })
+      );
     });
   });
 });

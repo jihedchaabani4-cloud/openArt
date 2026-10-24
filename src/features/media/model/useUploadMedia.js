@@ -111,9 +111,13 @@ export function useUploadMedia(overrideProjectId) {
       }
 
       // Pre-flight UX validation against DEFAULT_UPLOAD_POLICY (ADR-0012, Ticket 08)
-      const validation = validateFilesAgainstPolicy(files, DEFAULT_UPLOAD_POLICY);
-      if (!validation.valid) {
-        throw new Error(validation.message || "Invalid files for media upload.");
+      // Since useBatchUploadAssets dispatches each file in its own individual HTTP request,
+      // validate each individual file against MIME type and byte size rules.
+      for (const file of files) {
+        const validation = validateFilesAgainstPolicy(file, DEFAULT_UPLOAD_POLICY);
+        if (!validation.valid) {
+          throw new Error(validation.message || "Invalid files for media upload.");
+        }
       }
 
       // Check if options explicitly defined folderId / collectionId (null is preserved)
