@@ -222,4 +222,47 @@ describe("Batch Upload Pass (my-app)", () => {
     });
     expect(fileInput.value).toBe("");
   });
+
+  // 5) Dedicated test: after rejected 16-file selection AND after finished upload input is "" and toast shows limit
+  it('after a rejected 16-file selection AND after a finished upload the file input value is ""; the toast shows the "Maximum allowed is 15" message', async () => {
+    const { wrapper } = createWrapper();
+    const { container } = render(<NavbarImportButton />, { wrapper });
+    const fileInput = container.querySelector('input[type="file"]');
+    expect(fileInput).not.toBeNull();
+
+    const files16 = Array.from({ length: 16 }, (_, i) =>
+      new File([`data${i}`], `file-${i}.png`, { type: "image/png" })
+    );
+
+    // Part 1: Rejected 16-file selection
+    await act(async () => {
+      fireEvent.change(fileInput, { target: { files: files16 } });
+    });
+
+    // Green assertion: input is reset to ""
+    expect(fileInput.value).toBe("");
+    expect(toast.error).toHaveBeenCalledWith(
+      expect.stringContaining("Maximum allowed is 15")
+    );
+    expect(api.postForm).not.toHaveBeenCalled();
+
+    // Part 2: Finished upload (1 file)
+    api.postForm.mockResolvedValueOnce({
+      ok: true,
+      workflow_id: "wf-single",
+      media_id: "media-single",
+      url: "https://storage.test/single.png",
+      type: "image",
+    });
+
+    const singleFile = [new File(["single"], "single.png", { type: "image/png" })];
+    await act(async () => {
+      fireEvent.change(fileInput, { target: { files: singleFile } });
+    });
+
+    await waitFor(() => {
+      expect(api.postForm).toHaveBeenCalledTimes(1);
+    });
+    expect(fileInput.value).toBe("");
+  });
 });
