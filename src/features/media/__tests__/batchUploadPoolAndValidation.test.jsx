@@ -1,11 +1,12 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { renderHook, act, render, fireEvent } from "@testing-library/react";
+import { renderHook, act, render, fireEvent, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { api } from "@/shared/api/client";
 import { toast } from "sonner";
 import { useUploadMedia, validateBatchCount } from "../model/useUploadMedia";
 import { MAX_BATCH_UPLOAD_FILES, BATCH_UPLOAD_CONCURRENCY } from "../uploadPolicy";
 import { NavbarImportButton } from "@/widgets/StudioNavbar/ui/NavbarImportButton";
+import { useWorkflowsStore } from "@/features/workflows";
 
 vi.mock("@/shared/api/client", () => ({
   api: { postForm: vi.fn(), post: vi.fn() },
@@ -38,6 +39,7 @@ describe("Batch Upload Pass (my-app)", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    useWorkflowsStore.setState({ selectedProjectId: "test-proj-id" });
     origCreateObjectURL = globalThis.URL.createObjectURL;
     origRevokeObjectURL = globalThis.URL.revokeObjectURL;
     origImage = globalThis.Image;
@@ -170,7 +172,7 @@ describe("Batch Upload Pass (my-app)", () => {
     expect(typeof useUploadMedia).toBe("function");
     expect(typeof NavbarImportButton).toBe("function");
 
-    // Verify NavbarImportButton delegates file selection to the shared validateBatchCount hook logic
+    // Verify NavbarImportButton delegates file selection to the shared uploadMedia hook logic
     const { wrapper } = createWrapper();
     const { container } = render(<NavbarImportButton />, { wrapper });
     const fileInput = container.querySelector('input[type="file"]');
@@ -180,6 +182,7 @@ describe("Batch Upload Pass (my-app)", () => {
       new File([`data${i}`], `file-${i}.png`, { type: "image/png" })
     );
 
+    // 1. Rejected selection (16 files): rejects without network call, resets file input value
     await act(async () => {
       fireEvent.change(fileInput, { target: { files: files16 } });
     });
@@ -188,5 +191,35 @@ describe("Batch Upload Pass (my-app)", () => {
       expect.stringMatching(new RegExp(`Maximum allowed is ${MAX_BATCH_UPLOAD_FILES} files per upload`, "i"))
     );
     expect(api.postForm).not.toHaveBeenCalled();
+    expect(fileInput.value).toBe("");
+
+    // Selecting the same files again fires onChange
+    toast.error.mockClear();
+    await act(async () => {
+      fireEvent.change(fileInput, { target: { files: files16 } });
+    });
+    expect(toast.error).toHaveBeenCalledWith(
+      expect.stringMatching(new RegExp(`Maximum allowed is ${MAX_BATCH_UPLOAD_FILES} files per upload`, "i"))
+    );
+    expect(fileInput.value).toBe("");
+
+    // 2. Successful upload (1 file): finishes upload and resets file input value
+    api.postForm.mockResolvedValueOnce({
+      ok: true,
+      workflow_id: "wf-single",
+      media_id: "media-single",
+      url: "https://storage.test/single.png",
+      type: "image",
+    });
+
+    const singleFile = [new File(["single"], "single.png", { type: "image/png" })];
+    await act(async () => {
+      fireEvent.change(fileInput, { target: { files: singleFile } });
+    });
+
+    await waitFor(() => {
+      expect(api.postForm).toHaveBeenCalledTimes(1);
+    });
+    expect(fileInput.value).toBe("");
   });
 });
