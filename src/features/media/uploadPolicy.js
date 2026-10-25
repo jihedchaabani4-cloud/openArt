@@ -12,6 +12,8 @@
 
 const MB = 1024 * 1024;
 
+export const MAX_BATCH_UPLOAD_FILES = 15;
+
 function freezePolicy(policy) {
   if (Array.isArray(policy.allowedTypes)) {
     Object.freeze(policy.allowedTypes);

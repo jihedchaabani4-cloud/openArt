@@ -320,5 +320,25 @@ describe("Ticket 08: Frontend Upload Callers Migration to FormData and mediaId",
         })
       );
     });
+
+    it("rejects batch multi-file upload when more than 15 files are provided in a single upload", async () => {
+      const queryClient = new QueryClient({
+        defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+      });
+      const wrapper = ({ children }) => (
+        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+      );
+
+      const { result } = renderHook(() => useUploadMedia("proj-test"), { wrapper });
+
+      const files = Array.from({ length: 16 }, (_, i) =>
+        new File([`bytes${i}`], `file-${i}.png`, { type: "image/png" })
+      );
+
+      await expect(result.current.uploadMedia(files)).rejects.toThrow(
+        /Maximum allowed is 15 files per upload/i
+      );
+      expect(mockBatchUploadAsync).not.toHaveBeenCalled();
+    });
   });
 });

@@ -7,6 +7,7 @@ import { useUploadMedia } from "@/features/media";
 import { useCreateFolder } from "@/features/folders";
 import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows";
 import { Button } from "@/shared/ui/button";
+import { toast } from "sonner";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -58,6 +59,12 @@ export function NavbarImportButton() {
     const files = Array.from(e.target.files ?? []);
     if (files.length === 0) return;
 
+    if (files.length > 15) {
+      toast.error(`You can upload a maximum of 15 files at a time. Selected: ${files.length}`);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+
     try {
       await uploadMedia(files, {
         collectionId: currentCollectionId,
@@ -65,6 +72,7 @@ export function NavbarImportButton() {
       });
     } catch (err) {
       console.error("Batch upload failed in Navbar:", err);
+      toast.error(err.message || "Batch upload failed");
     } finally {
       // Reset the input so the same file can be uploaded again if needed
       if (fileInputRef.current) fileInputRef.current.value = "";

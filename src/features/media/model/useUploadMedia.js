@@ -3,7 +3,7 @@ import { useParams, useSearchParams, usePathname } from "next/navigation";
 import { useWorkflowsStore } from "@/features/workflows";
 import { useBatchUploadAssets } from "../api/mediaApi";
 import { intrinsicSizeToRatioLabel } from "@/shared/lib/displayUtils";
-import { validateFilesAgainstPolicy, DEFAULT_UPLOAD_POLICY } from "../uploadPolicy";
+import { validateFilesAgainstPolicy, DEFAULT_UPLOAD_POLICY, MAX_BATCH_UPLOAD_FILES } from "../uploadPolicy";
 import { api } from "@/shared/api/client";
 
 /**
@@ -106,6 +106,11 @@ export function useUploadMedia(overrideProjectId) {
       const files = isArray ? filesOrFile : [filesOrFile];
 
       if (files.length === 0) return isArray ? [] : null;
+      if (files.length > MAX_BATCH_UPLOAD_FILES) {
+        throw new Error(
+          `Too many files selected (${files.length}). Maximum allowed is ${MAX_BATCH_UPLOAD_FILES} files per upload.`
+        );
+      }
       if (!effectiveProjectId) {
         throw new Error("Project ID is required for asset uploads.");
       }

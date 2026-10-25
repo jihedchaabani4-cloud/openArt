@@ -1,5 +1,4 @@
 // [FSD Layer: features/media/api/mutations] — Multi-file upload mutation (1 hook / file).
-// Body copied VERBATIM from features/media/api/mediaApi.js useBatchUploadAssets + getMediaMetadata helper.
 // Optimistic blob URLs, cache snapshots, and delayed URL revocation are preserved byte-for-byte.
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/shared/api/client';
@@ -38,47 +37,90 @@ function getMediaMetadata(file) {
   });
 }
 
+/**
+ * Concurrently maps an array of items using a worker pool capped at `limit`.
+ * Aligns with backend per-user upload concurrency limits (default 2).
+ * On first error: stops accepting new work, signals abort, and re-throws.
+ *
+ * @template T, R
+ * @param {T[]} items
+ * @param {number} limit - max concurrent workers
+ * @param {(item: T, index: number) => Promise<R>} mapper
+ * @returns {Promise<R[]>}
+ */
+async function mapConcurrent(items, limit, mapper) {
+  if (!items || items.length === 0) return [];
+  const poolLimit = Math.max(1, Math.min(limit, items.length));
+  const results = new Array(items.length);
+  let currentIndex = 0;
+  let hasError = false;
+  let firstError = null;
+
+  const workers = Array.from({ length: poolLimit }, async () => {
+    while (currentIndex < items.length && !hasError) {
+      const idx = currentIndex++;
+      try {
+        results[idx] = await mapper(items[idx], idx);
+      } catch (err) {
+        hasError = true;
+        firstError = err;
+        throw err;
+      }
+    }
+  });
+
+  await Promise.allSettled(workers);
+  if (firstError) throw firstError;
+  return results;
+}
+
 export function useBatchUploadAssets() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ files, projectId, folderId, collectionId }) => {
+    mutationFn: async ({ files, projectId, folderId, collectionId, concurrency = 2 }) => {
       if (!projectId) throw new Error("Project ID required");
+      if (files?.length > 15) {
+        throw new Error(`Too many files selected (${files.length}). Maximum allowed is 15 files per upload.`);
+      }
       const effectiveFolderId = folderId || collectionId || null;
+      const abortController = new AbortController();
 
-      const results = await Promise.all(files.map(async (file) => {
-        // Since we already calculated metadata in onMutate, we can pass it here or re-calculate.
-        // To keep it simple and parallel, we re-calculate if needed, or better, pass a metadata map.
-        const metadata = await getMediaMetadata(file);
-        const formData = new FormData();
-        formData.append("project_id", projectId);
-        formData.append("workflow_type", "UPLOAD");
-        formData.append("workflowType", "UPLOAD");
-        formData.append("type", "upload");
-        formData.append("source", "upload");
-        if (effectiveFolderId) {
-          formData.append("folder_id", effectiveFolderId);
-          formData.append("folderId", effectiveFolderId);
-          formData.append("collection_id", effectiveFolderId);
-          formData.append("collectionId", effectiveFolderId);
-        }
-        if (metadata?.width && metadata?.height) {
-          formData.append("width", String(metadata.width));
-          formData.append("height", String(metadata.height));
-          formData.append("ratio", metadata.ratio || "");
-        }
-        formData.append("file", file);
-        const res = await api.postForm("/assets/upload", formData);
-        if (res?.url && (res?.width || metadata?.width) && (res?.height || metadata?.height)) {
-          setCachedImageDimensions(
-            res.url,
-            res.width || metadata.width,
-            res.height || metadata.height
-          );
-        }
-        return res;
-      }));
-
-      return results;
+      try {
+        const results = await mapConcurrent(files, concurrency, async (file) => {
+          const metadata = await getMediaMetadata(file);
+          const formData = new FormData();
+          formData.append("project_id", projectId);
+          formData.append("workflow_type", "UPLOAD");
+          formData.append("workflowType", "UPLOAD");
+          formData.append("type", "upload");
+          formData.append("source", "upload");
+          if (effectiveFolderId) {
+            formData.append("folder_id", effectiveFolderId);
+            formData.append("folderId", effectiveFolderId);
+            formData.append("collection_id", effectiveFolderId);
+            formData.append("collectionId", effectiveFolderId);
+          }
+          if (metadata?.width && metadata?.height) {
+            formData.append("width", String(metadata.width));
+            formData.append("height", String(metadata.height));
+            formData.append("ratio", metadata.ratio || "");
+          }
+          formData.append("file", file);
+          const res = await api.postForm("/assets/upload", formData, { signal: abortController.signal });
+          if (res?.url && (res?.width || metadata?.width) && (res?.height || metadata?.height)) {
+            setCachedImageDimensions(
+              res.url,
+              res.width || metadata.width,
+              res.height || metadata.height
+            );
+          }
+          return res;
+        });
+        return results;
+      } catch (err) {
+        abortController.abort();
+        throw err;
+      }
     },
 
     onMutate: async ({ files, projectId, folderId, collectionId }) => {
