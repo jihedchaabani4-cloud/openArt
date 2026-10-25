@@ -150,15 +150,17 @@ export function useUploadMedia(overrideProjectId) {
         }
       }
 
-      setItems(
-        files.map((file, idx) => ({
-          id: `upload-${Date.now()}-${idx}`,
-          file,
-          name: file?.name || "Uploaded Media",
-          status: "uploading",
-          error: null,
-        }))
-      );
+      const initialItems = files.map((file, idx) => ({
+        id: `upload-${Date.now()}-${idx}-${Math.random().toString(36).slice(2, 7)}`,
+        file,
+        name: file?.name || "Uploaded Media",
+        status: idx < BATCH_UPLOAD_CONCURRENCY ? "uploading" : "idle",
+        error: null,
+      }));
+
+      if (!options?.isRetry) {
+        setItems(initialItems);
+      }
 
       // Check if options explicitly defined folderId / collectionId (null is preserved)
       const explicitFolderId =
@@ -184,8 +186,10 @@ export function useUploadMedia(overrideProjectId) {
       // Normalize each returned item to match Prompt Bar and Media Store contract
       const normalized = (results || []).map((res, index) => {
         const file = files[index];
+        const itemId = options?.retryItemId || initialItems[index]?.id || `upload-${Date.now()}-${index}`;
         if (res?.status === "failed") {
           return {
+            id: itemId,
             status: "failed",
             file,
             error: res.error,
@@ -206,9 +210,9 @@ export function useUploadMedia(overrideProjectId) {
 
         return {
           ...res,
+          id: itemId,
           status: "done",
           file,
-          id: wfId,
           workflow_id: wfId,
           workflowId: wfId,
           asset_id: res.asset_id || res.media_id || wfId,
@@ -233,7 +237,18 @@ export function useUploadMedia(overrideProjectId) {
         toast.error(`${failedItems.length} upload${failedItems.length > 1 ? "s" : ""} failed (retry)`);
       }
 
-      setItems(normalized);
+      if (options?.isRetry) {
+        setItems((prev) =>
+          prev.map((item) =>
+            (options.retryItemId && item.id === options.retryItemId) || item.file === files[0]
+              ? normalized[0]
+              : item
+          )
+        );
+      } else {
+        setItems(normalized);
+      }
+
       return isArray ? normalized : normalized[0];
     },
     [effectiveProjectId, uploadBatchToServer, pageCollectionId]
@@ -242,23 +257,24 @@ export function useUploadMedia(overrideProjectId) {
   const retry = useCallback(
     async (failedItem, options = {}) => {
       const file = failedItem?.file || failedItem;
+      const itemId = failedItem?.id;
       if (!file) throw new Error("No file provided to retry");
 
       setIsRetrying(true);
       setItems((prev) =>
         prev.map((item) =>
-          item.file?.name === file.name || item.name === file.name
+          (itemId && item.id === itemId) || item.file === file || item.name === file.name
             ? { ...item, status: "uploading", error: null }
             : item
         )
       );
 
       try {
-        const result = await uploadMedia([file], options);
+        const result = await uploadMedia([file], { ...options, isRetry: true, retryItemId: itemId });
         const retriedItem = Array.isArray(result) ? result[0] : result;
         setItems((prev) =>
           prev.map((item) =>
-            item.file?.name === file.name || item.name === file.name
+            (itemId && item.id === itemId) || item.file === file || item.name === file.name
               ? retriedItem
               : item
           )
@@ -267,7 +283,7 @@ export function useUploadMedia(overrideProjectId) {
       } catch (err) {
         setItems((prev) =>
           prev.map((item) =>
-            item.file?.name === file.name || item.name === file.name
+            (itemId && item.id === itemId) || item.file === file || item.name === file.name
               ? { ...item, status: "failed", error: err }
               : item
           )

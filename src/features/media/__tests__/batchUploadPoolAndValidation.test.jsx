@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { renderHook, act } from "@testing-library/react";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { renderHook, act, render, fireEvent } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { api } from "@/shared/api/client";
 import { toast } from "sonner";
@@ -21,16 +21,6 @@ vi.mock("next/navigation", () => ({
   useSearchParams: () => new URLSearchParams(),
 }));
 
-globalThis.URL.createObjectURL = vi.fn(() => "blob:mock-preview-url");
-globalThis.URL.revokeObjectURL = vi.fn();
-
-class FakeImage {
-  set src(_v) {
-    setTimeout(() => this.onerror?.(), 0);
-  }
-}
-globalThis.Image = FakeImage;
-
 function createWrapper() {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
@@ -42,8 +32,31 @@ function createWrapper() {
 }
 
 describe("Batch Upload Pass (my-app)", () => {
+  let origCreateObjectURL;
+  let origRevokeObjectURL;
+  let origImage;
+
   beforeEach(() => {
     vi.clearAllMocks();
+    origCreateObjectURL = globalThis.URL.createObjectURL;
+    origRevokeObjectURL = globalThis.URL.revokeObjectURL;
+    origImage = globalThis.Image;
+
+    globalThis.URL.createObjectURL = vi.fn(() => "blob:mock-preview-url");
+    globalThis.URL.revokeObjectURL = vi.fn();
+
+    class FakeImage {
+      set src(_v) {
+        setTimeout(() => this.onerror?.(), 0);
+      }
+    }
+    globalThis.Image = FakeImage;
+  });
+
+  afterEach(() => {
+    globalThis.URL.createObjectURL = origCreateObjectURL;
+    globalThis.URL.revokeObjectURL = origRevokeObjectURL;
+    globalThis.Image = origImage;
   });
 
   // 1) 16 files -> rejected, 0 requests
@@ -154,8 +167,26 @@ describe("Batch Upload Pass (my-app)", () => {
 
   // 4) Navbar picker and drag-and-drop use the same hook
   it("Navbar picker and drag-and-drop use the same hook", async () => {
-    // Both NavbarImportButton and drag-and-drop import and invoke useUploadMedia
     expect(typeof useUploadMedia).toBe("function");
     expect(typeof NavbarImportButton).toBe("function");
+
+    // Verify NavbarImportButton delegates file selection to the shared validateBatchCount hook logic
+    const { wrapper } = createWrapper();
+    const { container } = render(<NavbarImportButton />, { wrapper });
+    const fileInput = container.querySelector('input[type="file"]');
+    expect(fileInput).not.toBeNull();
+
+    const files16 = Array.from({ length: 16 }, (_, i) =>
+      new File([`data${i}`], `file-${i}.png`, { type: "image/png" })
+    );
+
+    await act(async () => {
+      fireEvent.change(fileInput, { target: { files: files16 } });
+    });
+
+    expect(toast.error).toHaveBeenCalledWith(
+      expect.stringMatching(new RegExp(`Maximum allowed is ${MAX_BATCH_UPLOAD_FILES} files per upload`, "i"))
+    );
+    expect(api.postForm).not.toHaveBeenCalled();
   });
 });

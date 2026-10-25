@@ -8,6 +8,7 @@ import { useCreateFolder } from "@/features/folders";
 import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows";
 import { Button } from "@/shared/ui/button";
 import { toast } from "sonner";
+import { logger } from "@/shared/lib/logger";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -51,7 +52,7 @@ export function NavbarImportButton() {
         setActiveCollectionId(created.id);
       }
     } catch (err) {
-      console.error("Failed to create collection:", err);
+      logger.error("navbar_create_collection_failed", { message: err?.message });
     }
   };
 
@@ -66,7 +67,7 @@ export function NavbarImportButton() {
         folderId: currentCollectionId,
       });
     } catch (err) {
-      console.error("Batch upload failed in Navbar:", err);
+      logger.error("navbar_batch_upload_failed", { message: err?.message });
       toast.error(err.message || "Batch upload failed");
     } finally {
       // Reset the input so the same file can be uploaded again if needed
