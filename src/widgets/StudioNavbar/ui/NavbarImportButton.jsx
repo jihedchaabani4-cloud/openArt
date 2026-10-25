@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
-import { useUploadMedia } from "@/features/media";
+import { useUploadMedia, validateBatchCount } from "@/features/media";
 import { useCreateFolder } from "@/features/folders";
 import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows";
 import { Button } from "@/shared/ui/button";
@@ -59,13 +59,8 @@ export function NavbarImportButton() {
     const files = Array.from(e.target.files ?? []);
     if (files.length === 0) return;
 
-    if (files.length > 15) {
-      toast.error(`You can upload a maximum of 15 files at a time. Selected: ${files.length}`);
-      if (fileInputRef.current) fileInputRef.current.value = "";
-      return;
-    }
-
     try {
+      validateBatchCount(files);
       await uploadMedia(files, {
         collectionId: currentCollectionId,
         folderId: currentCollectionId,

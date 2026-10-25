@@ -4,6 +4,8 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/shared/api/client';
 import { queryKeys } from '@/shared/api/queryKeys';
 import { intrinsicSizeToRatioLabel, setCachedImageDimensions } from '@/shared/lib/displayUtils';
+import { validateBatchCount } from '../../model/useUploadMedia';
+import { BATCH_UPLOAD_CONCURRENCY } from '../../uploadPolicy';
 
 // ── Helper: extract width/height/ratio from file before upload ──────────────
 function getMediaMetadata(file) {
@@ -40,15 +42,18 @@ function getMediaMetadata(file) {
 /**
  * Concurrently maps an array of items using a worker pool capped at `limit`.
  * Aligns with backend per-user upload concurrency limits (default 2).
- * On first error: stops accepting new work, signals abort, and re-throws.
+ * On first error: stops accepting new work, signals abort, and re-throws when stopOnError is true.
+ * When stopOnError is false: records failed items and processes remaining files.
  *
  * @template T, R
  * @param {T[]} items
  * @param {number} limit - max concurrent workers
  * @param {(item: T, index: number) => Promise<R>} mapper
+ * @param {Object} [options]
+ * @param {boolean} [options.stopOnError=true]
  * @returns {Promise<R[]>}
  */
-async function mapConcurrent(items, limit, mapper) {
+async function mapConcurrent(items, limit, mapper, { stopOnError = true } = {}) {
   if (!items || items.length === 0) return [];
   const poolLimit = Math.max(1, Math.min(limit, items.length));
   const results = new Array(items.length);
@@ -57,65 +62,79 @@ async function mapConcurrent(items, limit, mapper) {
   let firstError = null;
 
   const workers = Array.from({ length: poolLimit }, async () => {
-    while (currentIndex < items.length && !hasError) {
+    while (currentIndex < items.length && (!stopOnError || !hasError)) {
       const idx = currentIndex++;
       try {
         results[idx] = await mapper(items[idx], idx);
       } catch (err) {
-        hasError = true;
-        firstError = err;
-        throw err;
+        if (stopOnError) {
+          hasError = true;
+          firstError = err;
+          throw err;
+        } else {
+          results[idx] = { status: "failed", error: err, file: items[idx] };
+        }
       }
     }
   });
 
   await Promise.allSettled(workers);
-  if (firstError) throw firstError;
+  if (stopOnError && firstError) throw firstError;
   return results;
 }
 
 export function useBatchUploadAssets() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ files, projectId, folderId, collectionId, concurrency = 2 }) => {
+    mutationFn: async ({
+      files,
+      projectId,
+      folderId,
+      collectionId,
+      concurrency = BATCH_UPLOAD_CONCURRENCY,
+      stopOnError = true,
+    }) => {
       if (!projectId) throw new Error("Project ID required");
-      if (files?.length > 15) {
-        throw new Error(`Too many files selected (${files.length}). Maximum allowed is 15 files per upload.`);
-      }
+      validateBatchCount(files);
       const effectiveFolderId = folderId || collectionId || null;
       const abortController = new AbortController();
 
       try {
-        const results = await mapConcurrent(files, concurrency, async (file) => {
-          const metadata = await getMediaMetadata(file);
-          const formData = new FormData();
-          formData.append("project_id", projectId);
-          formData.append("workflow_type", "UPLOAD");
-          formData.append("workflowType", "UPLOAD");
-          formData.append("type", "upload");
-          formData.append("source", "upload");
-          if (effectiveFolderId) {
-            formData.append("folder_id", effectiveFolderId);
-            formData.append("folderId", effectiveFolderId);
-            formData.append("collection_id", effectiveFolderId);
-            formData.append("collectionId", effectiveFolderId);
-          }
-          if (metadata?.width && metadata?.height) {
-            formData.append("width", String(metadata.width));
-            formData.append("height", String(metadata.height));
-            formData.append("ratio", metadata.ratio || "");
-          }
-          formData.append("file", file);
-          const res = await api.postForm("/assets/upload", formData, { signal: abortController.signal });
-          if (res?.url && (res?.width || metadata?.width) && (res?.height || metadata?.height)) {
-            setCachedImageDimensions(
-              res.url,
-              res.width || metadata.width,
-              res.height || metadata.height
-            );
-          }
-          return res;
-        });
+        const results = await mapConcurrent(
+          files,
+          concurrency,
+          async (file) => {
+            const metadata = await getMediaMetadata(file);
+            const formData = new FormData();
+            formData.append("project_id", projectId);
+            formData.append("workflow_type", "UPLOAD");
+            formData.append("workflowType", "UPLOAD");
+            formData.append("type", "upload");
+            formData.append("source", "upload");
+            if (effectiveFolderId) {
+              formData.append("folder_id", effectiveFolderId);
+              formData.append("folderId", effectiveFolderId);
+              formData.append("collection_id", effectiveFolderId);
+              formData.append("collectionId", effectiveFolderId);
+            }
+            if (metadata?.width && metadata?.height) {
+              formData.append("width", String(metadata.width));
+              formData.append("height", String(metadata.height));
+              formData.append("ratio", metadata.ratio || "");
+            }
+            formData.append("file", file);
+            const res = await api.postForm("/assets/upload", formData, { signal: abortController.signal });
+            if (res?.url && (res?.width || metadata?.width) && (res?.height || metadata?.height)) {
+              setCachedImageDimensions(
+                res.url,
+                res.width || metadata.width,
+                res.height || metadata.height
+              );
+            }
+            return { status: "done", ...res, file };
+          },
+          { stopOnError }
+        );
         return results;
       } catch (err) {
         abortController.abort();

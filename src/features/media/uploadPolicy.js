@@ -13,6 +13,7 @@
 const MB = 1024 * 1024;
 
 export const MAX_BATCH_UPLOAD_FILES = 15;
+export const BATCH_UPLOAD_CONCURRENCY = 2;
 
 function freezePolicy(policy) {
   if (Array.isArray(policy.allowedTypes)) {

@@ -1,10 +1,37 @@
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { useParams, useSearchParams, usePathname } from "next/navigation";
+import { toast } from "sonner";
 import { useWorkflowsStore } from "@/features/workflows";
 import { useBatchUploadAssets } from "../api/mediaApi";
 import { intrinsicSizeToRatioLabel } from "@/shared/lib/displayUtils";
-import { validateFilesAgainstPolicy, DEFAULT_UPLOAD_POLICY, MAX_BATCH_UPLOAD_FILES } from "../uploadPolicy";
+import {
+  validateFilesAgainstPolicy,
+  DEFAULT_UPLOAD_POLICY,
+  MAX_BATCH_UPLOAD_FILES,
+  BATCH_UPLOAD_CONCURRENCY,
+} from "../uploadPolicy";
 import { api } from "@/shared/api/client";
+
+/**
+ * Pure validation helper for batch upload counts.
+ * Enforces the maximum selection limit defined in uploadPolicy.
+ *
+ * @param {File | File[] | FileList} filesOrFile
+ */
+export function validateBatchCount(filesOrFile) {
+  if (!filesOrFile) return;
+  const files = Array.isArray(filesOrFile)
+    ? filesOrFile
+    : (typeof filesOrFile[Symbol.iterator] === "function" || typeof filesOrFile.length === "number")
+    ? Array.from(filesOrFile)
+    : [filesOrFile];
+
+  if (files.length > MAX_BATCH_UPLOAD_FILES) {
+    throw new Error(
+      `Too many files selected (${files.length}). Maximum allowed is ${MAX_BATCH_UPLOAD_FILES} files per upload.`
+    );
+  }
+}
 
 /**
  * Standalone direct media upload helper.
@@ -99,6 +126,8 @@ export function useUploadMedia(overrideProjectId) {
   const effectiveProjectId = overrideProjectId || routeProjectId || storeProjectId;
 
   const { mutateAsync: uploadBatchToServer, isPending: isUploading } = useBatchUploadAssets();
+  const [items, setItems] = useState([]);
+  const [isRetrying, setIsRetrying] = useState(false);
 
   const uploadMedia = useCallback(
     async (filesOrFile, options = {}) => {
@@ -106,11 +135,7 @@ export function useUploadMedia(overrideProjectId) {
       const files = isArray ? filesOrFile : [filesOrFile];
 
       if (files.length === 0) return isArray ? [] : null;
-      if (files.length > MAX_BATCH_UPLOAD_FILES) {
-        throw new Error(
-          `Too many files selected (${files.length}). Maximum allowed is ${MAX_BATCH_UPLOAD_FILES} files per upload.`
-        );
-      }
+      validateBatchCount(files);
       if (!effectiveProjectId) {
         throw new Error("Project ID is required for asset uploads.");
       }
@@ -124,6 +149,16 @@ export function useUploadMedia(overrideProjectId) {
           throw new Error(validation.message || "Invalid files for media upload.");
         }
       }
+
+      setItems(
+        files.map((file, idx) => ({
+          id: `upload-${Date.now()}-${idx}`,
+          file,
+          name: file?.name || "Uploaded Media",
+          status: "uploading",
+          error: null,
+        }))
+      );
 
       // Check if options explicitly defined folderId / collectionId (null is preserved)
       const explicitFolderId =
@@ -142,12 +177,27 @@ export function useUploadMedia(overrideProjectId) {
         projectId: effectiveProjectId,
         folderId: effectiveFolderId || null,
         collectionId: effectiveFolderId || null,
+        concurrency: BATCH_UPLOAD_CONCURRENCY,
+        stopOnError: false,
       });
 
       // Normalize each returned item to match Prompt Bar and Media Store contract
       const normalized = (results || []).map((res, index) => {
+        const file = files[index];
+        if (res?.status === "failed") {
+          return {
+            status: "failed",
+            file,
+            error: res.error,
+            message: res.error?.message || "Upload failed",
+            name: file?.name || "Uploaded Media",
+            displayName: file?.name || "Uploaded Media",
+            type: file?.type?.startsWith("video/") ? "video" : "image",
+          };
+        }
+
         const wfId = res.workflow_id || res.workflowId || res.asset_id || res.media_id;
-        const isVid = res.type === "video" || files[index]?.type?.startsWith("video/");
+        const isVid = res.type === "video" || file?.type?.startsWith("video/");
         const resolvedWidth = res.width || (isVid ? 1280 : 1024);
         const resolvedHeight = res.height || (isVid ? 720 : 1024);
         const resolvedRatio = (res.ratio && res.ratio !== "IMAGE_ASPECT_RATIO_UNSPECIFIED")
@@ -156,6 +206,8 @@ export function useUploadMedia(overrideProjectId) {
 
         return {
           ...res,
+          status: "done",
+          file,
           id: wfId,
           workflow_id: wfId,
           workflowId: wfId,
@@ -163,8 +215,8 @@ export function useUploadMedia(overrideProjectId) {
           media_id: res.media_id,
           url: res.url,
           preview: res.url,
-          displayName: files[index]?.name || "Uploaded Media",
-          name: files[index]?.name || "Uploaded Media",
+          displayName: file?.name || "Uploaded Media",
+          name: file?.name || "Uploaded Media",
           type: isVid ? "video" : "image",
           workflow_type: res.workflow_type || "UPLOAD",
           is_upload: true,
@@ -176,14 +228,63 @@ export function useUploadMedia(overrideProjectId) {
         };
       });
 
+      const failedItems = normalized.filter((item) => item.status === "failed");
+      if (failedItems.length > 0) {
+        toast.error(`${failedItems.length} upload${failedItems.length > 1 ? "s" : ""} failed (retry)`);
+      }
+
+      setItems(normalized);
       return isArray ? normalized : normalized[0];
     },
     [effectiveProjectId, uploadBatchToServer, pageCollectionId]
   );
 
+  const retry = useCallback(
+    async (failedItem, options = {}) => {
+      const file = failedItem?.file || failedItem;
+      if (!file) throw new Error("No file provided to retry");
+
+      setIsRetrying(true);
+      setItems((prev) =>
+        prev.map((item) =>
+          item.file?.name === file.name || item.name === file.name
+            ? { ...item, status: "uploading", error: null }
+            : item
+        )
+      );
+
+      try {
+        const result = await uploadMedia([file], options);
+        const retriedItem = Array.isArray(result) ? result[0] : result;
+        setItems((prev) =>
+          prev.map((item) =>
+            item.file?.name === file.name || item.name === file.name
+              ? retriedItem
+              : item
+          )
+        );
+        return retriedItem;
+      } catch (err) {
+        setItems((prev) =>
+          prev.map((item) =>
+            item.file?.name === file.name || item.name === file.name
+              ? { ...item, status: "failed", error: err }
+              : item
+          )
+        );
+        throw err;
+      } finally {
+        setIsRetrying(false);
+      }
+    },
+    [uploadMedia]
+  );
+
   return {
     uploadMedia,
-    isUploading,
+    retry,
+    items,
+    isUploading: isUploading || isRetrying,
     projectId: effectiveProjectId,
     collectionId: pageCollectionId,
     folderId: pageCollectionId,
