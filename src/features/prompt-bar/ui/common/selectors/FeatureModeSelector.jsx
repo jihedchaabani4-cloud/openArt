@@ -16,6 +16,7 @@ export function FeatureModeSelector({
   onModeChange,
   subMode = "frames",
   onSubModeChange,
+  availableSubModes,
   className = "",
 }) {
   const modeOptions = [
@@ -31,7 +32,7 @@ export function FeatureModeSelector({
     },
   ];
 
-  const subModeOptions = [
+  const allSubModeOptions = [
     {
       value: "frames",
       label: "Frames",
@@ -44,6 +45,10 @@ export function FeatureModeSelector({
     },
   ];
 
+  const subModeOptions = Array.isArray(availableSubModes) && availableSubModes.length > 0
+    ? allSubModeOptions.filter((opt) => availableSubModes.includes(opt.value))
+    : allSubModeOptions;
+
   return (
     <div className={`flex flex-col gap-2 ${className}`}>
       {/* Top Level: Image / Video */}
@@ -54,9 +59,9 @@ export function FeatureModeSelector({
         variant="white"
       />
 
-      {/* Sub Level: Frames / Reference (Only visible in Video mode) */}
+      {/* Sub Level: Frames / Reference (Only visible in Video mode when multiple sub-modes are available) */}
       <AnimatePresence initial={false}>
-        {mode === "video" && (
+        {mode === "video" && subModeOptions.length > 1 && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}

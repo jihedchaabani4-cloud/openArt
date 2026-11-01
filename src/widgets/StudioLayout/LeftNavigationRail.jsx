@@ -36,14 +36,15 @@ export function LeftNavigationRail() {
 
   const isCharactersActive = pathname?.includes("/characters");
   const isElementsActive = pathname?.includes("/elements");
-  const currentActiveTab = optimisticTab || (isCharactersActive ? "characters" : isElementsActive ? "elements" : "assets");
+  const isTrashActive = pathname?.includes("/trash");
+  const currentActiveTab = optimisticTab || (isCharactersActive ? "characters" : isElementsActive ? "elements" : isTrashActive ? "trash" : "assets");
 
   const handleToggleExpand = (e) => {
     e?.stopPropagation();
     setIsExpanded((prev) => !prev);
   };
 
-  if (!selectedProjectId) return null;
+  if (!selectedProjectId || isTrashActive) return null;
 
   const elementsHref = `/cinema-studio/${selectedProjectId}/elements`;
 
@@ -51,7 +52,7 @@ export function LeftNavigationRail() {
     ? `/cinema-studio/${selectedProjectId}/characters`
     : `/cinema-studio/${selectedProjectId}/characters/new`;
 
-  const navItems = [
+  const mainNavItems = [
     {
       id: "assets",
       label: "Assets",
@@ -75,6 +76,48 @@ export function LeftNavigationRail() {
     },
   ];
 
+  const trashItem = {
+    id: "trash",
+    label: "Corbeille",
+    icon: "delete",
+    href: `/cinema-studio/${selectedProjectId}/trash`,
+    isActive: currentActiveTab === "trash",
+  };
+
+  const renderNavItem = (item) => (
+    <Link
+      key={item.id}
+      href={item.href}
+      prefetch={true}
+      onClick={() => setOptimisticTab(item.id)}
+      className={cn(
+        "flex items-center h-[42px] rounded-[14px] transition-colors duration-100 w-full select-none outline-none overflow-hidden font-sans font-medium text-[14px] leading-5 antialiased",
+        item.isActive
+          ? "bg-[#2a2a2a] text-white shadow-sm"
+          : "text-white/80 hover:text-white hover:bg-white/[0.06]"
+      )}
+      title={!isExpanded ? item.label : undefined}
+    >
+      <span className="w-[48px] h-full shrink-0 flex items-center justify-center">
+        <GoogleIcon
+          iconName={item.icon}
+          className={cn(
+            "text-[20px] shrink-0",
+            item.isActive ? "text-white" : "text-white/80"
+          )}
+        />
+      </span>
+      <span
+        className={cn(
+          "tracking-normal truncate flex-1 pr-2 whitespace-nowrap",
+          isExpanded ? "block" : "hidden"
+        )}
+      >
+        {item.label}
+      </span>
+    </Link>
+  );
+
   return (
     <aside
       aria-label="Navigation Studio"
@@ -93,48 +136,16 @@ export function LeftNavigationRail() {
 
       {/* ── Top Navigation Items: Générations, Éléments, Personnages ── */}
       <nav className="flex flex-col gap-1.5 w-full shrink-0">
-        {navItems.map((item) => {
-          return (
-            <Link
-              key={item.id}
-              href={item.href}
-              prefetch={true}
-              onClick={() => setOptimisticTab(item.id)}
-              className={cn(
-                "flex items-center h-[42px] rounded-[14px] transition-colors duration-100 w-full select-none outline-none overflow-hidden font-sans font-medium text-[14px] leading-5 antialiased",
-                item.isActive
-                  ? "bg-[#2a2a2a] text-white shadow-sm"
-                  : "text-white/80 hover:text-white hover:bg-white/[0.06]"
-              )}
-              title={!isExpanded ? item.label : undefined}
-            >
-              <span className="w-[48px] h-full shrink-0 flex items-center justify-center">
-                <GoogleIcon
-                  iconName={item.icon}
-                  className={cn(
-                    "text-[20px] shrink-0",
-                    item.isActive ? "text-white" : "text-white/80"
-                  )}
-                />
-              </span>
-              <span
-                className={cn(
-                  "tracking-normal truncate flex-1 pr-2 whitespace-nowrap",
-                  isExpanded ? "block" : "hidden"
-                )}
-              >
-                {item.label}
-              </span>
-            </Link>
-          );
-        })}
+        {mainNavItems.map(renderNavItem)}
       </nav>
 
-      {/* ── Flexible Space (pushes toggle button to bottom) ── */}
+      {/* ── Flexible Space (pushes bottom section to bottom) ── */}
       <div className="flex-1 min-h-[20px]" />
 
-      {/* ── Dedicated Bottom Toggle Button: Opens & Closes the Sidebar ── */}
-      <div className="mt-auto pt-2 pb-2 mb-[30px] w-full shrink-0">
+      {/* ── Dedicated Bottom Actions: Corbeille (Trash) & Toggle Button ── */}
+      <div className="mt-auto flex flex-col gap-1.5 pt-2 pb-2 mb-[30px] w-full shrink-0">
+        {renderNavItem(trashItem)}
+
         <button
           type="button"
           onClick={handleToggleExpand}

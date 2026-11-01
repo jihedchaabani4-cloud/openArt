@@ -23,6 +23,8 @@ import {
   COMMAND_PRIORITY_HIGH,
 } from "lexical";
 
+import { SHINE_TEXT_SWEEP_MS } from "@/shared/ui/ShineText";
+
 const theme = {
   paragraph: "text-white/90 text-[14.5px] leading-relaxed",
 };
@@ -263,6 +265,7 @@ export function PromptEditor({
   mentionOpen = false,
   placeholder = "Describe the scene you imagine...",
   focusRequest = 0,
+  fillNonce = 0,
   plugins = null,
 }) {
   // Move nodes inside to participate in HMR correctly
@@ -279,6 +282,17 @@ export function PromptEditor({
   const editorId = React.useId();
   const editorKey = `editor-${editorId}-${MODULE_VERSION}`;
 
+  // ── One-shot ShineText sweep on programmatic fills ───────────────────────
+  // fillNonce increments ONLY for external programmatic sets (service, template
+  // action, queue replay). User typing goes through setPrompt and never animates.
+  const [sweeping, setSweeping] = React.useState(false);
+  useEffect(() => {
+    if (!fillNonce || fillNonce < 1) return;
+    setSweeping(true);
+    const timer = setTimeout(() => setSweeping(false), SHINE_TEXT_SWEEP_MS);
+    return () => clearTimeout(timer);
+  }, [fillNonce]);
+
   const handleLexicalChange = (editorState) => {
     editorState.read(() => {
       // Save the FULL content including serialized tags (<Trait: ...>) to the store.
@@ -292,7 +306,7 @@ export function PromptEditor({
       <div className="relative min-h-[38px] w-full items-start">
         <RichTextPlugin
           contentEditable={
-            <ContentEditable className="outline-none text-white text-[14.5px] leading-relaxed min-h-[36px] py-1.5 max-h-[200px] overflow-y-auto scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent" />
+            <ContentEditable className={"outline-none text-white text-[14.5px] leading-relaxed min-h-[36px] py-1.5 max-h-[200px] overflow-y-auto scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent" + (sweeping ? " shine-text--sweep shine-text--sweep--once" : "")} />
           }
           placeholder={
             !value && (

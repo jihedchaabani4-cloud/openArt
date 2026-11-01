@@ -1,7 +1,7 @@
 /**
  * Canonical media reference helpers for PromptBar.
  */
-import { resolveMediaUrl as canonicalResolveMediaUrl } from "@/features/workflows/core/toMediaItem";
+import { resolveMediaUrl as canonicalResolveMediaUrl } from "../../workflows/core/toMediaItem.js";
 
 /** Extracts the canonical asset ID from any media asset object or string. */
 export function getAssetId(asset) {

@@ -16,15 +16,13 @@ import {
   GeneratedPromptBar,
   useRealBackendModels,
 } from "@/features/prompt-bar/index.platform";
-import { RowsPhotoAlbum } from "react-photo-album";
-import "react-photo-album/rows.css";
+import { SharedGalleryGrid } from "@/features/media";
 import { MediaGridItem } from "@/widgets/StudioLayout/GenerationsStudio/MediaGridItem";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { Button } from "@/shared/ui/button";
 
 import { usePromptStore } from "@/features/prompt-bar/model/usePromptStore";
-import { resolveMainMedia } from "@/features/workflows/core/resolveMediaRef";
-import { getItemMetadata as getDisplayMeta, getStudioGridDensity, buildCollectionCoverById } from "@/shared/lib/displayUtils";
+import { buildCollectionCoverById } from "@/shared/lib/displayUtils";
 import { LoadingScreen } from "@/shared/ui/LoadingScreen";
 import { logger } from "@/shared/lib/logger";
 
@@ -40,6 +38,8 @@ export default function CollectionDetailPage({ params }) {
   const setActiveCollectionId = useGenerationsStore((s) => s.setActiveCollectionId);
   const gridSize = useGenerationsStore((s) => s.gridSize);
   const setIsNavbarHidden = useGenerationsStore((s) => s.setIsNavbarHidden);
+  const filters = useGenerationsStore((s) => s.filters);
+  const searchQuery = String(filters?.prompt || "").trim().toLowerCase();
 
   // Sync active studio project & collection id
   React.useEffect(() => {
@@ -161,7 +161,15 @@ export default function CollectionDetailPage({ params }) {
 
   // Combined: sub-collections first, then assets
   const combinedItems = React.useMemo(() => {
-    const subItems = subCollections.map((col) => ({
+    let filteredSub = subCollections;
+    if (searchQuery) {
+      filteredSub = subCollections.filter((col) => {
+        const name = (col.name || col.folder_name || "").toLowerCase();
+        return name.includes(searchQuery);
+      });
+    }
+
+    const subItems = filteredSub.map((col) => ({
       type: "collection",
       data: col,
       key: `col-${col.id}`,
@@ -173,7 +181,7 @@ export default function CollectionDetailPage({ params }) {
       key: w.id || w.name,
     }));
     return [...subItems, ...assetItems];
-  }, [subCollections, collectionWorkflows]);
+  }, [subCollections, collectionWorkflows, searchQuery]);
 
   // Pagination & scroll
   const [visibleCount, setVisibleCount] = React.useState(PAGE_SIZE);
@@ -284,86 +292,7 @@ export default function CollectionDetailPage({ params }) {
     [projectId, router]
   );
 
-  // Photos preparation for RowsPhotoAlbum — handles both sub-collections and workflows
-  const photos = React.useMemo(() => {
-    return visibleItems.reduce((acc, item, i) => {
-      if (item.type === "collection") {
-        acc.push({
-          src: "data:image/svg+xml;charset=utf-8,<svg xmlns='http://www.w3.org/2000/svg'/>",
-          width: 1200,
-          height: 1200,
-          key: item.key,
-          itemType: "collection",
-          collection: item.data,
-          coverUrl: collectionCoverById.get(item.data?.id)?.url || null,
-          coverIsVideo: collectionCoverById.get(item.data?.id)?.isVideo || false,
-        });
-        return acc;
-      }
-
-      const workflow = item.data;
-      if (!workflow) return acc;
-      const resolved = resolveMainMedia(workflow);
-      const primaryItem = resolved
-        ? (resolved.raw || resolved)
-        : {
-            id: workflow.id || workflow.name,
-            status: workflow.status || "processing",
-            url: null,
-          };
-      if (!primaryItem) return acc;
-
-      const meta = getDisplayMeta(primaryItem, workflow);
-      const aspect = meta?.aspect ?? "3/4";
-      const [wStr, hStr] = aspect.split("/");
-      const wNum = parseFloat(wStr) || 3;
-      const hNum = parseFloat(hStr) || 4;
-      const BASE = 1200;
-      const width = Math.round(BASE * (wNum / Math.max(wNum, hNum)));
-      const height = Math.round(BASE * (hNum / Math.max(wNum, hNum)));
-      const url = meta?.url || "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
-
-      acc.push({
-        src: url,
-        width,
-        height,
-        key: workflow.id || workflow.name || String(i),
-        itemType: "workflow",
-        workflow,
-      });
-      return acc;
-    }, []);
-  }, [visibleItems, collectionCoverById]);
-
-  const density = getStudioGridDensity(gridSize);
-
-  const renderPhoto = React.useCallback(
-    (_, { photo, width, height }) => {
-      return (
-        <MediaGridItem
-          key={photo.key}
-          collection={photo.collection}
-          workflow={photo.workflow}
-          itemType={photo.itemType}
-          coverUrl={photo.coverUrl}
-          coverIsVideo={photo.coverIsVideo}
-          projectId={projectId}
-          onClick={photo.itemType === "collection" ? handleCollectionClick : handleWorkflowClick}
-          className="rounded-xl border-none shadow-xl"
-          width={width}
-          height={height}
-        />
-      );
-    },
-    [handleCollectionClick, handleWorkflowClick, projectId]
-  );
-
-  const albumRender = React.useMemo(
-    () => ({ photo: renderPhoto }),
-    [renderPhoto]
-  );
-
-  if ((isFoldersLoading || isWorkflowsLoading) && combinedItems.length === 0 && !collection) {
+  if (isFoldersLoading || isWorkflowsLoading) {
     return <LoadingScreen message="Loading collection..." />;
   }
 
@@ -428,14 +357,15 @@ export default function CollectionDetailPage({ params }) {
                 transition={{ duration: 0.15 }}
                 className="flex flex-col gap-6 w-full pb-32"
               >
-                <RowsPhotoAlbum
-                  photos={photos}
-                  targetRowHeight={density.targetRowHeight}
-                  spacing={density.spacing}
-                  rowConstraints={{
-                    singleRowMaxHeight: density.targetRowHeight * density.maxRowHeightMultiplier,
-                  }}
-                  render={albumRender}
+                <SharedGalleryGrid
+                  entries={visibleItems}
+                  collectionCoverById={collectionCoverById}
+                  gridSize={gridSize}
+                  projectId={projectId}
+                  CardComponent={MediaGridItem}
+                  onWorkflowClick={handleWorkflowClick}
+                  onCollectionClick={handleCollectionClick}
+                  itemClassName="rounded-xl border-none shadow-xl"
                 />
                 {hasMore && (
                   <div className="flex justify-center pt-2 text-sm text-white/45">

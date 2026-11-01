@@ -93,6 +93,19 @@ mat-icon {
 }
 
 /* Scrollbar hide utility */
+/* ── Quantum / Higgsfield Typography Utilities ── */
+.text-q-label-md-semi-bold {
+  font-size: 1rem;
+  line-height: 1.5rem;
+  font-weight: 600;
+}
+
+.text-q-body-sm-regular {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 400;
+}
+
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
@@ -185,13 +198,21 @@ mat-icon {
   --color-card: var(--card);
   --radius-xs: var(--mat-sys-corner-extra-small, 4px);
   --radius-sm: var(--mat-sys-corner-small, 8px);
-  --radius-md: var(--mat-sys-corner-medium, 12px);
-  --radius-lg: var(--mat-sys-corner-large, 16px);
-  --radius-xl: var(--flow-panel-border-radius, 20px);
-  --radius-2xl: var(--mat-dialog-container-shape, 24px);
+  --radius-md: var(--button-border-radius, 12px);
+  --radius-lg: var(--card-border-radius, 16px);
+  --radius-xl: var(--card-border-radius, 16px);
+  --radius-2xl: var(--dialog-border-radius, 24px);
   --radius-3xl: var(--mat-sys-corner-extra-large, 28px);
   --radius-full: var(--mat-sys-corner-full, 9999px);
   --radius-button: var(--button-border-radius, 12px);
+  --radius-card: var(--card-border-radius, 16px);
+  --radius-dialog: var(--dialog-border-radius, 24px);
+  --radius-input: var(--input-border-radius, 12px);
+  --radius-panel: var(--panel-border-radius, 16px);
+  --radius-menu: var(--menu-border-radius, 16px);
+  --radius-pill: var(--pill-border-radius, 9999px);
+  --radius-badge: var(--badge-border-radius, 8px);
+  --radius-tile: var(--tile-border-radius, 16px);
 
   /* Custom UI Tokens */
   --background-base-pri:rgba(22, 23, 24, 0.9);
@@ -211,6 +232,10 @@ mat-icon {
 
   --radius-ui-panel: 10px;
   --radius-ui-item: 7px;
+  --color-q-text-primary: var(--color-q-text-primary, #f7f7f8);
+  --color-q-text-secondary: var(--color-q-text-secondary, #828282);
+  --color-neutral-primary-reverted-5: var(--color-neutral-primary-reverted-5, rgba(255, 255, 255, 0.05));
+  --color-neutral-primary-reverted-10: var(--color-neutral-primary-reverted-10, rgba(255, 255, 255, 0.1));
 }
 
 :root {
@@ -218,13 +243,34 @@ mat-icon {
   --background-base-primary: #000000;
   --packages-bg: rgb(43, 43, 43, 0.8);
   --radius: 0.625rem;
-  --mat-button-filled-container-shape: 12px;
-  --mat-button-outlined-container-shape: 12px;
-  --mat-button-text-container-shape: 12px;
-  --mat-button-tonal-container-shape: 12px;
-  --button-border-radius: var(--mat-button-filled-container-shape, 12px);
+  --color-q-text-primary: #f7f7f8;
+  --color-q-text-secondary: #828282;
+  --color-neutral-primary-reverted-5: rgba(255, 255, 255, 0.05);
+  --color-neutral-primary-reverted-10: rgba(255, 255, 255, 0.1);
+
+  /* ═════════════════════════════════════════════════════════════════
+     GLOBAL COMPONENT BORDER RADIUS TOKENS (One place to edit all)
+     ═════════════════════════════════════════════════════════════════ */
+  --button-border-radius: 12px;
+  --card-border-radius: 16px;
+  --dialog-border-radius: 24px;
+  --input-border-radius: 12px;
+  --panel-border-radius: 16px;
+  --menu-border-radius: 16px;
+  --pill-border-radius: 9999px;
+  --badge-border-radius: 8px;
+  --tile-border-radius: var(--card-border-radius, 16px);
+
+  /* Aliases & Material/Flow compatibility */
   --button-radius: var(--button-border-radius, 12px);
   --mat-button-border-radius: var(--button-border-radius, 12px);
+  --mat-button-filled-container-shape: var(--button-border-radius, 12px);
+  --mat-button-outlined-container-shape: var(--button-border-radius, 12px);
+  --mat-button-text-container-shape: var(--button-border-radius, 12px);
+  --mat-button-tonal-container-shape: var(--button-border-radius, 12px);
+  --mat-dialog-container-shape: var(--dialog-border-radius, 24px);
+  --flow-panel-border-radius: var(--panel-border-radius, 16px);
+  --mat-menu-container-shape: var(--menu-border-radius, 16px);
 
   /* Google Flow Design Tokens */
   --prompt-box-settings-width: 17.5rem;
@@ -255,7 +301,7 @@ mat-icon {
   /* Collection Tile Tokens (Google VideoFX / ImageFX) */
   --title-padding-top: 3rem;
   --title-padding-inline-end: 4.75rem;
-  --tile-border-radius: 16px;
+  --tile-border-radius: var(--card-border-radius, 16px);
   --tile-shadow: 0 18px 50px rgba(0, 0, 0, 0.38);
   --tile-shadow-hover: 0 24px 60px rgba(0, 0, 0, 0.48);
   --tile-scrim-gradient: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.04) 20%, rgba(0, 0, 0, 0.12) 40%, rgba(0, 0, 0, 0.25) 60%, rgba(0, 0, 0, 0.4) 80%, rgba(0, 0, 0, 0.5));
@@ -266,7 +312,7 @@ mat-icon {
   --prompt-box-min-height: 5.625rem;
   --prompt-box-max-height: min(28.75rem, 65vh);
   --prompt-box-footer-padding: 5rem;
-  --mat-button-filled-container-shape: 12px;
+  --mat-button-filled-container-shape: var(--button-border-radius, 12px);
   --mat-button-filled-horizontal-padding: 0.75rem;
   --mat-button-filled-container-color: var(--foreground-state-05);
   --mat-button-filled-container-height: var(--prompt-box-bottom-control-height);
@@ -326,7 +372,7 @@ mat-icon {
   --prompt-box-bottom-control-height: 2rem;
   --flow-menu-panel-width: 13rem;
   --flow-menu-panel-min-width: 12rem;
-  --flow-panel-border-radius: 20px;
+  --flow-panel-border-radius: var(--panel-border-radius, 16px);
   --glass-raised-box-shadow: 0 16px 32px -8px rgba(0,0,0,.4);
   --ogb-account-switcher-block-size: 2.5rem;
   --ogb-account-switcher-z-index: 1000;

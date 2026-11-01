@@ -261,28 +261,28 @@ export function getStudioMenuItems({
     case "character":
       rawItems = [
         itemLike,
-        ...(showReuse ? [itemReuse] : []),
+        ...(showReuse && canReuse ? [itemReuse] : []),
         separator("fav"),
-        ...(!isVideo ? [itemAddToPrompt] : []),
+        ...(!isVideo && canAddToPrompt ? [itemAddToPrompt] : []),
         ...(handleDownload ? [itemDownload] : []),
         ...(onRename ? [itemRename] : []),
         ...(handleSetCover ? [itemSetCover, separator("cover")] : []),
         ...(toggleTileDetails ? [itemTileDetails, separator("details")] : []),
-        itemDelete("Placer dans la corbeille"),
+        ...(canDelete ? [itemDelete("Placer dans la corbeille")] : []),
       ];
       break;
 
     case "element":
       rawItems = [
         itemLike,
-        ...(showReuse ? [itemReuse] : []),
+        ...(showReuse && canReuse ? [itemReuse] : []),
         separator("fav"),
-        ...(!isVideo ? [itemAddToPrompt] : []),
+        ...(!isVideo && canAddToPrompt ? [itemAddToPrompt] : []),
         ...(handleDownload ? [itemDownload] : []),
         ...(onRename ? [itemRename] : []),
         ...(handleSetCover ? [itemSetCover, separator("cover")] : []),
         ...(toggleTileDetails ? [itemTileDetails, separator("details")] : []),
-        itemDelete("Placer dans la corbeille"),
+        ...(canDelete ? [itemDelete("Placer dans la corbeille")] : []),
       ];
       break;
 
@@ -291,14 +291,14 @@ export function getStudioMenuItems({
         itemLike,
         separator("fav"),
         ...(handleAnimate && !isVideo ? [itemAnimate, separator("animate")] : []),
-        ...(!isVideo ? [itemAddToPrompt] : []),
+        ...(!isVideo && canAddToPrompt ? [itemAddToPrompt] : []),
         ...(handleDownload ? [itemDownload] : []),
         ...(onRename ? [itemRename] : []),
         ...(isVideo && handlePublishYoutube ? [itemPublishYoutube] : []),
         ...(handleSetCover ? [itemSetCover, separator("cover")] : []),
         ...(handleReport ? [itemReport, separator("report")] : []),
         ...(toggleTileDetails ? [itemTileDetails, separator("details")] : []),
-        itemDelete("Placer dans la corbeille"),
+        ...(canDelete ? [itemDelete("Placer dans la corbeille")] : []),
       ];
       break;
 
@@ -306,20 +306,23 @@ export function getStudioMenuItems({
     default:
       rawItems = [
         itemLike,
-        ...(showReuse ? [itemReuse] : []),
+        ...(showReuse && canReuse ? [itemReuse] : []),
         separator("fav-reuse"),
         ...(handleAnimate && !isVideo ? [itemAnimate, separator("animate")] : []),
-        ...(!isVideo ? [itemAddToPrompt] : []),
+        ...(!isVideo && canAddToPrompt ? [itemAddToPrompt] : []),
         ...(handleDownload ? [itemDownload] : []),
         ...(onRename ? [itemRename] : []),
         ...(isVideo && handlePublishYoutube ? [itemPublishYoutube] : []),
         ...(handleSetCover ? [itemSetCover, separator("cover")] : []),
         ...(handleReport ? [itemReport, separator("report")] : []),
         ...(toggleTileDetails ? [itemTileDetails, separator("details")] : []),
-        itemDelete("Placer dans la corbeille"),
+        ...(canDelete ? [itemDelete("Placer dans la corbeille")] : []),
       ];
       break;
   }
 
-  return sanitizeSeparators(rawItems);
+  const activeItems = rawItems.filter(
+    (item) => !item || item.type === "separator" || item.key?.startsWith("sep-") || !item.disabled
+  );
+  return sanitizeSeparators(activeItems);
 }

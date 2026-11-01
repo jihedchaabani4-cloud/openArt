@@ -172,8 +172,12 @@ export function drainPendingActions(
       executedActions.push(entry);
     } else if (targetStore && typeof targetStore.getState === "function") {
       const state = targetStore.getState();
-      if (entry.actionName === "setPrompt" && typeof state.setPrompt === "function") {
-        state.setPrompt(entry.args[0]);
+      if (entry.actionName === "setPrompt") {
+        if (typeof state.setPromptExternal === "function") {
+          state.setPromptExternal(entry.args[0]);
+        } else if (typeof state.setPrompt === "function") {
+          state.setPrompt(entry.args[0]);
+        }
       } else if (entry.actionName === "reset") {
         if (typeof state.resetStoreState === "function") {
           state.resetStoreState();

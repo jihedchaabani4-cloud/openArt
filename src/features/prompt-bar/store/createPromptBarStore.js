@@ -59,7 +59,7 @@ export function createPromptBarStore(overrides = {}, initialDeps = {}) {
         selectModel: (modelId) => storeGet().selectModel(modelId),
         attachMedia: (args) => storeGet().attachMedia(args),
         removeMedia: (args) => storeGet().removeMedia(args),
-        setPrompt: (text) => storeGet().setPrompt(text),
+        setPrompt: (text) => storeGet().setPromptExternal(text),
         setParametersBatch: (params) => storeGet().setParametersBatch(params),
       });
     } else {
@@ -78,6 +78,7 @@ export function createPromptBarStore(overrides = {}, initialDeps = {}) {
     rawModelsMap: {},
     selectedModelId: null,
     prompt: "",
+    promptFillNonce: 0,
     parameterValues: initialParams,
     elements: [],
     characters: [],
@@ -226,6 +227,15 @@ export function createPromptBarStore(overrides = {}, initialDeps = {}) {
 
     /** Update prompt text. */
     setPrompt: (prompt) => set({ prompt }),
+
+    /**
+     * Set prompt from a programmatic source (service dispatch, template action,
+     * or pending queue replay). Bumps promptFillNonce in the SAME set() call so
+     * the editor can play a one-shot ShineText fill sweep (DECISIONS PB-D-24).
+     * User typing must use setPrompt — it never animates.
+     */
+    setPromptExternal: (prompt) =>
+      set((state) => ({ prompt, promptFillNonce: state.promptFillNonce + 1 })),
 
     /** Update a single parameter value. */
     setParameter: (key, value) =>

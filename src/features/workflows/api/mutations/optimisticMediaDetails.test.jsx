@@ -77,12 +77,13 @@ describe("Optimistic Detail Media Insertion and Success Transition", () => {
         await Promise.resolve();
       });
 
-      // 1. In-flight: optimistic item must exist in cache with status processing and step_id character_detail
+      // 1. In-flight: optimistic item must exist in cache with status processing and step_id upload, role detail
       const inFlightCache = queryClient.getQueryData(pKey);
       expect(inFlightCache.projectContents.media).toHaveLength(1);
       const optimisticItem = inFlightCache.projectContents.media[0];
       expect(optimisticItem.status).toBe("processing");
-      expect(optimisticItem.step_id).toBe("character_detail");
+      expect(optimisticItem.step_id).toBe("upload");
+      expect(optimisticItem.role).toBe("detail");
       expect(optimisticItem.workflow_id).toBe("char-1");
       expect(optimisticItem.url).toBe("blob:mock-preview-url");
 
@@ -94,7 +95,8 @@ describe("Optimistic Detail Media Insertion and Success Transition", () => {
             id: "real-char-media-99",
             url: "https://storage.openart.ai/char-sheets/real.png",
             status: "success",
-            step_id: "character_detail",
+            step_id: "upload",
+            role: "detail",
             workflow_id: "char-1",
           },
         });
@@ -190,12 +192,12 @@ describe("Optimistic Detail Media Insertion and Success Transition", () => {
         await Promise.resolve();
       });
 
-      // 1. In-flight: optimistic item must exist in cache with status processing and step_id element_reference
+      // 1. In-flight: optimistic item must exist in cache with status processing and step_id upload, role detail
       const inFlightCache = queryClient.getQueryData(pKey);
       expect(inFlightCache.projectContents.media).toHaveLength(1);
       const optimisticItem = inFlightCache.projectContents.media[0];
       expect(optimisticItem.status).toBe("processing");
-      expect(optimisticItem.step_id).toBe("element_reference");
+      expect(optimisticItem.step_id).toBe("upload");
       expect(optimisticItem.role).toBe("detail");
       expect(optimisticItem.workflow_id).toBe("el-1");
       expect(optimisticItem.url).toBe("blob:mock-preview-url");
@@ -208,7 +210,7 @@ describe("Optimistic Detail Media Insertion and Success Transition", () => {
             id: "real-el-media-88",
             url: "https://storage.openart.ai/elements/real-el.png",
             status: "success",
-            step_id: "element_reference",
+            step_id: "upload",
             role: "detail",
             workflow_id: "el-1",
           },

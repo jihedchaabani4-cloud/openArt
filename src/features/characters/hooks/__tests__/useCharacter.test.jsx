@@ -17,11 +17,13 @@ vi.mock("@/features/workflows/model/useWorkflowDelete", () => ({
   }),
 }));
 
+const mockSetSheetMediaMutate = vi.fn();
+
 vi.mock("../useUpdateCharacter", () => ({
   useUpdateCharacter: () => ({ mutateAsync: vi.fn() }),
 }));
 vi.mock("../useSetCharacterSheetMedia", () => ({
-  useSetCharacterSheetMedia: () => ({ mutateAsync: vi.fn() }),
+  useSetCharacterSheetMedia: () => ({ mutateAsync: mockSetSheetMediaMutate }),
 }));
 vi.mock("../useAddMediaToCharacter", () => ({
   useAddMediaToCharacter: () => ({ mutateAsync: vi.fn() }),
@@ -210,5 +212,45 @@ describe("useCharacter Hook - isProcessing & isFailed status resolution", () => 
 
     expect(result.current.mainMedia).toBeDefined();
     expect(result.current.mainMedia.id).toBe("m-detail-pin");
+  });
+
+  it("selectSheetAsset passes both mediaId and imageUrl in mutation payload", async () => {
+    mockSetSheetMediaMutate.mockResolvedValueOnce({ media: { url: "https://example.com/asset.png" } });
+
+    useProjectData.mockReturnValue({
+      data: {
+        projectContents: {
+          workflows: [
+            {
+              id: "char-select",
+              name: "Selectable Hero",
+              workflow_type: "CHARACTER",
+              status: "completed",
+            },
+          ],
+        },
+      },
+      isLoading: false,
+    });
+
+    const { result } = renderHook(() =>
+      useCharacter({ projectId: "proj-1", characterId: "char-select" })
+    );
+
+    await result.current.selectSheetAsset([
+      {
+        id: "wf-gen-123",
+        media_id: "media-uuid-456",
+        mediaId: "media-uuid-456",
+        url: "https://example.com/asset.png",
+      },
+    ]);
+
+    expect(mockSetSheetMediaMutate).toHaveBeenCalledWith({
+      characterId: "char-select",
+      mediaId: "media-uuid-456",
+      imageUrl: "https://example.com/asset.png",
+      projectId: "proj-1",
+    });
   });
 });

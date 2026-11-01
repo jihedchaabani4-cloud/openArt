@@ -15,6 +15,32 @@ import {
 } from "@/shared/ui/context-menu";
 import { ActionBtn } from "./ActionBtn";
 
+function filterActiveMenuItems(items = []) {
+  if (!items || !items.length) return [];
+  const filtered = items.filter(
+    (m) => m && (m.type === "separator" || m.key === "separator" || m.key?.startsWith("sep-") || !m.disabled)
+  );
+  const result = [];
+  for (let i = 0; i < filtered.length; i++) {
+    const curr = filtered[i];
+    const isSep = curr.type === "separator" || curr.key === "separator" || curr.key?.startsWith("sep-");
+    if (isSep) {
+      if (result.length === 0) continue;
+      const prev = result[result.length - 1];
+      const prevIsSep = prev.type === "separator" || prev.key === "separator" || prev.key?.startsWith("sep-");
+      if (prevIsSep) continue;
+    }
+    result.push(curr);
+  }
+  if (result.length > 0) {
+    const last = result[result.length - 1];
+    if (last.type === "separator" || last.key === "separator" || last.key?.startsWith("sep-")) {
+      result.pop();
+    }
+  }
+  return result;
+}
+
 /**
  * Universal Dropdown Menu for Studio Media Items.
  * Accepts a list of items configured with labels, icons, onClick handlers, etc.
@@ -27,7 +53,9 @@ export function StudioItemDropdownMenu({
   align = "end",
   className = "w-52",
 }) {
-  if (!items || items.length === 0) {
+  const activeItems = React.useMemo(() => filterActiveMenuItems(items), [items]);
+
+  if (!activeItems || activeItems.length === 0) {
     return (
       trigger || (
         <ActionBtn onClick={(e) => e.stopPropagation()} title="More options">
@@ -47,7 +75,7 @@ export function StudioItemDropdownMenu({
         )}
       </DropdownMenuTrigger>
       <DropdownMenuContent align={align} className={cn("p-1.5 min-w-[12rem] w-52 flow-menu-panel mat-mdc-menu-panel", className)}>
-        {items.map((m, i) => {
+        {activeItems.map((m, i) => {
           if (m.key === "separator" || m.type === "separator") {
             return <DropdownMenuSeparator key={m.key || `sep-${i}`} className="my-1.5" />;
           }
@@ -101,9 +129,11 @@ export function StudioContextMenuContent({
   items = [],
   className = "w-52",
 }) {
+  const activeItems = React.useMemo(() => filterActiveMenuItems(items), [items]);
+
   return (
     <ContextMenuContent className={cn("p-1.5 min-w-[12rem] w-52 flow-menu-panel mat-mdc-menu-panel", className)}>
-      {items.map((m, i) => {
+      {activeItems.map((m, i) => {
         if (m.key === "separator" || m.type === "separator") {
           return <ContextMenuSeparator key={m.key || `ctx-sep-${i}`} className="my-1.5" />;
         }

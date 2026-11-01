@@ -300,7 +300,11 @@ export function promptBarService(
     const state = store.getState();
 
     if (actionName === "setPrompt") {
-      state.setPrompt(args[0]);
+      if (typeof state.setPromptExternal === "function") {
+        state.setPromptExternal(args[0]);
+      } else {
+        state.setPrompt(args[0]);
+      }
       return ok({ prompt: args[0] });
     }
 

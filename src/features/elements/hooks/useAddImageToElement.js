@@ -50,13 +50,24 @@ export function useAddImageToElement() {
 
     applyOptimistic: (oldData, { elementId, _localUrl, _tempId }) => {
       if (!oldData?.projectContents || !_localUrl) return oldData;
+
+      // Do not exceed maximum 6 reference images in optimistic cache
+      const existingCount = Array.isArray(oldData.projectContents.media)
+        ? oldData.projectContents.media.filter(
+            (m) => m.workflowId === elementId || m.workflow_id === elementId
+          ).length
+        : 0;
+      if (existingCount >= 6) {
+        return oldData;
+      }
+
       const optimisticId = _tempId || `optimistic-element-img-${Date.now()}`;
       const optimisticMedia = {
         id: optimisticId,
         url: _localUrl,
         file_url: _localUrl,
         status: "processing",
-        step_id: "element_reference",
+        step_id: "upload",
         role: "detail",
         mediaRole: "detail",
         feed_type: "upload",

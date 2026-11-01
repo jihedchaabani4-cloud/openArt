@@ -62,6 +62,14 @@ export function normalizeWorkflowType(workflow) {
 export function getWorkflowPrimaryMediaId(workflow) {
   if (!workflow || typeof workflow !== "object") return null;
 
+  if (Array.isArray(workflow.items)) {
+    const primaryItem = workflow.items.find((it) => it?.is_primary || it?.isPrimary);
+    if (primaryItem) {
+      const id = primaryItem.id || primaryItem.media_id || primaryItem.name;
+      if (id) return String(id).trim();
+    }
+  }
+
   const id =
     workflow.primary_media_id ??
     workflow.primaryMediaId ??
@@ -100,18 +108,14 @@ function matchesId(item, targetId) {
 function isSheetMedia(item) {
   if (!item) return false;
   if (item.role === "sheet" || item.role === "turnaround") return true;
-  const rawRole = String(
-    item.raw?.role || item.raw?.step_id || item.raw?.mediaRole || item.raw?.workflowStepId || ""
-  ).trim().toLowerCase();
-  if (
-    rawRole === "sheet" ||
-    rawRole === "turnaround" ||
-    rawRole === "character_sheet" ||
-    rawRole === "cae"
-  ) {
-    return true;
-  }
-  return false;
+  if (item.role && item.role !== "sheet" && item.role !== "turnaround") return false;
+  const explicitRawRole = String(item.raw?.role || item.raw?.mediaRole || "").trim().toLowerCase();
+  if (explicitRawRole === "sheet" || explicitRawRole === "turnaround") return true;
+  if (explicitRawRole) return false;
+
+  // Legacy fallback when no canonical role exists
+  const legacyStep = String(item.raw?.workflowStepId || item.raw?.step_id || "").trim().toLowerCase();
+  return legacyStep === "character_sheet" || legacyStep === "cae";
 }
 
 /**
@@ -122,12 +126,15 @@ function isSheetMedia(item) {
  */
 function isDetailMedia(item) {
   if (!item) return false;
-  if (item.role === "detail") return true;
-  const rawRole = String(
-    item.raw?.role || item.raw?.step_id || item.raw?.mediaRole || item.raw?.workflowStepId || ""
-  ).trim().toLowerCase();
-  if (rawRole === "detail" || rawRole === "character_detail") return true;
-  return false;
+  if (item.role === "detail" || item.role === "reference") return true;
+  if (item.role && item.role !== "detail" && item.role !== "reference") return false;
+  const explicitRawRole = String(item.raw?.role || item.raw?.mediaRole || "").trim().toLowerCase();
+  if (explicitRawRole === "detail" || explicitRawRole === "reference") return true;
+  if (explicitRawRole) return false;
+
+  // Legacy fallback when no canonical role exists
+  const legacyStep = String(item.raw?.workflowStepId || item.raw?.step_id || "").trim().toLowerCase();
+  return legacyStep === "character_detail";
 }
 
 /**

@@ -74,12 +74,12 @@ export function CharacterCardKrea({ character, onClick, onDelete }) {
       onClick={(e) => { e.stopPropagation(); if (onClick && !isProcessing) onClick(character); }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className="group relative flex cursor-pointer flex-col gap-2 rounded-xl p-2.5 transition-all duration-300 ease-out select-none outline-none hover:bg-white/[0.08] hover:shadow-2xl border border-white/5 hover:border-white/10"
+      className="group relative flex cursor-pointer flex-col gap-2 rounded-card p-2.5 transition-all duration-300 ease-out select-none outline-none hover:bg-white/[0.08] hover:shadow-2xl border border-white/5 hover:border-white/10"
     >
       {/* ── CARD INNER FRAME ── */}
       <div
         style={{ backgroundColor: cardBgColor }}
-        className="relative flex aspect-[370/240] w-full items-center justify-center overflow-hidden rounded-[10px] transition-all duration-300 ease-out shadow-inner"
+        className="relative flex aspect-[370/240] w-full items-center justify-center overflow-hidden rounded-card transition-all duration-300 ease-out shadow-inner"
       >
         {/* Top-Left Category Type Badge (User Icon) */}
         {!isProcessing && !isFailed && (

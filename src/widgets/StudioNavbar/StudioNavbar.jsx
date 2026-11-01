@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { motion } from "framer-motion"
+import { usePathname } from "next/navigation"
 import { useProjects, useUpdateProject } from "@/features/projects/api/projectsApi"
 import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows"
 import { cn } from "@/shared/lib/utils"
@@ -17,10 +18,10 @@ export function StudioNavbar() {
     const activeProjectId = useGenerationsStore(s => s.selectedProjectId);
     const filters = useGenerationsStore(s => s.filters);
     const setFilter = useGenerationsStore(s => s.setFilter);
-    const activeStudioTab = useGenerationsStore(s => s.activeStudioTab);
     const isNavbarHidden = useGenerationsStore(s => s.isNavbarHidden);
 
-    const isCleanNavbarTab = activeStudioTab === 'elements' || activeStudioTab === 'characters';
+    const pathname = usePathname() || "";
+    const isCleanNavbarTab = pathname.includes("/edit/") || pathname.endsWith("/new");
 
     const { data: projects = [] } = useProjects();
     const { mutateAsync: updateProject } = useUpdateProject();

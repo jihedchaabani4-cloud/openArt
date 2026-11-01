@@ -90,7 +90,18 @@ export function ImportMediaPopover({
   const allowsCharacters = resolvedAllowedTypes.includes("character");
   const allowsElements   = resolvedAllowedTypes.includes("element");
 
-  const effectiveMode = allowsVideos && !allowsImages ? "video" : (allowsImages && !allowsVideos ? "image" : "all");
+  const allowedSpecificCount = [allowsImages, allowsVideos, allowsCharacters, allowsElements].filter(Boolean).length;
+  const effectiveMode = allowedSpecificCount > 1
+    ? "all"
+    : allowsVideos
+      ? "video"
+      : allowsImages
+        ? "image"
+        : allowsCharacters
+          ? "character"
+          : allowsElements
+            ? "element"
+            : "all";
 
   const params = useParams();
   const projectId = params?.projectId;
@@ -205,7 +216,7 @@ export function ImportMediaPopover({
         });
 
         // Resolve primary/main media
-        const primaryMediaId = w.metadata?.primaryMediaId;
+        const primaryMediaId = w.primary_media_id || w.primaryMediaId || w.metadata?.primaryMediaId;
         const primaryMediaById = primaryMediaId
           ? rawMedia.find((m) => m.id === primaryMediaId || m.name === primaryMediaId)
           : null;
@@ -247,17 +258,19 @@ export function ImportMediaPopover({
             !!mainMedia?.video ||
             (url && /\.(mp4|webm|mov)$/i.test(url));
 
-          const isUploadItem =
-            w.workflow_type === "UPLOAD" ||
-            w.workflowType === "UPLOAD" ||
-            w.type === "upload" ||
-            Boolean(w.is_upload || mainMedia?.is_upload || mainMedia?.workflow_type === "UPLOAD");
+          const semanticCategory = resolveCategory(w);
 
-          const semanticCategory = isUploadItem ? null : resolveCategory(w);
+          const isUploadItem =
+            !semanticCategory && (
+              w.workflow_type === "UPLOAD" ||
+              w.workflowType === "UPLOAD" ||
+              w.type === "upload" ||
+              Boolean(w.is_upload || mainMedia?.is_upload || mainMedia?.workflow_type === "UPLOAD")
+            );
 
           let itemType;
-          if (isUploadItem)          itemType = "upload";
-          else if (semanticCategory) itemType = semanticCategory; // "character" | "element"
+          if (semanticCategory)      itemType = semanticCategory; // "character" | "element"
+          else if (isUploadItem)     itemType = "upload";
           else if (isVid)            itemType = "video";
           else                       itemType = "image";
 
@@ -274,6 +287,8 @@ export function ImportMediaPopover({
 
           finalItems.push({
             ...(mainMedia || {}),
+            media_id: mainMedia?.id || mainMedia?.media_id || null,
+            mediaId: mainMedia?.id || mainMedia?.mediaId || null,
             id: dedupeKey,
             workflow_id: dedupeKey,
             workflowId: dedupeKey,
@@ -500,6 +515,7 @@ export function ImportMediaPopover({
     const itemUrl = item.url ?? item.image?.url ?? item.video?.url ?? item.file_url;
     const isVideo = item.type === "video" || item.is_video || !!item.video;
     const canonicalWorkflowId = item.workflow_id || item.workflowId || item.workflow?.id || item.id || null;
+    const mediaId = item.media_id || item.mediaId || (item.workflow_id ? item.id : null);
     const count = item.image_count || 1;
     
     const asset = {
@@ -507,6 +523,8 @@ export function ImportMediaPopover({
       url:           itemUrl,
       workflow_id:   canonicalWorkflowId,
       workflowId:    canonicalWorkflowId,
+      media_id:      mediaId || item.media_id || item.id,
+      mediaId:       mediaId || item.mediaId || item.id,
       asset_id:      canonicalWorkflowId || item.id,
       id:            canonicalWorkflowId || item.id,
       is_video:      isVideo,
@@ -568,11 +586,14 @@ export function ImportMediaPopover({
     const itemUrl = resolveMediaUrl(item) ?? item.url ?? item.image?.url ?? item.video?.url ?? item.file_url ?? "";
     const isVideo = item.type === "video" || item.is_video || !!item.video;
     const canonicalWorkflowId = item.workflow_id || item.workflowId || item.workflow?.id || item.id || null;
+    const mediaId = item.media_id || item.mediaId || (item.workflow_id ? item.id : null);
     const asset = {
       ...item,
       url:           itemUrl,
       workflow_id:   canonicalWorkflowId,
       workflowId:    canonicalWorkflowId,
+      media_id:      mediaId || item.media_id || item.id,
+      mediaId:       mediaId || item.mediaId || item.id,
       asset_id:      canonicalWorkflowId || item.id,
       id:            canonicalWorkflowId || item.id,
       is_video:      isVideo,

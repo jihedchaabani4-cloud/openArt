@@ -46,7 +46,7 @@ function CardItem({ label, image, isSelected, onClick }) {
     >
       <div
         className={cn(
-          "relative w-[135px] h-[135px] rounded-xl overflow-hidden transition-all duration-300",
+          "relative w-[135px] h-[135px] rounded-card overflow-hidden transition-all duration-300",
           isSelected && "outline outline-2 outline-white"
         )}
       >

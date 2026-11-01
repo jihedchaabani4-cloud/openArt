@@ -11,29 +11,15 @@ import { Plus } from "lucide-react"
 import { Button } from "@/shared/ui/button";
 import { usePromptStore } from "@/features/studio";
 import { LoadingScreen } from "@/shared/ui/LoadingScreen";
-import { resolveMainMedia } from "@/features/workflows/core/resolveMediaRef";
-import { getItemMetadata as getDisplayMeta, getStudioGridDensity, getCachedImageDimensions, setCachedImageDimensions } from "@/shared/lib/displayUtils";
 
-import { RowsPhotoAlbum } from 'react-photo-album';
-import 'react-photo-album/rows.css';
+import { SharedGalleryGrid } from "@/features/media";
 import { MediaGridItem } from "@/widgets/StudioLayout/GenerationsStudio/MediaGridItem";
-import { HowToDrawer } from "@/components/cinema-studio/elements/HowToDrawer";
+import { HowToDrawer, ElementsEmptyState } from "@/components/cinema-studio/elements";
 import { useWorkflowDelete } from "@/features/workflows";
 import { ConfirmDeleteDialog } from "@/widgets/dialogs/ConfirmDeleteDialog";
 import { NewElementDialog } from "@/widgets/NewElementDialog";
 
 const PAGE_SIZE = 30;
-
-function resolvePrimaryRawMedia(workflow) {
-    if (!workflow) return null;
-    const resolved = resolveMainMedia(workflow);
-    if (resolved) return resolved.raw || resolved;
-    return {
-        id: workflow.id || workflow.name,
-        status: workflow.status || "processing",
-        url: null,
-    };
-}
 
 export default function ElementsPage({ params }) {
     const { projectId } = React.use(params)
@@ -51,14 +37,14 @@ export default function ElementsPage({ params }) {
         }
     }, [projectId, setSelectedProjectId, setActiveStudioTab])
 
-    const gridSize          = useGenerationsStore(s => s.gridSize);
+    const gridSize = useGenerationsStore(s => s.gridSize);
     
     const isDragging = usePromptStore(s => s.isDraggingGalleryItem);
     const router = useRouter();
     const searchParams = useSearchParams();
     const [isNewElementOpen, setIsNewElementOpen] = React.useState(false);
     
-    // Natively fetch element sheet workflows
+    // Natively fetch element sheet workflows via unified selector
     const { workflows: existingSheets, isLoading } = useElementSheetWorkflows(projectId);
 
     // Auto-open modal if URL has ?new=true or ?create=true
@@ -81,70 +67,6 @@ export default function ElementsPage({ params }) {
 
     const [isHowToOpen, setIsHowToOpen] = React.useState(false);
     const { isDeleteDialogOpen, setIsDeleteDialogOpen, confirmDelete, isDeleting } = useWorkflowDelete();
-
-    const [dimensionsVersion, setDimensionsVersion] = React.useState(0);
-
-    // Probe and cache authentic natural dimensions for element images
-    React.useEffect(() => {
-        visibleSheets.forEach((workflow) => {
-            const primaryItem = resolvePrimaryRawMedia(workflow);
-            if (!primaryItem) return;
-            const meta = getDisplayMeta(primaryItem, workflow);
-            const url = meta?.url || primaryItem?.url || primaryItem?.file_url;
-            if (!url || url.startsWith("data:image/gif")) return;
-
-            if (getCachedImageDimensions(url)) return;
-
-            const img = new window.Image();
-            img.onload = () => {
-                if (img.naturalWidth && img.naturalHeight) {
-                    setCachedImageDimensions(url, img.naturalWidth, img.naturalHeight);
-                    setDimensionsVersion((v) => v + 1);
-                }
-            };
-            img.src = url;
-            if (img.complete && img.naturalWidth && img.naturalHeight) {
-                setCachedImageDimensions(url, img.naturalWidth, img.naturalHeight);
-            }
-        });
-    }, [visibleSheets]);
-
-    const photos = React.useMemo(() => {
-        void dimensionsVersion;
-        return visibleSheets.reduce((acc, workflow, i) => {
-            const primaryItem = resolvePrimaryRawMedia(workflow);
-            if (!primaryItem) return acc;
-
-            const meta = getDisplayMeta(primaryItem, workflow);
-            const url = meta?.url || "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
-
-            // 1. Highest priority: verified authentic image dimensions
-            let natural = getCachedImageDimensions(url);
-            let wNum = natural?.width;
-            let hNum = natural?.height;
-
-            // 2. Second priority: If natural dimensions not yet available, use metadata aspect
-            if (!wNum || !hNum) {
-                const aspect = meta?.aspect && meta.aspect !== "auto" ? meta.aspect : (meta?.isVideo ? "16/9" : "3/4");
-                const [wStr, hStr] = String(aspect).split("/");
-                wNum = parseFloat(wStr) || 1;
-                hNum = parseFloat(hStr) || 1;
-            }
-
-            const BASE = 1200;
-            const width  = Math.round(BASE * (wNum / Math.max(wNum, hNum)));
-            const height = Math.round(BASE * (hNum / Math.max(wNum, hNum)));
-
-            acc.push({
-                src:      url,
-                width,
-                height,
-                key:      workflow.id || workflow.name || String(i),
-                workflow,
-            });
-            return acc;
-        }, []);
-    }, [visibleSheets, dimensionsVersion]);
 
     // Navigate to the Edit Page for this workflow
     const handleWorkflowClick = React.useCallback((workflow) => {
@@ -199,35 +121,12 @@ export default function ElementsPage({ params }) {
         }
     }, [hasMore, loadMore, visibleSheets.length]);
 
-    // Density configuration driven by studio gridSize
-    const density = getStudioGridDensity(gridSize);
-
-    const renderPhoto = React.useCallback(
-        (_, { photo, width, height }) => (
-            <MediaGridItem
-                key={photo.key}
-                workflow={photo.workflow}
-                onClick={handleWorkflowClick}
-                className="rounded-xl border-none shadow-xl"
-                width={width}
-                height={height}
-            />
-        ),
-        [handleWorkflowClick]
-    );
-
-    const albumRender = React.useMemo(() => ({
-        photo: renderPhoto,
-    }), [renderPhoto]);
-
     if (isLoading) {
         return <LoadingScreen message="Loading elements..." />
     }
 
     return (
         <div className="flex h-full w-full overflow-hidden text-white bg-background relative">
-
-
             <main className="flex-1 flex flex-col relative min-w-0 overflow-hidden z-10">
                 {/* ── Global Drag Overlay ── */}
                 <AnimatePresence>
@@ -249,31 +148,18 @@ export default function ElementsPage({ params }) {
                 >
                     {/* ── Elements Grid (Full Width 100%) ── */}
                     {visibleSheets.length === 0 ? (
-                        <div className="w-full flex flex-col items-center justify-center py-28 text-center col-span-full">
-                            <p className="text-[18px] text-white/35 font-normal tracking-wide">
-                                No elements yet
-                            </p>
-                            <p className="text-[13px] text-white/20 mt-1">
-                                Click &quot;New element&quot; below to create your first element.
-                            </p>
-                            <Button
-                                type="button"
-                                variant="studio-white"
-                                onClick={() => setIsNewElementOpen(true)}
-                                className="mt-4 rounded-full px-5 py-2.5 font-medium text-sm flex items-center gap-2 border-none"
-                            >
-                                <Plus className="size-4" />
-                                <span>Create element</span>
-                            </Button>
+                        <div className="flex-1 flex flex-col items-center justify-center min-h-[calc(100vh-140px)] w-full my-auto">
+                            <ElementsEmptyState onCreateElement={() => setIsNewElementOpen(true)} />
                         </div>
                     ) : (
                         <div className="flex flex-col gap-6 w-full pb-32">
-                            <RowsPhotoAlbum
-                                photos={photos}
-                                targetRowHeight={density.targetRowHeight}
-                                spacing={density.spacing}
-                                rowConstraints={{ singleRowMaxHeight: density.targetRowHeight * density.maxRowHeightMultiplier }}
-                                render={albumRender}
+                            <SharedGalleryGrid
+                                workflows={visibleSheets}
+                                gridSize={gridSize}
+                                projectId={projectId}
+                                CardComponent={MediaGridItem}
+                                onWorkflowClick={handleWorkflowClick}
+                                itemClassName="rounded-xl border-none shadow-xl"
                             />
                             {hasMore && (
                                 <div className="flex justify-center pt-2 text-sm text-white/45">
@@ -285,17 +171,19 @@ export default function ElementsPage({ params }) {
                 </div>
 
                 {/* Floating Action Button (New Element) */}
-                <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-40">
-                    <Button
-                        type="button"
-                        variant="create-element"
-                        size="fab"
-                        onClick={() => setIsNewElementOpen(true)}
-                    >
-                        <Plus className="size-5" />
-                        <span>New element</span>
-                    </Button>
-                </div>
+                {visibleSheets.length > 0 && (
+                    <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-40">
+                        <Button
+                            type="button"
+                            variant="create-element"
+                            size="fab"
+                            onClick={() => setIsNewElementOpen(true)}
+                        >
+                            <Plus className="size-5" />
+                            <span>New element</span>
+                        </Button>
+                    </div>
+                )}
 
                 <HowToDrawer
                     isOpen={isHowToOpen}
@@ -316,9 +204,6 @@ export default function ElementsPage({ params }) {
                     onOpenChange={setIsNewElementOpen}
                     projectId={projectId}
                 />
-
-
-
             </main>
         </div>
     )

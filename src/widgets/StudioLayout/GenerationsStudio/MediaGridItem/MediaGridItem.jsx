@@ -14,6 +14,8 @@ import { useWorkflowsStore } from "@/features/workflows/model/useWorkflowsStore"
 import { ActionBtn } from "./ActionBtn";
 import { StudioItemDropdownMenu } from "./StudioItemMenu";
 import { getStudioMenuItems, getWorkflowEntityType } from "./studioMenuConfig";
+import { getTrashMenuItems } from "./trashMenuConfig";
+import { useRestoreWorkflow } from "@/features/trash/api/mutations/useRestoreWorkflow";
 import { CoreMediaItemView } from "@/widgets/CoreMediaItemView";
 import { useUpdateFolder, useDeleteFolder, useFolderMove, useDownloadCollection } from "@/features/folders";
 
@@ -37,6 +39,10 @@ const WorkflowMediaGridItem = React.memo(function WorkflowMediaGridItem({
   menuItems: propMenuItems = null,
   topLeft = null,
   topRight: customTopRight = null,
+  isTrash: propIsTrash = false,
+  onRestoreSuccess = null,
+  onRestoreError = null,
+  projectId: propProjectId = null,
   ...props
 }) {
   // ─────────────────────────────────────────────────────────────────────────
@@ -49,11 +55,40 @@ const WorkflowMediaGridItem = React.memo(function WorkflowMediaGridItem({
     ? propItem
     : (workflow?.items?.find((i) => (i.id || i.name || i.asset_id) === effectiveMediaId) || (effectiveMediaId ? { id: effectiveMediaId } : null));
 
+  const effectiveProjectId = propProjectId || workflow?.projectId || workflow?.project_id || null;
+
   const {
     handleLike, handleDelete, handleDownload,
     handleReuseSettings, handleAnimate, handleAddToPrompt,
     isVideo, url, isLiked, status, aspect, prompt, item, canDelete, canReuseSettings, showReuseSettings, canAddToPrompt,
-  } = useWorkflowActions(workflow, resolvedItem);
+  } = useWorkflowActions(workflow, resolvedItem, { projectId: effectiveProjectId });
+
+  const isTrashItem = Boolean(propIsTrash || workflow?.deleted_at);
+  const restoreMutation = useRestoreWorkflow();
+
+  const handleRestore = useCallback(async (e) => {
+    e?.stopPropagation?.();
+    try {
+      const cleanId = workflow?.id || workflow?.name;
+      const projId = propProjectId || workflow?.projectId || workflow?.project_id;
+      await restoreMutation.mutateAsync({ workflowId: cleanId, projectId: projId });
+      onRestoreSuccess?.(cleanId);
+    } catch (err) {
+      onRestoreError?.(err);
+    }
+  }, [workflow, propProjectId, restoreMutation, onRestoreSuccess, onRestoreError]);
+
+  const trashMenuItems = React.useMemo(() => {
+    if (!isTrashItem) return null;
+    return getTrashMenuItems({
+      onRestore: handleRestore,
+      onDeletePermanently: (e) => {
+        e?.stopPropagation?.();
+        setIsDeleteConfirmOpen(true);
+      },
+      isRestoring: restoreMutation.isPending,
+    });
+  }, [isTrashItem, handleRestore, restoreMutation.isPending]);
 
   // ── State ──────────────────────────────────────────────────────────────
   const [isDropdownOpen,      setIsDropdownOpen]      = useState(false);
@@ -179,7 +214,7 @@ const WorkflowMediaGridItem = React.memo(function WorkflowMediaGridItem({
 
   const canReuse = canReuseSettings;
   const isElementSheet = isElement;
-  const isDraggable = isDone && !isElementSheet && !isCharacter;
+  const isDraggable = !isTrashItem && isDone && !isElementSheet && !isCharacter;
 
   const displayName = workflow?.display_name
                    || workflow?.metadata?.displayName
@@ -238,7 +273,7 @@ const WorkflowMediaGridItem = React.memo(function WorkflowMediaGridItem({
     return { top: `${top}px`, left: `${left}px` };
   };
 
-  const menuItems = propMenuItems || getStudioMenuItems({
+  const menuItems = propMenuItems || trashMenuItems || getStudioMenuItems({
     type: entityType,
     workflow,
     item,
@@ -402,7 +437,7 @@ const WorkflowMediaGridItem = React.memo(function WorkflowMediaGridItem({
           setIsDeleteConfirmOpen(true);
         }}
         className={cn(
-          "bg-[#0a0a0a] rounded-xl outline-2 outline-transparent transition-opacity duration-200",
+          "bg-[#0a0a0a] rounded-card outline-2 outline-transparent transition-opacity duration-200",
           isGalleryDragging && "opacity-50",
           canNavigate && !isRenaming
             ? (isElementSheet ? "cursor-pointer shadow-lg hover:shadow-2xl" : "cursor-grab active:cursor-grabbing shadow-lg hover:shadow-2xl")
@@ -414,7 +449,22 @@ const WorkflowMediaGridItem = React.memo(function WorkflowMediaGridItem({
         topRight={
           customTopRight !== null
             ? customTopRight
-            : (isDone && (
+            : isTrashItem
+              ? (
+                <div className={cn(
+                  "transition-opacity duration-200 pointer-events-auto",
+                  isDropdownOpen ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                )}>
+                  <ButtonGroup className="bg-white/60 backdrop-blur-md rounded-lg border-0 border-none">
+                    <StudioItemDropdownMenu
+                      open={isDropdownOpen}
+                      onOpenChange={setIsDropdownOpen}
+                      items={menuItems}
+                    />
+                  </ButtonGroup>
+                </div>
+              )
+              : (isDone && (
                 <div className={cn(
                   "transition-opacity duration-200 pointer-events-auto",
                   isDropdownOpen ? "opacity-100" : "opacity-0 group-hover:opacity-100"
@@ -427,8 +477,8 @@ const WorkflowMediaGridItem = React.memo(function WorkflowMediaGridItem({
                         className="text-[13px] text-[#303031]" 
                       />
                     </ActionBtn>
-                    {showReuseSettings && (
-                      <ActionBtn disabled={!canReuse} onClick={(e) => { e.stopPropagation(); handleReuseSettings(); }}>
+                    {showReuseSettings && canReuse && (
+                      <ActionBtn onClick={(e) => { e.stopPropagation(); handleReuseSettings(); }}>
                         <GoogleIcon iconName="history" className="text-[13px] text-[#303031]" />
                       </ActionBtn>
                     )}
@@ -495,21 +545,26 @@ const WorkflowMediaGridItem = React.memo(function WorkflowMediaGridItem({
         open={isDeleteConfirmOpen}
         onOpenChange={setIsDeleteConfirmOpen}
         title={
-          isError
-            ? "Delete generation?"
-            : entityType === "character"
-              ? "Delete Character?"
-              : entityType === "element"
-                ? "Delete Element?"
-                : isVideo
-                  ? "Delete video?"
-                  : "Delete image?"
+          isTrashItem
+            ? "Supprimer définitivement ?"
+            : isError
+              ? "Delete generation?"
+              : entityType === "character"
+                ? "Delete Character?"
+                : entityType === "element"
+                  ? "Delete Element?"
+                  : isVideo
+                    ? "Delete video?"
+                    : "Delete image?"
         }
         description={
-          isError
-            ? "Are you sure you want to delete this failed generation?"
-            : "This action cannot be undone."
+          isTrashItem
+            ? "Cette action est irréversible. Le workflow et tous ses médias seront définitivement supprimés."
+            : isError
+              ? "Are you sure you want to delete this failed generation?"
+              : "This action cannot be undone."
         }
+        confirmLabel={isTrashItem ? "Supprimer définitivement" : undefined}
         onConfirm={handleDelete}
       />
 

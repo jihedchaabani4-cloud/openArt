@@ -76,7 +76,7 @@ export function ReferenceMediaGalleryGrid({
       const mediaId = item?.id || item?.name || item?.asset_id;
       const isCover =
         (primaryMediaId && (mediaId === primaryMediaId || item?.asset_id === primaryMediaId)) ||
-        validItems.indexOf(item) === 0;
+        (!primaryMediaId && Boolean(item?.is_primary || item?.isPrimary));
       const isDeletingThis = deletingMediaId === mediaId;
       const isAddingThis = pendingUrls.includes(item?.url || item?.file_url);
       const isLoadingThis = isDeletingThis || isAddingThis;

@@ -3,6 +3,7 @@ import { renderHook, act } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { queryKeys } from "@/shared/api/queryKeys";
 import { useRemoveWorkflow } from "@/features/workflows/api/mutations/useRemoveWorkflow";
+import { useRestoreWorkflow } from "@/features/trash/api/mutations/useRestoreWorkflow";
 import { useWorkflowDelete } from "@/features/workflows/model/useWorkflowDelete";
 import { useRemoveAsset } from "@/features/media/api/mutations/useRemoveAsset";
 import { useToggleWorkflowLike } from "@/features/workflows/api/mutations/useToggleWorkflowLike";
@@ -71,6 +72,126 @@ describe("Consolidated Optimistic Mutations & Tracker Integration", () => {
       const restored = queryClient.getQueryData(pKey);
       expect(restored.projectContents.workflows).toHaveLength(1);
       expect(restored.projectContents.media).toHaveLength(1);
+    });
+
+    it("optimistically moves active workflow to trashedWorkflows and rolls back on error", async () => {
+      const { queryClient, wrapper } = createWrapper();
+      const pKey = queryKeys.projectData.byProject("proj-1");
+      queryClient.setQueryData(pKey, {
+        projectContents: {
+          workflows: [{ id: "wf-active", name: "Active Workflow" }],
+          trashedWorkflows: [],
+          media: [],
+        },
+      });
+
+      let intermediateCacheState = null;
+      api.delete.mockImplementationOnce(async () => {
+        // Inspect optimistic cache during in-flight mutation
+        intermediateCacheState = queryClient.getQueryData(pKey);
+        throw new Error("Network error during move to trash");
+      });
+
+      const { result } = renderHook(() => useRemoveWorkflow(), { wrapper });
+
+      await act(async () => {
+        try {
+          await result.current.mutateAsync({ workflowId: "wf-active", projectId: "proj-1" });
+        } catch {
+          // expected
+        }
+      });
+
+      // While in-flight: workflow was optimistically removed from active and moved to trash
+      expect(intermediateCacheState.projectContents.workflows).toHaveLength(0);
+      expect(intermediateCacheState.projectContents.trashedWorkflows).toHaveLength(1);
+      expect(intermediateCacheState.projectContents.trashedWorkflows[0].id).toBe("wf-active");
+      expect(intermediateCacheState.projectContents.trashedWorkflows[0].deleted_at).toBeDefined();
+
+      // After rejection: cache rolled back to original state
+      const finalState = queryClient.getQueryData(pKey);
+      expect(finalState.projectContents.workflows).toHaveLength(1);
+      expect(finalState.projectContents.workflows[0].id).toBe("wf-active");
+      expect(finalState.projectContents.trashedWorkflows).toHaveLength(0);
+      expect(toast.error).toHaveBeenCalled();
+    });
+
+    it("optimistically deletes item already in trashedWorkflows permanently and rolls back on error", async () => {
+      const { queryClient, wrapper } = createWrapper();
+      const pKey = queryKeys.projectData.byProject("proj-1");
+      queryClient.setQueryData(pKey, {
+        projectContents: {
+          workflows: [],
+          trashedWorkflows: [{ id: "wf-trash-1", name: "Trashed Item", deleted_at: "2026-10-26T12:00:00Z" }],
+          media: [],
+        },
+      });
+
+      let intermediateCacheState = null;
+      api.delete.mockImplementationOnce(async () => {
+        intermediateCacheState = queryClient.getQueryData(pKey);
+        throw new Error("Permanent delete failed");
+      });
+
+      const { result } = renderHook(() => useRemoveWorkflow(), { wrapper });
+
+      await act(async () => {
+        try {
+          await result.current.mutateAsync({ workflowId: "wf-trash-1", projectId: "proj-1" });
+        } catch {
+          // expected
+        }
+      });
+
+      // During in-flight: removed from trashedWorkflows optimistically
+      expect(intermediateCacheState.projectContents.trashedWorkflows).toHaveLength(0);
+
+      // After failure: rolled back to include trashed item
+      const finalState = queryClient.getQueryData(pKey);
+      expect(finalState.projectContents.trashedWorkflows).toHaveLength(1);
+      expect(finalState.projectContents.trashedWorkflows[0].id).toBe("wf-trash-1");
+      expect(toast.error).toHaveBeenCalled();
+    });
+  });
+
+  describe("useRestoreWorkflow", () => {
+    it("optimistically moves workflow from trashedWorkflows back to workflows and rolls back on error", async () => {
+      const { queryClient, wrapper } = createWrapper();
+      const pKey = queryKeys.projectData.byProject("proj-1");
+      queryClient.setQueryData(pKey, {
+        projectContents: {
+          workflows: [],
+          trashedWorkflows: [{ id: "wf-trash-2", name: "Item to Restore", deleted_at: "2026-10-26T12:00:00Z" }],
+        },
+      });
+
+      let intermediateCacheState = null;
+      api.post.mockImplementationOnce(async () => {
+        intermediateCacheState = queryClient.getQueryData(pKey);
+        throw new Error("Restore failed");
+      });
+
+      const { result } = renderHook(() => useRestoreWorkflow(), { wrapper });
+
+      await act(async () => {
+        try {
+          await result.current.mutateAsync({ workflowId: "wf-trash-2", projectId: "proj-1" });
+        } catch {
+          // expected
+        }
+      });
+
+      // In flight: restored to active workflows, removed from trash
+      expect(intermediateCacheState.projectContents.trashedWorkflows).toHaveLength(0);
+      expect(intermediateCacheState.projectContents.workflows).toHaveLength(1);
+      expect(intermediateCacheState.projectContents.workflows[0].id).toBe("wf-trash-2");
+      expect(intermediateCacheState.projectContents.workflows[0].deleted_at).toBeNull();
+
+      // On error: rolled back to trash
+      const finalState = queryClient.getQueryData(pKey);
+      expect(finalState.projectContents.trashedWorkflows).toHaveLength(1);
+      expect(finalState.projectContents.workflows).toHaveLength(0);
+      expect(toast.error).toHaveBeenCalled();
     });
   });
 

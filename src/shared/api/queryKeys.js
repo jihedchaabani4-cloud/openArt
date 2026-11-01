@@ -43,4 +43,8 @@ export const queryKeys = {
     all: () => ["folders"],
     byProject: (projectId) => ["folders", projectId],
   },
+
+  trash: {
+    all: () => ["trash"],
+  },
 };

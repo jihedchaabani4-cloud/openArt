@@ -6,3 +6,4 @@ export { ElementsKreaControls } from "./ElementsKreaControls";
 export { CreateElementModal } from "./CreateElementModal";
 export { NewElementCardKrea } from "./NewElementCardKrea";
 export { HowToDrawer } from "./HowToDrawer";
+export { ElementsEmptyState } from "./ElementsEmptyState";

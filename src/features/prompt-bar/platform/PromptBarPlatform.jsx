@@ -148,6 +148,7 @@ function PromptBarPlatformInner({
   const setPrompt        = usePromptBarStore((s) => s.setPrompt);
   const setParameter     = usePromptBarStore((s) => s.setParameter);
   const focusRequest     = usePromptBarStore((s) => s.focusRequest);
+  const promptFillNonce  = usePromptBarStore((s) => s.promptFillNonce);
 
   // Model state and synchronization (H1)
   const {
@@ -418,6 +419,7 @@ function PromptBarPlatformInner({
             mentionOpen={quickMentionOpen || dialogOpen}
             placeholder="Describe what you want to create..."
             focusRequest={focusRequest}
+            fillNonce={promptFillNonce}
             plugins={editorPlugins}
           />
         </div>

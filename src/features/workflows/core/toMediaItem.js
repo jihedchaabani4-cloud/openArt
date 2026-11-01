@@ -176,8 +176,16 @@ export function toMediaItem(raw, context = {}) {
   const rawId = raw.id ?? raw.name ?? raw.asset_id ?? "";
   const id = String(rawId);
 
-  const rawRole = context.role ?? raw.role ?? raw.mediaRole ?? raw.step_id ?? raw.workflowStepId ?? null;
-  const role = normalizeRole(rawRole);
+  const explicitRole = context.role ?? raw.role ?? raw.mediaRole ?? null;
+  let role = normalizeRole(explicitRole);
+  if (!role && !explicitRole) {
+    const legacyStep = raw.workflowStepId ?? raw.step_id ?? null;
+    if (legacyStep === "character_sheet") {
+      role = "sheet";
+    } else if (legacyStep === "character_detail") {
+      role = "detail";
+    }
+  }
 
   const rawStatus = raw.status ?? raw.media_status ?? null;
   const error = raw.error ?? raw.error_message ?? null;

@@ -9,6 +9,7 @@ import { LeftNavigationRail } from "@/widgets/StudioLayout/LeftNavigationRail"
 import { StudioNavbar } from "@/widgets/StudioNavbar"
 import { useWorkflowsStore } from "@/features/workflows"
 import { useProjectData } from "@/features/workflows/api/workflowsApi"
+import { useProjectFolders } from "@/features/folders"
 import { LoadingScreen } from "@/shared/ui/LoadingScreen"
 import { ProjectError } from "@/shared/ui/ProjectError"
 import { queryKeys } from "@/shared/api/queryKeys"
@@ -34,8 +35,16 @@ export default function StudioLayout({ children }) {
     const setSelectedProjectId = useWorkflowsStore(s => s.setSelectedProjectId);
     const setIsNavbarHidden = useWorkflowsStore(s => s.setIsNavbarHidden);
     
-    // 🔹 Data Layer (Pure Hook, controlled error)
-    const { data: projectData, isLoading, isError, refetch } = useProjectData(projectId)
+    // 🔹 Data Layer (Pure Hooks, concurrent project + folders prefetch)
+    const { data: projectData, isLoading: isProjectLoading, isError: isProjectError, refetch: refetchProject } = useProjectData(projectId);
+    const { isLoading: isFoldersLoading, isError: isFoldersError, refetch: refetchFolders } = useProjectFolders(projectId);
+
+    const isLoading = isProjectLoading || isFoldersLoading;
+    const isError = isProjectError || isFoldersError;
+    const refetch = useCallback(() => {
+        refetchProject();
+        refetchFolders();
+    }, [refetchProject, refetchFolders]);
 
     // 🚀 Sync selectedProjectId with URL
     useEffect(() => {
@@ -46,6 +55,8 @@ export default function StudioLayout({ children }) {
     
     // 🔹 Local Entry state
     const [isEntryLoading, setIsEntryLoading] = useState(true)
+
+    const isTrashPage = pathname?.includes("/trash");
 
     const isEditPage =
         pathname?.includes("/assets/edit/") ||
@@ -72,6 +83,9 @@ export default function StudioLayout({ children }) {
             // 🔴 Manual Invalidate on fresh entry
             queryClient.invalidateQueries({
                 queryKey: queryKeys.projectData.byProject(projectId),
+            });
+            queryClient.invalidateQueries({
+                queryKey: queryKeys.folders.byProject(projectId),
             });
             sessionStorage.setItem(entryKey, "true");
         }
@@ -128,7 +142,7 @@ export default function StudioLayout({ children }) {
                             <div className="flex-1 min-h-0 flex flex-col relative overflow-hidden">
                                 <StudioNavbar />
                                 <div className="flex-1 min-h-0 flex overflow-hidden relative">
-                                    <LeftNavigationRail />
+                                    {!isTrashPage && <LeftNavigationRail />}
                                     <div className="flex-1 min-w-0 flex flex-col relative overflow-hidden">
                                         {children}
                                     </div>

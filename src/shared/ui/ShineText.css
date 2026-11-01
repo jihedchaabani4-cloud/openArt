@@ -1,0 +1,43 @@
+/* ShineText — single source of the sweep styles.
+   Shared by shared/ui/ShineText.jsx and the Prompt Bar editor one-shot fill
+   (shine-text--sweep--once). */
+@keyframes shineTextSweep {
+  0%, 10% {
+    background-position: 100% 0;
+  }
+  60%, 100% {
+    background-position: 0% 0;
+  }
+}
+
+.shine-text {
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+.shine-text--sweep {
+  background-image: linear-gradient(90deg,
+    rgba(255, 255, 255, 0.38) 0%,
+    rgba(255, 255, 255, 0.38) 38%,
+    rgba(255, 255, 255, 0.96) 50%,
+    rgba(255, 255, 255, 0.38) 62%,
+    rgba(255, 255, 255, 0.38) 100%);
+  background-size: 250% 100%;
+  background-repeat: no-repeat;
+  color: transparent;
+  text-shadow: 0 0 16px rgba(255, 255, 255, 0.12);
+  animation-name: shineTextSweep;
+  animation-duration: 2.6s;
+  animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1);
+  animation-iteration-count: infinite;
+  will-change: background-position;
+}
+
+/* One-shot fill: sweep exactly once (start → end), then static. */
+.shine-text--sweep--once {
+  animation-iteration-count: 1;
+}
+
+.shine-text--idle {
+  color: rgba(255, 255, 255, 0.38);
+}

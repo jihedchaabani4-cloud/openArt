@@ -182,9 +182,9 @@ export function useElement({ projectId, elementId } = {}) {
   const deleteImage = useCallback(
     async (mediaId) => {
       if (!mediaId) return;
-      return deleteMediaMutation.mutateAsync({ mediaId, projectId });
+      return deleteMediaMutation.mutateAsync({ elementId: cleanId, mediaId, projectId });
     },
-    [projectId, deleteMediaMutation]
+    [cleanId, projectId, deleteMediaMutation]
   );
 
   const analyzeVision = useCallback(

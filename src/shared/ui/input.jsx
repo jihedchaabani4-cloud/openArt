@@ -115,10 +115,10 @@ const Input = React.forwardRef(({
           className={cn(
             "relative flex items-center justify-between w-full transition-all border-none outline-none font-sans antialiased",
             isSearch
-              ? "h-[42px] min-h-[42px] rounded-[16px] border border-[var(--foreground-state-05)] px-2.5 gap-2 text-sm text-[var(--mat-sys-on-surface,#e3e3e3)] shadow-none hover:bg-[var(--foreground-state-15)] focus-within:bg-[var(--foreground-state-15)] focus-within:border-[rgba(218,220,224,0.18)]"
+              ? "h-[42px] min-h-[42px] rounded-input border border-[var(--foreground-state-05)] px-2.5 gap-2 text-sm text-[var(--mat-sys-on-surface,#e3e3e3)] shadow-none hover:bg-[var(--foreground-state-15)] focus-within:bg-[var(--foreground-state-15)] focus-within:border-[rgba(218,220,224,0.18)]"
               : isBlurInput
-              ? "h-9 min-h-[36px] rounded-[var(--mat-sys-corner-medium,12px)] py-[2px] pr-[10px] pl-[14px] gap-2 text-sm font-medium text-[var(--mat-sys-on-surface,#e3e3e3)] flex-row"
-              : "min-h-[52px] rounded-[var(--mat-sys-corner-medium,12px)] px-3 py-2 bg-transparent hover:bg-[var(--foreground-state-05)] focus-within:bg-[var(--foreground-state-10)]"
+              ? "h-9 min-h-[36px] rounded-input py-[2px] pr-[10px] pl-[14px] gap-2 text-sm font-medium text-[var(--mat-sys-on-surface,#e3e3e3)] flex-row"
+              : "min-h-[52px] rounded-input px-3 py-2 bg-transparent hover:bg-[var(--foreground-state-05)] focus-within:bg-[var(--foreground-state-10)]"
           )}
           style={
             isSearch
@@ -229,7 +229,7 @@ const Input = React.forwardRef(({
       className={cn(
         isNavbar
           ? "bg-transparent border-none outline-none text-md font-medium tracking-tight text-[var(--mat-sys-on-surface,#e3e3e3)] placeholder:[var(--mat-sys-on-surface-variant,#8e918f)] max-w-[260px] focus:text-white focus:ring-0 p-0 shadow-none cursor-text disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-sans antialiased"
-          : "flex min-h-[52px] w-full rounded-[var(--mat-sys-corner-medium,12px)] border-none bg-transparent px-3 py-2 text-[var(--mat-sys-on-surface,#e3e3e3)] placeholder:text-[var(--mat-sys-on-surface-variant,#8e918f)] hover:bg-[var(--foreground-state-05)] focus:bg-[var(--foreground-state-10)] focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 transition-all font-sans antialiased shadow-none cursor-text p-0",
+          : "flex min-h-[52px] w-full rounded-input border-none bg-transparent px-3 py-2 text-[var(--mat-sys-on-surface,#e3e3e3)] placeholder:text-[var(--mat-sys-on-surface-variant,#8e918f)] hover:bg-[var(--foreground-state-05)] focus:bg-[var(--foreground-state-10)] focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 transition-all font-sans antialiased shadow-none cursor-text p-0",
         !isNavbar && !className?.includes("text-") && "text-sm",
         className
       )}

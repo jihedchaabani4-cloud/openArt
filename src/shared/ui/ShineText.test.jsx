@@ -1,4 +1,6 @@
 import { afterEach, describe, expect, it } from "vitest";
+import fs from "node:fs";
+import path from "node:path";
 import { cleanup, render, screen } from "@testing-library/react";
 import { ShineText } from "./ShineText";
 
@@ -29,15 +31,24 @@ describe("ShineText", () => {
     expect(el.className).not.toContain("shine-text--sweep");
   });
 
-  it("injects its own shineTextSweep keyframes for the sweep", () => {
+  it("keys its styles from ShineText.css — sweep keyframes live in one shared stylesheet", () => {
+    const css = fs.readFileSync(path.resolve(__dirname, "./ShineText.css"), "utf8");
+
+    expect(css).toContain("@keyframes shineTextSweep");
+    expect(css).toContain(".shine-text--sweep");
+    expect(css).toContain(".shine-text--sweep--once");
+    expect(css).toContain(".shine-text--idle");
+  });
+
+  it("does not self-inject a <style> tag (styles come from the imported stylesheet)", () => {
     render(
       <ShineText active>Generating…</ShineText>
     );
 
-    const styles = Array.from(document.querySelectorAll("style"));
-    const sweep = styles.filter((s) => s.textContent.includes("@keyframes shineTextSweep"));
-
-    expect(sweep.length).toBeGreaterThanOrEqual(1);
+    const componentStyles = Array.from(document.querySelectorAll("style")).filter(
+      (s) => s.textContent.includes("shine-text--sweep")
+    );
+    expect(componentStyles.length).toBe(0);
   });
 
   it("merges caller className and keeps it in sync with the sweep variant", () => {

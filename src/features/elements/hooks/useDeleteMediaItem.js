@@ -1,6 +1,7 @@
 // [FSD Layer: features/elements/hooks] — Delete element media item (1 hook/file).
 // Optimistically removes media item from projectData cache.
 import { api } from "@/shared/api/client";
+import { elementService } from "@/features/elements/services/elementService";
 import { queryKeys } from "@/shared/api/queryKeys";
 import { matchMediaId } from "@/features/workflows/lib/cacheHelpers";
 import { useOptimisticMutation } from "@/shared/lib/optimistic/useOptimisticMutation";
@@ -8,11 +9,22 @@ import { mediaEntity } from "@/shared/lib/optimistic/entityKeys";
 
 /**
  * useDeleteMediaItem
- * Deletes a media item from an element/workflow.
+ * Removes a media item from an element.
+ *
+ * When `elementId` is supplied (preferred) it calls the canonical
+ *   DELETE /v2/elements/:elementId/images/:mediaId
+ * which only removes the association and lets the backend decide orphan cleanup.
+ *
+ * Falls back to the legacy DELETE /workflows/media/:mediaId only when no
+ * elementId is available (non-element contexts).
  */
 export function useDeleteMediaItem() {
   return useOptimisticMutation({
-    mutationFn: async ({ mediaId }) => {
+    mutationFn: async ({ elementId, mediaId }) => {
+      if (elementId) {
+        return elementService.removeImage(elementId, mediaId);
+      }
+      // Legacy fallback for non-element contexts (plain workflow media)
       const res = await api.delete(`/workflows/media/${mediaId}`);
       return res;
     },

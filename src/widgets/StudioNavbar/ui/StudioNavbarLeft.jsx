@@ -14,6 +14,7 @@ import {
 } from "@/shared/ui/dropdown-menu"
 import { Button } from "@/shared/ui/button"
 import { NavbarBackButton } from "@/widgets/NavbarCore/ui/NavbarBackButton"
+import { NavbarTitle } from "@/widgets/NavbarCore/ui/NavbarTitle"
 import { ConfirmDeleteDialog } from "@/widgets/dialogs/ConfirmDeleteDialog"
 import { useProjectFolders, useUpdateFolder, useDeleteFolder, useFolderMove, useDownloadCollection } from "@/features/folders"
 import { useWorkflowsStore } from "@/features/workflows/model/useWorkflowsStore"
@@ -31,6 +32,7 @@ export function StudioNavbarLeft({
     const projectId = activeProjectId || params.projectId
     const collectionId = params.collectionId
     const isCollectionPage = Boolean(collectionId) || pathname.includes("/collection/")
+    const isTrashPage = pathname.includes("/trash")
 
     // Fetch folders to find active collection
     const { data: rawFolders = [] } = useProjectFolders(projectId)
@@ -48,17 +50,20 @@ export function StudioNavbarLeft({
     const parentId = activeCollection?.parent_id || activeCollection?.parentId
 
     // Back button behavior:
+    // If trash page -> assets page
     // If collection has parent -> parent collection
     // If collection has no parent -> assets page
     // Else (normal project page) -> cinema studio home
-    const backHref = isCollectionPage
-        ? (parentId
-            ? `/cinema-studio/${projectId}/collection/${parentId}`
-            : `/cinema-studio/${projectId}/assets`)
-        : "/cinema-studio"
+    const backHref = isTrashPage
+        ? `/cinema-studio/${projectId}/assets`
+        : isCollectionPage
+            ? (parentId
+                ? `/cinema-studio/${projectId}/collection/${parentId}`
+                : `/cinema-studio/${projectId}/assets`)
+            : "/cinema-studio"
 
-    const backIcon = isCollectionPage ? "arrow_back" : "home"
-    const backLabel = isCollectionPage ? "Back" : "Accueil"
+    const backIcon = (isTrashPage || isCollectionPage) ? "arrow_back" : "home"
+    const backLabel = (isTrashPage || isCollectionPage) ? "Back" : "Accueil"
 
     // Display title: collection name when in collection, else project name
     const displayName = isCollectionPage
@@ -269,70 +274,78 @@ export function StudioNavbarLeft({
                         onDrop={isCollectionPage ? handleBackDrop : undefined}
                     />
 
-                    <EditableDisplayName
-                        ref={nameRef}
-                        displayName={displayName}
-                        placeholder={isCollectionPage ? "Untitled collection" : "Untitled"}
-                        onSave={handleSaveName}
-                        inputClassName="text-md font-medium max-w-[160px] sm:max-w-[200px] focus:text-white transition-all"
-                    />
+                    {isTrashPage ? (
+                        <NavbarTitle>Trash</NavbarTitle>
+                    ) : (
+                        <EditableDisplayName
+                            ref={nameRef}
+                            displayName={displayName}
+                            placeholder={isCollectionPage ? "Untitled collection" : "Untitled"}
+                            onSave={handleSaveName}
+                            inputClassName="text-md font-medium max-w-[160px] sm:max-w-[200px] focus:text-white transition-all"
+                        />
+                    )}
                 </>
             )}
 
-            <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                    <Button
-                        variant="studio-ghost"
-                        size="icon"
-                        className="h-9 w-9 transition-all shrink-0 border-0 border-transparent"
-                    >
-                        <GoogleIcon iconName="more_vert" className="text-[16px]" />
-                    </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="w-52 p-1.5">
-                    {isCollectionPage && (
-                        <>
-                            <DropdownMenuItem onClick={handleToggleLike}>
-                                <GoogleIcon
-                                    iconName="favorite"
-                                    fill={isLiked}
-                                    className={cn("text-[13px]", isLiked ? "text-red-400 fill-red-400" : "")}
-                                />
-                                {isLiked ? "Unlike collection" : "Like collection"}
+            {!isTrashPage && (
+                <>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button
+                                variant="studio-ghost"
+                                size="icon"
+                                className="h-9 w-9 transition-all shrink-0 border-0 border-transparent"
+                            >
+                                <GoogleIcon iconName="more_vert" className="text-[16px]" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="start" className="w-52 p-1.5">
+                            {isCollectionPage && (
+                                <>
+                                    <DropdownMenuItem onClick={handleToggleLike}>
+                                        <GoogleIcon
+                                            iconName="favorite"
+                                            fill={isLiked}
+                                            className={cn("text-[13px]", isLiked ? "text-red-400 fill-red-400" : "")}
+                                        />
+                                        {isLiked ? "Unlike collection" : "Like collection"}
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={handleDownloadCollection} disabled={isDownloading}>
+                                        <GoogleIcon iconName="download" className="text-[13px]" />
+                                        {isDownloading ? "Downloading..." : "Download collection"}
+                                    </DropdownMenuItem>
+                                </>
+                            )}
+                            <DropdownMenuItem onClick={() => nameRef.current?.startEditing()}>
+                                <GoogleIcon iconName="edit" className="text-[13px]" />
+                              Rename
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={handleDownloadCollection} disabled={isDownloading}>
-                                <GoogleIcon iconName="download" className="text-[13px]" />
-                                {isDownloading ? "Downloading..." : "Download collection"}
+                            <DropdownMenuItem 
+                                variant="destructive"
+                                onClick={() => setIsDeleteDialogOpen(true)}
+                            >
+                                <GoogleIcon iconName="delete" className="text-[13px]" />
+                                Delete
                             </DropdownMenuItem>
-                        </>
-                    )}
-                    <DropdownMenuItem onClick={() => nameRef.current?.startEditing()}>
-                        <GoogleIcon iconName="edit" className="text-[13px]" />
-                      Rename
-                    </DropdownMenuItem>
-                    <DropdownMenuItem 
-                        variant="destructive"
-                        onClick={() => setIsDeleteDialogOpen(true)}
-                    >
-                        <GoogleIcon iconName="delete" className="text-[13px]" />
-                        Delete
-                    </DropdownMenuItem>
-                </DropdownMenuContent>
-            </DropdownMenu>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
 
-            <ConfirmDeleteDialog
-                open={isDeleteDialogOpen}
-                onOpenChange={setIsDeleteDialogOpen}
-                description={
-                    isCollectionPage
-                        ? `Delete collection "${displayName}"?`
-                        : `Delete "${selectedProjectName}"?`
-                }
-                onConfirm={handleDelete}
-                loading={isDeleting}
-                confirmLabel={isDeleting ? "Deleting..." : "Delete"}
-                cancelLabel="Cancel"
-            />
+                    <ConfirmDeleteDialog
+                        open={isDeleteDialogOpen}
+                        onOpenChange={setIsDeleteDialogOpen}
+                        description={
+                            isCollectionPage
+                                ? `Delete collection "${displayName}"?`
+                                : `Delete "${selectedProjectName}"?`
+                        }
+                        onConfirm={handleDelete}
+                        loading={isDeleting}
+                        confirmLabel={isDeleting ? "Deleting..." : "Delete"}
+                        cancelLabel="Cancel"
+                    />
+                </>
+            )}
         </div>
     )
 }

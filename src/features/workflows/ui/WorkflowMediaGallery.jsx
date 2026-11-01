@@ -59,7 +59,7 @@ function WorkflowMediaGalleryCard({
   const meta = getItemMetadata(item);
   const itemId = item.id || item.name;
   const isActive = activeItem && (itemId === activeItem.id || itemId === activeItem.name);
-  const isPrimary = primaryMediaId && (itemId === primaryMediaId);
+  const isPrimary = Boolean(item.is_primary || item.isPrimary || (primaryMediaId && (itemId === primaryMediaId)));
 
   const iUrl = meta.url;
   const iVideo = meta.isVideo;

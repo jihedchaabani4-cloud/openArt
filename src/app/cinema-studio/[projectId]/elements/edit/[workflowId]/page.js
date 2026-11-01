@@ -129,6 +129,7 @@ export default function ElementWorkflowEditPage() {
                                         setPrimaryMediaMutation.mutate({
                                             workflowId: currentWorkflowId,
                                             mediaId,
+                                            projectId,
                                         });
                                     }
                                 }}

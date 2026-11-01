@@ -49,6 +49,8 @@ export default function AssetsPage({ params }) {
     const setActiveStudioTab   = useGenerationsStore(s => s.setActiveStudioTab);
     const gridSize             = useGenerationsStore(s => s.gridSize);
     const setIsNavbarHidden    = useGenerationsStore(s => s.setIsNavbarHidden);
+    const filters              = useGenerationsStore(s => s.filters);
+    const searchQuery          = String(filters?.prompt || "").trim().toLowerCase();
 
     // Set the active project on mount
     React.useEffect(() => {
@@ -134,7 +136,14 @@ export default function AssetsPage({ params }) {
     // Unified list containing collections first, then root workflows
     const combinedItems = React.useMemo(() => {
         // Only root-level folders (no parent) appear on the assets page
-        const rootCollections = collections.filter(c => !c.parentId && !c.parent_id);
+        let rootCollections = collections.filter(c => !c.parentId && !c.parent_id);
+
+        if (searchQuery) {
+            rootCollections = rootCollections.filter(c => {
+                const name = (c.name || c.folder_name || "").toLowerCase();
+                return name.includes(searchQuery);
+            });
+        }
 
         const collectionItems = rootCollections.map(col => ({
             type: "collection",
@@ -151,7 +160,7 @@ export default function AssetsPage({ params }) {
             }));
 
         return [...collectionItems, ...rootWorkflows];
-    }, [collections, workflows]);
+    }, [collections, workflows, searchQuery]);
 
     const itemListKey = React.useMemo(
         () => combinedItems.map((item) => item.key).join("|"),
@@ -227,7 +236,7 @@ export default function AssetsPage({ params }) {
         }
     }, [hasMore, loadMore, visibleItems.length]);
 
-    if ((isLoading || isFoldersLoading) && combinedItems.length === 0) {
+    if (isLoading || isFoldersLoading) {
         return <LoadingScreen message="Loading assets" />
     }
 

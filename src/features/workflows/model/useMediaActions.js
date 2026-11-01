@@ -31,13 +31,19 @@ function resolvePrimaryRawMedia(workflow) {
  * @param {Object} item - (Optional) Specific media item to perform actions on. 
  *                        If not provided, defaults to the workflow's primary media.
  */
-export function useWorkflowActions(workflow, item = null) {
+export function useWorkflowActions(workflow, item = null, options = {}) {
   const pathname = usePathname();
   const router = useRouter();
 
   const { mutate: toggleLike } = useToggleWorkflowLike();
   const { mutate: removeWorkflow } = useRemoveWorkflow();
   const { mutate: removeAsset } = useRemoveAsset();
+
+  const effectiveProjectId = options?.projectId
+    || workflow?.projectId
+    || workflow?.project_id
+    || pathname?.match(/\/cinema-studio\/([^/]+)/)?.[1]
+    || null;
 
   // If item is provided, use it (or resolve by id if it's a mediaId string). Otherwise, use the primary item of the workflow.
   const isNormalizedMediaItem = Boolean(
@@ -78,7 +84,7 @@ export function useWorkflowActions(workflow, item = null) {
   const canDelete = !isInProgress;
   const isElementSheet = workflow?.workflow_type === "ELEMENT_SHEET";
   const isCharacter = workflow?.workflow_type === "CHARACTER_SHEET" || Boolean(workflow?.is_character) || workflow?.entity_type === "character";
-  const projectId = workflow?.projectId || workflow?.project_id;
+  const projectId = effectiveProjectId;
   const { data: modelsData } = useRealBackendModels({ projectId });
   const models = modelsData?.models || [];
 
@@ -97,11 +103,14 @@ export function useWorkflowActions(workflow, item = null) {
 
   const handleDelete = () => {
     if (!canDelete) return;
-    const projectId = workflow.projectId || workflow.project_id;
-    if (item && !isNormalizedMediaItem) {
-      removeAsset({ assetId: item.name || item.id, projectId });
-    } else {
-      removeWorkflow({ workflowId: workflow.name || workflow.id, projectId });
+    const wfId = workflow?.id || workflow?.name;
+    const cleanId = wfId ? String(wfId).replace(/^workflows\//, '') : null;
+    if (cleanId) {
+      removeWorkflow({
+        workflowId: cleanId,
+        projectId: effectiveProjectId,
+        workflowType: workflow?.workflow_type || workflow?.workflowType,
+      });
     }
   };
 

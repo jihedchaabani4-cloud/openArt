@@ -50,6 +50,9 @@ export function useWorkflowDelete() {
           workflows: (oldData.projectContents?.workflows || []).filter(
             (wf) => !matchWorkflowId(wf, workflowId)
           ),
+          trashedWorkflows: (oldData.projectContents?.trashedWorkflows || []).filter(
+            (wf) => !matchWorkflowId(wf, workflowId)
+          ),
           characters: (oldData.projectContents?.characters || []).filter(
             (c) => !matchWorkflowId(c, workflowId)
           ),
@@ -104,6 +107,7 @@ export function useWorkflowDelete() {
     promptDelete,
     confirmDelete,
     isDeleting: deleteMutation.isPending,
+    deleteMutation,
   };
 }
 

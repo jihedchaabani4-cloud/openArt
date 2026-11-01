@@ -18,7 +18,10 @@ export default function HomePage() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-black flex flex-col items-center justify-center text-white/50">
+      <div
+        className="min-h-screen bg-black flex flex-col items-center justify-center text-white/50"
+        suppressHydrationWarning
+      >
         <Loader2 className="w-10 h-10 animate-spin text-white mb-4" />
         <span>Chargement...</span>
       </div>

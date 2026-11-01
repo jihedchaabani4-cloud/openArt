@@ -55,10 +55,11 @@ export function usePromptBarGenerate({
   const minPromptLength = effectiveTemplate?.minPromptLength ?? 0;
   const isPromptTooShort = minPromptLength > 0 && cleanPrompt.length < minPromptLength;
 
-  // FR-SLOT-05: Generate is disabled in Frames mode if the Start Frame slot is empty, or if no eligible model is active.
+  // FR-SLOT-05 / ADR-0011: Generate in video mode allows Text-to-Video when startVal is empty as long as a prompt is provided.
   const isFramesMode = activeMode === "video" && activeSubMode === "frames";
   const modelNotReady = hasModels && (!selectedId || !isCurrentEligible);
-  const isGenerateDisabled = isGenerating || modelNotReady || (isFramesMode && !startVal) || isPromptTooShort;
+  const isVideoMissingInput = isFramesMode && !startVal && cleanPrompt.length === 0;
+  const isGenerateDisabled = isGenerating || modelNotReady || isVideoMissingInput || isPromptTooShort;
 
 
   const handleGenerate = useCallback(async () => {

@@ -22,12 +22,16 @@ export const useWorkflowUiStore = create(
       activeCollectionId: null,
       setActiveCollectionId: (id) => set({ activeCollectionId: id, selectedFolderId: id }),
 
-      activeStudioTab: "assets", // "assets" | "elements" | "characters"
+      activeStudioTab: "assets", // "assets" | "elements" | "characters" | "trash"
       setActiveStudioTab: (tab) => set((s) => {
         const target = tab === 'elements' ? '_elementFilters' : '_generationFilters';
+        const baseFilters = s[target] || s.filters;
         return {
           activeStudioTab: tab,
-          filters: s[target] || s.filters
+          filters: {
+            ...baseFilters,
+            prompt: s.filters.prompt || "",
+          },
         };
       }),
 
@@ -84,7 +88,11 @@ export const useWorkflowUiStore = create(
         const target = s.activeStudioTab === 'elements' ? '_elementFilters' : '_generationFilters';
         return {
           filters: nextFilters,
-          [target]: nextFilters
+          [target]: nextFilters,
+          ...(key === 'prompt' ? {
+            _generationFilters: { ...s._generationFilters, prompt: value },
+            _elementFilters: { ...s._elementFilters, prompt: value },
+          } : {})
         };
       }),
 
@@ -97,7 +105,9 @@ export const useWorkflowUiStore = create(
         const target = s.activeStudioTab === 'elements' ? '_elementFilters' : '_generationFilters';
         return {
           filters: empty,
-          [target]: empty
+          [target]: empty,
+          _generationFilters: empty,
+          _elementFilters: empty,
         };
       }),
 

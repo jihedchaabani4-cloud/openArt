@@ -62,7 +62,7 @@ function DialogContent({
             z-50 fixed top-[50%] left-[50%]
             translate-x-[-50%] translate-y-[-50%]
             w-full max-w-[calc(100%-2rem)]
-            rounded-[28px] border-none outline-none
+            rounded-dialog border-none outline-none
             bg-[rgba(20,21,24,0.72)] backdrop-blur-[100px]
             shadow-[0_32px_80px_-16px_rgba(0,0,0,0.85),0_0_50px_-10px_rgba(0,0,0,0.5)]
             data-[state=open]:animate-in
@@ -85,7 +85,7 @@ function DialogContent({
             translate-x-[-50%] translate-y-0 
             w-[300px] max-w-[95%]
             h-auto max-h-[60vh]
-            rounded-[var(--mat-dialog-container-shape,24px)] bg-[var(--mat-dialog-container-color,var(--background-state-90))] backdrop-blur-[80px] shadow-[var(--mat-dialog-container-elevation-shadow)] border border-[var(--mat-sys-outline-variant,rgba(255,255,255,0.08))] overflow-hidden
+            rounded-dialog bg-[var(--mat-dialog-container-color,var(--background-state-90))] backdrop-blur-[80px] shadow-[var(--mat-dialog-container-elevation-shadow)] border border-[var(--mat-sys-outline-variant,rgba(255,255,255,0.08))] overflow-hidden
             flex flex-col
             data-[state=open]:animate-in
             data-[state=closed]:animate-out
@@ -103,7 +103,7 @@ function DialogContent({
             translate-x-[-50%] translate-y-[-50%]
             w-full max-w-[calc(100%-2rem)]
             sm:max-w-6xl
-            rounded-[var(--mat-dialog-container-shape,24px)] border border-[var(--mat-sys-outline-variant,rgba(255,255,255,0.08))] p-6 shadow-[var(--mat-dialog-container-elevation-shadow)]
+            rounded-dialog border border-[var(--mat-sys-outline-variant,rgba(255,255,255,0.08))] p-6 shadow-[var(--mat-dialog-container-elevation-shadow)]
             data-[state=open]:animate-in
             data-[state=closed]:animate-out
 
@@ -114,7 +114,7 @@ function DialogContent({
             fixed top-[50%] left-[50%]
             translate-x-[-50%] translate-y-[-50%]
             w-full max-w-[250px] max-h-[200px]
-            rounded-[var(--mat-sys-corner-large,16px)] border border-[var(--mat-sys-outline-variant,rgba(255,255,255,0.08))] p-2 shadow-[var(--mat-dialog-container-elevation-shadow)]
+            rounded-dialog border border-[var(--mat-sys-outline-variant,rgba(255,255,255,0.08))] p-2 shadow-[var(--mat-dialog-container-elevation-shadow)]
             data-[state=open]:animate-in
             data-[state=closed]:animate-out
           `,

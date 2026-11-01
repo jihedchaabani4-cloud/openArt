@@ -298,4 +298,58 @@ describe("ElementDetailsGallery - Studio Media Grid Form", () => {
     expect(screen.queryByText("Ajouter une image")).toBeNull();
     expect(screen.queryByTitle("Ajouter une image de référence")).toBeNull();
   });
+
+  it("disables Importer and Depuis le projet buttons when 6 reference images are reached", () => {
+    const sixItems = Array.from({ length: 6 }, (_, i) => ({
+      id: `img-${i + 1}`,
+      url: `https://example.com/img-${i + 1}.png`,
+    }));
+
+    renderWithClient(
+      <ElementDetailsGallery
+        items={sixItems}
+        maxAllowed={6}
+        onUploadFiles={vi.fn()}
+        onOpenAssets={vi.fn()}
+        showTopActions={true}
+      />
+    );
+
+    const importBtn = screen.getByRole("button", { name: /importer/i });
+    const assetsBtn = screen.getByRole("button", { name: /depuis le projet/i });
+    expect(importBtn).toBeDefined();
+    expect(importBtn.hasAttribute("disabled")).toBe(true);
+    expect(assetsBtn).toBeDefined();
+    expect(assetsBtn.hasAttribute("disabled")).toBe(true);
+  });
+
+  it("clamps file selection in handleFileChange so total cannot exceed 6", () => {
+    const fiveItems = Array.from({ length: 5 }, (_, i) => ({
+      id: `img-${i + 1}`,
+      url: `https://example.com/img-${i + 1}.png`,
+    }));
+    const onUploadFiles = vi.fn();
+
+    const { container } = renderWithClient(
+      <ElementDetailsGallery
+        items={fiveItems}
+        maxAllowed={6}
+        onUploadFiles={onUploadFiles}
+      />
+    );
+
+    const fileInput = container.querySelector('input[type="file"]');
+    const fakeFiles = [
+      new File(["1"], "1.png", { type: "image/png" }),
+      new File(["2"], "2.png", { type: "image/png" }),
+      new File(["3"], "3.png", { type: "image/png" }),
+    ];
+
+    fireEvent.change(fileInput, { target: { files: fakeFiles } });
+
+    // Only 1 slot was remaining (6 - 5 = 1)
+    expect(onUploadFiles).toHaveBeenCalledTimes(1);
+    expect(onUploadFiles.mock.calls[0][0].length).toBe(1);
+    expect(onUploadFiles.mock.calls[0][0][0].name).toBe("1.png");
+  });
 });

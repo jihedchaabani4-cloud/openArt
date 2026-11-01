@@ -66,4 +66,25 @@ describe("StudioItemDropdownMenu & StudioContextMenuContent Material Flow stylin
     // Context menu trigger should be present
     expect(screen.getByText("Right click me")).toBeDefined();
   });
+
+  it("filters out inactive / disabled items so they are not rendered in dropdown", () => {
+    const itemsWithDisabled = [
+      { key: "custom-active", label: "Unique Active Item", icon: "favorite", onClick: vi.fn() },
+      { key: "disabled-btn", label: "Inactive Button", disabled: true, onClick: vi.fn() },
+      { key: "sep-1", type: "separator" },
+      { key: "custom-trash", label: "Unique Trash Item", icon: "delete", onClick: vi.fn() },
+    ];
+
+    render(
+      <StudioItemDropdownMenu
+        items={itemsWithDisabled}
+        open={true}
+        onOpenChange={vi.fn()}
+      />
+    );
+
+    expect(screen.getByText("Unique Active Item")).toBeDefined();
+    expect(screen.getByText("Unique Trash Item")).toBeDefined();
+    expect(screen.queryByText("Inactive Button")).toBeNull();
+  });
 });

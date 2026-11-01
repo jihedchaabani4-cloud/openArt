@@ -410,7 +410,10 @@ export function useCharacter({ projectId, characterId } = {}) {
           characterId: cleanId,
           ...(mediaId && !String(mediaId).startsWith("http") && !String(mediaId).startsWith("blob:")
             ? { mediaId }
-            : (fallbackUrl ? { imageUrl: fallbackUrl } : {})),
+            : {}),
+          ...(fallbackUrl && !String(fallbackUrl).startsWith("blob:")
+            ? { imageUrl: fallbackUrl }
+            : {}),
           projectId,
         };
         const res = await setSheetMediaMutation.mutateAsync(payload);
@@ -536,7 +539,10 @@ export function useCharacter({ projectId, characterId } = {}) {
             characterId: cleanId,
             ...(mediaId && !String(mediaId).startsWith("http") && !String(mediaId).startsWith("blob:")
               ? { mediaId }
-              : (fallbackUrl ? { imageUrl: fallbackUrl } : {})),
+              : {}),
+            ...(fallbackUrl && !String(fallbackUrl).startsWith("blob:")
+              ? { imageUrl: fallbackUrl }
+              : {}),
             projectId,
           });
           if (res?.media) {

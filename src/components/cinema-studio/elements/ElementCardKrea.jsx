@@ -155,12 +155,12 @@ export function ElementCardKrea({ element, onClick, onDelete }) {
       onClick={(e) => { e.stopPropagation(); if (onClick && !isProcessing) onClick(element); }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className="group relative flex cursor-pointer flex-col gap-2 rounded-md p-2.5 transition-all duration-300 ease-out select-none outline-none hover:bg-white/[0.08] hover:shadow-2xl"
+      className="group relative flex cursor-pointer flex-col gap-2 rounded-card p-2.5 transition-all duration-300 ease-out select-none outline-none hover:bg-white/[0.08] hover:shadow-2xl"
     >
       {/* ── CARD INNER FRAME ── */}
       <div
         style={{ backgroundColor: colors.bgGradient }}
-        className="relative flex aspect-[370/231] w-full items-center justify-center overflow-hidden rounded-[8px] transition-all duration-300 ease-out"
+        className="relative flex aspect-[370/231] w-full items-center justify-center overflow-hidden rounded-card transition-all duration-300 ease-out"
       >
         {/* Top-Left Category Type Badge (Google Icon) */}
         {!isProcessing && !isFailed && (

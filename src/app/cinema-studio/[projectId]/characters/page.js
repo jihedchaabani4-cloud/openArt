@@ -8,12 +8,9 @@ import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows"
 import { useCharacterWorkflows } from "@/features/characters"
 import { Plus } from "lucide-react"
 import { usePromptStore } from "@/features/studio";
-import { resolveMainMedia } from "@/features/workflows/core/resolveMediaRef"
-import { getStudioGridDensity, getCachedImageDimensions, setCachedImageDimensions } from "@/shared/lib/displayUtils"
 import { LoadingScreen } from "@/shared/ui/LoadingScreen"
 
-import { RowsPhotoAlbum } from 'react-photo-album'
-import 'react-photo-album/rows.css'
+import { SharedGalleryGrid } from "@/features/media"
 import { MediaGridItem } from "@/widgets/StudioLayout/GenerationsStudio/MediaGridItem"
 import { HowToDrawer } from "@/components/cinema-studio/elements/HowToDrawer"
 import { useWorkflowDelete } from "@/features/workflows"
@@ -39,20 +36,19 @@ export default function CharactersPage({ params }) {
     }, [projectId, setSelectedProjectId, setActiveStudioTab])
 
     const gridSize = useGenerationsStore(s => s.gridSize);
-    const density  = getStudioGridDensity(gridSize);
     
     const isDragging = usePromptStore(s => s.isDraggingGalleryItem);
     const router = useRouter();
     
-    // Natively fetch character sheet workflows
-    const { workflows: existingSheets, isLoading } = useCharacterWorkflows(projectId)
+    // Natively fetch character sheet workflows via unified selector
+    const { workflows: existingSheets, totalCharacters, isLoading } = useCharacterWorkflows(projectId)
 
-    // Redirect to /characters/new if project has 0 characters
+    // Redirect to /characters/new if project has 0 characters total
     React.useEffect(() => {
-        if (!isLoading && existingSheets.length === 0 && projectId) {
+        if (!isLoading && totalCharacters === 0 && projectId) {
             router.replace(`/cinema-studio/${projectId}/characters/new`);
         }
-    }, [isLoading, existingSheets.length, projectId, router]);
+    }, [isLoading, totalCharacters, projectId, router]);
 
     const sheetsListKey = React.useMemo(
         () => existingSheets.map((workflow) => workflow.id || workflow.name).join("|"),
@@ -64,92 +60,6 @@ export default function CharactersPage({ params }) {
         () => existingSheets.slice(0, visibleCount),
         [existingSheets, visibleCount]
     );
-
-    const [dimensionsVersion, setDimensionsVersion] = React.useState(0);
-
-    // Probe and cache authentic natural dimensions for character images
-    React.useEffect(() => {
-        visibleSheets.forEach((workflow) => {
-            const primaryItem = resolveMainMedia(workflow);
-            if (!primaryItem) return;
-            const url = primaryItem.url || primaryItem.thumbUrl;
-            if (!url || url.startsWith("data:image/gif")) return;
-
-            if (getCachedImageDimensions(url)) return;
-
-            const img = new window.Image();
-            img.onload = () => {
-                if (img.naturalWidth && img.naturalHeight) {
-                    setCachedImageDimensions(url, img.naturalWidth, img.naturalHeight);
-                    setDimensionsVersion((v) => v + 1);
-                }
-            };
-            img.src = url;
-            if (img.complete && img.naturalWidth && img.naturalHeight) {
-                setCachedImageDimensions(url, img.naturalWidth, img.naturalHeight);
-            }
-        });
-    }, [visibleSheets]);
-
-    const photos = React.useMemo(() => {
-        void dimensionsVersion;
-        return visibleSheets.reduce((acc, workflow, i) => {
-            const primaryItem = resolveMainMedia(workflow);
-            if (!primaryItem) return acc;
-
-            const url = primaryItem.url || primaryItem.thumbUrl || "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
-
-            // 1. Highest priority: verified authentic image dimensions
-            let natural = getCachedImageDimensions(url);
-
-            let aspect = natural?.aspect;
-            let wNum = natural?.width;
-            let hNum = natural?.height;
-
-            // 2. Second priority: If natural dimensions not yet available, use primaryItem dimensions or aspectRatio
-            if (!wNum || !hNum) {
-                if (primaryItem.width && primaryItem.height) {
-                    wNum = primaryItem.width;
-                    hNum = primaryItem.height;
-                    aspect = `${wNum}/${hNum}`;
-                } else {
-                    const rawAspect = primaryItem.aspectRatio || primaryItem.raw?.aspectRatio;
-                    if (rawAspect && rawAspect !== "auto") {
-                        const [wStr, hStr] = String(rawAspect).split("/");
-                        const pw = parseFloat(wStr);
-                        const ph = parseFloat(hStr);
-                        if (pw && ph && !isNaN(pw) && !isNaN(ph)) {
-                            wNum = pw;
-                            hNum = ph;
-                            aspect = rawAspect;
-                        }
-                    }
-                }
-            }
-
-            // 3. Fallback: clean 1/1 square instead of forcing 16:9
-            if (!wNum || !hNum || isNaN(wNum) || isNaN(hNum)) {
-                wNum = 1;
-                hNum = 1;
-                aspect = "1/1";
-            }
-
-            const BASE = 1200;
-            const width  = Math.round(BASE * (wNum / Math.max(wNum, hNum)));
-            const height = Math.round(BASE * (hNum / Math.max(wNum, hNum)));
-
-            acc.push({
-                src:      url,
-                width,
-                height,
-                aspect,
-                key:      workflow.id || workflow.name || String(i),
-                workflow,
-                item:     primaryItem.raw || primaryItem,
-            });
-            return acc;
-        }, []);
-    }, [visibleSheets, dimensionsVersion]);
 
     const [isHowToOpen, setIsHowToOpen] = React.useState(false);
     const { isDeleteDialogOpen, setIsDeleteDialogOpen, confirmDelete, isDeleting } = useWorkflowDelete();
@@ -207,26 +117,6 @@ export default function CharactersPage({ params }) {
         }
     }, [hasMore, loadMore, visibleSheets.length]);
 
-    const renderPhoto = React.useCallback(
-        (_, { photo, width, height }) => (
-            <MediaGridItem
-                key={photo.key}
-                workflow={photo.workflow}
-                item={photo.item}
-                onClick={handleWorkflowClick}
-                className="rounded-xl border-none shadow-xl"
-                width={width}
-                height={height}
-                aspect={photo.aspect}
-            />
-        ),
-        [handleWorkflowClick]
-    );
-
-    const albumRender = React.useMemo(() => ({
-        photo: renderPhoto,
-    }), [renderPhoto]);
-
     if (isLoading || existingSheets.length === 0) {
         return <LoadingScreen message="Loading characters..." />
     }
@@ -262,12 +152,13 @@ export default function CharactersPage({ params }) {
                         </div>
                     ) : (
                         <div className="flex flex-col gap-6 w-full pb-32">
-                            <RowsPhotoAlbum
-                                photos={photos}
-                                targetRowHeight={density.targetRowHeight}
-                                spacing={density.spacing}
-                                rowConstraints={{ singleRowMaxHeight: density.targetRowHeight * density.maxRowHeightMultiplier }}
-                                render={albumRender}
+                            <SharedGalleryGrid
+                                workflows={visibleSheets}
+                                gridSize={gridSize}
+                                projectId={projectId}
+                                CardComponent={MediaGridItem}
+                                onWorkflowClick={handleWorkflowClick}
+                                itemClassName="rounded-xl border-none shadow-xl"
                             />
                             {hasMore && (
                                 <div className="flex justify-center pt-2 text-sm text-white/45">
@@ -303,9 +194,6 @@ export default function CharactersPage({ params }) {
                     onConfirm={() => confirmDelete(projectId)}
                     isDeleting={isDeleting}
                 />
-
-
-
             </main>
         </div>
     )

@@ -32,11 +32,11 @@ export function ProjectCard({ project, onDelete, onRename }) {
             layout
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="group relative flex flex-col overflow-hidden rounded-[22px] bg-transparent transition-all duration-300 shadow-2xl"
+            className="group relative flex flex-col overflow-hidden rounded-card bg-transparent transition-all duration-300 shadow-2xl"
         >
             <Link href={`/cinema-studio/${project.project_id}`} className="block">
                 <div
-                    className="relative overflow-hidden rounded-[18px] aspect-[1.6/1]"
+                    className="relative overflow-hidden rounded-card aspect-[1.6/1]"
                     onMouseEnter={() => {
                         if (isVideoThumbnail) {
                             videoRef.current?.play().catch(() => {})

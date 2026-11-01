@@ -51,6 +51,28 @@ describe("LeftNavigationRail & Media Grid Baseline Alignment", () => {
     expect(railFile).toMatch(/animate=\{\{\s*height:\s*isNavbarHidden\s*\?\s*\d+\s*:\s*72\s*\}\}/);
   });
 
+  it("renders top nav items (Assets, Éléments, Personnages) and places Corbeille (Trash) at the bottom above Réduire", () => {
+    mockNavbarHidden = false;
+    const { container } = render(<LeftNavigationRail />);
+    const topNav = container.querySelector("nav");
+    const topLinks = Array.from(topNav.querySelectorAll("a span.tracking-normal")).map((s) => s.textContent?.trim());
+    expect(topLinks).toEqual(["Assets", "Éléments", "Personnages"]);
+
+    const bottomContainer = container.querySelector("div.mt-auto");
+    expect(bottomContainer).toBeDefined();
+
+    const bottomTrashLink = bottomContainer.querySelector("a");
+    expect(bottomTrashLink).toBeDefined();
+    expect(bottomTrashLink.querySelector("span.tracking-normal")?.textContent?.trim()).toBe("Corbeille");
+
+    const bottomReduceBtn = bottomContainer.querySelector("button");
+    expect(bottomReduceBtn).toBeDefined();
+    expect(bottomReduceBtn.querySelector("span.tracking-normal")?.textContent?.trim()).toBe("Réduire");
+
+    // Verify Corbeille precedes Réduire in DOM order (placed above it)
+    expect(bottomTrashLink.compareDocumentPosition(bottomReduceBtn) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
   it("Media grid scroll containers use pt-[72px] and remove py-3 / pt-4 across all studio views", () => {
     const assetsFile = fs.readFileSync(
       path.resolve(__dirname, "../../../app/cinema-studio/[projectId]/assets/page.js"),

@@ -26,14 +26,34 @@ describe("studioMenuConfig - Per-type menu list & animate exclusions", () => {
     expect(handleAnimate).toHaveBeenCalledTimes(1);
   });
 
-  it("keeps reuse visible and disabled when generated primary media has no saved config", () => {
+  it("removes inactive reuse button when canReuse is false", () => {
     const items = getStudioMenuItems({
       type: "generation",
       actions: { handleLike: vi.fn(), handleReuseSettings: vi.fn(), onDelete: vi.fn() },
       state: { showReuse: true, canReuse: false },
     });
 
-    expect(items.find((item) => item.key === "reuse")).toMatchObject({ disabled: true });
+    expect(items.find((item) => item.key === "reuse")).toBeUndefined();
+  });
+
+  it("removes inactive 'add' button when canAddToPrompt is false", () => {
+    const items = getStudioMenuItems({
+      type: "generation",
+      actions: { handleLike: vi.fn(), handleAddToPrompt: vi.fn(), onDelete: vi.fn() },
+      state: { canAddToPrompt: false },
+    });
+
+    expect(items.find((item) => item.key === "add")).toBeUndefined();
+  });
+
+  it("removes inactive 'delete' button when canDelete is false", () => {
+    const items = getStudioMenuItems({
+      type: "generation",
+      actions: { handleLike: vi.fn(), onDelete: vi.fn() },
+      state: { canDelete: false },
+    });
+
+    expect(items.find((item) => item.key === "delete")).toBeUndefined();
   });
 
   it("includes 'Animer' for non-video upload items", () => {
