@@ -1,6 +1,8 @@
 "use client";
 
 import { cn } from "@/shared/lib/utils";
+import { Button } from "@/shared/ui/button";
+import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 
 /**
  * FlowErrorTile
@@ -77,32 +79,14 @@ export function FlowErrorTile({
                 style={{ justifyContent: "flex-end" }}
               >
                 {/* 1. Reuse Prompt Button */}
-                <button
+                <Button
                   type="button"
-                  flow-icon-button=""
-                  maticonbutton=""
-                  className="mdc-icon-button mat-mdc-icon-button mat-mdc-button-base mat-mdc-tooltip-trigger mat-unthemed flow-icon-button-primary flow-button-small flow-icon-button-no-touch-target cursor-pointer shrink-0"
-                  mat-ripple-loader-class-name="mat-mdc-button-ripple"
-                  mat-ripple-loader-centered=""
+                  variant="ghost"
+                  size="icon-sm"
                   aria-label="Reuse prompt"
                   title="Reuse prompt"
                   disabled={!canReusePrompt}
-                  style={{
-                    width: "34px",
-                    height: "34px",
-                    minWidth: "32px",
-                    minHeight: "32px",
-                    borderRadius: "9999px",
-                    backgroundColor: "rgba(255, 255, 255, 0.12)",
-                    backdropFilter: "blur(24px)",
-                    WebkitBackdropFilter: "blur(24px)",
-                    color: "#ffffff",
-                    border: "none",
-                    display: "inline-flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    padding: 0,
-                  }}
+                  className="rounded-full bg-white/10 hover:bg-white/20 text-white size-8"
                   onClick={(e) => {
                     if (canReusePrompt) {
                       e.stopPropagation();
@@ -110,66 +94,24 @@ export function FlowErrorTile({
                     }
                   }}
                 >
-                  <span className="mat-mdc-button-persistent-ripple mdc-icon-button__ripple" />
-                  <mat-icon
-                    role="img"
-                    className="mat-icon notranslate google-symbols mat-icon-no-color"
-                    aria-hidden="true"
-                    data-mat-icon-type="font"
-                    style={{ fontSize: "17px", width: "17px", height: "17px" }}
-                  >
-                    undo
-                  </mat-icon>
-                  <span className="mat-focus-indicator" />
-                  <span className="mat-mdc-button-touch-target" />
-                  <span className="mat-ripple mat-mdc-button-ripple" />
-                </button>
+                  <GoogleIcon iconName="undo" className="text-base" />
+                </Button>
 
                 {/* 3. Delete Button */}
-                <button
+                <Button
                   type="button"
-                  flow-icon-button=""
-                  maticonbutton=""
-                  className="mdc-icon-button mat-mdc-icon-button mat-mdc-button-base mat-mdc-tooltip-trigger mat-unthemed flow-icon-button-primary flow-button-small flow-icon-button-no-touch-target cursor-pointer shrink-0"
-                  mat-ripple-loader-class-name="mat-mdc-button-ripple"
-                  mat-ripple-loader-centered=""
+                  variant="ghost"
+                  size="icon-sm"
                   aria-label="Delete"
                   title="Delete"
-                  style={{
-                    width: "34px",
-                    height: "34px",
-                    minWidth: "32px",
-                    minHeight: "32px",
-                    borderRadius: "9999px",
-                    backgroundColor: "rgba(255, 255, 255, 0.12)",
-                    backdropFilter: "blur(24px)",
-                    WebkitBackdropFilter: "blur(24px)",
-                    color: "#ffffff",
-                    border: "none",
-                    display: "inline-flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    padding: 0,
-                  }}
+                  className="rounded-full bg-white/10 hover:bg-white/20 text-white size-8"
                   onClick={(e) => {
                     e.stopPropagation();
                     onDelete?.(e);
                   }}
                 >
-                  <span className="mat-mdc-button-persistent-ripple mdc-icon-button__ripple" />
-                  <mat-icon
-                    role="img"
-                    className="mat-icon notranslate google-symbols mat-icon-no-color"
-                    aria-hidden="true"
-                    data-mat-icon-type="font"
-                    style={{ fontSize: "17px", width: "17px", height: "17px" }}
-                  >
-                    delete_forever
-                  </mat-icon>
-                  <span className="mat-focus-indicator" />
-                  <span className="mat-mdc-button-touch-target" />
-                  <span className="mat-ripple mat-mdc-button-ripple" />
-                </button>
+                  <GoogleIcon iconName="delete_forever" className="text-base" />
+                </Button>
               </div>
             </div>
           </div>

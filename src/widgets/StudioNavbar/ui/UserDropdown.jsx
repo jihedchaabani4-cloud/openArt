@@ -40,7 +40,7 @@ function UserMenuButton({ iconName, label, onClick, variant = "filled", isLoadin
   return (
     <Button
       type="button"
-      variant={variant === "filled" ? "user-menu-filled" : "user-menu-outline"}
+      variant={variant === "filled" ? "secondary" : "outline"}
       onClick={onClick}
       disabled={isLoading}
       className={cn("flex w-full items-center justify-center gap-2.5 font-sans font-medium text-[14px] antialiased", className)}
@@ -90,9 +90,9 @@ export function UserDropdown({ className }) {
       <>
         <Button
           onClick={() => setLoginOpen(true)}
-          variant="studio-ghost"
+          variant="ghost"
           size="sm"
-          className={cn("h-9 rounded-xl px-5 text-[14px] font-semibold text-white", className)}
+          className={cn("h-9 rounded-button px-5 text-sm font-semibold text-white", className)}
         >
           Login
         </Button>

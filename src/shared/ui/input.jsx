@@ -1,3 +1,12 @@
+/**
+ * Input Primitive — OpenArt / Labveil Unified Design System
+ * 
+ * STRICT ARCHITECTURAL RULES:
+ * 1. ZERO CALL-SITE RESTYLING: Never add ad-hoc border/bg/color/padding classes.
+ * 2. USE CANONICAL VARIANTS: `default`, `search`, `blurinput`.
+ * 3. `className` IS EXCLUSIVELY FOR LAYOUT (e.g. `w-full`, `max-w-md`).
+ */
+
 "use client";
 
 import * as React from "react";
@@ -115,7 +124,7 @@ const Input = React.forwardRef(({
           className={cn(
             "relative flex items-center justify-between w-full transition-all border-none outline-none font-sans antialiased",
             isSearch
-              ? "h-[42px] min-h-[42px] rounded-input border border-[var(--foreground-state-05)] px-2.5 gap-2 text-sm text-[var(--mat-sys-on-surface,#e3e3e3)] shadow-none hover:bg-[var(--foreground-state-15)] focus-within:bg-[var(--foreground-state-15)] focus-within:border-[rgba(218,220,224,0.18)]"
+              ? "h-[42px] min-h-[42px] rounded-input rounded-[16px] border border-[var(--foreground-state-05)] px-2.5 gap-2 text-sm text-[var(--mat-sys-on-surface,#e3e3e3)] shadow-none hover:bg-[var(--foreground-state-15)] focus-within:bg-[var(--foreground-state-15)] focus-within:border-[rgba(218,220,224,0.18)]"
               : isBlurInput
               ? "h-9 min-h-[36px] rounded-input py-[2px] pr-[10px] pl-[14px] gap-2 text-sm font-medium text-[var(--mat-sys-on-surface,#e3e3e3)] flex-row"
               : "min-h-[52px] rounded-input px-3 py-2 bg-transparent hover:bg-[var(--foreground-state-05)] focus-within:bg-[var(--foreground-state-10)]"

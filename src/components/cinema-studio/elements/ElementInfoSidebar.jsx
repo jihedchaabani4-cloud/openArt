@@ -31,14 +31,16 @@ export function InputInfoHover({ content, title, testId }) {
   return (
     <HoverCard open={open} onOpenChange={setOpen} openDelay={80} closeDelay={150}>
       <HoverCardTrigger asChild>
-        <button
+        <Button
           type="button"
+          variant="ghost"
+          size="icon-xs"
           onClick={(e) => {
             e.stopPropagation();
             setOpen((prev) => !prev);
           }}
           className={cn(
-            "inline-flex items-center justify-center size-4 rounded-full text-white/40 hover:text-white hover:bg-white/10 transition-colors cursor-pointer outline-none shrink-0",
+            "size-4 rounded-full text-white/40 hover:text-white hover:bg-white/10 shrink-0",
             open && "text-white bg-white/15"
           )}
           aria-label={title || content}
@@ -46,7 +48,7 @@ export function InputInfoHover({ content, title, testId }) {
           data-testid={testId}
         >
           <GoogleIcon iconName="info" className="text-[13px] leading-none" />
-        </button>
+        </Button>
       </HoverCardTrigger>
       <HoverCardContent
         side="top"

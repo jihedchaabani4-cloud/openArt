@@ -11,32 +11,8 @@ import {
 } from "@/shared/ui/dropdown-menu"
 import { cn } from "@/shared/lib/utils"
 import { Button } from "@/shared/ui/button"
+import { Switch } from "@/shared/ui/switch"
 import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows"
-
-function SlideToggle({ checked, ariaLabel }) {
-  return (
-    <div
-      role="switch"
-      aria-checked={checked}
-      aria-label={ariaLabel}
-      className={cn(
-        "relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors duration-200 ease-in-out outline-none select-none",
-        checked
-          ? "bg-[var(--foreground-state-90,#e3e3e3)]"
-          : "bg-transparent border border-[var(--foreground-state-50,rgba(218,220,224,0.4))]"
-      )}
-    >
-      <span
-        className={cn(
-          "pointer-events-none block rounded-full transition-all duration-200 ease-in-out shadow-sm",
-          checked
-            ? "translate-x-5.5 size-4 bg-[var(--background-color-100,#202124)]"
-            : "translate-x-1 size-3 bg-[var(--foreground-state-50,rgba(218,220,224,0.6))]"
-        )}
-      />
-    </div>
-  );
-}
 
 export function StudioSettingsDropdown(props) {
   const storeGridSize = useGenerationsStore(s => s.gridSize);
@@ -66,30 +42,17 @@ export function StudioSettingsDropdown(props) {
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
-        <button
+        <Button
           type="button"
-          flow-icon-button=""
-          maticonbutton=""
-          mattooltip="Paramètres d'affichage"
+          variant="ghost"
+          size="icon"
           title="Paramètres d'affichage"
           aria-label="Paramètres de la grille de blocs"
           aria-haspopup="menu"
           aria-expanded={open}
-          className="mdc-icon-button mat-mdc-icon-button mat-mdc-button-base mat-mdc-menu-trigger mat-mdc-tooltip-trigger mat-unthemed flow-icon-button-transparent flow-button-large flow-icon-button-no-touch-target inline-flex items-center justify-center size-9 rounded-xl text-white/80 hover:text-white hover:bg-white/10 active:bg-white/15 transition-all outline-none cursor-pointer"
         >
-          <span className="mat-mdc-button-persistent-ripple mdc-icon-button__ripple" />
-          <mat-icon
-            role="img"
-            className="mat-icon notranslate google-symbols mat-icon-no-color text-[20px] inline-flex items-center justify-center leading-none"
-            aria-hidden="true"
-            data-mat-icon-type="font"
-          >
-            settings_2
-          </mat-icon>
-          <span className="mat-focus-indicator" />
-          <span className="mat-mdc-button-touch-target" />
-          <span className="mat-ripple mat-mdc-button-ripple" />
-        </button>
+          <GoogleIcon iconName="settings_2" className="text-xl" />
+        </Button>
       </DropdownMenuTrigger>
       
       <DropdownMenuContent align="end" className="w-72 p-1.5 flex flex-col gap-1 font-sans antialiased">
@@ -145,7 +108,7 @@ export function StudioSettingsDropdown(props) {
                   Médias importés
                 </span>
               </div>
-              <SlideToggle checked={showUploadedMedia} ariaLabel="Médias importés" />
+              <Switch checked={showUploadedMedia} aria-label="Médias importés" />
             </DropdownMenuItem>
           )}
 
@@ -163,7 +126,7 @@ export function StudioSettingsDropdown(props) {
                   Détails des blocs
                 </span>
               </div>
-              <SlideToggle checked={showTileDetails} ariaLabel="Détails des blocs" />
+              <Switch checked={showTileDetails} aria-label="Détails des blocs" />
             </DropdownMenuItem>
           )}
 
@@ -181,7 +144,7 @@ export function StudioSettingsDropdown(props) {
                   Son au survol
                 </span>
               </div>
-              <SlideToggle checked={soundOnHover} ariaLabel="Son au survol" />
+              <Switch checked={soundOnHover} aria-label="Son au survol" />
             </DropdownMenuItem>
           )}
 
@@ -199,7 +162,7 @@ export function StudioSettingsDropdown(props) {
                   Effacer le prompt
                 </span>
               </div>
-              <SlideToggle checked={clearPromptOnSubmit} ariaLabel="Effacer le prompt" />
+              <Switch checked={clearPromptOnSubmit} aria-label="Effacer le prompt" />
             </DropdownMenuItem>
           )}
         </div>

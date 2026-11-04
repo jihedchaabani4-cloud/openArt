@@ -1,5 +1,6 @@
 import React from "react";
 import { cn } from "@/shared/lib/utils";
+import { Button } from "@/shared/ui/button";
 import { MediaInput } from "../../ui/common/MediaInput.jsx";
 import { SwapIcon, ReferenceButton, ViewReference } from "../../ui/common/ReferenceButton.jsx";
 
@@ -94,20 +95,22 @@ export function PromptBarSlotsRow({
                 onRemove={() => handleRemoveSlot?.(slot)}
               />
               {isStart && showSwap && (
-                <button
+                <Button
                   type="button"
+                  variant="ghost"
+                  size="icon-sm"
                   onClick={handleSwapFrames}
                   disabled={!swapEnabled}
                   className={cn(
-                    "p-1.5 rounded-md transition-colors",
+                    "p-1.5 rounded-button transition-colors",
                     swapEnabled
-                      ? "text-white/50 hover:text-white cursor-pointer hover:bg-white/5"
-                      : "text-white/15 cursor-not-allowed"
+                      ? "text-white/50 hover:text-white"
+                      : "text-white/15"
                   )}
                   title={swapEnabled ? "Swap start and end frames" : "Fill both frames to swap"}
                 >
                   <SwapIcon />
-                </button>
+                </Button>
               )}
             </div>
           );

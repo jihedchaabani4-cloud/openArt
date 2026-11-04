@@ -9,6 +9,7 @@ import { StudioItemDropdownMenu, StudioContextMenuContent } from "@/widgets/Stud
 import { ContextMenu, ContextMenuTrigger } from "@/shared/ui/context-menu";
 import { useMediaViewerCore } from "@/features/workflows/core/useMediaViewerCore";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
+import { Button } from "@/shared/ui/button";
 
 /**
  * CoreMediaItemPresenter - Pure presentational layout component for rendering media.
@@ -280,15 +281,17 @@ export function CoreMediaItemPresenter({
           {/* Top Left Slot */}
           <div className="pointer-events-auto flex items-center gap-2">
             {isLiked && effectiveShowLikedBadge && (
-              <button
+              <Button
                 type="button"
+                variant="ghost"
+                size="icon-xs"
                 onClick={(e) => {
                   e.stopPropagation();
                   onLikeToggle?.(e);
                 }}
                 className={cn(
-                  "flex items-center justify-center w-7 h-7 bg-transparent border-0 shadow-none transition-transform",
-                  onLikeToggle ? "cursor-pointer hover:scale-110 active:scale-95" : "cursor-default"
+                  "size-7 transition-transform bg-transparent",
+                  onLikeToggle ? "hover:scale-110 active:scale-95" : "cursor-default"
                 )}
                 title="Liked"
                 aria-label="Liked"
@@ -296,9 +299,9 @@ export function CoreMediaItemPresenter({
                 <GoogleIcon
                   iconName="favorite"
                   fill={true}
-                  className="text-[16px] text-white fill-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]"
+                  className="text-base text-white fill-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]"
                 />
-              </button>
+              </Button>
             )}
             {effectiveShowVideoBadge && (
               <div

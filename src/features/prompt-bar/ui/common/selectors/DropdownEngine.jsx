@@ -130,13 +130,7 @@ export function BaseSelect({
         type="button"
         variant="ghost"
         onPointerDown={handleToggle}
-        className={cn(
-          "flex w-auto max-w-fit items-center gap-1.5",
-          "rounded-lg px-3 py-2.5 text-sm text-[#f5f5f5]",
-          "bg-transparent hover:bg-white/10 hover:cursor-pointer",
-          "disabled:cursor-not-allowed disabled:opacity-50 outline-none",
-          className
-        )}
+        className={cn("max-w-fit gap-1.5", className)}
       >
         {Icon && <span className="text-white shrink-0">{Icon}</span>}
         <span className="truncate">{displayLabel}</span>
@@ -168,17 +162,13 @@ export function BaseSelect({
                   : item.icon;
 
                 return (
-                  <button
+                  <Button
                     key={item.value}
                     type="button"
+                    variant="ghost"
                     disabled={item.disabled}
                     onPointerDown={() => !item.disabled && handleSelect(item.value)}
-                    className={cn(
-                      "group w-full flex items-center gap-2 rounded-[7px] px-2 py-1.5 text-left",
-                      "text-[#f5f5f5] cursor-pointer outline-none select-none",
-                      "hover:bg-white/5 focus:bg-white/5",
-                      "data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
-                    )}
+                    className="group w-full h-auto justify-start gap-2 px-2 py-1.5 text-left font-normal"
                   >
                     {/* Icon slot */}
                     {ItemIcon && (
@@ -211,7 +201,7 @@ export function BaseSelect({
                         <GoogleIcon iconName="check" className="text-[12px]" />
                       </div>
                     )}
-                  </button>
+                  </Button>
                 );
               })}
               {gi < groups.length - 1 && <div className="my-1 h-px bg-white/5" />}

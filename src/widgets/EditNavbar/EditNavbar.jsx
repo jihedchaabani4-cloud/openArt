@@ -204,37 +204,40 @@ export function EditNavbar({
             showUserDropdown={showUserDropdown}
             left={
                 <>
-                    <EditableDisplayName
-                        ref={nameRef}
-                        displayName={workflow?.display_name || workflow?.metadata?.displayName || displayTitle}
-                        placeholder="Untitled Workflow"
-                        onSave={handleEditWorkflowName}
-                        inputClassName="text-md font-medium tracking-tight max-w-[260px] focus:text-white"
-                    />
+                    <div className="flex min-w-0 items-center gap-1">
+                        <EditableDisplayName
+                            ref={nameRef}
+                            displayName={workflow?.display_name || workflow?.metadata?.displayName || displayTitle}
+                            placeholder="Untitled Workflow"
+                            onSave={handleEditWorkflowName}
+                            inputClassName="text-md font-medium tracking-tight max-w-[260px] focus:text-white"
+                        />
 
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button
-                                variant="studio-ghost"
-                                size="icon"
-                            >
-                                <GoogleIcon iconName="more_vert" className="text-[13px]" />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="start" className="w-52 p-1.5">
-                            <DropdownMenuItem onClick={() => nameRef.current?.startEditing()}>
-                                <GoogleIcon iconName="edit" className="text-[20px]" />
-                                Renommer
-                            </DropdownMenuItem>
-                            <DropdownMenuItem 
-                                variant="destructive"
-                                onClick={() => setIsDeleteDialogOpen(true)}
-                            >
-                                <GoogleIcon iconName="delete" className="text-[20px]" />
-                                Placer dans la corbeille
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button
+                                    variant="studio-ghost"
+                                    size="icon-xs"
+                                    className="size-7 transition-all shrink-0 border-0 border-transparent text-white/70 hover:text-white"
+                                >
+                                    <GoogleIcon iconName="more_vert" className="text-[16px]" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="start" className="w-52 p-1.5">
+                                <DropdownMenuItem onClick={() => nameRef.current?.startEditing()}>
+                                    <GoogleIcon iconName="edit" className="text-[20px]" />
+                                    Renommer
+                                </DropdownMenuItem>
+                                <DropdownMenuItem 
+                                    variant="destructive"
+                                    onClick={() => setIsDeleteDialogOpen(true)}
+                                >
+                                    <GoogleIcon iconName="delete" className="text-[20px]" />
+                                    Placer dans la corbeille
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
 
                     <ConfirmDeleteDialog
                         open={isDeleteDialogOpen}

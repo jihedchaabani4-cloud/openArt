@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
+import { Button } from "@/shared/ui/button";
 import { cn } from "@/shared/lib/utils";
 import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows";
 import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
@@ -146,13 +147,11 @@ export function LeftNavigationRail() {
       <div className="mt-auto flex flex-col gap-1.5 pt-2 pb-2 mb-[30px] w-full shrink-0">
         {renderNavItem(trashItem)}
 
-        <button
+        <Button
           type="button"
+          variant="ghost"
           onClick={handleToggleExpand}
-          className={cn(
-            "flex items-center h-[42px] rounded-[14px] transition-colors duration-100 w-full select-none outline-none overflow-hidden cursor-pointer font-sans font-medium text-[14px] leading-5 antialiased",
-            "text-white/80 hover:text-white hover:bg-white/[0.06]"
-          )}
+          className="w-full h-[42px] justify-start p-0 overflow-hidden"
           title={isExpanded ? "Réduire la barre" : "Développer la barre"}
           aria-label={isExpanded ? "Réduire la barre" : "Développer la barre"}
         >
@@ -171,7 +170,7 @@ export function LeftNavigationRail() {
           >
             Réduire
           </span>
-        </button>
+        </Button>
       </div>
     </aside>
   );

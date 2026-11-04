@@ -4,6 +4,7 @@ import { logger } from "@/shared/lib/logger";
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { Check, X, Loader2 } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
+import { Button } from "@/shared/ui/button";
 
 /**
  * InlineRenamePill
@@ -108,32 +109,36 @@ export function InlineRenamePill({
       />
 
       {/* Action buttons (Check ✓ and Close ✕) */}
-      <div className="flex items-center gap-2 shrink-0">
-        <button
+      <div className="flex items-center gap-1 shrink-0">
+        <Button
           type="button"
+          variant="ghost"
+          size="icon-xs"
           onClick={handleSave}
           disabled={isSaving}
           title="Save (Enter)"
           aria-label="Save"
-          className="size-8 rounded-lg text-white/80 hover:text-white transition-all cursor-pointer disabled:opacity-40 flex items-center justify-center hover:bg-white/15 active:scale-95"
+          className="size-7"
         >
           {isSaving ? (
-            <Loader2 className="size-4.5 animate-spin text-white" />
+            <Loader2 className="size-4 animate-spin text-white" />
           ) : (
-            <Check className="size-4.5 stroke-[2.5]" />
+            <Check className="size-4 stroke-[2.5]" />
           )}
-        </button>
+        </Button>
 
-        <button
+        <Button
           type="button"
+          variant="ghost"
+          size="icon-xs"
           onClick={handleCancel}
           disabled={isSaving}
           title="Cancel (Esc)"
           aria-label="Cancel"
-          className="size-8 rounded-lg text-white/80 hover:text-white transition-all cursor-pointer disabled:opacity-40 flex items-center justify-center hover:bg-white/15 active:scale-95"
+          className="size-7"
         >
-          <X className="size-4.5 stroke-[2.5]" />
-        </button>
+          <X className="size-4 stroke-[2.5]" />
+        </Button>
       </div>
     </div>
   );

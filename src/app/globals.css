@@ -264,7 +264,7 @@ mat-icon {
   /* Aliases & Material/Flow compatibility */
   --button-radius: var(--button-border-radius, 12px);
   --mat-button-border-radius: var(--button-border-radius, 12px);
-  --mat-button-filled-container-shape: var(--button-border-radius, 12px);
+  --mat-button-filled-container-shape: 12px;
   --mat-button-outlined-container-shape: var(--button-border-radius, 12px);
   --mat-button-text-container-shape: var(--button-border-radius, 12px);
   --mat-button-tonal-container-shape: var(--button-border-radius, 12px);
@@ -312,7 +312,7 @@ mat-icon {
   --prompt-box-min-height: 5.625rem;
   --prompt-box-max-height: min(28.75rem, 65vh);
   --prompt-box-footer-padding: 5rem;
-  --mat-button-filled-container-shape: var(--button-border-radius, 12px);
+  --mat-button-filled-container-shape: 12px;
   --mat-button-filled-horizontal-padding: 0.75rem;
   --mat-button-filled-container-color: var(--foreground-state-05);
   --mat-button-filled-container-height: var(--prompt-box-bottom-control-height);

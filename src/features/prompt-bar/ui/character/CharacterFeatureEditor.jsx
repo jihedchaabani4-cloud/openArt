@@ -177,19 +177,17 @@ function IdentitySection() {
         {IDENTITY_SUB_TABS.map((tab) => {
           const isActive = activeSubTab === tab.id;
           return (
-            <button
+            <Button
               key={tab.id}
+              variant={isActive ? "secondary" : "ghost"}
               onClick={() => {
                 setActiveSubTab(tab.id);
                 setFeatureEditorView({ activeTab: "identity", activeSubTab: tab.id });
               }}
-              className={cn(
-                "w-full flex items-center px-2.5 py-2 rounded-lg transition-all text-[14px]",
-                isActive ? "text-white bg-white/10" : "text-white/70 hover:text-white/90"
-              )}
+              className="w-full justify-start text-sm"
             >
               {tab.label}
-            </button>
+            </Button>
           );
         })}
       </div>
@@ -282,19 +280,17 @@ function HeadSection() {
         {HEAD_SUB_TABS.map((tab) => {
           const isActive = activeSubTab === tab.id;
           return (
-            <button
+            <Button
               key={tab.id}
+              variant={isActive ? "secondary" : "ghost"}
               onClick={() => {
                 setActiveSubTab(tab.id);
                 setFeatureEditorView({ activeTab: "head", activeSubTab: tab.id });
               }}
-              className={cn(
-                "w-full flex items-center px-2.5 py-2 rounded-lg transition-all text-[14px]",
-                isActive ? "text-white bg-white/10" : "text-white/70 hover:text-white/90"
-              )}
+              className="w-full justify-start text-sm"
             >
               {tab.label}
-            </button>
+            </Button>
           );
         })}
       </div>
@@ -340,19 +336,17 @@ function DetailsSection() {
         {DETAILS_SUB_TABS.map((tab) => {
           const isActive = activeSubTab === tab.id;
           return (
-            <button
+            <Button
               key={tab.id}
+              variant={isActive ? "secondary" : "ghost"}
               onClick={() => {
                 setActiveSubTab(tab.id);
                 setFeatureEditorView({ activeTab: "details", activeSubTab: tab.id });
               }}
-              className={cn(
-                "w-full flex items-center px-2.5 py-2 rounded-lg transition-all text-[14px]",
-                isActive ? "text-white bg-white/10" : "text-white/70 hover:text-white/90"
-              )}
+              className="w-full justify-start text-sm"
             >
               {tab.label}
-            </button>
+            </Button>
           );
         })}
       </div>

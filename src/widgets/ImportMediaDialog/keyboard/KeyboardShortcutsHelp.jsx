@@ -6,6 +6,7 @@ import {
   HoverCardTrigger,
   HoverCardContent,
 } from "@/shared/ui/hover-card";
+import { Button } from "@/shared/ui/button";
 import { cn } from "@/shared/lib/utils";
 
 function ShortcutRow({ label, keys }) {
@@ -42,22 +43,20 @@ export function KeyboardShortcutsHelp({ className }) {
       closeDelay={180}
     >
       <HoverCardTrigger asChild>
-        <button
+        <Button
           type="button"
+          variant={open ? "secondary" : "ghost"}
+          size="icon-sm"
           onClick={(e) => {
             e.stopPropagation();
             setOpen((prev) => !prev);
           }}
-          className={cn(
-            "h-9 w-9 rounded-[12px] bg-white/5 hover:bg-white/10 active:scale-95 text-white/60 hover:text-white flex items-center justify-center transition-all cursor-pointer border-none font-medium text-[13.5px] font-mono select-none shrink-0 outline-none",
-            open && "bg-white/15 text-white",
-            className
-          )}
+          className={cn("font-mono text-sm shrink-0", className)}
           aria-label="Keyboard Shortcuts"
           title="Keyboard Shortcuts"
         >
           ?
-        </button>
+        </Button>
       </HoverCardTrigger>
       <HoverCardContent
         align="end"

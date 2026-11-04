@@ -3,6 +3,7 @@
 import React from "react";
 import { MediaRenderer } from "./MediaRenderer";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
+import { Button } from "@/shared/ui/button";
 import { cn } from "@/shared/lib/utils";
 
 /**
@@ -46,17 +47,19 @@ export const MediaChip = React.memo(
         <span className="font-medium truncate max-w-[140px]">{displayLabel}</span>
 
         {onRemove && (
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="icon-xs"
             onClick={(e) => {
               e.stopPropagation();
               onRemove(item, e);
             }}
             aria-label={`Remove ${displayLabel}`}
-            className="ml-0.5 p-0.5 rounded-full hover:bg-neutral-700 text-neutral-400 hover:text-neutral-200 transition-colors"
+            className="ml-0.5 size-4 p-0 rounded-full hover:bg-neutral-700 text-neutral-400 hover:text-neutral-200"
           >
             <GoogleIcon name="close" className="text-[14px]" />
-          </button>
+          </Button>
         )}
       </div>
     );

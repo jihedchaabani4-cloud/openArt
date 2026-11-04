@@ -110,15 +110,11 @@ export function FlowSelect({
               const isSelected = String(value) === String(item.value);
 
               return (
-                <button
+                <Button
                   key={String(item.value)}
                   type="button"
-                  className={cn(
-                    "flex items-center justify-between w-full h-8 px-2.5 rounded-[10px] text-[13px] font-sans antialiased text-left transition-colors cursor-pointer",
-                    isSelected
-                      ? "bg-white/15 text-white font-semibold"
-                      : "text-white/80 hover:bg-white/10 hover:text-white font-medium"
-                  )}
+                  variant={isSelected ? "secondary" : "ghost"}
+                  className="w-full justify-between h-8 px-2.5 text-xs font-normal"
                   onClick={() => {
                     onChange?.(item.value);
                     setOpen(false);
@@ -129,9 +125,9 @@ export function FlowSelect({
                     <span className="truncate">{item.label}</span>
                   </span>
                   {isSelected && (
-                    <GoogleIcon iconName="check" className="text-[16px] text-white shrink-0 ml-1" />
+                    <GoogleIcon iconName="check" className="text-base text-white shrink-0 ml-1" />
                   )}
-                </button>
+                </Button>
               );
             })}
           </Popover.Content>

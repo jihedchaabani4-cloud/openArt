@@ -383,13 +383,15 @@ export function NewElementDialog({ open, onOpenChange, projectId: propProjectId 
                             className="w-full h-full object-cover"
                           />
                         )}
-                        <button
+                        <Button
                           type="button"
+                          variant="ghost"
+                          size="icon-xs"
                           onClick={(e) => handleRemoveMedia(idx, e)}
-                          className="absolute top-0.5 right-0.5 size-4 rounded-full bg-black/70 text-white/80 hover:text-white hover:bg-black flex items-center justify-center text-[10px] border-none"
+                          className="absolute top-0.5 right-0.5 size-4 rounded-full bg-black/70 p-0 text-xs"
                         >
                           ×
-                        </button>
+                        </Button>
                       </div>
                     );
                   })}

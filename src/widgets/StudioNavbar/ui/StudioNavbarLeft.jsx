@@ -239,28 +239,24 @@ export function StudioNavbarLeft({
 
     return (
         <div className={cn(
-            "flex min-w-0 items-center gap-2.5 transition-opacity duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] flex-1",
+            "flex min-w-0 items-center gap-2 transition-opacity duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] flex-1",
             searchExpanded ? "opacity-0 pointer-events-none" : "opacity-100"
         )}>
             {isCollectionPage && isDragging ? (
-                <button
+                <Button
                     type="button"
+                    variant={isBackDragOver ? "secondary" : "outline"}
                     data-drop-back="true"
                     onDragOver={handleBackDragOver}
                     onDragEnter={handleBackDragEnter}
                     onDragLeave={handleBackDragLeave}
                     onDrop={handleBackDrop}
                     onClick={() => router.push(backHref)}
-                    className={cn(
-                        "h-10 px-4 rounded-xl border flex items-center justify-center font-medium text-sm transition-colors cursor-pointer shrink-0 select-none",
-                        isBackDragOver
-                            ? "border-white bg-white/20 text-white"
-                            : "border-white/20 bg-white/[0.06] text-white/90 hover:border-white/40 hover:bg-white/10"
-                    )}
+                    className="shrink-0 select-none"
                     title="Drop here to move out of collection"
                 >
                     <span className="pointer-events-none select-none">Move out of collection</span>
-                </button>
+                </Button>
             ) : (
                 <>
                     <NavbarBackButton
@@ -277,60 +273,62 @@ export function StudioNavbarLeft({
                     {isTrashPage ? (
                         <NavbarTitle>Trash</NavbarTitle>
                     ) : (
-                        <EditableDisplayName
-                            ref={nameRef}
-                            displayName={displayName}
-                            placeholder={isCollectionPage ? "Untitled collection" : "Untitled"}
-                            onSave={handleSaveName}
-                            inputClassName="text-md font-medium max-w-[160px] sm:max-w-[200px] focus:text-white transition-all"
-                        />
+                        <div className="flex min-w-0 items-center gap-1">
+                            <EditableDisplayName
+                                ref={nameRef}
+                                displayName={displayName}
+                                placeholder={isCollectionPage ? "Untitled collection" : "Untitled"}
+                                onSave={handleSaveName}
+                                inputClassName="text-md font-medium max-w-[160px] sm:max-w-[220px] focus:text-white transition-all"
+                            />
+
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button
+                                        variant="studio-ghost"
+                                        size="icon-xs"
+                                        className="size-7 transition-all shrink-0 border-0 border-transparent text-white/70 hover:text-white"
+                                    >
+                                        <GoogleIcon iconName="more_vert" className="text-[16px]" />
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="start" className="w-52 p-1.5">
+                                    {isCollectionPage && (
+                                        <>
+                                            <DropdownMenuItem onClick={handleToggleLike}>
+                                                <GoogleIcon
+                                                    iconName="favorite"
+                                                    fill={isLiked}
+                                                    className={cn("text-[13px]", isLiked ? "text-red-400 fill-red-400" : "")}
+                                                />
+                                                {isLiked ? "Unlike collection" : "Like collection"}
+                                            </DropdownMenuItem>
+                                            <DropdownMenuItem onClick={handleDownloadCollection} disabled={isDownloading}>
+                                                <GoogleIcon iconName="download" className="text-[13px]" />
+                                                {isDownloading ? "Downloading..." : "Download collection"}
+                                            </DropdownMenuItem>
+                                        </>
+                                    )}
+                                    <DropdownMenuItem onClick={() => nameRef.current?.startEditing()}>
+                                        <GoogleIcon iconName="edit" className="text-[13px]" />
+                                        Rename
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem 
+                                        variant="destructive"
+                                        onClick={() => setIsDeleteDialogOpen(true)}
+                                    >
+                                        <GoogleIcon iconName="delete" className="text-[13px]" />
+                                        Delete
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        </div>
                     )}
                 </>
             )}
 
             {!isTrashPage && (
                 <>
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button
-                                variant="studio-ghost"
-                                size="icon"
-                                className="h-9 w-9 transition-all shrink-0 border-0 border-transparent"
-                            >
-                                <GoogleIcon iconName="more_vert" className="text-[16px]" />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="start" className="w-52 p-1.5">
-                            {isCollectionPage && (
-                                <>
-                                    <DropdownMenuItem onClick={handleToggleLike}>
-                                        <GoogleIcon
-                                            iconName="favorite"
-                                            fill={isLiked}
-                                            className={cn("text-[13px]", isLiked ? "text-red-400 fill-red-400" : "")}
-                                        />
-                                        {isLiked ? "Unlike collection" : "Like collection"}
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem onClick={handleDownloadCollection} disabled={isDownloading}>
-                                        <GoogleIcon iconName="download" className="text-[13px]" />
-                                        {isDownloading ? "Downloading..." : "Download collection"}
-                                    </DropdownMenuItem>
-                                </>
-                            )}
-                            <DropdownMenuItem onClick={() => nameRef.current?.startEditing()}>
-                                <GoogleIcon iconName="edit" className="text-[13px]" />
-                              Rename
-                            </DropdownMenuItem>
-                            <DropdownMenuItem 
-                                variant="destructive"
-                                onClick={() => setIsDeleteDialogOpen(true)}
-                            >
-                                <GoogleIcon iconName="delete" className="text-[13px]" />
-                                Delete
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-
                     <ConfirmDeleteDialog
                         open={isDeleteDialogOpen}
                         onOpenChange={setIsDeleteDialogOpen}
