@@ -87,14 +87,30 @@ Depth is achieved via:
 
 ---
 
-## 7. Spacing Scale (8px Base Scale with Micro Steps)
+## 7. Spacing Scale (Runway 8px Base Grid + Micro Steps)
 
-```
-gap-1   (4px)   ──► Micro text, badge icon gap
-gap-1.5 (6px)   ──► Standard button content (icon + label)
-gap-2   (8px)   ──► Breadcrumbs, tag lists, item groups
-gap-3   (12px)  ──► Form field stacks
-gap-4   (16px)  ──► Card internal padding, sidebar item gap
-gap-6   (24px)  ──► Modal footer action row, grid gap
-gap-8   (32px)  ──► Major section separation
-```
+| Spacing Token | Value | Tailwind Class Equivalent | Runway Intended Usage |
+|---|---|---|---|
+| `xxs` | **4px** | `gap-1`, `p-1`, `space-x-1` | Micro labels, icon-label offsets |
+| `xs` | **6px** | `gap-1.5`, `py-1.5`, `px-2` | Button content gaps, badge internal padding |
+| `sm` | **8px** | `gap-2`, `p-2` | Base unit: card interior gaps, item groups |
+| `md` | **12px** | `gap-3`, `p-3` | Form field stacks, toolbar groupings |
+| `base` | **16px** | `gap-4`, `p-4` | Standard card internal padding, navigation tap targets |
+| `lg` | **20px** | `gap-5`, `p-5` | Component group separations, medium cards |
+| `xl` | **24px** | `gap-6`, `p-6` | Alert container padding, modal footer action rows |
+| `xxl` | **28px** | `gap-7`, `p-7` | Large card interiors |
+| `section` | **32px** | `py-8` | Compact section separators |
+| `section-lg` | **48px** | `py-12` | Major section vertical padding |
+| `section-xl` | **64px** | `py-16` | Light editorial section padding (`light-section`) |
+| `section-xxl` | **78px** | `py-[78px]` | Cinematic hero and mission statement bands (`dark-section`) |
+
+---
+
+## 8. Container Max Widths (Runway Cinema Hierarchy)
+
+| Container Tier | Max Width | Utility Class | Purpose |
+|---|---|---|---|
+| **Cinema Wide** | **1600px** | `.container-cinema` / `max-w-[1600px]` | Maximum viewport width for full-bleed studio layout |
+| **Editorial Content** | **1280px** | `.container-editorial` / `max-w-[1280px]` | Centered desktop content container |
+| **Compact Container** | **980px** | `.container-compact` / `max-w-[980px]` | Focused inspector panels, media info strips, form cards |
+| **Modal / Dialog** | **960px / 480px** | `max-w-4xl` / `max-w-md` | Standard confirmation & workflow creation dialogs |

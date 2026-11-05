@@ -45,9 +45,9 @@ export const MediaTile = React.memo(
         }
       }}
       className={cn(
-        "group relative overflow-hidden rounded-xl bg-neutral-900 border border-neutral-800 transition-all duration-150 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+        "group relative overflow-hidden rounded-card bg-neutral-900 border border-neutral-800 transition-all duration-150 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary shadow-none",
         isSelected
-          ? "ring-2 ring-primary border-transparent shadow-sm"
+          ? "ring-2 ring-primary border-transparent shadow-none"
           : "hover:border-neutral-700",
         className
       )}

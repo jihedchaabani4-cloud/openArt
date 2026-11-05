@@ -55,7 +55,7 @@ export function ModelSlider() {
         </div>
 
         {/* Carousel / Slider Card */}
-        <div className="relative h-[20rem] w-full overflow-hidden rounded-card bg-zinc-950 group shadow-[0_0_50px_rgba(0,0,0,0.8)]">
+        <div className="relative h-[20rem] w-full overflow-hidden rounded-card bg-zinc-950 group shadow-none">
           {/* Images */}
           {levelSlides.map((slide, idx) => (
             <div
@@ -110,7 +110,7 @@ export function ModelSlider() {
               variant="ghost"
               size="icon"
               onClick={() => setActiveSlide((prev) => (prev - 1 + levelSlides.length) % levelSlides.length)}
-              className="w-12 h-12 rounded-full border border-white/10 bg-black/40 backdrop-blur-md flex items-center justify-center text-white hover:bg-white hover:text-black transition-all duration-300 active:scale-95 shadow-lg p-0"
+              className="w-12 h-12 rounded-full border border-white/10 bg-black/40 backdrop-blur-md flex items-center justify-center text-white hover:bg-white hover:text-black transition-all duration-300 active:scale-95 shadow-none p-0"
               aria-label="Previous slide"
             >
               <svg viewBox="0 0 10 17" fill="none" className="w-2.5 h-4 -translate-x-0.5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -123,7 +123,7 @@ export function ModelSlider() {
               variant="ghost"
               size="icon"
               onClick={() => setActiveSlide((prev) => (prev + 1) % levelSlides.length)}
-              className="w-12 h-12 rounded-full border border-white/10 bg-black/40 backdrop-blur-md flex items-center justify-center text-white hover:bg-white hover:text-black transition-all duration-300 active:scale-95 shadow-lg p-0"
+              className="w-12 h-12 rounded-full border border-white/10 bg-black/40 backdrop-blur-md flex items-center justify-center text-white hover:bg-white hover:text-black transition-all duration-300 active:scale-95 shadow-none p-0"
               aria-label="Next slide"
             >
               <svg viewBox="0 0 10 17" fill="none" className="w-2.5 h-4 translate-x-0.5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">

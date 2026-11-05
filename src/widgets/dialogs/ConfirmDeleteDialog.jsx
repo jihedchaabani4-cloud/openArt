@@ -47,7 +47,7 @@ export function ConfirmDeleteDialog({
       {children && <DialogTrigger asChild>{children}</DialogTrigger>}
       <DialogContent
         variant="small"
-        className="bg-[var(--mat-dialog-container-color,var(--background-state-90))] border border-[var(--mat-sys-outline-variant,rgba(255,255,255,0.08))] text-[var(--mat-sys-on-surface,#e3e3e3)] max-w-[250px] p-4 shadow-[var(--mat-dialog-container-elevation-shadow)]"
+        className="bg-[var(--mat-dialog-container-color,var(--background-state-90))] border border-[var(--mat-sys-outline-variant,rgba(255,255,255,0.08))] text-[var(--mat-sys-on-surface,#e3e3e3)] max-w-[250px] p-4 shadow-none"
         showCloseButton={false}
       >
         <div className="flex flex-col items-center text-center">

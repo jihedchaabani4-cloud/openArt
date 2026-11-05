@@ -514,7 +514,7 @@ const WorkflowMediaGridItem = React.memo(function WorkflowMediaGridItem({
         bottomRight={
           isDone && (isCharacter || isElement) && (
             <div
-              className="flex items-center justify-center w-7 h-7 rounded-badge bg-white text-black shadow-lg shadow-black/40 pointer-events-none transition-all duration-200 group-hover:scale-105"
+              className="flex items-center justify-center w-7 h-7 rounded-badge bg-white text-black shadow-none pointer-events-none transition-all duration-200 group-hover:scale-105"
               title={isCharacter ? "Character" : "Element"}
             >
               <GoogleIcon
@@ -530,7 +530,7 @@ const WorkflowMediaGridItem = React.memo(function WorkflowMediaGridItem({
           isDone && isVideo && (
             <div className="w-full h-0.5 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
               <motion.div
-                className="h-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.5)]"
+                className="h-full bg-white shadow-none"
                 style={{ width: progressWidth }}
               />
             </div>
@@ -657,7 +657,7 @@ const WorkflowMediaGridItem = React.memo(function WorkflowMediaGridItem({
               initial={{ opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.12 }}
-              className="px-3 py-1.5 rounded-lg bg-black/80 backdrop-blur-md border border-white/20 text-white text-[11px] font-medium whitespace-nowrap shadow-lg"
+              className="px-3 py-1.5 rounded-badge bg-black/80 backdrop-blur-md border border-white/20 text-white text-[11px] font-medium whitespace-nowrap shadow-none"
             >
               {dragTarget === "add-to-collection" ? "Add to collection" : "Move out of collection"}
             </motion.div>

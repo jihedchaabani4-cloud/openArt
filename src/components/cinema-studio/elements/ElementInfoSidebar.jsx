@@ -54,7 +54,7 @@ export function InputInfoHover({ content, title, testId }) {
         side="top"
         align="start"
         sideOffset={6}
-        className="z-50 w-64 rounded-xl border border-white/10 bg-[#1e1e1f] backdrop-blur-xl p-3 text-[11.5px] text-white/80 shadow-2xl leading-relaxed"
+        className="z-50 w-64 rounded-card border border-white/10 bg-[#1e1e1f] backdrop-blur-xl p-3 text-[11.5px] text-white/80 shadow-none leading-relaxed"
       >
         {content}
       </HoverCardContent>

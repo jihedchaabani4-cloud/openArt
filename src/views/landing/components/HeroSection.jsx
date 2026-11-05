@@ -80,7 +80,7 @@ export function HeroSection({ user, authLoading, onCTA }) {
           <div className="relative flex justify-center items-center">
             <div className="absolute w-[110%] h-[70%] bg-white/20 blur-[120px] rounded-full pointer-events-none" />
             <div className="absolute w-[80%] h-[50%] bg-white/30 blur-[120px] rounded-full pointer-events-none" />
-            <h1 className="text-[100px] md:text-[140px] lg:text-[200px] font-medium text-white tracking-tighter leading-none m-0 drop-shadow-lg relative z-10 cursor-default flex items-center justify-center pointer-events-auto">
+            <h1 className="text-[100px] md:text-[140px] lg:text-[200px] font-medium text-white tracking-tighter leading-none m-0 relative z-10 cursor-default flex items-center justify-center pointer-events-auto">
               {appName}
             </h1>
           </div>
@@ -103,7 +103,9 @@ export function HeroSection({ user, authLoading, onCTA }) {
             <Button
               onClick={!authLoading ? onCTA : undefined}
               disabled={authLoading}
-              className="mt-8 px-8 py-6 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 backdrop-blur-xl text-white text-[17px] font-semibold transition-all hover:scale-105 active:scale-95 shadow-2xl disabled:opacity-60 disabled:cursor-default disabled:scale-100 flex items-center gap-2"
+              variant="white"
+              size="lg"
+              className="mt-8 rounded-button text-sm font-semibold transition-all shadow-none disabled:opacity-60 flex items-center gap-2"
             >
               {authLoading ? (
                 <><Loader2 className="size-5 animate-spin" /> Connexion...</>

@@ -176,14 +176,14 @@ export const MediaViewCard = React.forwardRef(function MediaViewCard({
 
       {/* Video Indicator Corner Badge */}
       {effectiveIsVideo && (
-        <div className="absolute bottom-2.5 right-2.5 z-20 flex items-center justify-center w-7 h-7 rounded-full bg-black/40 backdrop-blur-md border border-white/10 pointer-events-none drop-shadow-md">
+        <div className="absolute bottom-2.5 right-2.5 z-20 flex items-center justify-center w-7 h-7 rounded-full bg-black/40 backdrop-blur-md border border-white/10 pointer-events-none shadow-none">
           <GoogleIcon iconName="play_arrow" fill weight={300} className="text-[13px] text-white" />
         </div>
       )}
 
       {/* Character Indicator Corner Badge */}
       {isCharacter && !effectiveIsVideo && (
-        <div className="absolute bottom-2.5 right-2.5 z-20 flex items-center justify-center w-7 h-7 rounded-full bg-black/40 backdrop-blur-md border border-white/10 pointer-events-none drop-shadow-md text-white">
+        <div className="absolute bottom-2.5 right-2.5 z-20 flex items-center justify-center w-7 h-7 rounded-full bg-black/40 backdrop-blur-md border border-white/10 pointer-events-none shadow-none text-white">
           <span
             className="material-symbols-outlined select-none text-[18px]"
             style={{ fontVariationSettings: "'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 34" }}
@@ -195,7 +195,7 @@ export const MediaViewCard = React.forwardRef(function MediaViewCard({
 
       {/* Element Indicator Corner Badge */}
       {isElement && !isCharacter && !effectiveIsVideo && (
-        <div className="absolute bottom-2.5 right-2.5 z-20 flex items-center justify-center w-7 h-7 rounded-full bg-black/40 backdrop-blur-md border border-white/10 pointer-events-none drop-shadow-md text-white">
+        <div className="absolute bottom-2.5 right-2.5 z-20 flex items-center justify-center w-7 h-7 rounded-full bg-black/40 backdrop-blur-md border border-white/10 pointer-events-none shadow-none text-white">
           <span
             className="material-symbols-outlined select-none text-[18px]"
             style={{ fontVariationSettings: "'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24" }}
@@ -209,7 +209,7 @@ export const MediaViewCard = React.forwardRef(function MediaViewCard({
       {effectiveIsVideo && (
         <div className="absolute bottom-0 left-0 w-full h-0.5 bg-white/20 z-30 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
           <motion.div
-            className="h-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.5)]"
+            className="h-full bg-white shadow-none"
             style={{ width: progressWidth }}
           />
         </div>
@@ -218,7 +218,7 @@ export const MediaViewCard = React.forwardRef(function MediaViewCard({
       {/* Selection Overlay & Checkmark */}
       {isSelected && (
         <div className="absolute inset-0 bg-white/10 flex items-center justify-center z-20 pointer-events-none">
-          <div className="w-7 h-7 bg-white text-black rounded-full flex items-center justify-center shadow-xl">
+          <div className="w-7 h-7 bg-white text-black rounded-full flex items-center justify-center shadow-none">
             <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
               <path d="M13.485 3.485a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0l-3.25-3.25a.75.75 0 1 1 1.06-1.06L5.75 10.19l6.72-6.705a.75.75 0 0 1 1.015 0z" />
             </svg>

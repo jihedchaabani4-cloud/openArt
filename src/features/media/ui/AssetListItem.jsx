@@ -39,7 +39,7 @@ export function AssetListItem({
       className={cn(
         "group w-full h-12 rounded-button pl-1 pr-4 py-0 flex items-center gap-3 justify-start text-left border-none select-none relative cursor-pointer",
         isActive
-          ? "bg-[#444746] text-white shadow-sm"
+          ? "bg-[#444746] text-white shadow-none"
           : "bg-transparent hover:bg-white/5 text-white/90",
         isDisabled && "opacity-40",
         className

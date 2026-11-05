@@ -1,7 +1,7 @@
 # Runway Cinematic Design System (`design.md`)
 
 > **The Single Source of Truth** for UI architecture, tokens, components, and design encapsulation across the codebase (`my-app`).  
-> **Core Philosophy (Runway Standard):** A cinematic, photography-first AI creative platform where full-bleed imagery and video carry the entire interface. The interface retreats into near-invisibility — minimal 1px subtle borders, **zero box-shadows**, sharp geometric corners (4px buttons, 8px cards, 16px dialogs), and tight film-title typographic density.  
+> **Core Philosophy (Runway Standard):** A cinematic, photography-first AI creative platform where full-bleed imagery and video carry the entire interface. The interface retreats into near-invisibility — minimal 1px subtle borders, **zero box-shadows**, sharp geometric corners (4px buttons, 8px cards, 16px dialogs), 8px-based spacing with 48–78px section breathing room, and 1600px cinema-wide container width.  
 > **The Golden Law:** Decide a value once (token), build a component once (primitive with variants), use it everywhere.
 
 ---
@@ -18,7 +18,8 @@
 2. **Never hack styles in `className`:** The `className` prop at the call site is **exclusively for layout & positioning** (e.g. `w-full`, `shrink-0`, `col-span-2`, `self-end`).
 3. **Never hardcode arbitrary values:** No hex codes (`#fe6e6e`), no arbitrary Tailwind classes (`p-[13px]`, `rounded-[15px]`, `w-[320px]`).
 4. **The Zero Box-Shadow Law (Runway Elevation):** The entire system uses **zero box-shadow** (`shadow-none`). Depth comes from photography, full-bleed media, dark/light section alternation, and 1px hairline borders (`border-white/10`). Never use drop shadows for elevation.
-5. **Need a new look? Extend the primitive:** If a design requires a new variant, add it as a named variant inside the primitive file. **Never hack it inline at the call site.**
+5. **Strict Runway Spacing & Widths:** Always align layout widths and paddings to Runway's 8px base spacing scale and cinema container tiers (1600px max content width).
+6. **Need a new look? Extend the primitive:** If a design requires a new variant, add it as a named variant inside the primitive file. **Never hack it inline at the call site.**
 
 ---
 
@@ -127,11 +128,12 @@ Menus and popovers follow Runway's comfortable card geometry (**8px radius**) wi
 * **Radius:** `rounded-dialog` (**16px** Runway generous geometry).
 * **Shadow:** `shadow-none` (Zero box-shadow law).
 * **Border:** 1px hairline border (`border-white/10`).
+* **Padding:** 24px interior padding (`p-6`, Runway alert-container spec).
 * **Variants:** `glass` (dark overlay with blur), `default`.
 
 ---
 
-## 5. Runway Token Scales & Preserved Color System
+## 5. Runway 100% Token Scales (Preserved Color System)
 
 ### 5.1 Border Radius Tokens (Runway 4-Tier Scale)
 | Component Type | Canonical Token | Value | Allowed Class |
@@ -156,7 +158,37 @@ Menus and popovers follow Runway's comfortable card geometry (**8px radius**) wi
 
 ---
 
-### 5.3 Typography Scale (Runway Cinematic Hierarchy)
+### 5.3 Runway Spacing Scale (8px Base Grid + Micro Steps)
+All paddings, margins, and gaps follow Runway's 8px base spacing ladder:
+
+| Spacing Token | Value | Tailwind Class Equivalent | Runway Intended Usage |
+|---|---|---|---|
+| `xxs` | **4px** | `gap-1`, `p-1`, `space-x-1` | Micro labels, icon-label offsets |
+| `xs` | **6px** | `gap-1.5`, `py-1.5`, `px-2` | Button content gaps, badge internal padding |
+| `sm` | **8px** | `gap-2`, `p-2` | Base unit: card interior gaps, item groups |
+| `md` | **12px** | `gap-3`, `p-3` | Form field stacks, toolbar groupings |
+| `base` | **16px** | `gap-4`, `p-4` | Standard card internal padding, navigation tap targets |
+| `lg` | **20px** | `gap-5`, `p-5` | Component group separations, medium cards |
+| `xl` | **24px** | `gap-6`, `p-6` | Alert container padding, modal footer action rows |
+| `xxl` | **28px** | `gap-7`, `p-7` | Large card interiors |
+| `section` | **32px** | `py-8` | Compact section separators |
+| `section-lg` | **48px** | `py-12` | Major section vertical padding |
+| `section-xl` | **64px** | `py-16` | Light editorial section padding (`light-section`) |
+| `section-xxl` | **78px** | `py-[78px]` | Cinematic hero and mission statement bands (`dark-section`) |
+
+---
+
+### 5.4 Runway Container Widths & Layout Hierarchy
+| Layout Container | Max Width | Utility Class | Description |
+|---|---|---|---|
+| **Cinema Wide** | **1600px** | `.container-cinema` / `max-w-[1600px]` | Maximum cinema-grade viewport width for full-bleed studio |
+| **Editorial Content** | **1280px** | `.container-editorial` / `max-w-[1280px]` | Standard desktop content container with centered margins |
+| **Compact Container** | **980px** | `.container-compact` / `max-w-[980px]` | Focused inspector panels, media info strips, form cards |
+| **Modal / Dialog** | **960px / 480px** | `max-w-4xl` / `max-w-md` | Standard confirmation & workflow creation dialogs |
+
+---
+
+### 5.5 Typography Scale (Runway Cinematic Hierarchy)
 | Token Role | Size | Weight | Line Height | Tracking | Usage |
 |---|---|---|---|---|---|
 | **Display Hero** | 48px | 400 | 1.00 | -1.2px (`tracking-tighter`) | Cinematic hero headlines |
@@ -171,20 +203,7 @@ Menus and popovers follow Runway's comfortable card geometry (**8px radius**) wi
 
 ---
 
-### 5.4 Spacing Scale (8px Base Scale with Micro Steps)
-* `xxs` (4px) — Micro text and tight badge icon gaps.
-* `xs` (6px) — Button content gap (icon + label).
-* `sm` (8px) — Base unit: button groups, breadcrumbs, tags.
-* `md` (12px) — Form field stacks.
-* `base` (16px) — Card internal padding, sidebar item gap.
-* `lg` (20px) — Panel separators.
-* `xl` (24px) — Modal action rows, section grid gaps.
-* `xxl` (28px) — Large element spacing.
-* `section` (32px) to `section-xxl` (78px) — Section vertical padding and breathing room.
-
----
-
-### 5.5 Preserved Color System (User Verified Scheme)
+### 5.6 Preserved Color System (User Verified Scheme)
 | Role | Semantic Variable | Value | Usage |
 |---|---|---|---|
 | **Canvas Background** | `var(--background-primary)` | `#000000` | Deep OLED black viewport |

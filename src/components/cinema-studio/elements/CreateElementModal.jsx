@@ -37,7 +37,7 @@ export function CreateElementModal({ isOpen, onClose, projectId, onCreated }) {
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent
         showCloseButton={false}
-        className="w-full max-w-md sm:max-w-[480px] overflow-hidden rounded-dialog border border-white/5 bg-[var(--mat-dialog-container-color)] p-6 text-white shadow-[0_24px_80px_rgba(0,0,0,0.58)]"
+        className="w-full max-w-md sm:max-w-[480px] overflow-hidden rounded-dialog border border-white/10 bg-[var(--mat-dialog-container-color)] p-6 text-white shadow-none"
       >
         <DialogTitle className="flex items-center gap-3 text-lg font-bold text-white mb-2">
           <Button
@@ -146,7 +146,7 @@ export function CreateElementModal({ isOpen, onClose, projectId, onCreated }) {
                             e.stopPropagation();
                             handleRemoveImage(idx);
                           }}
-                          className="absolute top-2 right-2 bg-white/90 hover:bg-white text-zinc-800 rounded-lg p-1.5 opacity-0 group-hover:opacity-100 transition-all duration-200 cursor-pointer shadow-md"
+                          className="absolute top-2 right-2 bg-white/90 hover:bg-white text-zinc-800 rounded-button p-1.5 opacity-0 group-hover:opacity-100 transition-all duration-200 cursor-pointer shadow-none"
                         >
                           <Trash2 className="w-4 h-4 text-zinc-600 hover:text-red-600" />
                         </Button>

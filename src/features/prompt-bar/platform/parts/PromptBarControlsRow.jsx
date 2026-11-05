@@ -49,7 +49,7 @@ export function PromptBarControlsRow({
             className={cn(
               "settings-trigger-button h-8 px-2.5 rounded-button flex items-center gap-1.5 transition-all cursor-pointer select-none text-[12px] font-medium text-white",
               drawerOpen
-                ? "bg-white/15 border border-white/20 shadow-sm text-white"
+                ? "bg-white/15 border border-white/20 shadow-none text-white"
                 : "border-transparent text-white hover:text-white"
             )}
           >
@@ -91,7 +91,7 @@ export function PromptBarControlsRow({
             "size-8 min-w-8 p-0 rounded-full flex items-center justify-center transition-all shrink-0",
             isGenerateDisabled
               ? "bg-white/10 text-white/30 cursor-not-allowed"
-              : "bg-white text-black hover:bg-white/90 active:scale-95 shadow-sm"
+              : "bg-white text-black hover:bg-white/90 active:scale-95 shadow-none"
           )}
         >
           {isGenerating ? (

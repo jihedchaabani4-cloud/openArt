@@ -144,7 +144,7 @@ export const SharedGalleryGrid = React.memo(function SharedGalleryGrid({
   onCollectionClick,
   onItemClick,
   onSelect,
-  itemClassName = "rounded-xl border-none shadow-xl",
+  itemClassName = "rounded-card border border-white/10 shadow-none",
   defaultContainerWidth = 1200,
   targetRowHeight: propTargetRowHeight = null,
   spacing: propSpacing = null,

@@ -33,7 +33,7 @@ export const MediaHero = React.memo(
           objectFit={objectFit}
           controls={controls}
           autoPlay={autoPlay}
-          className="max-h-full max-w-full rounded-lg shadow-2xl"
+          className="max-h-full max-w-full rounded-card shadow-none"
           {...rendererProps}
         />
       </div>

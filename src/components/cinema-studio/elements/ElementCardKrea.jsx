@@ -155,7 +155,7 @@ export function ElementCardKrea({ element, onClick, onDelete }) {
       onClick={(e) => { e.stopPropagation(); if (onClick && !isProcessing) onClick(element); }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className="group relative flex cursor-pointer flex-col gap-2 rounded-card p-2.5 transition-all duration-300 ease-out select-none outline-none hover:bg-white/[0.08] hover:shadow-2xl"
+      className="group relative flex cursor-pointer flex-col gap-2 rounded-card p-2.5 transition-all duration-300 ease-out select-none outline-none hover:bg-white/[0.08] shadow-none"
     >
       {/* ── CARD INNER FRAME ── */}
       <div
@@ -166,7 +166,7 @@ export function ElementCardKrea({ element, onClick, onDelete }) {
         {!isProcessing && !isFailed && (
           <span
             title={`Type: ${elementType}`}
-            className="absolute left-2.5 top-2.5 z-20 flex items-center justify-center text-white/80 drop-shadow-sm group-hover:opacity-0 transition-opacity"
+            className="absolute left-2.5 top-2.5 z-20 flex items-center justify-center text-white/80 group-hover:opacity-0 transition-opacity"
           >
             <GoogleIcon iconName={ELEMENT_TYPE_GOOGLE_ICONS[elementType] || "directions_car"} weight={200} className="text-[9.5px]" />
           </span>
@@ -223,7 +223,7 @@ export function ElementCardKrea({ element, onClick, onDelete }) {
                     alt={name}
                     src={imgUrl}
                     loading="lazy"
-                    className="absolute top-1/2 left-1/2 w-[84px] aspect-[2/3] rounded-button object-cover shadow-[0_20px_25px_-5px_rgba(0,0,0,0.4),0_8px_10px_-6px_rgba(0,0,0,0.4)] border border-white/10"
+                    className="absolute top-1/2 left-1/2 w-[84px] aspect-[2/3] rounded-button object-cover shadow-none border border-white/10"
                     style={{
                       zIndex: preset.zIndex,
                       transform: `translate(-50%, -50%) translate(${x}px, ${preset.stackY}px) rotate(${rot}deg) scale(${sc})`,

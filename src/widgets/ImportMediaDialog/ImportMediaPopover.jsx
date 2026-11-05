@@ -732,7 +732,7 @@ export function ImportMediaPopover({
             backgroundColor: "var(--background-base-pri, rgba(22, 23, 24, 0.9))",
             backdropFilter: "blur(80px)",
             WebkitBackdropFilter: "blur(80px)",
-            boxShadow: "0 24px 80px rgba(0,0,0,0.58)",
+            boxShadow: "none",
           }}
           className={cn(
             isPanel
@@ -847,7 +847,7 @@ export function ImportMediaPopover({
                   className={cn(
                     "w-8 h-8 rounded-button transition-all cursor-pointer border-none outline-none p-0",
                     layoutMode === "grid"
-                      ? "bg-white/20 text-white shadow-sm hover:bg-white/20"
+                      ? "bg-white/20 text-white shadow-none hover:bg-white/20"
                       : "text-white/40 hover:text-white/80 hover:bg-white/5"
                   )}
                   title="Grid view"
@@ -863,7 +863,7 @@ export function ImportMediaPopover({
                   className={cn(
                     "w-8 h-8 rounded-button transition-all cursor-pointer border-none outline-none p-0",
                     layoutMode === "list"
-                      ? "bg-white/20 text-white shadow-sm hover:bg-white/20"
+                      ? "bg-white/20 text-white shadow-none hover:bg-white/20"
                       : "text-white/40 hover:text-white/80 hover:bg-white/5"
                   )}
                   title="List view"
