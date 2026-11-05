@@ -42,7 +42,7 @@ export function ReferenceButton({
       onDrop={onDrop}
       className={cn(
         "group relative shrink-0",
-        "w-[50px] h-[50px] rounded-[12px]",
+        "w-[50px] h-[50px] rounded-button",
         "flex items-center justify-center",
         "bg-white/[0.04]",
         "border border-[rgba(218,220,224,0.15)]",
@@ -148,7 +148,7 @@ export function ViewReference({
     >
       {/* 50x50 Chip Container */}
       <div
-        className="chip-container group w-full h-full relative rounded-[12px] overflow-hidden bg-white/[0.04] cursor-pointer flex items-center justify-center select-none"
+        className="chip-container group w-full h-full relative rounded-button overflow-hidden bg-white/[0.04] cursor-pointer flex items-center justify-center select-none"
         aria-label={tooltipText}
         onClick={(e) => {
           e.stopPropagation();
@@ -213,11 +213,11 @@ export function ViewReference({
             transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
             className="absolute bottom-[calc(100%+12px)] left-1/2 -translate-x-1/2 z-[100] pointer-events-none flex flex-col items-center"
           >
-            <div className="rounded-[18px] overflow-hidden shadow-[0_16px_40px_rgba(0,0,0,0.7)] bg-[#1e1f20] border-none flex items-center justify-center">
+            <div className="rounded-card overflow-hidden shadow-[0_16px_40px_rgba(0,0,0,0.7)] bg-[#1e1f20] border-none flex items-center justify-center">
               {isVideo ? (
                 <video
                   src={src}
-                  className="max-w-[200px] max-h-[280px] w-auto h-auto rounded-[18px] object-contain block"
+                  className="max-w-[200px] max-h-[280px] w-auto h-auto rounded-card object-contain block"
                   autoPlay
                   loop
                   muted
@@ -227,7 +227,7 @@ export function ViewReference({
                 <img
                   src={src}
                   alt=""
-                  className="max-w-[200px] max-h-[280px] w-auto h-auto rounded-[18px] object-contain block select-none pointer-events-none"
+                  className="max-w-[200px] max-h-[280px] w-auto h-auto rounded-card object-contain block select-none pointer-events-none"
                 />
               )}
             </div>

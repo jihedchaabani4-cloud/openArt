@@ -119,7 +119,7 @@ export const EditableDisplayName = React.forwardRef(({
               e.preventDefault()
               handleSaveEdit()
             }}
-            className="size-7 p-0 text-white/80 hover:text-white hover:bg-white/20 rounded-button flex items-center justify-center shrink-0"
+            className="size-7 p-0 text-white/80 hover:text-white hover:bg-white/20 flex items-center justify-center shrink-0"
             title="Save"
           >
             <Check className="size-4" strokeWidth={2.5} />
@@ -132,7 +132,7 @@ export const EditableDisplayName = React.forwardRef(({
               e.preventDefault()
               handleCancelEdit()
             }}
-            className="size-7 p-0 text-white/80 hover:text-white hover:bg-white/20 rounded-button flex items-center justify-center shrink-0"
+            className="size-7 p-0 text-white/80 hover:text-white hover:bg-white/20 flex items-center justify-center shrink-0"
             title="Cancel"
           >
             <X className="size-4" strokeWidth={2.5} />

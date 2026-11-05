@@ -153,7 +153,7 @@ function LeftPanel({ open }) {
   }, []);
 
   return (
-    <div className="relative hidden h-full min-h-0 flex-1 overflow-hidden rounded-[28px] bg-[radial-gradient(circle_at_22%_15%,rgba(255,255,255,0.18),transparent_22%),linear-gradient(180deg,#09111d_0%,#05080f_52%,#090d14_100%)] lg:flex">
+    <div className="relative hidden h-full min-h-0 flex-1 overflow-hidden rounded-dialog bg-[radial-gradient(circle_at_22%_15%,rgba(255,255,255,0.18),transparent_22%),linear-gradient(180deg,#09111d_0%,#05080f_52%,#090d14_100%)] lg:flex">
       <div className="relative size-full overflow-hidden">
         <div className="absolute inset-0">
           {previousVideo ? (
@@ -231,7 +231,7 @@ export function LoginDialog({ open, onClose }) {
 
   return (
     <Dialog open={open} onOpenChange={(nextOpen) => !nextOpen && onClose?.()}>
-      <DialogContent className="h-[min(740px,84vh)] w-[min(960px,94vw)] max-w-[960px] overflow-hidden rounded-[32px] p-0 bg-(--background-base-pri) backdrop-blur-[80px]" >
+      <DialogContent className="h-[min(740px,84vh)] w-[min(960px,94vw)] max-w-[960px] overflow-hidden p-0 bg-(--background-base-pri) backdrop-blur-[80px]" >
         <span className="sr-only">
           <DialogTitle>Authentication</DialogTitle>
         </span>

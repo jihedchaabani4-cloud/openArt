@@ -50,7 +50,7 @@ export function ElementEditNavbar({
                   type="button"
                   variant="ghost"
                   data-testid="import-dropdown-trigger"
-                  className="rounded-[var(--button-border-radius,12px)] h-8 w-8 p-0 text-white hover:text-white hover:bg-white/10 bg-transparent cursor-pointer transition-colors outline-none flex items-center justify-center"
+                  className="h-8 w-8 p-0 text-white hover:text-white hover:bg-white/10 bg-transparent cursor-pointer transition-colors outline-none flex items-center justify-center"
                   title="Ajouter des images"
                   aria-label="Ajouter des images"
                 >
@@ -61,7 +61,7 @@ export function ElementEditNavbar({
                 {onUpload && (
                   <DropdownMenuItem
                     onSelect={() => onUpload()}
-                    className="flex items-center gap-3 pl-3 pr-4 py-2 rounded-[16px] min-h-[2.125rem] text-[14px] leading-5 font-medium cursor-pointer text-white/90 hover:text-white hover:bg-white/10 transition-colors"
+                    className="flex items-center gap-3 pl-3 pr-4 py-2 rounded-button min-h-[2.125rem] text-[14px] leading-5 font-medium cursor-pointer text-white/90 hover:text-white hover:bg-white/10 transition-colors"
                   >
                     <GoogleIcon iconName="upload" className="text-[20px] text-white/80 shrink-0" />
                     <span className="font-medium">Importer depuis l'ordinateur</span>
@@ -70,7 +70,7 @@ export function ElementEditNavbar({
                 {onOpenAssets && (
                   <DropdownMenuItem
                     onSelect={() => onOpenAssets()}
-                    className="flex items-center gap-3 pl-3 pr-4 py-2 rounded-[16px] min-h-[2.125rem] text-[14px] leading-5 font-medium cursor-pointer text-white/90 hover:text-white hover:bg-white/10 transition-colors"
+                    className="flex items-center gap-3 pl-3 pr-4 py-2 rounded-button min-h-[2.125rem] text-[14px] leading-5 font-medium cursor-pointer text-white/90 hover:text-white hover:bg-white/10 transition-colors"
                   >
                     <GoogleIcon iconName="perm_media" className="text-[20px] text-white/80 shrink-0" />
                     <span className="font-medium">Depuis le projet</span>
@@ -86,7 +86,7 @@ export function ElementEditNavbar({
               variant="ghost"
               data-testid="like-element-button"
               onClick={onToggleLike}
-              className="rounded-[var(--button-border-radius,12px)] h-8 w-8 p-0 cursor-pointer transition-colors outline-none flex items-center justify-center bg-transparent hover:bg-white/10 text-white hover:text-white"
+              className="h-8 w-8 p-0 cursor-pointer transition-colors outline-none flex items-center justify-center bg-transparent hover:bg-white/10 text-white hover:text-white"
               title={isLiked ? "Retirer des favoris" : "Ajouter aux favoris"}
               aria-label={isLiked ? "Retirer des favoris" : "Ajouter aux favoris"}
             >

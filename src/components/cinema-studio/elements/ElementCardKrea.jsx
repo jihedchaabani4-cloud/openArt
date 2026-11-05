@@ -201,7 +201,7 @@ export function ElementCardKrea({ element, onClick, onDelete }) {
         {/* ── CARD STATES ── */}
         {isProcessing ? (
           <ProcessingCard
-            className="w-full h-full rounded-[8px]"
+            className="w-full h-full rounded-card"
             showPlayIcon={false}
           />
         ) : isFailed ? (
@@ -223,7 +223,7 @@ export function ElementCardKrea({ element, onClick, onDelete }) {
                     alt={name}
                     src={imgUrl}
                     loading="lazy"
-                    className="absolute top-1/2 left-1/2 w-[84px] aspect-[2/3] rounded-[6px] object-cover shadow-[0_20px_25px_-5px_rgba(0,0,0,0.4),0_8px_10px_-6px_rgba(0,0,0,0.4)] border border-white/10"
+                    className="absolute top-1/2 left-1/2 w-[84px] aspect-[2/3] rounded-button object-cover shadow-[0_20px_25px_-5px_rgba(0,0,0,0.4),0_8px_10px_-6px_rgba(0,0,0,0.4)] border border-white/10"
                     style={{
                       zIndex: preset.zIndex,
                       transform: `translate(-50%, -50%) translate(${x}px, ${preset.stackY}px) rotate(${rot}deg) scale(${sc})`,

@@ -37,7 +37,7 @@ export function CreateElementModal({ isOpen, onClose, projectId, onCreated }) {
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent
         showCloseButton={false}
-        className="w-full max-w-md sm:max-w-[480px] overflow-hidden rounded-[28px] border border-white/5 bg-[var(--mat-dialog-container-color)] p-6 text-white shadow-[0_24px_80px_rgba(0,0,0,0.58)]"
+        className="w-full max-w-md sm:max-w-[480px] overflow-hidden rounded-dialog border border-white/5 bg-[var(--mat-dialog-container-color)] p-6 text-white shadow-[0_24px_80px_rgba(0,0,0,0.58)]"
       >
         <DialogTitle className="flex items-center gap-3 text-lg font-bold text-white mb-2">
           <Button
@@ -45,7 +45,7 @@ export function CreateElementModal({ isOpen, onClose, projectId, onCreated }) {
             variant="ghost"
             size="icon-xs"
             onClick={onClose}
-            className="p-1.5 bg-zinc-900 border border-white/10 hover:bg-zinc-800 text-white rounded-lg transition-colors cursor-pointer"
+            className="p-1.5 bg-zinc-900 border border-white/10 hover:bg-zinc-800 text-white rounded-button transition-colors cursor-pointer"
           >
             <ChevronLeft className="w-4 h-4" />
           </Button>

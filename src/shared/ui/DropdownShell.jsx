@@ -51,7 +51,7 @@ export function DropdownShell({
           variant="ghost"
           size="icon"
           className={cn(
-            "size-9 rounded-[var(--mat-sys-corner-medium,12px)] flex items-center justify-center transition-all p-0",
+            "size-9 rounded-button flex items-center justify-center transition-all p-0",
             isActive
               ? "bg-transparent text-[var(--mat-sys-on-surface,#e3e3e3)]"
               : "text-[var(--mat-sys-on-surface,#e3e3e3)] hover:bg-[var(--foreground-state-10)] hover:text-white"
@@ -68,7 +68,7 @@ export function DropdownShell({
         onCloseAutoFocus={(e) => e.preventDefault()}
         className={cn(
           panelWidth,
-          "backdrop-blur-[100px] bg-[var(--mat-menu-container-color,rgba(22,23,24,0.85))] border-none rounded-[var(--mat-menu-container-shape,24px)] p-1.5 z-50 shadow-[var(--mat-menu-container-elevation-shadow)]",
+          "backdrop-blur-[100px] bg-[var(--mat-menu-container-color,rgba(22,23,24,0.85))] border-none rounded-card p-1.5 z-50 shadow-[var(--mat-menu-container-elevation-shadow)]",
           className
         )}
       >
@@ -169,7 +169,7 @@ export const DropdownSegmented = React.memo(({ value, onChange, options, classNa
   return (
     <div
       className={cn(
-        "mat-button-toggle-group toggle-group flex items-center gap-1 p-1 bg-[rgba(218,220,224,0.05)] rounded-[14px] min-w-0 w-full select-none",
+        "mat-button-toggle-group toggle-group flex items-center gap-1 p-1 bg-[rgba(218,220,224,0.05)] rounded-button min-w-0 w-full select-none",
         className
       )}
       role="radiogroup"
@@ -196,7 +196,7 @@ export const DropdownSegmented = React.memo(({ value, onChange, options, classNa
             disabled={opt.disabled}
             style={itemStyle}
             className={cn(
-              "mat-button-toggle toggle flex-toggle rounded-[10px] h-8 min-h-[32px] text-[13px] font-medium transition-all flex items-center justify-center relative",
+              "mat-button-toggle toggle flex-toggle rounded-button h-8 min-h-[32px] text-[13px] font-medium transition-all flex items-center justify-center relative",
               compact ? "p-1.5 size-12 shrink-0 [&_svg]:size-full" : "flex-row gap-1.5 px-3 py-1 flex-1 min-w-fit",
               visibleCount ? "flex-none" : !compact ? "flex-1 min-w-fit" : "",
               isDragging && "pointer-events-none",
@@ -230,7 +230,7 @@ export const DropdownSegmentedWithLabel = React.memo(({ label, value, onChange, 
 
   return (
     <div className={cn(
-      "flex items-center gap-2 p-1 rounded-[14px] overflow-hidden",
+      "flex items-center gap-2 p-1 rounded-button overflow-hidden",
       !transparent && "bg-[rgba(218,220,224,0.05)]",
       className
     )}>
@@ -251,7 +251,7 @@ export const DropdownSegmentedWithLabel = React.memo(({ label, value, onChange, 
               variant={isSelected ? activeVariant : "flow-toggle"}
               onClick={() => !opt.disabled && onChange(opt.value)}
               disabled={opt.disabled}
-              className="h-8 min-h-[32px] rounded-[10px] text-[13px] font-medium px-3 flex-1 min-w-fit"
+              className="h-8 min-h-[32px] rounded-button text-[13px] font-medium px-3 flex-1 min-w-fit"
             >
               {opt.icon && (
                 <span className={cn(
@@ -288,7 +288,7 @@ export function DropdownChips({ options, selected, onToggle, accent = "lime" }) 
             size="xs"
             onClick={() => onToggle(opt)}
             className={cn(
-              "px-2.5 py-1.5 rounded-lg text-xs transition-all font-medium h-auto",
+              "px-2.5 py-1.5 rounded-button text-xs transition-all font-medium h-auto",
               isSelected
                 ? "bg-[#505153] text-white hover:bg-[#505153]"
                 : "bg-white/2 text-white hover:text-white hover:bg-white/10"
@@ -377,14 +377,14 @@ export function DropdownClearAction({ onClick, label = "Clear" }) {
 
 export const DropdownToggle = React.memo(({ value, onChange }) => {
   return (
-    <div className="flex gap-0.5 bg-white/5 p-0.5 rounded-lg">
+    <div className="flex gap-0.5 bg-white/5 p-0.5 rounded-button">
       <Button
         type="button"
         variant="ghost"
         size="xs"
         onClick={() => onChange(false)}
         className={cn(
-          "px-3 py-1 rounded-md text-xs font-medium transition-all h-auto",
+          "px-3 py-1 rounded-button text-xs font-medium transition-all h-auto",
           !value ? "bg-[#505153] text-white hover:bg-[#505153]" : "text-white hover:text-white/50"
         )}
       >
@@ -396,7 +396,7 @@ export const DropdownToggle = React.memo(({ value, onChange }) => {
         size="xs"
         onClick={() => onChange(true)}
         className={cn(
-          "px-3 py-1 rounded-md text-xs font-medium transition-all h-auto",
+          "px-3 py-1 rounded-button text-xs font-medium transition-all h-auto",
           value ? "bg-[#505153] text-white hover:bg-[#505153]" : "text-white hover:text-white/50"
         )}
       >

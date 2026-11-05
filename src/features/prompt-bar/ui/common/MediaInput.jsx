@@ -184,7 +184,7 @@ export function MediaInput({
           data-testid="media-input-uploading"
           role="status"
           aria-label={`Uploading ${label || "media"}`}
-          className="chip-container group size-12 relative rounded-xl overflow-hidden bg-white/5 border border-white/10 flex items-center justify-center select-none"
+          className="chip-container group size-12 relative rounded-button overflow-hidden bg-white/5 border border-white/10 flex items-center justify-center select-none"
         >
           {tempPreview && (
             <img
@@ -200,7 +200,7 @@ export function MediaInput({
           data-testid="media-input-failed"
           role="alert"
           aria-label={error || "Upload failed"}
-          className="chip-container group size-12 relative rounded-xl overflow-hidden bg-red-500/10 border border-red-500/30 flex flex-col items-center justify-center p-1 text-center select-none"
+          className="chip-container group size-12 relative rounded-button overflow-hidden bg-red-500/10 border border-red-500/30 flex flex-col items-center justify-center p-1 text-center select-none"
         >
           <span className="text-xs text-red-400 font-medium leading-none mb-1 scale-75">Failed</span>
           <Button
@@ -209,7 +209,7 @@ export function MediaInput({
             size="icon-xs"
             data-testid="media-input-retry-btn"
             onClick={handleRetry}
-            className="h-5 px-1.5 text-xs text-white bg-white/20 hover:bg-white/30 rounded"
+            className="h-5 px-1.5 text-xs text-white bg-white/20 hover:bg-white/30 rounded-button"
             title="Retry upload"
           >
             <RefreshCw className="w-2.5 h-2.5" />

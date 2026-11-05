@@ -63,7 +63,7 @@ export function StudioSettingsDropdown(props) {
           </span>
           <flow-toggles aria-label="Taille de la grille" class="block w-full">
             <div
-              className="mat-button-toggle-group toggle-group flex items-center gap-0.5 p-0.5 bg-[rgba(218,220,224,0.05)] rounded-[12px] w-full select-none"
+              className="mat-button-toggle-group toggle-group flex items-center gap-0.5 p-0.5 bg-[rgba(218,220,224,0.05)] rounded-button w-full select-none"
               role="radiogroup"
             >
               {[
@@ -80,7 +80,7 @@ export function StudioSettingsDropdown(props) {
                     aria-checked={isChecked}
                     variant={isChecked ? "flow-toggle-active" : "flow-toggle"}
                     onClick={() => setGridSize?.(opt.value)}
-                    className="mat-button-toggle toggle flex-toggle flex-1 h-8 rounded-[10px] text-[13px] font-medium"
+                    className="mat-button-toggle toggle flex-toggle flex-1 h-8 text-[13px] font-medium"
                   >
                     <span>{opt.label}</span>
                   </Button>
@@ -100,7 +100,7 @@ export function StudioSettingsDropdown(props) {
                 e.preventDefault()
                 setShowUploadedMedia(!showUploadedMedia)
               }}
-              className="flex items-center justify-between cursor-pointer pl-3 pr-4 py-2 min-h-[2.125rem] rounded-[16px] hover:bg-[var(--mat-menu-item-hover-state-layer-color,var(--foreground-state-10))] transition-colors duration-100 ease-in-out"
+              className="flex items-center justify-between cursor-pointer pl-3 pr-4 py-2 min-h-[2.125rem] hover:bg-[var(--mat-menu-item-hover-state-layer-color,var(--foreground-state-10))] transition-colors duration-100 ease-in-out"
             >
               <div className="flex items-center gap-3">
                 <GoogleIcon iconName="upload" className="text-[20px] text-[var(--foreground-neutral-000,#fff)] shrink-0" />
@@ -118,7 +118,7 @@ export function StudioSettingsDropdown(props) {
                 e.preventDefault()
                 setShowTileDetails(!showTileDetails)
               }}
-              className="flex items-center justify-between cursor-pointer pl-3 pr-4 py-2 min-h-[2.125rem] rounded-[16px] hover:bg-[var(--mat-menu-item-hover-state-layer-color,var(--foreground-state-10))] transition-colors duration-100 ease-in-out"
+              className="flex items-center justify-between cursor-pointer pl-3 pr-4 py-2 min-h-[2.125rem] hover:bg-[var(--mat-menu-item-hover-state-layer-color,var(--foreground-state-10))] transition-colors duration-100 ease-in-out"
             >
               <div className="flex items-center gap-3">
                 <GoogleIcon iconName="visibility" className="text-[20px] text-[var(--foreground-neutral-000,#fff)] shrink-0" />
@@ -136,7 +136,7 @@ export function StudioSettingsDropdown(props) {
                 e.preventDefault()
                 setSoundOnHover(!soundOnHover)
               }}
-              className="flex items-center justify-between cursor-pointer pl-3 pr-4 py-2 min-h-[2.125rem] rounded-[16px] hover:bg-[var(--mat-menu-item-hover-state-layer-color,var(--foreground-state-10))] transition-colors duration-100 ease-in-out"
+              className="flex items-center justify-between cursor-pointer pl-3 pr-4 py-2 min-h-[2.125rem] hover:bg-[var(--mat-menu-item-hover-state-layer-color,var(--foreground-state-10))] transition-colors duration-100 ease-in-out"
             >
               <div className="flex items-center gap-3">
                 <GoogleIcon iconName="volume_up" className="text-[20px] text-[var(--foreground-neutral-000,#fff)] shrink-0" />
@@ -154,7 +154,7 @@ export function StudioSettingsDropdown(props) {
                 e.preventDefault()
                 setClearPromptOnSubmit(!clearPromptOnSubmit)
               }}
-              className="flex items-center justify-between cursor-pointer pl-3 pr-4 py-2 min-h-[2.125rem] rounded-[16px] hover:bg-[var(--mat-menu-item-hover-state-layer-color,var(--foreground-state-10))] transition-colors duration-100 ease-in-out"
+              className="flex items-center justify-between cursor-pointer pl-3 pr-4 py-2 min-h-[2.125rem] hover:bg-[var(--mat-menu-item-hover-state-layer-color,var(--foreground-state-10))] transition-colors duration-100 ease-in-out"
             >
               <div className="flex items-center gap-3">
                 <GoogleIcon iconName="backspace" className="text-[20px] text-[var(--foreground-neutral-000,#fff)] shrink-0" />

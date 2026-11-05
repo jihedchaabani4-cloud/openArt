@@ -9,7 +9,7 @@ import { cn } from "@/shared/lib/utils";
  *
  * Exact visual fidelity to Google Flow's <flow-character-image-preview>:
  * - Big 16:9 box (`aspect-video w-full max-w-[860px]`)
- * - Dark Google Flow surface background (`#1e1f20`, `rounded-[28px]`, `border border-white/10`)
+ * - Dark Google Flow surface background (`#1e1f20`, `rounded-dialog`, `border border-white/10`)
  * - Centered prompt text with Google Sans
  * - Material 3 / Google Flow style buttons:
  *   1. "Importer" (upload icon)
@@ -26,7 +26,7 @@ export function FlowCharacterImagePreview({
     <div
       data-component="flow-character-image-preview"
       className={cn(
-        "relative aspect-video w-full max-w-[850px] mx-auto rounded-[28px] bg-[rgba(218,220,224,0.1)] backdrop-blur-[80px] shadow-lg flex flex-col items-center justify-center p-6 sm:p-10 select-none border-none",
+        "relative aspect-video w-full max-w-[850px] mx-auto rounded-dialog bg-[rgba(218,220,224,0.1)] backdrop-blur-[80px] shadow-lg flex flex-col items-center justify-center p-6 sm:p-10 select-none border-none",
         className
       )}
     >

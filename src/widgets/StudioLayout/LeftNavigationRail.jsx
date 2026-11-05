@@ -92,7 +92,7 @@ export function LeftNavigationRail() {
       prefetch={true}
       onClick={() => setOptimisticTab(item.id)}
       className={cn(
-        "flex items-center h-[42px] rounded-[14px] transition-colors duration-100 w-full select-none outline-none overflow-hidden font-sans font-medium text-[14px] leading-5 antialiased",
+        "flex items-center h-[42px] rounded-button transition-colors duration-100 w-full select-none outline-none overflow-hidden font-sans font-medium text-[14px] leading-5 antialiased",
         item.isActive
           ? "bg-[#2a2a2a] text-white shadow-sm"
           : "text-white/80 hover:text-white hover:bg-white/[0.06]"

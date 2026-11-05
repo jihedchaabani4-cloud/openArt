@@ -74,8 +74,8 @@ export const DurationSelector = React.memo(({ value, onChange, options, classNam
 
   // Otherwise, use the custom slider selector
   return (
-    <div role="group" aria-label="Duration" className={`w-full p-1.5 bg-white/5 rounded-2xl ${className || ""}`} data-rac="" data-orientation="horizontal">
-      <div className="group relative w-full h-8 rounded-xl overflow-hidden  transition-colors" data-rac="" data-orientation="horizontal" style={{ position: "relative", touchAction: "none" }}>
+    <div role="group" aria-label="Duration" className={`w-full p-1.5 bg-white/5 rounded-card ${className || ""}`} data-rac="" data-orientation="horizontal">
+      <div className="group relative w-full h-8 rounded-button overflow-hidden  transition-colors" data-rac="" data-orientation="horizontal" style={{ position: "relative", touchAction: "none" }}>
         {/* Invisible Input on top to capture clicks/drags natively */}
         <input 
           tabIndex={0} 

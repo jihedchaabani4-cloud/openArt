@@ -134,7 +134,7 @@ export function ImportMediaListView({
       </div>
 
       {/* ── Right Pane: Detail & Preview Hero Pane ── */}
-      <div className="flex-1 min-h-0 flex flex-col bg-[#1e1f20]/80 rounded-[20px] overflow-hidden relative">
+      <div className="flex-1 min-h-0 flex flex-col bg-[#1e1f20]/80 rounded-card overflow-hidden relative">
         {focusedItem ? (
           <>
             {/* Center Hero Preview Area */}
@@ -184,7 +184,7 @@ export function ImportMediaListView({
                       }}
                       disabled={isFocusedOverQuota}
                       className={cn(
-                        "h-9 px-4 rounded-[12px] text-xs font-medium transition-all flex items-center gap-1.5 shadow-sm select-none",
+                        "h-9 px-4 rounded-button text-xs font-medium transition-all flex items-center gap-1.5 shadow-sm select-none",
                         isFocusedOverQuota
                           ? "bg-white/10 text-white/40 cursor-not-allowed border border-white/5"
                           : "bg-white text-black hover:bg-white/90 active:scale-[0.97] cursor-pointer border-none"

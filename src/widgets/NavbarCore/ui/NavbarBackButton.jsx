@@ -41,7 +41,7 @@ export function NavbarBackButton({
         size={children ? "default" : "icon"}
         disabled={disabled}
         className={cn(
-          "rounded-[var(--mat-sys-corner-medium,12px)] cursor-pointer shrink-0 text-[var(--mat-sys-on-surface,#e3e3e3)] hover:text-white transition-all",
+          "cursor-pointer shrink-0 text-[var(--mat-sys-on-surface,#e3e3e3)] hover:text-white transition-all",
           children ? "h-10 px-3.5 gap-2 font-medium text-sm" : "h-10 w-10",
           className
         )}
@@ -74,7 +74,7 @@ export function NavbarBackButton({
       size={children ? "default" : "icon"}
       disabled={disabled}
       className={cn(
-        "rounded-[var(--mat-sys-corner-medium,12px)] cursor-pointer shrink-0 text-[var(--mat-sys-on-surface,#e3e3e3)] hover:text-white transition-all",
+        "cursor-pointer shrink-0 text-[var(--mat-sys-on-surface,#e3e3e3)] hover:text-white transition-all",
         children ? "h-10 px-3.5 gap-2 font-medium text-sm" : "h-10 w-10",
         className
       )}

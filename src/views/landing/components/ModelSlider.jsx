@@ -55,7 +55,7 @@ export function ModelSlider() {
         </div>
 
         {/* Carousel / Slider Card */}
-        <div className="relative h-[20rem] w-full overflow-hidden rounded-[32px] bg-zinc-950 group shadow-[0_0_50px_rgba(0,0,0,0.8)]">
+        <div className="relative h-[20rem] w-full overflow-hidden rounded-card bg-zinc-950 group shadow-[0_0_50px_rgba(0,0,0,0.8)]">
           {/* Images */}
           {levelSlides.map((slide, idx) => (
             <div

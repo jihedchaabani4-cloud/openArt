@@ -47,7 +47,7 @@ export function PromptBarControlsRow({
             title="Paramètres de génération et modèles"
             onClick={onToggleDrawer}
             className={cn(
-              "settings-trigger-button h-8 px-2.5 rounded-xl flex items-center gap-1.5 transition-all cursor-pointer select-none text-[12px] font-medium text-white",
+              "settings-trigger-button h-8 px-2.5 rounded-button flex items-center gap-1.5 transition-all cursor-pointer select-none text-[12px] font-medium text-white",
               drawerOpen
                 ? "bg-white/15 border border-white/20 shadow-sm text-white"
                 : "border-transparent text-white hover:text-white"

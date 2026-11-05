@@ -460,7 +460,7 @@ export default function TestMentionPage() {
 
             {/* Interactive Prompt Bar Shell */}
             <div className="relative mt-2">
-              <div className="rounded-[24px] bg-[#161718]/80 backdrop-blur-xl border border-white/10 p-4 shadow-[0_16px_50px_rgba(0,0,0,0.5)] focus-within:border-white/30 transition-all">
+              <div className="rounded-3xl bg-[#161718]/80 backdrop-blur-xl border border-white/10 p-4 shadow-[0_16px_50px_rgba(0,0,0,0.5)] focus-within:border-white/30 transition-all">
                 <LexicalComposer initialConfig={initialConfigV1}>
                   <div className="relative min-h-[70px] w-full">
                     <RichTextPlugin
@@ -576,7 +576,7 @@ export default function TestMentionPage() {
               />
 
               {/* Prompt Bar Shell (Border-free and shadow-free matching prompt bar) */}
-              <div className="w-full rounded-[28px] bg-(--background-base-pri) backdrop-blur-[80px] p-3.5 shadow-none transition-all border-0">
+              <div className="w-full rounded-3xl bg-(--background-base-pri) backdrop-blur-[80px] p-3.5 shadow-none transition-all border-0">
                 <LexicalComposer initialConfig={initialConfigV2}>
                   <div className="relative min-h-[50px] w-full px-1">
                     <RichTextPlugin

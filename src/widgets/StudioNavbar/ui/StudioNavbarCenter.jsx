@@ -23,7 +23,7 @@ export function StudioNavbarCenter({
                     ref={searchInputRef}
                     variant="search"
                     googleIcon="search"
-                    placeholder="Rechercher des médias..."
+                    placeholder=""
                     onClear={searchExpanded ? () => { setFilter('prompt', ''); handleCloseSearch?.(); } : undefined}
                     type="search"
                     value={filters.prompt || ""}

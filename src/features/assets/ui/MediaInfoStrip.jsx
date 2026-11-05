@@ -38,7 +38,7 @@ export function MediaInfoStrip({
   const referencesLabel = referencesCount > 0 ? `${referencesCount} reference${referencesCount === 1 ? "" : "s"}` : null;
 
   return (
-    <div className="mt-4 w-full max-w-[980px] overflow-x-auto rounded-[28px] border border-[#27433d] bg-[#10201d]/95 p-3 shadow-[0_20px_60px_rgba(0,0,0,0.35)]">
+    <div className="mt-4 w-full max-w-[980px] overflow-x-auto rounded-card border border-[#27433d] bg-[#10201d]/95 p-3 shadow-[0_20px_60px_rgba(0,0,0,0.35)]">
       <div className="flex min-w-max items-stretch gap-3">
         <InfoPill icon={MessageSquareText} label="Prompt" value={prompt} strong />
         <InfoPill icon={Sparkles} label="Model" value={model} />

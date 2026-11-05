@@ -170,7 +170,7 @@ describe("StudioNavbar Layout & Collection Page Header", () => {
     expect(backdrop).toBeDefined();
     expect(backdrop.className).toContain("header-backdrop-visible");
 
-    const searchWrapper = container.querySelector("div[class*='rounded-[16px]']");
+    const searchWrapper = container.querySelector("div[class*='rounded-input']");
     expect(searchWrapper).toBeDefined();
     expect(searchWrapper.className).not.toContain("shadow-[var(--glass-raised-box-shadow)]");
     expect(searchWrapper.className).toContain("shadow-none");

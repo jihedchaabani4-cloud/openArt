@@ -46,7 +46,7 @@ export function HeroSection({ user, authLoading, onCTA }) {
               animate={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
               transition={{ duration: 1.4, delay: index * 0.04, ease: [0.16, 1, 0.3, 1] }}
               whileHover={{ scale: 1.03, y: -6, transition: { duration: 0.4, ease: "easeOut" } }}
-              className="group break-inside-avoid mb-3 lg:mb-4 rounded-[24px] overflow-hidden relative"
+              className="group break-inside-avoid mb-3 lg:mb-4 rounded-card overflow-hidden relative"
               style={{ transformStyle: "preserve-3d" }}
             >
               <div className="absolute inset-0 bg-black/10 z-10 pointer-events-none" />
@@ -65,7 +65,7 @@ export function HeroSection({ user, authLoading, onCTA }) {
                 animate={{ scale: [1, 1.04, 1] }}
                 transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
               />
-              <div className="absolute inset-0 rounded-[24px] ring-1 ring-white/10 group-hover:ring-white/20 transition-all duration-500" />
+              <div className="absolute inset-0 rounded-card ring-1 ring-white/10 group-hover:ring-white/20 transition-all duration-500" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-white/5" />
             </motion.div>
           ))}

@@ -838,14 +838,14 @@ export function ImportMediaPopover({
               </div>
 
               {/* Layout Mode Switcher (Grid vs List) */}
-              <div className="flex items-center p-0.5 rounded-[12px] bg-white/5 shrink-0">
+              <div className="flex items-center p-0.5 rounded-button bg-white/5 shrink-0">
                 <Button
                   type="button"
                   variant="ghost"
                   size="icon-sm"
                   onClick={() => setLayoutMode("grid")}
                   className={cn(
-                    "w-8 h-8 rounded-[10px] transition-all cursor-pointer border-none outline-none p-0",
+                    "w-8 h-8 rounded-button transition-all cursor-pointer border-none outline-none p-0",
                     layoutMode === "grid"
                       ? "bg-white/20 text-white shadow-sm hover:bg-white/20"
                       : "text-white/40 hover:text-white/80 hover:bg-white/5"
@@ -861,7 +861,7 @@ export function ImportMediaPopover({
                   size="icon-sm"
                   onClick={() => setLayoutMode("list")}
                   className={cn(
-                    "w-8 h-8 rounded-[10px] transition-all cursor-pointer border-none outline-none p-0",
+                    "w-8 h-8 rounded-button transition-all cursor-pointer border-none outline-none p-0",
                     layoutMode === "list"
                       ? "bg-white/20 text-white shadow-sm hover:bg-white/20"
                       : "text-white/40 hover:text-white/80 hover:bg-white/5"

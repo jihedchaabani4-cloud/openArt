@@ -274,7 +274,7 @@ export function AtMentionMenu({
       exit={{ opacity: 0, scale: 0.98, y: 6 }}
       transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
       className={cn(
-        "w-full rounded-2xl bg-(--background-base-pri) backdrop-blur-[80px] shadow-none pointer-events-auto flex flex-col z-50 overflow-hidden select-none border-0 font-sans antialiased",
+        "w-full rounded-card bg-(--background-base-pri) backdrop-blur-[80px] shadow-none pointer-events-auto flex flex-col z-50 overflow-hidden select-none border-0 font-sans antialiased",
         className
       )}
     >
@@ -301,7 +301,7 @@ export function AtMentionMenu({
                     onClick={item.action}
                     onMouseEnter={() => setSelectedIndex(globalIdx)}
                     className={cn(
-                      "flex items-center gap-2.5 px-3 py-2 rounded-xl cursor-pointer transition-all text-left",
+                      "flex items-center gap-2.5 px-3 py-2 rounded-button cursor-pointer transition-all text-left",
                       isSelected
                         ? "bg-white/[0.08] text-white ring-1 ring-white/20"
                         : "hover:bg-white/[0.05] text-white/90"
@@ -343,13 +343,13 @@ export function AtMentionMenu({
                     onClick={item.action}
                     onMouseEnter={() => setSelectedIndex(globalIdx)}
                     className={cn(
-                      "flex items-center gap-2.5 px-3 py-2 rounded-xl cursor-pointer transition-all text-left group",
+                      "flex items-center gap-2.5 px-3 py-2 rounded-button cursor-pointer transition-all text-left group",
                       isSelected
                         ? "bg-white/[0.08] text-white ring-1 ring-white/20"
                         : "hover:bg-white/[0.05] text-white/90"
                     )}
                   >
-                    <div className="size-5 shrink-0 rounded-md overflow-hidden bg-white/10 flex items-center justify-center">
+                    <div className="size-5 shrink-0 rounded-button overflow-hidden bg-white/10 flex items-center justify-center">
                       {item.url ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
