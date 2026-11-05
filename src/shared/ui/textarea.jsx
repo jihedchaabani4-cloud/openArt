@@ -53,20 +53,12 @@ const Textarea = React.forwardRef(({
     <div 
       className={cn(
         isPersonality
-          ? "personality-textarea-wrapper relative w-full rounded-lg bg-[var(--foreground-state-05)] p-3.5 sm:p-4 transition-all border border-[var(--mat-sys-outline-variant,rgba(255,255,255,0.08))] hover:bg-[var(--foreground-state-10)] focus-within:bg-[var(--foreground-state-15)] focus-within:border-[var(--mat-sys-primary,#a8c7fa)]"
+          ? "personality-textarea-wrapper relative w-full rounded-lg bg-surface-card p-3.5 sm:p-4 transition-all border border-white/10 hover:border-white/20 focus-within:border-white/30 focus-within:bg-surface-elevated"
           : isBlur
-          ? "relative w-full rounded-sm p-3 transition-all border-none hover:bg-[var(--foreground-state-15)] focus-within:bg-[var(--foreground-state-15)]"
-          : "relative w-full rounded-lg bg-[var(--foreground-state-05)] p-4 transition-all border border-[var(--mat-sys-outline-variant,rgba(255,255,255,0.08))] hover:bg-[var(--foreground-state-10)] focus-within:bg-[var(--foreground-state-15)] focus-within:border-[var(--mat-sys-primary,#a8c7fa)]"
+          ? "relative w-full rounded-sm p-3 transition-all border border-white/10 bg-surface-card hover:border-white/20 focus-within:border-white/30"
+          : "relative w-full rounded-lg bg-surface-card p-4 transition-all border border-white/10 hover:border-white/20 focus-within:border-white/30 focus-within:bg-surface-elevated"
       )}
-      style={
-        isBlur
-          ? {
-              backgroundColor: "var(--foreground-state-10, rgba(218, 220, 224, 0.1))",
-              backdropFilter: "blur(80px)",
-              WebkitBackdropFilter: "blur(80px)",
-            }
-          : undefined
-      }
+      style={undefined}
     >
       <textarea
         ref={innerRef}
@@ -75,8 +67,8 @@ const Textarea = React.forwardRef(({
         rows={rows}
         placeholder={placeholder}
         className={cn(
-          "w-full bg-transparent text-xs sm:text-sm text-[var(--mat-sys-on-surface,#e3e3e3)] placeholder:[var(--mat-sys-on-surface-variant,#8e918f)] resize-none outline-none custom-scrollbar leading-relaxed font-sans transition-[height] duration-150 ease-out",
-          isPersonality && "personality-textarea text-[var(--mat-sys-on-surface,#e3e3e3)]",
+          "w-full bg-transparent text-xs sm:text-sm text-white placeholder:text-cool-slate resize-none outline-none custom-scrollbar leading-relaxed font-sans transition-[height] duration-150 ease-out",
+          isPersonality && "personality-textarea text-white",
           isOverflowing ? "overflow-y-auto" : "overflow-hidden",
           className
         )}
@@ -120,15 +112,15 @@ const Textarea = React.forwardRef(({
     return (
       <div className={cn("flex flex-col gap-2 w-full", containerClassName)}>
         {label && (
-          <label className="text-xs font-semibold text-[var(--mat-sys-on-surface,#e3e3e3)] flex items-center justify-between">
-            <span>{label} {labelExtra && <span className="font-normal text-[var(--mat-sys-on-surface-variant,#8e918f)]">{labelExtra}</span>}</span>
+          <label className="text-xs font-semibold text-white flex items-center justify-between">
+            <span>{label} {labelExtra && <span className="font-normal text-cool-slate">{labelExtra}</span>}</span>
           </label>
         )}
 
         {textareaElement}
 
         {hint && (
-          <p className="text-[11px] text-[var(--mat-sys-on-surface-variant,#8e918f)] leading-relaxed pt-0.5">
+          <p className="text-[11px] text-cool-slate leading-relaxed pt-0.5">
             {hint}
           </p>
         )}

@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { Check, ChevronDown } from "lucide-react"
 import { GoogleIcon } from "@/shared/ui/GoogleIcon"
 import * as SelectPrimitive from "@radix-ui/react-select"
 
@@ -80,31 +81,21 @@ function SelectTrigger({ className, size = "default", variant = "default", asChi
         // Shape
         "rounded-sm",
         // Colors
-        variant === "blur"
-          ? "bg-[var(--foreground-state-10,rgba(218,220,224,0.1))] backdrop-blur-[80px] border-none text-[var(--mat-sys-on-surface,#e3e3e3)] hover:bg-[var(--foreground-state-15)]"
-          : "bg-transparent hover:bg-[var(--foreground-state-10)]",
+        variant === "blur" ? "bg-surface-elevated text-white hover:bg-white/10 border border-white/10" : "bg-transparent hover:bg-white/10 text-white",
         // Text
-        "text-sm font-medium text-[var(--mat-sys-on-surface,#e3e3e3)]",
+        "text-sm font-medium text-white",
         "hover:cursor-pointer transition-colors outline-none",
 
         // Disabled
         "disabled:cursor-not-allowed disabled:opacity-50",
         className
       )}
-      style={
-        variant === "blur"
-          ? {
-              backgroundColor: "var(--foreground-state-10, rgba(218, 220, 224, 0.1))",
-              backdropFilter: "blur(80px)",
-              WebkitBackdropFilter: "blur(80px)",
-            }
-          : undefined
-      }
+      style={undefined}
       {...props}
     >
       {children}
       <SelectPrimitive.Icon asChild>
-        <GoogleIcon iconName="keyboard_arrow_down" className="text-[18px] opacity-60 shrink-0 ml-2" />
+        <ChevronDown className="size-4 stroke-[1.5] opacity-60 shrink-0 ml-2" />
       </SelectPrimitive.Icon>
     </SelectPrimitive.Trigger>
   )
@@ -131,7 +122,7 @@ function SelectContent({
           // Shape
           "rounded-lg p-2",
           // Colors
-          "bg-[var(--mat-menu-container-color,var(--background-state-90))] backdrop-blur-[80px] border border-[var(--mat-sys-outline-variant,rgba(255,255,255,0.08))]",
+          "bg-surface-card border border-white/10 text-white shadow-none",
           // Shadow
           "shadow-none",
           // Animations — open
@@ -222,7 +213,7 @@ function SelectItem({ className, children, icon, subtitle, badge, iconVariant = 
         // Layout
         "group flex cursor-pointer items-center gap-3 min-h-[40px] px-3.5 py-2 rounded-sm outline-none select-none font-sans antialiased transition-all duration-150",
         // Text & State layers
-        "text-[var(--mat-menu-item-label-text-color,var(--foreground-neutral-000,#fff))] hover:bg-[var(--mat-menu-item-hover-state-layer-color,var(--foreground-state-10))] focus:bg-[var(--mat-menu-item-focus-state-layer-color,var(--foreground-state-15))] data-[highlighted]:bg-[var(--mat-menu-item-hover-state-layer-color,var(--foreground-state-10))] data-[highlighted]:text-white",
+        "text-white/90 hover:bg-white/10 hover:text-white focus:bg-white/10 focus:text-white data-[highlighted]:bg-white/10 data-[highlighted]:text-white",
         // Disabled
         "data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
         className
@@ -233,7 +224,7 @@ function SelectItem({ className, children, icon, subtitle, badge, iconVariant = 
       {icon && (
         <span 
           className={cn(
-            "shrink-0 flex items-center justify-center text-[20px] transition-colors duration-150 text-[var(--mat-menu-item-icon-color,var(--foreground-neutral-000,#fff))]",
+            "shrink-0 flex items-center justify-center text-[20px] transition-colors duration-150 text-white/80",
             iconVariant === "square" && "aspect-square h-[48px] -ml-2 -my-1.5 bg-[#171717] rounded-sm border-r border-white/5"
           )}
         >
@@ -262,7 +253,7 @@ function SelectItem({ className, children, icon, subtitle, badge, iconVariant = 
       {/* ── Checkmark ─────────────────────────────────────────────────────── */}
       <span className="shrink-0 flex size-4 items-center justify-center text-white/80">
         <SelectPrimitive.ItemIndicator>
-          <GoogleIcon iconName="check" className="text-[14px]" />
+          <Check className="size-3.5 stroke-[1.5]" />
         </SelectPrimitive.ItemIndicator>
       </span>
     </SelectPrimitive.Item>
@@ -277,7 +268,7 @@ function SelectSeparator({ className, ...props }) {
     <SelectPrimitive.Separator
       data-slot="select-separator"
       className={cn(
-        "pointer-events-none -mx-1 my-1.5 h-px bg-[var(--mat-menu-divider-color,var(--foreground-state-15))]",
+        "pointer-events-none -mx-1 my-1.5 h-px bg-white/10",
         className
       )}
       {...props}

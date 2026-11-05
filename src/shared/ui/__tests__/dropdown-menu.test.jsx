@@ -6,6 +6,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
 } from "@/shared/ui/dropdown-menu";
 import {
   ContextMenu,
@@ -14,13 +15,15 @@ import {
   ContextMenuItem,
 } from "@/shared/ui/context-menu";
 
-describe("Google Flow menu styling matching user tokens and DOM", () => {
-  it("renders DropdownMenu with width w-52, blur, bg, and button style min-h-[2.125rem], rounded-sm, and text-[14px]", () => {
+describe("DropdownMenu and ContextMenu — Runway Flat Surface Architecture", () => {
+  it("renders DropdownMenu with width w-52, rounded-lg, flat bg-surface-card, border-white/10, and zero shadows", () => {
     render(
       <DropdownMenu open={true}>
         <DropdownMenuTrigger>Open</DropdownMenuTrigger>
         <DropdownMenuContent>
           <DropdownMenuItem>Option 1</DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem variant="destructive">Delete</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     );
@@ -33,17 +36,22 @@ describe("Google Flow menu styling matching user tokens and DOM", () => {
     expect(menuItem.className).toContain("text-[14px]");
     expect(menuItem.className).toContain("pl-3");
     expect(menuItem.className).toContain("pr-4");
+    expect(menuItem.className).toContain("text-white/90");
+
+    const deleteItem = screen.getByText("Delete").closest('[data-slot="dropdown-menu-item"]');
+    expect(deleteItem?.className).toContain("data-[variant=destructive]:!text-danger");
 
     const content = item.closest('[data-slot="dropdown-menu-content"]');
     expect(content).not.toBeNull();
     expect(content.className).toContain("w-52");
     expect(content.className).toContain("rounded-lg");
-    expect(content.style.borderRadius).toBe("var(--mat-menu-container-shape, 8px)");
-    expect(content.style.backgroundColor).toBe("var(--mat-menu-container-color, rgba(22, 23, 24, 0.9))");
-    expect(content.style.backdropFilter).toContain("blur(100px)");
+    expect(content.className).toContain("bg-surface-card");
+    expect(content.className).toContain("border-white/10");
+    expect(content.className).toContain("shadow-none");
+    expect(content.className).not.toContain("backdrop-blur");
   });
 
-  it("renders ContextMenu with width w-52, blur, bg, and button style min-h-[2.125rem], rounded-sm, and text-[14px]", () => {
+  it("renders ContextMenu trigger and content structure conforming to Runway flat surfaces", () => {
     render(
       <ContextMenu>
         <ContextMenuTrigger>Right click</ContextMenuTrigger>

@@ -116,7 +116,7 @@ const Input = React.forwardRef(({
         }}
       >
         {label && (
-          <label className="text-xs font-semibold text-[var(--mat-sys-on-surface,#e3e3e3)]">
+          <label className="text-xs font-semibold text-white">
             {label}
           </label>
         )}
@@ -124,44 +124,30 @@ const Input = React.forwardRef(({
           className={cn(
             "relative flex items-center justify-between w-full transition-all border-none outline-none font-sans antialiased",
             isSearch
-              ? "h-[42px] min-h-[42px] rounded-sm border border-[var(--foreground-state-05)] px-2.5 gap-2 text-sm text-[var(--mat-sys-on-surface,#e3e3e3)] shadow-none hover:bg-[var(--foreground-state-15)] focus-within:bg-[var(--foreground-state-15)] focus-within:border-[rgba(218,220,224,0.18)]"
+              ? "h-[42px] min-h-[42px] rounded-sm border border-white/10 px-2.5 gap-2 text-sm text-white shadow-none bg-surface-card hover:bg-surface-elevated focus-within:bg-surface-elevated focus-within:border-white/20"
               : isBlurInput
-              ? "h-9 min-h-[36px] rounded-sm py-[2px] pr-[10px] pl-[14px] gap-2 text-sm font-medium text-[var(--mat-sys-on-surface,#e3e3e3)] flex-row"
-              : "min-h-[52px] rounded-sm px-3 py-2 bg-transparent hover:bg-[var(--foreground-state-05)] focus-within:bg-[var(--foreground-state-10)]"
+              ? "h-9 min-h-[36px] rounded-sm py-[2px] pr-[10px] pl-[14px] gap-2 text-sm font-medium text-white flex-row bg-surface-card border border-white/10 hover:bg-surface-elevated focus-within:border-white/20"
+              : "min-h-[52px] rounded-sm px-3 py-2 bg-surface-panel text-white border border-white/10 hover:border-white/20 focus-within:border-white/30"
           )}
-          style={
-            isSearch
-              ? {
-                  backgroundColor: "var(--foreground-state-10, rgba(218, 220, 224, 0.1))",
-                  backdropFilter: "blur(80px)",
-                  WebkitBackdropFilter: "blur(80px)",
-                }
-              : isBlurInput
-              ? {
-                  backgroundColor: "var(--foreground-state-10, rgba(218, 220, 224, 0.1))",
-                  backdropFilter: "blur(80px)",
-                  WebkitBackdropFilter: "blur(80px)",
-                }
-              : undefined
-          }
+          style={undefined}
         >
           {googleIcon && (
-            <span className={cn("flex items-center justify-center shrink-0 select-none", isSearch ? "size-7 rounded-full text-[var(--mat-sys-on-surface-variant,#c4c7c5)] mr-0.5" : "text-[var(--mat-sys-on-surface-variant,#8e918f)]")}>
+            <span className={cn("flex items-center justify-center shrink-0 select-none", isSearch ? "size-7 rounded-full text-cool-slate mr-0.5" : "text-cool-slate")}>
               <GoogleIcon iconName={googleIcon} name={googleIcon} weight={googleIconWeight} className={cn("shrink-0", isSearch ? "text-[20px]" : "text-[1.1rem]")} />
             </span>
           )}
 
           {Icon && !googleIcon && (
-            <span className={cn("flex items-center justify-center shrink-0", isSearch ? "size-7 text-[var(--mat-sys-on-surface-variant,#c4c7c5)] mr-0.5" : isBlurInput ? "mr-0.5" : "mr-2.5 text-[var(--mat-sys-on-surface-variant,#8e918f)]")}>
+            <span className={cn("flex items-center justify-center shrink-0", isSearch ? "size-7 text-cool-slate mr-0.5" : isBlurInput ? "mr-0.5" : "mr-2.5 text-cool-slate")}>
               {renderIconNode(Icon, {
-                className: cn("shrink-0", isSearch ? "text-[20px]" : "size-4 text-[var(--mat-sys-on-surface-variant,#8e918f)]"),
+                className: cn("shrink-0", isSearch ? "text-[20px]" : "size-4 text-cool-slate"),
                 strokeWidth: iconStrokeWidth ?? (isBlurInput ? 1.75 : 2.0),
               })}
             </span>
           )}
 
           {hasPrefix && (
-            <span className={cn("text-[var(--mat-sys-on-surface-variant,#8e918f)] select-none shrink-0 pointer-events-none mr-0.5 font-sans", textClasses || "text-sm")}>
+            <span className={cn("text-cool-slate select-none shrink-0 pointer-events-none mr-0.5 font-sans", textClasses || "text-sm")}>
               {prefixStr}
             </span>
           )}
@@ -173,8 +159,8 @@ const Input = React.forwardRef(({
             value={hasPrefix ? displayValue : value}
             onChange={handleChange}
             className={cn(
-              "bg-transparent border-none outline-none p-0 flex-1 placeholder:text-[var(--mat-sys-on-surface-variant,#8e918f)] text-[var(--mat-sys-on-surface,#e3e3e3)] min-w-0 font-sans antialiased shadow-none cursor-text",
-              isSearch ? "text-[13.5px] font-medium leading-normal placeholder:text-[rgba(218,220,224,0.45)]" : "text-sm font-medium",
+              "bg-transparent border-none outline-none p-0 flex-1 placeholder:text-cool-slate text-white min-w-0 font-sans antialiased shadow-none cursor-text",
+              isSearch ? "text-[13.5px] font-medium leading-normal placeholder:text-cool-slate" : "text-sm font-medium",
               className
             )}
             style={{
@@ -235,8 +221,8 @@ const Input = React.forwardRef(({
       onChange={onChange}
       className={cn(
         isNavbar
-          ? "bg-transparent border-none outline-none text-md font-medium tracking-tight text-[var(--mat-sys-on-surface,#e3e3e3)] placeholder:[var(--mat-sys-on-surface-variant,#8e918f)] max-w-[260px] focus:text-white focus:ring-0 p-0 shadow-none cursor-text disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-sans antialiased"
-          : "flex min-h-[52px] w-full rounded-sm border-none bg-transparent px-3 py-2 text-[var(--mat-sys-on-surface,#e3e3e3)] placeholder:text-[var(--mat-sys-on-surface-variant,#8e918f)] hover:bg-[var(--foreground-state-05)] focus:bg-[var(--foreground-state-10)] focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 transition-all font-sans antialiased shadow-none cursor-text p-0",
+          ? "bg-transparent border-none outline-none text-md font-medium tracking-tight text-white placeholder:text-cool-slate max-w-[260px] focus:text-white focus:ring-0 p-0 shadow-none cursor-text disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-sans antialiased"
+          : "flex min-h-[52px] w-full rounded-sm border border-white/10 bg-surface-panel px-3 py-2 text-white placeholder:text-cool-slate hover:border-white/20 focus:border-white/30 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 transition-all font-sans antialiased shadow-none cursor-text",
         !isNavbar && !className?.includes("text-") && "text-sm",
         className
       )}

@@ -52,8 +52,8 @@ export function DropdownShell({
           className={cn(
             "size-9 rounded-sm flex items-center justify-center transition-all p-0",
             isActive
-              ? "bg-transparent text-[var(--mat-sys-on-surface,#e3e3e3)]"
-              : "text-[var(--mat-sys-on-surface,#e3e3e3)] hover:bg-[var(--foreground-state-10)] hover:text-white"
+              ? "bg-transparent text-white/90"
+              : "text-white/90 hover:bg-white/10 hover:text-white"
           )}
         >
           {trigger}
@@ -67,7 +67,7 @@ export function DropdownShell({
         onCloseAutoFocus={(e) => e.preventDefault()}
         className={cn(
           panelWidth,
-          "backdrop-blur-[100px] bg-[var(--mat-menu-container-color,rgba(22,23,24,0.85))] border-none rounded-lg p-1.5 z-50 shadow-none",
+          "bg-surface-card border border-white/10 rounded-lg p-1.5 z-50 shadow-none text-white",
           className
         )}
       >
@@ -85,7 +85,7 @@ export function DropdownSection({ label, action, className, children }) {
   return (
     <div className={cn("mb-4", className)}>
       <div className="flex items-center justify-between mb-2">
-        <p className="text-xs font-medium text-[var(--mat-sys-on-surface,#e3e3e3)]">
+        <p className="text-xs font-medium text-white/90">
           {label}
         </p>
         {action}
@@ -168,7 +168,7 @@ export const DropdownSegmented = React.memo(({ value, onChange, options, classNa
   return (
     <div
       className={cn(
-        "mat-button-toggle-group toggle-group flex items-center gap-1 p-1 bg-[rgba(218,220,224,0.05)] rounded-sm min-w-0 w-full select-none",
+        "toggle-group flex items-center gap-1 p-1 bg-white/5 border border-white/5 rounded-sm min-w-0 w-full select-none",
         className
       )}
       role="radiogroup"
@@ -195,7 +195,7 @@ export const DropdownSegmented = React.memo(({ value, onChange, options, classNa
             disabled={opt.disabled}
             style={itemStyle}
             className={cn(
-              "mat-button-toggle toggle flex-toggle rounded-sm h-8 min-h-[32px] text-[13px] font-medium transition-all flex items-center justify-center relative",
+              "toggle flex-toggle rounded-sm h-8 min-h-[32px] text-[13px] font-medium transition-all flex items-center justify-center relative",
               compact ? "p-1.5 size-12 shrink-0 [&_svg]:size-full" : "flex-row gap-1.5 px-3 py-1 flex-1 min-w-fit",
               visibleCount ? "flex-none" : !compact ? "flex-1 min-w-fit" : "",
               isDragging && "pointer-events-none",
