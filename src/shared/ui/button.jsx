@@ -29,22 +29,22 @@ import { Slot } from "radix-ui";
 import { cn } from "@/shared/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap font-sans antialiased shadow-none transition-all disabled:pointer-events-none disabled:opacity-50 shrink-0 outline-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap font-sans text-sm font-semibold antialiased shadow-none transition-all disabled:pointer-events-none disabled:opacity-50 shrink-0 outline-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {
         primary:
-          "h-8 px-3.5 rounded-sm font-semibold text-sm bg-white text-black hover:bg-white/90 active:scale-[0.98] border-none",
+          "h-8 px-3.5 rounded-sm bg-white text-black hover:bg-white/90 active:scale-[0.98] border-none",
         secondary:
-          "h-8 px-3.5 rounded-sm font-medium text-sm bg-[var(--mat-sys-surface-container-high,#282a2c)] text-[var(--mat-sys-on-surface,#e3e3e3)] hover:text-white hover:bg-[var(--foreground-state-15)] active:bg-[var(--foreground-state-25)] border-none",
+          "h-8 px-3.5 rounded-sm bg-surface-elevated text-white hover:bg-white/10 active:bg-white/20 border-none",
         outline:
-          "h-8 px-3.5 rounded-sm font-semibold text-sm border border-[var(--mat-sys-outline-variant,#444746)] bg-transparent text-[var(--mat-sys-on-surface,#e3e3e3)] hover:text-white hover:bg-[var(--foreground-state-10)] active:bg-[var(--foreground-state-15)]",
+          "h-8 px-3.5 rounded-sm border border-white/10 bg-transparent text-white hover:bg-white/5 active:bg-white/10",
         ghost:
-          "h-8 px-3.5 rounded-sm font-medium text-sm bg-transparent hover:bg-[var(--foreground-state-10,rgba(218,220,224,0.1))] text-[var(--mat-sys-on-surface,#e3e3e3)] hover:text-white border-none",
+          "h-8 px-3.5 rounded-sm bg-transparent text-white/90 hover:bg-white/10 hover:text-white border-none",
         danger:
-          "h-8 px-3.5 rounded-sm font-medium text-sm bg-transparent text-[var(--foreground-color-danger,#fe6e6e)] hover:text-[var(--foreground-color-danger)] hover:bg-[var(--foreground-state-10)] active:bg-[var(--foreground-state-25)] border-none [&_svg]:text-[var(--foreground-color-danger)] [&_mat-icon]:text-[var(--foreground-color-danger)] [&_.google-symbols]:text-[var(--foreground-color-danger)]",
+          "h-8 px-3.5 rounded-sm bg-transparent text-danger hover:text-danger hover:bg-danger/10 active:bg-danger/20 border-none",
         link:
-          "p-0 h-auto bg-transparent text-[var(--mat-sys-link,#a8c7fa)] underline-offset-4 hover:underline font-medium text-sm cursor-pointer border-none",
+          "p-0 h-auto bg-transparent text-accent-blue underline-offset-4 hover:underline font-medium cursor-pointer border-none",
       },
     },
     defaultVariants: {

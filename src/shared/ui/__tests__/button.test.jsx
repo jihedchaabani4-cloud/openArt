@@ -50,8 +50,8 @@ describe("Button Primitive — 6 Core Semantic Variants Architecture", () => {
     it("renders secondary variant (surface container high)", () => {
       render(<Button variant="secondary">Cancel</Button>);
       const btn = screen.getByRole("button", { name: "Cancel" });
-      expect(btn.className).toContain("bg-[var(--mat-sys-surface-container-high,#282a2c)]");
-      expect(btn.className).toContain("text-[var(--mat-sys-on-surface,#e3e3e3)]");
+      expect(btn.className).toContain("bg-surface-elevated");
+      expect(btn.className).toContain("text-white");
       expect(btn.className).toContain("h-8");
       expect(btn.getAttribute("data-variant")).toBe("secondary");
     });
@@ -60,6 +60,7 @@ describe("Button Primitive — 6 Core Semantic Variants Architecture", () => {
       render(<Button variant="outline">Reset</Button>);
       const btn = screen.getByRole("button", { name: "Reset" });
       expect(btn.className).toContain("border");
+      expect(btn.className).toContain("border-white/10");
       expect(btn.className).toContain("bg-transparent");
       expect(btn.className).toContain("h-8");
       expect(btn.getAttribute("data-variant")).toBe("outline");
@@ -69,7 +70,7 @@ describe("Button Primitive — 6 Core Semantic Variants Architecture", () => {
       render(<Button variant="ghost">Dismiss</Button>);
       const btn = screen.getByRole("button", { name: "Dismiss" });
       expect(btn.className).toContain("bg-transparent");
-      expect(btn.className).toContain("text-[var(--mat-sys-on-surface,#e3e3e3)]");
+      expect(btn.className).toContain("text-white/90");
       expect(btn.className).toContain("h-8");
       expect(btn.getAttribute("data-variant")).toBe("ghost");
     });
@@ -77,7 +78,7 @@ describe("Button Primitive — 6 Core Semantic Variants Architecture", () => {
     it("renders danger variant (semantic danger tokens)", () => {
       render(<Button variant="danger">Delete Workflow</Button>);
       const btn = screen.getByRole("button", { name: "Delete Workflow" });
-      expect(btn.className).toContain("text-[var(--foreground-color-danger,#fe6e6e)]");
+      expect(btn.className).toContain("text-danger");
       expect(btn.className).toContain("bg-transparent");
       expect(btn.className).toContain("h-8");
       expect(btn.getAttribute("data-variant")).toBe("danger");
@@ -86,7 +87,7 @@ describe("Button Primitive — 6 Core Semantic Variants Architecture", () => {
     it("renders link variant (underlined text link)", () => {
       render(<Button variant="link">Learn More</Button>);
       const btn = screen.getByRole("button", { name: "Learn More" });
-      expect(btn.className).toContain("text-[var(--mat-sys-link,#a8c7fa)]");
+      expect(btn.className).toContain("text-accent-blue");
       expect(btn.className).toContain("hover:underline");
       expect(btn.className).toContain("p-0");
       expect(btn.className).toContain("h-auto");
