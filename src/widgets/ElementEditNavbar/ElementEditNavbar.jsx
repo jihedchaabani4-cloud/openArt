@@ -49,8 +49,8 @@ export function ElementEditNavbar({
                 <Button
                   type="button"
                   variant="ghost"
+                  className="size-8 p-0"
                   data-testid="import-dropdown-trigger"
-                  className="h-8 w-8 p-0 text-white hover:text-white hover:bg-white/10 bg-transparent cursor-pointer transition-colors outline-none flex items-center justify-center"
                   title="Ajouter des images"
                   aria-label="Ajouter des images"
                 >
@@ -84,9 +84,9 @@ export function ElementEditNavbar({
             <Button
               type="button"
               variant="ghost"
+                  className="size-8 p-0"
               data-testid="like-element-button"
               onClick={onToggleLike}
-              className="h-8 w-8 p-0 cursor-pointer transition-colors outline-none flex items-center justify-center bg-transparent hover:bg-white/10 text-white hover:text-white"
               title={isLiked ? "Retirer des favoris" : "Ajouter aux favoris"}
               aria-label={isLiked ? "Retirer des favoris" : "Ajouter aux favoris"}
             >

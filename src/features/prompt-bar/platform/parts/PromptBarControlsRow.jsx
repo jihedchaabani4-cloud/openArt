@@ -42,12 +42,12 @@ export function PromptBarControlsRow({
           <Button
             ref={tuneButtonRef}
             type="button"
-            variant="blur"
+            variant="ghost"
             aria-label="Déclencheur des paramètres"
             title="Paramètres de génération et modèles"
             onClick={onToggleDrawer}
             className={cn(
-              "settings-trigger-button h-8 px-2.5 flex items-center gap-1.5 transition-all cursor-pointer select-none text-[12px] font-medium text-white",
+              "settings-trigger-button h-8 px-2.5 bg-white/5 flex items-center gap-1.5 transition-all cursor-pointer select-none text-[12px] font-medium text-white",
               drawerOpen
                 ? "bg-white/15 border border-white/20 shadow-none text-white"
                 : "border-transparent text-white hover:text-white"
@@ -82,13 +82,13 @@ export function PromptBarControlsRow({
 
         <Button
           type="button"
-          variant="flow-generate"
+          variant="primary"
           aria-label="Generate"
           title={estimatedCredits > 0 ? `Generate (${estimatedCredits} cr)` : "Generate"}
           onClick={handleGenerate}
           disabled={isGenerateDisabled}
           className={cn(
-            "size-8 min-w-8 p-0 rounded-full flex items-center justify-center transition-all shrink-0",
+            "size-8 p-0 rounded-full shrink-0 border-none",
             isGenerateDisabled
               ? "bg-white/10 text-white/30 cursor-not-allowed"
               : "bg-white text-black hover:bg-white/90 active:scale-95 shadow-none"

@@ -42,9 +42,9 @@ export function HowToDrawer({ isOpen, onClose }) {
               <Button
                 type="button"
                 variant="ghost"
-                size="icon"
+                className="size-9 p-0 rounded-full hover:bg-white/10 text-white"
                 onClick={onClose}
-                className="p-2 text-white/50 hover:text-white rounded-full hover:bg-white/10 transition-colors cursor-pointer"
+                aria-label="Close"
               >
                 <X className="w-5 h-5" />
               </Button>
@@ -98,9 +98,8 @@ export function HowToDrawer({ isOpen, onClose }) {
             <Button
               type="button"
               variant="secondary"
-              size="lg"
               onClick={onClose}
-              className="w-full"
+              className="w-full h-10 px-6 text-sm"
             >
               Got it
             </Button>

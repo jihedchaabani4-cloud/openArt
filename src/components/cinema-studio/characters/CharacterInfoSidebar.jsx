@@ -82,9 +82,10 @@ export function CharacterInfoSidebar({
                 <Button
                   type="button"
                   variant="ghost"
-                  size="icon-xs"
+                  className="size-6 p-0 [&_svg]:size-3.5"
                   onClick={onCopyPrompt}
-                  className="text-white/40 hover:text-white"
+                  title="Copy prompt"
+                  aria-label="Copy prompt"
                 >
                   {promptCopied ? (
                     <Check className="size-3.5 text-emerald-400" />

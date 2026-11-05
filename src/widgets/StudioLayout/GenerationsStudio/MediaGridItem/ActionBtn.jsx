@@ -1,13 +1,15 @@
 import React from "react";
-import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/button";
+import { cn } from "@/shared/lib/utils";
 
 export const ActionBtn = React.forwardRef(({ onClick, children, className, ...props }, ref) => (
   <Button
     ref={ref}
-    variant="groupBtn"
-    size="icon"
-    className={cn("h-7 w-7 transition-all text-[#303031] hover:bg-white/90 rounded-full border-0 border-none shadow-none", className)}
+    variant="ghost"
+    className={cn(
+      "size-7 p-0 rounded-full text-neutral-800 bg-transparent hover:bg-white/90 border-none flex items-center justify-center",
+      className
+    )}
     onClick={onClick}
     {...props}
   >

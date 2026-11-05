@@ -160,9 +160,9 @@ export function ElementsEmptyState({ onCreateElement, className = "" }) {
       {/* ── Proportional Direct Call to Action Button ── */}
       <Button
         type="button"
-        variant="studio-white"
+        variant="primary"
+        className="rounded-full px-4"
         onClick={onCreateElement}
-        className="rounded-full px-5 py-2 h-9 text-sm font-semibold flex items-center gap-2 border-none shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
       >
         <GoogleIcon
           iconName="add"

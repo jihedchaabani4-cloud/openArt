@@ -50,7 +50,6 @@ export const MediaChip = React.memo(
           <Button
             type="button"
             variant="ghost"
-            size="icon-xs"
             onClick={(e) => {
               e.stopPropagation();
               onRemove(item, e);

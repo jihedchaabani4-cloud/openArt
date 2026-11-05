@@ -455,7 +455,7 @@ const WorkflowMediaGridItem = React.memo(function WorkflowMediaGridItem({
                   "transition-opacity duration-200 pointer-events-auto",
                   isDropdownOpen ? "opacity-100" : "opacity-0 group-hover:opacity-100"
                 )}>
-                  <ButtonGroup className="bg-white/60 backdrop-blur-md rounded-full border-0 border-none">
+                  <ButtonGroup variant="pill">
                     <StudioItemDropdownMenu
                       open={isDropdownOpen}
                       onOpenChange={setIsDropdownOpen}
@@ -469,7 +469,7 @@ const WorkflowMediaGridItem = React.memo(function WorkflowMediaGridItem({
                   "transition-opacity duration-200 pointer-events-auto",
                   isDropdownOpen ? "opacity-100" : "opacity-0 group-hover:opacity-100"
                 )}>
-                  <ButtonGroup className="bg-white/60 backdrop-blur-md rounded-full border-0 border-none">
+                  <ButtonGroup variant="pill">
                     <ActionBtn onClick={(e) => { e.stopPropagation(); handleLike(); }}>
                       <GoogleIcon 
                         iconName="favorite" 
@@ -1029,7 +1029,7 @@ const CollectionMediaGridItem = React.memo(function CollectionMediaGridItem({
             )}
             onClick={(e) => e.stopPropagation()}
           >
-            <ButtonGroup className="bg-white/60 backdrop-blur-md rounded-full border-0 border-none">
+            <ButtonGroup variant="pill">
               <ActionBtn
                 onClick={handleToggleLike}
                 title={isLiked ? "Unlike collection" : "Like collection"}

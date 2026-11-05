@@ -38,7 +38,6 @@ function CardItem({ label, image, isSelected, onClick }) {
     <Button
       type="button"
       variant="ghost"
-      size="tile"
       onClick={onClick}
       className={cn(
         "group relative flex flex-col gap-2 transition-all duration-300 p-0 h-auto items-start text-left"

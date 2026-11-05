@@ -797,7 +797,7 @@ export function ImportMediaPopover({
               {(allowsImages || allowsVideos) && (
                 <div className="mt-auto pt-1">
                   <Button
-                    variant="nav-tab"
+                    variant="ghost"
                     disabled={isUploading}
                     onClick={() => fileInputRef.current?.click()}
                     className="w-full justify-start h-8 text-xs gap-2.5 cursor-pointer px-2.5 flex items-center"
@@ -842,7 +842,6 @@ export function ImportMediaPopover({
                 <Button
                   type="button"
                   variant="ghost"
-                  size="icon-sm"
                   onClick={() => setLayoutMode("grid")}
                   className={cn(
                     "w-8 h-8 rounded-sm transition-all cursor-pointer border-none outline-none p-0",
@@ -858,7 +857,6 @@ export function ImportMediaPopover({
                 <Button
                   type="button"
                   variant="ghost"
-                  size="icon-sm"
                   onClick={() => setLayoutMode("list")}
                   className={cn(
                     "w-8 h-8 rounded-sm transition-all cursor-pointer border-none outline-none p-0",

@@ -37,7 +37,6 @@ export function NavbarRestoreAllButton() {
     <Button
       type="button"
       variant="outline"
-      size="sm"
       onClick={handleRestoreAll}
       disabled={isPending || !hasTrashed}
       className="flex items-center gap-1.5 cursor-pointer"

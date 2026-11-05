@@ -46,12 +46,11 @@ export function KeyboardShortcutsHelp({ className }) {
         <Button
           type="button"
           variant={open ? "secondary" : "ghost"}
-          size="icon-sm"
           onClick={(e) => {
             e.stopPropagation();
             setOpen((prev) => !prev);
           }}
-          className={cn("font-mono text-sm shrink-0", className)}
+          className={cn("size-8 p-0 font-mono text-sm shrink-0", className)}
           aria-label="Keyboard Shortcuts"
           title="Keyboard Shortcuts"
         >

@@ -25,10 +25,10 @@ describe("Theme Background Tokens - Pure Black (#000000)", () => {
     expect(railContent).toMatch(/bg-black/);
   });
 
-  it("enforces 12px for button container shape and button border radius in globals.css", () => {
+  it("enforces canonical 4px sharp radius for button container shape and button border radius in globals.css", () => {
     const cssContent = fs.readFileSync(globalsCssPath, "utf-8");
 
-    expect(cssContent).toMatch(/--mat-button-filled-container-shape:\s*12px;/);
-    expect(cssContent).toMatch(/--button-border-radius:\s*(12px|var\(--mat-button-filled-container-shape,\s*12px\));/);
+    expect(cssContent).toMatch(/--mat-button-filled-container-shape:\s*var\(--radius-sm,\s*4px\);/);
+    expect(cssContent).toMatch(/--button-border-radius:\s*var\(--radius-sm,\s*4px\);/);
   });
 });

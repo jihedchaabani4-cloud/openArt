@@ -16,8 +16,7 @@ export function NewElementCardKrea({ onClick, label = "New element" }) {
           <Button
             type="button"
             variant="primary"
-            size="icon"
-            className="rounded-full"
+            className="size-8 p-0 rounded-full"
             aria-label={label}
           >
             <Plus className="size-4 stroke-[2.2]" />

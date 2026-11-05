@@ -216,9 +216,9 @@ export function EditNavbar({
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button
-                                    variant="studio-ghost"
-                                    size="icon-xs"
-                                    className="size-7 transition-all shrink-0 border-0 border-transparent text-white/70 hover:text-white"
+                                    variant="ghost"
+                                    className="size-6 p-0 shrink-0"
+                                    aria-label="More options"
                                 >
                                     <GoogleIcon iconName="more_vert" className="text-[16px]" />
                                 </Button>

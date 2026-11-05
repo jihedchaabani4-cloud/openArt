@@ -108,7 +108,6 @@ export function ModelSlider() {
             <Button
               type="button"
               variant="ghost"
-              size="icon"
               onClick={() => setActiveSlide((prev) => (prev - 1 + levelSlides.length) % levelSlides.length)}
               className="w-12 h-12 rounded-full border border-white/10 bg-black/40 backdrop-blur-md flex items-center justify-center text-white hover:bg-white hover:text-black transition-all duration-300 active:scale-95 shadow-none p-0"
               aria-label="Previous slide"
@@ -121,7 +120,6 @@ export function ModelSlider() {
             <Button
               type="button"
               variant="ghost"
-              size="icon"
               onClick={() => setActiveSlide((prev) => (prev + 1) % levelSlides.length)}
               className="w-12 h-12 rounded-full border border-white/10 bg-black/40 backdrop-blur-md flex items-center justify-center text-white hover:bg-white hover:text-black transition-all duration-300 active:scale-95 shadow-none p-0"
               aria-label="Next slide"

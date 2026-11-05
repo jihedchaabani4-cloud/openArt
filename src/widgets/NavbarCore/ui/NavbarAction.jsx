@@ -4,6 +4,7 @@ import * as React from "react";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
+import { cn } from "@/shared/lib/utils";
 
 /**
  * NavbarAction
@@ -61,14 +62,21 @@ export function NavbarAction({
     return null;
   }, [icon, loading, variant, size]);
 
+  const isIcon = size === "icon";
+  const coreVariant = variant === "white" || variant === "neon" ? "primary" : variant;
+
   return (
     <Button
       type="button"
-      variant={variant}
-      size={size === "icon" ? "icon" : "default"}
+      variant={coreVariant}
+      data-variant={variant}
       disabled={disabled || loading}
       onClick={onClick}
-      className={className}
+      className={cn(
+        isIcon && "size-9 p-0",
+        variant === "neon" && "bg-brand-neon text-black hover:opacity-80 active:opacity-60",
+        className
+      )}
       {...rest}
     >
       {renderedIcon}

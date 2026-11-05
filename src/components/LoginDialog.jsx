@@ -45,13 +45,9 @@ function AuthButton({ icon, children, onClick, inverted = false, isLoading = fal
     <Button
       type="button"
       variant={inverted ? "primary" : "secondary"}
-      size="lg"
       onClick={onClick}
       disabled={isLoading}
-      className={cn(
-        "w-full rounded-full gap-2 text-[15px]",
-        !inverted && "bg-zinc-800 hover:bg-zinc-700 text-white"
-      )}
+      className="h-10 w-full rounded-full gap-2 text-sm"
     >
       {isLoading ? (
         <Loader2 className="size-5 animate-spin" />
@@ -239,9 +235,8 @@ export function LoginDialog({ open, onClose }) {
         <Button
           type="button"
           variant="ghost"
-          size="icon"
           onClick={onClose}
-          className="absolute right-3 top-3 z-20 rounded-full"
+          className="absolute right-3 top-3 z-20 size-9 p-0 rounded-full hover:bg-white/10 text-white"
           aria-label="Close login dialog"
         >
           <X className="size-5" />

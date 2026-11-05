@@ -89,8 +89,7 @@ export function UserDropdown({ className }) {
         <DropdownMenuTrigger asChild>
         <Button
           type="button"
-          variant="user-avatar"
-          size="avatar"
+          variant="ghost"
           className={cn("size-9 min-w-9 min-h-9 p-0", className)}
           aria-label="Open user menu"
         >
@@ -142,7 +141,7 @@ export function UserDropdown({ className }) {
           </div>
           <Button 
             type="button"
-            variant="white"
+            variant="primary"
             onClick={(e) => {
               e.preventDefault();
               setDropdownOpen(false);

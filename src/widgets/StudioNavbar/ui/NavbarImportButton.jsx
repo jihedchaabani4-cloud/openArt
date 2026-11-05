@@ -89,8 +89,8 @@ export function NavbarImportButton() {
         <DropdownMenuTrigger asChild>
           <Button
             disabled={isUploading || isCreatingFolder || !projectId}
-            variant="studio-ghost"
-            size="icon"
+            variant="ghost"
+            className="size-9 p-0"
             title={projectId ? "Add or Upload" : "Project is still loading"}
           >
             {isUploading || isCreatingFolder ? (

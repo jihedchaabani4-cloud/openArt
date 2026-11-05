@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeAll } from "vitest";
 import { render, screen } from "@testing-library/react";
 import * as React from "react";
 import { Checkbox } from "@/shared/ui/checkbox";
@@ -9,6 +9,21 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/shared/ui/tabs";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/shared/ui/card";
 import { Badge } from "@/shared/ui/badge";
 import { Skeleton } from "@/shared/ui/skeleton";
+import { Slider } from "@/shared/ui/slider";
+import { Switch } from "@/shared/ui/switch";
+import { Dialog, DialogTrigger, DialogContent, DialogTitle, DialogDescription } from "@/shared/ui/dialog";
+import { Input } from "@/shared/ui/input";
+import { Select, SelectTrigger, SelectValue } from "@/shared/ui/select";
+
+beforeAll(() => {
+  if (typeof global.ResizeObserver === "undefined") {
+    global.ResizeObserver = class ResizeObserver {
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+    };
+  }
+});
 
 describe("Canonical Design System Primitives Suite", () => {
   describe("1. Checkbox Primitive", () => {
@@ -171,6 +186,95 @@ describe("Canonical Design System Primitives Suite", () => {
       const skeleton = screen.getByTestId("test-skeleton");
       expect(skeleton.className).toContain("animate-shimmer");
       expect(skeleton.className).toContain("rounded-lg");
+    });
+  });
+
+  describe("9. Slider Primitive", () => {
+    it("renders slider root with rounded-full track and thumb", () => {
+      const { container } = render(<Slider defaultValue={[50]} />);
+      const thumb = container.querySelector('[data-slot="slider-thumb"]');
+      expect(thumb).not.toBeNull();
+      expect(thumb?.className).toContain("rounded-full");
+    });
+
+    it("supports variant='bar' and size='sm'", () => {
+      const { container } = render(<Slider variant="bar" size="sm" defaultValue={[20]} />);
+      const root = container.querySelector('[data-slot="slider"]');
+      expect(root).not.toBeNull();
+      expect(root?.getAttribute("data-variant")).toBe("bar");
+      expect(root?.getAttribute("data-size")).toBe("sm");
+    });
+  });
+
+  describe("10. Switch Primitive", () => {
+    it("renders switch with role='switch' and rounded-full track", () => {
+      render(<Switch aria-label="Airplane Mode" />);
+      const toggle = screen.getByRole("switch", { name: "Airplane Mode" });
+      expect(toggle).toBeDefined();
+      expect(toggle.className).toContain("rounded-full");
+      expect(toggle.getAttribute("data-slot")).toBe("switch");
+    });
+
+    it("supports size='sm' and variant='neon'", () => {
+      render(<Switch aria-label="Neon Toggle" variant="neon" size="sm" defaultChecked />);
+      const toggle = screen.getByRole("switch", { name: "Neon Toggle" });
+      expect(toggle.className).toContain("h-5");
+      expect(toggle.getAttribute("data-variant")).toBe("neon");
+      expect(toggle.getAttribute("data-state")).toBe("checked");
+    });
+  });
+
+  describe("11. Dialog Primitive", () => {
+    it("renders dialog content with canonical rounded-2xl token", () => {
+      render(
+        <Dialog open={true}>
+          <DialogContent>
+            <DialogTitle>Modal Heading</DialogTitle>
+            <DialogDescription>Modal body description</DialogDescription>
+            <p>Modal body copy</p>
+          </DialogContent>
+        </Dialog>
+      );
+      const title = screen.getByText("Modal Heading");
+      expect(title).toBeDefined();
+      const content = screen.getByText("Modal Heading").closest('[data-slot="dialog-content"]');
+      expect(content).not.toBeNull();
+      expect(content?.className).toContain("rounded-2xl");
+      expect(content?.className).toContain("shadow-none");
+    });
+  });
+
+  describe("12. Input Primitive", () => {
+    it("renders standard input with sharp 4px radius", () => {
+      render(<Input placeholder="Enter prompt..." />);
+      const input = screen.getByPlaceholderText("Enter prompt...");
+      expect(input).toBeDefined();
+      expect(input.className).toContain("rounded-sm");
+    });
+
+    it("renders search variant container with icon support", () => {
+      const { container } = render(
+        <Input variant="search" placeholder="Search prompts..." googleIcon="search" />
+      );
+      const wrapper = container.querySelector('.rounded-sm');
+      expect(wrapper).not.toBeNull();
+      expect(screen.getByPlaceholderText("Search prompts...")).toBeDefined();
+    });
+  });
+
+  describe("13. Select Primitive", () => {
+    it("renders select trigger with sharp 4px radius", () => {
+      render(
+        <Select defaultValue="opt1">
+          <SelectTrigger aria-label="Options">
+            <SelectValue placeholder="Choose option" />
+          </SelectTrigger>
+        </Select>
+      );
+      const trigger = screen.getByRole("combobox", { name: "Options" });
+      expect(trigger).toBeDefined();
+      expect(trigger.className).toContain("rounded-sm");
+      expect(trigger.getAttribute("data-slot")).toBe("select-trigger");
     });
   });
 });

@@ -191,7 +191,6 @@ const Input = React.forwardRef(({
             <Button
               type="button"
               variant="ghost"
-              size="icon"
               onClick={onClear}
               className={cn(
                 "p-1 size-7 rounded-md text-white/60 hover:text-white transition-colors shrink-0 ml-1 cursor-pointer",
@@ -211,7 +210,6 @@ const Input = React.forwardRef(({
             <Button
               type="button"
               variant="ghost"
-              size="icon"
               onClick={handleEditClick}
               className="flex items-center justify-center size-7 p-1.5 rounded-md text-white/60 hover:text-white hover:bg-white/10 transition-colors shrink-0 ml-2 cursor-pointer"
               aria-label="Edit"

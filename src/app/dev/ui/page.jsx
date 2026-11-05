@@ -72,7 +72,6 @@ export default function DesignSystemShowcasePage() {
           </div>
           <Button
             variant={activeSection === "tokens" ? "secondary" : "ghost"}
-            size="sm"
             onClick={() => setActiveSection("tokens")}
             className="w-full justify-start gap-2"
           >
@@ -81,7 +80,6 @@ export default function DesignSystemShowcasePage() {
           </Button>
           <Button
             variant={activeSection === "buttons" ? "secondary" : "ghost"}
-            size="sm"
             onClick={() => setActiveSection("buttons")}
             className="w-full justify-start gap-2"
           >
@@ -90,7 +88,6 @@ export default function DesignSystemShowcasePage() {
           </Button>
           <Button
             variant={activeSection === "forms" ? "secondary" : "ghost"}
-            size="sm"
             onClick={() => setActiveSection("forms")}
             className="w-full justify-start gap-2"
           >
@@ -99,7 +96,6 @@ export default function DesignSystemShowcasePage() {
           </Button>
           <Button
             variant={activeSection === "overlays" ? "secondary" : "ghost"}
-            size="sm"
             onClick={() => setActiveSection("overlays")}
             className="w-full justify-start gap-2"
           >
@@ -108,7 +104,6 @@ export default function DesignSystemShowcasePage() {
           </Button>
           <Button
             variant={activeSection === "navigation" ? "secondary" : "ghost"}
-            size="sm"
             onClick={() => setActiveSection("navigation")}
             className="w-full justify-start gap-2"
           >
@@ -117,7 +112,6 @@ export default function DesignSystemShowcasePage() {
           </Button>
           <Button
             variant={activeSection === "cards" ? "secondary" : "ghost"}
-            size="sm"
             onClick={() => setActiveSection("cards")}
             className="w-full justify-start gap-2"
           >
@@ -126,7 +120,6 @@ export default function DesignSystemShowcasePage() {
           </Button>
           <Button
             variant={activeSection === "feedback" ? "secondary" : "ghost"}
-            size="sm"
             onClick={() => setActiveSection("feedback")}
             className="w-full justify-start gap-2"
           >
@@ -227,8 +220,8 @@ export default function DesignSystemShowcasePage() {
                 </div>
                 <Button
                   variant="outline"
-                  size="xs"
-                  onClick={() => copySnippet("btn", '<Button variant="white" size="default">Generate</Button>')}
+                  className="h-6 px-2 text-xs"
+                  onClick={() => copySnippet("btn", '<Button variant="primary">Generate</Button>')}
                 >
                   <GoogleIcon iconName="content_copy" className="text-xs" />
                   <span>{copiedSnippet === "btn" ? "Copied!" : "Copy JSX"}</span>
@@ -239,15 +232,15 @@ export default function DesignSystemShowcasePage() {
               <div className="flex flex-col gap-3">
                 <h3 className="text-sm font-semibold text-white/90">Canonical Variants</h3>
                 <div className="flex flex-wrap items-center gap-3">
-                  <Button variant="white">Primary White</Button>
+                  <Button variant="primary">Primary White</Button>
                   <Button variant="secondary">Secondary Surface</Button>
                   <Button variant="outline">Outline Ghost</Button>
                   <Button variant="ghost">Subtle Ghost</Button>
                   <Button variant="danger">Danger Ghost</Button>
-                  <Button variant="destructive-filled">Destructive Filled</Button>
-                  <Button variant="neon">Cinema Neon</Button>
-                  <Button variant="pill">Resting Pill</Button>
-                  <Button variant="pill-active">Active Pill</Button>
+                  <Button variant="danger" className="bg-red-900 text-red-100 hover:bg-red-800 border border-red-500/20">Destructive Filled</Button>
+                  <Button variant="primary" className="h-10 px-5 bg-brand-neon text-black text-sm font-semibold hover:opacity-80">Cinema Neon</Button>
+                  <Button variant="ghost" className="rounded-full px-4 bg-white/10 hover:bg-white/15 text-white/60 hover:text-white">Resting Pill</Button>
+                  <Button variant="primary" className="rounded-full px-4">Active Pill</Button>
                 </div>
               </div>
 
@@ -255,17 +248,17 @@ export default function DesignSystemShowcasePage() {
               <div className="flex flex-col gap-3">
                 <h3 className="text-sm font-semibold text-white/90">Canonical Sizes</h3>
                 <div className="flex flex-wrap items-center gap-3">
-                  <Button variant="secondary" size="lg">Large (h-10)</Button>
-                  <Button variant="secondary" size="default">Default (h-8)</Button>
-                  <Button variant="secondary" size="sm">Small (h-8)</Button>
-                  <Button variant="secondary" size="xs">Micro (h-6)</Button>
-                  <Button variant="secondary" size="icon" aria-label="Icon">
+                  <Button variant="secondary" className="h-10 px-6 text-sm">Large (h-10)</Button>
+                  <Button variant="secondary">Default (h-8)</Button>
+                  <Button variant="secondary">Small (h-8)</Button>
+                  <Button variant="secondary" className="h-6 px-2 text-xs">Micro (h-6)</Button>
+                  <Button variant="secondary" className="size-9 p-0" aria-label="Icon">
                     <GoogleIcon iconName="settings" />
                   </Button>
-                  <Button variant="secondary" size="icon-sm" aria-label="Small Icon">
+                  <Button variant="secondary" className="size-8 p-0" aria-label="Small Icon">
                     <GoogleIcon iconName="edit" />
                   </Button>
-                  <Button variant="secondary" size="icon-xs" aria-label="Micro Icon">
+                  <Button variant="secondary" className="size-6 p-0 [&_svg]:size-3" aria-label="Micro Icon">
                     <GoogleIcon iconName="close" />
                   </Button>
                 </div>
@@ -275,13 +268,16 @@ export default function DesignSystemShowcasePage() {
               <div className="flex flex-col gap-3">
                 <h3 className="text-sm font-semibold text-white/90">Segmented ButtonGroup</h3>
                 <ButtonGroup>
-                  <Button variant="ghost" size="icon-sm" aria-label="Thumb Up">
+                  <Button variant="ghost"
+                    className="size-8 p-0" aria-label="Thumb Up">
                     <GoogleIcon iconName="thumb_up" />
                   </Button>
-                  <Button variant="ghost" size="icon-sm" aria-label="Share">
+                  <Button variant="ghost"
+                    className="size-8 p-0" aria-label="Share">
                     <GoogleIcon iconName="share" />
                   </Button>
-                  <Button variant="ghost" size="icon-sm" aria-label="More">
+                  <Button variant="ghost"
+                    className="size-8 p-0" aria-label="More">
                     <GoogleIcon iconName="more_vert" />
                   </Button>
                 </ButtonGroup>
@@ -374,7 +370,7 @@ export default function DesignSystemShowcasePage() {
                 {/* Dialog */}
                 <Dialog>
                   <DialogTrigger asChild>
-                    <Button variant="white">Open Glass Dialog</Button>
+                    <Button variant="primary">Open Glass Dialog</Button>
                   </DialogTrigger>
                   <DialogContent variant="glass">
                     <DialogHeader>
@@ -387,7 +383,7 @@ export default function DesignSystemShowcasePage() {
                       <DialogClose asChild>
                         <Button variant="outline">Cancel</Button>
                       </DialogClose>
-                      <Button variant="white">Confirm</Button>
+                      <Button variant="primary">Confirm</Button>
                     </DialogFooter>
                   </DialogContent>
                 </Dialog>
@@ -423,7 +419,7 @@ export default function DesignSystemShowcasePage() {
                     <div className="flex flex-col gap-2">
                       <span className="text-xs font-semibold">Filter Generations</span>
                       <p className="text-xs text-muted-foreground">Adjust display settings.</p>
-                      <Button variant="white" size="xs" className="mt-2">Apply</Button>
+                      <Button variant="primary" className="h-6 px-2 text-xs mt-2">Apply</Button>
                     </div>
                   </PopoverContent>
                 </Popover>
@@ -431,7 +427,7 @@ export default function DesignSystemShowcasePage() {
                 {/* Tooltip */}
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button variant="ghost" size="icon" aria-label="Help">
+                    <Button variant="ghost" className="size-9 p-0" aria-label="Help">
                       <GoogleIcon iconName="help" />
                     </Button>
                   </TooltipTrigger>
@@ -518,7 +514,7 @@ export default function DesignSystemShowcasePage() {
                     <p className="text-xs text-muted-foreground">Content inside standard card.</p>
                   </CardContent>
                   <CardFooter>
-                    <Button variant="secondary" size="xs">Action</Button>
+                    <Button variant="secondary" className="h-6 px-2 text-xs">Action</Button>
                   </CardFooter>
                 </Card>
 
@@ -531,7 +527,7 @@ export default function DesignSystemShowcasePage() {
                     <p className="text-xs text-muted-foreground">Hover to inspect elevation.</p>
                   </CardContent>
                   <CardFooter>
-                    <Button variant="white" size="xs">Open</Button>
+                    <Button variant="primary" className="h-6 px-2 text-xs">Open</Button>
                   </CardFooter>
                 </Card>
 
@@ -544,7 +540,8 @@ export default function DesignSystemShowcasePage() {
                     <p className="text-xs text-muted-foreground">Subtle backdrop blur.</p>
                   </CardContent>
                   <CardFooter>
-                    <Button variant="outline" size="xs">Details</Button>
+                    <Button variant="outline"
+                  className="h-6 px-2 text-xs">Details</Button>
                   </CardFooter>
                 </Card>
               </div>

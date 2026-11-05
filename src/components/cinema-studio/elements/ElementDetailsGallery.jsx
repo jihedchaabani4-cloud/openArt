@@ -67,16 +67,10 @@ export function ElementDetailsGallery({
         <div className="flex items-center justify-end gap-2 w-full shrink-0">
           <Button
             type="button"
-            variant="blur"
-            size="sm"
+            variant="ghost"
+            className="h-8 px-4 rounded-full bg-white/10 hover:bg-white/15 text-white/60 hover:text-white border-none"
             disabled={isFull}
             onClick={() => !isFull && fileInputRef.current?.click()}
-            className={cn(
-              "h-8 px-3.5 rounded-full text-[12px] gap-1.5 font-medium transition-all shadow-sm cursor-pointer",
-              isFull
-                ? "bg-white/5 text-white/30 cursor-not-allowed opacity-50"
-                : "bg-white/10 hover:bg-white/15 text-white"
-            )}
             title="Importer depuis l'ordinateur"
           >
             <GoogleIcon iconName="upload" className="text-[17px]" />
@@ -86,16 +80,10 @@ export function ElementDetailsGallery({
           {onOpenAssets && (
             <Button
               type="button"
-              variant="blur"
-              size="sm"
+              variant="ghost"
+            className="h-8 px-4 rounded-full bg-white/10 hover:bg-white/15 text-white/60 hover:text-white border-none"
               disabled={isFull}
               onClick={!isFull ? onOpenAssets : undefined}
-              className={cn(
-                "h-8 px-3 rounded-full text-[12px] gap-1.5 font-medium transition-all cursor-pointer",
-                isFull
-                  ? "bg-white/5 text-white/20 cursor-not-allowed opacity-50"
-                  : "bg-white/5 hover:bg-white/10 text-white/70"
-              )}
               title="Ajouter à partir du projet"
             >
               <GoogleIcon iconName="add" className="text-[17px]" />
@@ -135,10 +123,9 @@ export function ElementDetailsGallery({
           <div className="flex items-center gap-3">
             <Button
               type="button"
-              variant="studio-white"
-              size="sm"
+              variant="primary"
+              className="rounded-full px-4"
               onClick={() => fileInputRef.current?.click()}
-              className="h-9 px-4 rounded-full text-xs font-medium flex items-center gap-2 cursor-pointer border-none"
             >
               <GoogleIcon iconName="upload" className="text-[16px]" />
               <span>Importer</span>
@@ -148,9 +135,7 @@ export function ElementDetailsGallery({
               <Button
                 type="button"
                 variant="ghost"
-                size="sm"
                 onClick={onOpenAssets}
-                className="h-9 px-4 rounded-full text-xs font-medium flex items-center gap-2 text-white/70 hover:text-white hover:bg-white/10 cursor-pointer"
               >
                 <GoogleIcon iconName="add" className="text-[16px]" />
                 <span>Depuis le projet</span>

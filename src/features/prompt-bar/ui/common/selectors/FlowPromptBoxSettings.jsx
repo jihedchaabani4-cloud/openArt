@@ -73,9 +73,9 @@ export function FlowSelect({
         <Popover.Trigger asChild>
           <Button
             type="button"
-            variant="flow-select-trigger"
+            variant="ghost"
+            className="w-full h-9 px-3 bg-[rgba(218,220,224,0.06)] hover:bg-[rgba(218,220,224,0.12)] active:bg-[rgba(218,220,224,0.2)] text-white flex items-center justify-between transition-all"
             aria-label={ariaLabel || label || displayValue}
-            className="w-full h-8 px-2.5 bg-[rgba(218,220,224,0.05)] hover:bg-[rgba(218,220,224,0.1)] active:bg-[rgba(218,220,224,0.15)] text-white flex items-center justify-between transition-all cursor-pointer outline-none text-[13px] font-sans antialiased"
           >
             <span className="flex items-center gap-1.5 truncate text-white">
               {icon}
@@ -115,7 +115,7 @@ export function FlowSelect({
                   key={String(item.value)}
                   type="button"
                   variant={isSelected ? "secondary" : "ghost"}
-                  className="w-full justify-between h-8 px-2.5 text-xs font-normal"
+                  className="w-full justify-between"
                   onClick={() => {
                     onChange?.(item.value);
                     setOpen(false);
@@ -351,7 +351,7 @@ export function FlowPromptBoxSettings({
                   >
                     <Button
                       type="button"
-                      variant={isChecked ? "flow-toggle-active" : "flow-toggle"}
+                      variant={isChecked ? "secondary" : "ghost"}
                       onClick={() => onModeChange?.(opt.value)}
                       role="radio"
                       aria-checked={isChecked}
@@ -400,7 +400,7 @@ export function FlowPromptBoxSettings({
                   >
                     <Button
                       type="button"
-                      variant={isChecked ? "flow-toggle-active" : "flow-toggle"}
+                      variant={isChecked ? "secondary" : "ghost"}
                       onClick={() => onSubModeChange?.(opt.value)}
                       role="radio"
                       aria-checked={isChecked}
@@ -451,8 +451,7 @@ export function FlowPromptBoxSettings({
                   >
                     <Button
                       type="button"
-                      variant={isChecked ? "flow-ratio-active" : "flow-ratio"}
-                      size="ratio"
+                      variant={isChecked ? "secondary" : "ghost"}
                       onClick={() => handleRatioClick(ratio)}
                       role="radio"
                       aria-checked={isChecked}
@@ -548,7 +547,7 @@ export function FlowPromptBoxSettings({
                           >
                             <Button
                               type="button"
-                              variant={isChecked ? "flow-toggle-active" : "flow-toggle"}
+                              variant={isChecked ? "secondary" : "ghost"}
                               onClick={() => onParamChange?.(key, itemVal)}
                               role="radio"
                               aria-checked={isChecked}
@@ -591,17 +590,17 @@ export function FlowPromptBoxSettings({
                     <div className="flex items-center gap-1 p-1 bg-[rgba(218,220,224,0.05)] rounded-sm">
                       <Button
                         type="button"
-                        variant={!isChecked ? "flow-boolean-active" : "flow-boolean"}
+                        variant={!isChecked ? "secondary" : "ghost"}
+                        className="px-2.5 py-0.5 text-xs font-medium"
                         onClick={() => onParamChange?.(key, false)}
-                        className="text-white hover:text-white"
                       >
                         Off
                       </Button>
                       <Button
                         type="button"
-                        variant={isChecked ? "flow-boolean-active" : "flow-boolean"}
+                        variant={isChecked ? "secondary" : "ghost"}
+                        className="px-2.5 py-0.5 text-xs font-semibold"
                         onClick={() => onParamChange?.(key, true)}
-                        className="text-white hover:text-white"
                       >
                         On
                       </Button>
@@ -710,7 +709,7 @@ export function FlowPromptBoxSettings({
                   >
                     <Button
                       type="button"
-                      variant={isChecked ? "flow-toggle-active" : "flow-toggle"}
+                      variant={isChecked ? "secondary" : "ghost"}
                       onClick={() => handleCountClick(countVal)}
                       role="radio"
                       aria-checked={isChecked}

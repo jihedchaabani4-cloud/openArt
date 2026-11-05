@@ -50,9 +50,9 @@ export function CharacterEditNavbar({
                 <Button
                   type="button"
                   variant="ghost"
+                  className="size-8 p-0"
                   data-testid="import-dropdown-trigger"
                   disabled={isAddDisabled}
-                  className="h-8 w-8 p-0 text-white hover:text-white hover:bg-white/10 bg-transparent cursor-pointer transition-colors outline-none flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed"
                   title={isAddDisabled ? "Maximum 5 images de détail autorisées" : "Ajouter des images"}
                   aria-label={isAddDisabled ? "Maximum 5 images de détail autorisées" : "Ajouter des images"}
                 >
@@ -86,9 +86,9 @@ export function CharacterEditNavbar({
             <Button
               type="button"
               variant="ghost"
+                  className="size-8 p-0"
               data-testid="like-character-button"
               onClick={onToggleLike}
-              className="h-8 w-8 p-0 cursor-pointer transition-colors outline-none flex items-center justify-center bg-transparent hover:bg-white/10 text-white hover:text-white"
               title={isLiked ? "Retirer des favoris" : "Ajouter aux favoris"}
               aria-label={isLiked ? "Retirer des favoris" : "Ajouter aux favoris"}
             >

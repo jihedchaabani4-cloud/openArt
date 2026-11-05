@@ -74,9 +74,9 @@ function VideoControlsBar({
         <Button
           type="button"
           variant="ghost"
-          size="icon-xs"
+          className="size-8 p-0"
           onClick={togglePlay}
-          className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white/10 text-white"
+          aria-label={isPlaying ? "Pause" : "Play"}
         >
           {isPlaying ? <Pause className="size-3.5 fill-white" /> : <Play className="size-3.5 fill-white ml-0.5" />}
         </Button>
@@ -104,9 +104,9 @@ function VideoControlsBar({
         <Button
           type="button"
           variant="ghost"
-          size="icon-xs"
+          className="size-8 p-0"
           onClick={toggleMute}
-          className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white/10 text-white"
+          aria-label={isMuted ? "Unmute" : "Mute"}
         >
           {isMuted ? <VolumeX className="size-3.5 text-white" /> : <Volume2 className="size-3.5 text-white" />}
         </Button>
@@ -115,9 +115,9 @@ function VideoControlsBar({
         <Button
           type="button"
           variant="ghost"
-          size="icon-xs"
+          className="size-8 p-0"
           onClick={toggleFullscreen}
-          className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white/10 text-white"
+          aria-label="Fullscreen"
         >
           <Maximize className="size-3.5 text-white" />
         </Button>

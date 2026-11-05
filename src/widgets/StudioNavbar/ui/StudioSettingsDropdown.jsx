@@ -45,7 +45,7 @@ export function StudioSettingsDropdown(props) {
         <Button
           type="button"
           variant="ghost"
-          size="icon"
+          className="size-9 p-0"
           title="Paramètres d'affichage"
           aria-label="Paramètres de la grille de blocs"
           aria-haspopup="menu"
@@ -78,7 +78,7 @@ export function StudioSettingsDropdown(props) {
                     type="button"
                     role="radio"
                     aria-checked={isChecked}
-                    variant={isChecked ? "flow-toggle-active" : "flow-toggle"}
+                    variant={isChecked ? "secondary" : "ghost"}
                     onClick={() => setGridSize?.(opt.value)}
                     className="mat-button-toggle toggle flex-toggle flex-1 h-8 text-[13px] font-medium"
                   >

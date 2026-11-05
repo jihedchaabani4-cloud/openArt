@@ -401,9 +401,8 @@ export default function TestMentionPage() {
             <Button
               type="button"
               variant="secondary"
-              size="xs"
+              className="h-6 px-2 text-xs"
               onClick={handleAddSample}
-              className="text-[11px] bg-white/10 hover:bg-white/20 text-white rounded-xl gap-1"
             >
               <GoogleIcon iconName="add" className="text-[14px]" />
               Add Sample
@@ -411,9 +410,8 @@ export default function TestMentionPage() {
             <Button
               type="button"
               variant="ghost"
-              size="xs"
+              className="h-6 px-2 text-xs"
               onClick={handleResetReferences}
-              className="text-[11px] text-white/50 hover:text-white rounded-xl"
             >
               Reset Pool
             </Button>
@@ -497,8 +495,8 @@ export default function TestMentionPage() {
                   </div>
                   <Button
                     type="button"
-                    size="xs"
-                    className="rounded-xl bg-white text-black font-semibold text-[11px] px-3 hover:bg-white/90"
+                    variant="primary"
+                    className="h-6 px-2 text-xs"
                     onClick={() => alert(`Submitted V1 prompt: ${v1RawOutput}`)}
                   >
                     Generate

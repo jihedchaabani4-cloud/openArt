@@ -151,7 +151,7 @@ export function LeftNavigationRail() {
           type="button"
           variant="ghost"
           onClick={handleToggleExpand}
-          className="w-full h-[42px] justify-start p-0 overflow-hidden"
+          className="w-full h-[42px] justify-start overflow-hidden"
           title={isExpanded ? "Réduire la barre" : "Développer la barre"}
           aria-label={isExpanded ? "Réduire la barre" : "Développer la barre"}
         >

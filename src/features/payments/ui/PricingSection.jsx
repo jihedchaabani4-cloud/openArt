@@ -175,7 +175,6 @@ function CompareCategorySection({ title, items, packages, initialVisibleCount = 
                     <Button
                         type="button"
                         variant="ghost"
-                        size="sm"
                         onClick={() => setIsExpanded((current) => !current)}
                         className="h-auto p-0 text-sm font-medium hover:bg-transparent hover:text-white"
                         style={{ color: TEXT_MUTED }}

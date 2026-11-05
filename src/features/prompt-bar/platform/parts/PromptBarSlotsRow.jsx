@@ -98,11 +98,10 @@ export function PromptBarSlotsRow({
                 <Button
                   type="button"
                   variant="ghost"
-                  size="icon-sm"
                   onClick={handleSwapFrames}
                   disabled={!swapEnabled}
                   className={cn(
-                    "p-1.5 rounded-sm transition-colors",
+                    "size-8 p-0 rounded-sm transition-colors",
                     swapEnabled
                       ? "text-white/50 hover:text-white"
                       : "text-white/15"

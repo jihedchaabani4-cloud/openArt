@@ -205,11 +205,10 @@ export function MediaInput({
           <span className="text-xs text-red-400 font-medium leading-none mb-1 scale-75">Failed</span>
           <Button
             type="button"
-            variant="ghost"
-            size="icon-xs"
+            variant="secondary"
+            className="h-6 px-2 text-xs [&_svg]:size-2.5"
             data-testid="media-input-retry-btn"
             onClick={handleRetry}
-            className="h-5 px-1.5 text-xs text-white bg-white/20 hover:bg-white/30 rounded-sm"
             title="Retry upload"
           >
             <RefreshCw className="w-2.5 h-2.5" />
@@ -218,11 +217,11 @@ export function MediaInput({
           <Button
             type="button"
             variant="ghost"
-            size="icon-xs"
             data-testid="media-input-dismiss-btn"
             onClick={handleDismissFailed}
-            className="absolute top-0.5 right-0.5 size-4 p-0 rounded-full bg-black/60 hover:bg-black/90 text-white/70 hover:text-white"
+            className="absolute top-0.5 right-0.5 size-4 p-0 rounded-full hover:bg-white/10 text-white"
             title="Dismiss error"
+            aria-label="Dismiss error"
           >
             <X className="w-2.5 h-2.5" />
           </Button>

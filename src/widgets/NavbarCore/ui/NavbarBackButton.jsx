@@ -37,8 +37,7 @@ export function NavbarBackButton({
     return (
       <Button
         asChild
-        variant="studio-ghost"
-        size={children ? "default" : "icon"}
+        variant="ghost"
         disabled={disabled}
         className={cn(
           "cursor-pointer shrink-0 text-[var(--mat-sys-on-surface,#e3e3e3)] hover:text-white transition-all",
@@ -70,8 +69,7 @@ export function NavbarBackButton({
   return (
     <Button
       type="button"
-      variant="studio-ghost"
-      size={children ? "default" : "icon"}
+      variant="ghost"
       disabled={disabled}
       className={cn(
         "cursor-pointer shrink-0 text-[var(--mat-sys-on-surface,#e3e3e3)] hover:text-white transition-all",

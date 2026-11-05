@@ -114,7 +114,6 @@ export const EditableDisplayName = React.forwardRef(({
           <Button
             type="button"
             variant="ghost"
-            size="icon-xs"
             onMouseDown={(e) => {
               e.preventDefault()
               handleSaveEdit()
@@ -127,7 +126,6 @@ export const EditableDisplayName = React.forwardRef(({
           <Button
             type="button"
             variant="ghost"
-            size="icon-xs"
             onMouseDown={(e) => {
               e.preventDefault()
               handleCancelEdit()

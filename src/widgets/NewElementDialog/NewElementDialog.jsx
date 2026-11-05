@@ -268,9 +268,8 @@ export function NewElementDialog({ open, onOpenChange, projectId: propProjectId 
           <Button
             type="button"
             variant="ghost"
-            size="icon-sm"
             onClick={() => handleOpenChange(false)}
-            className="rounded-full text-white/50 hover:text-white"
+            className="size-8 p-0 rounded-full text-white/50 hover:text-white"
           >
             <GoogleIcon iconName="close" className="text-[20px]" />
           </Button>
@@ -345,10 +344,9 @@ export function NewElementDialog({ open, onOpenChange, projectId: propProjectId 
                   {/* Remove active button */}
                   <Button
                     type="button"
-                    variant="blur"
-                    size="icon-sm"
+                    variant="ghost"
                     onClick={(e) => handleRemoveMedia(activePreviewIndex, e)}
-                    className="absolute top-3 right-3 rounded-full"
+                    className="absolute top-3 right-3 size-8 p-0 rounded-full bg-white/5 backdrop-blur-md text-white/80 hover:text-white hover:bg-white/10 border-none"
                     title="Supprimer ce fichier"
                   >
                     <GoogleIcon iconName="close" className="text-[16px]" />
@@ -386,9 +384,8 @@ export function NewElementDialog({ open, onOpenChange, projectId: propProjectId 
                         <Button
                           type="button"
                           variant="ghost"
-                          size="icon-xs"
                           onClick={(e) => handleRemoveMedia(idx, e)}
-                          className="absolute top-0.5 right-0.5 size-4 rounded-full bg-black/70 p-0 text-xs"
+                          className="absolute top-0.5 right-0.5 size-4 p-0 rounded-full bg-black/70 text-xs"
                         >
                           ×
                         </Button>
@@ -400,10 +397,9 @@ export function NewElementDialog({ open, onOpenChange, projectId: propProjectId 
                   {mediaItems.length < 6 && (
                     <Button
                       type="button"
-                      variant="blur"
-                      size="icon"
+                      variant="ghost"
                       onClick={() => fileInputRef.current?.click()}
-                      className="size-14 rounded-sm flex flex-col items-center justify-center gap-0.5 shrink-0"
+                      className="size-14 p-0 rounded-sm bg-white/5 backdrop-blur-md text-white/80 hover:text-white hover:bg-white/10 border-none flex flex-col items-center justify-center gap-0.5 shrink-0"
                       title="Ajouter un autre fichier"
                     >
                       <GoogleIcon iconName="add" className="text-[20px]" />
@@ -489,7 +485,6 @@ export function NewElementDialog({ open, onOpenChange, projectId: propProjectId 
             <Button
               type="button"
               variant="ghost"
-              size="default"
               onClick={() => handleOpenChange(false)}
               disabled={isUploading}
             >
@@ -497,8 +492,7 @@ export function NewElementDialog({ open, onOpenChange, projectId: propProjectId 
             </Button>
             <Button
               type="button"
-              variant="studio-white"
-              size="default"
+              variant="primary"
               onClick={handleCreate}
               disabled={mediaItems.length === 0 || isUploading}
               className="gap-2"

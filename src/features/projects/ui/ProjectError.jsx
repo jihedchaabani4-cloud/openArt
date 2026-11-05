@@ -53,8 +53,8 @@ export function ProjectError({ error, reset, onRetry }) {
           <Button
             type="button"
             variant="primary"
+            className="h-10 px-6 text-sm"
             onClick={onRetry}
-            className="rounded-sm px-6 py-2.5 shadow-none h-auto"
           >
             Réessayer
           </Button>
@@ -63,8 +63,8 @@ export function ProjectError({ error, reset, onRetry }) {
         <Button
           type="button"
           variant="outline"
+          className="h-10 px-6 text-sm"
           onClick={handleBack}
-          className="rounded-sm px-6 py-2.5 shadow-none h-auto"
         >
           <ArrowLeft className="h-4 w-4" />
           Retour aux projets

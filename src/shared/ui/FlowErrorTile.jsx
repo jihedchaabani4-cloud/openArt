@@ -82,11 +82,11 @@ export function FlowErrorTile({
                 <Button
                   type="button"
                   variant="ghost"
-                  size="icon-sm"
+                  className="size-8 p-0 rounded-full"
                   aria-label="Reuse prompt"
                   title="Reuse prompt"
                   disabled={!canReusePrompt}
-                  className="rounded-full bg-white/10 hover:bg-white/20 text-white size-8"
+                  
                   onClick={(e) => {
                     if (canReusePrompt) {
                       e.stopPropagation();
@@ -101,10 +101,10 @@ export function FlowErrorTile({
                 <Button
                   type="button"
                   variant="ghost"
-                  size="icon-sm"
+                  className="size-8 p-0 rounded-full"
                   aria-label="Delete"
                   title="Delete"
-                  className="rounded-full bg-white/10 hover:bg-white/20 text-white size-8"
+                  
                   onClick={(e) => {
                     e.stopPropagation();
                     onDelete?.(e);

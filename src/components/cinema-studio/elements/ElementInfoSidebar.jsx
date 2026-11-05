@@ -34,7 +34,6 @@ export function InputInfoHover({ content, title, testId }) {
         <Button
           type="button"
           variant="ghost"
-          size="icon-xs"
           onClick={(e) => {
             e.stopPropagation();
             setOpen((prev) => !prev);
@@ -208,10 +207,9 @@ export function ElementInfoSidebar({
             <Button
               type="button"
               variant="ghost"
-              size="sm"
+              className="h-6 px-2 text-xs [&_svg]:size-3"
               disabled={isAnalyzingVision}
               onClick={onAnalyzeVision}
-              className="h-6 px-2 text-[11px] text-[var(--mat-sys-on-surface-variant,#8e918f)] hover:text-white hover:bg-white/10 gap-1.5 rounded-lg transition-colors cursor-pointer"
               title="Analyser automatiquement les images avec Vision AI"
             >
               {isAnalyzingVision ? (
@@ -253,7 +251,6 @@ export function ElementInfoSidebar({
             <Button
               type="button"
               variant="ghost"
-              size="icon-xs"
               onClick={copyGuidelines}
               className="text-[var(--mat-sys-on-surface-variant,#8e918f)] hover:text-white"
               title="Copier les directives"

@@ -144,7 +144,7 @@ describe("Trash Page Standalone Layout & Navbar Header", () => {
   it("keeps center search bar and right actions (Tout restaurer, settings) in StudioNavbar on the trash route", () => {
     renderWithClient(<StudioNavbar />);
 
-    expect(screen.getByPlaceholderText(/rechercher des médias/i)).toBeDefined();
+    expect(screen.getByRole("searchbox")).toBeDefined();
     expect(screen.getByRole("button", { name: /tout restaurer/i })).toBeDefined();
     expect(screen.getByRole("button", { name: /paramètres de la grille/i })).toBeDefined();
   });

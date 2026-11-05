@@ -12,17 +12,8 @@ import {
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { Dialog, DialogContent, DialogTitle } from "@/shared/ui/dialog";
 import { Button } from "@/shared/ui/button";
+import { cn } from "@/shared/lib/utils";
 import { usePackages, useCheckout } from "@/features/payments/api/paymentsApi";
-
-const SURFACE_BORDER = "rgba(255,255,255,0.1)";
-const SURFACE_PANEL = "#1b1b1b";
-const TEXT_PRIMARY = "#f3f3f3";
-const TEXT_SECONDARY = "rgba(255,255,255,0.72)";
-const TEXT_MUTED = "rgba(255,255,255,0.56)";
-const TEXT_FAINT = "rgba(255,255,255,0.4)";
-const BUTTON_PRIMARY = "#d9d9de";
-const BUTTON_PRIMARY_HOVER = "#e8e8eb";
-const BUTTON_TEXT = "#202020";
 
 function formatPrice(value, currency = "USD") {
     if (value == null) {
@@ -56,7 +47,6 @@ function getPlanSuffix(pkg) {
     return getPlanKind(pkg) === "subscription" ? "/month" : "";
 }
 
-
 function estimateTenCreditsPrice(pkg) {
     const value = Number(pkg?.price);
     const credits = Number(pkg?.credits);
@@ -88,7 +78,6 @@ function estimateCreditsLabel(pkg) {
 
     return `${credits}`;
 }
-
 
 function LeftPanel({ open }) {
     const showcaseImages = useMemo(() => [
@@ -160,7 +149,7 @@ function LeftPanel({ open }) {
     }, [activeIndex, open, showcaseImages]);
 
     return (
-        <div className="relative hidden h-[280px] sm:h-[360px] lg:h-full lg:min-h-[420px] w-full overflow-hidden rounded-lg lg:flex border border-white/8">
+        <div className="relative hidden h-[280px] sm:h-[360px] lg:h-full lg:min-h-[420px] w-full overflow-hidden rounded-lg lg:flex border border-white/10">
             <div className="relative size-full overflow-hidden">
                 <div className="absolute inset-0">
                     {previousImage ? (
@@ -186,7 +175,7 @@ function LeftPanel({ open }) {
                         ].join(" ")}
                     />
                 </div>
-                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#02050c]/92 via-[#02050c]/28 to-white/10" />
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-white/10" />
                 <div className="pointer-events-none absolute bottom-7 left-7 right-7 z-10 h-[2px] overflow-hidden rounded-full bg-white/20">
                     <div
                         className="h-full rounded-full bg-white"
@@ -195,10 +184,10 @@ function LeftPanel({ open }) {
                 </div>
                 <div className="relative z-10 flex h-full flex-col justify-end p-5 lg:p-6 pb-9 lg:pb-10">
                     <div className="space-y-2">
-                        <div className="flex w-fit items-center gap-2 text-[12px] font-semibold text-white/92 sm:text-[14px]">
+                        <div className="flex w-fit items-center gap-2 text-xs font-semibold text-white/90 sm:text-sm">
                             Premium creative access
                         </div>
-                        <p className="max-w-[280px] text-[16px] font-semibold leading-[1.25] tracking-[-0.03em] text-white sm:text-[18px]">
+                        <p className="max-w-[280px] text-base font-semibold leading-tight tracking-tight text-white sm:text-lg">
                             Unlock stronger image and video models for your workflow.
                         </p>
                     </div>
@@ -252,7 +241,7 @@ export function PackageSelectionDialog({
             <Dialog open={open} onOpenChange={onOpenChange}>
                 <DialogContent
                     showCloseButton
-                    className="flex h-[min(740px,84vh)] w-[min(960px,94vw)] max-w-[960px] items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-(--background-base-pri) p-0 text-white shadow-none backdrop-blur-[80px]"
+                    className="flex h-[min(740px,84vh)] w-[min(960px,94vw)] max-w-[960px] items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-black p-0 text-white shadow-none backdrop-blur-[80px]"
                 >
                     <DialogTitle className="sr-only">Choose your package</DialogTitle>
                     <Loader2 className="animate-spin text-white/40" size={32} />
@@ -265,7 +254,7 @@ export function PackageSelectionDialog({
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent
                 showCloseButton
-                className="h-[min(740px,84vh)] w-[min(960px,94vw)] max-w-[960px] overflow-hidden rounded-2xl border border-white/10 bg-(--background-base-pri) p-0 text-white shadow-none backdrop-blur-[80px]"
+                className="h-[min(740px,84vh)] w-[min(960px,94vw)] max-w-[960px] overflow-hidden rounded-2xl border border-white/10 bg-black p-0 text-white shadow-none backdrop-blur-[80px]"
             >
                 <DialogTitle className="sr-only">Choose your package</DialogTitle>
 
@@ -276,10 +265,10 @@ export function PackageSelectionDialog({
 
                     <div className="flex min-h-0 flex-col justify-start px-4 pb-4 pt-5 sm:px-6 sm:pb-6 sm:pt-7 lg:px-7 lg:pt-10 xl:px-8">
                         <div className="max-w-[428px]">
-                            <h3 className="text-[20px] font-semibold leading-[1.15] tracking-[-0.03em] sm:text-[22px]" style={{ color: TEXT_PRIMARY }}>
+                            <h3 className="text-xl font-semibold leading-tight tracking-tight text-white sm:text-[22px]">
                                 Unlock more image and video power.
                             </h3>
-                            <p className="mt-2 max-w-[420px] text-[12px] font-normal leading-5" style={{ color: TEXT_SECONDARY }}>
+                            <p className="mt-2 max-w-[420px] text-xs font-normal leading-5 text-white/70">
                                 Generate, edit, and scale high-quality images and videos with the models that matter most.
                             </p>
                         </div>
@@ -298,28 +287,28 @@ export function PackageSelectionDialog({
                                         type="button"
                                         variant="ghost"
                                         onClick={() => setSelectedPackageId(pkg.id)}
-                                        className="w-full h-auto p-3 sm:p-4 rounded-lg border text-left transition-all duration-200 block justify-start"
-                                        style={{
-                                            borderColor: isSelected ? "rgba(255,255,255,0.88)" : SURFACE_BORDER,
-                                            background: isSelected ? SURFACE_PANEL : "transparent",
-                                        }}
+                                        className={cn(
+                                            "w-full h-auto p-3 sm:p-4 rounded-lg border text-left transition-all duration-200 block justify-start",
+                                            isSelected
+                                                ? "border-white/90 bg-surface-card"
+                                                : "border-white/10 bg-transparent hover:bg-white/5"
+                                        )}
                                     >
                                         <div className="flex items-start gap-3">
                                             <span
-                                                className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border"
-                                                style={{
-                                                    borderColor: isSelected ? "#ffffff" : "rgba(255,255,255,0.16)",
-                                                    background: isSelected ? "#ffffff" : "transparent",
-                                                }}
+                                                className={cn(
+                                                    "mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full border transition-colors",
+                                                    isSelected ? "border-white bg-white" : "border-white/20 bg-transparent"
+                                                )}
                                             >
-                                                {isSelected && <Check size={12} color="#101010" />}
+                                                {isSelected && <Check size={12} className="stroke-[3] text-black" />}
                                             </span>
 
                                             <div className="min-w-0 flex-1">
                                                 <div className="flex items-start justify-between gap-3 sm:gap-4">
                                                     <div>
                                                         <div className="flex flex-wrap items-center gap-2">
-                                                            <p className="text-[15px] font-medium leading-none tracking-[-0.02em]" style={{ color: TEXT_PRIMARY }}>
+                                                            <p className="text-[15px] font-medium leading-none tracking-tight text-white">
                                                                 {pkg.label}
                                                             </p>
                                                             {tag === "Most popular" && (
@@ -330,7 +319,7 @@ export function PackageSelectionDialog({
                                                         </div>
 
                                                         {price && (
-                                                            <p className="mt-1 text-[12px] font-normal leading-none" style={{ color: TEXT_SECONDARY }}>
+                                                            <p className="mt-1 text-xs font-normal leading-none text-white/70">
                                                                 {price}
                                                                 {getPlanSuffix(pkg)}
                                                             </p>
@@ -338,12 +327,12 @@ export function PackageSelectionDialog({
                                                     </div>
 
                                                     <div className="shrink-0 text-right">
-                                                        <p className="flex items-center justify-end gap-1 text-[13px] font-normal" style={{ color: TEXT_PRIMARY }}>
+                                                        <p className="flex items-center justify-end gap-1 text-[13px] font-normal text-white">
                                                             <GoogleIcon iconName="stars" className="text-[13px] text-white" />
                                                             {creditsLabel}
                                                         </p>
                                                         {tenCreditsPrice && (
-                                                            <p className="mt-1 text-[14px] font-medium leading-none" style={{ color: TEXT_PRIMARY }}>
+                                                            <p className="mt-1 text-sm font-medium leading-none text-white">
                                                                 {tenCreditsPrice}
                                                             </p>
                                                         )}
@@ -366,9 +355,9 @@ export function PackageSelectionDialog({
                         </div>
 
                         {selectedPackage && getPlanKind(selectedPackage) === "subscription" && (
-                            <p className="mt-4 text-center text-[11px] font-normal leading-5 lg:mt-5 lg:text-left" style={{ color: TEXT_MUTED }}>
+                            <p className="mt-4 text-center text-[11px] font-normal leading-5 text-white/60 lg:mt-5 lg:text-left">
                                 With the selected plan,{" "}
-                                <span style={{ color: TEXT_PRIMARY }}>
+                                <span className="text-white">
                                     you will be charged {formatPrice(selectedPackage.price, selectedPackage.currency)} each billing cycle
                                 </span>{" "}
                                 until you cancel.
@@ -378,34 +367,27 @@ export function PackageSelectionDialog({
                         {selectedPackage && (
                             <div className="mt-5 border-t border-white/10 pt-4 lg:mt-6">
                                 <div className="flex items-center justify-between gap-4">
-                                    <p className="text-[12px] font-medium tracking-[-0.02em]" style={{ color: TEXT_FAINT }}>
+                                    <p className="text-xs font-medium tracking-tight text-white/40">
                                         Total Cost
                                     </p>
-                                    <p className="text-[14px] font-semibold tracking-[-0.02em]" style={{ color: TEXT_PRIMARY }}>
+                                    <p className="text-sm font-semibold tracking-tight text-white">
                                         {formatPrice(selectedPackage.price, selectedPackage.currency)}
                                     </p>
                                 </div>
                             </div>
                         )}
 
-
                         <div className="mt-5 space-y-4 lg:mt-6">
                             <Button
                                 type="button"
+                                variant="primary"
                                 disabled={!selectedPackage || (isPending && pendingPackageId === selectedPackage.id)}
                                 onClick={() => {
                                     if (selectedPackage) {
                                         onBuy?.(selectedPackage.id);
                                     }
                                 }}
-                                className="relative h-12 w-full overflow-hidden rounded-sm px-5 py-3 text-[15px] font-semibold transition-colors before:absolute before:left-[-40%] before:top-0 before:h-full before:w-[8%] before:skew-x-[-20deg] before:bg-[linear-gradient(90deg,transparent_0%,rgba(255,255,255,0.5)_50%,transparent_100%)] before:content-[''] sm:h-14 sm:py-4 sm:text-[16px]"
-                                style={{ background: BUTTON_PRIMARY, color: BUTTON_TEXT }}
-                                onMouseOver={(event) => {
-                                    event.currentTarget.style.backgroundColor = BUTTON_PRIMARY_HOVER;
-                                }}
-                                onMouseOut={(event) => {
-                                    event.currentTarget.style.backgroundColor = BUTTON_PRIMARY;
-                                }}
+                                className="relative h-12 w-full overflow-hidden rounded-sm px-5 py-3 text-sm font-semibold transition-all sm:h-14 sm:py-4 sm:text-base before:absolute before:left-[-40%] before:top-0 before:h-full before:w-[8%] before:skew-x-[-20deg] before:bg-gradient-to-r before:from-transparent before:via-white/50 before:to-transparent before:content-['']"
                             >
                                 {isPending && pendingPackageId === selectedPackage?.id ? (
                                     <Loader2 size={18} className="animate-spin" />
@@ -416,7 +398,7 @@ export function PackageSelectionDialog({
                             <div className="flex w-full flex-col gap-1">
                                 <div className="flex w-full items-center justify-center gap-2">
                                     <ShieldCheck size={16} />
-                                    <p className="text-center text-[11px] font-normal" style={{ color: TEXT_PRIMARY }}>
+                                    <p className="text-center text-[11px] font-normal text-white">
                                         Paiement sur et securise
                                     </p>
                                 </div>
@@ -439,20 +421,20 @@ export function PackageSelectionDialog({
                                     ))}
                                 </div>
                             </div>
-                 {showViewAllLink && (
-                            <div className="mt-4 flex w-full items-center justify-center">
-                                <Link
-                                    href="/pricing"
-                                    onClick={() => onOpenChange?.(false)}
-                                    className="group inline-flex h-8 items-center justify-center gap-1.5 rounded-sm px-2.5 py-1.5 text-[13px] font-medium text-white transition-colors hover:bg-white/6"
-                                >
-                                    <span className="relative">View all plans and features</span>
-                                    <span className="relative">
-                                        <ArrowUpRight size={16} className="text-white transition-colors group-hover:text-white/70" />
-                                    </span>
-                                </Link>
-                            </div>
-                        )}
+                            {showViewAllLink && (
+                                <div className="mt-4 flex w-full items-center justify-center">
+                                    <Link
+                                        href="/pricing"
+                                        onClick={() => onOpenChange?.(false)}
+                                        className="group inline-flex h-8 items-center justify-center gap-1.5 rounded-sm px-2.5 py-1.5 text-[13px] font-medium text-white transition-colors hover:bg-white/5"
+                                    >
+                                        <span className="relative">View all plans and features</span>
+                                        <span className="relative">
+                                            <ArrowUpRight size={16} className="text-white transition-colors group-hover:text-white/70" />
+                                        </span>
+                                    </Link>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

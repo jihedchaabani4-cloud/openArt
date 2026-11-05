@@ -14,7 +14,7 @@ const ROOT = path.resolve(__dirname, '..');
 const BASELINE = path.join(ROOT, 'ui-baseline.json');
 const SRC_DIRS = ['src', 'app', 'components', 'pages'];
 const TOKEN_FILES = ['globals.css', 'tokens', 'tailwind.config', 'theme'];       // may contain raw colors
-const PRIMITIVE_DIRS = ['components/ui/', 'components/primitives/'];              // may contain raw <button>
+const PRIMITIVE_DIRS = ['src/shared/ui/', 'shared/ui/', 'components/ui/', 'components/primitives/'];              // may contain raw <button>
 const SKIP = new Set(['node_modules', '.next', '.git', 'coverage', 'dist', 'build', 'out']);
 const rel = (p) => path.relative(ROOT, p).split(path.sep).join('/');
 const isComment = (l) => /^\s*(\/\/|\/\*|\*)/.test(l);
@@ -30,15 +30,15 @@ function walk(dir, out = []) {
 }
 
 const RULES = [
-  { id: 'U1', desc: 'raw color literal (#hex, rgb(), hsl()) outside token files', ext: /\.(jsx?|tsx?|css)$/,
+  { id: 'U1', desc: 'raw color literal (#hex, rgb(), hsl(), oklch(), oklab()) outside token files', ext: /\.(jsx?|tsx?|css)$/,
     skip: (r) => TOKEN_FILES.some((t) => r.includes(t)),
-    re: /#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{3,4})\b|\b(?:rgba?|hsla?)\(\s*\d/g },
+    re: /#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{3,4})\b|\b(?:rgba?|hsla?)\(\s*\d|\b(?:oklch|oklab)\(/g },
   { id: 'U2', desc: 'Tailwind arbitrary value (w-[437px], p-[13px], ...)', ext: /\.(jsx?|tsx?)$/,
     re: /(?<![\w-])(?!(?:data|aria|supports|has|group|peer|min|max|nth)-)[a-z][a-z0-9-]*-\[[^\]\s]+\]/g },
   { id: 'U3', desc: 'raw <button> outside the primitives folder (use the Button primitive)', ext: /\.(jsx?|tsx?)$/,
     skip: (r) => PRIMITIVE_DIRS.some((p) => r.includes(p)), re: /<button\b/g },
-  { id: 'U4', desc: 'fetch( inside components/ (use the API client or a hook)', ext: /\.(jsx?|tsx?)$/,
-    only: (r) => /(^|\/)components\//.test(r), re: /\bfetch\s*\(/g },
+  { id: 'U4', desc: 'fetch( inside components/, features/, or widgets/ (use the API client or a hook)', ext: /\.(jsx?|tsx?)$/,
+    only: (r) => /(^|\/)(components|features|widgets)\//.test(r), re: /\bfetch\s*\(/g },
   { id: 'U5', desc: 'inline style={{ }} (use tokens/classes; allowed only for truly dynamic values)', ext: /\.(jsx?|tsx?)$/,
     re: /style=\{\{/g },
   { id: 'U6', desc: 'dead radius class (rounded-button, rounded-card, rounded-dialog, rounded-badge, rounded-input)', ext: /\.(jsx?|tsx?)$/,

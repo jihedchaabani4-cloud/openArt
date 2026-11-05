@@ -75,7 +75,7 @@ export function ConfirmDeleteDialog({
             </DialogClose>
             <Button
               type="button"
-              variant="destructive"
+              variant="danger"
               onClick={handleConfirm}
               disabled={loading}
               className="flex-1"

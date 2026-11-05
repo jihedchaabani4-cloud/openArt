@@ -92,9 +92,8 @@ export function ProjectCard({ project, onDelete, onRename }) {
                     {!isEditing && (
                         <Button
                             variant="ghost"
-                            size="icon-xs"
                             onClick={(e) => { e.preventDefault(); e.stopPropagation(); editRef.current?.startEditing(); }}
-                            className="h-auto w-auto p-0 transition-all duration-300 opacity-0 group-hover:opacity-100 text-white shrink-0"
+                            className="size-6 p-0 transition-opacity duration-300 opacity-0 group-hover:opacity-100 shrink-0"
                             aria-label={`Rename ${project.project_name}`}
                         >
                             <GoogleIcon iconName="edit" className="text-[14px]" />
@@ -108,9 +107,8 @@ export function ProjectCard({ project, onDelete, onRename }) {
                         onConfirm={() => onDelete(project.project_id)}
                         trigger={
                             <Button
-                                variant="ghost-destructive"
-                                size="icon-xs"
-                                className="h-auto w-auto p-0 transition-all duration-300 opacity-0 group-hover:opacity-100"
+                                variant="danger"
+                                className="size-6 p-0 transition-opacity duration-300 opacity-0 group-hover:opacity-100"
                                 aria-label={`Delete ${project.project_name}`}
                                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
                             >

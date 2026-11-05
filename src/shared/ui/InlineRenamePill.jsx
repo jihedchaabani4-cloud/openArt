@@ -113,12 +113,11 @@ export function InlineRenamePill({
         <Button
           type="button"
           variant="ghost"
-          size="icon-xs"
           onClick={handleSave}
           disabled={isSaving}
           title="Save (Enter)"
           aria-label="Save"
-          className="size-7"
+          className="size-7 p-0"
         >
           {isSaving ? (
             <Loader2 className="size-4 animate-spin text-white" />
@@ -130,12 +129,11 @@ export function InlineRenamePill({
         <Button
           type="button"
           variant="ghost"
-          size="icon-xs"
           onClick={handleCancel}
           disabled={isSaving}
           title="Cancel (Esc)"
           aria-label="Cancel"
-          className="size-7"
+          className="size-7 p-0"
         >
           <X className="size-4 stroke-[2.5]" />
         </Button>

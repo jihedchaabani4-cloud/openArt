@@ -81,11 +81,10 @@ export function CharacterDetailsGallery({
         <div className="flex items-center justify-end gap-2 w-full shrink-0">
           <Button
             type="button"
-            variant="blur"
-            size="sm"
+            variant="ghost"
+            className="h-8 px-4 rounded-full bg-white/10 hover:bg-white/15 text-white/60 hover:text-white border-none"
             disabled={atLimit}
             onClick={() => fileInputRef.current?.click()}
-            className="h-8 px-3.5 rounded-full text-[12px] gap-1.5 font-medium bg-white/10 hover:bg-white/15 text-white transition-all shadow-sm cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
             title={atLimit ? "Maximum 5 images autorisées" : "Importer depuis l'ordinateur"}
           >
             <GoogleIcon iconName="upload" className="text-[17px]" />
@@ -95,11 +94,10 @@ export function CharacterDetailsGallery({
           {onOpenAssets && (
             <Button
               type="button"
-              variant="blur"
-              size="sm"
+              variant="ghost"
+            className="h-8 px-4 rounded-full bg-white/10 hover:bg-white/15 text-white/60 hover:text-white border-none"
               disabled={atLimit}
               onClick={onOpenAssets}
-              className="h-8 px-3 rounded-full text-[12px] gap-1.5 font-medium bg-white/5 hover:bg-white/10 text-white/70 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
               title={atLimit ? "Maximum 5 images autorisées" : "Ajouter à partir du projet"}
             >
               <GoogleIcon iconName="add" className="text-[17px]" />

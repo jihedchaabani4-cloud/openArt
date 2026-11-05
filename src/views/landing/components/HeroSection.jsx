@@ -103,9 +103,8 @@ export function HeroSection({ user, authLoading, onCTA }) {
             <Button
               onClick={!authLoading ? onCTA : undefined}
               disabled={authLoading}
-              variant="white"
-              size="lg"
-              className="mt-8 rounded-sm text-sm font-semibold transition-all shadow-none disabled:opacity-60 flex items-center gap-2"
+              variant="primary"
+              className="mt-8 flex items-center gap-2 h-10 px-6 text-sm"
             >
               {authLoading ? (
                 <><Loader2 className="size-5 animate-spin" /> Connexion...</>

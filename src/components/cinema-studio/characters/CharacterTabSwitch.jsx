@@ -22,8 +22,8 @@ export function CharacterTabSwitch({
       {/* Button 1: Body Sheet */}
       <Button
         type="button"
-        variant={activeTab === "sheet" ? "flow-pill-active" : "flow-pill"}
-        size="flow"
+        variant="ghost"
+        className="h-8 px-2.5 bg-white/5 border-none text-white/80 hover:text-white hover:bg-white/10 text-xs"
         onClick={() => setActiveTab("sheet")}
         aria-label="Body Sheet"
       >
@@ -52,8 +52,8 @@ export function CharacterTabSwitch({
       {/* Button 2: More Details */}
       <Button
         type="button"
-        variant={activeTab === "details" ? "flow-pill-active" : "flow-pill"}
-        size="flow"
+        variant="ghost"
+        className="h-8 px-2.5 bg-white/5 border-none text-white/80 hover:text-white hover:bg-white/10 text-xs"
         onClick={() => setActiveTab("details")}
         aria-label="More Details"
       >

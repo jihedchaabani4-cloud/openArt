@@ -49,7 +49,6 @@ export function DropdownShell({
         <Button
           type="button"
           variant="ghost"
-          size="icon"
           className={cn(
             "size-9 rounded-sm flex items-center justify-center transition-all p-0",
             isActive
@@ -188,7 +187,7 @@ export const DropdownSegmented = React.memo(({ value, onChange, options, classNa
             type="button"
             role="radio"
             aria-checked={isSelected}
-            variant={isSelected ? activeVariant : "flow-toggle"}
+            variant={isSelected ? (variant === "white" ? "primary" : "secondary") : "ghost"}
             onClick={() => {
               if (isDragging) return;
               if (!opt.disabled) onChange(opt.value);
@@ -248,7 +247,7 @@ export const DropdownSegmentedWithLabel = React.memo(({ label, value, onChange, 
               type="button"
               role="radio"
               aria-checked={isSelected}
-              variant={isSelected ? activeVariant : "flow-toggle"}
+              variant={isSelected ? (variant === "white" ? "primary" : "secondary") : "ghost"}
               onClick={() => !opt.disabled && onChange(opt.value)}
               disabled={opt.disabled}
               className="h-8 min-h-[32px] rounded-sm text-[13px] font-medium px-3 flex-1 min-w-fit"
@@ -285,7 +284,6 @@ export function DropdownChips({ options, selected, onToggle, accent = "lime" }) 
             key={opt}
             type="button"
             variant="ghost"
-            size="xs"
             onClick={() => onToggle(opt)}
             className={cn(
               "px-2.5 py-1.5 rounded-sm text-xs transition-all font-medium h-auto",
@@ -343,7 +341,6 @@ export function DropdownReset({ onReset, label = "Reset", className }) {
   return (
     <Button
       variant="ghost"
-      size="sm"
       onClick={onReset}
       className={cn("h-7 px-2 text-[11px] font-medium text-white/40 hover:text-white hover:bg-white/5", className)}
     >
@@ -362,7 +359,6 @@ export function DropdownClearAction({ onClick, label = "Clear" }) {
     <Button
       type="button"
       variant="link"
-      size="xs"
       onClick={onClick}
       className="text-[10px] text-white font-medium hover:underline p-0 h-auto"
     >
@@ -381,7 +377,6 @@ export const DropdownToggle = React.memo(({ value, onChange }) => {
       <Button
         type="button"
         variant="ghost"
-        size="xs"
         onClick={() => onChange(false)}
         className={cn(
           "px-3 py-1 rounded-sm text-xs font-medium transition-all h-auto",
@@ -393,7 +388,6 @@ export const DropdownToggle = React.memo(({ value, onChange }) => {
       <Button
         type="button"
         variant="ghost"
-        size="xs"
         onClick={() => onChange(true)}
         className={cn(
           "px-3 py-1 rounded-sm text-xs font-medium transition-all h-auto",

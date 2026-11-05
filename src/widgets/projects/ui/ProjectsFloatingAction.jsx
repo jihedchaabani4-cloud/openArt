@@ -8,10 +8,10 @@ export function ProjectsFloatingAction({ onCreate, isLoading }) {
         <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-50">
             <Button
                 type="button"
-                variant="ghost"
+                variant="secondary"
+                className="h-auto px-6 py-4 rounded-2xl bg-neutral-800 hover:bg-neutral-700 text-neutral-200 hover:text-white active:scale-95 border-none backdrop-blur-md text-sm font-medium"
                 onClick={onCreate}
                 disabled={isLoading}
-                className="flex items-center gap-2 px-6 py-4 rounded-2xl bg-[#4a4a4a] hover:bg-[#5a5a5a] text-[#d1d1d1] hover:text-white shadow-none transition-all active:scale-95 border border-white/5 backdrop-blur-md h-auto"
             >
                 {isLoading ? (
                     <Loader2 className="size-5 animate-spin" />

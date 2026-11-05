@@ -22,7 +22,6 @@ export function AssetsGroupSection({
         <Button
           type="button"
           variant="ghost"
-          size="icon-xs"
           onClick={() => onToggleGroupSelection(group.photos)}
           className={`
             flex h-6 w-6 items-center justify-center rounded-md border transition p-0

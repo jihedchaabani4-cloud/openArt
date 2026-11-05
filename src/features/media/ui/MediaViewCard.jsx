@@ -122,7 +122,6 @@ export const MediaViewCard = React.forwardRef(function MediaViewCard({
       ref={ref}
       type="button"
       variant="ghost"
-      size="tile"
       onClick={() => {
         if (!isDisabled && onSelect) {
           onSelect(item);

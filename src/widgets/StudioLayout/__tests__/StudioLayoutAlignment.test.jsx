@@ -184,7 +184,7 @@ describe("CollectionMediaGridItem action button group & menu styling", () => {
       "utf8"
     );
 
-    expect(mediaGridItemFile).toContain('ButtonGroup className="bg-white/60 backdrop-blur-md rounded-lg border-0 border-none"');
+    expect(mediaGridItemFile).toContain('ButtonGroup variant="pill"');
     expect(buttonGroupFile).not.toContain("border border-[var(--mat-sys-outline-variant");
   });
 });

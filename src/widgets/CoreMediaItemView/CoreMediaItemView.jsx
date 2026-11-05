@@ -284,7 +284,6 @@ export function CoreMediaItemPresenter({
               <Button
                 type="button"
                 variant="ghost"
-                size="icon-xs"
                 onClick={(e) => {
                   e.stopPropagation();
                   onLikeToggle?.(e);

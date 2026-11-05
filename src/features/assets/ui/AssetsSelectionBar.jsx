@@ -27,22 +27,20 @@ export function AssetsSelectionBar({
         <Button
           type="button"
           onClick={onDownloadSelected}
-          variant="studio-normal"
+          variant="secondary"
+          className="h-10 px-6 text-sm"
           disabled={isDownloading}
-          className="h-10 rounded-lg border border-white/10 bg-[#24262d] px-4 text-[14px] font-semibold text-white hover:bg-[#2d3038]"
         >
           <Download className="h-4 w-4" />
           {isDownloading ? "Downloading..." : "Download"}
         </Button>
 
-
-
         <Button
           type="button"
-          variant="studio-normal"
+          variant="secondary"
+          className="size-10 p-0"
           onClick={onFavoriteSelected}
           disabled={isFavoriting || isDeleting}
-          className="h-10 w-10 rounded-lg border border-white/10 bg-[#24262d] text-white/78 hover:bg-[#2d3038] hover:text-white"
           aria-label="Favorite selected"
         >
           <Heart className={`h-4 w-4 ${allSelectedAreLiked ? "fill-current text-white" : ""}`} />
@@ -50,10 +48,10 @@ export function AssetsSelectionBar({
 
         <Button
           type="button"
-          variant="studio-normal"
+          variant="secondary"
+          className="size-10 p-0"
           onClick={onDeleteSelected}
           disabled={isDeleting || isFavoriting}
-          className="h-10 w-10 rounded-lg border border-white/10 bg-[#24262d] text-white/78 hover:bg-[#2d3038] hover:text-white"
           aria-label="Delete selected"
         >
           <Trash2 className="h-4 w-4" />
@@ -61,8 +59,9 @@ export function AssetsSelectionBar({
 
         <Button
           type="button"
+          variant="secondary"
+          className="size-10 p-0"
           onClick={onClearSelection}
-          className="h-10 w-10 rounded-lg border border-white/10 bg-[#24262d] text-white/62 hover:bg-[#2d3038] hover:text-white"
           aria-label="Clear selection"
         >
           <X className="h-4.5 w-4.5" />
