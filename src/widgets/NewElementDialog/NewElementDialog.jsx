@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { Loader2 } from "lucide-react";
+import { Loader2, Upload, X, Plus } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -258,7 +258,7 @@ export function NewElementDialog({ open, onOpenChange, projectId: propProjectId 
       <DialogContent
         variant="glass"
         showCloseButton={false}
-        className="w-full max-w-[960px] h-[610px] max-h-[92vh] flex flex-col p-7 border-none font-sans antialiased text-white select-none"
+        className="w-full max-w-[960px] h-[610px] max-h-[92vh] flex flex-col p-7 border border-white/10 bg-surface-panel rounded-2xl font-sans antialiased text-white select-none shadow-none"
       >
         {/* ── Dialog Header (Borderless) ── */}
         <div className="flex items-center justify-between w-full mb-4 shrink-0">
@@ -271,7 +271,7 @@ export function NewElementDialog({ open, onOpenChange, projectId: propProjectId 
             onClick={() => handleOpenChange(false)}
             className="size-8 p-0 rounded-full text-white/50 hover:text-white"
           >
-            <GoogleIcon iconName="close" className="text-[20px]" />
+            <X className="size-5 stroke-[1.5]" />
           </Button>
         </div>
 
@@ -293,22 +293,22 @@ export function NewElementDialog({ open, onOpenChange, projectId: propProjectId 
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
             className={cn(
-              "flex-1 min-h-[300px] h-full rounded-lg bg-[var(--foreground-state-05,rgba(218,220,224,0.05))] backdrop-blur-[60px] flex flex-col items-center justify-center relative overflow-hidden transition-all duration-300 border-none",
-              isDragging && "bg-[var(--foreground-state-15)] scale-[0.995]"
+              "flex-1 min-h-[300px] h-full rounded-lg bg-surface-card flex flex-col items-center justify-center relative overflow-hidden transition-all duration-300 border border-white/5",
+              isDragging && "bg-surface-elevated scale-[0.995]"
             )}
           >
             {mediaItems.length === 0 ? (
-              /* Empty Drop Zone (Borderless Frosted Tile) */
+              /* Empty Drop Zone */
               <div
                 onClick={() => fileInputRef.current?.click()}
                 className={cn(
-                  "w-[90%] max-w-[440px] h-[280px] rounded-lg bg-[var(--foreground-state-05)] hover:bg-[var(--foreground-state-10)] active:bg-[var(--foreground-state-15)]",
-                  "flex flex-col items-center justify-center gap-4 transition-all duration-200 cursor-pointer p-8 text-center group border-none",
-                  isDragging && "bg-[var(--foreground-state-20)] scale-[1.01] shadow-none"
+                  "w-[90%] max-w-[440px] h-[280px] rounded-lg bg-white/5 hover:bg-white/10 active:bg-white/15",
+                  "flex flex-col items-center justify-center gap-4 transition-all duration-200 cursor-pointer p-8 text-center group border border-white/5",
+                  isDragging && "bg-white/20 scale-[1.01] shadow-none"
                 )}
               >
-                <div className="size-14 rounded-lg bg-[var(--foreground-state-10)] group-hover:bg-[var(--foreground-state-15)] backdrop-blur-md flex items-center justify-center text-white/80 group-hover:text-white transition-all shadow-none">
-                  <GoogleIcon iconName="cloud_upload" className="text-[28px]" />
+                <div className="size-14 rounded-lg bg-white/10 group-hover:bg-white/15 flex items-center justify-center text-white/80 group-hover:text-white transition-all shadow-none">
+                  <Upload className="size-7 stroke-[1.5]" />
                 </div>
                 <div className="flex flex-col items-center gap-1.5">
                   <span className="text-[15px] font-medium text-white/85 group-hover:text-white transition-colors">
@@ -346,10 +346,10 @@ export function NewElementDialog({ open, onOpenChange, projectId: propProjectId 
                     type="button"
                     variant="ghost"
                     onClick={(e) => handleRemoveMedia(activePreviewIndex, e)}
-                    className="absolute top-3 right-3 size-8 p-0 rounded-full bg-white/5 backdrop-blur-md text-white/80 hover:text-white hover:bg-white/10 border-none"
+                    className="absolute top-3 right-3 size-8 p-0 rounded-full bg-surface-elevated/80 text-white/80 hover:text-white hover:bg-surface-elevated border border-white/10"
                     title="Supprimer ce fichier"
                   >
-                    <GoogleIcon iconName="close" className="text-[16px]" />
+                    <X className="size-4 stroke-[1.5]" />
                   </Button>
                 </div>
 
@@ -399,10 +399,10 @@ export function NewElementDialog({ open, onOpenChange, projectId: propProjectId 
                       type="button"
                       variant="ghost"
                       onClick={() => fileInputRef.current?.click()}
-                      className="size-14 p-0 rounded-sm bg-white/5 backdrop-blur-md text-white/80 hover:text-white hover:bg-white/10 border-none flex flex-col items-center justify-center gap-0.5 shrink-0"
+                      className="size-14 p-0 rounded-sm bg-white/5 text-white/80 hover:text-white hover:bg-white/10 border border-white/10 flex flex-col items-center justify-center gap-0.5 shrink-0"
                       title="Ajouter un autre fichier"
                     >
-                      <GoogleIcon iconName="add" className="text-[20px]" />
+                      <Plus className="size-5 stroke-[1.5]" />
                       <span className="text-[10px] font-medium">Add</span>
                     </Button>
                   )}
@@ -415,7 +415,7 @@ export function NewElementDialog({ open, onOpenChange, projectId: propProjectId 
           <div className="w-full md:w-[320px] shrink-0 flex flex-col gap-4 overflow-y-auto pr-0.5 custom-scrollbar">
             {/* 1. Category Field (Predefined Select Component with blur variant) */}
             <div className="flex flex-col gap-1.5 w-full">
-              <label className="text-xs font-semibold text-[var(--mat-sys-on-surface,#e3e3e3)] pl-0.5">
+              <label className="text-xs font-semibold text-white/90 pl-0.5">
                 Category
               </label>
               <Select value={category} onValueChange={setCategory}>
@@ -449,7 +449,7 @@ export function NewElementDialog({ open, onOpenChange, projectId: propProjectId 
                 placeholder="Enter element name"
                 className="text-[14px]"
               />
-              <span className="text-[11.5px] text-[var(--mat-sys-on-surface-variant,#8e918f)] pl-0.5">
+              <span className="text-[11.5px] text-cool-slate pl-0.5">
                 The display name, e.g. Cal, Oli, Elena
               </span>
             </div>

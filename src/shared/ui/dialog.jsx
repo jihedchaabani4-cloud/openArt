@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { GoogleIcon } from "@/shared/ui/GoogleIcon"
+import { X } from "lucide-react"
 import * as DialogPrimitive from "@radix-ui/react-dialog"
 
 import { cn } from "@/shared/lib/utils"
@@ -33,7 +33,7 @@ function DialogOverlay({ className, ...props }) {
     <DialogPrimitive.Overlay
       data-slot="dialog-overlay"
       className={cn(
-        "fixed inset-0 z-50 bg-black/65 backdrop-blur-[24px] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0 duration-300",
+        "fixed inset-0 z-50 bg-black/75 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0 duration-300",
         className
       )}
       {...props}
@@ -56,14 +56,14 @@ function DialogContent({
       <DialogPrimitive.Content
         data-slot="dialog-content"
         className={cn(
-          // GLASS (border-none, maximum blur)
+          // GLASS (Preserved variant name for API stability -> Flat Dark Surface per Runway)
           variant === "glass" &&
             `
             z-50 fixed top-[50%] left-[50%]
             translate-x-[-50%] translate-y-[-50%]
             w-full max-w-[calc(100%-2rem)]
             rounded-2xl border border-white/10 outline-none
-            bg-[rgba(20,21,24,0.72)] backdrop-blur-[100px]
+            bg-surface-panel text-white
             shadow-none
             data-[state=open]:animate-in
             data-[state=closed]:animate-out
@@ -75,9 +75,9 @@ function DialogContent({
 
           // FULL SCREEN
           variant === "full" &&
-            "fixed inset-0 z-50 w-screen h-screen outline-none bg-[var(--mat-dialog-container-color,var(--background-state-90))] backdrop-blur-[80px]",
+            "fixed inset-0 z-50 w-screen h-screen outline-none bg-surface-panel text-white",
 
-          // FLOATING (فوق prompt bar)
+          // FLOATING (above prompt bar)
           variant === "floating" &&
             `
             fixed z-50
@@ -85,7 +85,7 @@ function DialogContent({
             translate-x-[-50%] translate-y-0 
             w-[300px] max-w-[95%]
             h-auto max-h-[60vh]
-            rounded-2xl bg-[var(--mat-dialog-container-color,var(--background-state-90))] backdrop-blur-[80px] shadow-none border border-[var(--mat-sys-outline-variant,rgba(255,255,255,0.08))] overflow-hidden
+            rounded-2xl bg-surface-panel text-white shadow-none border border-white/10 overflow-hidden
             flex flex-col
             data-[state=open]:animate-in
             data-[state=closed]:animate-out
@@ -98,23 +98,22 @@ function DialogContent({
           // DEFAULT (centered)
           variant === "default" &&
             `
-            z-50 bg-[var(--mat-dialog-container-color,var(--background-state-90))]
+            z-50 bg-surface-panel text-white
             fixed top-[50%] left-[50%]
             translate-x-[-50%] translate-y-[-50%]
             w-full max-w-[calc(100%-2rem)]
             sm:max-w-6xl
-            rounded-2xl border border-[var(--mat-sys-outline-variant,rgba(255,255,255,0.08))] p-6 shadow-none
+            rounded-2xl border border-white/10 p-6 shadow-none
             data-[state=open]:animate-in
             data-[state=closed]:animate-out
-
           `,
           variant === "small" &&
             `
-            z-50 bg-[var(--mat-dialog-container-color,var(--background-state-90))]
+            z-50 bg-surface-panel text-white
             fixed top-[50%] left-[50%]
             translate-x-[-50%] translate-y-[-50%]
             w-full max-w-[250px] max-h-[200px]
-            rounded-2xl border border-[var(--mat-sys-outline-variant,rgba(255,255,255,0.08))] p-2 shadow-none
+            rounded-2xl border border-white/10 p-2 shadow-none
             data-[state=open]:animate-in
             data-[state=closed]:animate-out
           `,
@@ -126,9 +125,9 @@ function DialogContent({
 
         {showCloseButton && (
           <DialogPrimitive.Close
-            className="absolute top-4 right-4 text-[var(--mat-sys-on-surface-variant,#8e918f)] hover:text-[var(--mat-sys-on-surface,#e3e3e3)] transition flex items-center justify-center"
+            className="absolute top-4 right-4 text-cool-slate hover:text-white transition flex items-center justify-center cursor-pointer"
           >
-            <GoogleIcon iconName="close" className="text-[20px]" />
+            <X className="size-5 stroke-[1.5]" />
             <span className="sr-only">Close</span>
           </DialogPrimitive.Close>
         )}
@@ -176,7 +175,7 @@ function DialogTitle({ className, ...props }) {
   return (
     <DialogPrimitive.Title
       data-slot="dialog-title"
-      className={cn("text-lg font-medium", className)}
+      className={cn("text-lg font-semibold text-white tracking-tight", className)}
       {...props}
     />
   )
@@ -187,7 +186,7 @@ function DialogDescription({ className, ...props }) {
   return (
     <DialogPrimitive.Description
       data-slot="dialog-description"
-      className={cn("text-sm text-muted-foreground", className)}
+      className={cn("text-sm text-cool-slate leading-relaxed", className)}
       {...props}
     />
   )
