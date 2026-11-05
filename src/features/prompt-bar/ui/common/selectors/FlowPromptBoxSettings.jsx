@@ -74,12 +74,12 @@ export function FlowSelect({
           <Button
             type="button"
             variant="ghost"
-            className="w-full h-9 px-3 bg-[rgba(218,220,224,0.06)] hover:bg-[rgba(218,220,224,0.12)] active:bg-[rgba(218,220,224,0.2)] text-white flex items-center justify-between transition-all"
+            className="w-full h-9 px-3 bg-white/5 hover:bg-white/10 active:bg-white/15 text-white rounded-sm border border-white/10 flex items-center justify-between transition-all"
             aria-label={ariaLabel || label || displayValue}
           >
             <span className="flex items-center gap-1.5 truncate text-white">
               {icon}
-              {label && <span className="text-white/60 font-normal">{label}:</span>}
+              {label && <span className="text-cool-slate font-normal">{label}:</span>}
               <span className="truncate text-white font-medium">{displayValue}</span>
             </span>
             <GoogleIcon
@@ -302,9 +302,7 @@ export function FlowPromptBoxSettings({
      
       className={cn(
         "settings-content-overlay flow-prompt-box-settings block w-[var(--prompt-box-settings-width,17.5rem)] rounded-lg p-2",
-        "bg-[rgba(22,23,24,0.6)] backdrop-blur-[100px]",
-        "border-none",
-        "shadow-none",
+        "bg-surface-card border border-white/10 shadow-none",
         "text-white select-none font-sans antialiased",
         className
       )}
@@ -312,13 +310,11 @@ export function FlowPromptBoxSettings({
         display: "block",
         boxSizing: "border-box",
         width: "var(--prompt-box-settings-width, 17.5rem)",
-        borderRadius: "var(--mat-menu-container-shape, 8px)",
+        borderRadius: "8px",
         padding: "0.5rem",
-        boxShadow: "var(--mat-menu-container-elevation-shadow, 0 16px 32px -8px rgba(0, 0, 0, 0.4))",
-        backdropFilter: "blur(100px) saturate(190%) contrast(105%)",
-        WebkitBackdropFilter: "blur(100px) saturate(190%) contrast(105%)",
-        backgroundColor: "rgba(22, 23, 24, 0.6)",
-        border: "none",
+        backgroundColor: "#1e1f20",
+        border: "1px solid rgba(255, 255, 255, 0.10)",
+        boxShadow: "none",
         colorScheme: "dark",
         pointerEvents: "auto",
         WebkitFontSmoothing: "antialiased",
@@ -332,7 +328,7 @@ export function FlowPromptBoxSettings({
             className="variant-emphasized block w-full"
           >
             <mat-button-toggle-group
-              className="mat-button-toggle-group toggle-group flex items-center gap-1 p-1 bg-[rgba(218,220,224,0.05)] rounded-sm w-full"
+              className="mat-button-toggle-group toggle-group flex items-center gap-1 p-1 bg-white/5 rounded-sm w-full"
               role="radiogroup"
             >
               {modeOptions.map((opt) => {
@@ -381,7 +377,7 @@ export function FlowPromptBoxSettings({
             className="variant-emphasized block w-full"
           >
             <mat-button-toggle-group
-              className="mat-button-toggle-group toggle-group mat-button-toggle-group-appearance-standard flex items-center gap-1 p-1 bg-[rgba(218,220,224,0.05)] rounded-sm w-full"
+              className="mat-button-toggle-group toggle-group mat-button-toggle-group-appearance-standard flex items-center gap-1 p-1 bg-white/5 rounded-sm w-full"
               role="radiogroup"
             >
               {subModeOptions.map((opt) => {
@@ -430,7 +426,7 @@ export function FlowPromptBoxSettings({
             className="block w-full"
           >
             <mat-button-toggle-group
-              className="mat-button-toggle-group toggle-group content-layout-column flex flex-wrap items-center gap-1 p-1 bg-[rgba(218,220,224,0.05)] rounded-sm w-full"
+              className="mat-button-toggle-group toggle-group content-layout-column flex flex-wrap items-center gap-1 p-1 bg-white/5 rounded-sm w-full"
               role="radiogroup"
             >
               {ratioOptions.map((ratio) => {
@@ -514,7 +510,7 @@ export function FlowPromptBoxSettings({
                   >
                     <mat-button-toggle-group
                       className={cn(
-                        "mat-button-toggle-group toggle-group p-1 bg-[rgba(218,220,224,0.05)] rounded-sm w-full max-w-full",
+                        "mat-button-toggle-group toggle-group p-1 bg-white/5 rounded-sm w-full max-w-full",
                         isGrid ? cn("grid", gridColsClass, "gap-1") : "flex items-center gap-1"
                       )}
                       role="radiogroup"
@@ -584,7 +580,7 @@ export function FlowPromptBoxSettings({
                     <span className="text-[12px] text-white font-medium">
                       {def.label || key}
                     </span>
-                    <div className="flex items-center gap-1 p-1 bg-[rgba(218,220,224,0.05)] rounded-sm">
+                    <div className="flex items-center gap-1 p-1 bg-white/5 rounded-sm">
                       <Button
                         type="button"
                         variant={!isChecked ? "secondary" : "ghost"}
@@ -614,7 +610,7 @@ export function FlowPromptBoxSettings({
                 const numVal = val !== undefined && val !== null ? Number(val) : (def.default ?? min);
 
                 return (
-                  <div key={key} className="flex flex-col gap-1 p-1 bg-[rgba(218,220,224,0.05)] rounded-sm px-2.5 py-2">
+                  <div key={key} className="flex flex-col gap-1 p-1 bg-white/5 rounded-sm px-2.5 py-2">
                     <div className="flex items-center justify-between text-[11px]">
                       <span className="text-white font-medium">{def.label || key}</span>
                       <span className="font-mono text-white font-semibold tabular-nums">{numVal}</span>
@@ -689,7 +685,7 @@ export function FlowPromptBoxSettings({
             className="block w-full"
           >
             <mat-button-toggle-group
-              className="mat-button-toggle-group toggle-group flex items-center gap-1 p-1 bg-[rgba(218,220,224,0.05)] rounded-sm w-full"
+              className="mat-button-toggle-group toggle-group flex items-center gap-1 p-1 bg-white/5 rounded-sm w-full"
               role="radiogroup"
             >
               {[1, 2, 3, 4].map((countVal) => {
@@ -733,7 +729,7 @@ export function FlowPromptBoxSettings({
           <flow-credit-cost-label
             className="settings-credit-cost block text-center"
           >
-            <span className="credit-cost-label block text-[11px] text-white">
+            <span className="credit-cost-label block text-[11px] text-cool-slate">
               <span>
                 La génération utilisera{" "}
                 <a

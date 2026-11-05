@@ -274,7 +274,7 @@ export function AtMentionMenu({
       exit={{ opacity: 0, scale: 0.98, y: 6 }}
       transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
       className={cn(
-        "w-full rounded-lg bg-(--background-base-pri) backdrop-blur-[80px] shadow-none pointer-events-auto flex flex-col z-50 overflow-hidden select-none border-0 font-sans antialiased",
+        "w-full rounded-lg bg-surface-card border border-white/10 shadow-none pointer-events-auto flex flex-col z-50 overflow-hidden select-none font-sans antialiased",
         className
       )}
     >
@@ -285,7 +285,7 @@ export function AtMentionMenu({
         {/* ── SECTION: Add ── */}
         {addItems.length > 0 && (
           <div>
-            <div className="text-[12px] font-medium text-white/50 px-3 pt-1 pb-1">
+            <div className="text-[12px] font-medium text-cool-slate px-3 pt-1 pb-1">
               Add
             </div>
             <div className="flex flex-col gap-0.5">
@@ -314,7 +314,7 @@ export function AtMentionMenu({
                       <span className="text-[14px] font-medium text-white">
                         {item.title}
                       </span>
-                      <span className="text-[13px] text-white/60 font-normal truncate">
+                      <span className="text-[13px] text-cool-slate font-normal truncate">
                         {item.subtitle}
                       </span>
                     </div>
@@ -328,7 +328,7 @@ export function AtMentionMenu({
         {/* ── SECTION: Workspace References (if available or queried) ── */}
         {referenceItems.length > 0 && (
           <div>
-            <div className="text-[12px] font-medium text-white/50 px-3 pt-2 pb-1">
+            <div className="text-[12px] font-medium text-cool-slate px-3 pt-2 pb-1">
               References
             </div>
             <div className="flex flex-col gap-0.5">
@@ -365,7 +365,7 @@ export function AtMentionMenu({
                       <span className="text-[14px] font-medium text-white truncate">
                         {item.title}
                       </span>
-                      <span className="text-[11px] text-white/70 font-medium px-2 py-0.5 rounded-full bg-white/[0.06] shrink-0 border-0 ml-auto">
+                      <span className="text-[11px] text-cool-slate font-medium px-2 py-0.5 rounded-full bg-white/[0.06] shrink-0 border-0 ml-auto">
                         {item.category}
                       </span>
                     </div>
@@ -377,7 +377,7 @@ export function AtMentionMenu({
         )}
 
         {allItems.length === 0 && (
-          <div className="py-6 text-center text-[13px] text-white/40">
+          <div className="py-6 text-center text-[13px] text-cool-slate">
             No matching options found
           </div>
         )}

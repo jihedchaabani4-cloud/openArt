@@ -8,11 +8,11 @@ import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { resolveMediaUrl } from "../../core/mediaRef.js";
 
 const VARIANTS = {
-  start:  { word: "Start",  HoverContent: () => <Plus size={15} strokeWidth={1.5} className="text-[rgba(218,220,224,0.7)]" /> },
-  end:    { word: "End",    HoverContent: () => <Plus size={15} strokeWidth={1.5} className="text-[rgba(218,220,224,0.7)]" /> },
-  motion: { word: "Motion", HoverContent: () => <Play size={15} strokeWidth={1.5} className="text-[rgba(218,220,224,0.7)]" /> },
-  ref:    { word: "Ref",    HoverContent: () => <Plus size={15} strokeWidth={1.5} className="text-[rgba(218,220,224,0.7)]" /> },
-  add:    { word: "Add",    HoverContent: () => <Plus size={15} strokeWidth={1.5} className="text-[rgba(218,220,224,0.7)]" /> },
+  start:  { word: "Start",  HoverContent: () => <Plus size={15} strokeWidth={1.5} className="text-cool-slate" /> },
+  end:    { word: "End",    HoverContent: () => <Plus size={15} strokeWidth={1.5} className="text-cool-slate" /> },
+  motion: { word: "Motion", HoverContent: () => <Play size={15} strokeWidth={1.5} className="text-cool-slate" /> },
+  ref:    { word: "Ref",    HoverContent: () => <Plus size={15} strokeWidth={1.5} className="text-cool-slate" /> },
+  add:    { word: "Add",    HoverContent: () => <Plus size={15} strokeWidth={1.5} className="text-cool-slate" /> },
 };
 
 export function ReferenceButton({
@@ -45,9 +45,9 @@ export function ReferenceButton({
         "w-[50px] h-[50px] rounded-sm",
         "flex items-center justify-center",
         "bg-white/[0.04]",
-        "border border-[rgba(218,220,224,0.15)]",
+        "border border-white/10",
         "transition-all duration-200 ease-out",
-        "hover:bg-white/[0.07] hover:border-[rgba(218,220,224,0.28)]",
+        "hover:bg-white/[0.07] hover:border-white/20",
         "active:scale-95",
         pulse && "animate-pulse-border",
         disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer",
@@ -59,7 +59,7 @@ export function ReferenceButton({
         <span
           className={cn(
             "pointer-events-none select-none",
-            "text-[13px] font-medium text-[rgba(218,220,224,0.75)]",
+            "text-[13px] font-medium text-cool-slate",
             "tracking-[0.01em] whitespace-nowrap",
             "transition-all duration-200 ease-out",
             HoverContent
@@ -176,7 +176,7 @@ export function ViewReference({
 
         {/* Hover overlay — cancel button */}
         <div
-          className="hover-icon-overlay absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-20"
+          className="hover-icon-overlay absolute inset-0 flex items-center justify-center bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-20"
           title={`Supprimer ${tooltipText}`}
         >
           <GoogleIcon

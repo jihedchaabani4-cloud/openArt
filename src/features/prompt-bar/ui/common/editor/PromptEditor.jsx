@@ -310,7 +310,7 @@ export function PromptEditor({
           }
           placeholder={
             !value && (
-              <span className="absolute top-1.5 left-0 text-white/25 text-[14.5px] pointer-events-none">
+              <span className="absolute top-1.5 left-0 text-cool-slate/50 text-[14.5px] pointer-events-none">
                 {placeholder}
               </span>
             )

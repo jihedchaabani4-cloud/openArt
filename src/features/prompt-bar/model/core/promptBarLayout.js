@@ -1,9 +1,9 @@
 const BASE_CARD_CLASS =
-  "relative w-full flex flex-col bg-(--background-base-pri) backdrop-blur-[80px] rounded-2xl min-h-[60px]";
+  "relative w-full flex flex-col bg-surface-panel rounded-2xl min-h-[60px] border border-white/10 shadow-none";
 
 export const PROMPT_BAR_VARIANTS = {
   generation: {
-    cardClassName: `${BASE_CARD_CLASS} border border-white/5`,
+    cardClassName: BASE_CARD_CLASS,
     innerClassName: "w-full flex flex-col gap-1 p-2.5",
   },
   edit: {
