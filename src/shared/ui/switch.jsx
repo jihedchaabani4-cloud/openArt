@@ -51,7 +51,7 @@ const Switch = React.forwardRef(({
       <SwitchPrimitive.Thumb
         data-slot="switch-thumb"
         className={cn(
-          "pointer-events-none block rounded-full shadow-md ring-0 transition-transform duration-200 ease-in-out bg-white data-[state=checked]:bg-black",
+          "pointer-events-none block rounded-full ring-0 transition-transform duration-200 ease-in-out bg-white data-[state=checked]:bg-black",
           isSm
             ? "size-3.5 data-[state=checked]:translate-x-4 data-[state=unchecked]:translate-x-0.5"
             : "size-5 data-[state=checked]:translate-x-5 data-[state=unchecked]:translate-x-0.5"

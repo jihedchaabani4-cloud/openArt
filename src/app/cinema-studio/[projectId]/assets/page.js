@@ -274,7 +274,7 @@ export default function AssetsPage({ params }) {
                                     CardComponent={MediaGridItem}
                                     onWorkflowClick={handleWorkflowClick}
                                     onCollectionClick={handleCollectionClick}
-                                    itemClassName="rounded-xl border-none shadow-xl"
+                                    itemClassName="rounded-lg border border-white/10 shadow-none"
                                 />
                                 {hasMore && (
                                     <div className="flex justify-center pt-2 text-sm text-white/45">

@@ -171,7 +171,7 @@ function IdentitySection() {
   }, [prompt, activeSubTab]);
 
   return (
-    <div className="flex rounded-xl overflow-hidden h-full">
+    <div className="flex rounded-lg overflow-hidden h-full">
       {/* Left Sidebar - Sub-tabs */}
       <div className="w-1/6 p-2 space-y-1">
         {IDENTITY_SUB_TABS.map((tab) => {
@@ -275,7 +275,7 @@ function HeadSection() {
   }, [prompt, activeSubTab]);
 
   return (
-    <div className="flex rounded-xl overflow-hidden h-full">
+    <div className="flex rounded-lg overflow-hidden h-full">
       <div className="w-1/6 p-2 space-y-1">
         {HEAD_SUB_TABS.map((tab) => {
           const isActive = activeSubTab === tab.id;
@@ -331,7 +331,7 @@ function DetailsSection() {
   }, [prompt, activeSubTab]);
 
   return (
-    <div className="flex rounded-xl overflow-hidden h-full">
+    <div className="flex rounded-lg overflow-hidden h-full">
       <div className="w-1/6 p-2 space-y-1">
         {DETAILS_SUB_TABS.map((tab) => {
           const isActive = activeSubTab === tab.id;

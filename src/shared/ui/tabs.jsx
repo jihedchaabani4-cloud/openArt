@@ -72,7 +72,7 @@ function TabsTrigger({
         variant === "pills" && [
           isSm ? "h-6 px-2.5 text-xs rounded-full" : "h-7 px-3.5 text-xs rounded-full",
           "text-white/60 hover:text-white hover:bg-white/5",
-          "data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:font-semibold data-[state=active]:shadow-xs",
+          "data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:font-semibold",
         ],
         // Underline variant
         variant === "underline" && [
@@ -84,7 +84,7 @@ function TabsTrigger({
         variant === "studio" && [
           "flex-1 py-1.5 rounded-sm text-xs uppercase tracking-wider font-semibold",
           "text-white/60 hover:text-white hover:bg-white/5",
-          "data-[state=active]:bg-lime-400 data-[state=active]:text-black data-[state=active]:shadow-sm",
+          "data-[state=active]:bg-lime-400 data-[state=active]:text-black",
         ],
         className
       )}

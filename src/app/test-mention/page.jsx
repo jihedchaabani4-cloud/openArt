@@ -343,9 +343,9 @@ export default function TestMentionPage() {
             <button
               type="button"
               onClick={() => setActiveTab("both")}
-              className={`px-3 py-1.5 rounded-xl text-[12px] font-medium transition-all ${
+              className={`px-3 py-1.5 rounded-lg text-[12px] font-medium transition-all ${
                 activeTab === "both"
-                  ? "bg-white text-black shadow-lg font-semibold"
+                  ? "bg-white text-black shadow-none font-semibold"
                   : "text-white/60 hover:text-white hover:bg-white/5"
               }`}
             >
@@ -354,9 +354,9 @@ export default function TestMentionPage() {
             <button
               type="button"
               onClick={() => setActiveTab("v1")}
-              className={`px-3 py-1.5 rounded-xl text-[12px] font-medium transition-all ${
+              className={`px-3 py-1.5 rounded-lg text-[12px] font-medium transition-all ${
                 activeTab === "v1"
-                  ? "bg-white text-black shadow-lg font-semibold"
+                  ? "bg-white text-black shadow-none font-semibold"
                   : "text-white/60 hover:text-white hover:bg-white/5"
               }`}
             >
@@ -365,9 +365,9 @@ export default function TestMentionPage() {
             <button
               type="button"
               onClick={() => setActiveTab("v2")}
-              className={`px-3 py-1.5 rounded-xl text-[12px] font-medium transition-all ${
+              className={`px-3 py-1.5 rounded-lg text-[12px] font-medium transition-all ${
                 activeTab === "v2"
-                  ? "bg-white text-black shadow-lg font-semibold"
+                  ? "bg-white text-black shadow-none font-semibold"
                   : "text-white/60 hover:text-white hover:bg-white/5"
               }`}
             >
@@ -423,11 +423,11 @@ export default function TestMentionPage() {
       <div className={`max-w-6xl mx-auto grid gap-8 ${activeTab === "both" ? "grid-cols-1 lg:grid-cols-2" : "grid-cols-1"}`}>
         {/* ── VERSION 1 CARD ── */}
         {(activeTab === "both" || activeTab === "v1") && (
-          <div className="flex flex-col gap-4 rounded-3xl bg-[#131415]/90 border border-white/10 p-6 shadow-2xl relative">
+          <div className="flex flex-col gap-4 rounded-2xl bg-[#131415]/90 border border-white/10 p-6 shadow-none relative">
             {/* Header Badge */}
             <div className="flex items-center justify-between pb-3 border-b border-white/5">
               <div className="flex items-center gap-2.5">
-                <span className="size-8 rounded-xl bg-purple-500/20 text-purple-400 border border-purple-500/30 flex items-center justify-center font-bold text-[13px]">
+                <span className="size-8 rounded-lg bg-purple-500/20 text-purple-400 border border-purple-500/30 flex items-center justify-center font-bold text-[13px]">
                   V1
                 </span>
                 <div>
@@ -458,7 +458,7 @@ export default function TestMentionPage() {
 
             {/* Interactive Prompt Bar Shell */}
             <div className="relative mt-2">
-              <div className="rounded-3xl bg-[#161718]/80 backdrop-blur-xl border border-white/10 p-4 shadow-none focus-within:border-white/30 transition-all">
+              <div className="rounded-2xl bg-[#161718]/80 backdrop-blur-xl border border-white/10 p-4 shadow-none focus-within:border-white/30 transition-all">
                 <LexicalComposer initialConfig={initialConfigV1}>
                   <div className="relative min-h-[70px] w-full">
                     <RichTextPlugin
@@ -520,11 +520,11 @@ export default function TestMentionPage() {
 
         {/* ── VERSION 2 CARD ── */}
         {(activeTab === "both" || activeTab === "v2") && (
-          <div className="flex flex-col gap-4 rounded-3xl bg-[#131415]/90 border border-white/10 p-6 shadow-2xl relative">
+          <div className="flex flex-col gap-4 rounded-2xl bg-[#131415]/90 border border-white/10 p-6 shadow-none relative">
             {/* Header Badge */}
             <div className="flex items-center justify-between pb-3 border-b border-white/5">
               <div className="flex items-center gap-2.5">
-                <span className="size-8 rounded-xl bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 flex items-center justify-center font-bold text-[13px]">
+                <span className="size-8 rounded-lg bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 flex items-center justify-center font-bold text-[13px]">
                   V2
                 </span>
                 <div>
@@ -574,7 +574,7 @@ export default function TestMentionPage() {
               />
 
               {/* Prompt Bar Shell (Border-free and shadow-free matching prompt bar) */}
-              <div className="w-full rounded-3xl bg-(--background-base-pri) backdrop-blur-[80px] p-3.5 shadow-none transition-all border-0">
+              <div className="w-full rounded-2xl bg-(--background-base-pri) backdrop-blur-[80px] p-3.5 shadow-none transition-all border-0">
                 <LexicalComposer initialConfig={initialConfigV2}>
                   <div className="relative min-h-[50px] w-full px-1">
                     <RichTextPlugin
@@ -646,7 +646,7 @@ export default function TestMentionPage() {
                     <button
                       type="button"
                       onClick={() => alert(`Submitted prompt: ${v2RawOutput}`)}
-                      className="size-8 rounded-full bg-white hover:bg-white/90 active:scale-95 text-black flex items-center justify-center transition-all shadow-md shrink-0 cursor-pointer"
+                      className="size-8 rounded-full bg-white hover:bg-white/90 active:scale-95 text-black flex items-center justify-center transition-all shadow-none shrink-0 cursor-pointer"
                       title="Generate"
                     >
                       <GoogleIcon iconName="add" className="text-[20px] font-bold text-black" />
@@ -671,7 +671,7 @@ export default function TestMentionPage() {
       </div>
 
       {/* Feature Comparison Table */}
-      <div className="max-w-6xl mx-auto mt-12 p-6 rounded-3xl bg-[#141516]/80 border border-white/10 backdrop-blur-xl">
+      <div className="max-w-6xl mx-auto mt-12 p-6 rounded-2xl bg-[#141516]/80 border border-white/10 backdrop-blur-xl">
         <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
           <GoogleIcon iconName="table_chart" className="text-[20px] text-white/70" />
           Comparison Breakdown

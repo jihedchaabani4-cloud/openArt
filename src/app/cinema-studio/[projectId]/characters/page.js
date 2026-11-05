@@ -158,7 +158,7 @@ export default function CharactersPage({ params }) {
                                 projectId={projectId}
                                 CardComponent={MediaGridItem}
                                 onWorkflowClick={handleWorkflowClick}
-                                itemClassName="rounded-xl border-none shadow-xl"
+                                itemClassName="rounded-lg border border-white/10 shadow-none"
                             />
                             {hasMore && (
                                 <div className="flex justify-center pt-2 text-sm text-white/45">
@@ -174,7 +174,7 @@ export default function CharactersPage({ params }) {
                     <Button
                         type="button"
                         onClick={() => router.push(`/cinema-studio/${projectId}/characters/new`)}
-                        className="flex items-center gap-2 px-6 py-4 h-auto rounded-2xl bg-[#4a4a4a] hover:bg-[#5a5a5a] text-[#d1d1d1] hover:text-white shadow-2xl shadow-black/50 transition-all active:scale-95 border border-white/5 backdrop-blur-md cursor-pointer"
+                        className="flex items-center gap-2 px-6 py-4 h-auto rounded-full bg-surface-card hover:bg-surface-elevated text-white transition-all active:scale-95 border border-white/10 shadow-none cursor-pointer"
                     >
                         <Plus className="size-5" />
                         <span className="font-medium text-[15px]">New character</span>

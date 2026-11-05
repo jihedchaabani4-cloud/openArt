@@ -12,7 +12,7 @@ export function SidebarFilterButton({ label, icon: Icon, active = false, onClick
       variant="ghost"
       onClick={onClick}
       className={cn(
-        "flex h-8 w-full items-center justify-between rounded-xl px-3 text-left text-[14px] transition",
+        "flex h-8 w-full items-center justify-between rounded-sm px-3 text-left text-[14px] transition",
         active ? "bg-white/12 text-white hover:bg-white/12" : "hover:bg-white/6"
       )}
     >
@@ -31,7 +31,7 @@ export function SidebarDropdownButton({ label, active = false, onClick }) {
       variant="ghost"
       onClick={onClick}
       className={cn(
-        "flex h-8 w-full items-center justify-between rounded-xl px-3 text-left text-[14px] transition",
+        "flex h-8 w-full items-center justify-between rounded-sm px-3 text-left text-[14px] transition",
         active ? "bg-white/12 text-white hover:bg-white/12" : "hover:bg-white/6 hover:text-white/88"
       )}
     >

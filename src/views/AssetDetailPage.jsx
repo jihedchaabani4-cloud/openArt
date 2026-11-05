@@ -35,7 +35,7 @@ function AssetDetailState({ message = null }) {
   return (
     <div className="flex min-h-[calc(100vh-75px)] w-full items-center justify-center px-6">
       {message ? (
-        <div className="rounded-3xl border border-white/10 bg-white/[0.03] px-6 py-5 text-sm text-white/45">
+        <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-6 py-5 text-sm text-white/45">
           {message}
         </div>
       ) : null}

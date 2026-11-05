@@ -165,7 +165,7 @@ mat-icon {
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: 'Google Sans Text', 'Google Sans', var(--font-google-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-sans: var(--font-inter), var(--font-arabic), 'Inter', 'Noto Sans Arabic', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-mono: var(--font-geist-mono);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -277,12 +277,18 @@ mat-icon {
   --color-danger: var(--color-danger, #fe6e6e);
   --color-success: var(--color-success, #80da88);
   --color-warning: var(--color-warning, #fcbd00);
+  --color-cool-slate: #767d88;
+  --color-mid-slate: #7d848e;
+  --color-border-hairline: rgba(255, 255, 255, 0.10);
   --color-background-state-75: var(--background-state-75, rgba(22, 23, 24, 0.75));
 }
 
 :root {
   --background-primary: #000000;
   --background-base-primary: #000000;
+  --color-cool-slate: #767d88;
+  --color-mid-slate: #7d848e;
+  --border-hairline: #27272a;
   --packages-bg: rgb(43, 43, 43, 0.8);
   --radius: 0.625rem;
   --color-q-text-primary: #f7f7f8;
@@ -878,14 +884,14 @@ mat-icon {
   /* Global Typography & Extended Colors */
   -webkit-text-size-adjust: 100%;
     tab-size: 4;
-    font-family: 'Google Sans Text', 'Google Sans', var(--font-google-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-family: var(--font-inter), var(--font-arabic), 'Inter', 'Noto Sans Arabic', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     font-feature-settings: 'liga', 'kern';
     font-variation-settings: "GRAD" 0;
     -webkit-tap-highlight-color: transparent;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
-    --font-sans: 'Google Sans Text', 'Google Sans', var(--font-google-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --font-sans: var(--font-inter), var(--font-arabic), 'Inter', 'Noto Sans Arabic', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     --font-mono: var(--font-geist-mono), monospace;
     --color-red-50: oklch(97.1% .013 17.38);
     --color-red-500: oklch(63.7% .237 25.331);

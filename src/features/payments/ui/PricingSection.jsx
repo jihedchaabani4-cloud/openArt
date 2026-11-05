@@ -265,7 +265,7 @@ function ComparePlansSection({ packages, modelsComparison, onBuy, isPending, pen
                                                     variant="ghost"
                                                     onClick={() => onBuy(pkg.id)}
                                                     disabled={isPending && pendingPackageId === pkg.id}
-                                                    className="mt-3 h-10 w-full rounded-xl px-4 text-sm font-semibold hover:text-white"
+                                                    className="mt-3 h-10 w-full rounded-lg px-4 text-sm font-semibold hover:text-white"
                                                     style={{ background: BUTTON_SURFACE, color: TEXT_PRIMARY }}
                                                 >
                                                     {isPending && pendingPackageId === pkg.id ? (
@@ -515,7 +515,7 @@ function SkeletonCard() {
     return (
         <div
             style={{ background: SURFACE_BACKGROUND_ELEVATED, borderColor: SURFACE_BORDER }}
-            className="aspect-[1/1.08] w-full rounded-xl border"
+            className="aspect-[1/1.08] w-full rounded-lg border"
         />
     );
 }
@@ -710,7 +710,7 @@ export function PricingSection({ hideFaq = false }) {
                                 });
                             }}
                             disabled={!nonTrialPackages.length}
-                            className="h-10 rounded-xl px-5 text-sm font-semibold text-white transition-colors"
+                            className="h-10 rounded-lg px-5 text-sm font-semibold text-white transition-colors"
                             style={{ background: BUTTON_PRIMARY }}
                             onMouseOver={(event) => {
                                 event.currentTarget.style.backgroundColor = BUTTON_PRIMARY_HOVER;

@@ -364,7 +364,7 @@ export function NewElementDialog({ open, onOpenChange, projectId: propProjectId 
                         className={cn(
                           "relative size-14 rounded-sm overflow-hidden cursor-pointer shrink-0 border-none transition-all",
                           isSelected
-                            ? "ring-2 ring-white/90 shadow-lg opacity-100"
+                            ? "ring-2 ring-white/90 opacity-100"
                             : "opacity-50 hover:opacity-90"
                         )}
                       >

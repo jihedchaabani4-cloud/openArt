@@ -11,7 +11,7 @@ describe("Button Primitive — 6 Core Semantic Variants Architecture", () => {
       expect(btn.className).toContain("rounded-sm");
       expect(btn.className).toContain("h-8");
       expect(btn.className).toContain("px-3.5");
-      expect(btn.className).toContain("text-xs");
+      expect(btn.className).toContain("text-sm");
       expect(btn.className).toContain("bg-transparent");
       expect(btn.getAttribute("data-slot")).toBe("button");
       expect(btn.getAttribute("data-variant")).toBe("ghost");

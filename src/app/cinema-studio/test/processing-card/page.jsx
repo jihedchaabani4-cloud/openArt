@@ -44,7 +44,7 @@ export default function ProcessingCardTestPage() {
           </div>
 
           {/* Controls Bar */}
-          <div className="flex flex-wrap items-center gap-3 bg-white/[0.04] p-3 rounded-xl border border-white/10">
+          <div className="flex flex-wrap items-center gap-3 bg-white/[0.04] p-3 rounded-lg border border-white/10">
             <button
               type="button"
               onClick={() => setIsAutoSimulating(!isAutoSimulating)}
@@ -110,7 +110,7 @@ export default function ProcessingCardTestPage() {
               progress={progress}
               aspectRatio="16/9"
               showPlayIcon={showPlayIcon}
-              className="w-full shadow-2xl border border-white/5"
+              className="w-full shadow-none border border-white/5"
             />
           </div>
         </section>
@@ -129,7 +129,7 @@ export default function ProcessingCardTestPage() {
                 progress={progress}
                 aspectRatio="16/9"
                 showPlayIcon={showPlayIcon}
-                className="w-full shadow-lg border border-white/5"
+                className="w-full shadow-none border border-white/5"
               />
             </div>
 
@@ -140,7 +140,7 @@ export default function ProcessingCardTestPage() {
                 progress={progress}
                 aspectRatio="1/1"
                 showPlayIcon={showPlayIcon}
-                className="w-full shadow-lg border border-white/5"
+                className="w-full shadow-none border border-white/5"
               />
             </div>
 
@@ -151,7 +151,7 @@ export default function ProcessingCardTestPage() {
                 progress={progress}
                 aspectRatio="9/16"
                 showPlayIcon={showPlayIcon}
-                className="w-full shadow-lg border border-white/5"
+                className="w-full shadow-none border border-white/5"
               />
             </div>
 
@@ -162,7 +162,7 @@ export default function ProcessingCardTestPage() {
                 progress={progress}
                 aspectRatio="21/9"
                 showPlayIcon={showPlayIcon}
-                className="w-full shadow-lg border border-white/5"
+                className="w-full shadow-none border border-white/5"
               />
             </div>
           </div>
@@ -206,7 +206,7 @@ export default function ProcessingCardTestPage() {
               <ProcessingCard
                 showPlayIcon={showPlayIcon}
                 aspectRatio="370/240"
-                className="w-full shadow-lg border border-white/5"
+                className="w-full shadow-none border border-white/5"
               />
             </div>
           </div>
@@ -219,19 +219,19 @@ export default function ProcessingCardTestPage() {
             Reverse Engineered Video Analysis Specifications
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-white/60">
-            <div className="flex flex-col gap-1 p-3 rounded-xl bg-black/40 border border-white/5">
+            <div className="flex flex-col gap-1 p-3 rounded-lg bg-black/40 border border-white/5">
               <span className="text-white font-medium">Card Container</span>
               <span>Background: <code className="text-white/80">#17181a</code> (pure neutral dark)</span>
               <span>Radius: <code className="text-white/80">rounded-2xl</code> (~16px)</span>
               <span>No skeleton shimmer, no spinner</span>
             </div>
-            <div className="flex flex-col gap-1 p-3 rounded-xl bg-black/40 border border-white/5">
+            <div className="flex flex-col gap-1 p-3 rounded-lg bg-black/40 border border-white/5">
               <span className="text-white font-medium">Blobs Motion</span>
               <span>Blob A: 55% x 70%, 10s orbital loop</span>
               <span>Blob B: 40% x 50%, 13s loop (opacity 0.5)</span>
               <span>Blur: <code className="text-white/80">blur-3xl</code> (~64px ethereal glow)</span>
             </div>
-            <div className="flex flex-col gap-1 p-3 rounded-xl bg-black/40 border border-white/5">
+            <div className="flex flex-col gap-1 p-3 rounded-lg bg-black/40 border border-white/5">
               <span className="text-white font-medium">Overlays</span>
               <span>Top-left: Semi-transparent Play icon (~16px)</span>
               <span>Top-right: <code className="text-white/80">11px font-medium text-white/60</code></span>

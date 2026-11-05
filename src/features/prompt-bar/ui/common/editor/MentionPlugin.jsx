@@ -214,7 +214,7 @@ export function MentionPlugin({ references = [], onOpenMediaLibrary }) {
                   e.preventDefault();
                   insertMention(item, i);
                 }}
-                className={`flex items-center gap-2.5 px-2.5 py-1.5 rounded-xl cursor-pointer transition-colors ${
+                className={`flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg cursor-pointer transition-colors ${
                   isSelected ? "bg-white/15 text-white" : "hover:bg-white/10 text-white/80"
                 }`}
               >
@@ -248,7 +248,7 @@ export function MentionPlugin({ references = [], onOpenMediaLibrary }) {
                 setOpen(false);
                 onOpenMediaLibrary();
               }}
-              className={`flex items-center gap-2 px-2.5 py-1.5 rounded-xl cursor-pointer transition-colors text-[12px] ${
+              className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg cursor-pointer transition-colors text-[12px] ${
                 activeIdx === filtered.length ? "bg-white/15 text-white" : "hover:bg-white/10 text-white/70 hover:text-white"
               }`}
             >

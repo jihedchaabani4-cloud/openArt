@@ -38,7 +38,7 @@ export function AssetsSidebar({ hidden = false }) {
             icon={Search}
             onClear={searchQuery ? () => setSearchQuery("") : undefined}
             clearIcon={X}
-            className="h-10 rounded-xl px-3 text-[13px]"
+            className="h-10 rounded-lg px-3 text-[13px]"
           />
         </div>
 

@@ -29,7 +29,7 @@ export function ElementsEmptyState({ onCreateElement, className = "" }) {
       {/* ── Top Header Section (Icon Badge + Titles) ── */}
       <div className="flex flex-col items-center gap-3 text-center max-w-sm">
         {/* Proportional 48px circle with 24px icon (1:2 balanced ratio) */}
-        <span className="size-12 flex items-center justify-center rounded-full bg-white/[0.06] backdrop-blur-xl shadow-md border-none shrink-0">
+        <span className="size-12 flex items-center justify-center rounded-full bg-white/[0.06] border border-white/10 shrink-0">
           <GoogleIcon
             iconName="alternate_email"
             opticalSize={24}
@@ -62,7 +62,7 @@ export function ElementsEmptyState({ onCreateElement, className = "" }) {
               onCreateElement?.();
             }
           }}
-          className="group relative p-3.5 flex flex-col gap-2.5 overflow-hidden bg-white/[0.04] hover:bg-white/[0.07] transition-all duration-200 cursor-pointer h-[220px] rounded-2xl border-none shadow-sm"
+          className="group relative p-3.5 flex flex-col gap-2.5 overflow-hidden bg-white/[0.04] hover:bg-white/[0.07] transition-all duration-200 cursor-pointer h-[220px] rounded-2xl border border-white/10 shadow-none"
         >
           <div className="flex shrink-0 items-center gap-2.5 min-w-0">
             <span className="size-[30px] flex shrink-0 items-center justify-center rounded-full bg-white/[0.08] border-none">
@@ -95,7 +95,7 @@ export function ElementsEmptyState({ onCreateElement, className = "" }) {
         </div>
 
         {/* Card 2: Add to prompt-box */}
-        <div className="p-3.5 flex flex-col gap-2.5 overflow-hidden bg-white/[0.04] h-[220px] rounded-2xl border-none shadow-sm">
+        <div className="p-3.5 flex flex-col gap-2.5 overflow-hidden bg-white/[0.04] h-[220px] rounded-2xl border border-white/10 shadow-none">
           <div className="flex shrink-0 items-center gap-2.5 min-w-0">
             <span className="size-[30px] flex shrink-0 items-center justify-center rounded-full bg-white/[0.08] border-none">
               <GoogleIcon
@@ -126,7 +126,7 @@ export function ElementsEmptyState({ onCreateElement, className = "" }) {
         </div>
 
         {/* Card 3: Use for consistency */}
-        <div className="p-3.5 flex flex-col gap-2.5 overflow-hidden bg-white/[0.04] h-[220px] rounded-2xl border-none shadow-sm">
+        <div className="p-3.5 flex flex-col gap-2.5 overflow-hidden bg-white/[0.04] h-[220px] rounded-2xl border border-white/10 shadow-none">
           <div className="flex shrink-0 items-center gap-2.5 min-w-0">
             <span className="size-[30px] flex shrink-0 items-center justify-center rounded-full bg-white/[0.08] border-none">
               <GoogleIcon

@@ -21,7 +21,7 @@ export function AssetsNavbar({ hidden = false }) {
         <div className="flex shrink-0 items-center gap-3">
           <Link
             href="/"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-xl text-white/72 transition hover:bg-white/5 hover:text-white"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-sm text-white/72 transition hover:bg-white/5 hover:text-white"
             aria-label="Back to home"
           >
             <ArrowLeft className="h-6 w-6" strokeWidth={3} />

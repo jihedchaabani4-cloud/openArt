@@ -194,7 +194,7 @@ export default function NewCharacterPage() {
         <div className="w-full px-4 sm:px-8 py-8 flex flex-col gap-8 items-center justify-center min-h-[calc(100vh-240px)]">
           <AnimatePresence>
             {error && (
-              <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} className="text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 w-full max-w-[55rem]">
+              <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} className="text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-3 w-full max-w-[55rem]">
                 {error}
               </motion.div>
             )}

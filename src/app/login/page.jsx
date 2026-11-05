@@ -78,14 +78,14 @@ export default function LoginPage() {
                 initial={{ scale: 0.8 }}
                 animate={{ scale: 1 }}
                 transition={{ type: "spring", bounce: 0.5 }}
-                className="flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-tr from-purple-500 to-blue-500 shadow-lg shadow-purple-500/30"
+                className="flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-tr from-purple-500 to-blue-500 shadow-none border border-white/10"
               >
                 <Sparkles className="w-8 h-8 text-white" />
               </motion.div>
             </div>
 
             {/* Card Container */}
-            <div className="backdrop-blur-xl bg-white/[0.03] border border-white/[0.08] p-8 rounded-3xl shadow-2xl relative overflow-hidden">
+            <div className="bg-surface-panel border border-white/10 p-8 rounded-2xl shadow-none relative overflow-hidden">
               
               {/* Shine effect on card */}
               <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
@@ -112,7 +112,7 @@ export default function LoginPage() {
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full pl-11 pr-4 py-3 bg-black/40 border border-white/10 rounded-xl text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all text-sm min-h-0"
+                      className="w-full pl-11 pr-4 py-3 bg-black/40 border border-white/10 rounded-sm text-white placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-white/20 transition-all text-sm min-h-0"
                       placeholder="name@example.com"
                       required
                     />
@@ -133,7 +133,7 @@ export default function LoginPage() {
                       type="password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="w-full pl-11 pr-4 py-3 bg-black/40 border border-white/10 rounded-xl text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all text-sm min-h-0"
+                      className="w-full pl-11 pr-4 py-3 bg-black/40 border border-white/10 rounded-sm text-white placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-white/20 transition-all text-sm min-h-0"
                       placeholder="••••••••"
                       required
                     />
@@ -145,7 +145,7 @@ export default function LoginPage() {
                   <motion.div
                     initial={{ opacity: 0, y: -8 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 text-center"
+                    className="text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-3 text-center"
                   >
                     {error}
                   </motion.div>
@@ -159,7 +159,7 @@ export default function LoginPage() {
                   onHoverStart={() => setIsHovered(true)}
                   onHoverEnd={() => setIsHovered(false)}
                   disabled={isLoading}
-                  className="w-full mt-6 bg-gradient-to-r from-purple-600 to-blue-600 text-white font-medium py-3 rounded-xl flex items-center justify-center space-x-2 shadow-lg shadow-purple-500/25 border border-white/10 overflow-hidden relative group disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="w-full mt-6 bg-white text-black font-semibold py-3 rounded-sm flex items-center justify-center space-x-2 shadow-none border border-white/10 overflow-hidden relative group disabled:opacity-60 disabled:cursor-not-allowed text-sm"
                 >
                   <span className="relative z-10 flex items-center gap-2">
                     Sign In
@@ -190,7 +190,7 @@ export default function LoginPage() {
                   onClick={handleMicrosoftLogin}
                   whileHover={{ scale: 1.02, backgroundColor: "rgba(255,255,255,0.1)" }}
                   whileTap={{ scale: 0.98 }}
-                  className="flex items-center justify-center gap-2 py-2.5 bg-white/[0.03] border border-white/10 rounded-xl transition-colors"
+                  className="flex items-center justify-center gap-2 py-2.5 bg-white/[0.03] border border-white/10 rounded-sm transition-colors"
                 >
                   <Laptop className="w-5 h-5 text-white/80" />
                   <span className="text-sm font-medium text-white/80">Microsoft</span>
@@ -200,7 +200,7 @@ export default function LoginPage() {
                   onClick={handleGoogleLogin}
                   whileHover={{ scale: 1.02, backgroundColor: "rgba(255,255,255,0.1)" }}
                   whileTap={{ scale: 0.98 }}
-                  className="flex items-center justify-center gap-2 py-2.5 bg-white/[0.03] border border-white/10 rounded-xl transition-colors"
+                  className="flex items-center justify-center gap-2 py-2.5 bg-white/[0.03] border border-white/10 rounded-sm transition-colors"
                 >
                   <Chrome className="w-5 h-5 text-white/80" />
                   <span className="text-sm font-medium text-white/80">Google</span>

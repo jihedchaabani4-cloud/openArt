@@ -1,5 +1,5 @@
 import "./globals.css";
-import { Geist_Mono } from "next/font/google";
+import { Geist_Mono, Inter, Noto_Sans_Arabic } from "next/font/google";
 import localFont from "next/font/local";
 
 import { ReactQueryProvider } from "@/shared/lib/ReactQueryProvider";
@@ -10,6 +10,18 @@ import Script from "next/script";
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+const inter = Inter({
+  variable: "--font-inter",
+  subsets: ["latin"],
+  display: "swap",
+});
+
+const arabic = Noto_Sans_Arabic({
+  variable: "--font-arabic",
+  subsets: ["arabic"],
+  display: "swap",
 });
 
 const googleSans = localFont({
@@ -78,7 +90,7 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body
-        className={`${googleSans.variable} ${geistMono.variable} antialiased bg-background text-foreground font-sans`}
+        className={`${inter.variable} ${arabic.variable} ${googleSans.variable} ${geistMono.variable} antialiased bg-background text-foreground font-sans`}
         suppressHydrationWarning
       >
         <ReactQueryProvider>

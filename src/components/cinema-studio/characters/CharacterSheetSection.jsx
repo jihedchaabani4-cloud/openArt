@@ -122,7 +122,7 @@ export function CharacterSheetSection({
           <p className="text-white/60 text-sm">Updating Body Sheet…</p>
         </div>
       ) : isBusy && !hasImage ? (
-        <div className="relative aspect-video w-full max-w-[850px] mx-auto rounded-2xl overflow-hidden shadow-lg select-none group/sheet">
+        <div className="relative aspect-video w-full max-w-[850px] mx-auto rounded-2xl overflow-hidden border border-white/10 shadow-none select-none group/sheet">
           <ProcessingCard
             progress={item?.progress ?? workflow?.progress}
             aspectRatio="16/9"
@@ -163,7 +163,7 @@ export function CharacterSheetSection({
           </div>
         </div>
       ) : isError ? (
-        <div className="relative aspect-video w-full max-w-[850px] mx-auto rounded-2xl overflow-hidden shadow-lg select-none group/sheet">
+        <div className="relative aspect-video w-full max-w-[850px] mx-auto rounded-2xl overflow-hidden border border-white/10 shadow-none select-none group/sheet">
           <FlowErrorTile
             error={item?.error_message || item?.error || "Generation failed. You can upload a custom turnaround sheet or choose from project assets."}
             onReusePrompt={onOpenAssets}
@@ -212,11 +212,11 @@ export function CharacterSheetSection({
             src={activeSheetSrc}
             status="completed"
             fit="contain"
-            className="group/sheet relative max-w-full max-h-[520px] rounded-xl overflow-hidden border-none shadow-2xl flex items-center justify-center bg-transparent"
+            className="group/sheet relative max-w-full max-h-[520px] rounded-lg overflow-hidden border-none shadow-none flex items-center justify-center bg-transparent"
             style={{
               maxHeight: 520,
             }}
-            mediaClassName="rounded-xl object-contain max-h-[520px] w-auto h-auto"
+            mediaClassName="rounded-lg object-contain max-h-[520px] w-auto h-auto"
             showLikedBadge={false}
             showVideoBadge={false}
             showMenu={false}
@@ -224,7 +224,7 @@ export function CharacterSheetSection({
             onError={() => setImageLoadError && setImageLoadError(true)}
             overlay={
               isUpdatingSheet ? (
-                <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] z-40 flex flex-col items-center justify-center gap-2 rounded-xl">
+                <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] z-40 flex flex-col items-center justify-center gap-2 rounded-lg">
                   <Loader2 className="size-7 text-white animate-spin" />
                   <span className="text-xs text-white/80">Updating…</span>
                 </div>

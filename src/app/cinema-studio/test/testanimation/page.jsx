@@ -27,7 +27,7 @@ export default function ShineTextTestPage() {
           </div>
 
           {/* Controls Bar */}
-          <div className="flex flex-wrap items-center gap-3 bg-white/[0.04] p-3 rounded-xl border border-white/10">
+          <div className="flex flex-wrap items-center gap-3 bg-white/[0.04] p-3 rounded-lg border border-white/10">
             <button
               type="button"
               onClick={() => setActive(!active)}
@@ -77,7 +77,7 @@ export default function ShineTextTestPage() {
             <span className="text-xs text-white/40">Default cycle: 2.6s sweep + soft hold</span>
           </div>
 
-          <div className="p-10 rounded-2xl bg-[#141518] border border-white/5 shadow-2xl flex items-center justify-center">
+          <div className="p-10 rounded-2xl bg-[#141518] border border-white/5 shadow-none flex items-center justify-center">
             <ShineText
               active={active}
               duration={duration}
@@ -132,28 +132,28 @@ export default function ShineTextTestPage() {
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <div className="p-6 rounded-xl bg-[#141518] border border-white/5 flex flex-col gap-3">
+            <div className="p-6 rounded-lg bg-[#141518] border border-white/5 flex flex-col gap-3">
               <span className="text-xs text-white/50 font-mono">Image generation</span>
               <ShineText active={active} duration={duration} className="text-xl font-semibold">
                 Generating your character…
               </ShineText>
             </div>
 
-            <div className="p-6 rounded-xl bg-[#141518] border border-white/5 flex flex-col gap-3">
+            <div className="p-6 rounded-lg bg-[#141518] border border-white/5 flex flex-col gap-3">
               <span className="text-xs text-white/50 font-mono">Video generation</span>
               <ShineText active={active} duration={duration} className="text-xl font-semibold">
                 Rendering your scene…
               </ShineText>
             </div>
 
-            <div className="p-6 rounded-xl bg-[#141518] border border-white/5 flex flex-col gap-3">
+            <div className="p-6 rounded-lg bg-[#141518] border border-white/5 flex flex-col gap-3">
               <span className="text-xs text-white/50 font-mono">Long copy (sweep across wrap)</span>
               <ShineText active={active} duration={duration} className="text-xl font-semibold">
                 Upscaling 4× — almost there, polishing details…
               </ShineText>
             </div>
 
-            <div className="p-6 rounded-xl bg-[#141518] border border-white/5 flex flex-col gap-3">
+            <div className="p-6 rounded-lg bg-[#141518] border border-white/5 flex flex-col gap-3">
               <span className="text-xs text-white/50 font-mono">active=false (idle comparison)</span>
               <ShineText active={false} className="text-xl font-semibold">
                 Upscaling 4× — almost there, polishing details…
@@ -169,19 +169,19 @@ export default function ShineTextTestPage() {
             Spec Sheet
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-white/60">
-            <div className="flex flex-col gap-1 p-3 rounded-xl bg-black/40 border border-white/5">
+            <div className="flex flex-col gap-1 p-3 rounded-lg bg-black/40 border border-white/5">
               <span className="text-white font-medium">Glyphs &amp; Colors</span>
               <span>Base: dim <code className="text-white/80">white/38%</code> over dark surfaces</span>
               <span>Glint: bright <code className="text-white/80">white/96%</code> (aurora family)</span>
               <span>Background clip: <code className="text-white/80">background-clip: text</code></span>
             </div>
-            <div className="flex flex-col gap-1 p-3 rounded-xl bg-black/40 border border-white/5">
+            <div className="flex flex-col gap-1 p-3 rounded-lg bg-black/40 border border-white/5">
               <span className="text-white font-medium">Motion</span>
               <span>Streak sweeps <strong>start → end</strong> (left → right)</span>
               <span>0–10% hold, 10–60% sweep, 60–100% hold → soft pause before loop</span>
               <span>Default cycle <code className="text-white/80">2.6s</code> (adjustable)</span>
             </div>
-            <div className="flex flex-col gap-1 p-3 rounded-xl bg-black/40 border border-white/5">
+            <div className="flex flex-col gap-1 p-3 rounded-lg bg-black/40 border border-white/5">
               <span className="text-white font-medium">Behavior</span>
               <span><code className="text-white/80">active</code>: loops while processing</span>
               <span><code className="text-white/80">active=false</code> → static dim, no animation</span>

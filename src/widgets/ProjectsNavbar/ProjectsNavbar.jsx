@@ -66,13 +66,13 @@ export function ProjectsNavbar() {
                 {/* ── Center: Nav Links ── */}
                 <div className="absolute left-1/2 -translate-x-1/2 hidden md:flex items-center gap-1">
 
-                    <Link href="/cinema-studio" className="text-[14px] font-semibold text-white/90 hover:text-white transition-colors px-3 py-2 rounded-xl hover:bg-white/5">
+                    <Link href="/cinema-studio" className="text-[14px] font-semibold text-white/90 hover:text-white transition-colors px-3 py-2 rounded-sm hover:bg-white/5">
                         Cinema Studio
                     </Link>
-                    <Link href="/pricing" className="text-[14px] font-semibold text-white/90 hover:text-white transition-colors px-3 py-2 rounded-xl hover:bg-white/5">
+                    <Link href="/pricing" className="text-[14px] font-semibold text-white/90 hover:text-white transition-colors px-3 py-2 rounded-sm hover:bg-white/5">
                         Pricing
                     </Link>
-                    <Link href="/assets" className="text-[14px] font-semibold text-white/90 hover:text-white transition-colors px-3 py-2 rounded-xl hover:bg-white/5">
+                    <Link href="/assets" className="text-[14px] font-semibold text-white/90 hover:text-white transition-colors px-3 py-2 rounded-sm hover:bg-white/5">
                         Assets
                     </Link>
                 </div>

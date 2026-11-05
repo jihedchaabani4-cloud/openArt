@@ -98,13 +98,10 @@ export function FlowSelect({
             sideOffset={8}
             collisionPadding={16}
             avoidCollisions
-            className="z-[99999] rounded-lg shadow-2xl p-1 bg-[rgba(22,23,24,0.9)] backdrop-blur-2xl border border-white/10 overflow-y-auto font-sans antialiased outline-none"
+            className="z-[99999] rounded-lg p-1 bg-surface-card border border-white/10 shadow-none overflow-y-auto font-sans antialiased outline-none"
             style={{
               width: `${width}px`,
               maxHeight: `${maxHeightLimit}px`,
-              backgroundColor: "rgba(22, 23, 24, 0.9)",
-              backdropFilter: "blur(60px) saturate(180%) contrast(105%)",
-              WebkitBackdropFilter: "blur(60px) saturate(180%) contrast(105%)",
             }}
           >
             {items.map((item) => {

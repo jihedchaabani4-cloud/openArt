@@ -67,7 +67,7 @@ function VideoControlsBar({
   return (
     <div className="p-3 w-full transition-opacity duration-300">
       <div
-        className="flex items-center gap-2.5 p-2 px-3 bg-black/70 backdrop-blur-md border border-white/10 rounded-xl"
+        className="flex items-center gap-2.5 p-2 px-3 bg-black/70 backdrop-blur-md border border-white/10 rounded-lg"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Play/Pause */}

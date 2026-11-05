@@ -30,7 +30,7 @@ export function HowToDrawer({ isOpen, onClose }) {
           animate={{ x: 0 }}
           exit={{ x: "100%" }}
           transition={{ type: "spring", damping: 25, stiffness: 250 }}
-          className="relative w-full max-w-md h-full bg-[#121215] border-l border-white/10 p-6 flex flex-col justify-between shadow-2xl z-10 overflow-y-auto"
+          className="relative w-full max-w-md h-full bg-[#121215] border-l border-white/10 p-6 flex flex-col justify-between shadow-none z-10 overflow-y-auto"
         >
           <div>
             {/* Header */}

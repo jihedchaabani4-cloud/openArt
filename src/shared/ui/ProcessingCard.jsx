@@ -117,12 +117,12 @@ export function ProcessingCard({
 
       {/* ── Optional Top-Left Play Icon (Only when isVideo or showPlayIcon) ── */}
       {shouldShowPlayIcon && (
-        <Play className="absolute left-3 top-3 h-3.5 w-3.5 text-white/50 fill-white/50 pointer-events-none drop-shadow-sm" />
+        <Play className="absolute left-3 top-3 h-3.5 w-3.5 text-white/50 fill-white/50 pointer-events-none" />
       )}
 
       {/* ── Top-Right Progress Badge ── */}
       {hasProgress && (
-        <span className="absolute right-3 top-3 text-[11px] font-medium text-white/60 tabular-nums pointer-events-none drop-shadow-sm">
+        <span className="absolute right-3 top-3 text-[11px] font-medium text-white/60 tabular-nums pointer-events-none">
           {typeof progress === "number" ? Math.round(progress) : progress}%
         </span>
       )}

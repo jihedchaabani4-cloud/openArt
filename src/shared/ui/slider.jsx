@@ -85,7 +85,7 @@ const Slider = React.forwardRef(({
           "block transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-black disabled:pointer-events-none cursor-pointer",
           isBar
             ? "w-1 h-5 rounded-full bg-white shadow-none"
-            : cn("rounded-full bg-white shadow-md hover:scale-110", isSm ? "size-3" : "size-4")
+            : cn("rounded-full bg-white hover:scale-110", isSm ? "size-3" : "size-4")
         )}
       />
     </SliderPrimitive.Root>

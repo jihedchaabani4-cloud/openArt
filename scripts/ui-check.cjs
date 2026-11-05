@@ -43,6 +43,8 @@ const RULES = [
     re: /style=\{\{/g },
   { id: 'U6', desc: 'dead radius class (rounded-button, rounded-card, rounded-dialog, rounded-badge, rounded-input)', ext: /\.(jsx?|tsx?)$/,
     re: /\brounded-(button|card|dialog|badge|input)\b/g },
+  { id: 'U7', desc: 'positive Tailwind shadow class (shadow-xs, shadow-sm, shadow-md, shadow-lg, shadow-xl, shadow-2xl; use shadow-none or border separation)', ext: /\.(jsx?|tsx?)$/,
+    re: /\bshadow-(xs|sm|md|lg|xl|2xl)\b/g },
 ];
 
 function collect() {

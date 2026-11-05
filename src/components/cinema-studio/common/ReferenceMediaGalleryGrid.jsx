@@ -121,7 +121,7 @@ export function ReferenceMediaGalleryGrid({
             aspectRatio: `${width} / ${height}`,
             transform: "translateZ(0)",
           }}
-          className="group relative rounded-xl overflow-hidden bg-[#0a0a0a] border-none shadow-xl flex items-center justify-center"
+          className="group relative rounded-lg overflow-hidden bg-[#0a0a0a] border-none shadow-none flex items-center justify-center"
           showLikedBadge={false}
           showVideoBadge={false}
           showMenu={false}
@@ -167,7 +167,7 @@ export function ReferenceMediaGalleryGrid({
           }
           overlay={
             isLoadingThis ? (
-              <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] z-30 flex items-center justify-center rounded-xl">
+              <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] z-30 flex items-center justify-center rounded-lg">
                 <Loader2 className="size-6 text-white animate-spin" />
               </div>
             ) : null

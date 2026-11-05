@@ -82,9 +82,9 @@ export function InlineRenamePill({
       onDragStart={(e) => { e.preventDefault(); e.stopPropagation(); }}
       className={cn(
         "flex items-center gap-3.5",
-        "bg-(--background-base-pri) backdrop-blur-[80px] rounded-2xl",
+        "bg-surface-panel border border-white/10 rounded-2xl",
         "px-5 py-3",
-        "shadow-2xl shadow-black/80",
+        "shadow-none",
         "min-w-[400px] max-w-[min(92vw,560px)]",
         "select-none",
         className

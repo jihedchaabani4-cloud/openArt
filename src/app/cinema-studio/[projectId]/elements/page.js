@@ -159,7 +159,7 @@ export default function ElementsPage({ params }) {
                                 projectId={projectId}
                                 CardComponent={MediaGridItem}
                                 onWorkflowClick={handleWorkflowClick}
-                                itemClassName="rounded-xl border-none shadow-xl"
+                                itemClassName="rounded-lg border border-white/10 shadow-none"
                             />
                             {hasMore && (
                                 <div className="flex justify-center pt-2 text-sm text-white/45">

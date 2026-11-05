@@ -145,7 +145,7 @@ describe("EditNavbar & NavbarCore matches StudioNavbar layout", () => {
 });
 
 describe("Media Item border radius", () => {
-  it("uses rounded-xl instead of rounded-2xl across MediaGridItem and gallery views", () => {
+  it("uses rounded-lg instead of rounded-2xl across MediaGridItem and gallery views", () => {
     const assetsFile = fs.readFileSync(
       path.resolve(__dirname, "../../../app/cinema-studio/[projectId]/assets/page.js"),
       "utf8"
@@ -155,9 +155,9 @@ describe("Media Item border radius", () => {
       "utf8"
     );
 
-    expect(assetsFile).toContain("rounded-xl");
+    expect(assetsFile).toContain("rounded-lg");
     expect(assetsFile).not.toContain("rounded-2xl");
-    expect(mediaGridItemFile).toContain("rounded-xl");
+    expect(mediaGridItemFile).toContain("rounded-lg");
     expect(mediaGridItemFile).not.toContain("rounded-2xl");
   });
 });

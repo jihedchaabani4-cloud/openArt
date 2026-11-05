@@ -83,7 +83,7 @@ export default function PromptBarTestPage() {
             PromptBarPlatform · featureConfig · per-instance store
           </p>
         </div>
-        <div className="flex items-center gap-1 bg-white/5 rounded-xl p-1">
+        <div className="flex items-center gap-1 bg-white/5 rounded-lg p-1">
           {tabs.map((tab) => (
             <button
               key={tab.id}
@@ -111,7 +111,7 @@ export default function PromptBarTestPage() {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.2 }}
-            className="rounded-3xl bg-white/[0.02] border border-white/5 p-8"
+            className="rounded-2xl bg-white/[0.02] border border-white/5 p-8"
           >
             <V3Panel
               instanceLabel="Main"
@@ -134,13 +134,13 @@ export default function PromptBarTestPage() {
             </div>
 
             <div className="grid grid-cols-2 gap-8">
-              <div className="rounded-3xl bg-white/[0.02] border border-white/5 p-6">
+              <div className="rounded-2xl bg-white/[0.02] border border-white/5 p-6">
                 <V3Panel
                   instanceLabel="Instance A"
                   color={{ badge: "bg-purple-500/20 border border-purple-500/30 text-purple-400", text: "text-purple-400" }}
                 />
               </div>
-              <div className="rounded-3xl bg-white/[0.02] border border-white/5 p-6">
+              <div className="rounded-2xl bg-white/[0.02] border border-white/5 p-6">
                 <V3Panel
                   instanceLabel="Instance B"
                   color={{ badge: "bg-blue-500/20 border border-blue-500/30 text-blue-400", text: "text-blue-400" }}
@@ -151,7 +151,7 @@ export default function PromptBarTestPage() {
         )}
 
         {/* ── Architecture Summary ────────────────────────────── */}
-        <div className="mt-8 rounded-3xl bg-white/[0.02] border border-white/5 p-6">
+        <div className="mt-8 rounded-2xl bg-white/[0.02] border border-white/5 p-6">
           <h2 className="text-[13px] font-semibold text-white/70 mb-4 uppercase tracking-wider">v3 Architecture</h2>
           <div className="grid grid-cols-2 gap-4 text-[12px]">
             {[
@@ -162,7 +162,7 @@ export default function PromptBarTestPage() {
               ["Serialization", "serialize() → { model, prompt, parameters } via backend keys"],
               ["Parameter routing", "ParameterControl → RatioSelector / DurationSelector / VariationSelector..."],
             ].map(([feat, desc]) => (
-              <div key={feat} className="flex gap-3 py-2.5 px-3 rounded-xl bg-white/[0.03]">
+              <div key={feat} className="flex gap-3 py-2.5 px-3 rounded-lg bg-white/[0.03]">
                 <div className="text-emerald-400 shrink-0">✓</div>
                 <div>
                   <div className="font-semibold text-white/80 mb-0.5">{feat}</div>

@@ -96,7 +96,7 @@ export function TrashView({ projectId }) {
                   gridSize={gridSize}
                   projectId={projectId}
                   CardComponent={renderCard}
-                  itemClassName="rounded-xl border-none shadow-xl"
+                  itemClassName="rounded-lg border border-white/10 shadow-none"
                 />
               </motion.div>
             ) : (
