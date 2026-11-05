@@ -135,14 +135,17 @@ Menus and popovers follow Runway's comfortable card geometry (**8px radius**) wi
 
 ## 5. Runway 100% Token Scales (Preserved Color System)
 
-### 5.1 Border Radius Tokens (Runway 4-Tier Scale)
-| Component Type | Canonical Token | Value | Allowed Class |
-|---|---|---|---|
-| **Buttons, Inputs, Switches** | `--radius-button` / `--radius-input` | **4px** (`sharp`) | `rounded-button` / `rounded-input` / `rounded-md` |
-| **Cards, Panels, Dropdowns** | `--radius-card` / `--radius-panel` / `--radius-menu` | **8px** (`comfortable`) | `rounded-card` / `rounded-panel` / `rounded-lg` / `rounded-xl` |
-| **Dialogs & Modals** | `--radius-dialog` | **16px** (`generous`) | `rounded-dialog` / `rounded-2xl` |
-| **Badges & Micro Tags** | `--radius-badge` | **4px** (`sharp`) | `rounded-badge` / `rounded-sm` |
-| **Pills & Avatars** | `--radius-pill` | **9999px** | `rounded-full` / `rounded-pill` |
+### 5.1 Border Radius Tokens (Runway Standard 4-Tier Scale)
+| UI Element Category | Base Token | Value | Canonical Tailwind Class | Description |
+|---|---|---|---|---|
+| **Buttons, Inputs, Badges, Menu Items** | `--radius-sm` | **4px** (`sharp`) | `rounded-sm` | Sharp geometric corners across all action targets |
+| **Subtle Chips & Secondary Tags** | `--radius-md` | **6px** (`subtle`) | `rounded-md` | Soft intermediate chip containers |
+| **Cards, Dropdowns, Menus, Panels** | `--radius-lg` | **8px** (`comfortable`) | `rounded-lg` | Standard card and popover panels |
+| **Dialogs & Modals** | `--radius-2xl` | **16px** (`generous`) | `rounded-2xl` | Overlay confirmation dialogs and workflow containers |
+| **Pills & Avatars** | `--radius-full` | **9999px** | `rounded-full` | Filter pills and circular icons |
+
+> [!IMPORTANT]
+> **Single Token Class Law:** Always use the standard Tailwind class directly (`rounded-sm`, `rounded-lg`, `rounded-2xl`). Never concatenate duplicate/alias classes (no `rounded-sm rounded-button`). Updating `--radius-sm` or `--radius-lg` in `:root` automatically cascades across all components globally.
 
 ---
 

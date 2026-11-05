@@ -63,17 +63,19 @@ Fonts loaded locally via variable `@font-face`:
 
 ---
 
-## 5. Border Radius Hierarchy (Runway 4-Tier Scale)
+## 5. Border Radius Hierarchy (Runway Standard 4-Tier Scale)
 
-Enforced strictly across all components (Zero Arbitrary Brackets):
+Enforced strictly across all components (Single Standard Token, Zero Redundant Classes):
 
-| Geometry Tier | Value | CSS Token | Canonical Tailwind Token | Allowed Components |
+| Geometry Tier | Value | CSS Token | Canonical Tailwind Token | Target UI Elements |
 |---|---|---|---|---|
-| **Badge & Micro Tag** | `4px` (`sharp`) | `--radius-badge` | `rounded-badge` | Badges, micro tags, tooltips |
-| **Button / Input**| `4px` (`sharp`) | `--radius-button` / `--radius-input` | `rounded-button` / `rounded-input` | Buttons, Inputs, Switches, Select Triggers |
-| **Card / Panel** | `8px` (`comfortable`) | `--radius-card` | `rounded-card` | Cards, Dropdowns, Popovers, Panels |
-| **Dialog / Modal**| `16px` (`generous`)| `--radius-dialog` | `rounded-dialog` | Modal Dialogs, Confirmation Sheets |
-| **Pill / Circle** | `9999px`| `--radius-pill` | `rounded-full` / `rounded-pill` | Filter chips, avatar circles, switch thumbs |
+| **Sharp** | `4px` | `--radius-sm` | `rounded-sm` | Buttons, Inputs, Badges, Micro Tags, Tooltips, Menu Items |
+| **Subtle** | `6px` | `--radius-md` | `rounded-md` | Subtle links, intermediate chips |
+| **Comfortable** | `8px` | `--radius-lg` | `rounded-lg` | Cards, Dropdowns, Context Menus, Popovers, Panels |
+| **Generous** | `16px`| `--radius-2xl` | `rounded-2xl` | Modal Dialogs, Workflow Creation Sheets |
+| **Pill / Circle** | `9999px`| `--radius-full` | `rounded-full` | Filter chips, avatar circles, switch thumbs |
+
+> **Global Cascade Rule:** Changing `--radius-sm` or `--radius-lg` in `:root` automatically updates all components on the entire site simultaneously. Never write custom compound classes (`rounded-card`, `rounded-button`).
 
 ---
 

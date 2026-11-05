@@ -46,7 +46,7 @@ function DropdownMenuContent({
           ...style,
         }}
         className={cn(
-          "z-50 max-h-(--radix-dropdown-menu-content-available-height) w-52 min-w-[12rem] rounded-card origin-(--radix-dropdown-menu-content-transform-origin) overflow-x-hidden overflow-y-auto p-1.5 flex flex-col gap-0.5 font-sans antialiased",
+          "z-50 max-h-(--radix-dropdown-menu-content-available-height) w-52 min-w-[12rem] rounded-lg origin-(--radix-dropdown-menu-content-transform-origin) overflow-x-hidden overflow-y-auto p-1.5 flex flex-col gap-0.5 font-sans antialiased",
           // Animations
           "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
           className
@@ -75,7 +75,7 @@ function DropdownMenuItem({
       data-variant={variant}
       className={cn(
         // Layout
-        "relative flex cursor-pointer items-center gap-3 rounded-button pl-3 pr-4 py-2 min-h-[2.125rem] text-[14px] leading-5 font-medium outline-hidden select-none font-sans antialiased",
+        "relative flex cursor-pointer items-center gap-3 rounded-sm pl-3 pr-4 py-2 min-h-[2.125rem] text-[14px] leading-5 font-medium outline-hidden select-none font-sans antialiased",
         // Theme defaults: on-surface text, state layers for hover/focus/active
         "text-[var(--mat-menu-item-label-text-color,var(--foreground-neutral-000,#fff))] hover:text-white hover:bg-[var(--mat-menu-item-hover-state-layer-color,var(--foreground-state-10))] focus:bg-[var(--mat-menu-item-focus-state-layer-color,var(--foreground-state-15))] focus:text-white active:bg-[var(--foreground-state-25)] transition-colors duration-100 ease-in-out",
         // Icon defaults
@@ -102,7 +102,7 @@ function DropdownMenuCheckboxItem({
     <DropdownMenuPrimitive.CheckboxItem
       data-slot="dropdown-menu-checkbox-item"
       className={cn(
-        "relative flex cursor-pointer items-center gap-2 rounded-button py-2.5 pr-2 pl-8 text-sm outline-hidden select-none",
+        "relative flex cursor-pointer items-center gap-2 rounded-sm py-2.5 pr-2 pl-8 text-sm outline-hidden select-none",
         "text-white hover:bg-white/10 focus:bg-white/10 focus:text-white",
         "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         "data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
@@ -135,7 +135,7 @@ function DropdownMenuRadioItem({
     <DropdownMenuPrimitive.RadioItem
       data-slot="dropdown-menu-radio-item"
       className={cn(
-        "relative flex cursor-pointer items-center gap-2 rounded-button py-2.5 pr-2 pl-8 text-sm outline-hidden select-none",
+        "relative flex cursor-pointer items-center gap-2 rounded-sm py-2.5 pr-2 pl-8 text-sm outline-hidden select-none",
         "text-white hover:bg-white/10 focus:bg-white/10 focus:text-white",
         "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         "data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
@@ -210,7 +210,7 @@ function DropdownMenuSubTrigger({
       data-slot="dropdown-menu-sub-trigger"
       data-inset={inset}
       className={cn(
-        "flex cursor-pointer items-center gap-3 rounded-button pl-3 pr-4 py-2 min-h-[2.125rem] text-[14px] leading-5 font-medium outline-hidden select-none font-sans antialiased",
+        "flex cursor-pointer items-center gap-3 rounded-sm pl-3 pr-4 py-2 min-h-[2.125rem] text-[14px] leading-5 font-medium outline-hidden select-none font-sans antialiased",
         "text-[var(--mat-menu-item-label-text-color,var(--foreground-neutral-000,#fff))] hover:bg-[var(--mat-menu-item-hover-state-layer-color,var(--foreground-state-10))] hover:text-white focus:bg-[var(--mat-menu-item-focus-state-layer-color,var(--foreground-state-15))] focus:text-white",
         "data-[state=open]:bg-[var(--foreground-state-15)] data-[state=open]:text-white transition-colors duration-100 ease-in-out",
         "[&_svg:not([class*='text-'])]:text-white/70 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-5",
@@ -236,14 +236,14 @@ function DropdownMenuSubContent({
         backgroundColor: "var(--mat-menu-container-color, rgba(22, 23, 24, 0.9))",
         backdropFilter: "blur(100px) saturate(190%) contrast(105%)",
         WebkitBackdropFilter: "blur(100px) saturate(190%) contrast(105%)",
-        boxShadow: "var(--mat-menu-container-elevation-shadow, 0 16px 32px -8px rgba(0, 0, 0, 0.4))",
+        boxShadow: "var(--mat-menu-container-elevation-shadow, none)",
         borderRadius: "var(--mat-menu-container-shape, 8px)",
         border: "none",
         color: "var(--mat-sys-on-surface, #e3e3e3)",
         ...style,
       }}
       className={cn(
-        "z-50 w-52 min-w-[12rem] rounded-card origin-(--radix-dropdown-menu-content-transform-origin) overflow-hidden p-1.5 flex flex-col gap-0.5 font-sans antialiased",
+        "z-50 w-52 min-w-[12rem] rounded-lg origin-(--radix-dropdown-menu-content-transform-origin) overflow-hidden p-1.5 flex flex-col gap-0.5 font-sans antialiased",
         "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
         className
       )}

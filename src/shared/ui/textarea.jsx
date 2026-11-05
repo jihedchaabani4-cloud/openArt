@@ -53,10 +53,10 @@ const Textarea = React.forwardRef(({
     <div 
       className={cn(
         isPersonality
-          ? "personality-textarea-wrapper relative w-full rounded-card bg-[var(--foreground-state-05)] p-3.5 sm:p-4 transition-all border border-[var(--mat-sys-outline-variant,rgba(255,255,255,0.08))] hover:bg-[var(--foreground-state-10)] focus-within:bg-[var(--foreground-state-15)] focus-within:border-[var(--mat-sys-primary,#a8c7fa)]"
+          ? "personality-textarea-wrapper relative w-full rounded-lg bg-[var(--foreground-state-05)] p-3.5 sm:p-4 transition-all border border-[var(--mat-sys-outline-variant,rgba(255,255,255,0.08))] hover:bg-[var(--foreground-state-10)] focus-within:bg-[var(--foreground-state-15)] focus-within:border-[var(--mat-sys-primary,#a8c7fa)]"
           : isBlur
-          ? "relative w-full rounded-button p-3 transition-all border-none hover:bg-[var(--foreground-state-15)] focus-within:bg-[var(--foreground-state-15)]"
-          : "relative w-full rounded-card bg-[var(--foreground-state-05)] p-4 transition-all border border-[var(--mat-sys-outline-variant,rgba(255,255,255,0.08))] hover:bg-[var(--foreground-state-10)] focus-within:bg-[var(--foreground-state-15)] focus-within:border-[var(--mat-sys-primary,#a8c7fa)]"
+          ? "relative w-full rounded-sm p-3 transition-all border-none hover:bg-[var(--foreground-state-15)] focus-within:bg-[var(--foreground-state-15)]"
+          : "relative w-full rounded-lg bg-[var(--foreground-state-05)] p-4 transition-all border border-[var(--mat-sys-outline-variant,rgba(255,255,255,0.08))] hover:bg-[var(--foreground-state-10)] focus-within:bg-[var(--foreground-state-15)] focus-within:border-[var(--mat-sys-primary,#a8c7fa)]"
       )}
       style={
         isBlur

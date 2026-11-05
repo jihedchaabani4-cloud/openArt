@@ -46,7 +46,7 @@ function TabsList({
           "inline-flex items-center justify-center font-sans antialiased",
           variant === "pills" && "rounded-full bg-white/5 p-1 gap-1 border border-white/5",
           variant === "underline" && "gap-4 border-b border-white/10 px-1",
-          variant === "studio" && "w-full rounded-card bg-card p-1 gap-1 border border-white/5",
+          variant === "studio" && "w-full rounded-lg bg-card p-1 gap-1 border border-white/5",
           className
         )}
         {...props}
@@ -82,7 +82,7 @@ function TabsTrigger({
         ],
         // Studio variant
         variant === "studio" && [
-          "flex-1 py-1.5 rounded-button text-xs uppercase tracking-wider font-semibold",
+          "flex-1 py-1.5 rounded-sm text-xs uppercase tracking-wider font-semibold",
           "text-white/60 hover:text-white hover:bg-white/5",
           "data-[state=active]:bg-lime-400 data-[state=active]:text-black data-[state=active]:shadow-sm",
         ],

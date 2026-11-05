@@ -196,23 +196,23 @@ mat-icon {
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
-  --radius-xs: var(--mat-sys-corner-extra-small, 2px);
-  --radius-sm: var(--badge-border-radius, 4px);
-  --radius-md: var(--button-border-radius, 4px);
-  --radius-lg: var(--card-border-radius, 8px);
-  --radius-xl: var(--card-border-radius, 8px);
-  --radius-2xl: var(--dialog-border-radius, 16px);
-  --radius-3xl: var(--dialog-border-radius, 16px);
-  --radius-full: var(--mat-sys-corner-full, 9999px);
-  --radius-button: var(--button-border-radius, 4px);
-  --radius-card: var(--card-border-radius, 8px);
-  --radius-dialog: var(--dialog-border-radius, 16px);
-  --radius-input: var(--input-border-radius, 4px);
-  --radius-panel: var(--panel-border-radius, 8px);
-  --radius-menu: var(--menu-border-radius, 8px);
-  --radius-pill: var(--pill-border-radius, 9999px);
-  --radius-badge: var(--badge-border-radius, 4px);
-  --radius-tile: var(--tile-border-radius, 8px);
+
+  /* Canonical Runway Design Radius Tokens (Theme Inline) */
+  --radius-none: 0px;
+  --radius-xs: var(--radius-xs, 2px);
+  --radius-sm: var(--radius-sm, 4px);
+  --radius-md: var(--radius-md, 6px);
+  --radius-lg: var(--radius-lg, 8px);
+  --radius-xl: var(--radius-xl, 12px);
+  --radius-2xl: var(--radius-2xl, 16px);
+  --radius-3xl: var(--radius-3xl, 24px);
+  --radius-full: var(--radius-full, 9999px);
+
+  /* Named Runway Tokens */
+  --radius-sharp: var(--radius-sm, 4px);
+  --radius-subtle: var(--radius-md, 6px);
+  --radius-comfortable: var(--radius-lg, 8px);
+  --radius-generous: var(--radius-2xl, 16px);
 
   /* Runway Zero Box-Shadow Law (depth from contrast & photography, not elevation) */
   --shadow-2xs: none;
@@ -304,28 +304,46 @@ mat-icon {
   --color-warning: #fcbd00;
 
   /* ═════════════════════════════════════════════════════════════════
-     GLOBAL RUNWAY DESIGN TOKENS (Cinematic sharp 4px buttons, 8px cards, 16px dialogs)
+     GLOBAL RUNWAY DESIGN TOKENS (Base Radius Hierarchy)
+     To change radiuses across the whole site, edit these base tokens:
      ═════════════════════════════════════════════════════════════════ */
-  --button-border-radius: 4px;
-  --card-border-radius: 8px;
-  --dialog-border-radius: 16px;
-  --input-border-radius: 4px;
-  --panel-border-radius: 8px;
-  --menu-border-radius: 8px;
-  --pill-border-radius: 9999px;
-  --badge-border-radius: 4px;
-  --tile-border-radius: var(--card-border-radius, 8px);
+  --radius-none: 0px;
+  --radius-xs: 2px;
+  --radius-sm: 4px;      /* Runway Sharp: Buttons, Inputs, Badges, Menu items (4px) */
+  --radius-md: 6px;      /* Runway Subtle: Secondary tags & chips (6px) */
+  --radius-lg: 8px;      /* Runway Comfortable: Cards, Menus, Popovers, Panels (8px) */
+  --radius-xl: 12px;     /* Medium card containers (12px) */
+  --radius-2xl: 16px;    /* Runway Generous: Dialogs, Modals, Large sheets (16px) */
+  --radius-3xl: 24px;
+  --radius-full: 9999px; /* Runway Pills & circular avatars */
+
+  /* Named Runway Design Tokens */
+  --radius-sharp: var(--radius-sm, 4px);
+  --radius-subtle: var(--radius-md, 6px);
+  --radius-comfortable: var(--radius-lg, 8px);
+  --radius-generous: var(--radius-2xl, 16px);
+
+  /* Component bindings derived 100% from base tokens */
+  --button-border-radius: var(--radius-sm, 4px);
+  --card-border-radius: var(--radius-lg, 8px);
+  --dialog-border-radius: var(--radius-2xl, 16px);
+  --input-border-radius: var(--radius-sm, 4px);
+  --panel-border-radius: var(--radius-lg, 8px);
+  --menu-border-radius: var(--radius-lg, 8px);
+  --pill-border-radius: var(--radius-full, 9999px);
+  --badge-border-radius: var(--radius-sm, 4px);
+  --tile-border-radius: var(--radius-lg, 8px);
 
   /* Aliases & Material/Flow compatibility */
-  --button-radius: var(--button-border-radius, 4px);
-  --mat-button-border-radius: var(--button-border-radius, 4px);
-  --mat-button-filled-container-shape: var(--button-border-radius, 4px);
-  --mat-button-outlined-container-shape: var(--button-border-radius, 4px);
-  --mat-button-text-container-shape: var(--button-border-radius, 4px);
-  --mat-button-tonal-container-shape: var(--button-border-radius, 4px);
-  --mat-dialog-container-shape: var(--dialog-border-radius, 16px);
-  --flow-panel-border-radius: var(--panel-border-radius, 8px);
-  --mat-menu-container-shape: var(--menu-border-radius, 8px);
+  --button-radius: var(--radius-sm, 4px);
+  --mat-button-border-radius: var(--radius-sm, 4px);
+  --mat-button-filled-container-shape: var(--radius-sm, 4px);
+  --mat-button-outlined-container-shape: var(--radius-sm, 4px);
+  --mat-button-text-container-shape: var(--radius-sm, 4px);
+  --mat-button-tonal-container-shape: var(--radius-sm, 4px);
+  --mat-dialog-container-shape: var(--radius-2xl, 16px);
+  --flow-panel-border-radius: var(--radius-lg, 8px);
+  --mat-menu-container-shape: var(--radius-lg, 8px);
 
   /* Google Flow Design Tokens */
   --prompt-box-settings-width: 17.5rem;
@@ -609,18 +627,18 @@ mat-icon {
   --mat-sys-title-small-weight: 500;
 
   /* Shape Tokens */
-  --mat-sys-corner-extra-large: var(--dialog-border-radius, 12px);
-  --mat-sys-corner-extra-large-top: var(--dialog-border-radius, 12px) var(--dialog-border-radius, 12px) 0 0;
-  --mat-sys-corner-extra-small: 2px;
-  --mat-sys-corner-extra-small-top: 2px 2px 0 0;
-  --mat-sys-corner-full: 9999px;
-  --mat-sys-corner-large: var(--card-border-radius, 8px);
-  --mat-sys-corner-large-end: 0 var(--card-border-radius, 8px) var(--card-border-radius, 8px) 0;
-  --mat-sys-corner-large-start: var(--card-border-radius, 8px) 0 0 var(--card-border-radius, 8px);
-  --mat-sys-corner-large-top: var(--card-border-radius, 8px) var(--card-border-radius, 8px) 0 0;
-  --mat-sys-corner-medium: var(--button-border-radius, 6px);
+  --mat-sys-corner-extra-large: var(--radius-2xl, 16px);
+  --mat-sys-corner-extra-large-top: var(--radius-2xl, 16px) var(--radius-2xl, 16px) 0 0;
+  --mat-sys-corner-extra-small: var(--radius-xs, 2px);
+  --mat-sys-corner-extra-small-top: var(--radius-xs, 2px) var(--radius-xs, 2px) 0 0;
+  --mat-sys-corner-full: var(--radius-full, 9999px);
+  --mat-sys-corner-large: var(--radius-lg, 8px);
+  --mat-sys-corner-large-end: 0 var(--radius-lg, 8px) var(--radius-lg, 8px) 0;
+  --mat-sys-corner-large-start: var(--radius-lg, 8px) 0 0 var(--radius-lg, 8px);
+  --mat-sys-corner-large-top: var(--radius-lg, 8px) var(--radius-lg, 8px) 0 0;
+  --mat-sys-corner-medium: var(--radius-sm, 4px);
   --mat-sys-corner-none: 0;
-  --mat-sys-corner-small: var(--badge-border-radius, 4px);
+  --mat-sys-corner-small: var(--radius-sm, 4px);
 
   /* State Layer Opacities */
   --mat-sys-dragged-state-layer-opacity: 0.16;
@@ -728,8 +746,8 @@ mat-icon {
   /* Material Component Tokens */
   --mat-dialog-container-color: var(--background-state-90);
   --mat-dialog-container-elevation-shadow: none;
-  --mat-dialog-container-shape: var(--dialog-border-radius, 16px);
-  --mat-menu-container-shape: var(--menu-border-radius, 8px);
+  --mat-dialog-container-shape: var(--radius-2xl, 16px);
+  --mat-menu-container-shape: var(--radius-lg, 8px);
   --mat-menu-container-color: var(--background-state-90);
   --mat-menu-container-elevation-shadow: none;
   --mat-menu-divider-bottom-spacing: 0.5rem;

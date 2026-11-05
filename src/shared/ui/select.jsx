@@ -78,7 +78,7 @@ function SelectTrigger({ className, size = "default", variant = "default", asChi
         "flex items-center",
         variant === "blur" ? "w-full h-10 px-3.5 justify-between" : "w-auto max-w-fit px-3 py-2.5",
         // Shape
-        "rounded-button",
+        "rounded-sm",
         // Colors
         variant === "blur"
           ? "bg-[var(--foreground-state-10,rgba(218,220,224,0.1))] backdrop-blur-[80px] border-none text-[var(--mat-sys-on-surface,#e3e3e3)] hover:bg-[var(--foreground-state-15)]"
@@ -129,7 +129,7 @@ function SelectContent({
           // Size
           "min-w-[120px] max-h-[500px]",
           // Shape
-          "rounded-card p-2",
+          "rounded-lg p-2",
           // Colors
           "bg-[var(--mat-menu-container-color,var(--background-state-90))] backdrop-blur-[80px] border border-[var(--mat-sys-outline-variant,rgba(255,255,255,0.08))]",
           // Shadow
@@ -220,7 +220,7 @@ function SelectItem({ className, children, icon, subtitle, badge, iconVariant = 
       data-slot="select-item"
       className={cn(
         // Layout
-        "group flex cursor-pointer items-center gap-3 min-h-[40px] px-3.5 py-2 rounded-button outline-none select-none font-sans antialiased transition-all duration-150",
+        "group flex cursor-pointer items-center gap-3 min-h-[40px] px-3.5 py-2 rounded-sm outline-none select-none font-sans antialiased transition-all duration-150",
         // Text & State layers
         "text-[var(--mat-menu-item-label-text-color,var(--foreground-neutral-000,#fff))] hover:bg-[var(--mat-menu-item-hover-state-layer-color,var(--foreground-state-10))] focus:bg-[var(--mat-menu-item-focus-state-layer-color,var(--foreground-state-15))] data-[highlighted]:bg-[var(--mat-menu-item-hover-state-layer-color,var(--foreground-state-10))] data-[highlighted]:text-white",
         // Disabled
@@ -234,7 +234,7 @@ function SelectItem({ className, children, icon, subtitle, badge, iconVariant = 
         <span 
           className={cn(
             "shrink-0 flex items-center justify-center text-[20px] transition-colors duration-150 text-[var(--mat-menu-item-icon-color,var(--foreground-neutral-000,#fff))]",
-            iconVariant === "square" && "aspect-square h-[48px] -ml-2 -my-1.5 bg-[#171717] rounded-button border-r border-white/5"
+            iconVariant === "square" && "aspect-square h-[48px] -ml-2 -my-1.5 bg-[#171717] rounded-sm border-r border-white/5"
           )}
         >
           {renderIconNode(icon)}

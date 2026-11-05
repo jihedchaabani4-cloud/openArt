@@ -12,11 +12,11 @@ import { Skeleton } from "@/shared/ui/skeleton";
 
 describe("Canonical Design System Primitives Suite", () => {
   describe("1. Checkbox Primitive", () => {
-    it("renders with role='checkbox' and canonical token rounded-badge", () => {
+    it("renders with role='checkbox' and canonical token rounded-sm", () => {
       render(<Checkbox aria-label="Accept Terms" />);
       const checkbox = screen.getByRole("checkbox", { name: "Accept Terms" });
       expect(checkbox).toBeDefined();
-      expect(checkbox.className).toContain("rounded-badge");
+      expect(checkbox.className).toContain("rounded-sm");
       expect(checkbox.getAttribute("data-slot")).toBe("checkbox");
     });
 
@@ -85,7 +85,7 @@ describe("Canonical Design System Primitives Suite", () => {
       expect(screen.getByText("Filter Settings")).toBeDefined();
       const content = screen.getByText("Filter Settings").closest('[data-slot="popover-content"]');
       expect(content).not.toBeNull();
-      expect(content.className).toContain("rounded-card");
+      expect(content.className).toContain("rounded-lg");
       expect(content.className).toContain("backdrop-blur-md");
     });
   });
@@ -141,7 +141,7 @@ describe("Canonical Design System Primitives Suite", () => {
       );
       const card = screen.getByText("Asset Title").closest('[data-slot="card"]');
       expect(card).not.toBeNull();
-      expect(card.className).toContain("rounded-card");
+      expect(card.className).toContain("rounded-lg");
       expect(card.className).toContain("hover:bg-white/10");
       expect(screen.getByText("Created yesterday")).toBeDefined();
       expect(screen.getByText("Body Content")).toBeDefined();
@@ -149,10 +149,10 @@ describe("Canonical Design System Primitives Suite", () => {
   });
 
   describe("7. Badge Primitive", () => {
-    it("renders badge with rounded-badge and canonical variants", () => {
+    it("renders badge with rounded-sm and canonical variants", () => {
       const { rerender } = render(<Badge variant="default">New</Badge>);
       const badge = screen.getByText("New");
-      expect(badge.className).toContain("rounded-badge");
+      expect(badge.className).toContain("rounded-sm");
       expect(badge.className).toContain("h-5");
 
       rerender(<Badge variant="neon">Pro</Badge>);
@@ -170,7 +170,7 @@ describe("Canonical Design System Primitives Suite", () => {
       render(<Skeleton variant="shimmer" shape="card" data-testid="test-skeleton" />);
       const skeleton = screen.getByTestId("test-skeleton");
       expect(skeleton.className).toContain("animate-shimmer");
-      expect(skeleton.className).toContain("rounded-card");
+      expect(skeleton.className).toContain("rounded-lg");
     });
   });
 });

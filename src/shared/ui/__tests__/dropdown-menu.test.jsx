@@ -15,7 +15,7 @@ import {
 } from "@/shared/ui/context-menu";
 
 describe("Google Flow menu styling matching user tokens and DOM", () => {
-  it("renders DropdownMenu with width w-52, blur, bg, and button style min-h-[2.125rem], rounded-button, and text-[14px]", () => {
+  it("renders DropdownMenu with width w-52, blur, bg, and button style min-h-[2.125rem], rounded-sm, and text-[14px]", () => {
     render(
       <DropdownMenu open={true}>
         <DropdownMenuTrigger>Open</DropdownMenuTrigger>
@@ -29,7 +29,7 @@ describe("Google Flow menu styling matching user tokens and DOM", () => {
     const menuItem = item.closest('[data-slot="dropdown-menu-item"]');
     expect(menuItem).not.toBeNull();
     expect(menuItem.className).toContain("min-h-[2.125rem]");
-    expect(menuItem.className).toContain("rounded-button");
+    expect(menuItem.className).toContain("rounded-sm");
     expect(menuItem.className).toContain("text-[14px]");
     expect(menuItem.className).toContain("pl-3");
     expect(menuItem.className).toContain("pr-4");
@@ -37,13 +37,13 @@ describe("Google Flow menu styling matching user tokens and DOM", () => {
     const content = item.closest('[data-slot="dropdown-menu-content"]');
     expect(content).not.toBeNull();
     expect(content.className).toContain("w-52");
-    expect(content.className).toContain("rounded-card");
+    expect(content.className).toContain("rounded-lg");
     expect(content.style.borderRadius).toBe("var(--mat-menu-container-shape, 8px)");
     expect(content.style.backgroundColor).toBe("var(--mat-menu-container-color, rgba(22, 23, 24, 0.9))");
     expect(content.style.backdropFilter).toContain("blur(100px)");
   });
 
-  it("renders ContextMenu with width w-52, blur, bg, and button style min-h-[2.125rem], rounded-button, and text-[14px]", () => {
+  it("renders ContextMenu with width w-52, blur, bg, and button style min-h-[2.125rem], rounded-sm, and text-[14px]", () => {
     render(
       <ContextMenu>
         <ContextMenuTrigger>Right click</ContextMenuTrigger>

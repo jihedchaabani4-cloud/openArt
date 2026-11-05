@@ -34,7 +34,7 @@ const Checkbox = React.forwardRef(({
       data-size={size}
       className={cn(
         // Base structure & geometry
-        "peer shrink-0 cursor-pointer rounded-badge border transition-colors outline-none",
+        "peer shrink-0 cursor-pointer rounded-sm border transition-colors outline-none",
         "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-black",
         "disabled:cursor-not-allowed disabled:opacity-50",
         isLg ? "size-5" : "size-4",

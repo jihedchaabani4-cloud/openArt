@@ -20,15 +20,15 @@ const badgeVariants = cva(
       variant: {
         default: "bg-white/15 text-white border border-white/10",
         secondary: "bg-white/10 text-white border border-transparent",
-        neon: "bg-lime-400 text-black font-semibold border border-transparent shadow-xs",
+        neon: "bg-lime-400 text-black font-semibold border border-transparent shadow-none",
         success: "bg-emerald-950/70 text-emerald-300 border border-emerald-800/50",
         danger: "bg-red-950/70 text-red-300 border border-red-800/50",
         warning: "bg-amber-950/70 text-amber-300 border border-amber-800/50",
         outline: "bg-transparent text-white/70 border border-white/20",
       },
       size: {
-        default: "h-5 px-2 text-xs rounded-badge gap-1",
-        sm: "h-4 px-1.5 text-xs rounded-badge gap-0.5",
+        default: "h-5 px-2 text-xs rounded-sm gap-1",
+        sm: "h-4 px-1.5 text-xs rounded-sm gap-0.5",
       },
     },
     defaultVariants: {
