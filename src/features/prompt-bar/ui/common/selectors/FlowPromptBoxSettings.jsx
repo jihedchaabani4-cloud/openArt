@@ -302,7 +302,7 @@ export function FlowPromptBoxSettings({
      
       className={cn(
         "settings-content-overlay flow-prompt-box-settings block w-[var(--prompt-box-settings-width,17.5rem)] rounded-lg p-2",
-        "bg-surface-card border border-white/10 shadow-none",
+        "bg-surface-card/90 backdrop-blur-xl border border-white/10 shadow-none",
         "text-white select-none font-sans antialiased",
         className
       )}
@@ -312,9 +312,6 @@ export function FlowPromptBoxSettings({
         width: "var(--prompt-box-settings-width, 17.5rem)",
         borderRadius: "8px",
         padding: "0.5rem",
-        backgroundColor: "#1e1f20",
-        border: "1px solid rgba(255, 255, 255, 0.10)",
-        boxShadow: "none",
         colorScheme: "dark",
         pointerEvents: "auto",
         WebkitFontSmoothing: "antialiased",

@@ -33,7 +33,7 @@ function DialogOverlay({ className, ...props }) {
     <DialogPrimitive.Overlay
       data-slot="dialog-overlay"
       className={cn(
-        "fixed inset-0 z-50 bg-black/75 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0 duration-300",
+        "fixed inset-0 z-50 bg-black/70 backdrop-blur-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0 duration-300",
         className
       )}
       {...props}
@@ -56,14 +56,14 @@ function DialogContent({
       <DialogPrimitive.Content
         data-slot="dialog-content"
         className={cn(
-          // GLASS (Preserved variant name for API stability -> Flat Dark Surface per Runway)
+          // GLASS (Controlled translucent glassmorphism)
           variant === "glass" &&
             `
             z-50 fixed top-[50%] left-[50%]
             translate-x-[-50%] translate-y-[-50%]
             w-full max-w-[calc(100%-2rem)]
             rounded-2xl border border-white/10 outline-none
-            bg-surface-panel text-white
+            bg-surface-panel/85 backdrop-blur-xl text-white
             shadow-none
             data-[state=open]:animate-in
             data-[state=closed]:animate-out

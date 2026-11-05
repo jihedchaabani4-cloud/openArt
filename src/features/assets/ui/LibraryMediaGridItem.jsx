@@ -86,7 +86,7 @@ export function LibraryMediaGridItem({
               "absolute left-3 top-3 z-30 flex h-6 w-6 items-center justify-center rounded-sm border transition p-0",
               isSelected
                 ? "border-white bg-white text-black hover:bg-white/90"
-                : "border-white/20 bg-surface-panel/90 text-transparent hover:border-white/40 hover:text-white/70"
+                : "border-white/20 bg-black/50 backdrop-blur-sm text-transparent hover:border-white/40 hover:text-white/70"
             )}
             aria-label="Select media"
           >
@@ -129,7 +129,7 @@ export function LibraryMediaGridItem({
 
           <div className="absolute inset-0 z-10 flex flex-col justify-between p-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
             <div className="flex justify-end">
-              <ButtonGroup className="pointer-events-auto bg-surface-card border border-white/10 rounded-lg p-0.5 shadow-none">
+              <ButtonGroup className="pointer-events-auto bg-black/50 backdrop-blur-md border border-white/15 rounded-lg p-0.5 shadow-none">
                 <ActionBtn
                   className="text-white hover:bg-white/10"
                   onClick={(e) => {

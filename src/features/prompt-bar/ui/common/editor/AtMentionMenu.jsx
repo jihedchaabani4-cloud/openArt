@@ -274,7 +274,7 @@ export function AtMentionMenu({
       exit={{ opacity: 0, scale: 0.98, y: 6 }}
       transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
       className={cn(
-        "w-full rounded-lg bg-surface-card border border-white/10 shadow-none pointer-events-auto flex flex-col z-50 overflow-hidden select-none font-sans antialiased",
+        "w-full rounded-lg bg-surface-card/90 backdrop-blur-xl border border-white/10 shadow-none pointer-events-auto flex flex-col z-50 overflow-hidden select-none font-sans antialiased",
         className
       )}
     >

@@ -85,7 +85,7 @@ export function CharacterCardKrea({ character, onClick, onDelete }) {
         {!isProcessing && !isFailed && (
           <span
             title="Character"
-            className="absolute left-2.5 top-2.5 z-20 flex items-center justify-center text-white/90 bg-black/60 p-1.5 rounded-sm border border-white/10 group-hover:opacity-0 transition-opacity"
+            className="absolute left-2.5 top-2.5 z-20 flex items-center justify-center text-white/90 bg-black/60 backdrop-blur-sm p-1.5 rounded-sm border border-white/10 group-hover:opacity-0 transition-opacity"
           >
             <User className="size-3 text-white" strokeWidth={1.5} />
           </span>
@@ -96,7 +96,7 @@ export function CharacterCardKrea({ character, onClick, onDelete }) {
           type="button"
           variant="ghost"
           onClick={(e) => { e.stopPropagation(); setIsStarred(!isStarred); }}
-          className="absolute top-2 left-2 z-30 flex size-7 items-center justify-center rounded-sm text-white transition-all duration-200 bg-surface-card/90 hover:bg-white/10 border border-white/10 opacity-100 md:opacity-0 md:group-hover:opacity-100 cursor-pointer p-0 shadow-none"
+          className="absolute top-2 left-2 z-30 flex size-7 items-center justify-center rounded-sm text-white transition-all duration-200 bg-black/50 hover:bg-black/75 backdrop-blur-sm border border-white/15 opacity-100 md:opacity-0 md:group-hover:opacity-100 cursor-pointer p-0 shadow-none"
           aria-label="Pin Character"
         >
           <Star strokeWidth={1.5} className={`size-3.5 transition-colors ${isStarred ? "text-amber-400 fill-amber-400" : "text-white hover:text-amber-300"}`} />

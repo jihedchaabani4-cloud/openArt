@@ -93,6 +93,15 @@ describe("Button Primitive — 6 Core Semantic Variants Architecture", () => {
       expect(btn.className).toContain("h-auto");
       expect(btn.getAttribute("data-variant")).toBe("link");
     });
+
+    it("renders neon variant (signature OpenArt electric yellow CTA)", () => {
+      render(<Button variant="neon">Generate Neon</Button>);
+      const btn = screen.getByRole("button", { name: "Generate Neon" });
+      expect(btn.className).toContain("bg-brand-neon");
+      expect(btn.className).toContain("text-black");
+      expect(btn.className).toContain("h-8");
+      expect(btn.getAttribute("data-variant")).toBe("neon");
+    });
   });
 
   describe("3. Customization with className via tailwind-merge", () => {
@@ -141,9 +150,9 @@ describe("Button Primitive — 6 Core Semantic Variants Architecture", () => {
   });
 
   describe("4. Verification of Palette Strictness", () => {
-    it("buttonVariants defines strictly the 6 core semantic variants", () => {
+    it("buttonVariants defines strictly the core semantic and brand variants", () => {
       // In CVA, variants can be inspected or called
-      const coreVariants = ["primary", "secondary", "outline", "ghost", "danger", "link"];
+      const coreVariants = ["primary", "secondary", "outline", "ghost", "danger", "link", "neon"];
       coreVariants.forEach((v) => {
         expect(() => buttonVariants({ variant: v })).not.toThrow();
         expect(buttonVariants({ variant: v })).toBeTruthy();

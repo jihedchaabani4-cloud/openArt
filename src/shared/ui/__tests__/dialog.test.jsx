@@ -36,25 +36,25 @@ describe("Dialog Primitive — Runway Flat Surface Architecture", () => {
       expect(content?.className).not.toContain("backdrop-blur");
     });
 
-    it("renders glass variant mapped to flat dark surface without GPU-heavy blur", () => {
+    it("renders glass variant with controlled translucent surface and backdrop-blur", () => {
       render(
         <Dialog open={true}>
           <DialogContent variant="glass">
             <DialogHeader>
-              <DialogTitle>Flat Surface Dialog</DialogTitle>
+              <DialogTitle>Glass Surface Dialog</DialogTitle>
               <DialogDescription>Description text</DialogDescription>
             </DialogHeader>
           </DialogContent>
         </Dialog>
       );
 
-      const content = screen.getByText("Flat Surface Dialog").closest('[data-slot="dialog-content"]');
+      const content = screen.getByText("Glass Surface Dialog").closest('[data-slot="dialog-content"]');
       expect(content).not.toBeNull();
       expect(content?.className).toContain("rounded-2xl");
-      expect(content?.className).toContain("bg-surface-panel");
+      expect(content?.className).toContain("bg-surface-panel/85");
+      expect(content?.className).toContain("backdrop-blur-xl");
       expect(content?.className).toContain("border-white/10");
       expect(content?.className).toContain("shadow-none");
-      expect(content?.className).not.toContain("backdrop-blur");
     });
 
     it("renders small and floating variants with flat surface and zero positive shadows", () => {
