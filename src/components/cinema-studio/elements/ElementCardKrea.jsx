@@ -65,17 +65,17 @@ export function ElementCardKrea({ element, onClick, onDelete }) {
       onClick={(e) => { e.stopPropagation(); if (onClick && !isProcessing) onClick(element); }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className="group relative flex cursor-pointer flex-col gap-2 rounded-lg p-2.5 transition-all duration-300 ease-out select-none outline-none hover:bg-white/[0.08] shadow-none"
+      className="group relative flex cursor-pointer flex-col gap-2 rounded-lg p-2.5 transition-all duration-300 ease-out select-none outline-none bg-surface-card border border-white/10 hover:border-white/20 hover:bg-surface-elevated shadow-none"
     >
       {/* ── CARD INNER FRAME ── */}
       <div
-        className="relative flex aspect-[370/231] w-full items-center justify-center overflow-hidden rounded-lg bg-surface-elevated transition-all duration-300 ease-out"
+        className="relative flex aspect-[370/231] w-full items-center justify-center overflow-hidden rounded-lg bg-surface-elevated transition-all duration-300 ease-out shadow-none"
       >
         {/* Top-Left Category Type Badge (Google Icon) */}
         {!isProcessing && !isFailed && (
           <span
             title={`Type: ${elementType}`}
-            className="absolute left-2.5 top-2.5 z-20 flex items-center justify-center text-white/80 group-hover:opacity-0 transition-opacity"
+            className="absolute left-2.5 top-2.5 z-20 flex items-center justify-center text-white/90 bg-black/60 p-1.5 rounded-sm border border-white/10 group-hover:opacity-0 transition-opacity"
           >
             <GoogleIcon iconName={ELEMENT_TYPE_GOOGLE_ICONS[elementType] || "directions_car"} weight={200} className="text-[9.5px]" />
           </span>
@@ -86,10 +86,10 @@ export function ElementCardKrea({ element, onClick, onDelete }) {
           type="button"
           variant="ghost"
           onClick={(e) => { e.stopPropagation(); setIsStarred(!isStarred); }}
-          className="absolute top-2 left-2 z-30 flex size-7 items-center justify-center rounded-md text-white transition-all duration-200 bg-transparent hover:bg-white/15 backdrop-blur-md border border-white/20 opacity-100 md:opacity-0 md:group-hover:opacity-100 cursor-pointer"
+          className="absolute top-2 left-2 z-30 flex size-7 items-center justify-center rounded-sm text-white transition-all duration-200 bg-surface-card/90 hover:bg-white/10 border border-white/10 opacity-100 md:opacity-0 md:group-hover:opacity-100 cursor-pointer p-0 shadow-none"
           aria-label="Pin Element"
         >
-          <Star className={`size-3.5 transition-colors ${isStarred ? "text-yellow-400 fill-yellow-400" : "text-white hover:text-yellow-300"}`} />
+          <Star strokeWidth={1.5} className={`size-3.5 transition-colors ${isStarred ? "text-amber-400 fill-amber-400" : "text-white hover:text-amber-300"}`} />
         </Button>
 
         {/* Top-Right Delete Button */}
@@ -98,10 +98,10 @@ export function ElementCardKrea({ element, onClick, onDelete }) {
             type="button"
             variant="danger"
             onClick={(e) => { e.stopPropagation(); onDelete(element.id || element.name); }}
-            className="absolute top-2 right-2 z-30 size-7 opacity-0 group-hover:opacity-100 cursor-pointer"
+            className="absolute top-2 right-2 z-30 size-7 opacity-0 group-hover:opacity-100 cursor-pointer p-0"
             aria-label="Delete Element"
           >
-            <Trash2 className="size-3.5" />
+            <Trash2 className="size-3.5" strokeWidth={1.5} />
           </Button>
         )}
 

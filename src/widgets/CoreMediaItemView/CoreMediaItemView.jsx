@@ -213,7 +213,7 @@ export function CoreMediaItemPresenter({
         {isCompleted && !isVideo && (
           <div className={cn("relative flex items-center justify-center", isContain ? "w-fit h-fit max-w-full max-h-full" : "w-full h-full")}>
             {core.isMediaLoaded === false && (
-              <div className="absolute inset-0 bg-[#15161a] animate-pulse rounded-lg" />
+              <div className="absolute inset-0 bg-surface-panel animate-pulse rounded-lg" />
             )}
             <img
               src={url}

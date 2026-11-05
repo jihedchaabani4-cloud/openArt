@@ -68,7 +68,7 @@ export function LibraryMediaGridItem({
           }
         }}
         className={cn(
-          "group relative cursor-pointer overflow-hidden rounded-lg bg-[#0a0a0a] shadow-none transition-all duration-300",
+          "group relative cursor-pointer overflow-hidden rounded-lg bg-surface-card border border-white/10 shadow-none transition-all duration-300 hover:border-white/20",
           isSelected && "ring-2 ring-white shadow-none",
           className
         )}
@@ -83,25 +83,25 @@ export function LibraryMediaGridItem({
               onToggleSelect?.();
             }}
             className={cn(
-              "absolute left-3 top-3 z-30 flex h-6 w-6 items-center justify-center rounded-md border transition p-0",
+              "absolute left-3 top-3 z-30 flex h-6 w-6 items-center justify-center rounded-sm border transition p-0",
               isSelected
-                ? "border-white bg-white text-[#050505] hover:bg-white/90"
-                : "border-white/16 bg-black/40 text-transparent backdrop-blur-md hover:border-white/28 hover:text-white/70"
+                ? "border-white bg-white text-black hover:bg-white/90"
+                : "border-white/20 bg-surface-panel/90 text-transparent hover:border-white/40 hover:text-white/70"
             )}
             aria-label="Select media"
           >
-            <Check className="h-3.5 w-3.5" strokeWidth={3} />
+            <Check strokeWidth={2} className="h-3.5 w-3.5" />
           </Button>
 
-            <div className="absolute bottom-3 left-3 z-30 flex  items-center ">
+            <div className="absolute bottom-3 left-3 z-30 flex items-center gap-1">
             {isVideo && (
-              <div className="inline-flex h-8 w-8 items-center justify-center rounded-full text-white ">
-                <Play className="h-3.5 w-3.5 fill-white text-white" />
+              <div className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-black/60 text-white border border-white/10">
+                <Play className="h-3 w-3 fill-white text-white" />
               </div>
             )}
             {isLiked && (
-              <div className="inline-flex h-8 w-8 items-center justify-center rounded-full  text-white ">
-                <Heart className="h-3.5 w-3.5 fill-white text-white" />
+              <div className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-black/60 text-white border border-white/10">
+                <Heart className="h-3 w-3 fill-white text-white" />
               </div>
             )}
           </div>
@@ -129,22 +129,28 @@ export function LibraryMediaGridItem({
 
           <div className="absolute inset-0 z-10 flex flex-col justify-between p-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
             <div className="flex justify-end">
-              <ButtonGroup className="pointer-events-auto bg-white/60 backdrop-blur-md rounded-lg border-0 border-none">
+              <ButtonGroup className="pointer-events-auto bg-surface-card border border-white/10 rounded-lg p-0.5 shadow-none">
                 <ActionBtn
+                  className="text-white hover:bg-white/10"
                   onClick={(e) => {
                     e.stopPropagation();
                     toggleLike({ workflowId: workflow.id });
                   }}
+                  title={isLiked ? "Unlike" : "Like"}
+                  aria-label={isLiked ? "Unlike" : "Like"}
                 >
-                  <Heart className={cn("size-4", isLiked && "fill-[#303031] text-[#303031]")} />
+                  <Heart strokeWidth={1.5} className={cn("size-4", isLiked && "fill-accent text-accent")} />
                 </ActionBtn>
                 <ActionBtn
+                  className="text-white hover:bg-white/10 hover:text-danger"
                   onClick={(e) => {
                     e.stopPropagation();
                     setIsDeleteConfirmOpen(true);
                   }}
+                  title="Delete"
+                  aria-label="Delete"
                 >
-                  <Trash2 className="size-4" />
+                  <Trash2 strokeWidth={1.5} className="size-4" />
                 </ActionBtn>
               </ButtonGroup>
             </div>

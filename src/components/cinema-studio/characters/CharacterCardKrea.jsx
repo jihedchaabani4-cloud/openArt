@@ -74,7 +74,7 @@ export function CharacterCardKrea({ character, onClick, onDelete }) {
       onClick={(e) => { e.stopPropagation(); if (onClick && !isProcessing) onClick(character); }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className="group relative flex cursor-pointer flex-col gap-2 rounded-lg p-2.5 transition-all duration-300 ease-out select-none outline-none hover:bg-white/[0.08] shadow-none border border-white/5 hover:border-white/10"
+      className="group relative flex cursor-pointer flex-col gap-2 rounded-lg p-2.5 transition-all duration-300 ease-out select-none outline-none bg-surface-card border border-white/10 hover:border-white/20 hover:bg-surface-elevated shadow-none"
     >
       {/* ── CARD INNER FRAME ── */}
       <div
@@ -85,9 +85,9 @@ export function CharacterCardKrea({ character, onClick, onDelete }) {
         {!isProcessing && !isFailed && (
           <span
             title="Character"
-            className="absolute left-2.5 top-2.5 z-20 flex items-center justify-center text-white/90 bg-black/60 p-1.5 rounded-lg border border-white/10 group-hover:opacity-0 transition-opacity"
+            className="absolute left-2.5 top-2.5 z-20 flex items-center justify-center text-white/90 bg-black/60 p-1.5 rounded-sm border border-white/10 group-hover:opacity-0 transition-opacity"
           >
-            <User className="size-3 text-white" />
+            <User className="size-3 text-white" strokeWidth={1.5} />
           </span>
         )}
 
@@ -96,10 +96,10 @@ export function CharacterCardKrea({ character, onClick, onDelete }) {
           type="button"
           variant="ghost"
           onClick={(e) => { e.stopPropagation(); setIsStarred(!isStarred); }}
-          className="absolute top-2 left-2 z-30 flex size-7 items-center justify-center rounded-lg text-white transition-all duration-200 bg-black/40 hover:bg-white/20 backdrop-blur-md border border-white/20 opacity-100 md:opacity-0 md:group-hover:opacity-100 cursor-pointer p-0"
+          className="absolute top-2 left-2 z-30 flex size-7 items-center justify-center rounded-sm text-white transition-all duration-200 bg-surface-card/90 hover:bg-white/10 border border-white/10 opacity-100 md:opacity-0 md:group-hover:opacity-100 cursor-pointer p-0 shadow-none"
           aria-label="Pin Character"
         >
-          <Star className={`size-3.5 transition-colors ${isStarred ? "text-amber-400 fill-amber-400" : "text-white hover:text-amber-300"}`} />
+          <Star strokeWidth={1.5} className={`size-3.5 transition-colors ${isStarred ? "text-amber-400 fill-amber-400" : "text-white hover:text-amber-300"}`} />
         </Button>
 
         {/* Top-Right Delete Button */}
@@ -111,7 +111,7 @@ export function CharacterCardKrea({ character, onClick, onDelete }) {
             className="absolute top-2 right-2 z-30 flex size-7 items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer p-0"
             aria-label="Delete Character"
           >
-            <Trash2 className="size-3.5" />
+            <Trash2 className="size-3.5" strokeWidth={1.5} />
           </Button>
         )}
 
@@ -163,7 +163,7 @@ export function CharacterCardKrea({ character, onClick, onDelete }) {
           {name}
         </p>
         {description && (
-          <p className="line-clamp-1 text-[11px] text-white/50 group-hover:text-white/70 transition-colors">
+          <p className="line-clamp-1 text-[11px] text-cool-slate group-hover:text-white/80 transition-colors">
             {description}
           </p>
         )}

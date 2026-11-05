@@ -32,7 +32,7 @@ export const MediaCard = React.memo(
       onClick={onClick}
       onDoubleClick={onDoubleClick}
       className={cn(
-        "group relative flex flex-col overflow-hidden rounded-lg bg-neutral-900 border border-neutral-800/80 transition-all duration-200 hover:border-neutral-700/80 shadow-none",
+        "group relative flex flex-col overflow-hidden rounded-lg bg-surface-card border border-white/10 transition-all duration-200 hover:border-white/20 shadow-none",
         isSelected && "ring-2 ring-primary border-transparent shadow-none",
         className
       )}
@@ -69,7 +69,7 @@ export const MediaCard = React.memo(
 
       {/* Bottom Footer Slot (e.g. title, metadata) */}
       {footerSlot && (
-        <div className="relative z-10 p-3 bg-neutral-900/90 backdrop-blur-sm border-t border-neutral-800/60">
+        <div className="relative z-10 p-3 bg-surface-panel border-t border-white/10">
           {footerSlot}
         </div>
       )}

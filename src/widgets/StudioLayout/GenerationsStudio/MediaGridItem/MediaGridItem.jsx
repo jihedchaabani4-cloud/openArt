@@ -437,7 +437,7 @@ const WorkflowMediaGridItem = React.memo(function WorkflowMediaGridItem({
           setIsDeleteConfirmOpen(true);
         }}
         className={cn(
-          "bg-[#0a0a0a] rounded-lg border border-white/10 outline-2 outline-transparent transition-opacity duration-200 shadow-none",
+          "bg-surface-card rounded-lg border border-white/10 hover:border-white/20 outline-2 outline-transparent transition-all duration-200 shadow-none",
           isGalleryDragging && "opacity-50",
           canNavigate && !isRenaming
             ? (isElementSheet ? "cursor-pointer" : "cursor-grab active:cursor-grabbing")
@@ -657,7 +657,7 @@ const WorkflowMediaGridItem = React.memo(function WorkflowMediaGridItem({
               initial={{ opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.12 }}
-              className="px-3 py-1.5 rounded-sm bg-black/80 backdrop-blur-md border border-white/20 text-white text-[11px] font-medium whitespace-nowrap shadow-none"
+              className="px-3 py-1.5 rounded-sm bg-surface-elevated border border-white/20 text-white text-[11px] font-medium whitespace-nowrap shadow-none"
             >
               {dragTarget === "add-to-collection" ? "Add to collection" : "Move out of collection"}
             </motion.div>
