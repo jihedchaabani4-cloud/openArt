@@ -62,9 +62,9 @@ function DialogContent({
             z-50 fixed top-[50%] left-[50%]
             translate-x-[-50%] translate-y-[-50%]
             w-full max-w-[calc(100%-2rem)]
-            rounded-dialog border-none outline-none
+            rounded-dialog border border-white/10 outline-none
             bg-[rgba(20,21,24,0.72)] backdrop-blur-[100px]
-            shadow-[0_32px_80px_-16px_rgba(0,0,0,0.85),0_0_50px_-10px_rgba(0,0,0,0.5)]
+            shadow-none
             data-[state=open]:animate-in
             data-[state=closed]:animate-out
             data-[state=open]:fade-in-0

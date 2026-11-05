@@ -62,7 +62,7 @@ export function KeyboardShortcutsHelp({ className }) {
         align="end"
         side="bottom"
         sideOffset={6}
-        className="z-[999999] w-[236px] p-2 bg-[rgba(22,23,24,0.88)] backdrop-blur-[80px] saturate-[180%] border border-white/[0.08] rounded-card shadow-[0_16px_36px_rgba(0,0,0,0.55)] text-white select-none font-['Google_Sans_Text',sans-serif]"
+        className="z-[999999] w-[236px] p-2 bg-[rgba(22,23,24,0.88)] backdrop-blur-[80px] saturate-[180%] border border-white/[0.08] rounded-card shadow-none text-white select-none font-['Google_Sans_Text',sans-serif]"
       >
         {/* Minimal Header */}
         <div className="flex items-center justify-between px-2 pt-0.5 pb-1.5 mb-1 border-b border-white/[0.06]">

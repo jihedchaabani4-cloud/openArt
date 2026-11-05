@@ -133,7 +133,7 @@ function SelectContent({
           // Colors
           "bg-[var(--mat-menu-container-color,var(--background-state-90))] backdrop-blur-[80px] border border-[var(--mat-sys-outline-variant,rgba(255,255,255,0.08))]",
           // Shadow
-          "shadow-[var(--mat-menu-container-elevation-shadow)]",
+          "shadow-none",
           // Animations — open
           "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95",
           // Animations — close

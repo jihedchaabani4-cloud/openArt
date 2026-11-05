@@ -305,10 +305,10 @@ export function NewElementDialog({ open, onOpenChange, projectId: propProjectId 
                 className={cn(
                   "w-[90%] max-w-[440px] h-[280px] rounded-card bg-[var(--foreground-state-05)] hover:bg-[var(--foreground-state-10)] active:bg-[var(--foreground-state-15)]",
                   "flex flex-col items-center justify-center gap-4 transition-all duration-200 cursor-pointer p-8 text-center group border-none",
-                  isDragging && "bg-[var(--foreground-state-20)] scale-[1.01] shadow-[0_0_40px_rgba(255,255,255,0.08)]"
+                  isDragging && "bg-[var(--foreground-state-20)] scale-[1.01] shadow-none"
                 )}
               >
-                <div className="size-14 rounded-card bg-[var(--foreground-state-10)] group-hover:bg-[var(--foreground-state-15)] backdrop-blur-md flex items-center justify-center text-white/80 group-hover:text-white transition-all shadow-inner">
+                <div className="size-14 rounded-card bg-[var(--foreground-state-10)] group-hover:bg-[var(--foreground-state-15)] backdrop-blur-md flex items-center justify-center text-white/80 group-hover:text-white transition-all shadow-none">
                   <GoogleIcon iconName="cloud_upload" className="text-[28px]" />
                 </div>
                 <div className="flex flex-col items-center gap-1.5">

@@ -32,7 +32,7 @@ export function ProjectCard({ project, onDelete, onRename }) {
             layout
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="group relative flex flex-col overflow-hidden rounded-card bg-transparent transition-all duration-300 shadow-2xl"
+            className="group relative flex flex-col overflow-hidden rounded-card bg-transparent transition-all duration-300 shadow-none"
         >
             <Link href={`/cinema-studio/${project.project_id}`} className="block">
                 <div

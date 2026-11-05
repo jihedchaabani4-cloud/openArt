@@ -631,7 +631,7 @@ const WorkflowMediaGridItem = React.memo(function WorkflowMediaGridItem({
           transition={{ duration: 0.15, ease: "easeOut" }}
         >
           <div
-            className="rounded-button overflow-hidden border-2 border-white/80 shadow-[0_16px_40px_rgba(0,0,0,0.55)]"
+            className="rounded-button overflow-hidden border-2 border-white/80 shadow-none"
             style={(() => {
               let numericAspect = 1;
               if (typeof aspect === "number") {
@@ -1121,7 +1121,7 @@ const CollectionMediaGridItem = React.memo(function CollectionMediaGridItem({
       {/* ── Collection drag ghost portal ── */}
       {isDraggingThis && typeof window !== "undefined" && createPortal(
         <motion.div
-          className="fixed top-0 left-0 z-[99999] pointer-events-none overflow-hidden rounded-card border border-white/70 bg-[#505050] shadow-[0_22px_70px_rgba(0,0,0,0.62)]"
+          className="fixed top-0 left-0 z-[99999] pointer-events-none overflow-hidden rounded-card border border-white/70 bg-[#505050] shadow-none"
           style={{
             x: mouseX,
             y: mouseY,
@@ -1139,7 +1139,7 @@ const CollectionMediaGridItem = React.memo(function CollectionMediaGridItem({
             <h3 className="min-w-0 truncate text-[12px] font-medium leading-tight tracking-tight text-white/92">
               {collectionName}
             </h3>
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-button border border-white/10 bg-[#343434]/95 text-white/90 shadow-[0_10px_24px_rgba(0,0,0,0.45)]">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-button border border-white/10 bg-[#343434]/95 text-white/90 shadow-none">
               <GoogleIcon iconName="folder" className="text-[16px]" />
             </div>
           </div>

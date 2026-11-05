@@ -63,21 +63,31 @@ Fonts loaded locally via variable `@font-face`:
 
 ---
 
-## 5. Border Radius Hierarchy
+## 5. Border Radius Hierarchy (Runway 4-Tier Scale)
 
 Enforced strictly across all components (Zero Arbitrary Brackets):
 
 | Geometry Tier | Value | CSS Token | Canonical Tailwind Token | Allowed Components |
 |---|---|---|---|---|
-| **Badge** | `4px` | `--radius-badge` | `rounded-badge` | Badges, micro tags, tooltips |
-| **Button / Input**| `6px` | `--radius-button` | `rounded-button` | Buttons, Inputs, Switches, Select Triggers |
-| **Card / Panel** | `8px` | `--radius-card` | `rounded-card` | Cards, Dropdowns, Popovers, Panels |
-| **Dialog / Modal**| `12px`| `--radius-dialog` | `rounded-dialog` | Modal Dialogs, Confirmation Sheets |
+| **Badge & Micro Tag** | `4px` (`sharp`) | `--radius-badge` | `rounded-badge` | Badges, micro tags, tooltips |
+| **Button / Input**| `4px` (`sharp`) | `--radius-button` / `--radius-input` | `rounded-button` / `rounded-input` | Buttons, Inputs, Switches, Select Triggers |
+| **Card / Panel** | `8px` (`comfortable`) | `--radius-card` | `rounded-card` | Cards, Dropdowns, Popovers, Panels |
+| **Dialog / Modal**| `16px` (`generous`)| `--radius-dialog` | `rounded-dialog` | Modal Dialogs, Confirmation Sheets |
 | **Pill / Circle** | `9999px`| `--radius-pill` | `rounded-full` / `rounded-pill` | Filter chips, avatar circles, switch thumbs |
 
 ---
 
-## 6. Spacing Scale (4px Base Grid)
+## 6. Elevation & Shadows (Runway Zero Box-Shadow Law)
+
+The entire design system enforces **zero box-shadow** (`shadow-none`).
+Depth is achieved via:
+- High-contrast photographic compositions and full-bleed video.
+- 1px hairline border containment (`border-white/10`).
+- Alternation of dark surface layers (`#000000`, `#131314`, `#1e1f20`, `#282a2c`).
+
+---
+
+## 7. Spacing Scale (8px Base Scale with Micro Steps)
 
 ```
 gap-1   (4px)   ──► Micro text, badge icon gap

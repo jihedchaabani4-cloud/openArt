@@ -39,9 +39,9 @@ function DropdownMenuContent({
           backgroundColor: "var(--mat-menu-container-color, rgba(22, 23, 24, 0.9))",
           backdropFilter: "blur(100px) saturate(190%) contrast(105%)",
           WebkitBackdropFilter: "blur(100px) saturate(190%) contrast(105%)",
-          boxShadow: "var(--mat-menu-container-elevation-shadow, 0 16px 32px -8px rgba(0, 0, 0, 0.4))",
+          boxShadow: "var(--mat-menu-container-elevation-shadow, none)",
           borderRadius: "var(--mat-menu-container-shape, 8px)",
-          border: "none",
+          border: "1px solid var(--border-dark, rgba(255, 255, 255, 0.1))",
           color: "var(--mat-sys-on-surface, #e3e3e3)",
           ...style,
         }}

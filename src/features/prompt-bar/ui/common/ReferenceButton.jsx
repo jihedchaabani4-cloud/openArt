@@ -213,7 +213,7 @@ export function ViewReference({
             transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
             className="absolute bottom-[calc(100%+12px)] left-1/2 -translate-x-1/2 z-[100] pointer-events-none flex flex-col items-center"
           >
-            <div className="rounded-card overflow-hidden shadow-[0_16px_40px_rgba(0,0,0,0.7)] bg-[#1e1f20] border-none flex items-center justify-center">
+            <div className="rounded-card overflow-hidden shadow-none bg-[#1e1f20] border border-white/10 flex items-center justify-center">
               {isVideo ? (
                 <video
                   src={src}

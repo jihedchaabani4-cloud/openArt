@@ -66,7 +66,7 @@ export function CharacterFeatureEditor({ open, onOpenChange, anchorRef }) {
             "absolute bottom-full left-1/2 -translate-x-1/2 mb-4 z-50 pointer-events-auto",
             "flex flex-col h-[470px] w-[880px] max-w-[95vw] overflow-hidden",
             "gap-2 p-3 rounded-dialog backdrop-blur-[40px]",
-            "border border-white/10 shadow-[0_24px_80px_rgba(0,0,0,0.65)]",
+            "border border-white/10 shadow-none",
             "bg-[#131517]/95 text-white"
           )}
         >

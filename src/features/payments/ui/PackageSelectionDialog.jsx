@@ -252,7 +252,7 @@ export function PackageSelectionDialog({
             <Dialog open={open} onOpenChange={onOpenChange}>
                 <DialogContent
                     showCloseButton
-                    className="flex h-[min(740px,84vh)] w-[min(960px,94vw)] max-w-[960px] items-center justify-center overflow-hidden rounded-dialog border-0 bg-(--background-base-pri) p-0 text-white shadow-[0_24px_80px_rgba(0,0,0,0.58)] backdrop-blur-[80px]"
+                    className="flex h-[min(740px,84vh)] w-[min(960px,94vw)] max-w-[960px] items-center justify-center overflow-hidden rounded-dialog border border-white/10 bg-(--background-base-pri) p-0 text-white shadow-none backdrop-blur-[80px]"
                 >
                     <DialogTitle className="sr-only">Choose your package</DialogTitle>
                     <Loader2 className="animate-spin text-white/40" size={32} />
@@ -265,7 +265,7 @@ export function PackageSelectionDialog({
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent
                 showCloseButton
-                className="h-[min(740px,84vh)] w-[min(960px,94vw)] max-w-[960px] overflow-hidden rounded-dialog border-0 bg-(--background-base-pri) p-0 text-white shadow-[0_24px_80px_rgba(0,0,0,0.58)] backdrop-blur-[80px]"
+                className="h-[min(740px,84vh)] w-[min(960px,94vw)] max-w-[960px] overflow-hidden rounded-dialog border border-white/10 bg-(--background-base-pri) p-0 text-white shadow-none backdrop-blur-[80px]"
             >
                 <DialogTitle className="sr-only">Choose your package</DialogTitle>
 

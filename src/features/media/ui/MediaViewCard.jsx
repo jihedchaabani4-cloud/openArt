@@ -143,9 +143,9 @@ export const MediaViewCard = React.forwardRef(function MediaViewCard({
       }}
       className={cn(
         "group relative rounded-card overflow-hidden bg-[#0a0a0a] select-none border-none p-0 block text-left outline-none h-auto transition-all",
-        "shadow-lg hover:shadow-2xl",
+        "shadow-none",
         isHighlighted
-          ? "ring-2 ring-white shadow-2xl z-10"
+          ? "ring-2 ring-white shadow-none z-10"
           : isSelected
           ? "ring-2 ring-white"
           : "hover:ring-2 hover:ring-white/20",

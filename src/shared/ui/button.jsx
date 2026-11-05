@@ -22,34 +22,34 @@ import { cn } from "@/shared/lib/utils"
 
 // ── Standardized Canonical Style Definitions ─────────────────────────────────
 const PRIMARY_WHITE =
-  "px-4 py-2 bg-white text-black hover:bg-white/90 active:scale-[0.98] font-semibold rounded-button shadow-xs transition-all";
+  "px-4 py-2 bg-white text-black hover:bg-white/90 active:scale-[0.98] font-semibold rounded-button shadow-none transition-all";
 
 const SECONDARY_SURFACE =
-  "px-4 py-2 bg-[var(--mat-sys-surface-container-high,#282a2c)] text-[var(--mat-sys-on-surface,#e3e3e3)] hover:text-white hover:bg-[var(--foreground-state-15)] active:bg-[var(--foreground-state-25)] rounded-button font-medium transition-all";
+  "px-4 py-2 bg-[var(--mat-sys-surface-container-high,#282a2c)] text-[var(--mat-sys-on-surface,#e3e3e3)] hover:text-white hover:bg-[var(--foreground-state-15)] active:bg-[var(--foreground-state-25)] rounded-button font-medium shadow-none transition-all";
 
 const OUTLINE_GHOST =
-  "px-4 py-2 border border-[var(--mat-sys-outline-variant,#444746)] bg-transparent text-[var(--mat-sys-on-surface,#e3e3e3)] hover:text-white hover:bg-[var(--foreground-state-10)] active:bg-[var(--foreground-state-15)] rounded-button font-medium transition-all";
+  "px-4 py-2 border border-[var(--mat-sys-outline-variant,#444746)] bg-transparent text-[var(--mat-sys-on-surface,#e3e3e3)] hover:text-white hover:bg-[var(--foreground-state-10)] active:bg-[var(--foreground-state-15)] rounded-button font-semibold shadow-none transition-all";
 
 const GHOST_SUBTLE =
-  "px-3 py-1.5 hover:bg-[var(--foreground-state-10,rgba(218,220,224,0.1))] text-[var(--mat-sys-on-surface,#e3e3e3)] hover:text-white rounded-button transition-all";
+  "px-3 py-1.5 hover:bg-[var(--foreground-state-10,rgba(218,220,224,0.1))] text-[var(--mat-sys-on-surface,#e3e3e3)] hover:text-white rounded-button shadow-none transition-all";
 
 const DANGER_GHOST =
-  "px-3 py-1.5 bg-transparent text-[var(--foreground-color-danger,#fe6e6e)] hover:text-[var(--foreground-color-danger,#fe6e6e)] hover:bg-[var(--foreground-state-10,rgba(218,220,224,0.1))] active:bg-[var(--foreground-state-25)] rounded-button transition-all [&_svg]:text-[var(--foreground-color-danger,#fe6e6e)] [&_mat-icon]:text-[var(--foreground-color-danger,#fe6e6e)] [&_.google-symbols]:text-[var(--foreground-color-danger,#fe6e6e)]";
+  "px-3 py-1.5 bg-transparent text-[var(--foreground-color-danger,#fe6e6e)] hover:text-[var(--foreground-color-danger,#fe6e6e)] hover:bg-[var(--foreground-state-10,rgba(218,220,224,0.1))] active:bg-[var(--foreground-state-25)] rounded-button shadow-none transition-all [&_svg]:text-[var(--foreground-color-danger,#fe6e6e)] [&_mat-icon]:text-[var(--foreground-color-danger,#fe6e6e)] [&_.google-symbols]:text-[var(--foreground-color-danger,#fe6e6e)]";
 
 const DANGER_FILLED =
-  "px-4 py-2 bg-[var(--mat-sys-error-container,#8c1d18)] text-[var(--mat-sys-on-error-container,#f9dedc)] hover:brightness-110 border border-[var(--mat-sys-error,#f2b8b5)]/20 active:scale-[0.98] font-semibold rounded-button transition-all";
+  "px-4 py-2 bg-[var(--mat-sys-error-container,#8c1d18)] text-[var(--mat-sys-on-error-container,#f9dedc)] hover:brightness-110 border border-[var(--mat-sys-error,#f2b8b5)]/20 active:scale-[0.98] font-semibold rounded-button shadow-none transition-all";
 
 const NEON_CTA =
-  "inline-flex items-center justify-center gap-2 h-10 px-5 rounded-button bg-[#EFFE17] text-black text-sm font-semibold pb-0.5 transition-all hover:opacity-80 active:opacity-60 shadow-[inset_0px_-3px_rgba(0,0,0,0.25)] disabled:opacity-50";
+  "inline-flex items-center justify-center gap-2 h-10 px-5 rounded-button bg-[#EFFE17] text-black text-sm font-semibold pb-0.5 transition-all hover:opacity-80 active:opacity-60 shadow-none disabled:opacity-50";
 
 const PILL_RESTING =
-  "rounded-full px-4 py-1.5 text-xs font-medium text-white/60 hover:text-white hover:bg-white/10 transition-all";
+  "rounded-full px-4 py-1.5 text-xs font-medium text-white/60 hover:text-white hover:bg-white/10 shadow-none transition-all";
 
 const PILL_ACTIVE =
-  "rounded-full px-4 py-1.5 text-xs font-semibold bg-white text-black hover:bg-white/90 shadow-sm transition-all";
+  "rounded-full px-4 py-1.5 text-xs font-semibold bg-white text-black hover:bg-white/90 shadow-none transition-all";
 
 const buttonVariants = cva(
-  "inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-button text-sm font-medium font-sans antialiased transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none",
+  "inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-button text-sm font-semibold font-sans antialiased shadow-none transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none",
   {
     variants: {
       variant: {
