@@ -2,7 +2,7 @@
 
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Sparkles } from "lucide-react";
+import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { Button } from "@/shared/ui/button";
 
 /**
@@ -36,7 +36,7 @@ export function HowToDrawer({ isOpen, onClose }) {
             {/* Header */}
             <div className="flex items-center justify-between pb-6 border-b border-white/10">
               <div className="flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-white/80" />
+                <GoogleIcon iconName="auto_awesome" className="text-xl text-white/80" />
                 <h2 className="text-lg font-bold text-white">How AI Elements Work</h2>
               </div>
               <Button
@@ -46,7 +46,7 @@ export function HowToDrawer({ isOpen, onClose }) {
                 onClick={onClose}
                 aria-label="Close"
               >
-                <X className="w-5 h-5" />
+                <GoogleIcon iconName="close" className="text-xl" />
               </Button>
             </div>
 

@@ -17,7 +17,6 @@ import {
   HoverCardTrigger,
   HoverCardContent,
 } from "@/shared/ui/hover-card";
-import { Check, Copy, Sparkles, Loader2 } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 
 /**
@@ -181,7 +180,7 @@ export function ElementInfoSidebar({
                   />
                   <span className="flex-1">{type.label}</span>
                   {isSelected && (
-                    <Check className="size-3.5 text-white/70 ml-auto" />
+                    <GoogleIcon iconName="check" className="text-sm text-white/70 ml-auto font-bold" />
                   )}
                 </DropdownMenuItem>
               );
@@ -213,9 +212,9 @@ export function ElementInfoSidebar({
               title="Analyser automatiquement les images avec Vision AI"
             >
               {isAnalyzingVision ? (
-                <Loader2 className="size-3 animate-spin text-white/60" />
+                <GoogleIcon iconName="progress_activity" className="text-xs animate-spin text-white/60" />
               ) : (
-                <Sparkles className="size-3 text-white/60" />
+                <GoogleIcon iconName="auto_awesome" className="text-xs text-white/60" />
               )}
               <span>{isAnalyzingVision ? "Analyse…" : "Vision AI"}</span>
             </Button>
@@ -256,9 +255,9 @@ export function ElementInfoSidebar({
               title="Copier les directives"
             >
               {copied ? (
-                <Check className="size-3.5 text-emerald-400" />
+                <GoogleIcon iconName="check" className="text-sm text-emerald-400" />
               ) : (
-                <Copy className="size-3.5" />
+                <GoogleIcon iconName="content_copy" className="text-sm" />
               )}
             </Button>
           )}

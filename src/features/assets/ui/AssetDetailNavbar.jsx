@@ -2,10 +2,10 @@
 
 import Link from "next/link";
 import { useMemo } from "react";
-import { ArrowLeft } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { queryKeys } from "@/shared/api/queryKeys";
+import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { UserDropdown } from "@/widgets/StudioNavbar/ui/UserDropdown";
 
 export default function AssetDetailNavbar({ workflowId }) {
@@ -42,7 +42,7 @@ export default function AssetDetailNavbar({ workflowId }) {
             className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-sm text-white/72 transition hover:bg-white/5 hover:text-white"
             aria-label="Back to assets"
           >
-            <ArrowLeft className="h-6 w-6" strokeWidth={3} />
+            <GoogleIcon iconName="arrow_back" className="text-2xl" />
           </Link>
 
           <div className="flex min-w-0 items-center gap-3">

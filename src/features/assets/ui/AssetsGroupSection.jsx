@@ -1,7 +1,7 @@
 "use client";
 
-import { Check, Minus } from "lucide-react";
 import { RowsPhotoAlbum } from "react-photo-album";
+import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 
 import { LibraryMediaGridItem } from "./LibraryMediaGridItem";
 import { Button } from "@/shared/ui/button";
@@ -32,9 +32,9 @@ export function AssetsGroupSection({
           aria-label={`Select ${group.label}`}
         >
           {isAllSelected ? (
-            <Check className="h-3.5 w-3.5" strokeWidth={3} />
+            <GoogleIcon iconName="check" className="text-sm font-bold" />
           ) : isPartiallySelected ? (
-            <Minus className="h-3.5 w-3.5" strokeWidth={3} />
+            <GoogleIcon iconName="remove" className="text-sm font-bold" />
           ) : null}
         </Button>
         <h2 className="text-[28px] font-semibold tracking-tight text-white">

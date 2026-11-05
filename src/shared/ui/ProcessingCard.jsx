@@ -1,6 +1,6 @@
 "use client";
 
-import { Play } from "lucide-react";
+import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { cn } from "@/shared/lib/utils";
 
 /**
@@ -117,7 +117,7 @@ export function ProcessingCard({
 
       {/* ── Optional Top-Left Play Icon (Only when isVideo or showPlayIcon) ── */}
       {shouldShowPlayIcon && (
-        <Play className="absolute left-3 top-3 h-3.5 w-3.5 text-white/50 fill-white/50 pointer-events-none" />
+        <GoogleIcon iconName="play_arrow" fill={true} className="absolute left-3 top-3 text-sm text-white/50 pointer-events-none" />
       )}
 
       {/* ── Top-Right Progress Badge ── */}

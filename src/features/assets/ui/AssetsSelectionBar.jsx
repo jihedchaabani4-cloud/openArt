@@ -1,7 +1,6 @@
 "use client";
 
-import { Download, Heart, Trash2, X } from "lucide-react";
-
+import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { Button } from "@/shared/ui/button";
 
 export function AssetsSelectionBar({
@@ -31,7 +30,7 @@ export function AssetsSelectionBar({
           className="h-10 px-6 text-sm"
           disabled={isDownloading}
         >
-          <Download className="h-4 w-4" />
+          <GoogleIcon iconName="download" className="text-base" />
           {isDownloading ? "Downloading..." : "Download"}
         </Button>
 
@@ -43,7 +42,7 @@ export function AssetsSelectionBar({
           disabled={isFavoriting || isDeleting}
           aria-label="Favorite selected"
         >
-          <Heart className={`h-4 w-4 ${allSelectedAreLiked ? "fill-current text-white" : ""}`} />
+          <GoogleIcon iconName="favorite" fill={allSelectedAreLiked} className={allSelectedAreLiked ? "text-base text-white" : "text-base"} />
         </Button>
 
         <Button
@@ -54,7 +53,7 @@ export function AssetsSelectionBar({
           disabled={isDeleting || isFavoriting}
           aria-label="Delete selected"
         >
-          <Trash2 className="h-4 w-4" />
+          <GoogleIcon iconName="delete" className="text-base" />
         </Button>
 
         <Button
@@ -64,7 +63,7 @@ export function AssetsSelectionBar({
           onClick={onClearSelection}
           aria-label="Clear selection"
         >
-          <X className="h-4.5 w-4.5" />
+          <GoogleIcon iconName="close" className="text-lg" />
         </Button>
       </div>
     </div>

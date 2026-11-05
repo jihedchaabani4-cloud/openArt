@@ -1,7 +1,6 @@
 "use client";
 
-import { ChevronDown } from "lucide-react";
-
+import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/button";
 
@@ -17,7 +16,7 @@ export function SidebarFilterButton({ label, icon: Icon, active = false, onClick
       )}
     >
       <span className="flex items-center gap-2.5">
-        {Icon ? <Icon className="h-4 w-4" /> : null}
+        {Icon ? (typeof Icon === "string" ? <GoogleIcon iconName={Icon} className="text-base" /> : React.isValidElement(Icon) ? Icon : typeof Icon === "function" ? React.createElement(Icon, { className: "text-base" }) : null) : null}
         <span>{label}</span>
       </span>
     </Button>
@@ -36,7 +35,7 @@ export function SidebarDropdownButton({ label, active = false, onClick }) {
       )}
     >
       <span>{label}</span>
-      <ChevronDown className="h-4 w-4 rotate-[-90deg] text-white/32" />
+      <GoogleIcon iconName="keyboard_arrow_down" className="text-base rotate-[-90deg] text-white/32" />
     </Button>
   );
 }

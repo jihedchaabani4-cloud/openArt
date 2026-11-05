@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState, useEffect, useCallback } from "react";
-import { Loader2, RefreshCw, X } from "lucide-react";
+import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { ReferenceButton, ViewReference } from "./ReferenceButton.jsx";
 import { Button } from "@/shared/ui/button";
 import { cn } from "@/shared/lib/utils";
@@ -193,7 +193,7 @@ export function MediaInput({
               className="absolute inset-0 w-full h-full object-cover opacity-30"
             />
           )}
-          <Loader2 className="w-5 h-5 text-white/80 animate-spin relative z-10" />
+          <GoogleIcon iconName="progress_activity" className="text-xl text-white/80 animate-spin relative z-10" />
         </div>
       ) : status === "failed" ? (
         <div
@@ -211,7 +211,7 @@ export function MediaInput({
             onClick={handleRetry}
             title="Retry upload"
           >
-            <RefreshCw className="w-2.5 h-2.5" />
+            <GoogleIcon iconName="refresh" className="text-xs" />
             <span>Retry</span>
           </Button>
           <Button
@@ -223,7 +223,7 @@ export function MediaInput({
             title="Dismiss error"
             aria-label="Dismiss error"
           >
-            <X className="w-2.5 h-2.5" />
+            <GoogleIcon iconName="close" className="text-xs" />
           </Button>
         </div>
       ) : value ? (

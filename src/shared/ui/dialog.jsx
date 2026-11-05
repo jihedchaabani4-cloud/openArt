@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { X } from "lucide-react"
+import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import * as DialogPrimitive from "@radix-ui/react-dialog"
 
 import { cn } from "@/shared/lib/utils"
@@ -127,7 +127,7 @@ function DialogContent({
           <DialogPrimitive.Close
             className="absolute top-4 right-4 text-cool-slate hover:text-white transition flex items-center justify-center cursor-pointer"
           >
-            <X className="size-5 stroke-[1.5]" />
+            <GoogleIcon iconName="close" className="text-xl" />
             <span className="sr-only">Close</span>
           </DialogPrimitive.Close>
         )}

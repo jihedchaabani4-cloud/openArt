@@ -14,7 +14,7 @@
 
 import * as React from "react";
 import { Checkbox as CheckboxPrimitive } from "radix-ui";
-import { Check } from "lucide-react";
+import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { cn } from "@/shared/lib/utils";
 
 const Checkbox = React.forwardRef(({
@@ -52,7 +52,7 @@ const Checkbox = React.forwardRef(({
         data-slot="checkbox-indicator"
         className="flex items-center justify-center text-current"
       >
-        <Check className={cn(isLg ? "size-3.5 stroke-2" : "size-3 stroke-2")} />
+        <GoogleIcon iconName="check" className={cn(isLg ? "text-sm font-bold" : "text-xs font-bold")} />
       </CheckboxPrimitive.Indicator>
     </CheckboxPrimitive.Root>
   );

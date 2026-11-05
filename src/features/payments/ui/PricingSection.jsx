@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { usePackages, useCheckout } from "@/features/payments/api/paymentsApi";
 import { PackageSelectionDialog } from "@/features/payments/ui/PackageSelectionDialog";
 import {
@@ -10,7 +11,6 @@ import {
     AccordionTrigger,
 } from "@/shared/ui/accordion";
 import { Button } from "@/shared/ui/button";
-import { Check, ChevronDown, Loader2, Plus } from "lucide-react";
 import { useAuthSession } from "@/shared/api/auth";
 import { LoginDialog } from "@/components/LoginDialog";
 
@@ -179,9 +179,9 @@ function CompareCategorySection({ title, items, packages, initialVisibleCount = 
                         className="h-auto p-0 text-sm font-medium hover:bg-transparent hover:text-white"
                         style={{ color: TEXT_MUTED }}
                     >
-                        <ChevronDown
-                            size={16}
-                            className={`transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`}
+                        <GoogleIcon
+                            iconName="keyboard_arrow_down"
+                            className={`text-base transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`}
                         />
                         {isExpanded ? "View less" : "View more"}
                     </Button>
@@ -269,7 +269,7 @@ function ComparePlansSection({ packages, modelsComparison, onBuy, isPending, pen
                                                     style={{ background: BUTTON_SURFACE, color: TEXT_PRIMARY }}
                                                 >
                                                     {isPending && pendingPackageId === pkg.id ? (
-                                                        <Loader2 size={16} className="animate-spin" />
+                                                        <GoogleIcon iconName="progress_activity" className="text-base animate-spin" />
                                                     ) : (
                                                         ctaLabel
                                                     )}
@@ -463,7 +463,7 @@ function TemplatePricingCard({ pkg, modelsComparison, onBuy, isLoading }) {
                         color: "#202020",
                     }}
                 >
-                    {isLoading ? <Loader2 size={16} className="animate-spin" /> : "Get Started"}
+                    {isLoading ? <GoogleIcon iconName="progress_activity" className="text-base animate-spin" /> : "Get Started"}
                 </Button>
             </div>
 
@@ -472,7 +472,7 @@ function TemplatePricingCard({ pkg, modelsComparison, onBuy, isLoading }) {
                 <ul className="space-y-4 text-[13px] leading-5.5 sm:text-[13px]" style={{ color: TEXT_PRIMARY }}>
                     {primaryFeatures.map((feature) => (
                         <li key={feature} className="flex items-start gap-3">
-                            <Check size={16} className="mt-1 shrink-0" />
+                            <GoogleIcon iconName="check" className="text-base mt-1 shrink-0 font-bold" />
                             <span>{feature}</span>
                         </li>
                     ))}
@@ -481,7 +481,7 @@ function TemplatePricingCard({ pkg, modelsComparison, onBuy, isLoading }) {
                 {(secondaryFeatures.length > 0 || generatedBreakdown.length > 0) && (
                     <div className="flex items-center gap-4 py-1">
                         <div className="h-px flex-1 bg-white/10" />
-                        <Plus size={18} className="shrink-0 text-white" />
+                        <GoogleIcon iconName="add" className="text-lg shrink-0 text-white" />
                         <div className="h-px flex-1 bg-white/10" />
                     </div>
                 )}
@@ -489,7 +489,7 @@ function TemplatePricingCard({ pkg, modelsComparison, onBuy, isLoading }) {
                 <ul className="space-y-4 text-[13px] leading-5.5 sm:text-[13px]" style={{ color: TEXT_PRIMARY }}>
                     {secondaryFeatures.map((feature) => (
                         <li key={feature} className="flex items-start gap-3">
-                            <Check size={16} className="mt-1 shrink-0" />
+                            <GoogleIcon iconName="check" className="text-base mt-1 shrink-0 font-bold" />
                             <span>{feature}</span>
                         </li>
                     ))}
@@ -673,7 +673,7 @@ export function PricingSection({ hideFaq = false }) {
                                             className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full"
                                             style={{ background: "rgba(255,255,255,0.08)", color: TEXT_PRIMARY }}
                                         >
-                                            <Plus size={16} />
+                                            <GoogleIcon iconName="add" className="text-base" />
                                         </span>
                                     }
                                 >

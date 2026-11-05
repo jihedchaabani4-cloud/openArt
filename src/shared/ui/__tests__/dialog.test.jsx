@@ -93,7 +93,7 @@ describe("Dialog Primitive — Runway Flat Surface Architecture", () => {
   });
 
   describe("2. Interactive Behavior & Accessibility", () => {
-    it("renders close button with Lucide X and closes dialog on click", () => {
+    it("renders close button with GoogleIcon close and closes dialog on click", () => {
       const onOpenChange = vi.fn();
       render(
         <Dialog open={true} onOpenChange={onOpenChange}>

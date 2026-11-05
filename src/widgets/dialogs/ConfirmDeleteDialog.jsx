@@ -10,7 +10,7 @@ import {
   DialogClose,
   DialogTrigger,
 } from "@/shared/ui/dialog";
-import { AlertTriangle } from "lucide-react";
+import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { Button } from "@/shared/ui/button";
 
 /**
@@ -52,7 +52,7 @@ export function ConfirmDeleteDialog({
       >
         <div className="flex flex-col items-center text-center">
           <div className="mb-3">
-            <AlertTriangle className="size-8 text-danger stroke-[1.5]" />
+            <GoogleIcon iconName="warning" className="text-3xl text-danger" />
           </div>
           
           <DialogHeader className="space-y-1">

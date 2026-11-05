@@ -2,7 +2,7 @@
 
 import { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Check, Heart, Play, Trash2 } from "lucide-react";
+import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 
 import { useRemoveWorkflow, useToggleWorkflowLike } from "@/features/workflows/api/workflowsApi";
 import { ImageStatusView } from "@/features/workflows/ui/ImageStatusView";
@@ -90,18 +90,18 @@ export function LibraryMediaGridItem({
             )}
             aria-label="Select media"
           >
-            <Check strokeWidth={2} className="h-3.5 w-3.5" />
+            <GoogleIcon iconName="check" className="text-sm font-bold" />
           </Button>
 
             <div className="absolute bottom-3 left-3 z-30 flex items-center gap-1">
             {isVideo && (
               <div className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-black/60 text-white border border-white/10">
-                <Play className="h-3 w-3 fill-white text-white" />
+                <GoogleIcon iconName="play_arrow" fill={true} className="text-xs text-white" />
               </div>
             )}
             {isLiked && (
               <div className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-black/60 text-white border border-white/10">
-                <Heart className="h-3 w-3 fill-white text-white" />
+                <GoogleIcon iconName="favorite" fill={true} className="text-xs text-white" />
               </div>
             )}
           </div>
@@ -139,7 +139,7 @@ export function LibraryMediaGridItem({
                   title={isLiked ? "Unlike" : "Like"}
                   aria-label={isLiked ? "Unlike" : "Like"}
                 >
-                  <Heart strokeWidth={1.5} className={cn("size-4", isLiked && "fill-accent text-accent")} />
+                  <GoogleIcon iconName="favorite" fill={isLiked} className={cn("text-base", isLiked ? "text-accent" : "text-white/80")} />
                 </ActionBtn>
                 <ActionBtn
                   className="text-white hover:bg-white/10 hover:text-danger"
@@ -150,7 +150,7 @@ export function LibraryMediaGridItem({
                   title="Delete"
                   aria-label="Delete"
                 >
-                  <Trash2 strokeWidth={1.5} className="size-4" />
+                  <GoogleIcon iconName="delete" className="text-base" />
                 </ActionBtn>
               </ButtonGroup>
             </div>

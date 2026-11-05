@@ -3,8 +3,8 @@
 import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthSession } from "@/shared/api/auth";
-import { Loader2 } from "lucide-react";
 import { LandingPage } from "@/views";
+import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 
 export default function HomePage() {
   const router = useRouter();
@@ -22,7 +22,7 @@ export default function HomePage() {
         className="min-h-screen bg-black flex flex-col items-center justify-center text-white/50"
         suppressHydrationWarning
       >
-        <Loader2 className="w-10 h-10 animate-spin text-white mb-4" />
+        <GoogleIcon iconName="progress_activity" className="text-4xl animate-spin text-white mb-4" />
         <span>Chargement...</span>
       </div>
     );

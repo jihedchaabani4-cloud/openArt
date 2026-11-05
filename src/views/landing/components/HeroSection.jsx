@@ -1,8 +1,9 @@
 "use client";
+
 import React from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/shared/ui/button";
-import { Loader2 } from "lucide-react";
+import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 
 const appName = process.env.NEXT_PUBLIC_APP_NAME || "Level Labs";
 
@@ -107,7 +108,7 @@ export function HeroSection({ user, authLoading, onCTA }) {
               className="mt-8 flex items-center gap-2 h-10 px-6 text-sm"
             >
               {authLoading ? (
-                <><Loader2 className="size-5 animate-spin" /> Connexion...</>
+                <><GoogleIcon iconName="progress_activity" className="text-xl animate-spin" /> Connexion...</>
               ) : user ? (
                 "Cinema Studio"
               ) : (

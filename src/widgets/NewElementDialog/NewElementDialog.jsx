@@ -2,7 +2,6 @@
 
 import React, { useState, useRef, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { Loader2, Upload, X, Plus } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -271,7 +270,7 @@ export function NewElementDialog({ open, onOpenChange, projectId: propProjectId 
             onClick={() => handleOpenChange(false)}
             className="size-8 p-0 rounded-full text-white/50 hover:text-white"
           >
-            <X className="size-5 stroke-[1.5]" />
+            <GoogleIcon iconName="close" className="text-xl" />
           </Button>
         </div>
 
@@ -308,7 +307,7 @@ export function NewElementDialog({ open, onOpenChange, projectId: propProjectId 
                 )}
               >
                 <div className="size-14 rounded-lg bg-white/10 group-hover:bg-white/15 flex items-center justify-center text-white/80 group-hover:text-white transition-all shadow-none">
-                  <Upload className="size-7 stroke-[1.5]" />
+                  <GoogleIcon iconName="upload" className="text-3xl" />
                 </div>
                 <div className="flex flex-col items-center gap-1.5">
                   <span className="text-[15px] font-medium text-white/85 group-hover:text-white transition-colors">
@@ -349,7 +348,7 @@ export function NewElementDialog({ open, onOpenChange, projectId: propProjectId 
                     className="absolute top-3 right-3 size-8 p-0 rounded-full bg-surface-elevated/80 text-white/80 hover:text-white hover:bg-surface-elevated border border-white/10"
                     title="Supprimer ce fichier"
                   >
-                    <X className="size-4 stroke-[1.5]" />
+                    <GoogleIcon iconName="close" className="text-base" />
                   </Button>
                 </div>
 
@@ -402,7 +401,7 @@ export function NewElementDialog({ open, onOpenChange, projectId: propProjectId 
                       className="size-14 p-0 rounded-sm bg-white/5 text-white/80 hover:text-white hover:bg-white/10 border border-white/10 flex flex-col items-center justify-center gap-0.5 shrink-0"
                       title="Ajouter un autre fichier"
                     >
-                      <Plus className="size-5 stroke-[1.5]" />
+                      <GoogleIcon iconName="add" className="text-xl" />
                       <span className="text-[10px] font-medium">Add</span>
                     </Button>
                   )}
@@ -499,7 +498,7 @@ export function NewElementDialog({ open, onOpenChange, projectId: propProjectId 
             >
               {isUploading ? (
                 <>
-                  <Loader2 className="size-4 animate-spin" />
+                  <GoogleIcon iconName="progress_activity" className="text-base animate-spin" />
                   <span>Creating...</span>
                 </>
               ) : (

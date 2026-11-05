@@ -8,7 +8,6 @@ import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { Button } from "@/shared/ui/button";
 import { cn } from "@/shared/lib/utils";
 import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows";
-import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { useCharacterWorkflows } from "@/features/characters";
 import { useElementSheetWorkflows } from "@/features/elements";
 
@@ -157,9 +156,9 @@ export function LeftNavigationRail() {
         >
           <span className="w-[48px] h-full shrink-0 flex items-center justify-center">
             {isExpanded ? (
-              <PanelLeftClose className="w-5 h-5 text-white/80 shrink-0" />
+              <GoogleIcon iconName="left_panel_close" className="text-xl text-white/80 shrink-0" />
             ) : (
-              <PanelLeftOpen className="w-5 h-5 text-white/80 shrink-0" />
+              <GoogleIcon iconName="left_panel_open" className="text-xl text-white/80 shrink-0" />
             )}
           </span>
           <span

@@ -1,7 +1,6 @@
 "use client";
 
 import { useRef, useMemo } from "react";
-import { Loader2 } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { MediaItemView } from "@/widgets/CoreMediaItemView";
@@ -118,7 +117,7 @@ export function CharacterSheetSection({
 
       {isUpdatingSheet && !hasImage ? (
         <div className="flex flex-col items-center gap-3 py-16">
-          <Loader2 className="size-8 text-violet-400 animate-spin" />
+          <GoogleIcon iconName="progress_activity" className="text-3xl text-violet-400 animate-spin" />
           <p className="text-white/60 text-sm">Updating Body Sheet…</p>
         </div>
       ) : isBusy && !hasImage ? (
@@ -225,7 +224,7 @@ export function CharacterSheetSection({
             overlay={
               isUpdatingSheet ? (
                 <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] z-40 flex flex-col items-center justify-center gap-2 rounded-lg">
-                  <Loader2 className="size-7 text-white animate-spin" />
+                  <GoogleIcon iconName="progress_activity" className="text-2xl text-white animate-spin" />
                   <span className="text-xs text-white/80">Updating…</span>
                 </div>
               ) : null

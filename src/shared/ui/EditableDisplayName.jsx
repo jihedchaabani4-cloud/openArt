@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Check, X } from "lucide-react"
+import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { cn } from "@/shared/lib/utils"
 import { Button } from "@/shared/ui/button"
 import { Input } from "@/shared/ui/input"
@@ -121,7 +121,7 @@ export const EditableDisplayName = React.forwardRef(({
             className="size-7 p-0 text-white/80 hover:text-white hover:bg-white/20 flex items-center justify-center shrink-0"
             title="Save"
           >
-            <Check className="size-4" strokeWidth={2.5} />
+            <GoogleIcon iconName="check" className="text-base font-bold" />
           </Button>
           <Button
             type="button"
@@ -133,7 +133,7 @@ export const EditableDisplayName = React.forwardRef(({
             className="size-7 p-0 text-white/80 hover:text-white hover:bg-white/20 flex items-center justify-center shrink-0"
             title="Cancel"
           >
-            <X className="size-4" strokeWidth={2.5} />
+            <GoogleIcon iconName="close" className="text-base font-bold" />
           </Button>
         </div>
       )}

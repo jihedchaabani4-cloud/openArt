@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
+import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { motion, AnimatePresence } from "framer-motion";
-import { Mail, Lock, Chrome, ArrowRight, Sparkles, Laptop } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { LoadingScreen } from "@/shared/ui/LoadingScreen";
@@ -80,7 +80,7 @@ export default function LoginPage() {
                 transition={{ type: "spring", bounce: 0.5 }}
                 className="flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-tr from-purple-500 to-blue-500 shadow-none border border-white/10"
               >
-                <Sparkles className="w-8 h-8 text-white" />
+                <GoogleIcon iconName="auto_awesome" className="text-3xl text-white" />
               </motion.div>
             </div>
 
@@ -106,7 +106,7 @@ export default function LoginPage() {
                   <label className="text-xs font-medium text-white/70 ml-1">Email Address</label>
                   <div className="relative group">
                     <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                      <Mail className="h-5 w-5 text-white/40 group-focus-within:text-purple-400 transition-colors" />
+                      <GoogleIcon iconName="mail" className="text-xl text-white/40 group-focus-within:text-purple-400 transition-colors" />
                     </div>
                     <Input
                       type="email"
@@ -127,7 +127,7 @@ export default function LoginPage() {
                   </div>
                   <div className="relative group">
                     <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                      <Lock className="h-5 w-5 text-white/40 group-focus-within:text-purple-400 transition-colors" />
+                      <GoogleIcon iconName="lock" className="text-xl text-white/40 group-focus-within:text-purple-400 transition-colors" />
                     </div>
                     <Input
                       type="password"
@@ -167,7 +167,7 @@ export default function LoginPage() {
                       animate={{ x: isHovered ? 4 : 0 }}
                       transition={{ type: "spring", stiffness: 300 }}
                     >
-                      <ArrowRight className="w-4 h-4" />
+                      <GoogleIcon iconName="arrow_forward" className="text-base" />
                     </motion.div>
                   </span>
                   
@@ -192,7 +192,7 @@ export default function LoginPage() {
                   whileTap={{ scale: 0.98 }}
                   className="flex items-center justify-center gap-2 py-2.5 bg-white/[0.03] border border-white/10 rounded-sm transition-colors"
                 >
-                  <Laptop className="w-5 h-5 text-white/80" />
+                  <GoogleIcon iconName="laptop" className="text-xl text-white/80" />
                   <span className="text-sm font-medium text-white/80">Microsoft</span>
                 </motion.button>
                 <motion.button 
@@ -202,7 +202,7 @@ export default function LoginPage() {
                   whileTap={{ scale: 0.98 }}
                   className="flex items-center justify-center gap-2 py-2.5 bg-white/[0.03] border border-white/10 rounded-sm transition-colors"
                 >
-                  <Chrome className="w-5 h-5 text-white/80" />
+                  <GoogleIcon iconName="globe" className="text-xl text-white/80" />
                   <span className="text-sm font-medium text-white/80">Google</span>
                 </motion.button>
               </div>

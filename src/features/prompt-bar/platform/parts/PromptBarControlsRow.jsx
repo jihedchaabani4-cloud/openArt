@@ -1,6 +1,5 @@
 import { cn } from "@/shared/lib/utils";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
-import { ArrowRight } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 
 /**
@@ -97,7 +96,7 @@ export function PromptBarControlsRow({
           {isGenerating ? (
             <span className="size-3.5 rounded-full border-2 border-black/30 border-t-black animate-spin" />
           ) : (
-            <ArrowRight className="size-4 shrink-0" strokeWidth={2.5} />
+            <GoogleIcon iconName="arrow_forward" className="text-base shrink-0 font-bold" />
           )}
         </Button>
       </div>

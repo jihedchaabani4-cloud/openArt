@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Check, ChevronRight, Circle } from "lucide-react"
+import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { ContextMenu as ContextMenuPrimitive } from "radix-ui"
 
 import { cn } from "@/shared/lib/utils"
@@ -62,7 +62,7 @@ function ContextMenuSubTrigger({
       )}
       {...props}>
       {children}
-      <ChevronRight className="ml-auto size-4 stroke-[1.5] text-cool-slate" />
+      <GoogleIcon iconName="chevron_right" className="ml-auto text-base text-cool-slate" />
     </ContextMenuPrimitive.SubTrigger>
   );
 }
@@ -156,7 +156,7 @@ function ContextMenuCheckboxItem({
       {...props}>
       <span className="absolute left-2 flex size-3.5 items-center justify-center">
         <ContextMenuPrimitive.ItemIndicator>
-          <Check className="size-3.5 stroke-[1.5]" />
+          <GoogleIcon iconName="check" className="text-sm font-bold" />
         </ContextMenuPrimitive.ItemIndicator>
       </span>
       {children}
@@ -182,7 +182,7 @@ function ContextMenuRadioItem({
       {...props}>
       <span className="absolute left-2 flex size-3.5 items-center justify-center">
         <ContextMenuPrimitive.ItemIndicator>
-          <Circle className="size-2 fill-current" />
+          <GoogleIcon iconName="circle" fill={true} className="text-xs" />
         </ContextMenuPrimitive.ItemIndicator>
       </span>
       {children}

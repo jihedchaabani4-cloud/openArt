@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState, useCallback, useEffect } from "react";
-import { Play, Pause, Volume2, VolumeX, Maximize } from "lucide-react";
+import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/button";
 import { CoreMediaItemView } from "@/widgets/CoreMediaItemView";
@@ -78,7 +78,7 @@ function VideoControlsBar({
           onClick={togglePlay}
           aria-label={isPlaying ? "Pause" : "Play"}
         >
-          {isPlaying ? <Pause className="size-3.5 fill-white" /> : <Play className="size-3.5 fill-white ml-0.5" />}
+          {isPlaying ? <GoogleIcon iconName="pause" fill={true} className="text-sm text-white" /> : <GoogleIcon iconName="play_arrow" fill={true} className="text-sm text-white ml-0.5" />}
         </Button>
 
         {/* Scrubber Track */}
@@ -108,7 +108,7 @@ function VideoControlsBar({
           onClick={toggleMute}
           aria-label={isMuted ? "Unmute" : "Mute"}
         >
-          {isMuted ? <VolumeX className="size-3.5 text-white" /> : <Volume2 className="size-3.5 text-white" />}
+          {isMuted ? <GoogleIcon iconName="volume_off" className="text-sm text-white" /> : <GoogleIcon iconName="volume_up" className="text-sm text-white" />}
         </Button>
 
         {/* Fullscreen */}
@@ -119,7 +119,7 @@ function VideoControlsBar({
           onClick={toggleFullscreen}
           aria-label="Fullscreen"
         >
-          <Maximize className="size-3.5 text-white" />
+          <GoogleIcon iconName="fullscreen" className="text-sm text-white" />
         </Button>
       </div>
     </div>

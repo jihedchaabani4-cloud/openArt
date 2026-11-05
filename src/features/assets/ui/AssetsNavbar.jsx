@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ArrowLeft } from "lucide-react";
 
+import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { UserDropdown } from "@/widgets/StudioNavbar/ui/UserDropdown";
 
 export function AssetsNavbar({ hidden = false }) {
@@ -24,7 +24,7 @@ export function AssetsNavbar({ hidden = false }) {
             className="inline-flex h-10 w-10 items-center justify-center rounded-sm text-white/72 transition hover:bg-white/5 hover:text-white"
             aria-label="Back to home"
           >
-            <ArrowLeft className="h-6 w-6" strokeWidth={3} />
+            <GoogleIcon iconName="arrow_back" className="text-2xl" />
           </Link>
 
           <Link

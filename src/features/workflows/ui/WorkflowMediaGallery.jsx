@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Play, ImageIcon, Scissors, Trash2 } from "lucide-react";
+import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { useDeleteMedia, useDetachMedia } from "../api/workflowsApi";
 import { ActionBtn } from "@/widgets/StudioLayout/GenerationsStudio/MediaGridItem/ActionBtn";
 import { ButtonGroup } from "@/shared/ui/button-group";
@@ -150,7 +150,7 @@ function WorkflowMediaGalleryCard({
                 }}
                 title="Détacher vers un nouveau workflow"
               >
-                <Scissors className="size-3.5" />
+                <GoogleIcon iconName="content_cut" className="text-sm" />
               </ActionBtn>
               
               <ActionBtn 
@@ -160,7 +160,7 @@ function WorkflowMediaGalleryCard({
                 }}
                 title="Supprimer le média"
               >
-                <Trash2 className="size-3.5" />
+                <GoogleIcon iconName="delete" className="text-sm" />
               </ActionBtn>
             </ButtonGroup>
           </div>
@@ -168,7 +168,7 @@ function WorkflowMediaGalleryCard({
         topRight={
           iVideo ? (
             <div className="p-1.5 bg-black/60 backdrop-blur-md rounded-lg border border-white/10">
-              <Play className="size-3 fill-white text-white" />
+              <GoogleIcon iconName="play_arrow" fill={true} className="text-xs text-white" />
             </div>
           ) : null
         }
@@ -209,7 +209,7 @@ function WorkflowMediaGalleryCard({
                 key={idx}
                 className="relative w-10 h-10 flex items-center justify-center rounded-lg overflow-hidden border border-white/10 bg-white/5 shrink-0"
               >
-                <ImageIcon className="absolute size-4 text-white/20" />
+                <GoogleIcon iconName="image" className="absolute text-base text-white/20" />
                 <img 
                   src={refUrl} 
                   className="absolute inset-0 w-full h-full object-cover z-10" 

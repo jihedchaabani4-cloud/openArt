@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import { Plus, Loader2 } from "lucide-react"
-import { Button } from "@/shared/ui/button"
+import { Button } from "@/shared/ui/button";
+import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 
 export function ProjectsFloatingAction({ onCreate, isLoading }) {
     return (
@@ -14,9 +14,9 @@ export function ProjectsFloatingAction({ onCreate, isLoading }) {
                 disabled={isLoading}
             >
                 {isLoading ? (
-                    <Loader2 className="size-5 animate-spin" />
+                    <GoogleIcon iconName="progress_activity" className="text-xl animate-spin" />
                 ) : (
-                    <Plus className="size-5" />
+                    <GoogleIcon iconName="add" className="text-xl" />
                 )}
                 <span className="font-medium text-[15px]">New project</span>
             </Button>

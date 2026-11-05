@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import { Star, Trash2, Images, Loader2, AlertCircle } from "lucide-react";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { Button } from "@/shared/ui/button";
+import { cn } from "@/shared/lib/utils";
 import { FlowErrorTile } from "@/shared/ui/FlowErrorTile";
 import { ProcessingCard } from "@/shared/ui/ProcessingCard";
 
@@ -89,7 +89,7 @@ export function ElementCardKrea({ element, onClick, onDelete }) {
           className="absolute top-2 left-2 z-30 flex size-7 items-center justify-center rounded-sm text-white transition-all duration-200 bg-black/50 hover:bg-black/75 backdrop-blur-sm border border-white/15 opacity-100 md:opacity-0 md:group-hover:opacity-100 cursor-pointer p-0 shadow-none"
           aria-label="Pin Element"
         >
-          <Star strokeWidth={1.5} className={`size-3.5 transition-colors ${isStarred ? "text-amber-400 fill-amber-400" : "text-white hover:text-amber-300"}`} />
+          <GoogleIcon iconName="star" fill={isStarred} className={cn("text-sm transition-colors", isStarred ? "text-amber-400" : "text-white hover:text-amber-300")} />
         </Button>
 
         {/* Top-Right Delete Button */}
@@ -101,7 +101,7 @@ export function ElementCardKrea({ element, onClick, onDelete }) {
             className="absolute top-2 right-2 z-30 size-7 opacity-0 group-hover:opacity-100 cursor-pointer p-0"
             aria-label="Delete Element"
           >
-            <Trash2 className="size-3.5" strokeWidth={1.5} />
+            <GoogleIcon iconName="delete" className="text-sm" />
           </Button>
         )}
 

@@ -2,7 +2,7 @@
 import { logger } from "@/shared/lib/logger";
 
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import { Check, X, Loader2 } from "lucide-react";
+import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/button";
 
@@ -120,9 +120,9 @@ export function InlineRenamePill({
           className="size-7 p-0"
         >
           {isSaving ? (
-            <Loader2 className="size-4 animate-spin text-white" />
+            <GoogleIcon iconName="progress_activity" className="text-base animate-spin text-white" />
           ) : (
-            <Check className="size-4 stroke-[2.5]" />
+            <GoogleIcon iconName="check" className="text-base font-bold" />
           )}
         </Button>
 
@@ -135,7 +135,7 @@ export function InlineRenamePill({
           aria-label="Cancel"
           className="size-7 p-0"
         >
-          <X className="size-4 stroke-[2.5]" />
+          <GoogleIcon iconName="close" className="text-base font-bold" />
         </Button>
       </div>
     </div>

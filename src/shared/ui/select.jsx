@@ -1,7 +1,6 @@
 "use client"
 
 import * as React from "react"
-import { Check, ChevronDown } from "lucide-react"
 import { GoogleIcon } from "@/shared/ui/GoogleIcon"
 import * as SelectPrimitive from "@radix-ui/react-select"
 
@@ -95,7 +94,7 @@ function SelectTrigger({ className, size = "default", variant = "default", asChi
     >
       {children}
       <SelectPrimitive.Icon asChild>
-        <ChevronDown className="size-4 stroke-[1.5] opacity-60 shrink-0 ml-2" />
+        <GoogleIcon iconName="keyboard_arrow_down" className="text-base opacity-60 shrink-0 ml-2" />
       </SelectPrimitive.Icon>
     </SelectPrimitive.Trigger>
   )
@@ -253,7 +252,7 @@ function SelectItem({ className, children, icon, subtitle, badge, iconVariant = 
       {/* ── Checkmark ─────────────────────────────────────────────────────── */}
       <span className="shrink-0 flex size-4 items-center justify-center text-white/80">
         <SelectPrimitive.ItemIndicator>
-          <Check className="size-3.5 stroke-[1.5]" />
+          <GoogleIcon iconName="check" className="text-sm font-bold" />
         </SelectPrimitive.ItemIndicator>
       </span>
     </SelectPrimitive.Item>

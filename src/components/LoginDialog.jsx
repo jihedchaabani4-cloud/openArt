@@ -1,12 +1,12 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { Loader2, X } from "lucide-react";
+import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { Dialog, DialogContent, DialogTitle } from "@/shared/ui/dialog";
 import { Button } from "@/shared/ui/button";
 import { cn } from "@/shared/lib/utils";
 
-function GoogleIcon() {
+function GoogleBrandIcon() {
   return (
     <svg viewBox="0 0 18 18" fill="none" className="size-5">
       <path
@@ -50,7 +50,7 @@ function AuthButton({ icon, children, onClick, inverted = false, isLoading = fal
       className="h-10 w-full rounded-full gap-2 text-sm"
     >
       {isLoading ? (
-        <Loader2 className="size-5 animate-spin" />
+        <GoogleIcon iconName="progress_activity" className="text-xl animate-spin" />
       ) : React.isValidElement(icon) ? (
         icon
       ) : typeof icon === "function" || (typeof icon === "object" && icon !== null && ("$$typeof" in icon || "render" in icon)) ? (
@@ -239,7 +239,7 @@ export function LoginDialog({ open, onClose }) {
           className="absolute right-3 top-3 z-20 size-9 p-0 rounded-full hover:bg-white/10 text-white"
           aria-label="Close login dialog"
         >
-          <X className="size-5" />
+          <GoogleIcon iconName="close" className="text-xl" />
         </Button>
 
         <div className="flex h-full w-full items-stretch justify-center p-3">
@@ -257,7 +257,7 @@ export function LoginDialog({ open, onClose }) {
               </div>
 
               <div className="space-y-3">
-                <AuthButton icon={<GoogleIcon />} onClick={handleGoogleLogin} inverted isLoading={isGoogleLoading}>
+                <AuthButton icon={<GoogleBrandIcon />} onClick={handleGoogleLogin} inverted isLoading={isGoogleLoading}>
                   Continue with Google
                 </AuthButton>
                 <AuthButton icon={<MicrosoftIcon />} onClick={handleMicrosoftLogin} isLoading={isMicrosoftLoading}>

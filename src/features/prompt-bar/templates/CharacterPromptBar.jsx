@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { UserCircle } from "lucide-react";
+import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { Button } from "@/shared/ui/button";
 import { cn } from "@/shared/lib/utils";
 import { PromptBarPlatform } from "../platform/PromptBarPlatform.jsx";
@@ -65,7 +65,7 @@ export function CharacterPromptBar({
             )}
             title="Character Form Features"
           >
-            <UserCircle className="w-3.5 h-3.5 shrink-0" />
+            <GoogleIcon iconName="account_circle" className="text-sm shrink-0" />
             <span>Form</span>
           </Button>
           {propRenderRightActions && propRenderRightActions(args)}

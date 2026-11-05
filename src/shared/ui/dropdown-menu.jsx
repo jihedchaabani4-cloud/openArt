@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Check, ChevronRight, Circle } from "lucide-react"
+import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { DropdownMenu as DropdownMenuPrimitive } from "radix-ui"
 
 import { cn } from "@/shared/lib/utils"
@@ -102,7 +102,7 @@ function DropdownMenuCheckboxItem({
       {...props}>
       <span className="pointer-events-none absolute left-2 flex size-3.5 items-center justify-center">
         <DropdownMenuPrimitive.ItemIndicator>
-          <Check className="size-3.5 stroke-[1.5]" />
+          <GoogleIcon iconName="check" className="text-sm font-bold" />
         </DropdownMenuPrimitive.ItemIndicator>
       </span>
       {children}
@@ -134,7 +134,7 @@ function DropdownMenuRadioItem({
       {...props}>
       <span className="pointer-events-none absolute left-2 flex size-3.5 items-center justify-center">
         <DropdownMenuPrimitive.ItemIndicator>
-          <Circle className="size-2 fill-current" />
+          <GoogleIcon iconName="circle" fill={true} className="text-xs" />
         </DropdownMenuPrimitive.ItemIndicator>
       </span>
       {children}
@@ -209,7 +209,7 @@ function DropdownMenuSubTrigger({
       )}
       {...props}>
       {children}
-      <ChevronRight className="ml-auto size-4 stroke-[1.5] text-cool-slate" />
+      <GoogleIcon iconName="chevron_right" className="ml-auto text-base text-cool-slate" />
     </DropdownMenuPrimitive.SubTrigger>
   );
 }

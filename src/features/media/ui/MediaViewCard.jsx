@@ -183,24 +183,14 @@ export const MediaViewCard = React.forwardRef(function MediaViewCard({
       {/* Character Indicator Corner Badge */}
       {isCharacter && !effectiveIsVideo && (
         <div className="absolute bottom-2.5 right-2.5 z-20 flex items-center justify-center w-7 h-7 rounded-full bg-black/40 backdrop-blur-md border border-white/10 pointer-events-none shadow-none text-white">
-          <span
-            className="material-symbols-outlined select-none text-[18px]"
-            style={{ fontVariationSettings: "'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 34" }}
-          >
-            accessibility_new
-          </span>
+          <GoogleIcon iconName="accessibility_new" weight={300} opticalSize={34} className="text-lg" />
         </div>
       )}
 
       {/* Element Indicator Corner Badge */}
       {isElement && !isCharacter && !effectiveIsVideo && (
         <div className="absolute bottom-2.5 right-2.5 z-20 flex items-center justify-center w-7 h-7 rounded-full bg-black/40 backdrop-blur-md border border-white/10 pointer-events-none shadow-none text-white">
-          <span
-            className="material-symbols-outlined select-none text-[18px]"
-            style={{ fontVariationSettings: "'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24" }}
-          >
-            widgets
-          </span>
+          <GoogleIcon iconName="widgets" weight={300} opticalSize={24} className="text-lg" />
         </div>
       )}
 

@@ -3,7 +3,6 @@
 import * as React from "react"
 import { useRouter } from "next/navigation"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { Loader2 } from "lucide-react"
 import { GoogleIcon } from "@/shared/ui/GoogleIcon"
 
 import { api } from "@/shared/api/client"
@@ -184,7 +183,7 @@ export function UserDropdown({ className }) {
             className="flex h-10 w-full items-center justify-center gap-2.5 font-sans text-sm font-medium antialiased"
           >
             {logoutMutation.isPending && (
-              <Loader2 size={16} className="animate-spin text-white/70" />
+              <GoogleIcon iconName="progress_activity" className="text-base animate-spin text-white/70" />
             )}
             <span>{logoutMutation.isPending ? "Déconnexion..." : "Se déconnecter"}</span>
           </Button>

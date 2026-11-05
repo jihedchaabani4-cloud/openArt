@@ -2,13 +2,6 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import {
-    Check,
-    Loader2,
-    Sparkles,
-    ShieldCheck,
-    ArrowUpRight,
-} from "lucide-react";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { Dialog, DialogContent, DialogTitle } from "@/shared/ui/dialog";
 import { Button } from "@/shared/ui/button";
@@ -244,7 +237,7 @@ export function PackageSelectionDialog({
                     className="flex h-[min(740px,84vh)] w-[min(960px,94vw)] max-w-[960px] items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-black p-0 text-white shadow-none backdrop-blur-[80px]"
                 >
                     <DialogTitle className="sr-only">Choose your package</DialogTitle>
-                    <Loader2 className="animate-spin text-white/40" size={32} />
+                    <GoogleIcon iconName="progress_activity" className="text-3xl animate-spin text-white/40" />
                 </DialogContent>
             </Dialog>
         );
@@ -301,7 +294,7 @@ export function PackageSelectionDialog({
                                                     isSelected ? "border-white bg-white" : "border-white/20 bg-transparent"
                                                 )}
                                             >
-                                                {isSelected && <Check size={12} className="stroke-[3] text-black" />}
+                                                {isSelected && <GoogleIcon iconName="check" className="text-xs font-bold text-black" />}
                                             </span>
 
                                             <div className="min-w-0 flex-1">
@@ -390,14 +383,14 @@ export function PackageSelectionDialog({
                                 className="relative h-12 w-full overflow-hidden rounded-sm px-5 py-3 text-sm font-semibold transition-all sm:h-14 sm:py-4 sm:text-base before:absolute before:left-[-40%] before:top-0 before:h-full before:w-[8%] before:skew-x-[-20deg] before:bg-gradient-to-r before:from-transparent before:via-white/50 before:to-transparent before:content-['']"
                             >
                                 {isPending && pendingPackageId === selectedPackage?.id ? (
-                                    <Loader2 size={18} className="animate-spin" />
+                                    <GoogleIcon iconName="progress_activity" className="text-lg animate-spin" />
                                 ) : (
                                     "Continuer"
                                 )}
                             </Button>
                             <div className="flex w-full flex-col gap-1">
                                 <div className="flex w-full items-center justify-center gap-2">
-                                    <ShieldCheck size={16} />
+                                    <GoogleIcon iconName="verified_user" className="text-base" />
                                     <p className="text-center text-[11px] font-normal text-white">
                                         Paiement sur et securise
                                     </p>
@@ -430,7 +423,7 @@ export function PackageSelectionDialog({
                                     >
                                         <span className="relative">View all plans and features</span>
                                         <span className="relative">
-                                            <ArrowUpRight size={16} className="text-white transition-colors group-hover:text-white/70" />
+                                            <GoogleIcon iconName="north_east" className="text-base text-white transition-colors group-hover:text-white/70" />
                                         </span>
                                     </Link>
                                 </div>

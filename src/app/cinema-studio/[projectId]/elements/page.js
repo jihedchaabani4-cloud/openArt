@@ -1,12 +1,12 @@
-"use client"
+"use client";
 
 import * as React from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useRouter, useSearchParams } from "next/navigation"
+import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 
 import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows"
 import { useElementSheetWorkflows } from "@/features/elements"
-import { Plus } from "lucide-react"
 
 import { Button } from "@/shared/ui/button";
 import { usePromptStore } from "@/features/studio";
@@ -179,7 +179,7 @@ export default function ElementsPage({ params }) {
                             className="h-auto px-6 py-4 rounded-2xl bg-neutral-800 hover:bg-neutral-700 text-neutral-200 hover:text-white active:scale-95 border-none backdrop-blur-md text-sm font-medium"
                             onClick={() => setIsNewElementOpen(true)}
                         >
-                            <Plus className="size-5" />
+                            <GoogleIcon iconName="add" className="text-xl" />
                             <span>New element</span>
                         </Button>
                     </div>

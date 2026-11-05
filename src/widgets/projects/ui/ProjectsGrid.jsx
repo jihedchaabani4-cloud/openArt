@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
-import { ProjectCard } from "@/features/projects/ui/ProjectCard"
-import { Button } from "@/shared/ui/button"
-import { Plus, Loader2 } from "lucide-react"
+import { ProjectCard } from "@/features/projects/ui/ProjectCard";
+import { Button } from "@/shared/ui/button";
+import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 
 export function ProjectsGrid({ projects, isLoading, onDelete, onRename, onCreate, isCreating }) {
     return (

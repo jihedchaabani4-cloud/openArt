@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { FolderOpen, ImageIcon, Search, Video, X } from "lucide-react";
+import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 
 import { CATEGORY_FILTERS, MEDIA_FILTERS, useAssetsFilters } from "../model/assetsFilters";
 import { Input } from "@/shared/ui/input";
@@ -35,9 +35,9 @@ export function AssetsSidebar({ hidden = false }) {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search"
-            icon={Search}
+            icon={(p) => <GoogleIcon iconName="search" {...p} />}
             onClear={searchQuery ? () => setSearchQuery("") : undefined}
-            clearIcon={X}
+            clearIcon={(p) => <GoogleIcon iconName="close" {...p} />}
             className="h-10 rounded-lg px-3 text-[13px]"
           />
         </div>
@@ -48,7 +48,7 @@ export function AssetsSidebar({ hidden = false }) {
             <div className="space-y-1">
               <SidebarFilterButton
                 label="All Assets"
-                icon={FolderOpen}
+                icon="folder_open"
                 active={categoryFilter === "all"}
                 onClick={() => setCategoryFilter("all")}
               />
@@ -72,10 +72,10 @@ export function AssetsSidebar({ hidden = false }) {
                     label={filter.label}
                     icon={
                       filter.id === "image"
-                        ? ImageIcon
+                        ? "image"
                         : filter.id === "video"
-                          ? Video
-                          : FolderOpen
+                          ? "videocam"
+                          : "folder_open"
                     }
                     active={mediaFilter === filter.id}
                     onClick={() => setMediaFilter(filter.id)}

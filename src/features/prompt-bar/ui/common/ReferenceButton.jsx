@@ -2,17 +2,16 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Play, ArrowLeftRight, Plus } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { resolveMediaUrl } from "../../core/mediaRef.js";
 
 const VARIANTS = {
-  start:  { word: "Start",  HoverContent: () => <Plus size={15} strokeWidth={1.5} className="text-cool-slate" /> },
-  end:    { word: "End",    HoverContent: () => <Plus size={15} strokeWidth={1.5} className="text-cool-slate" /> },
-  motion: { word: "Motion", HoverContent: () => <Play size={15} strokeWidth={1.5} className="text-cool-slate" /> },
-  ref:    { word: "Ref",    HoverContent: () => <Plus size={15} strokeWidth={1.5} className="text-cool-slate" /> },
-  add:    { word: "Add",    HoverContent: () => <Plus size={15} strokeWidth={1.5} className="text-cool-slate" /> },
+  start:  { word: "Start",  HoverContent: () => <GoogleIcon iconName="add" className="text-base text-cool-slate" /> },
+  end:    { word: "End",    HoverContent: () => <GoogleIcon iconName="add" className="text-base text-cool-slate" /> },
+  motion: { word: "Motion", HoverContent: () => <GoogleIcon iconName="play_arrow" className="text-base text-cool-slate" /> },
+  ref:    { word: "Ref",    HoverContent: () => <GoogleIcon iconName="add" className="text-base text-cool-slate" /> },
+  add:    { word: "Add",    HoverContent: () => <GoogleIcon iconName="add" className="text-base text-cool-slate" /> },
 };
 
 export function ReferenceButton({
@@ -92,7 +91,7 @@ export function ReferenceButton({
 export function SwapIcon({ className }) {
   return (
     <div className={cn("flex items-center justify-center shrink-0", className)}>
-      <ArrowLeftRight size={16} strokeWidth={2} />
+      <GoogleIcon iconName="swap_horiz" className="text-base" />
     </div>
   );
 }

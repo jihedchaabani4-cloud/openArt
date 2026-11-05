@@ -1,10 +1,10 @@
 "use client";
 
 import React from "react";
+import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { Input } from "@/shared/ui/input";
 import { Textarea } from "@/shared/ui/textarea";
 import { Button } from "@/shared/ui/button";
-import { Check, Copy } from "lucide-react";
 
 /**
  * CharacterInfoSidebar
@@ -88,9 +88,9 @@ export function CharacterInfoSidebar({
                   aria-label="Copy prompt"
                 >
                   {promptCopied ? (
-                    <Check className="size-3.5 text-emerald-400" />
+                    <GoogleIcon iconName="check" className="text-sm text-emerald-400" />
                   ) : (
-                    <Copy className="size-3.5" />
+                    <GoogleIcon iconName="content_copy" className="text-sm" />
                   )}
                 </Button>
               </div>

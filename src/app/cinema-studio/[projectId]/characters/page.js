@@ -1,12 +1,12 @@
-"use client"
+"use client";
 
 import * as React from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useRouter } from "next/navigation"
+import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 
 import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows"
 import { useCharacterWorkflows } from "@/features/characters"
-import { Plus } from "lucide-react"
 import { usePromptStore } from "@/features/studio";
 import { LoadingScreen } from "@/shared/ui/LoadingScreen"
 
@@ -176,7 +176,7 @@ export default function CharactersPage({ params }) {
                         onClick={() => router.push(`/cinema-studio/${projectId}/characters/new`)}
                         className="flex items-center gap-2 px-6 py-4 h-auto rounded-full bg-surface-card hover:bg-surface-elevated text-white transition-all active:scale-95 border border-white/10 shadow-none cursor-pointer"
                     >
-                        <Plus className="size-5" />
+                        <GoogleIcon iconName="add" className="text-xl" />
                         <span className="font-medium text-[15px]">New character</span>
                     </Button>
                 </div>

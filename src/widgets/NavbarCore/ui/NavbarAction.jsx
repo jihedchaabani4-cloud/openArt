@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { Loader2 } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { cn } from "@/shared/lib/utils";
@@ -38,7 +37,7 @@ export function NavbarAction({
 
   const renderedIcon = React.useMemo(() => {
     if (loading) {
-      return <Loader2 className={size === "icon" ? "w-5 h-5 animate-spin shrink-0" : "w-4 h-4 animate-spin shrink-0"} />;
+      return <GoogleIcon iconName="progress_activity" className={size === "icon" ? "text-xl animate-spin shrink-0" : "text-base animate-spin shrink-0"} />;
     }
     if (!icon) {
       if (variant === "danger") {

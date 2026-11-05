@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { Upload, Search, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useParams } from "next/navigation";
 import { useLibraryFilter, extractIdentifyingKeys } from "@/features/studio";
@@ -806,7 +805,7 @@ export function ImportMediaPopover({
                       {isUploading ? (
                         <GoogleIcon iconName="progress_activity" weight={300} className="text-[14px] animate-spin text-white/40 leading-none" />
                       ) : (
-                        <Upload size={14} strokeWidth={1.75} className="shrink-0" />
+                        <GoogleIcon iconName="upload" className="text-sm shrink-0" />
                       )}
                     </span>
                     <span className="truncate leading-none select-none flex items-center">{isUploading ? "Uploading..." : "Upload Media"}</span>
@@ -825,8 +824,7 @@ export function ImportMediaPopover({
                 <Input
                   ref={searchInputRef}
                   variant="blurinput"
-                  icon={Search}
-                  iconStrokeWidth={1.75}
+                  googleIcon="search"
                   type="search"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}

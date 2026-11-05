@@ -1,8 +1,8 @@
 "use client";
 
 import React from "react";
-import { Plus } from "lucide-react";
 import { Button } from "@/shared/ui/button";
+import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 
 export function NewElementCardKrea({ onClick, label = "New element" }) {
   return (
@@ -18,7 +18,7 @@ export function NewElementCardKrea({ onClick, label = "New element" }) {
             className="size-8 p-0 rounded-full"
             aria-label={label}
           >
-            <Plus className="size-4 stroke-[2]" />
+            <GoogleIcon iconName="add" className="text-base" />
           </Button>
         </div>
       </div>

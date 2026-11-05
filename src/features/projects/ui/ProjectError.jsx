@@ -2,10 +2,10 @@
 
 import React, { useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
 import { motion } from "framer-motion";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/shared/ui/button";
+import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 
 /**
  * Standardized ProjectError with Legacy Design and Smart Logic.
@@ -66,7 +66,7 @@ export function ProjectError({ error, reset, onRetry }) {
           className="h-10 px-6 text-sm"
           onClick={handleBack}
         >
-          <ArrowLeft className="h-4 w-4" />
+          <GoogleIcon iconName="arrow_back" className="text-base" />
           Retour aux projets
         </Button>
       </div>

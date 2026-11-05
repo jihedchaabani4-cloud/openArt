@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Play, Pause, RotateCcw, Sparkles } from "lucide-react";
+import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { ShineText } from "@/shared/ui/ShineText";
 
 export default function ShineTextTestPage() {
@@ -37,7 +37,7 @@ export default function ShineTextTestPage() {
                   : "bg-white/5 text-white/60 hover:bg-white/10 border border-white/10"
               }`}
             >
-              {active ? <Pause className="size-3.5" /> : <Play className="size-3.5" />}
+              {active ? <GoogleIcon iconName="pause" className="text-sm" /> : <GoogleIcon iconName="play_arrow" className="text-sm" />}
               {active ? "Sweeping (loop)" : "Idle (processing done)"}
             </button>
 
@@ -49,7 +49,7 @@ export default function ShineTextTestPage() {
               }}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-white/5 hover:bg-white/10 text-white/60 hover:text-white border border-white/10 transition-colors cursor-pointer"
             >
-              <RotateCcw className="size-3.5" />
+              <GoogleIcon iconName="refresh" className="text-sm" />
               Reset
             </button>
 
@@ -165,7 +165,7 @@ export default function ShineTextTestPage() {
         {/* ── Specs Breakdown ── */}
         <section className="p-6 rounded-2xl bg-white/[0.02] border border-white/10 flex flex-col gap-3">
           <div className="flex items-center gap-2 text-white/80 font-medium text-sm">
-            <Sparkles className="size-4 text-white/60" />
+            <GoogleIcon iconName="auto_awesome" className="text-base text-white/60" />
             Spec Sheet
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-white/60">

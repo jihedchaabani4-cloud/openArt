@@ -3,7 +3,6 @@
 import { useMemo, useCallback } from "react";
 import { RowsPhotoAlbum } from "react-photo-album";
 import "react-photo-album/rows.css";
-import { Loader2 } from "lucide-react";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { cn } from "@/shared/lib/utils";
 import { ButtonGroup } from "@/shared/ui/button-group";
@@ -168,7 +167,7 @@ export function ReferenceMediaGalleryGrid({
           overlay={
             isLoadingThis ? (
               <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] z-30 flex items-center justify-center rounded-lg">
-                <Loader2 className="size-6 text-white animate-spin" />
+                <GoogleIcon iconName="progress_activity" className="text-2xl text-white animate-spin" />
               </div>
             ) : null
           }
