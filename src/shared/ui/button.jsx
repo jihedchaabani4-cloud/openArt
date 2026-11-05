@@ -45,8 +45,6 @@ const buttonVariants = cva(
           "h-8 px-3.5 rounded-sm bg-transparent text-danger hover:text-danger hover:bg-danger/10 active:bg-danger/20 border-none",
         link:
           "p-0 h-auto bg-transparent text-accent-blue underline-offset-4 hover:underline font-medium cursor-pointer border-none",
-        neon:
-          "h-8 px-3.5 rounded-sm bg-brand-neon text-black font-semibold hover:opacity-90 active:scale-95 border-b-2 border-black/20",
       },
     },
     defaultVariants: {
