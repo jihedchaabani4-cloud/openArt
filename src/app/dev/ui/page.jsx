@@ -45,7 +45,7 @@ export default function DesignSystemShowcasePage() {
       {/* Top Header */}
       <header className="h-16 border-b border-white/10 px-6 flex items-center justify-between bg-black/60 backdrop-blur-md sticky top-0 z-40">
         <div className="flex items-center gap-3">
-          <div className="size-8 rounded-badge bg-lime-400 text-black flex items-center justify-center font-bold text-sm">
+          <div className="size-8 rounded-sm bg-lime-400 text-black flex items-center justify-center font-bold text-sm">
             DS
           </div>
           <div>
@@ -151,23 +151,23 @@ export default function DesignSystemShowcasePage() {
               <div className="flex flex-col gap-3">
                 <h3 className="text-sm font-semibold text-white/90">Surface Ladder (Dark First)</h3>
                 <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-                  <div className="p-4 rounded-card bg-black border border-white/10 flex flex-col gap-1">
+                  <div className="p-4 rounded-lg bg-black border border-white/10 flex flex-col gap-1">
                     <span className="text-xs font-semibold">Canvas</span>
                     <span className="text-xs text-muted-foreground">bg-black</span>
                   </div>
-                  <div className="p-4 rounded-card bg-neutral-900 border border-white/10 flex flex-col gap-1">
+                  <div className="p-4 rounded-lg bg-neutral-900 border border-white/10 flex flex-col gap-1">
                     <span className="text-xs font-semibold">Panel</span>
                     <span className="text-xs text-muted-foreground">bg-surface-panel</span>
                   </div>
-                  <div className="p-4 rounded-card bg-card border border-white/10 flex flex-col gap-1">
+                  <div className="p-4 rounded-lg bg-card border border-white/10 flex flex-col gap-1">
                     <span className="text-xs font-semibold">Card</span>
                     <span className="text-xs text-muted-foreground">bg-card</span>
                   </div>
-                  <div className="p-4 rounded-card bg-surface-elevated border border-white/10 flex flex-col gap-1">
+                  <div className="p-4 rounded-lg bg-surface-elevated border border-white/10 flex flex-col gap-1">
                     <span className="text-xs font-semibold">Elevated</span>
                     <span className="text-xs text-muted-foreground">bg-surface-elevated</span>
                   </div>
-                  <div className="p-4 rounded-card bg-white/5 border border-white/10 backdrop-blur-md flex flex-col gap-1">
+                  <div className="p-4 rounded-lg bg-white/5 border border-white/10 backdrop-blur-md flex flex-col gap-1">
                     <span className="text-xs font-semibold">Glass</span>
                     <span className="text-xs text-muted-foreground">backdrop-blur-md</span>
                   </div>
@@ -178,21 +178,21 @@ export default function DesignSystemShowcasePage() {
               <div className="flex flex-col gap-3">
                 <h3 className="text-sm font-semibold text-white/90">Strict Border Radius Tokens</h3>
                 <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-                  <div className="p-3 bg-white/5 border border-white/10 rounded-badge flex flex-col items-center justify-center text-center">
+                  <div className="p-3 bg-white/5 border border-white/10 rounded-sm flex flex-col items-center justify-center text-center">
                     <span className="text-xs font-semibold">Badge</span>
-                    <span className="text-xs text-muted-foreground">8px (rounded-badge)</span>
+                    <span className="text-xs text-muted-foreground">8px (rounded-sm)</span>
                   </div>
-                  <div className="p-3 bg-white/5 border border-white/10 rounded-button flex flex-col items-center justify-center text-center">
+                  <div className="p-3 bg-white/5 border border-white/10 rounded-sm flex flex-col items-center justify-center text-center">
                     <span className="text-xs font-semibold">Button/Input</span>
-                    <span className="text-xs text-muted-foreground">12px (rounded-button)</span>
+                    <span className="text-xs text-muted-foreground">12px (rounded-sm)</span>
                   </div>
-                  <div className="p-3 bg-white/5 border border-white/10 rounded-card flex flex-col items-center justify-center text-center">
+                  <div className="p-3 bg-white/5 border border-white/10 rounded-lg flex flex-col items-center justify-center text-center">
                     <span className="text-xs font-semibold">Card/Panel</span>
-                    <span className="text-xs text-muted-foreground">16px (rounded-card)</span>
+                    <span className="text-xs text-muted-foreground">16px (rounded-lg)</span>
                   </div>
-                  <div className="p-3 bg-white/5 border border-white/10 rounded-dialog flex flex-col items-center justify-center text-center">
+                  <div className="p-3 bg-white/5 border border-white/10 rounded-2xl flex flex-col items-center justify-center text-center">
                     <span className="text-xs font-semibold">Dialog</span>
-                    <span className="text-xs text-muted-foreground">24px (rounded-dialog)</span>
+                    <span className="text-xs text-muted-foreground">24px (rounded-2xl)</span>
                   </div>
                   <div className="p-3 bg-white/5 border border-white/10 rounded-full flex flex-col items-center justify-center text-center">
                     <span className="text-xs font-semibold">Pill</span>
@@ -315,7 +315,7 @@ export default function DesignSystemShowcasePage() {
               </div>
 
               {/* Toggles, Checkboxes & Radios */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 p-4 rounded-card bg-card border border-white/5">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 p-4 rounded-lg bg-card border border-white/5">
                 {/* Switches */}
                 <div className="flex flex-col gap-3">
                   <span className="text-xs font-semibold text-muted-foreground">Switches</span>

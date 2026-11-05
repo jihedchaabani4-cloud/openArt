@@ -143,9 +143,9 @@ export function BaseSelect({
           style={panelStyle}
           className={cn(
             "min-w-[180px] max-h-[400px] overflow-y-auto",
-            "rounded-card px-1 py-1",
+            "rounded-lg px-1 py-1",
             "bg-[#232424] border border-white/5",
-            "shadow-[0px_4px_4px_rgba(0,0,0,.1),0px_20px_25px_-5px_rgba(0,0,0,.15)]"
+            "shadow-none border border-white/10"
           )}
         >
           {groups.map((group, gi) => (
@@ -158,7 +158,7 @@ export function BaseSelect({
               {group.items.map((item) => {
                 const isSelected = String(item.value) === String(value);
                 const ItemIcon = item.image
-                  ? <img src={item.image} alt={item.label} className="size-7 rounded-badge object-contain brightness-0 invert" />
+                  ? <img src={item.image} alt={item.label} className="size-7 rounded-sm object-contain brightness-0 invert" />
                   : item.icon;
 
                 return (
@@ -174,7 +174,7 @@ export function BaseSelect({
                     {ItemIcon && (
                       <span className={cn(
                         "flex-shrink-0 flex items-center justify-center transition-colors duration-150 group-hover:text-[#f5f5f5]",
-                        iconVariant === "square" && "aspect-square h-[36px] -ml-2 -my-1 bg-[#171717] rounded-button border-r border-white/5"
+                        iconVariant === "square" && "aspect-square h-[36px] -ml-2 -my-1 bg-[#171717] rounded-sm border-r border-white/5"
                       )}>
                         {ItemIcon}
                       </span>

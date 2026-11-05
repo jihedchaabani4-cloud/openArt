@@ -12,13 +12,13 @@ import { cn } from "@/shared/lib/utils";
 function ShortcutRow({ label, keys }) {
   const list = Array.isArray(keys) ? keys : [keys];
   return (
-    <div className="flex items-center justify-between px-2 py-1 rounded-button hover:bg-white/[0.04] transition-colors">
+    <div className="flex items-center justify-between px-2 py-1 rounded-sm hover:bg-white/[0.04] transition-colors">
       <span className="text-[12px] text-white/70 font-normal leading-none">{label}</span>
       <div className="flex items-center gap-1 shrink-0">
         {list.map((k, i) => (
           <kbd
             key={i}
-            className="px-1.5 py-0.5 min-w-[18px] text-[10.5px] font-mono font-medium text-white/85 bg-white/[0.08] rounded-badge border border-white/[0.06] flex items-center justify-center leading-none select-none"
+            className="px-1.5 py-0.5 min-w-[18px] text-[10.5px] font-mono font-medium text-white/85 bg-white/[0.08] rounded-sm border border-white/[0.06] flex items-center justify-center leading-none select-none"
           >
             {k}
           </kbd>
@@ -62,7 +62,7 @@ export function KeyboardShortcutsHelp({ className }) {
         align="end"
         side="bottom"
         sideOffset={6}
-        className="z-[999999] w-[236px] p-2 bg-[rgba(22,23,24,0.88)] backdrop-blur-[80px] saturate-[180%] border border-white/[0.08] rounded-card shadow-none text-white select-none font-['Google_Sans_Text',sans-serif]"
+        className="z-[999999] w-[236px] p-2 bg-[rgba(22,23,24,0.88)] backdrop-blur-[80px] saturate-[180%] border border-white/[0.08] rounded-lg shadow-none text-white select-none font-['Google_Sans_Text',sans-serif]"
       >
         {/* Minimal Header */}
         <div className="flex items-center justify-between px-2 pt-0.5 pb-1.5 mb-1 border-b border-white/[0.06]">

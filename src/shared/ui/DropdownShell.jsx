@@ -68,7 +68,7 @@ export function DropdownShell({
         onCloseAutoFocus={(e) => e.preventDefault()}
         className={cn(
           panelWidth,
-          "backdrop-blur-[100px] bg-[var(--mat-menu-container-color,rgba(22,23,24,0.85))] border-none rounded-lg p-1.5 z-50 shadow-[var(--mat-menu-container-elevation-shadow)]",
+          "backdrop-blur-[100px] bg-[var(--mat-menu-container-color,rgba(22,23,24,0.85))] border-none rounded-lg p-1.5 z-50 shadow-none",
           className
         )}
       >

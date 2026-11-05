@@ -58,7 +58,7 @@ export function CharacterPromptBar({
             variant="ghost"
             size="sm"
             className={cn(
-              "rounded-button transition-all shrink-0 gap-1.5 h-8 px-2.5 text-xs font-medium relative overflow-hidden",
+              "rounded-sm transition-all shrink-0 gap-1.5 h-8 px-2.5 text-xs font-medium relative overflow-hidden",
               featureEditorOpen
                 ? "bg-white/10 text-white"
                 : "text-neutral-400 hover:bg-white/5 hover:text-neutral-100"

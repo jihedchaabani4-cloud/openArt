@@ -294,7 +294,7 @@ export function NewElementDialog({ open, onOpenChange, projectId: propProjectId 
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
             className={cn(
-              "flex-1 min-h-[300px] h-full rounded-card bg-[var(--foreground-state-05,rgba(218,220,224,0.05))] backdrop-blur-[60px] flex flex-col items-center justify-center relative overflow-hidden transition-all duration-300 border-none",
+              "flex-1 min-h-[300px] h-full rounded-lg bg-[var(--foreground-state-05,rgba(218,220,224,0.05))] backdrop-blur-[60px] flex flex-col items-center justify-center relative overflow-hidden transition-all duration-300 border-none",
               isDragging && "bg-[var(--foreground-state-15)] scale-[0.995]"
             )}
           >
@@ -303,12 +303,12 @@ export function NewElementDialog({ open, onOpenChange, projectId: propProjectId 
               <div
                 onClick={() => fileInputRef.current?.click()}
                 className={cn(
-                  "w-[90%] max-w-[440px] h-[280px] rounded-card bg-[var(--foreground-state-05)] hover:bg-[var(--foreground-state-10)] active:bg-[var(--foreground-state-15)]",
+                  "w-[90%] max-w-[440px] h-[280px] rounded-lg bg-[var(--foreground-state-05)] hover:bg-[var(--foreground-state-10)] active:bg-[var(--foreground-state-15)]",
                   "flex flex-col items-center justify-center gap-4 transition-all duration-200 cursor-pointer p-8 text-center group border-none",
                   isDragging && "bg-[var(--foreground-state-20)] scale-[1.01] shadow-none"
                 )}
               >
-                <div className="size-14 rounded-card bg-[var(--foreground-state-10)] group-hover:bg-[var(--foreground-state-15)] backdrop-blur-md flex items-center justify-center text-white/80 group-hover:text-white transition-all shadow-none">
+                <div className="size-14 rounded-lg bg-[var(--foreground-state-10)] group-hover:bg-[var(--foreground-state-15)] backdrop-blur-md flex items-center justify-center text-white/80 group-hover:text-white transition-all shadow-none">
                   <GoogleIcon iconName="cloud_upload" className="text-[28px]" />
                 </div>
                 <div className="flex flex-col items-center gap-1.5">
@@ -324,7 +324,7 @@ export function NewElementDialog({ open, onOpenChange, projectId: propProjectId 
               /* Media Preview Area */
               <div className="w-full h-full flex flex-col p-3 gap-3">
                 {/* Hero Preview Frame */}
-                <div className="flex-1 min-h-0 w-full relative flex items-center justify-center rounded-card overflow-hidden bg-black/40">
+                <div className="flex-1 min-h-0 w-full relative flex items-center justify-center rounded-lg overflow-hidden bg-black/40">
                   {activeMedia?.isVideo ? (
                     <video
                       src={activeMedia.url}
@@ -364,7 +364,7 @@ export function NewElementDialog({ open, onOpenChange, projectId: propProjectId 
                         key={idx}
                         onClick={() => setActivePreviewIndex(idx)}
                         className={cn(
-                          "relative size-14 rounded-button overflow-hidden cursor-pointer shrink-0 border-none transition-all",
+                          "relative size-14 rounded-sm overflow-hidden cursor-pointer shrink-0 border-none transition-all",
                           isSelected
                             ? "ring-2 ring-white/90 shadow-lg opacity-100"
                             : "opacity-50 hover:opacity-90"
@@ -403,7 +403,7 @@ export function NewElementDialog({ open, onOpenChange, projectId: propProjectId 
                       variant="blur"
                       size="icon"
                       onClick={() => fileInputRef.current?.click()}
-                      className="size-14 rounded-button flex flex-col items-center justify-center gap-0.5 shrink-0"
+                      className="size-14 rounded-sm flex flex-col items-center justify-center gap-0.5 shrink-0"
                       title="Ajouter un autre fichier"
                     >
                       <GoogleIcon iconName="add" className="text-[20px]" />

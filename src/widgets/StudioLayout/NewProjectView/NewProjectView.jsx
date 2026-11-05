@@ -33,7 +33,7 @@ export function NewProjectView() {
         <div className="flex h-full w-full overflow-hidden bg-background text-white p-4 gap-6">
             
             {/* ── Main Content Area ── */}
-            <main className="flex-1 flex flex-col relative min-w-0 bg-background rounded-dialog border border-white/5 shadow-none overflow-hidden">
+            <main className="flex-1 flex flex-col relative min-w-0 bg-background rounded-2xl border border-white/5 shadow-none overflow-hidden">
                 
                 {/* ── Content: Masonry Grid OR Empty ── */}
                 <div className="flex-1 overflow-y-auto overflow-x-hidden p-6 scrollbar-hide">

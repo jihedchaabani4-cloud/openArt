@@ -32,11 +32,11 @@ export function ProjectCard({ project, onDelete, onRename }) {
             layout
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="group relative flex flex-col overflow-hidden rounded-card bg-transparent transition-all duration-300 shadow-none"
+            className="group relative flex flex-col overflow-hidden rounded-lg bg-transparent transition-all duration-300 shadow-none"
         >
             <Link href={`/cinema-studio/${project.project_id}`} className="block">
                 <div
-                    className="relative overflow-hidden rounded-card aspect-[1.6/1]"
+                    className="relative overflow-hidden rounded-lg aspect-[1.6/1]"
                     onMouseEnter={() => {
                         if (isVideoThumbnail) {
                             videoRef.current?.play().catch(() => {})
@@ -79,7 +79,7 @@ export function ProjectCard({ project, onDelete, onRename }) {
             </Link>
 
             {/* Footer Actions Row */}
-            <div className="flex items-center justify-between px-5 py-3 transition-colors rounded-card duration-300 group-hover:bg-[#0e0f11]">
+            <div className="flex items-center justify-between px-5 py-3 transition-colors rounded-lg duration-300 group-hover:bg-[#0e0f11]">
                 <div className="flex items-center gap-2 flex-1 min-w-0">
                     <EditableDisplayName
                         ref={editRef}

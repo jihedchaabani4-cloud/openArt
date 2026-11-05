@@ -34,7 +34,7 @@ export function LoadingScreen({ message = "Art", fullScreen = false }) {
               repeat: Infinity, 
               ease: "easeInOut" 
             }}
-            className="absolute inset-0 bg-white/90 w-1/3 rounded-full shadow-[0_0_10px_rgba(59,130,246,0.5)]"
+            className="absolute inset-0 bg-white/90 w-1/3 rounded-full"
           />
         </div>
       </motion.div>

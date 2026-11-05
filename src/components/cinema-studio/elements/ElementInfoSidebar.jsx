@@ -54,7 +54,7 @@ export function InputInfoHover({ content, title, testId }) {
         side="top"
         align="start"
         sideOffset={6}
-        className="z-50 w-64 rounded-card border border-white/10 bg-[#1e1e1f] backdrop-blur-xl p-3 text-[11.5px] text-white/80 shadow-none leading-relaxed"
+        className="z-50 w-64 rounded-lg border border-white/10 bg-[#1e1e1f] backdrop-blur-xl p-3 text-[11.5px] text-white/80 shadow-none leading-relaxed"
       >
         {content}
       </HoverCardContent>
@@ -137,7 +137,7 @@ export function ElementInfoSidebar({
               type="button"
               variant="ghost"
               className={cn(
-                "flex items-center gap-2.5 w-full h-auto px-3.5 py-2.5 rounded-button text-sm font-medium transition-all duration-200 text-left outline-none select-none justify-start cursor-pointer",
+                "flex items-center gap-2.5 w-full h-auto px-3.5 py-2.5 rounded-sm text-sm font-medium transition-all duration-200 text-left outline-none select-none justify-start cursor-pointer",
                 "bg-white/5 text-white hover:bg-white/[0.08] hover:text-white",
                 typeOpen && "bg-white/[0.08]"
               )}
@@ -169,7 +169,7 @@ export function ElementInfoSidebar({
                     setTypeOpen(false);
                   }}
                   className={cn(
-                    "flex items-center gap-3 pl-3 pr-4 py-2 min-h-[2.125rem] text-[14px] leading-5 font-medium rounded-button cursor-pointer transition-colors duration-100 ease-in-out",
+                    "flex items-center gap-3 pl-3 pr-4 py-2 min-h-[2.125rem] text-[14px] leading-5 font-medium rounded-sm cursor-pointer transition-colors duration-100 ease-in-out",
                     isSelected ? "text-white bg-white/10" : "text-white/70 hover:text-white hover:bg-white/5"
                   )}
                 >

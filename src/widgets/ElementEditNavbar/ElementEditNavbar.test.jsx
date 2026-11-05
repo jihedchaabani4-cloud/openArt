@@ -57,7 +57,7 @@ describe("ElementEditNavbar", () => {
 
     const uploadMenuItem = uploadItem.closest('[data-slot="dropdown-menu-item"]');
     expect(uploadMenuItem.className).toContain("min-h-[2.125rem]");
-    expect(uploadMenuItem.className).toContain("rounded-button");
+    expect(uploadMenuItem.className).toContain("rounded-sm");
     expect(uploadMenuItem.className).toContain("text-[14px]");
 
     // Clicking options triggers callbacks
@@ -144,15 +144,15 @@ describe("ElementEditNavbar", () => {
     );
 
     const doneBtn = container.querySelector("button[data-variant='white']");
-    expect(doneBtn.className).toContain("var(--button-border-radius");
+    expect(doneBtn.className).toContain("rounded-sm");
 
     const deleteBtn = container.querySelector("button[title='Delete']");
-    expect(deleteBtn.className).toContain("var(--button-border-radius");
+    expect(deleteBtn.className).toContain("rounded-sm");
 
     const likeBtn = container.querySelector("[data-testid='like-element-button']");
-    expect(likeBtn.className).toContain("var(--button-border-radius");
+    expect(likeBtn.className).toContain("rounded-sm");
 
     const addBtn = container.querySelector("[data-testid='import-dropdown-trigger']");
-    expect(addBtn.className).toContain("var(--button-border-radius");
+    expect(addBtn.className).toContain("rounded-sm");
   });
 });

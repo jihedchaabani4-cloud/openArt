@@ -4,7 +4,7 @@
  * ═══════════════════════════════════════════════════════════════════════════════
  * STRICT ARCHITECTURAL RULES:
  * 1. ZERO CALL-SITE RESTYLING: Internal background and glass effects are encapsulated.
- * 2. USE CANONICAL TOKENS: `rounded-card`, elevation shadows, glassmorphism.
+ * 2. USE CANONICAL TOKENS: `rounded-lg`, elevation shadows, glassmorphism.
  * ═══════════════════════════════════════════════════════════════════════════════
  */
 

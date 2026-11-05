@@ -54,7 +54,7 @@ export function ProjectError({ error, reset, onRetry }) {
             type="button"
             variant="primary"
             onClick={onRetry}
-            className="rounded-button px-6 py-2.5 shadow-none h-auto"
+            className="rounded-sm px-6 py-2.5 shadow-none h-auto"
           >
             Réessayer
           </Button>
@@ -64,7 +64,7 @@ export function ProjectError({ error, reset, onRetry }) {
           type="button"
           variant="outline"
           onClick={handleBack}
-          className="rounded-button px-6 py-2.5 shadow-none h-auto"
+          className="rounded-sm px-6 py-2.5 shadow-none h-auto"
         >
           <ArrowLeft className="h-4 w-4" />
           Retour aux projets

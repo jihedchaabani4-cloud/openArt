@@ -59,7 +59,7 @@ export function UserDropdown({ className }) {
   })
 
   if (isLoading) {
-    return <div className={cn("size-9 animate-pulse rounded-button bg-white/5", className)} />
+    return <div className={cn("size-9 animate-pulse rounded-full bg-white/5", className)} />
   }
 
   if (!currentUser) {
@@ -94,9 +94,9 @@ export function UserDropdown({ className }) {
           className={cn("size-9 min-w-9 min-h-9 p-0", className)}
           aria-label="Open user menu"
         >
-          <Avatar className="size-full rounded-button bg-transparent">
+          <Avatar className="size-full rounded-full bg-transparent">
             <AvatarImage src={avatarUrl} alt={displayName} />
-            <AvatarFallback className="rounded-button bg-[#2f3b4d] text-[13px] font-semibold text-white/88">
+            <AvatarFallback className="rounded-full bg-[#2f3b4d] text-[13px] font-semibold text-white/88">
               {initials}
             </AvatarFallback>
           </Avatar>
@@ -106,7 +106,7 @@ export function UserDropdown({ className }) {
       <DropdownMenuContent
         align="end"
         sideOffset={10}
-        className="user-dropdown-panel w-[360px] rounded-card border border-[var(--mat-sys-outline-variant,rgba(255,255,255,0.08))] p-4 shadow-none font-sans antialiased"
+        className="user-dropdown-panel w-[360px] rounded-lg border border-[var(--mat-sys-outline-variant,rgba(255,255,255,0.08))] p-4 shadow-none font-sans antialiased"
       >
 
 

@@ -4,7 +4,7 @@
  * ═══════════════════════════════════════════════════════════════════════════════
  * STRICT ARCHITECTURAL RULES:
  * 1. ZERO CALL-SITE RESTYLING: Never add ad-hoc background, border, or corner classes.
- * 2. USE CANONICAL TOKENS: `rounded-badge`, dark surface container, text-xs/2xs.
+ * 2. USE CANONICAL TOKENS: `rounded-sm`, dark surface container, text-xs/2xs.
  * ═══════════════════════════════════════════════════════════════════════════════
  */
 

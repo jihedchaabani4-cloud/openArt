@@ -63,7 +63,7 @@ export function StudioSettingsDropdown(props) {
           </span>
           <flow-toggles aria-label="Taille de la grille" class="block w-full">
             <div
-              className="mat-button-toggle-group toggle-group flex items-center gap-0.5 p-0.5 bg-[rgba(218,220,224,0.05)] rounded-button w-full select-none"
+              className="mat-button-toggle-group toggle-group flex items-center gap-0.5 p-0.5 bg-[rgba(218,220,224,0.05)] rounded-sm w-full select-none"
               role="radiogroup"
             >
               {[

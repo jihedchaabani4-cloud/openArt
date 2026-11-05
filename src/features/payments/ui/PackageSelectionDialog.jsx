@@ -160,7 +160,7 @@ function LeftPanel({ open }) {
     }, [activeIndex, open, showcaseImages]);
 
     return (
-        <div className="relative hidden h-[280px] sm:h-[360px] lg:h-full lg:min-h-[420px] w-full overflow-hidden rounded-card lg:flex border border-white/8">
+        <div className="relative hidden h-[280px] sm:h-[360px] lg:h-full lg:min-h-[420px] w-full overflow-hidden rounded-lg lg:flex border border-white/8">
             <div className="relative size-full overflow-hidden">
                 <div className="absolute inset-0">
                     {previousImage ? (
@@ -252,7 +252,7 @@ export function PackageSelectionDialog({
             <Dialog open={open} onOpenChange={onOpenChange}>
                 <DialogContent
                     showCloseButton
-                    className="flex h-[min(740px,84vh)] w-[min(960px,94vw)] max-w-[960px] items-center justify-center overflow-hidden rounded-dialog border border-white/10 bg-(--background-base-pri) p-0 text-white shadow-none backdrop-blur-[80px]"
+                    className="flex h-[min(740px,84vh)] w-[min(960px,94vw)] max-w-[960px] items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-(--background-base-pri) p-0 text-white shadow-none backdrop-blur-[80px]"
                 >
                     <DialogTitle className="sr-only">Choose your package</DialogTitle>
                     <Loader2 className="animate-spin text-white/40" size={32} />
@@ -265,7 +265,7 @@ export function PackageSelectionDialog({
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent
                 showCloseButton
-                className="h-[min(740px,84vh)] w-[min(960px,94vw)] max-w-[960px] overflow-hidden rounded-dialog border border-white/10 bg-(--background-base-pri) p-0 text-white shadow-none backdrop-blur-[80px]"
+                className="h-[min(740px,84vh)] w-[min(960px,94vw)] max-w-[960px] overflow-hidden rounded-2xl border border-white/10 bg-(--background-base-pri) p-0 text-white shadow-none backdrop-blur-[80px]"
             >
                 <DialogTitle className="sr-only">Choose your package</DialogTitle>
 
@@ -298,7 +298,7 @@ export function PackageSelectionDialog({
                                         type="button"
                                         variant="ghost"
                                         onClick={() => setSelectedPackageId(pkg.id)}
-                                        className="w-full h-auto p-3 sm:p-4 rounded-card border text-left transition-all duration-200 block justify-start"
+                                        className="w-full h-auto p-3 sm:p-4 rounded-lg border text-left transition-all duration-200 block justify-start"
                                         style={{
                                             borderColor: isSelected ? "rgba(255,255,255,0.88)" : SURFACE_BORDER,
                                             background: isSelected ? SURFACE_PANEL : "transparent",
@@ -398,7 +398,7 @@ export function PackageSelectionDialog({
                                         onBuy?.(selectedPackage.id);
                                     }
                                 }}
-                                className="relative h-12 w-full overflow-hidden rounded-button px-5 py-3 text-[15px] font-semibold transition-colors before:absolute before:left-[-40%] before:top-0 before:h-full before:w-[8%] before:skew-x-[-20deg] before:bg-[linear-gradient(90deg,transparent_0%,rgba(255,255,255,0.5)_50%,transparent_100%)] before:content-[''] sm:h-14 sm:py-4 sm:text-[16px]"
+                                className="relative h-12 w-full overflow-hidden rounded-sm px-5 py-3 text-[15px] font-semibold transition-colors before:absolute before:left-[-40%] before:top-0 before:h-full before:w-[8%] before:skew-x-[-20deg] before:bg-[linear-gradient(90deg,transparent_0%,rgba(255,255,255,0.5)_50%,transparent_100%)] before:content-[''] sm:h-14 sm:py-4 sm:text-[16px]"
                                 style={{ background: BUTTON_PRIMARY, color: BUTTON_TEXT }}
                                 onMouseOver={(event) => {
                                     event.currentTarget.style.backgroundColor = BUTTON_PRIMARY_HOVER;
@@ -444,7 +444,7 @@ export function PackageSelectionDialog({
                                 <Link
                                     href="/pricing"
                                     onClick={() => onOpenChange?.(false)}
-                                    className="group inline-flex h-8 items-center justify-center gap-1.5 rounded-button px-2.5 py-1.5 text-[13px] font-medium text-white transition-colors hover:bg-white/6"
+                                    className="group inline-flex h-8 items-center justify-center gap-1.5 rounded-sm px-2.5 py-1.5 text-[13px] font-medium text-white transition-colors hover:bg-white/6"
                                 >
                                     <span className="relative">View all plans and features</span>
                                     <span className="relative">

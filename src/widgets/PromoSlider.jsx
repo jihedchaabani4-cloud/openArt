@@ -133,7 +133,7 @@ function SingleViewSlider({ items, isEmpty }) {
 
   return (
     <div 
-      className="relative w-full overflow-hidden rounded-card transition-all duration-500 mb-10"
+      className="relative w-full overflow-hidden rounded-lg transition-all duration-500 mb-10"
       style={{ height: cardHeight }}
     >
       <AnimatePresence initial={false}>

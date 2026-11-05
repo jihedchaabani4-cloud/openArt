@@ -47,8 +47,8 @@ function renderIconNode(IconCandidate, props = {}) {
 //
 // Radius:
 //   trigger        → rounded-lg (8px)
-//   panel          → rounded-card
-//   item           → rounded-button
+//   panel          → rounded-lg
+//   item           → rounded-sm
 //
 // Shadow (panel):
 //   0px 4px 4px rgba(0,0,0,.05), 0px 20px 25px -5px rgba(0,0,0,.05)
@@ -196,7 +196,7 @@ function SelectLabel({ className, ...props }) {
  * Tokens:
  *   padding      : px-2 py-1.5  →  8px 8px 6px 8px
  *   gap          : gap-2  →  8px  (icon ↔ text block)
- *   radius       : rounded-button
+ *   radius       : rounded-sm
  *   text color   : #f5f5f5 (primary)
  *   icon color   : #737373 (muted) → #f5f5f5 on hover (group-hover)
  *   hover bg     : rgba(255,255,255,0.05)

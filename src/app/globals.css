@@ -342,8 +342,7 @@ mat-icon {
   --mat-button-text-container-shape: var(--radius-sm, 4px);
   --mat-button-tonal-container-shape: var(--radius-sm, 4px);
   --mat-dialog-container-shape: var(--radius-2xl, 16px);
-  --flow-panel-border-radius: var(--radius-lg, 8px);
-  --mat-menu-container-shape: var(--radius-lg, 8px);
+  --mat-menu-container-shape: var(--radius-2xl, 16px);
 
   /* Google Flow Design Tokens */
   --prompt-box-settings-width: 17.5rem;
@@ -747,7 +746,7 @@ mat-icon {
   --mat-dialog-container-color: var(--background-state-90);
   --mat-dialog-container-elevation-shadow: none;
   --mat-dialog-container-shape: var(--radius-2xl, 16px);
-  --mat-menu-container-shape: var(--radius-lg, 8px);
+  --mat-menu-container-shape: var(--radius-2xl, 16px);
   --mat-menu-container-color: var(--background-state-90);
   --mat-menu-container-elevation-shadow: none;
   --mat-menu-divider-bottom-spacing: 0.5rem;
@@ -857,6 +856,48 @@ mat-icon {
   --mat-list-list-item-leading-avatar-shape: 8px;
   --mat-list-list-item-leading-avatar-size: 2rem;
   --mat-list-list-item-leading-avatar-color: var(--foreground-state-15);
+
+  /* Google Flow Ingredient Chips Tokens */
+  --chip-size: 3.125rem;
+  --gap-size: 0.25rem;
+  --padding-bottom: 0.25rem;
+  --max-lines: 3;
+
+  /* Global Typography & Extended Colors */
+  -webkit-text-size-adjust: 100%;
+    tab-size: 4;
+    font-family: 'Google Sans Text', 'Google Sans', var(--font-google-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-feature-settings: 'liga', 'kern';
+    font-variation-settings: "GRAD" 0;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    --font-sans: 'Google Sans Text', 'Google Sans', var(--font-google-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --font-mono: var(--font-geist-mono), monospace;
+    --color-red-50: oklch(97.1% .013 17.38);
+    --color-red-500: oklch(63.7% .237 25.331);
+    --color-orange-500: oklch(70.5% .213 47.604);
+    --color-amber-500: oklch(76.9% .188 70.08);
+    --color-yellow-500: oklch(79.5% .184 86.047);
+    --color-lime-500: oklch(76.8% .233 130.85);
+    --color-green-500: oklch(72.3% .219 149.579);
+    --color-emerald-500: oklch(69.6% .17 162.48);
+    --color-teal-500: oklch(70.4% .14 182.503);
+    --color-cyan-500: oklch(71.5% .143 215.221);
+    --color-sky-500: oklch(68.5% .169 237.323);
+    --color-blue-500: oklch(62.3% .214 259.815);
+    --color-indigo-500: oklch(58.5% .233 277.117);
+    --color-violet-500: oklch(60.6% .25 292.717);
+    --color-purple-500: oklch(62.7% .265 303.9);
+    --color-fuchsia-500: oklch(66.7% .295 322.15);
+    --color-pink-500: oklch(65.6% .241 354.308);
+    --color-rose-500: oklch(64.5% .246 16.439);
+    --color-slate-500: oklch(55.4% .046 257.417);
+    --color-gray-500: oklch(55.1% .027 264.364);
+    --color-zinc-500: oklch(55.2% .016 285.938);
+    --color-neutral-500: oklch(55.6% 0 0);
+    --color-stone-500: oklch(55.3% .013 58.071);
 }
 
 /* ── Google Flow Menu Item Styling & Destructive / Danger Rules ── */
@@ -1070,8 +1111,6 @@ flow-menu-item {
 }
 
 /* Sidenav & Navigation Rail Items */
-.mat-mdc-list-item,
-.mat-list-item,
 aside nav a,
 aside nav button {
   font-family: var(--mat-list-list-item-label-text-font, 'Google Sans Text', 'Google Sans', sans-serif) !important;
@@ -1100,9 +1139,7 @@ aside nav button {
 }
 
 [data-slot="dropdown-menu-separator"],
-[data-slot="context-menu-separator"],
-mat-divider,
-.mat-divider {
+[data-slot="context-menu-separator"] {
   background-color: var(--mat-menu-divider-color, var(--foreground-state-15)) !important;
   height: 1px !important;
   margin-top: var(--mat-menu-divider-top-spacing, 0.5rem) !important;
@@ -1344,10 +1381,6 @@ mat-button-toggle {
   box-sizing: border-box;
 }
 
-mat-divider {
-  display: block;
-  box-sizing: border-box;
-}
 
 flow-credit-cost-label {
   display: block;
@@ -1356,7 +1389,6 @@ flow-credit-cost-label {
 
 /* ── Google Flow Menu & Model Picker Panel ── */
 .flow-menu-panel,
-.flow-model-picker-panel,
 .mat-mdc-menu-panel {
   border-radius: var(--mat-menu-container-shape, 8px) !important;
   background-color: var(--mat-menu-container-color, var(--background-state-90, rgba(22, 23, 24, 0.9))) !important;
@@ -1374,13 +1406,6 @@ flow-credit-cost-label {
   min-height: fit-content !important;
 }
 
-.mat-mdc-menu-content {
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 2px !important;
-  width: 100% !important;
-  height: auto !important;
-}
 
 flow-menu-item {
   display: block !important;
@@ -1515,13 +1540,6 @@ flow-menu-item.selected .mat-mdc-menu-item,
   flex-shrink: 0;
 }
 
-.mat-mdc-menu-submenu-icon {
-  width: 5px;
-  height: 10px;
-  fill: var(--foreground-neutral-400, #bdc1c6);
-  margin-left: auto;
-  flex-shrink: 0;
-}
 
 
 /* ── Google Flow Settings Trigger Button ── */
@@ -1610,25 +1628,6 @@ flow-menu-item.selected .mat-mdc-menu-item,
 
 /* Standalone Flow Personality Textarea */
 .personality-textarea,
-.flow-textarea {
-  box-sizing: border-box;
-  display: block;
-  width: 100%;
-  border-radius: var(--mat-sys-corner-large, 8px);
-  background-color: var(--foreground-state-05, rgba(218, 220, 224, 0.05));
-  color: var(--mat-sys-on-surface, var(--color-white, #fff));
-  font-family: var(--mat-sys-body-large-font, 'Google Sans Text', 'Google Sans', sans-serif);
-  font-size: var(--mat-sys-body-large-size, 1rem);
-  line-height: var(--mat-sys-body-large-line-height, 1.5rem);
-  letter-spacing: var(--mat-sys-body-large-tracking, 0);
-  font-weight: var(--mat-sys-body-large-weight, 400);
-  border: 1px solid var(--mat-sys-outline-variant, rgba(255, 255, 255, 0.08));
-  outline: none;
-  resize: none;
-  padding: 0.875rem 1rem;
-  transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
-  -webkit-font-smoothing: antialiased;
-}
 
 .personality-textarea:hover,
 .flow-textarea:hover {
@@ -1692,25 +1691,7 @@ flow-menu-item.selected .mat-mdc-menu-item,
 }
 
 /* ── Google Flow Ingredient Chips (Reference Button View) ── */
-:root {
-  --chip-size: 3.125rem;
-  --gap-size: 0.25rem;
-  --padding-bottom: 0.25rem;
-  --max-lines: 3;
-}
 
-flow-character-ingredient-chip,
-flow-element-ingredient-chip,
-flow-ingredient-chip,
-.flow-ingredient-chip {
-  display: inline-block;
-  box-sizing: border-box;
-  width: var(--chip-size, 3.125rem);
-  height: var(--chip-size, 3.125rem);
-  position: relative;
-  flex-shrink: 0;
-  -webkit-font-smoothing: antialiased;
-}
 
 .chip-container {
   position: relative;
@@ -1822,43 +1803,7 @@ flow-ingredient-chip,
   opacity: 0;
 }
 
-/* ── Global Typography & Color Variables ── */
-:root {
-  -webkit-text-size-adjust: 100%;
-  tab-size: 4;
-  font-family: 'Google Sans Text', 'Google Sans', var(--font-google-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  font-feature-settings: 'liga', 'kern';
-  font-variation-settings: "GRAD" 0;
-  -webkit-tap-highlight-color: transparent;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
-  --font-sans: 'Google Sans Text', 'Google Sans', var(--font-google-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-mono: var(--font-geist-mono), monospace;
-  --color-red-50: oklch(97.1% .013 17.38);
-  --color-red-500: oklch(63.7% .237 25.331);
-  --color-orange-500: oklch(70.5% .213 47.604);
-  --color-amber-500: oklch(76.9% .188 70.08);
-  --color-yellow-500: oklch(79.5% .184 86.047);
-  --color-lime-500: oklch(76.8% .233 130.85);
-  --color-green-500: oklch(72.3% .219 149.579);
-  --color-emerald-500: oklch(69.6% .17 162.48);
-  --color-teal-500: oklch(70.4% .14 182.503);
-  --color-cyan-500: oklch(71.5% .143 215.221);
-  --color-sky-500: oklch(68.5% .169 237.323);
-  --color-blue-500: oklch(62.3% .214 259.815);
-  --color-indigo-500: oklch(58.5% .233 277.117);
-  --color-violet-500: oklch(60.6% .25 292.717);
-  --color-purple-500: oklch(62.7% .265 303.9);
-  --color-fuchsia-500: oklch(66.7% .295 322.15);
-  --color-pink-500: oklch(65.6% .241 354.308);
-  --color-rose-500: oklch(64.5% .246 16.439);
-  --color-slate-500: oklch(55.4% .046 257.417);
-  --color-gray-500: oklch(55.1% .027 264.364);
-  --color-zinc-500: oklch(55.2% .016 285.938);
-  --color-neutral-500: oklch(55.6% 0 0);
-  --color-stone-500: oklch(55.3% .013 58.071);
-}
+/* ── Global Typography & Color Variables consolidated in :root ── */
 
 /* ── Google VideoFX / Flow Error Tile System ── */
 flow-video-tile {
@@ -1990,9 +1935,7 @@ flow-error-tile {
   padding-top: 12px;
 }
 
-.error-tile .buttons-container button.flow-icon-button,
-.error-tile .buttons-container button.mdc-icon-button,
-.error-tile .buttons-container .flow-icon-button-primary {
+.error-tile .buttons-container button.mdc-icon-button {
   width: 40px !important;
   height: 40px !important;
   min-width: 40px !important;
@@ -2014,16 +1957,14 @@ flow-error-tile {
 }
 
 .error-tile .buttons-container button.flow-icon-button:hover,
-.error-tile .buttons-container button.mdc-icon-button:hover,
-.error-tile .buttons-container .flow-icon-button-primary:hover {
+.error-tile .buttons-container button.mdc-icon-button:hover:hover {
   background-color: rgba(255, 255, 255, 0.22) !important;
   color: #ffffff !important;
   transform: scale(1.04) !important;
 }
 
 .error-tile .buttons-container button.flow-icon-button:active,
-.error-tile .buttons-container button.mdc-icon-button:active,
-.error-tile .buttons-container .flow-icon-button-primary:active {
+.error-tile .buttons-container button.mdc-icon-button:active:active {
   transform: scale(0.95) !important;
   background-color: rgba(255, 255, 255, 0.3) !important;
 }

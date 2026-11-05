@@ -1,6 +1,7 @@
 "use client"
 import React from "react"
 import { BaseSelector } from "./BaseSelector";
+import { Slider } from "@/shared/ui/slider";
 
 const DEFAULT_DURATIONS = ["5s", "10s", "15s"];
 
@@ -48,19 +49,7 @@ export const DurationSelector = React.memo(({ value, onChange, options, classNam
     return Math.max(min, Math.min(max, num));
   }, [value, min, max]);
 
-  // Calculate percentage
-  const percentage = React.useMemo(() => {
-    if (max === min) return 0;
-    return ((numericValue - min) / (max - min)) * 100;
-  }, [numericValue, min, max]);
-
-  const handleSliderChange = (e) => {
-    const newVal = e.target.value;
-    onChange(`${newVal}${unit}`);
-  };
-
   // Fallback to normal select dropdown if there are fewer than 3 items
-  // (We declare this conditionally AFTER all hooks have been declared unconditionally!)
   if (items.length < 3) {
     return (
       <BaseSelector
@@ -72,38 +61,22 @@ export const DurationSelector = React.memo(({ value, onChange, options, classNam
     );
   }
 
-  // Otherwise, use the custom slider selector
+  // Otherwise, use the canonical slider primitive
   return (
-    <div role="group" aria-label="Duration" className={`w-full p-1.5 bg-white/5 rounded-card ${className || ""}`} data-rac="" data-orientation="horizontal">
-      <div className="group relative w-full h-8 rounded-button overflow-hidden  transition-colors" data-rac="" data-orientation="horizontal" style={{ position: "relative", touchAction: "none" }}>
-        {/* Invisible Input on top to capture clicks/drags natively */}
-        <input 
-          tabIndex={0} 
-          id="duration-range-input" 
-          aria-labelledby="duration-range-input" 
-          min={min} 
-          max={max} 
-          step={step} 
-          aria-orientation="horizontal" 
-          aria-valuetext={`${numericValue}${unit}`} 
-          type="range" 
-          value={numericValue}
-          onChange={handleSliderChange}
-          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
+    <div role="group" aria-label="Duration" className={`w-full p-1.5 bg-white/5 rounded-lg ${className || ""}`}>
+      <div className="relative w-full h-8 flex items-center">
+        <Slider
+          variant="bar"
+          min={min}
+          max={max}
+          step={step}
+          value={[numericValue]}
+          onValueChange={([val]) => onChange(`${val}${unit}`)}
+          className="h-8 rounded-sm overflow-hidden"
         />
-
-        {/* Output Text Value */}
-        <output htmlFor="duration-range-input" aria-live="off" className="text-white text-[13px] font-semibold text-left absolute top-1/2 -translate-y-1/2 left-3 z-10 pointer-events-none select-none">
+        <output className="text-white text-[13px] font-semibold text-left absolute left-3 z-10 pointer-events-none select-none">
           {numericValue}{unit}
         </output>
-
-        {/* Left Track Fill */}
-        <div className="absolute h-full inset-0 bg-white/15 pointer-events-none" style={{ width: `${percentage}%` }}></div>
-
-        {/* Thumb Indicator */}
-        <div className="h-full top-1/2 bg-transparent w-1 border-transparent border border-solid outline-hidden pointer-events-none" data-rac="" style={{ position: "absolute", left: `${percentage}%`, transform: "translate(-50%, -50%)" }}>
-          <div className="thumb w-[3px] h-[55%] rounded-full bg-white absolute top-1/2 -translate-y-1/2"></div>
-        </div>
       </div>
     </div>
   );

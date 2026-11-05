@@ -455,7 +455,7 @@ const WorkflowMediaGridItem = React.memo(function WorkflowMediaGridItem({
                   "transition-opacity duration-200 pointer-events-auto",
                   isDropdownOpen ? "opacity-100" : "opacity-0 group-hover:opacity-100"
                 )}>
-                  <ButtonGroup className="bg-white/60 backdrop-blur-md rounded-lg border-0 border-none">
+                  <ButtonGroup className="bg-white/60 backdrop-blur-md rounded-full border-0 border-none">
                     <StudioItemDropdownMenu
                       open={isDropdownOpen}
                       onOpenChange={setIsDropdownOpen}
@@ -469,7 +469,7 @@ const WorkflowMediaGridItem = React.memo(function WorkflowMediaGridItem({
                   "transition-opacity duration-200 pointer-events-auto",
                   isDropdownOpen ? "opacity-100" : "opacity-0 group-hover:opacity-100"
                 )}>
-                  <ButtonGroup className="bg-white/60 backdrop-blur-md rounded-lg border-0 border-none">
+                  <ButtonGroup className="bg-white/60 backdrop-blur-md rounded-full border-0 border-none">
                     <ActionBtn onClick={(e) => { e.stopPropagation(); handleLike(); }}>
                       <GoogleIcon 
                         iconName="favorite" 
@@ -514,7 +514,7 @@ const WorkflowMediaGridItem = React.memo(function WorkflowMediaGridItem({
         bottomRight={
           isDone && (isCharacter || isElement) && (
             <div
-              className="flex items-center justify-center w-7 h-7 rounded-badge bg-white text-black shadow-none pointer-events-none transition-all duration-200 group-hover:scale-105"
+              className="flex items-center justify-center w-7 h-7 rounded-full bg-white text-black shadow-none pointer-events-none transition-all duration-200 group-hover:scale-105"
               title={isCharacter ? "Character" : "Element"}
             >
               <GoogleIcon
@@ -631,7 +631,7 @@ const WorkflowMediaGridItem = React.memo(function WorkflowMediaGridItem({
           transition={{ duration: 0.15, ease: "easeOut" }}
         >
           <div
-            className="rounded-button overflow-hidden border-2 border-white/80 shadow-none"
+            className="rounded-sm overflow-hidden border-2 border-white/80 shadow-none"
             style={(() => {
               let numericAspect = 1;
               if (typeof aspect === "number") {
@@ -657,7 +657,7 @@ const WorkflowMediaGridItem = React.memo(function WorkflowMediaGridItem({
               initial={{ opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.12 }}
-              className="px-3 py-1.5 rounded-badge bg-black/80 backdrop-blur-md border border-white/20 text-white text-[11px] font-medium whitespace-nowrap shadow-none"
+              className="px-3 py-1.5 rounded-sm bg-black/80 backdrop-blur-md border border-white/20 text-white text-[11px] font-medium whitespace-nowrap shadow-none"
             >
               {dragTarget === "add-to-collection" ? "Add to collection" : "Move out of collection"}
             </motion.div>
@@ -1029,7 +1029,7 @@ const CollectionMediaGridItem = React.memo(function CollectionMediaGridItem({
             )}
             onClick={(e) => e.stopPropagation()}
           >
-            <ButtonGroup className="bg-white/60 backdrop-blur-md rounded-lg border-0 border-none">
+            <ButtonGroup className="bg-white/60 backdrop-blur-md rounded-full border-0 border-none">
               <ActionBtn
                 onClick={handleToggleLike}
                 title={isLiked ? "Unlike collection" : "Like collection"}
@@ -1121,7 +1121,7 @@ const CollectionMediaGridItem = React.memo(function CollectionMediaGridItem({
       {/* ── Collection drag ghost portal ── */}
       {isDraggingThis && typeof window !== "undefined" && createPortal(
         <motion.div
-          className="fixed top-0 left-0 z-[99999] pointer-events-none overflow-hidden rounded-card border border-white/70 bg-[#505050] shadow-none"
+          className="fixed top-0 left-0 z-[99999] pointer-events-none overflow-hidden rounded-lg border border-white/70 bg-[#505050] shadow-none"
           style={{
             x: mouseX,
             y: mouseY,
@@ -1139,7 +1139,7 @@ const CollectionMediaGridItem = React.memo(function CollectionMediaGridItem({
             <h3 className="min-w-0 truncate text-[12px] font-medium leading-tight tracking-tight text-white/92">
               {collectionName}
             </h3>
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-button border border-white/10 bg-[#343434]/95 text-white/90 shadow-none">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-sm border border-white/10 bg-[#343434]/95 text-white/90 shadow-none">
               <GoogleIcon iconName="folder" className="text-[16px]" />
             </div>
           </div>

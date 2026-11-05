@@ -37,7 +37,7 @@ export function AssetListItem({
         }
       }}
       className={cn(
-        "group w-full h-12 rounded-button pl-1 pr-4 py-0 flex items-center gap-3 justify-start text-left border-none select-none relative cursor-pointer",
+        "group w-full h-12 rounded-sm pl-1 pr-4 py-0 flex items-center gap-3 justify-start text-left border-none select-none relative cursor-pointer",
         isActive
           ? "bg-[#444746] text-white shadow-none"
           : "bg-transparent hover:bg-white/5 text-white/90",
@@ -46,7 +46,7 @@ export function AssetListItem({
       )}
     >
       {/* Thumbnail */}
-      <div className="w-10 h-10 rounded-button overflow-hidden bg-black/40 shrink-0 relative flex items-center justify-center">
+      <div className="w-10 h-10 rounded-sm overflow-hidden bg-black/40 shrink-0 relative flex items-center justify-center">
         {isVideo ? (
           <video src={itemUrl} className="w-full h-full object-cover" muted />
         ) : (

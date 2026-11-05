@@ -85,7 +85,7 @@ function DialogContent({
             translate-x-[-50%] translate-y-0 
             w-[300px] max-w-[95%]
             h-auto max-h-[60vh]
-            rounded-2xl bg-[var(--mat-dialog-container-color,var(--background-state-90))] backdrop-blur-[80px] shadow-[var(--mat-dialog-container-elevation-shadow)] border border-[var(--mat-sys-outline-variant,rgba(255,255,255,0.08))] overflow-hidden
+            rounded-2xl bg-[var(--mat-dialog-container-color,var(--background-state-90))] backdrop-blur-[80px] shadow-none border border-[var(--mat-sys-outline-variant,rgba(255,255,255,0.08))] overflow-hidden
             flex flex-col
             data-[state=open]:animate-in
             data-[state=closed]:animate-out
@@ -103,7 +103,7 @@ function DialogContent({
             translate-x-[-50%] translate-y-[-50%]
             w-full max-w-[calc(100%-2rem)]
             sm:max-w-6xl
-            rounded-2xl border border-[var(--mat-sys-outline-variant,rgba(255,255,255,0.08))] p-6 shadow-[var(--mat-dialog-container-elevation-shadow)]
+            rounded-2xl border border-[var(--mat-sys-outline-variant,rgba(255,255,255,0.08))] p-6 shadow-none
             data-[state=open]:animate-in
             data-[state=closed]:animate-out
 
@@ -114,7 +114,7 @@ function DialogContent({
             fixed top-[50%] left-[50%]
             translate-x-[-50%] translate-y-[-50%]
             w-full max-w-[250px] max-h-[200px]
-            rounded-2xl border border-[var(--mat-sys-outline-variant,rgba(255,255,255,0.08))] p-2 shadow-[var(--mat-dialog-container-elevation-shadow)]
+            rounded-2xl border border-[var(--mat-sys-outline-variant,rgba(255,255,255,0.08))] p-2 shadow-none
             data-[state=open]:animate-in
             data-[state=closed]:animate-out
           `,

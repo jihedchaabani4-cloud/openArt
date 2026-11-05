@@ -155,12 +155,12 @@ export function ElementCardKrea({ element, onClick, onDelete }) {
       onClick={(e) => { e.stopPropagation(); if (onClick && !isProcessing) onClick(element); }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className="group relative flex cursor-pointer flex-col gap-2 rounded-card p-2.5 transition-all duration-300 ease-out select-none outline-none hover:bg-white/[0.08] shadow-none"
+      className="group relative flex cursor-pointer flex-col gap-2 rounded-lg p-2.5 transition-all duration-300 ease-out select-none outline-none hover:bg-white/[0.08] shadow-none"
     >
       {/* ── CARD INNER FRAME ── */}
       <div
         style={{ backgroundColor: colors.bgGradient }}
-        className="relative flex aspect-[370/231] w-full items-center justify-center overflow-hidden rounded-card transition-all duration-300 ease-out"
+        className="relative flex aspect-[370/231] w-full items-center justify-center overflow-hidden rounded-lg transition-all duration-300 ease-out"
       >
         {/* Top-Left Category Type Badge (Google Icon) */}
         {!isProcessing && !isFailed && (
@@ -201,7 +201,7 @@ export function ElementCardKrea({ element, onClick, onDelete }) {
         {/* ── CARD STATES ── */}
         {isProcessing ? (
           <ProcessingCard
-            className="w-full h-full rounded-card"
+            className="w-full h-full rounded-lg"
             showPlayIcon={false}
           />
         ) : isFailed ? (
@@ -223,7 +223,7 @@ export function ElementCardKrea({ element, onClick, onDelete }) {
                     alt={name}
                     src={imgUrl}
                     loading="lazy"
-                    className="absolute top-1/2 left-1/2 w-[84px] aspect-[2/3] rounded-button object-cover shadow-none border border-white/10"
+                    className="absolute top-1/2 left-1/2 w-[84px] aspect-[2/3] rounded-sm object-cover shadow-none border border-white/10"
                     style={{
                       zIndex: preset.zIndex,
                       transform: `translate(-50%, -50%) translate(${x}px, ${preset.stackY}px) rotate(${rot}deg) scale(${sc})`,

@@ -41,6 +41,8 @@ const RULES = [
     only: (r) => /(^|\/)components\//.test(r), re: /\bfetch\s*\(/g },
   { id: 'U5', desc: 'inline style={{ }} (use tokens/classes; allowed only for truly dynamic values)', ext: /\.(jsx?|tsx?)$/,
     re: /style=\{\{/g },
+  { id: 'U6', desc: 'dead radius class (rounded-button, rounded-card, rounded-dialog, rounded-badge, rounded-input)', ext: /\.(jsx?|tsx?)$/,
+    re: /\brounded-(button|card|dialog|badge|input)\b/g },
 ];
 
 function collect() {

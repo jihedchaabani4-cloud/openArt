@@ -226,11 +226,11 @@ function ComparePlansSection({ packages, modelsComparison, onBuy, isPending, pen
             </div>
 
             <div
-                className="rounded-card  "
+                className="rounded-lg  "
             >
                 <div className="">
                     <div
-                        className="sticky rounded-card bg-white/5 backdrop-blur-[80px] top-0 z-30 
+                        className="sticky rounded-lg bg-white/5 backdrop-blur-[80px] top-0 z-30 
                         "
                     >
                         <div
@@ -607,7 +607,7 @@ export function PricingSection({ hideFaq = false }) {
                 {isError && (
                     <div
                         style={{ background: SURFACE_BACKGROUND_ELEVATED, borderColor: SURFACE_BORDER, color: TEXT_MUTED }}
-                        className="rounded-card border px-6 py-12 text-center text-sm md:col-span-3"
+                        className="rounded-lg border px-6 py-12 text-center text-sm md:col-span-3"
                     >
                         Could not load packages. Please try again later.
                     </div>

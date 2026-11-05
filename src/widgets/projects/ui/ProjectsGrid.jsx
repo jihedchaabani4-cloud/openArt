@@ -13,7 +13,7 @@ export function ProjectsGrid({ projects, isLoading, onDelete, onRename, onCreate
             {isLoading && projects.length === 0 ? (
                 <div className="flex flex-wrap gap-12">
                     {[1, 2, 3, 4, 5, 6].map((idx) => (
-                        <div key={idx} className="w-full sm:w-[calc(50%-24px)] lg:w-[calc(33.33%-32px)] aspect-[1.6/1] rounded-card border border-white/5 bg-white/5 animate-pulse" />
+                        <div key={idx} className="w-full sm:w-[calc(50%-24px)] lg:w-[calc(33.33%-32px)] aspect-[1.6/1] rounded-lg border border-white/5 bg-white/5 animate-pulse" />
                     ))}
                 </div>
             ) : (

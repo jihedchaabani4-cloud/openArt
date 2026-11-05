@@ -171,7 +171,7 @@ export function CoreMediaItemPresenter({
   const cardElement = (
     <div
       className={cn(
-        "group relative select-none items-center justify-center overflow-hidden rounded-card bg-black/40 shadow-2xl",
+        "group relative select-none items-center justify-center overflow-hidden rounded-lg bg-black/40 shadow-2xl",
         isContain ? "inline-flex w-fit h-fit max-w-full max-h-full shrink-0" : "flex w-full h-full",
         draggable ? "cursor-grab active:cursor-grabbing" : onClick ? "cursor-pointer" : "",
         className
@@ -213,7 +213,7 @@ export function CoreMediaItemPresenter({
         {isCompleted && !isVideo && (
           <div className={cn("relative flex items-center justify-center", isContain ? "w-fit h-fit max-w-full max-h-full" : "w-full h-full")}>
             {core.isMediaLoaded === false && (
-              <div className="absolute inset-0 bg-[#15161a] animate-pulse rounded-card" />
+              <div className="absolute inset-0 bg-[#15161a] animate-pulse rounded-lg" />
             )}
             <img
               src={url}

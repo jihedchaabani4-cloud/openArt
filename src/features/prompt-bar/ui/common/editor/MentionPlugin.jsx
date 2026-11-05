@@ -188,7 +188,7 @@ export function MentionPlugin({ references = [], onOpenMediaLibrary }) {
     <div
       ref={menuRef}
       style={{ top: pos.top, left: pos.left }}
-      className="absolute z-[9999] w-64 rounded-card border border-white/10 bg-[#161718]/95 backdrop-blur-2xl p-1.5 shadow-none animate-in fade-in zoom-in-95 duration-150"
+      className="absolute z-[9999] w-64 rounded-lg border border-white/10 bg-[#161718]/95 backdrop-blur-2xl p-1.5 shadow-none animate-in fade-in zoom-in-95 duration-150"
     >
       <div className="px-2.5 py-1 text-[10px] font-semibold tracking-wider uppercase text-white/40 flex items-center justify-between">
         <span>Mention Reference</span>

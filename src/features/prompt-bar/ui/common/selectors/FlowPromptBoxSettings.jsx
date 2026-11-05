@@ -5,6 +5,7 @@ import { Popover } from "radix-ui";
 import { cn } from "@/shared/lib/utils";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { Button } from "@/shared/ui/button";
+import { Slider } from "@/shared/ui/slider";
 import { resolveModelIcon } from "../../../core/modelManagement.js";
 import { calculateModelCredits } from "../../../core/creditCalculationService.js";
 
@@ -97,7 +98,7 @@ export function FlowSelect({
             sideOffset={8}
             collisionPadding={16}
             avoidCollisions
-            className="z-[99999] rounded-card shadow-2xl p-1 bg-[rgba(22,23,24,0.9)] backdrop-blur-2xl border border-white/10 overflow-y-auto font-sans antialiased outline-none"
+            className="z-[99999] rounded-lg shadow-2xl p-1 bg-[rgba(22,23,24,0.9)] backdrop-blur-2xl border border-white/10 overflow-y-auto font-sans antialiased outline-none"
             style={{
               width: `${width}px`,
               maxHeight: `${maxHeightLimit}px`,
@@ -303,10 +304,10 @@ export function FlowPromptBoxSettings({
     <flow-prompt-box-settings
      
       className={cn(
-        "settings-content-overlay flow-prompt-box-settings block w-[var(--prompt-box-settings-width,17.5rem)] rounded-card p-2",
+        "settings-content-overlay flow-prompt-box-settings block w-[var(--prompt-box-settings-width,17.5rem)] rounded-lg p-2",
         "bg-[rgba(22,23,24,0.6)] backdrop-blur-[100px]",
         "border-none",
-        "shadow-[var(--mat-menu-container-elevation-shadow,var(--glass-raised-box-shadow))]",
+        "shadow-none",
         "text-white select-none font-sans antialiased",
         className
       )}
@@ -334,7 +335,7 @@ export function FlowPromptBoxSettings({
             className="variant-emphasized block w-full"
           >
             <mat-button-toggle-group
-              className="mat-button-toggle-group toggle-group flex items-center gap-1 p-1 bg-[rgba(218,220,224,0.05)] rounded-button w-full"
+              className="mat-button-toggle-group toggle-group flex items-center gap-1 p-1 bg-[rgba(218,220,224,0.05)] rounded-sm w-full"
               role="radiogroup"
             >
               {modeOptions.map((opt) => {
@@ -344,7 +345,7 @@ export function FlowPromptBoxSettings({
                     key={opt.value}
                     role="presentation"
                     className={cn(
-                      "mat-button-toggle toggle flex-toggle flex-1 flex h-8 rounded-button transition-all",
+                      "mat-button-toggle toggle flex-toggle flex-1 flex h-8 rounded-sm transition-all",
                       isChecked && "mat-button-toggle-checked"
                     )}
                   >
@@ -383,7 +384,7 @@ export function FlowPromptBoxSettings({
             className="variant-emphasized block w-full"
           >
             <mat-button-toggle-group
-              className="mat-button-toggle-group toggle-group mat-button-toggle-group-appearance-standard flex items-center gap-1 p-1 bg-[rgba(218,220,224,0.05)] rounded-button w-full"
+              className="mat-button-toggle-group toggle-group mat-button-toggle-group-appearance-standard flex items-center gap-1 p-1 bg-[rgba(218,220,224,0.05)] rounded-sm w-full"
               role="radiogroup"
             >
               {subModeOptions.map((opt) => {
@@ -393,7 +394,7 @@ export function FlowPromptBoxSettings({
                     key={opt.value}
                     role="presentation"
                     className={cn(
-                      "mat-button-toggle toggle flex-toggle mat-button-toggle-appearance-standard mat-button-toggle-animations-enabled flex-1 flex h-8 rounded-button transition-all",
+                      "mat-button-toggle toggle flex-toggle mat-button-toggle-appearance-standard mat-button-toggle-animations-enabled flex-1 flex h-8 rounded-sm transition-all",
                       isChecked && "mat-button-toggle-checked"
                     )}
                   >
@@ -432,7 +433,7 @@ export function FlowPromptBoxSettings({
             className="block w-full"
           >
             <mat-button-toggle-group
-              className="mat-button-toggle-group toggle-group content-layout-column flex flex-wrap items-center gap-1 p-1 bg-[rgba(218,220,224,0.05)] rounded-button w-full"
+              className="mat-button-toggle-group toggle-group content-layout-column flex flex-wrap items-center gap-1 p-1 bg-[rgba(218,220,224,0.05)] rounded-sm w-full"
               role="radiogroup"
             >
               {ratioOptions.map((ratio) => {
@@ -444,7 +445,7 @@ export function FlowPromptBoxSettings({
                     key={ratio}
                     role="presentation"
                     className={cn(
-                      "mat-button-toggle toggle flex-toggle flex-1 min-w-[44px] h-[54px] rounded-button transition-all",
+                      "mat-button-toggle toggle flex-toggle flex-1 min-w-[44px] h-[54px] rounded-sm transition-all",
                       isChecked && "mat-button-toggle-checked"
                     )}
                   >
@@ -517,7 +518,7 @@ export function FlowPromptBoxSettings({
                   >
                     <mat-button-toggle-group
                       className={cn(
-                        "mat-button-toggle-group toggle-group p-1 bg-[rgba(218,220,224,0.05)] rounded-button w-full max-w-full",
+                        "mat-button-toggle-group toggle-group p-1 bg-[rgba(218,220,224,0.05)] rounded-sm w-full max-w-full",
                         isGrid ? cn("grid", gridColsClass, "gap-1") : "flex items-center gap-1"
                       )}
                       role="radiogroup"
@@ -540,7 +541,7 @@ export function FlowPromptBoxSettings({
                             role="presentation"
                             aria-description={infoText || undefined}
                             className={cn(
-                              "mat-button-toggle toggle flex h-8 rounded-button transition-all overflow-hidden",
+                              "mat-button-toggle toggle flex h-8 rounded-sm transition-all overflow-hidden",
                               !isGrid && "flex-1",
                               isChecked && "mat-button-toggle-checked"
                             )}
@@ -587,7 +588,7 @@ export function FlowPromptBoxSettings({
                     <span className="text-[12px] text-white font-medium">
                       {def.label || key}
                     </span>
-                    <div className="flex items-center gap-1 p-1 bg-[rgba(218,220,224,0.05)] rounded-button">
+                    <div className="flex items-center gap-1 p-1 bg-[rgba(218,220,224,0.05)] rounded-sm">
                       <Button
                         type="button"
                         variant={!isChecked ? "flow-boolean-active" : "flow-boolean"}
@@ -617,19 +618,18 @@ export function FlowPromptBoxSettings({
                 const numVal = val !== undefined && val !== null ? Number(val) : (def.default ?? min);
 
                 return (
-                  <div key={key} className="flex flex-col gap-1 p-1 bg-[rgba(218,220,224,0.05)] rounded-button px-2.5 py-2">
+                  <div key={key} className="flex flex-col gap-1 p-1 bg-[rgba(218,220,224,0.05)] rounded-sm px-2.5 py-2">
                     <div className="flex items-center justify-between text-[11px]">
                       <span className="text-white font-medium">{def.label || key}</span>
                       <span className="font-mono text-white font-semibold tabular-nums">{numVal}</span>
                     </div>
-                    <input
-                      type="range"
+                    <Slider
                       min={min}
                       max={max}
                       step={step}
-                      value={Number.isNaN(numVal) ? min : numVal}
-                      onChange={(e) => onParamChange?.(key, Number(e.target.value))}
-                      className="w-full h-1.5 bg-white/20 rounded-lg appearance-none cursor-pointer accent-white"
+                      value={[Number.isNaN(numVal) ? min : numVal]}
+                      onValueChange={([newVal]) => onParamChange?.(key, newVal)}
+                      className="w-full py-1.5"
                     />
                   </div>
                 );
@@ -670,7 +670,7 @@ export function FlowPromptBoxSettings({
                 <img
                   src={currentModelIcon}
                   alt=""
-                  className="size-3.5 rounded-badge object-contain brightness-0 invert shrink-0"
+                  className="size-3.5 rounded-sm object-contain brightness-0 invert shrink-0"
                   onError={(e) => {
                     e.currentTarget.style.display = "none";
                   }}
@@ -693,7 +693,7 @@ export function FlowPromptBoxSettings({
             className="block w-full"
           >
             <mat-button-toggle-group
-              className="mat-button-toggle-group toggle-group flex items-center gap-1 p-1 bg-[rgba(218,220,224,0.05)] rounded-button w-full"
+              className="mat-button-toggle-group toggle-group flex items-center gap-1 p-1 bg-[rgba(218,220,224,0.05)] rounded-sm w-full"
               role="radiogroup"
             >
               {[1, 2, 3, 4].map((countVal) => {
@@ -704,7 +704,7 @@ export function FlowPromptBoxSettings({
                     key={countVal}
                     role="presentation"
                     className={cn(
-                      "mat-button-toggle toggle flex-toggle flex-1 flex h-8 rounded-button transition-all",
+                      "mat-button-toggle toggle flex-toggle flex-1 flex h-8 rounded-sm transition-all",
                       isChecked && "mat-button-toggle-checked"
                     )}
                   >

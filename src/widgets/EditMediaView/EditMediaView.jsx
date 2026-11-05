@@ -89,7 +89,7 @@ function VideoControlsBar({
         >
           <div className="w-full h-1 bg-white/20 rounded-full overflow-hidden transition-all duration-200 group-hover/track:h-1.5 relative pointer-events-none">
             <div
-              className="h-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.6)]"
+              className="h-full bg-white"
               style={{ width: `${progressPercent}%` }}
             />
           </div>
