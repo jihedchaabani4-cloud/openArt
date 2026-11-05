@@ -169,27 +169,82 @@ export default function DesignSystemShowcasePage() {
 
               {/* Border Radius Hierarchy */}
               <div className="flex flex-col gap-3">
-                <h3 className="text-sm font-semibold text-white/90">Strict Border Radius Tokens</h3>
+                <h3 className="text-sm font-semibold text-white/90">Strict Runway Border Radius Tokens</h3>
                 <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
                   <div className="p-3 bg-white/5 border border-white/10 rounded-sm flex flex-col items-center justify-center text-center">
-                    <span className="text-xs font-semibold">Badge</span>
-                    <span className="text-xs text-muted-foreground">8px (rounded-sm)</span>
+                    <span className="text-xs font-semibold">Sharp</span>
+                    <span className="text-xs text-muted-foreground">4px (rounded-sm)</span>
                   </div>
-                  <div className="p-3 bg-white/5 border border-white/10 rounded-sm flex flex-col items-center justify-center text-center">
-                    <span className="text-xs font-semibold">Button/Input</span>
-                    <span className="text-xs text-muted-foreground">12px (rounded-sm)</span>
+                  <div className="p-3 bg-white/5 border border-white/10 rounded-md flex flex-col items-center justify-center text-center">
+                    <span className="text-xs font-semibold">Subtle</span>
+                    <span className="text-xs text-muted-foreground">6px (rounded-md)</span>
                   </div>
                   <div className="p-3 bg-white/5 border border-white/10 rounded-lg flex flex-col items-center justify-center text-center">
-                    <span className="text-xs font-semibold">Card/Panel</span>
-                    <span className="text-xs text-muted-foreground">16px (rounded-lg)</span>
+                    <span className="text-xs font-semibold">Comfortable</span>
+                    <span className="text-xs text-muted-foreground">8px (rounded-lg)</span>
                   </div>
                   <div className="p-3 bg-white/5 border border-white/10 rounded-2xl flex flex-col items-center justify-center text-center">
-                    <span className="text-xs font-semibold">Dialog</span>
-                    <span className="text-xs text-muted-foreground">24px (rounded-2xl)</span>
+                    <span className="text-xs font-semibold">Generous</span>
+                    <span className="text-xs text-muted-foreground">16px (rounded-2xl)</span>
                   </div>
                   <div className="p-3 bg-white/5 border border-white/10 rounded-full flex flex-col items-center justify-center text-center">
-                    <span className="text-xs font-semibold">Pill</span>
+                    <span className="text-xs font-semibold">Full</span>
                     <span className="text-xs text-muted-foreground">9999px (rounded-full)</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Runway Spacing Scale */}
+              <div className="flex flex-col gap-3">
+                <h3 className="text-sm font-semibold text-white/90">Runway 8px Spacing Scale</h3>
+                <div className="grid grid-cols-2 sm:grid-cols-6 gap-2">
+                  <div className="p-2.5 bg-white/5 border border-white/10 rounded-sm text-center">
+                    <span className="text-xs font-semibold block">xxs: 4px</span>
+                    <span className="text-xs text-muted-foreground">p-xxs / gap-xxs</span>
+                  </div>
+                  <div className="p-2.5 bg-white/5 border border-white/10 rounded-sm text-center">
+                    <span className="text-xs font-semibold block">xs: 6px</span>
+                    <span className="text-xs text-muted-foreground">p-xs / gap-xs</span>
+                  </div>
+                  <div className="p-2.5 bg-white/5 border border-white/10 rounded-sm text-center">
+                    <span className="text-xs font-semibold block">sm: 8px</span>
+                    <span className="text-xs text-muted-foreground">p-sm / gap-sm</span>
+                  </div>
+                  <div className="p-2.5 bg-white/5 border border-white/10 rounded-sm text-center">
+                    <span className="text-xs font-semibold block">md: 12px</span>
+                    <span className="text-xs text-muted-foreground">p-md / gap-md</span>
+                  </div>
+                  <div className="p-2.5 bg-white/5 border border-white/10 rounded-sm text-center">
+                    <span className="text-xs font-semibold block">base: 16px</span>
+                    <span className="text-xs text-muted-foreground">p-base / gap-base</span>
+                  </div>
+                  <div className="p-2.5 bg-white/5 border border-white/10 rounded-sm text-center">
+                    <span className="text-xs font-semibold block">lg: 20px</span>
+                    <span className="text-xs text-muted-foreground">p-lg / gap-lg</span>
+                  </div>
+                  <div className="p-2.5 bg-white/5 border border-white/10 rounded-sm text-center">
+                    <span className="text-xs font-semibold block">xl: 24px</span>
+                    <span className="text-xs text-muted-foreground">p-xl / gap-xl</span>
+                  </div>
+                  <div className="p-2.5 bg-white/5 border border-white/10 rounded-sm text-center">
+                    <span className="text-xs font-semibold block">xxl: 28px</span>
+                    <span className="text-xs text-muted-foreground">p-xxl / gap-xxl</span>
+                  </div>
+                  <div className="p-2.5 bg-white/5 border border-white/10 rounded-sm text-center">
+                    <span className="text-xs font-semibold block">section: 32px</span>
+                    <span className="text-xs text-muted-foreground">py-section</span>
+                  </div>
+                  <div className="p-2.5 bg-white/5 border border-white/10 rounded-sm text-center">
+                    <span className="text-xs font-semibold block">sec-lg: 48px</span>
+                    <span className="text-xs text-muted-foreground">py-section-lg</span>
+                  </div>
+                  <div className="p-2.5 bg-white/5 border border-white/10 rounded-sm text-center">
+                    <span className="text-xs font-semibold block">sec-xl: 64px</span>
+                    <span className="text-xs text-muted-foreground">py-section-xl</span>
+                  </div>
+                  <div className="p-2.5 bg-white/5 border border-white/10 rounded-sm text-center">
+                    <span className="text-xs font-semibold block">sec-xxl: 78px</span>
+                    <span className="text-xs text-muted-foreground">py-section-xxl</span>
                   </div>
                 </div>
               </div>
@@ -215,7 +270,7 @@ export default function DesignSystemShowcasePage() {
                 <div>
                   <h2 className="text-xl font-bold">Button Primitive</h2>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Canonical 5 Hierarchy Tiers + Neon & Pill Accents.
+                    Canonical 6 Core Semantic Variants (primary, secondary, outline, ghost, danger, link) + Tailwind Utilities.
                   </p>
                 </div>
                 <Button
@@ -230,17 +285,25 @@ export default function DesignSystemShowcasePage() {
 
               {/* Variants Grid */}
               <div className="flex flex-col gap-3">
-                <h3 className="text-sm font-semibold text-white/90">Canonical Variants</h3>
+                <h3 className="text-sm font-semibold text-white/90">6 Core Semantic Variants</h3>
                 <div className="flex flex-wrap items-center gap-3">
-                  <Button variant="primary">Primary White</Button>
-                  <Button variant="secondary">Secondary Surface</Button>
-                  <Button variant="outline">Outline Ghost</Button>
-                  <Button variant="ghost">Subtle Ghost</Button>
-                  <Button variant="danger">Danger Ghost</Button>
-                  <Button variant="danger" className="bg-red-900 text-red-100 hover:bg-red-800 border border-red-500/20">Destructive Filled</Button>
-                  <Button variant="primary" className="h-10 px-5 bg-brand-neon text-black text-sm font-semibold hover:opacity-80">Cinema Neon</Button>
+                  <Button variant="primary">primary</Button>
+                  <Button variant="secondary">secondary</Button>
+                  <Button variant="outline">outline</Button>
+                  <Button variant="ghost">ghost (default)</Button>
+                  <Button variant="danger">danger</Button>
+                  <Button variant="link">link</Button>
+                </div>
+              </div>
+
+              {/* Specialized Styling via className */}
+              <div className="flex flex-col gap-3">
+                <h3 className="text-sm font-semibold text-white/90">Custom Styling via className (No Extra Props)</h3>
+                <div className="flex flex-wrap items-center gap-3">
+                  <Button variant="primary" className="h-10 px-5 bg-brand-neon text-black text-sm font-semibold hover:opacity-80">Neon CTA</Button>
                   <Button variant="ghost" className="rounded-full px-4 bg-white/10 hover:bg-white/15 text-white/60 hover:text-white">Resting Pill</Button>
                   <Button variant="primary" className="rounded-full px-4">Active Pill</Button>
+                  <Button variant="danger" className="bg-red-900 text-red-100 hover:bg-red-800 border border-red-500/20">Destructive Filled</Button>
                 </div>
               </div>
 
