@@ -227,7 +227,7 @@ export function LoginDialog({ open, onClose }) {
 
   return (
     <Dialog open={open} onOpenChange={(nextOpen) => !nextOpen && onClose?.()}>
-      <DialogContent className="h-[min(740px,84vh)] w-[min(960px,94vw)] max-w-[960px] overflow-hidden p-0 bg-(--background-base-pri) backdrop-blur-[80px]" >
+      <DialogContent className="h-[min(740px,84vh)] w-[min(960px,94vw)] max-w-[960px] overflow-hidden p-0">
         <span className="sr-only">
           <DialogTitle>Authentication</DialogTitle>
         </span>

@@ -91,7 +91,7 @@ export function LeftNavigationRail() {
       prefetch={true}
       onClick={() => setOptimisticTab(item.id)}
       className={cn(
-        "flex items-center h-[42px] rounded-sm transition-colors duration-100 w-full select-none outline-none overflow-hidden font-sans font-medium text-[14px] leading-5 antialiased",
+        "flex items-center h-[42px] rounded-sm transition-colors duration-100 w-full select-none outline-none overflow-hidden font-sans font-medium text-sm leading-5 antialiased",
         item.isActive
           ? "bg-[#2a2a2a] text-white shadow-none"
           : "text-white/80 hover:text-white hover:bg-white/[0.06]"
@@ -102,15 +102,15 @@ export function LeftNavigationRail() {
         <GoogleIcon
           iconName={item.icon}
           className={cn(
-            "text-[20px] shrink-0",
+            "text-xl shrink-0",
             item.isActive ? "text-white" : "text-white/80"
           )}
         />
       </span>
       <span
         className={cn(
-          "tracking-normal truncate flex-1 pr-2 whitespace-nowrap",
-          isExpanded ? "block" : "hidden"
+          "tracking-normal truncate flex-1 pr-2 whitespace-nowrap rail-label-transition",
+          isExpanded ? "opacity-100" : "opacity-0 pointer-events-none"
         )}
       >
         {item.label}
@@ -124,7 +124,7 @@ export function LeftNavigationRail() {
       style={{
         width: isExpanded ? 230 : 64,
       }}
-      className="h-full shrink-0 relative z-40 bg-black flex flex-col select-none pt-0 pb-3 px-2 overflow-hidden border-none"
+      className="h-full shrink-0 relative z-40 bg-black flex flex-col select-none pt-0 pb-3 px-2 overflow-hidden border-none rail-smooth-transition"
     >
       {/* ── Top Spacer (animates cleanly with StudioNavbar hide/show) ── */}
       <motion.div
@@ -150,7 +150,7 @@ export function LeftNavigationRail() {
           type="button"
           variant="ghost"
           onClick={handleToggleExpand}
-          className="w-full h-[42px] justify-start overflow-hidden"
+          className="w-full h-[42px] p-0 gap-0 justify-start overflow-hidden font-medium text-sm leading-5"
           title={isExpanded ? "Réduire la barre" : "Développer la barre"}
           aria-label={isExpanded ? "Réduire la barre" : "Développer la barre"}
         >
@@ -163,8 +163,8 @@ export function LeftNavigationRail() {
           </span>
           <span
             className={cn(
-              "tracking-normal truncate flex-1 text-left pr-2 whitespace-nowrap",
-              isExpanded ? "block" : "hidden"
+              "tracking-normal truncate flex-1 text-left pr-2 whitespace-nowrap rail-label-transition",
+              isExpanded ? "opacity-100" : "opacity-0 pointer-events-none"
             )}
           >
             Réduire

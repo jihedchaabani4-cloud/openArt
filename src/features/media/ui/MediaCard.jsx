@@ -32,7 +32,7 @@ export const MediaCard = React.memo(
       onClick={onClick}
       onDoubleClick={onDoubleClick}
       className={cn(
-        "group relative flex flex-col overflow-hidden rounded-lg bg-surface-card border border-white/10 transition-all duration-200 hover:border-white/20 shadow-none",
+        "group relative flex flex-col overflow-hidden rounded-lg bg-surface-card border border-white/10 transition-none hover:border-white/20 shadow-none",
         isSelected && "ring-2 ring-primary border-transparent shadow-none",
         className
       )}

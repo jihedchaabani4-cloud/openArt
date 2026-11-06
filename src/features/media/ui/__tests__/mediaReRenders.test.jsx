@@ -236,4 +236,44 @@ describe("Media Presentation Memoization & Re-renders (100 Tiles)", () => {
     rerender(<Container item={newItem} />);
     expect(renderCount).toBe(2);
   });
+
+  it("enforces canonical xxs (4px) spacing on RowsPhotoAlbum container across all density variants", () => {
+    const clientWidthSpy = vi.spyOn(HTMLElement.prototype, "clientWidth", "get").mockReturnValue(1200);
+    try {
+      const entries = [
+        {
+          type: "media",
+          data: { id: "m-1", url: "https://example.com/1.png", width: 500, height: 500, status: "ready" },
+          key: "m-1",
+        },
+      ];
+
+      // 1. Default (md) -> spacing is 4 (xxs token)
+      const { container, rerender } = render(<SharedGalleryGrid entries={entries} />);
+      const album = container.querySelector(".react-photo-album");
+      expect(album.style.getPropertyValue("--react-photo-album--spacing")).toBe("4");
+
+      // 2. Large density -> spacing is 4 (xxs token)
+      rerender(<SharedGalleryGrid entries={entries} gridSize="lg" />);
+      expect(album.style.getPropertyValue("--react-photo-album--spacing")).toBe("4");
+
+      // 3. Small density -> spacing is 4 (xxs token)
+      rerender(<SharedGalleryGrid entries={entries} gridSize="sm" />);
+      expect(album.style.getPropertyValue("--react-photo-album--spacing")).toBe("4");
+
+      // 4. Custom prop spacing override
+      rerender(<SharedGalleryGrid entries={entries} spacing={8} />);
+      expect(album.style.getPropertyValue("--react-photo-album--spacing")).toBe("8");
+
+      // 5. Dynamic gridSpacing="md" (M / 8px)
+      rerender(<SharedGalleryGrid entries={entries} gridSpacing="md" />);
+      expect(album.style.getPropertyValue("--react-photo-album--spacing")).toBe("8");
+
+      // 6. Dynamic gridSpacing="lg" (L / 16px)
+      rerender(<SharedGalleryGrid entries={entries} gridSpacing="lg" />);
+      expect(album.style.getPropertyValue("--react-photo-album--spacing")).toBe("16");
+    } finally {
+      clientWidthSpy.mockRestore();
+    }
+  });
 });

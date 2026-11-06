@@ -2,24 +2,28 @@
 // ✅ Pure UI helpers — no business logic, no side effects
 import { resolveMainMedia } from "@/features/workflows/core/resolveMediaRef";
 
+export const STUDIO_GRID_SPACING_CONFIG = {
+  sm: { px: 4 },
+  md: { px: 8 },
+  lg: { px: 16 },
+};
+
+export function getStudioGridSpacingPx(spacingKey = "sm") {
+  return STUDIO_GRID_SPACING_CONFIG[spacingKey]?.px ?? 4;
+}
+
 export const STUDIO_GRID_CONFIG = {
   sm: {
     targetRowHeight: 250,
-    spacing: 12,
     maxRowHeightMultiplier: 1.0,
-    cardGridClass: "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-3",
   },
   md: {
     targetRowHeight: 420,
-    spacing: 16,
     maxRowHeightMultiplier: 1.0,
-    cardGridClass: "grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-4",
   },
   lg: {
     targetRowHeight: 540,
-    spacing: 20,
     maxRowHeightMultiplier: 1.0,
-    cardGridClass: "grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3 gap-5",
   },
 };
 
@@ -54,8 +58,10 @@ export function setCachedImageDimensions(url, width, height) {
   });
 }
 
-export function getStudioGridDensity(gridSize = "md") {
-  return STUDIO_GRID_CONFIG[gridSize] || STUDIO_GRID_CONFIG.md;
+export function getStudioGridDensity(gridSize = "md", gridSpacing = "sm") {
+  const base = STUDIO_GRID_CONFIG[gridSize] || STUDIO_GRID_CONFIG.md;
+  const spacingPx = getStudioGridSpacingPx(gridSpacing);
+  return { ...base, spacing: spacingPx };
 }
 
 /**
@@ -63,9 +69,9 @@ export function getStudioGridDensity(gridSize = "md") {
  */
 export function getGridClass(_group, _count, gridSize = "lg") {
   const layouts = {
-    sm: { container: "flex flex-wrap gap-2",   maxHeight: "h-[320px]" },
-    md: { container: "flex flex-wrap gap-3",   maxHeight: "h-[500px]" },
-    lg: { container: "flex flex-wrap gap-4",   maxHeight: "h-[650px]" },
+    sm: { container: "flex flex-wrap gap-xxs",   maxHeight: "h-[320px]" },
+    md: { container: "flex flex-wrap gap-xxs",   maxHeight: "h-[500px]" },
+    lg: { container: "flex flex-wrap gap-xxs",   maxHeight: "h-[650px]" },
   };
   const props = layouts[gridSize] ?? layouts.lg;
   return { gridClass: props.container, maxHeightClass: props.maxHeight };
@@ -212,9 +218,9 @@ function extractRawRatio(item, group) {
     } else if (hasValidDims) {
       aspect = `${w}/${h}`;
     } else {
-      const isChar = group?.workflow_type === "CHARACTER" || group?.workflow_type === "CHARACTER_SHEET" || group?.is_character || group?.entity_type === "character";
+      const isChar = group?.workflow_type === "CHARACTER" || group?.workflow_type === "CHARACTER_SHEET" || group?.is_character || group?.entity_type === "character" || item?.role === "sheet" || item?.mediaRole === "sheet";
       const isElem = group?.workflow_type === "ELEMENT_SHEET" || group?.is_element || group?.entity_type === "element";
-      aspect = isElem ? null : (isChar ? null : (isVideo ? '16/9' : null));
+      aspect = isElem ? null : (isChar ? '16/9' : (isVideo ? '16/9' : null));
     }
 
     const ratioStr = cachedDims 
@@ -257,9 +263,9 @@ function extractRawRatio(item, group) {
   } else if (hasValidDims) {
     aspect = `${w}/${h}`;
   } else {
-    const isChar = group?.workflow_type === "CHARACTER" || group?.workflow_type === "CHARACTER_SHEET" || group?.is_character || group?.entity_type === "character";
+    const isChar = group?.workflow_type === "CHARACTER" || group?.workflow_type === "CHARACTER_SHEET" || group?.is_character || group?.entity_type === "character" || item?.role === "sheet" || item?.mediaRole === "sheet";
     const isElem = group?.workflow_type === "ELEMENT_SHEET" || group?.is_element || group?.entity_type === "element";
-    const defaultRatio = isElem ? null : (isChar ? null : (isVideo ? '16/9' : null));
+    const defaultRatio = isElem ? null : (isChar ? '16/9' : (isVideo ? '16/9' : null));
     aspect = defaultRatio;
   }
 

@@ -234,7 +234,7 @@ export function PackageSelectionDialog({
             <Dialog open={open} onOpenChange={onOpenChange}>
                 <DialogContent
                     showCloseButton
-                    className="flex h-[min(740px,84vh)] w-[min(960px,94vw)] max-w-[960px] items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-black p-0 text-white shadow-none backdrop-blur-[80px]"
+                    className="flex h-[min(740px,84vh)] w-[min(960px,94vw)] max-w-[960px] items-center justify-center overflow-hidden p-0"
                 >
                     <DialogTitle className="sr-only">Choose your package</DialogTitle>
                     <GoogleIcon iconName="progress_activity" className="text-3xl animate-spin text-white/40" />
@@ -247,7 +247,7 @@ export function PackageSelectionDialog({
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent
                 showCloseButton
-                className="h-[min(740px,84vh)] w-[min(960px,94vw)] max-w-[960px] overflow-hidden rounded-2xl border border-white/10 bg-black p-0 text-white shadow-none backdrop-blur-[80px]"
+                className="h-[min(740px,84vh)] w-[min(960px,94vw)] max-w-[960px] overflow-hidden p-0"
             >
                 <DialogTitle className="sr-only">Choose your package</DialogTitle>
 

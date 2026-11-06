@@ -29,6 +29,7 @@ export function ReferenceMediaGalleryGrid({
   pendingUrls = [],
   deletingMediaId = null,
   targetRowHeight = DEFAULT_REFERENCE_ROW_HEIGHT,
+  spacing: propSpacing = 16,
   onDeleteImage,
   onSetCover,
   className,
@@ -193,7 +194,7 @@ export function ReferenceMediaGalleryGrid({
         photos={photos}
         defaultContainerWidth={900}
         targetRowHeight={targetRowHeight}
-        spacing={16}
+        spacing={propSpacing}
         rowConstraints={{ singleRowMaxHeight: Math.round(targetRowHeight * 1.35) }}
         render={albumRender}
       />

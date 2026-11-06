@@ -45,10 +45,10 @@ describe("DropdownMenu and ContextMenu — Runway Flat Surface Architecture", ()
     expect(content).not.toBeNull();
     expect(content.className).toContain("w-52");
     expect(content.className).toContain("rounded-lg");
-    expect(content.className).toContain("bg-surface-card");
+    expect(content.className).toContain("bg-(--background-state-90)");
+    expect(content.className).toContain("backdrop-blur-80");
     expect(content.className).toContain("border-white/10");
     expect(content.className).toContain("shadow-none");
-    expect(content.className).not.toContain("backdrop-blur");
   });
 
   it("renders ContextMenu trigger and content structure conforming to Runway flat surfaces", () => {

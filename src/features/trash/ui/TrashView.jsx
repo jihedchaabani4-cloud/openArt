@@ -21,6 +21,7 @@ export function TrashView({ projectId }) {
   }, [data?.projectContents, filters]);
 
   const gridSize = useGenerationsStore((s) => s.gridSize);
+  const gridSpacing = useGenerationsStore((s) => s.gridSpacing);
   const setIsNavbarHidden = useGenerationsStore((s) => s.setIsNavbarHidden);
 
   const scrollRef = useRef(null);
@@ -94,6 +95,7 @@ export function TrashView({ projectId }) {
                 <SharedGalleryGrid
                   workflows={trashedWorkflows}
                   gridSize={gridSize}
+                  gridSpacing={gridSpacing}
                   projectId={projectId}
                   CardComponent={renderCard}
                   itemClassName="rounded-lg border border-white/10 shadow-none"

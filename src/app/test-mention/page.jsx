@@ -574,7 +574,7 @@ export default function TestMentionPage() {
               />
 
               {/* Prompt Bar Shell (Border-free and shadow-free matching prompt bar) */}
-              <div className="w-full rounded-2xl bg-(--background-base-pri) backdrop-blur-[80px] p-3.5 shadow-none transition-all border-0">
+              <div className="w-full rounded-2xl bg-(--background-state-90) backdrop-blur-80 p-3.5 shadow-none transition-all border-0">
                 <LexicalComposer initialConfig={initialConfigV2}>
                   <div className="relative min-h-[50px] w-full px-1">
                     <RichTextPlugin

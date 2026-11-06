@@ -9,6 +9,8 @@ import { useAddMediaToCharacter } from "./useAddMediaToCharacter";
 import { useRemoveMediaFromCharacter } from "./useRemoveMediaFromCharacter";
 import { useGenerateCharacterSheetMutation } from "./useGenerateCharacterSheetMutation";
 import { resolveMainMedia } from "@/features/workflows/core/resolveMediaRef";
+import { isDetailMedia, isSheetMedia } from "../core/mediaClassification";
+import { logger } from "@/shared/lib/logger";
 import {
   validateFilesAgainstPolicy,
   CHARACTER_SHEET_UPLOAD_POLICY,
@@ -19,30 +21,6 @@ import {
 const MAX_DETAIL_IMAGES = 5;
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const isValidUUID = (id) => id && UUID_REGEX.test(id);
-
-const isDetailMedia = (m) =>
-  m?.role === "detail" ||
-  m?.role === "reference" ||
-  m?.mediaRole === "detail" ||
-  m?.mediaRole === "reference" ||
-  m?.raw?.role === "detail" ||
-  m?.raw?.role === "reference" ||
-  (!m?.role && !m?.mediaRole && !m?.raw?.role && (
-    m?.step_id === "character_detail" ||
-    m?.raw?.step_id === "character_detail"
-  ));
-
-const isSheetMedia = (m) =>
-  m?.role === "sheet" ||
-  m?.role === "turnaround" ||
-  m?.mediaRole === "sheet" ||
-  m?.mediaRole === "turnaround" ||
-  m?.raw?.role === "sheet" ||
-  m?.raw?.role === "turnaround" ||
-  (!m?.role && !m?.mediaRole && !m?.raw?.role && (
-    m?.step_id === "character_sheet" ||
-    m?.raw?.step_id === "character_sheet"
-  ));
 
 /**
  * useCharacter
@@ -230,10 +208,20 @@ export function useCharacter({ projectId, characterId } = {}) {
       .map((item, idx) => {
         const src = item.url || item.file_url;
         const dims = detailDims[src];
+        const itemAspect = item.aspectRatio || item.aspect || item.params?.aspectRatio || item.params?.ratio;
+        let defaultW = item.width || 4;
+        let defaultH = item.height || 3;
+        if (itemAspect && typeof itemAspect === "string" && itemAspect.includes("/")) {
+          const [w, h] = itemAspect.split("/").map(Number);
+          if (w && h) { defaultW = w; defaultH = h; }
+        } else if (itemAspect && typeof itemAspect === "string" && itemAspect.includes(":")) {
+          const [w, h] = itemAspect.split(":").map(Number);
+          if (w && h) { defaultW = w; defaultH = h; }
+        }
         return {
           src,
-          width: dims?.width || 4,
-          height: dims?.height || 3,
+          width: dims?.width || defaultW,
+          height: dims?.height || defaultH,
           key: item.id || String(idx),
           ref: item,
         };
@@ -384,7 +372,7 @@ export function useCharacter({ projectId, characterId } = {}) {
         }
         return res;
       } catch (err) {
-        console.error("❌ Failed to upload character sheet:", err);
+        logger.error("character_sheet_upload_failed", { error: err });
         setOptimisticSheetUrl(null);
         throw err;
       } finally {
@@ -422,7 +410,7 @@ export function useCharacter({ projectId, characterId } = {}) {
         }
         return res;
       } catch (err) {
-        console.error("❌ Failed to set sheet asset:", err);
+        logger.error("character_sheet_set_asset_failed", { error: err });
         setOptimisticSheetUrl(null);
         throw err;
       } finally {
@@ -500,7 +488,7 @@ export function useCharacter({ projectId, characterId } = {}) {
             setAddedDetailImages((prev) => prev.filter((r) => r.id !== item.id));
           }
         } catch (err) {
-          console.error("Failed to upload detail media file:", err);
+          logger.error("character_detail_upload_failed", { error: err });
           setAddedDetailImages((prev) => prev.filter((r) => r.id !== item.id));
         } finally {
           setPendingUrls((prev) => prev.filter((u) => u !== item.url));
@@ -516,7 +504,23 @@ export function useCharacter({ projectId, characterId } = {}) {
       const remaining = MAX_DETAIL_IMAGES - displayDetailImages.length;
       if (remaining <= 0) return;
 
-      const itemsToAdd = selectedItems.slice(0, remaining);
+      const sheetUrls = new Set(
+        sheetPhotos.map((s) => s.src).concat([activeSheetSrc, mainMedia?.url, mainMedia?.file_url]).filter(Boolean)
+      );
+      const sheetKeys = new Set(
+        sheetPhotos.map((s) => s.key).concat([mainMedia?.id, mainMedia?.name, cleanId]).filter(Boolean)
+      );
+
+      const itemsToAdd = selectedItems
+        .filter((item) => {
+          const mId = item.mediaId || item.media_id || item.id || item.workflow_id || item.workflowId;
+          const u = item.url || item.file_url || item.src || item.image?.url;
+          if (mId && sheetKeys.has(String(mId))) return false;
+          if (u && sheetUrls.has(u)) return false;
+          return true;
+        })
+        .slice(0, remaining);
+
       for (const item of itemsToAdd) {
         const mediaId = item.mediaId || item.media_id || item.id || item.workflow_id || item.workflowId;
         const fallbackUrl = item.url || item.file_url || item.src || item.image?.url;
@@ -557,12 +561,20 @@ export function useCharacter({ projectId, characterId } = {}) {
             setAddedDetailImages((prev) => prev.filter((r) => r.id !== tempId));
           }
         } catch (err) {
-          console.error("Failed to add detail asset:", err);
+          logger.error("character_detail_add_asset_failed", { error: err });
           setAddedDetailImages((prev) => prev.filter((r) => r.id !== tempId));
         }
       }
     },
-    [cleanId, projectId, displayDetailImages.length, addMediaMutation]
+    [
+      cleanId,
+      projectId,
+      displayDetailImages.length,
+      addMediaMutation,
+      sheetPhotos,
+      activeSheetSrc,
+      mainMedia,
+    ]
   );
 
   const removeDetailImage = useCallback(
@@ -576,7 +588,7 @@ export function useCharacter({ projectId, characterId } = {}) {
         try {
           await removeMediaMutation.mutateAsync({ characterId: cleanId, mediaId, projectId });
         } catch (err) {
-          console.error("Failed to delete detail image:", err);
+          logger.error("character_detail_delete_failed", { error: err });
         } finally {
           setDeletingMediaId(null);
         }
@@ -612,6 +624,7 @@ export function useCharacter({ projectId, characterId } = {}) {
     copyPrompt,
 
     // Turnaround Sheet
+    sheetPhotos,
     activeSheetSrc,
     isUpdatingSheet,
     imageLoadError,

@@ -40,6 +40,7 @@ export default function CharacterDetailPage() {
     copyPrompt,
 
     // Turnaround Sheet
+    sheetPhotos,
     activeSheetSrc,
     isUpdatingSheet,
     imageLoadError,
@@ -143,7 +144,7 @@ export default function CharacterDetailPage() {
             <div className="lg:col-span-8 xl:col-span-8 flex flex-col gap-3 relative border-none">
               <div
                 className={cn(
-                  "relative w-full flex items-center justify-center transition-all duration-300",
+                  "relative w-full flex items-center justify-center transition-none",
                   activeTab === "details"
                     ? (displayDetailImages.length === 0
                         ? "bg-transparent p-0 border-none"
@@ -237,6 +238,8 @@ export default function CharacterDetailPage() {
         mode="image"
         maxAllowed={Math.max(1, maxDetailImages - displayDetailImages.length)}
         selectedItems={displayDetailImages}
+        excludedIds={[workflowId, workflow?.id, mainMedia?.id, ...(sheetPhotos?.map((s) => s.key).filter(Boolean) || [])]}
+        excludedItems={[...(sheetPhotos?.map((s) => s.rawItem).filter(Boolean) || []), mainMedia].filter(Boolean)}
       />
 
       {/* Assets Import Popover (Body Sheet) */}

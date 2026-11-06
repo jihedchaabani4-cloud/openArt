@@ -257,7 +257,7 @@ export function NewElementDialog({ open, onOpenChange, projectId: propProjectId 
       <DialogContent
         variant="glass"
         showCloseButton={false}
-        className="w-full max-w-[960px] h-[610px] max-h-[92vh] flex flex-col p-7 border border-white/10 bg-surface-panel rounded-2xl font-sans antialiased text-white select-none shadow-none"
+        className="w-full max-w-[960px] h-[610px] max-h-[92vh] flex flex-col p-7 select-none"
       >
         {/* ── Dialog Header (Borderless) ── */}
         <div className="flex items-center justify-between w-full mb-4 shrink-0">

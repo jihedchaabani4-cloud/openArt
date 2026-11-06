@@ -68,6 +68,9 @@ describe("LeftNavigationRail & Media Grid Baseline Alignment", () => {
     const bottomReduceBtn = bottomContainer.querySelector("button");
     expect(bottomReduceBtn).toBeDefined();
     expect(bottomReduceBtn.querySelector("span.tracking-normal")?.textContent?.trim()).toBe("Réduire");
+    expect(bottomReduceBtn.className).toContain("p-0");
+    expect(bottomReduceBtn.className).toContain("gap-0");
+    expect(bottomReduceBtn.querySelector("span.w-\\[48px\\]")).toBeDefined();
 
     // Verify Corbeille precedes Réduire in DOM order (placed above it)
     expect(bottomTrashLink.compareDocumentPosition(bottomReduceBtn) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
@@ -79,7 +82,7 @@ describe("LeftNavigationRail & Media Grid Baseline Alignment", () => {
       "utf8"
     );
     const collectionFile = fs.readFileSync(
-      path.resolve(__dirname, "../../../app/cinema-studio/[projectId]/collection/[collectionId]/page.js"),
+      path.resolve(__dirname, "../../../app/cinema-studio/[projectId]/collection/[collectionId]/page.jsx"),
       "utf8"
     );
     const elementsFile = fs.readFileSync(

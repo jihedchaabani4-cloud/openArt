@@ -121,7 +121,7 @@ function SelectContent({
           // Shape
           "rounded-lg p-2",
           // Colors
-          "bg-surface-card border border-white/10 text-white shadow-none",
+          "bg-(--background-state-90) backdrop-blur-80 border border-white/10 text-white shadow-none",
           // Shadow
           "shadow-none",
           // Animations — open

@@ -65,11 +65,11 @@ export function ElementCardKrea({ element, onClick, onDelete }) {
       onClick={(e) => { e.stopPropagation(); if (onClick && !isProcessing) onClick(element); }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className="group relative flex cursor-pointer flex-col gap-2 rounded-lg p-2.5 transition-all duration-300 ease-out select-none outline-none bg-surface-card border border-white/10 hover:border-white/20 hover:bg-surface-elevated shadow-none"
+      className="group relative flex cursor-pointer flex-col gap-2 rounded-lg p-2.5 transition-none select-none outline-none bg-surface-card border border-white/10 hover:border-white/20 hover:bg-surface-elevated shadow-none"
     >
       {/* ── CARD INNER FRAME ── */}
       <div
-        className="relative flex aspect-[370/231] w-full items-center justify-center overflow-hidden rounded-lg bg-surface-elevated transition-all duration-300 ease-out shadow-none"
+        className="relative flex aspect-[370/231] w-full items-center justify-center overflow-hidden rounded-lg bg-surface-elevated transition-none shadow-none"
       >
         {/* Top-Left Category Type Badge (Google Icon) */}
         {!isProcessing && !isFailed && (

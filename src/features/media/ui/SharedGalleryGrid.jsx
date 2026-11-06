@@ -137,6 +137,7 @@ export const SharedGalleryGrid = React.memo(function SharedGalleryGrid({
   entries = null,
   collectionCoverById = null,
   gridSize = "md",
+  gridSpacing = "sm",
   variant = "card",
   CardComponent = null,
   projectId = null,
@@ -149,7 +150,7 @@ export const SharedGalleryGrid = React.memo(function SharedGalleryGrid({
   targetRowHeight: propTargetRowHeight = null,
   spacing: propSpacing = null,
 }) {
-  const density = getStudioGridDensity(gridSize);
+  const density = getStudioGridDensity(gridSize, gridSpacing);
   const targetRowHeight = propTargetRowHeight ?? density.targetRowHeight;
   const spacing = propSpacing ?? density.spacing;
   const singleRowMaxHeight =

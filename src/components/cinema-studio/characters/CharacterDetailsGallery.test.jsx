@@ -155,6 +155,47 @@ describe("CharacterDetailsGallery - Studio Media Grid Form", () => {
     expect(uploadBtn.className).toContain("rounded-full");
   });
 
+  it("strictly filters out any character sheet media from the details gallery", () => {
+    const mixedItems = [
+      {
+        id: "sheet-item-1",
+        url: "https://example.com/sheet.png",
+        role: "sheet",
+        status: "completed",
+      },
+      {
+        id: "sheet-item-2",
+        url: "https://example.com/turnaround.png",
+        step_id: "character_sheet",
+        status: "completed",
+      },
+      {
+        id: "detail-item-1",
+        url: "https://example.com/detail.png",
+        role: "detail",
+        status: "completed",
+      },
+      {
+        // Explicit detail role must win over the legacy image_generation fallback
+        id: "detail-item-2",
+        url: "https://example.com/detail-generated.png",
+        role: "detail",
+        step_id: "image_generation",
+        status: "completed",
+      },
+    ];
+
+    const { container } = renderWithClient(
+      <CharacterDetailsGallery
+        items={mixedItems}
+        onUploadFiles={vi.fn()}
+      />
+    );
+
+    // Only the two detail items should be rendered in the details gallery
+    expect(container.querySelectorAll(".group").length).toBe(2);
+  });
+
   it("renders FlowCharacterImagePreview for selecting details when items is empty", () => {
     const { container } = renderWithClient(
       <CharacterDetailsGallery
@@ -208,6 +249,30 @@ describe("CharacterDetailsGallery - Studio Media Grid Form", () => {
 
     const photoAlbum = container.querySelector(".react-photo-album, .react-photo-album--rows");
     expect(photoAlbum).not.toBeNull();
+  });
+
+  it("uses the 16px reference gallery spacing by default", () => {
+    const { container } = renderWithClient(
+      <CharacterMediaGalleryGrid items={mockItems} />
+    );
+
+    const photoAlbum = container.querySelector(".react-photo-album");
+    expect(photoAlbum).not.toBeNull();
+    expect(
+      photoAlbum.style.getPropertyValue("--react-photo-album--spacing")
+    ).toBe("16");
+  });
+
+  it("honors an explicit spacing prop for reference grids", () => {
+    const { container } = renderWithClient(
+      <CharacterMediaGalleryGrid items={mockItems} spacing={4} />
+    );
+
+    const photoAlbum = container.querySelector(".react-photo-album");
+    expect(photoAlbum).not.toBeNull();
+    expect(
+      photoAlbum.style.getPropertyValue("--react-photo-album--spacing")
+    ).toBe("4");
   });
 
   it("configures RowsPhotoAlbum with larger grid size (DEFAULT_CHARACTER_ROW_HEIGHT >= 300)", () => {

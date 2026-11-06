@@ -48,6 +48,7 @@ export default function AssetsPage({ params }) {
     const setSelectedProjectId = useGenerationsStore(s => s.setSelectedProjectId);
     const setActiveStudioTab   = useGenerationsStore(s => s.setActiveStudioTab);
     const gridSize             = useGenerationsStore(s => s.gridSize);
+    const gridSpacing          = useGenerationsStore(s => s.gridSpacing);
     const setIsNavbarHidden    = useGenerationsStore(s => s.setIsNavbarHidden);
     const filters              = useGenerationsStore(s => s.filters);
     const searchQuery          = String(filters?.prompt || "").trim().toLowerCase();
@@ -270,6 +271,7 @@ export default function AssetsPage({ params }) {
                                     entries={visibleItems}
                                     collectionCoverById={collectionCoverById}
                                     gridSize={gridSize}
+                                    gridSpacing={gridSpacing}
                                     projectId={projectId}
                                     CardComponent={MediaGridItem}
                                     onWorkflowClick={handleWorkflowClick}

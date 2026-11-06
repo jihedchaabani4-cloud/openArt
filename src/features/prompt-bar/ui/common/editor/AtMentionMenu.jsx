@@ -119,7 +119,7 @@ export function getReferenceCategory(ref) {
  *
  * Streamlined @ mention menu matching the prompt bar design system:
  *  - No borders (seamless with prompt bar shell)
- *  - Background and blur matching prompt bar: bg-(--background-base-pri) / backdrop-blur-[80px]
+ *  - Background and blur matching prompt bar: bg-(--background-state-90) / backdrop-blur-[80px]
  *  - "Add" section: Asset library only
  *  - "References" section showing type category:
  *      • Character
@@ -274,7 +274,7 @@ export function AtMentionMenu({
       exit={{ opacity: 0, scale: 0.98, y: 6 }}
       transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
       className={cn(
-        "w-full rounded-lg bg-surface-card/90 backdrop-blur-xl border border-white/10 shadow-none pointer-events-auto flex flex-col z-50 overflow-hidden select-none font-sans antialiased",
+        "w-full rounded-lg bg-(--background-state-90) backdrop-blur-80 border border-white/10 shadow-none pointer-events-auto flex flex-col z-50 overflow-hidden select-none font-sans antialiased",
         className
       )}
     >

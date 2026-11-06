@@ -67,7 +67,6 @@ export function DropdownShell({
         onCloseAutoFocus={(e) => e.preventDefault()}
         className={cn(
           panelWidth,
-          "bg-surface-card border border-white/10 rounded-lg p-1.5 z-50 shadow-none text-white",
           className
         )}
       >

@@ -1,11 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Popover } from "radix-ui";
 import { cn } from "@/shared/lib/utils";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { Button } from "@/shared/ui/button";
 import { Slider } from "@/shared/ui/slider";
+import { Popover, PopoverTrigger, PopoverContent } from "@/shared/ui/popover";
 import { resolveModelIcon } from "../../../core/modelManagement.js";
 import { calculateModelCredits } from "../../../core/creditCalculationService.js";
 
@@ -69,8 +69,8 @@ export function FlowSelect({
 
   return (
     <div className="relative w-full">
-      <Popover.Root open={open} onOpenChange={setOpen}>
-        <Popover.Trigger asChild>
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
           <Button
             type="button"
             variant="ghost"
@@ -87,50 +87,48 @@ export function FlowSelect({
               className={cn("text-[20px] text-white transition-transform shrink-0", open && "rotate-180")}
             />
           </Button>
-        </Popover.Trigger>
+        </PopoverTrigger>
 
-        <Popover.Portal>
-          <Popover.Content
-            role="listbox"
-            data-portal="true"
-            side="left"
-            align="end"
-            sideOffset={8}
-            collisionPadding={16}
-            avoidCollisions
-            className="z-[99999] rounded-lg p-1 bg-surface-card border border-white/10 shadow-none overflow-y-auto font-sans antialiased outline-none"
-            style={{
-              width: `${width}px`,
-              maxHeight: `${maxHeightLimit}px`,
-            }}
-          >
-            {items.map((item) => {
-              const isSelected = String(value) === String(item.value);
+        <PopoverContent
+          role="listbox"
+          data-portal="true"
+          side="left"
+          align="end"
+          sideOffset={8}
+          collisionPadding={16}
+          avoidCollisions
+          className="z-[99999] p-1 overflow-y-auto font-sans antialiased"
+          style={{
+            width: `${width}px`,
+            maxHeight: `${maxHeightLimit}px`,
+          }}
+        >
+          {items.map((item) => {
+            const isSelected = String(value) === String(item.value);
 
-              return (
-                <Button
-                  key={String(item.value)}
-                  type="button"
-                  variant={isSelected ? "secondary" : "ghost"}
-                  className="w-full justify-between"
-                  onClick={() => {
-                    onChange?.(item.value);
-                    setOpen(false);
-                  }}
-                >
-                  <span className="flex items-center gap-2 truncate">
-                    {item.icon}
-                    <span className="truncate">{item.label}</span>
-                  </span>
-                  {isSelected && (
-                    <GoogleIcon iconName="check" className="text-base text-white shrink-0 ml-1" />
-                  )}
-                </Button>
-              );
-            })}
-          </Popover.Content>
-        </Popover.Portal>
-      </Popover.Root>
+            return (
+              <Button
+                key={String(item.value)}
+                type="button"
+                variant={isSelected ? "secondary" : "ghost"}
+                className="w-full justify-between"
+                onClick={() => {
+                  onChange?.(item.value);
+                  setOpen(false);
+                }}
+              >
+                <span className="flex items-center gap-2 truncate">
+                  {item.icon}
+                  <span className="truncate">{item.label}</span>
+                </span>
+                {isSelected && (
+                  <GoogleIcon iconName="check" className="text-base text-white shrink-0 ml-1" />
+                )}
+              </Button>
+            );
+          })}
+        </PopoverContent>
+      </Popover>
     </div>
   );
 }
@@ -302,7 +300,7 @@ export function FlowPromptBoxSettings({
      
       className={cn(
         "settings-content-overlay flow-prompt-box-settings block w-[var(--prompt-box-settings-width,17.5rem)] rounded-lg p-2",
-        "bg-surface-card/90 backdrop-blur-xl border border-white/10 shadow-none",
+        "bg-(--background-state-90) backdrop-blur-80 border border-white/10 shadow-none",
         "text-white select-none font-sans antialiased",
         className
       )}

@@ -33,7 +33,7 @@ function DialogOverlay({ className, ...props }) {
     <DialogPrimitive.Overlay
       data-slot="dialog-overlay"
       className={cn(
-        "fixed inset-0 z-50 bg-black/70 backdrop-blur-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0 duration-300",
+        "fixed inset-0 z-50 bg-black/70 backdrop-blur-80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0 duration-300",
         className
       )}
       {...props}
@@ -63,7 +63,7 @@ function DialogContent({
             translate-x-[-50%] translate-y-[-50%]
             w-full max-w-[calc(100%-2rem)]
             rounded-2xl border border-white/10 outline-none
-            bg-surface-panel/85 backdrop-blur-xl text-white
+            bg-(--background-state-90) backdrop-blur-80 text-white
             shadow-none
             data-[state=open]:animate-in
             data-[state=closed]:animate-out
@@ -75,7 +75,7 @@ function DialogContent({
 
           // FULL SCREEN
           variant === "full" &&
-            "fixed inset-0 z-50 w-screen h-screen outline-none bg-surface-panel text-white",
+            "fixed inset-0 z-50 w-screen h-screen outline-none bg-(--background-state-90) text-white",
 
           // FLOATING (above prompt bar)
           variant === "floating" &&
@@ -85,7 +85,7 @@ function DialogContent({
             translate-x-[-50%] translate-y-0 
             w-[300px] max-w-[95%]
             h-auto max-h-[60vh]
-            rounded-2xl bg-surface-panel text-white shadow-none border border-white/10 overflow-hidden
+            rounded-2xl bg-(--background-state-90) backdrop-blur-80 text-white shadow-none border border-white/10 overflow-hidden
             flex flex-col
             data-[state=open]:animate-in
             data-[state=closed]:animate-out
@@ -98,7 +98,7 @@ function DialogContent({
           // DEFAULT (centered)
           variant === "default" &&
             `
-            z-50 bg-surface-panel text-white
+            z-50 bg-(--background-state-90) backdrop-blur-80 text-white
             fixed top-[50%] left-[50%]
             translate-x-[-50%] translate-y-[-50%]
             w-full max-w-[calc(100%-2rem)]
@@ -109,7 +109,7 @@ function DialogContent({
           `,
           variant === "small" &&
             `
-            z-50 bg-surface-panel text-white
+            z-50 bg-(--background-state-90) backdrop-blur-80 text-white
             fixed top-[50%] left-[50%]
             translate-x-[-50%] translate-y-[-50%]
             w-full max-w-[250px] max-h-[200px]

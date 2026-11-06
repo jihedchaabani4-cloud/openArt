@@ -17,6 +17,10 @@ vi.mock("@/features/workflows/model/useWorkflowDelete", () => ({
   }),
 }));
 
+const { mockAddMediaMutate, stableAddMediaMutation } = vi.hoisted(() => {
+  const mutate = vi.fn();
+  return { mockAddMediaMutate: mutate, stableAddMediaMutation: { mutateAsync: mutate } };
+});
 const mockSetSheetMediaMutate = vi.fn();
 
 vi.mock("../useUpdateCharacter", () => ({
@@ -26,7 +30,7 @@ vi.mock("../useSetCharacterSheetMedia", () => ({
   useSetCharacterSheetMedia: () => ({ mutateAsync: mockSetSheetMediaMutate }),
 }));
 vi.mock("../useAddMediaToCharacter", () => ({
-  useAddMediaToCharacter: () => ({ mutateAsync: vi.fn() }),
+  useAddMediaToCharacter: () => stableAddMediaMutation,
 }));
 vi.mock("../useRemoveMediaFromCharacter", () => ({
   useRemoveMediaFromCharacter: () => ({ mutateAsync: vi.fn() }),
@@ -250,6 +254,80 @@ describe("useCharacter Hook - isProcessing & isFailed status resolution", () => 
       characterId: "char-select",
       mediaId: "media-uuid-456",
       imageUrl: "https://example.com/asset.png",
+      projectId: "proj-1",
+    });
+  });
+
+  it("addDetailFromAssets excludes turnaround sheet media and responds reactively to loaded data", async () => {
+    mockAddMediaMutate.mockResolvedValue({ media: { id: "new-detail-id", url: "https://example.com/valid-detail.png" } });
+
+    // 1. Initial render: project data has not loaded yet
+    useProjectData.mockReturnValue({
+      data: undefined,
+      isLoading: true,
+    });
+
+    const { result, rerender } = renderHook(() =>
+      useCharacter({ projectId: "proj-1", characterId: "char-import" })
+    );
+
+    // 2. Data arrives with the character sheet after the initial render
+    useProjectData.mockReturnValue({
+      data: {
+        projectContents: {
+          workflows: [
+            {
+              id: "char-import",
+              name: "Importable Hero",
+              workflow_type: "CHARACTER",
+              status: "completed",
+              primary_media_id: "sheet-media-1",
+            },
+          ],
+          media: [
+            {
+              id: "sheet-media-1",
+              workflow_id: "char-import",
+              step_id: "character_sheet",
+              role: "sheet",
+              status: "completed",
+              url: "https://example.com/sheet-turnaround.png",
+            },
+          ],
+        },
+      },
+      isLoading: false,
+    });
+    rerender();
+
+    expect(result.current.activeSheetSrc).toBe("https://example.com/sheet-turnaround.png");
+
+    // 2. User tries to import a list of assets containing both the sheet and a new detail
+    const selectedAssets = [
+      {
+        id: "sheet-media-1",
+        mediaId: "sheet-media-1",
+        url: "https://example.com/sheet-turnaround.png",
+      },
+      {
+        id: "char-import", // workflow ID matching cleanId
+        url: "https://example.com/another-sheet.png",
+      },
+      {
+        id: "valid-detail-asset",
+        mediaId: "valid-detail-asset",
+        url: "https://example.com/valid-detail.png",
+      },
+    ];
+
+    await result.current.addDetailFromAssets(selectedAssets);
+
+    // Only the valid detail asset should be sent to mutation, sheet items strictly filtered
+    expect(mockAddMediaMutate).toHaveBeenCalledTimes(1);
+    expect(mockAddMediaMutate).toHaveBeenCalledWith({
+      characterId: "char-import",
+      mediaId: "valid-detail-asset",
+      imageUrl: "https://example.com/valid-detail.png",
       projectId: "proj-1",
     });
   });

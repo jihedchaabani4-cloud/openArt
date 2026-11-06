@@ -38,6 +38,7 @@ export default function ElementsPage({ params }) {
     }, [projectId, setSelectedProjectId, setActiveStudioTab])
 
     const gridSize = useGenerationsStore(s => s.gridSize);
+    const gridSpacing = useGenerationsStore(s => s.gridSpacing);
     
     const isDragging = usePromptStore(s => s.isDraggingGalleryItem);
     const router = useRouter();
@@ -156,6 +157,7 @@ export default function ElementsPage({ params }) {
                             <SharedGalleryGrid
                                 workflows={visibleSheets}
                                 gridSize={gridSize}
+                                gridSpacing={gridSpacing}
                                 projectId={projectId}
                                 CardComponent={MediaGridItem}
                                 onWorkflowClick={handleWorkflowClick}

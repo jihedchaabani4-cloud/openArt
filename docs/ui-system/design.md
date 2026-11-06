@@ -66,7 +66,7 @@ The application uses an 8px base scale with precise micro-steps:
 
 | Token | Pixel Value | Typical Application | Tailwind Utility |
 |---|---|---|---|
-| **`xxs`** | **4px** | Micro gaps, badge inner padding, tight icon margins | `p-xxs`, `gap-xxs`, `m-xxs` |
+| **`xxs`** | **4px** | Micro gaps, badge inner padding, Studio Media Grid | `p-xxs`, `gap-xxs`, `m-xxs` |
 | **`xs`** | **6px** | Small icon-text gaps, compact list item padding | `p-xs`, `gap-xs`, `m-xs` |
 | **`sm`** | **8px** | Standard element gap, compact card padding | `p-sm`, `gap-sm`, `m-sm` |
 | **`md`** | **12px** | Form field spacing, medium element gaps | `p-md`, `gap-md`, `m-md` |
@@ -102,7 +102,14 @@ Every shared component has explicit default bindings. Feature callsites must NOT
 | **`<Tabs />`** | `full` (pills) / `comfortable` (studio) | List: 36px (h-9); Trigger: 28px (h-7) | List: `p-1`; Trigger: `px-3 py-1.5` | `gap-1` | Flat `bg-white/5`, active solid `bg-white` |
 | **`<Tooltip />`** | `sharp` (4px) | Auto fit | `px-2.5 py-1` | `gap-1.5` | `bg-card`, hairline `border-white/10`, `shadow-none` |
 | **`<Popover />`** | `comfortable` (8px) | Width: 288px (w-72) | `p-4` | `gap-2` | `bg-card`, hairline `border-white/10`, `shadow-none` |
+| **`<SharedGalleryGrid />`** | `comfortable` (8px) card | Rows-layout responsive | N/A | Dynamic: S (`xxs` 4px, default), M (`sm` 8px), L (`base` 16px) | Flat surface, hairline `border-white/10`, `shadow-none` |
 | **`<Skeleton />`** | Shape-mapped (`sharp`/`comfortable`/`full`) | Sizing via caller | `p-0` | N/A | `bg-white/5 animate-pulse`, `border-none` |
+
+> [!NOTE]
+> **Cinema Studio Media Grid Spacing:** Managed by user display settings (`StudioSettingsDropdown`, label `"Space between media"`), persisted in `localStorage` under `studio-ui-settings.gridSpacing`, and maps directly to canonical spacing tokens:
+> - **S (Default):** 4px (`--spacing-xxs`, `gap-xxs`)
+> - **M:** 8px (`--spacing-sm`, `gap-sm`)
+> - **L:** 16px (`--spacing-base`, `gap-base`)
 
 ---
 
@@ -293,8 +300,8 @@ Every shared primitive in `src/shared/ui/` has an exact, verified contract.
 * **Internal Spacing / Gap:** `gap-4` between title, description, content body, and action footer.
 * **Height & Sizing:** `w-full max-w-[calc(100%-2rem)] sm:max-w-6xl` (default), `max-w-[300px]` (floating), `max-w-[250px]` (small), `w-screen h-screen` (full).
 * **Border & Shadow:** `shadow-none`. Hairline border `border border-white/10`.
-* **Overlay:** `fixed inset-0 z-50 bg-black/65 backdrop-blur-[24px]`.
-* **Variants:** `default`, `glass`, `floating`, `small`, `full`.
+* **Overlay:** `fixed inset-0 z-50 bg-black/70 backdrop-blur-80`.
+* **Variants:** `default` (`bg-(--background-state-90) backdrop-blur-80`), `glass` (`bg-(--background-state-90) backdrop-blur-80`), `floating`, `small`, `full`.
 * **States:** Entrance/exit animations (`data-[state=open]:zoom-in-95 data-[state=closed]:zoom-out-95`).
 * **Exceptions:** `showCloseButton` mounts top-right close icon (`size-7 p-1.5`).
 
@@ -302,6 +309,7 @@ Every shared primitive in `src/shared/ui/` has an exact, verified contract.
 
 ### 4.11 `<DropdownMenu />` (`@/shared/ui/dropdown-menu`)
 * **Role:** Contextual action list, selection menu.
+* **Surface & Blur:** `bg-(--background-state-90) backdrop-blur-80 border border-white/10 shadow-none`.
 * **Radius Token:** `comfortable` = **8px** (`var(--radius-lg)`, `rounded-lg`) on menu container; `sharp` = **4px** (`rounded-sm`) on menu items.
 * **Padding Rules:** `p-1.5` on content container; `px-2.5 py-1.5` on items.
 * **Internal Spacing / Gap:** `gap-0.5` on item list stack; `gap-2` inside item (icon to text).
@@ -311,7 +319,7 @@ Every shared primitive in `src/shared/ui/` has an exact, verified contract.
 * **States:**
   * **Highlight:** `focus:bg-white/10 focus:text-white`.
   * **Disabled:** `data-[disabled]:pointer-events-none data-[disabled]:opacity-40`.
-* **Exceptions:** Studio Media Grid menus match `.flow-menu-panel.mat-mdc-menu-panel` to apply `rounded-2xl` (16px) per Runway studio spec.
+* **Exceptions:** None. All studio menus conform to canonical `rounded-lg` (8px) container shape.
 
 ---
 

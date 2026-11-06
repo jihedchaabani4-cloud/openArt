@@ -101,7 +101,7 @@ describe("Canonical Design System Primitives Suite", () => {
       const content = screen.getByText("Filter Settings").closest('[data-slot="popover-content"]');
       expect(content).not.toBeNull();
       expect(content.className).toContain("rounded-lg");
-      expect(content.className).toContain("backdrop-blur-md");
+      expect(content.className).toContain("backdrop-blur-80");
     });
   });
 

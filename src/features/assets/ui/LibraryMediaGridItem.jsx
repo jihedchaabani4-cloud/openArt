@@ -68,7 +68,7 @@ export function LibraryMediaGridItem({
           }
         }}
         className={cn(
-          "group relative cursor-pointer overflow-hidden rounded-lg bg-surface-card border border-white/10 shadow-none transition-all duration-300 hover:border-white/20",
+          "group relative cursor-pointer overflow-hidden rounded-lg bg-surface-card border border-white/10 shadow-none transition-none hover:border-white/20",
           isSelected && "ring-2 ring-white shadow-none",
           className
         )}

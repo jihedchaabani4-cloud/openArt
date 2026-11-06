@@ -126,7 +126,7 @@ describe("Characterization: Current Primary Media Resolution Behavior", () => {
       const migratedFiles = [
         "app/cinema-studio/[projectId]/assets/edit/[workflowId]/page.js",
         "app/cinema-studio/[projectId]/assets/page.js",
-        "app/cinema-studio/[projectId]/collection/[collectionId]/page.js",
+        "app/cinema-studio/[projectId]/collection/[collectionId]/page.jsx",
         "app/cinema-studio/[projectId]/elements/edit/[workflowId]/page.js",
         "app/cinema-studio/[projectId]/elements/page.js",
         "features/elements/hooks/useNewElement.js",

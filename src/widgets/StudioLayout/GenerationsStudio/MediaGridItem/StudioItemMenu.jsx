@@ -74,7 +74,7 @@ export function StudioItemDropdownMenu({
           </ActionBtn>
         )}
       </DropdownMenuTrigger>
-      <DropdownMenuContent align={align} className={cn("p-1.5 min-w-[12rem] w-52 flow-menu-panel mat-mdc-menu-panel rounded-2xl", className)}>
+      <DropdownMenuContent align={align} className={cn("p-1.5 min-w-[12rem] w-52 flow-menu-panel mat-mdc-menu-panel", className)}>
         {activeItems.map((m, i) => {
           if (m.key === "separator" || m.type === "separator") {
             return <DropdownMenuSeparator key={m.key || `sep-${i}`} className="my-1.5" />;
@@ -132,7 +132,7 @@ export function StudioContextMenuContent({
   const activeItems = React.useMemo(() => filterActiveMenuItems(items), [items]);
 
   return (
-    <ContextMenuContent className={cn("p-1.5 min-w-[12rem] w-52 flow-menu-panel mat-mdc-menu-panel rounded-2xl", className)}>
+    <ContextMenuContent className={cn("p-1.5 min-w-[12rem] w-52 flow-menu-panel mat-mdc-menu-panel", className)}>
       {activeItems.map((m, i) => {
         if (m.key === "separator" || m.type === "separator") {
           return <ContextMenuSeparator key={m.key || `ctx-sep-${i}`} className="my-1.5" />;

@@ -47,7 +47,7 @@ export function ConfirmDeleteDialog({
       {children && <DialogTrigger asChild>{children}</DialogTrigger>}
       <DialogContent
         variant="small"
-        className="bg-surface-panel border border-white/10 text-white max-w-[250px] p-4 shadow-none"
+        className="max-w-[250px] p-4"
         showCloseButton={false}
       >
         <div className="flex flex-col items-center text-center">

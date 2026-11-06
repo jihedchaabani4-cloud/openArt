@@ -141,7 +141,7 @@ export const MediaViewCard = React.forwardRef(function MediaViewCard({
         aspectRatio: aspectRatio || undefined,
       }}
       className={cn(
-        "group relative rounded-lg overflow-hidden bg-[#0a0a0a] select-none border-none p-0 block text-left outline-none h-auto transition-all",
+        "group relative rounded-lg overflow-hidden bg-[#0a0a0a] select-none border-none p-0 block text-left outline-none h-auto transition-none",
         "shadow-none",
         isHighlighted
           ? "ring-2 ring-white shadow-none z-10"

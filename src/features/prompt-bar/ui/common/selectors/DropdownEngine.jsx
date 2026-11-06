@@ -144,8 +144,7 @@ export function BaseSelect({
           className={cn(
             "min-w-[180px] max-h-[400px] overflow-y-auto",
             "rounded-lg px-1 py-1",
-            "bg-[#232424] border border-white/5",
-            "shadow-none border border-white/10"
+            "bg-(--background-state-90) backdrop-blur-80 border border-white/10 shadow-none"
           )}
         >
           {groups.map((group, gi) => (

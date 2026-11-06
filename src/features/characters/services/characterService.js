@@ -68,12 +68,23 @@ export const characterService = {
       role: "sheet",
       mediaRole: "sheet",
       step_id: "image_generation",
+      width: 1344,
+      height: 768,
+      aspectRatio: "16:9",
+      params: {
+        ratio: "16:9",
+        aspectRatio: "16:9",
+        width: 1344,
+        height: 768,
+      },
       mediaMetadata: {
         createTime: new Date().toISOString(),
         visibility: "PRIVATE",
       },
       generationConfig: {
         prompt,
+        ratio: "16:9",
+        aspectRatio: "16:9",
       },
     };
   },

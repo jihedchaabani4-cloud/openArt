@@ -7,6 +7,7 @@ import { cn } from "@/shared/lib/utils";
 import { CharacterMediaGalleryGrid } from "./CharacterMediaGalleryGrid";
 import { FlowCharacterImagePreview } from "./FlowCharacterImagePreview";
 import { getAcceptedMimeTypes, CHARACTER_DETAIL_UPLOAD_POLICY } from "@/features/media";
+import { isSheetMedia } from "@/features/characters/core/mediaClassification";
 
 /**
  * CharacterDetailsGallery
@@ -49,12 +50,14 @@ export function CharacterDetailsGallery({
 
   // Harmonize incoming items whether caller passes items, displayDetailImages, or detailPhotos
   const resolvedItems = useMemo(() => {
-    if (items && items.length > 0) return items;
-    if (displayDetailImages && displayDetailImages.length > 0) return displayDetailImages;
-    if (detailPhotos && detailPhotos.length > 0) {
-      return detailPhotos.map((p) => p.ref || { id: p.key, url: p.src });
+    let source = [];
+    if (items && items.length > 0) source = items;
+    else if (displayDetailImages && displayDetailImages.length > 0) source = displayDetailImages;
+    else if (detailPhotos && detailPhotos.length > 0) {
+      source = detailPhotos.map((p) => p.ref || { id: p.key, url: p.src });
     }
-    return [];
+    // Strictly filter out any sheet media, letting explicit roles win over step_id
+    return source.filter((m) => !isSheetMedia(m));
   }, [items, displayDetailImages, detailPhotos]);
 
   // Filter out items without valid URLs or identifiers

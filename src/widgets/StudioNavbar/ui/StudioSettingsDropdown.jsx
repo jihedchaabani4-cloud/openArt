@@ -17,6 +17,8 @@ import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows"
 export function StudioSettingsDropdown(props) {
   const storeGridSize = useGenerationsStore(s => s.gridSize);
   const storeSetGridSize = useGenerationsStore(s => s.setGridSize);
+  const storeGridSpacing = useGenerationsStore(s => s.gridSpacing);
+  const storeSetGridSpacing = useGenerationsStore(s => s.setGridSpacing);
   const storeShowUploadedMedia = useGenerationsStore(s => s.showUploadedMedia);
   const storeSetShowUploadedMedia = useGenerationsStore(s => s.setShowUploadedMedia);
   const storeShowTileDetails = useGenerationsStore(s => s.showTileDetails);
@@ -28,6 +30,8 @@ export function StudioSettingsDropdown(props) {
 
   const gridSize = props.gridSize ?? storeGridSize;
   const setGridSize = props.setGridSize ?? storeSetGridSize;
+  const gridSpacing = props.gridSpacing ?? (typeof storeGridSpacing === "string" ? storeGridSpacing : "sm");
+  const setGridSpacing = props.setGridSpacing ?? storeSetGridSpacing;
   const showUploadedMedia = props.showUploadedMedia ?? storeShowUploadedMedia;
   const setShowUploadedMedia = props.setShowUploadedMedia ?? storeSetShowUploadedMedia;
   const showTileDetails = props.showTileDetails ?? storeShowTileDetails;
@@ -58,12 +62,12 @@ export function StudioSettingsDropdown(props) {
       <DropdownMenuContent align="end" className="w-72 p-1.5 flex flex-col gap-1 font-sans antialiased">
         {/* ── 1. Grid Size Selector (styled like Prompt Bar Parameter Selector) ── */}
         <div className="flex flex-col gap-1 px-0.5 mb-1">
-          <span className="text-[12px] font-medium text-[rgba(218,220,224,0.75)]">
+          <span className="text-xs font-medium text-white/75">
             Taille de la grille
           </span>
           <flow-toggles aria-label="Taille de la grille" class="block w-full">
             <div
-              className="mat-button-toggle-group toggle-group flex items-center gap-0.5 p-0.5 bg-[rgba(218,220,224,0.05)] rounded-sm w-full select-none"
+              className="mat-button-toggle-group toggle-group flex items-center gap-0.5 p-0.5 bg-white/5 rounded-sm w-full select-none"
               role="radiogroup"
             >
               {[
@@ -80,6 +84,40 @@ export function StudioSettingsDropdown(props) {
                     aria-checked={isChecked}
                     variant={isChecked ? "secondary" : "ghost"}
                     onClick={() => setGridSize?.(opt.value)}
+                    className="mat-button-toggle toggle flex-toggle flex-1 h-8 text-[13px] font-medium"
+                  >
+                    <span>{opt.label}</span>
+                  </Button>
+                );
+              })}
+            </div>
+          </flow-toggles>
+        </div>
+
+        {/* ── 2. Space Between Media (S: 4px, M: 8px, L: 16px) ── */}
+        <div className="flex flex-col gap-1 px-0.5 mb-1">
+          <span className="text-xs font-medium text-white/75">
+            Space between media
+          </span>
+          <flow-toggles aria-label="Space between media" class="block w-full">
+            <div
+              className="mat-button-toggle-group toggle-group flex items-center gap-0.5 p-0.5 bg-white/5 rounded-sm w-full select-none"
+              role="radiogroup"
+            >
+              {[
+                { value: "sm", label: "S" },
+                { value: "md", label: "M" },
+                { value: "lg", label: "L" },
+              ].map((opt) => {
+                const isChecked = gridSpacing === opt.value;
+                return (
+                  <Button
+                    key={opt.value}
+                    type="button"
+                    role="radio"
+                    aria-checked={isChecked}
+                    variant={isChecked ? "secondary" : "ghost"}
+                    onClick={() => setGridSpacing?.(opt.value)}
                     className="mat-button-toggle toggle flex-toggle flex-1 h-8 text-[13px] font-medium"
                   >
                     <span>{opt.label}</span>

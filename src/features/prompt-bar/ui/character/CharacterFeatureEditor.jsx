@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { BaseSelector } from "../common/selectors/BaseSelector";
 import { SelectorCard } from "@/shared/ui/selector-card";
 import { SelectorSlide } from "@/shared/ui/selector-slide";
+import { Button } from "@/shared/ui/button";
 import { cn } from "@/shared/lib/utils";
 import { useCharacterStore } from "../../model/useCharacterStore";
 
@@ -65,9 +66,9 @@ export function CharacterFeatureEditor({ open, onOpenChange, anchorRef }) {
           className={cn(
             "absolute bottom-full left-1/2 -translate-x-1/2 mb-4 z-50 pointer-events-auto",
             "flex flex-col h-[470px] w-[880px] max-w-[95vw] overflow-hidden",
-            "gap-2 p-3 rounded-2xl backdrop-blur-[40px]",
+            "gap-2 p-3 rounded-2xl backdrop-blur-80",
             "border border-white/10 shadow-none",
-            "bg-[#131517]/95 text-white"
+            "bg-(--background-state-90) text-white"
           )}
         >
           {/* Header - Tabs */}

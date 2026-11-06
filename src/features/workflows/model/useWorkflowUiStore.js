@@ -54,6 +54,9 @@ export const useWorkflowUiStore = create(
       gridSize: "lg", // "sm" | "md" | "lg"
       setGridSize: (size) => set({ gridSize: size }),
 
+      gridSpacing: "sm", // "sm" (4px, xxs) | "md" (8px, sm) | "lg" (16px, base)
+      setGridSpacing: (spacing) => set({ gridSpacing: spacing }),
+
       // Settings Toggles
       soundOnHover: false,
       setSoundOnHover: (val) => set({ soundOnHover: val }),
@@ -132,6 +135,7 @@ export const useWorkflowUiStore = create(
       name: "studio-ui-settings",
       partialize: (state) => ({
         gridSize: state.gridSize,
+        gridSpacing: state.gridSpacing,
         soundOnHover: state.soundOnHover,
         showTileDetails: state.showTileDetails,
         showDetails: state.showDetails,

@@ -60,4 +60,18 @@ describe("useWorkflowUiStore - Search & Filter Cross-Tab Sync", () => {
     expect(state._generationFilters.prompt).toBe("");
     expect(state._elementFilters.prompt).toBe("");
   });
+
+  it("4. defaults gridSpacing to 'sm' (S / 4px) and updates via setGridSpacing", () => {
+    useWorkflowUiStore.getState().setGridSpacing("sm");
+    expect(useWorkflowUiStore.getState().gridSpacing).toBe("sm");
+
+    useWorkflowUiStore.getState().setGridSpacing("md");
+    expect(useWorkflowUiStore.getState().gridSpacing).toBe("md");
+
+    useWorkflowUiStore.getState().setGridSpacing("lg");
+    expect(useWorkflowUiStore.getState().gridSpacing).toBe("lg");
+
+    useWorkflowUiStore.getState().setGridSpacing("sm");
+    expect(useWorkflowUiStore.getState().gridSpacing).toBe("sm");
+  });
 });
