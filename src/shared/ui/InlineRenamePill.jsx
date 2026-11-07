@@ -1,7 +1,7 @@
 "use client";
 import { logger } from "@/shared/lib/logger";
 
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/button";

@@ -1,6 +1,5 @@
 import { describe, it, expect, beforeAll } from "vitest";
 import { render, screen } from "@testing-library/react";
-import * as React from "react";
 import { Checkbox } from "@/shared/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/shared/ui/radio-group";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/shared/ui/tooltip";
@@ -11,7 +10,7 @@ import { Badge } from "@/shared/ui/badge";
 import { Skeleton } from "@/shared/ui/skeleton";
 import { Slider } from "@/shared/ui/slider";
 import { Switch } from "@/shared/ui/switch";
-import { Dialog, DialogTrigger, DialogContent, DialogTitle, DialogDescription } from "@/shared/ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/shared/ui/dialog";
 import { Input } from "@/shared/ui/input";
 import { Select, SelectTrigger, SelectValue } from "@/shared/ui/select";
 

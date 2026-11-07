@@ -1,12 +1,17 @@
 "use client";
 
 import { useState } from "react";
+import { notFound } from "next/navigation";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { ShineText } from "@/shared/ui/ShineText";
 
 export default function ShineTextTestPage() {
   const [active, setActive] = useState(true);
   const [duration, setDuration] = useState(2.6);
+
+  if (process.env.NODE_ENV === "production") {
+    notFound();
+  }
 
   return (
     <div className="min-h-screen bg-[#0d0e11] text-white p-6 md:p-10">

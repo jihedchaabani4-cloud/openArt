@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { Button } from "@/shared/ui/button";
 import { cn } from "@/shared/lib/utils";
 
@@ -12,7 +11,7 @@ import { cn } from "@/shared/lib/utils";
  * - Frosted blur feedback on active click identical to Button nav-tab.
  */
 export function AssetListItem({
-  item,
+  item: _item,
   itemUrl,
   title = "Sans titre",
   typeLabel = "Image",

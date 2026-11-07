@@ -12,7 +12,7 @@ import { queryKeys } from "@/shared/api/queryKeys";
 export function useUpdateElementMetadata() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ workflowId, projectId, name, description, guidelines, elementType, element_type }) => {
+    mutationFn: async ({ workflowId, projectId: _projectId, name, description, guidelines, elementType, element_type }) => {
       const payload = {};
       if (name !== undefined) payload.name = name;
       if (description !== undefined) payload.description = description;

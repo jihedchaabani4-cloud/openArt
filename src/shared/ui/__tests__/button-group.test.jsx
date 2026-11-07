@@ -1,6 +1,5 @@
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
-import * as React from "react";
 import { ButtonGroup } from "@/shared/ui/button-group";
 
 describe("ButtonGroup component", () => {

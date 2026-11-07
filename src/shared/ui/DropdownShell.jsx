@@ -178,7 +178,6 @@ export const DropdownSegmented = React.memo(({ value, onChange, options, classNa
       >
       {options.map((opt) => {
         const isSelected = value === opt.value && !opt.disabled;
-        const activeVariant = variant === "white" ? "flow-toggle-white" : "flow-toggle-active";
 
         return (
           <Button
@@ -224,8 +223,6 @@ export const DropdownSegmented = React.memo(({ value, onChange, options, classNa
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const DropdownSegmentedWithLabel = React.memo(({ label, value, onChange, options, className, variant = "default", transparent = false }) => {
-  const activeVariant = variant === "white" ? "flow-toggle-white" : "flow-toggle-active";
-
   return (
     <div className={cn(
       "flex items-center gap-2 p-1 rounded-sm overflow-hidden",
@@ -273,7 +270,7 @@ export const DropdownSegmentedWithLabel = React.memo(({ label, value, onChange, 
 // DropdownChips — multi-select chip group
 // ─────────────────────────────────────────────────────────────────────────────
 
-export function DropdownChips({ options, selected, onToggle, accent = "lime" }) {
+export function DropdownChips({ options, selected, onToggle, accent: _accent = "lime" }) {
   return (
     <div className="flex flex-wrap gap-1.5">
       {options.map((opt) => {

@@ -23,7 +23,7 @@ export function ProjectsPage() {
         }
     }, [queryClient])
 
-    const { data: projects = [], isLoading, error } = useProjects()
+    const { data: projects = [], isLoading } = useProjects()
     const { mutateAsync: createProject, isPending: isCreating } = useCreateProject()
     const { mutateAsync: deleteProject } = useDeleteProject()
     const { mutateAsync: updateProject } = useUpdateProject()

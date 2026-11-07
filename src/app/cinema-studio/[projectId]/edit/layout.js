@@ -1,5 +1,3 @@
-import { EditNavbar } from "@/widgets/EditNavbar/EditNavbar"
-
 /**
  * Layout for /projects/[projectId]/edit/[workflowId] pages.
  * Shows the EditNavbar and provides the height container.

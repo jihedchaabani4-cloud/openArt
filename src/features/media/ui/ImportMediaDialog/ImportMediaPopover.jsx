@@ -10,27 +10,12 @@ import { resolveMediaUrl } from "@/shared/lib/displayUtils";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/shared/ui/dropdown-menu";
 import { RowsPhotoAlbum } from 'react-photo-album';
 import 'react-photo-album/rows.css';
 import { cn } from "@/shared/lib/utils";
 import { ImportMediaListView } from "./ImportMediaListView";
 import { useImportMediaKeyboard } from "./keyboard/useImportMediaKeyboard";
 import { KeyboardShortcutsHelp } from "./keyboard/KeyboardShortcutsHelp";
-
-const CATEGORIES = [
-  { id: "all",       label: "All",        googleIcon: "dashboard" },
-  { id: "image",     label: "Images",     googleIcon: "image" },
-  { id: "video",     label: "Videos",     googleIcon: "videocam" },
-  { id: "character", label: "Characters", googleIcon: "accessibility_new" },
-  { id: "element",   label: "Elements",   googleIcon: "widgets" },
-  { id: "upload",    label: "Uploads",    googleIcon: "drive_folder_upload" },
-];
 
 /**
  * ImportMediaPopover
@@ -384,39 +369,6 @@ export function ImportMediaPopover({
     });
   }, [effectiveLibrary, selectedKeySet]);
 
-  // Calculate item counts per category in the effective library
-  const categoryCounts = React.useMemo(() => {
-    let images = 0;
-    let videos = 0;
-    let characters = 0;
-    let elements = 0;
-    let uploads = 0;
-
-    unselectedLibrary.forEach((item) => {
-      const isVid = item.is_video || item.type === "video" || !!item.video;
-      const wType = String(item.workflow_type || item.workflowType || "").toUpperCase();
-      const isChar = item.is_character || item.type === "character" || wType === "CHARACTER" || wType === "CHARACTER_SHEET";
-      const isElem = item.is_element || item.type === "element" || wType === "ELEMENT" || wType === "ELEMENT_SHEET";
-      const isImg = !isVid && !isChar && !isElem && item.type !== "voice";
-      const isUp = item.workflow_type === "UPLOAD" || item.workflowType === "UPLOAD" || item.type === "upload" || Boolean(item.is_upload);
-
-      if (isImg) images++;
-      if (isVid) videos++;
-      if (isChar) characters++;
-      if (isElem) elements++;
-      if (isUp) uploads++;
-    });
-
-    return {
-      all: unselectedLibrary.length,
-      image: images,
-      video: videos,
-      character: characters,
-      element: elements,
-      upload: uploads,
-    };
-  }, [unselectedLibrary]);
-
   // Always show all allowed categories in the sidebar menu (do not hide empty ones)
   const availableCategories = React.useMemo(() => {
     const cats = [];
@@ -469,7 +421,7 @@ export function ImportMediaPopover({
     if (open) {
       setSearch(initialSearch || "");
     }
-  }, [open, initialSearch]);
+  }, [open, initialSearch, setSearch]);
 
   // Sync selectedCategory if current selection is not in availableCategories
   React.useEffect(() => {
@@ -510,7 +462,7 @@ export function ImportMediaPopover({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [open, onOpenChange, anchorRef]);
 
-  const toggleSelection = (item) => {
+  const toggleSelection = React.useCallback((item) => {
     const itemUrl = item.url ?? item.image?.url ?? item.video?.url ?? item.file_url;
     const isVideo = item.type === "video" || item.is_video || !!item.video;
     const canonicalWorkflowId = item.workflow_id || item.workflowId || item.workflow?.id || item.id || null;
@@ -551,7 +503,7 @@ export function ImportMediaPopover({
       }
       return [...prev, asset];
     });
-  };
+  }, [maxAllowed, remainingImages]);
 
   const selectedImageCount = React.useMemo(() => {
     return selectedItems.reduce((acc, cur) => acc + (cur.image_count || 1), 0);
@@ -564,12 +516,12 @@ export function ImportMediaPopover({
     return Math.max(0, maxAllowed - selectedItems.length);
   }, [remainingImages, maxAllowed, selectedImageCount, selectedItems.length]);
 
-  const handleImport = () => {
+  const handleImport = React.useCallback(() => {
     if (selectedItems.length === 0) return;
     onSelect(selectedItems);
     setSelectedItems([]);
     onOpenChange(false);
-  };
+  }, [selectedItems, onSelect, onOpenChange]);
 
   // ── Desktop-Class Keyboard Navigation Engine ───────────────────────────
   const categoryRefs = React.useRef([]);
@@ -610,7 +562,7 @@ export function ImportMediaPopover({
   const handleToggleHighlight = React.useCallback((item) => {
     if (!item) return;
     toggleSelection(item);
-  }, []);
+  }, [toggleSelection]);
 
   // Enter key commit or direct selection helper
   const handleConfirmOrSelect = React.useCallback((highlightedItem) => {

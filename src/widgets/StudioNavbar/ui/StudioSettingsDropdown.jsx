@@ -9,7 +9,6 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from "@/shared/ui/dropdown-menu"
-import { cn } from "@/shared/lib/utils"
 import { Button } from "@/shared/ui/button"
 import { Switch } from "@/shared/ui/switch"
 import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows"

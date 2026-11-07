@@ -23,7 +23,6 @@ export function useFilteredWorkflows(projectId) {
   const showUploaded = showUploadedMedia !== false;
 
   const rawWorkflows = queryResult.data?.projectContents?.workflows ?? [];
-  const rawBatches = queryResult.data?.projectContents?.batches ?? [];
 
   // ── filteredWorkflows (via unified selector) ──────────────────────────────
   const filteredWorkflows = useMemo(() => {
@@ -36,11 +35,12 @@ export function useFilteredWorkflows(projectId) {
 
   // ── availableModels ──────────────────────────────────────────────────────
   const availableModels = useMemo(() => {
+    const rawBatches = queryResult.data?.projectContents?.batches ?? [];
     const models = rawBatches
       .map((b) => b.generationConfig?.model)
       .filter(Boolean);
     return [...new Set(models)];
-  }, [rawBatches]);
+  }, [queryResult.data?.projectContents?.batches]);
 
   // ─────────────────────────────────────────────────────────────────────────
   return {

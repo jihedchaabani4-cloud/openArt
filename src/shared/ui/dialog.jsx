@@ -1,6 +1,5 @@
 "use client"
 
-import * as React from "react"
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import * as DialogPrimitive from "@radix-ui/react-dialog"
 

@@ -1,5 +1,4 @@
 "use client";
-import React from "react";
 import { motion } from "framer-motion";
 import { RowsPhotoAlbum } from "react-photo-album";
 import "react-photo-album/rows.css";

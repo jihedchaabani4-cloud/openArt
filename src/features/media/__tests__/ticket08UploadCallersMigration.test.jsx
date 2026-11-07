@@ -1,5 +1,4 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import React from "react";
 import { render, screen, cleanup, renderHook } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { elementService } from "@/features/elements/services/elementService";
@@ -9,8 +8,6 @@ import {
   validateFilesAgainstPolicy,
   ELEMENT_REFERENCE_UPLOAD_POLICY,
   CHARACTER_DETAIL_UPLOAD_POLICY,
-  CHARACTER_SHEET_UPLOAD_POLICY,
-  DEFAULT_UPLOAD_POLICY,
   getAcceptedMimeTypes,
 } from "../uploadPolicy";
 import { CharacterDetailsGallery } from "@/components/cinema-studio/characters/CharacterDetailsGallery";

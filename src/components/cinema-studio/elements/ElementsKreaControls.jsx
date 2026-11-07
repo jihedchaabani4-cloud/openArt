@@ -1,9 +1,7 @@
 "use client";
 
-import React from "react";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { Button } from "@/shared/ui/button";
-import { cn } from "@/shared/lib/utils";
 
 const CATEGORY_TABS = [
   { id: "all", label: "All", googleIcon: "grid_view" },

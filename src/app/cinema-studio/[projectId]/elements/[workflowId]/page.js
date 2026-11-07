@@ -5,13 +5,12 @@ import { useParams } from "next/navigation";
 import { useElementEdit } from "@/features/elements";
 import { LoadingScreen } from "@/shared/ui/LoadingScreen";
 import { ConfirmDeleteDialog } from "@/shared/ui/ConfirmDeleteDialog";
-import { ImportMediaPopover } from "@/widgets/ImportMediaDialog/ImportMediaPopover";
+import { ImportMediaPopover } from "@/features/media";
 import { ElementEditNavbar } from "@/widgets/ElementEditNavbar/ElementEditNavbar";
 import {
   ElementInfoSidebar,
   ElementDetailsGallery,
 } from "@/components/cinema-studio/elements";
-import { cn } from "@/shared/lib/utils";
 
 /**
  * ElementWorkflowEditPage

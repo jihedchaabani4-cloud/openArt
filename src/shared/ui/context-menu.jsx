@@ -1,6 +1,5 @@
 "use client"
 
-import * as React from "react"
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { ContextMenu as ContextMenuPrimitive } from "radix-ui"
 

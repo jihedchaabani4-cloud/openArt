@@ -1,10 +1,8 @@
 "use client";
 
 import { ProjectCard } from "@/features/projects/ui/ProjectCard";
-import { Button } from "@/shared/ui/button";
-import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 
-export function ProjectsGrid({ projects, isLoading, onDelete, onRename, onCreate, isCreating }) {
+export function ProjectsGrid({ projects, isLoading, onDelete, onRename, onCreate: _onCreate, isCreating: _isCreating }) {
     return (
         <div className="flex flex-col gap-6">
   

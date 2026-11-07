@@ -8,7 +8,7 @@ import { persist } from "zustand/middleware";
  */
 export const useWorkflowUiStore = create(
   persist(
-    (set, get) => ({
+    (set, _get) => ({
       // Active Workspace Selection
       activeWorkspaceId: null,
       setActiveWorkspaceId: (id) => set({ activeWorkspaceId: id, selectedNodeId: null }),

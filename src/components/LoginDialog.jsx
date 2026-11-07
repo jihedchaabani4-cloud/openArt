@@ -4,7 +4,6 @@ import React, { useEffect, useRef, useState } from "react";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { Dialog, DialogContent, DialogTitle } from "@/shared/ui/dialog";
 import { Button } from "@/shared/ui/button";
-import { cn } from "@/shared/lib/utils";
 
 function GoogleBrandIcon() {
   return (

@@ -1,7 +1,7 @@
 "use client";
 /* eslint-disable @next/next/no-img-element */
 
-import React, { useRef, useState, useCallback, useMemo, forwardRef, memo } from "react";
+import { useRef, useState, useCallback, forwardRef, memo } from "react";
 import { cn } from "@/shared/lib/utils";
 import { ProcessingCard } from "@/shared/ui/ProcessingCard";
 import { FlowErrorTile } from "@/shared/ui/FlowErrorTile";
@@ -86,7 +86,7 @@ export const CoreMediaItemPresenter = memo(
       // Menu activation and items
       showMenu = false,
       activeMenu = false,
-      menuItems = [],
+      menuItems: _menuItems = [],
       menuTrigger = null,
       menuPosition = "topRight",
       isMenuOpen: controlledMenuOpen,
@@ -157,7 +157,7 @@ export const CoreMediaItemPresenter = memo(
     // Local or controlled menu open state
     const [internalMenuOpen, setInternalMenuOpen] = useState(false);
     const isMenuOpen = controlledMenuOpen !== undefined ? controlledMenuOpen : internalMenuOpen;
-    const setMenuOpen = controlledOnMenuOpenChange || setInternalMenuOpen;
+    const _setMenuOpen = controlledOnMenuOpenChange || setInternalMenuOpen;
 
     const isMenuActive = Boolean(showMenu || activeMenu || menuSlot || menuTrigger);
 

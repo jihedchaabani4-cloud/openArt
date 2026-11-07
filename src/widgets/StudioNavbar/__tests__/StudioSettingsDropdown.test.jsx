@@ -1,5 +1,4 @@
 import { describe, it, expect, beforeEach, afterEach, beforeAll, vi } from "vitest";
-import React from "react";
 import { render, screen, fireEvent, cleanup } from "@testing-library/react";
 import { StudioSettingsDropdown } from "../ui/StudioSettingsDropdown";
 import { useWorkflowUiStore } from "@/features/workflows/model/useWorkflowUiStore";

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { Button } from "@/shared/ui/button";
 import { resolveMediaUrl } from "@/shared/lib/displayUtils";
@@ -22,7 +22,7 @@ export function ImportMediaListView({
   onLoadMore,
   remainingImages,
   availableSlots,
-  maxAllowed,
+  maxAllowed: _maxAllowed,
 }) {
   const [internalFocusedId, setInternalFocusedId] = useState(null);
   const focusedId = propFocusedId !== undefined ? propFocusedId : internalFocusedId;
@@ -44,7 +44,7 @@ export function ImportMediaListView({
     if (focusedItem && !focusedId) {
       setFocusedId(focusedItem.id || focusedItem.name || focusedItem.workflow_id);
     }
-  }, [focusedItem, focusedId]);
+  }, [focusedItem, focusedId, setFocusedId]);
 
   // Infinite scroll intersection observer for list
   useEffect(() => {

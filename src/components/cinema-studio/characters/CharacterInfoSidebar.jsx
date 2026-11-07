@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { Input } from "@/shared/ui/input";
 import { Textarea } from "@/shared/ui/textarea";

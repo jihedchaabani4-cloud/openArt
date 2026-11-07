@@ -14,7 +14,6 @@ import { Button } from "@/shared/ui/button";
 import { useAuthSession } from "@/shared/api/auth";
 import { LoginDialog } from "@/components/LoginDialog";
 
-const SURFACE_BACKGROUND = "#1a1a1a";
 const SURFACE_BACKGROUND_ELEVATED = "#222222";
 const SURFACE_BORDER = "#2f2f2f";
 const SURFACE_BORDER_SUBTLE = "#2a2a2a";
@@ -60,26 +59,8 @@ function getPlanKind(pkg) {
     return null;
 }
 
-function getPlanColor(label) {
+function getPlanColor(_label) {
     return PLAN_COLORS;
-}
-
-function getPlanHeroBackground(label) {
-    const value = label?.toLowerCase() || "";
-
-    if (value.includes("starter")) {
-        return "radial-gradient(circle at 24% 14%, rgba(255,255,255,0.38), transparent 24%), radial-gradient(circle at 72% 22%, rgba(124, 108, 255, 0.42), transparent 34%), radial-gradient(circle at 88% 72%, rgba(238, 224, 255, 0.22), transparent 26%), linear-gradient(135deg, #0d4ed3 0%, #2f63f2 46%, #9d79ff 100%)";
-    }
-
-    if (value.includes("creator")) {
-        return "radial-gradient(circle at 22% 12%, rgba(255,255,255,0.32), transparent 23%), radial-gradient(circle at 78% 24%, rgba(152, 112, 255, 0.46), transparent 33%), radial-gradient(circle at 90% 78%, rgba(255, 240, 255, 0.18), transparent 24%), linear-gradient(135deg, #164fd9 0%, #4d57f1 48%, #bb84ff 100%)";
-    }
-
-    if (value.includes("studio")) {
-        return "radial-gradient(circle at 20% 10%, rgba(255,255,255,0.34), transparent 22%), radial-gradient(circle at 76% 18%, rgba(130, 103, 255, 0.5), transparent 30%), radial-gradient(circle at 92% 70%, rgba(255, 245, 255, 0.24), transparent 25%), linear-gradient(135deg, #1c44d9 0%, #5b4ff0 50%, #d1a3ff 100%)";
-    }
-
-    return "radial-gradient(circle at 18% 16%, rgba(255,255,255,0.18), transparent 24%), radial-gradient(circle at 80% 18%, rgba(145, 99, 255, 0.32), transparent 30%), linear-gradient(135deg, #1e55d8 0%, #5347ea 50%, #9f7cff 100%)";
 }
 
 function getPlanSuffix(pkg) {
@@ -316,7 +297,6 @@ function TemplatePricingCard({ pkg, modelsComparison, onBuy, isLoading }) {
         ? pkg.features.map((feature) => feature.replace(/^~\s*/, ""))
         : [];
     const price = formatPrice(pkg.price, pkg.currency);
-    const ctaLabel = pkg.cta_label || `Get ${pkg.label}`;
     const colors = getPlanColor(pkg.label);
 
     const generatedBreakdown = [];

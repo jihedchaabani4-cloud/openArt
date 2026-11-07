@@ -10,7 +10,7 @@ import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 /**
  * Standardized ProjectError with Legacy Design and Smart Logic.
  */
-export function ProjectError({ error, reset, onRetry }) {
+export function ProjectError({ error, reset: _reset, onRetry }) {
   const router = useRouter();
   const queryClient = useQueryClient();
 

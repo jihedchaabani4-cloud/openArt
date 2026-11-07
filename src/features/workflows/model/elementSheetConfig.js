@@ -132,7 +132,6 @@ export function buildElementSheetDraft(workflow, targetItem = null) {
   const workflowPrompt = primaryConfig.prompt || currentItem?.params?.prompt || meta.prompt || "";
   const dna = primaryConfig.dna || null;
   const elementMode = normalizeElementMode(dna?.type);
-  const elementConfig = getElementSheetConfig(elementMode);
   const prompt = buildElementPrompt(workflowPrompt, dna?.traits || []);
   const references = normalizeElementReferences(primaryConfig.references || []);
   const features = extractFeaturesFromPrompt(prompt);

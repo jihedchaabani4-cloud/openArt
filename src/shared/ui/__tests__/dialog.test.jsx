@@ -1,15 +1,11 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
-import * as React from "react";
 import {
   Dialog,
-  DialogTrigger,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
-  DialogFooter,
-  DialogClose,
 } from "@/shared/ui/dialog";
 import { ConfirmDeleteDialog } from "@/shared/ui/ConfirmDeleteDialog";
 

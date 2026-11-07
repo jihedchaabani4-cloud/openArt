@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";

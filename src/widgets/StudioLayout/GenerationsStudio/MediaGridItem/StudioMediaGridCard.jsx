@@ -22,15 +22,15 @@ export const StudioMediaGridCard = React.memo(function StudioMediaGridCard({
   aspect: propAspect = null,
   className,
   onClick = () => {},
-  onDragStart = () => {},
-  onDragEnd = () => {},
+  onDragStart: _onDragStart = () => {},
+  onDragEnd: _onDragEnd = () => {},
   width: albumWidth = null,
   height: albumHeight = null,
   menuItems: propMenuItems = null,
   topLeft = null,
   topRight: customTopRight = null,
   projectId: propProjectId = null,
-  ...props
+  ..._props
 }) {
   const effectiveMediaId = mediaId || (typeof propItem === "string" ? propItem : null);
   const resolvedItem = (typeof propItem === "object" && propItem !== null)

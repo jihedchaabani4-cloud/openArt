@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { renderHook, act, waitFor, cleanup } from "@testing-library/react";
+import { renderHook, act, cleanup } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import React from "react";
 import { api } from "@/shared/api/client";
 import { queryKeys } from "@/shared/api/queryKeys";
 import { useAddImageToElement } from "../hooks/useAddImageToElement";
@@ -57,7 +56,7 @@ describe("useAddImageToElement", () => {
       media: { id: "media-new-1", url: "https://cdn.example.com/elem1.png" },
     });
 
-    const { wrapper, queryClient } = createWrapper({
+    const { wrapper } = createWrapper({
       projectContents: { media: [] },
     });
 

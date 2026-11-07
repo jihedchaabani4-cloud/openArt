@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
 import {
   Dialog,
@@ -115,7 +115,7 @@ export function NewElementDialog({ open, onOpenChange, projectId: propProjectId 
           const next = [...prev, ...newItems].slice(0, 6);
           return next;
         });
-      } catch (err) {
+      } catch {
         setError("Erreur lors de la lecture des fichiers.");
       }
     },

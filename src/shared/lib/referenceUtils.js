@@ -53,7 +53,7 @@ export function adaptReferences(currentRefs = [], newMode = "image", maxRefs = 4
  * Validates if an asset can be added given mode + current refs.
  * Returns { ok: true } or { ok: false, reason: string }
  */
-export function validateReference(asset, role, currentRefs, maxRefs, generationMode) {
+export function validateReference(asset, role, currentRefs, maxRefs, _generationMode) {
   if (role === "mc_video" && !asset.is_video) {
     return { ok: false, reason: "Motion ref slot requires a video." };
   }

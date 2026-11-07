@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderHook, act, cleanup } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import React from "react";
 import { characterService } from "../services/characterService";
 import { queryKeys } from "@/shared/api/queryKeys";
 import { useAddMediaToCharacter } from "../hooks/useAddMediaToCharacter";

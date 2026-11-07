@@ -78,8 +78,8 @@ function sanitizeSeparators(items) {
 
 export function getStudioMenuItems({
   type = "generation",
-  workflow = null,
-  item = null,
+  workflow: _workflow = null,
+  item: _item = null,
   actions = {},
   state = {},
 }) {
@@ -89,7 +89,6 @@ export function getStudioMenuItems({
     handleLike,
     handleReuseSettings,
     handleDownload,
-    handleCopy,
     handleSetCover,
     handleReport,
     handlePublishYoutube,
@@ -108,8 +107,6 @@ export function getStudioMenuItems({
     showReuse = false,
     canAddToPrompt = true,
   } = state;
-
-  const mediaUrl = item?.url || workflow?.url || workflow?.primary_media?.url || "";
 
   // 1. Favorite / Like
   const itemLike = {
@@ -155,19 +152,7 @@ export function getStudioMenuItems({
     onClick: handleDownload,
   };
 
-  // 6. Copy
-  const itemCopy = {
-    key: "copy",
-    icon: "content_copy",
-    label: "Copier",
-    onClick: handleCopy || (() => {
-      if (mediaUrl && typeof navigator !== "undefined") {
-        navigator.clipboard?.writeText?.(mediaUrl);
-      }
-    }),
-  };
-
-  // 7. Rename
+  // 6. Rename
   const itemRename = {
     key: "rename",
     icon: "edit",

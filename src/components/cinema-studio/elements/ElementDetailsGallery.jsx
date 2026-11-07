@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef } from "react";
+import { useRef } from "react";
 import { Button } from "@/shared/ui/button";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { cn } from "@/shared/lib/utils";
@@ -27,7 +27,7 @@ export function ElementDetailsGallery({
   onDeleteImage,
   onSetCover,
   isSettingCover = false,
-  projectId = null,
+  projectId: _projectId = null,
   targetRowHeight,
   showTopActions = true,
   className,

@@ -287,7 +287,6 @@ export const SharedGalleryGrid = React.memo(function SharedGalleryGrid({
       );
     },
     [
-      ResolvedCard,
       projectId,
       onCollectionClick,
       onWorkflowClick,

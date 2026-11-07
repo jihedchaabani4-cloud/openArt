@@ -36,7 +36,7 @@ export default function StudioLayout({ children }) {
     const setIsNavbarHidden = useWorkflowsStore(s => s.setIsNavbarHidden);
     
     // 🔹 Data Layer (Pure Hooks, concurrent project + folders prefetch)
-    const { data: projectData, isLoading: isProjectLoading, isError: isProjectError, refetch: refetchProject } = useProjectData(projectId);
+    const { isLoading: isProjectLoading, isError: isProjectError, refetch: refetchProject } = useProjectData(projectId);
     const { isLoading: isFoldersLoading, isError: isFoldersError, refetch: refetchFolders } = useProjectFolders(projectId);
 
     const isLoading = isProjectLoading || isFoldersLoading;

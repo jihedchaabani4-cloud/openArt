@@ -23,7 +23,7 @@ export const TrashMediaGridCard = React.memo(function TrashMediaGridCard({
   onRestoreSuccess = null,
   onRestoreError = null,
   projectId: propProjectId = null,
-  ...props
+  ..._props
 }) {
   const effectiveMediaId = mediaId || (typeof propItem === "string" ? propItem : null);
   const resolvedItem = (typeof propItem === "object" && propItem !== null)

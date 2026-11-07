@@ -6,7 +6,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import fs from "node:fs";
 import path from "node:path";
-import React from "react";
 import { render, act, cleanup } from "@testing-library/react";
 import { createPromptBarStore } from "../store/createPromptBarStore.js";
 import { selectPersistable } from "../store/persistence.js";

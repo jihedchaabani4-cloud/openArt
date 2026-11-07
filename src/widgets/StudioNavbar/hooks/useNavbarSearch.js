@@ -1,21 +1,21 @@
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, useCallback } from "react"
 
 export function useNavbarSearch(setFilter) {
     const [searchExpanded, setSearchExpanded] = useState(false)
     const searchInputRef = useRef(null)
 
-    const handleOpenSearch = () => {
+    const handleOpenSearch = useCallback(() => {
         if (searchExpanded) return
         setSearchExpanded(true)
         setTimeout(() => searchInputRef.current?.focus(), 100)
-    }
+    }, [searchExpanded])
 
-    const handleCloseSearch = () => {
+    const handleCloseSearch = useCallback(() => {
         if (!searchExpanded) return
         setSearchExpanded(false)
         setFilter('prompt', "")
         searchInputRef.current?.blur()
-    }
+    }, [searchExpanded, setFilter])
 
     useEffect(() => {
         const handleKey = (e) => {
@@ -27,7 +27,7 @@ export function useNavbarSearch(setFilter) {
         }
         window.addEventListener("keydown", handleKey)
         return () => window.removeEventListener("keydown", handleKey)
-    }, [searchExpanded])
+    }, [searchExpanded, handleCloseSearch, handleOpenSearch])
 
     return {
         searchExpanded,

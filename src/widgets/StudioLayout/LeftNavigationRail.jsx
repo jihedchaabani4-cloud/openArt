@@ -24,7 +24,7 @@ export function LeftNavigationRail() {
   const pathname = usePathname();
 
   const { workflows: characters = [] } = useCharacterWorkflows(selectedProjectId);
-  const { workflows: elements = [] } = useElementSheetWorkflows(selectedProjectId);
+  useElementSheetWorkflows(selectedProjectId);
 
   // Expands / collapses only via explicit button click (Réduire / Développer)
   const [isExpanded, setIsExpanded] = useState(true);

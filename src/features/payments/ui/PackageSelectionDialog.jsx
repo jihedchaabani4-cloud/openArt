@@ -194,7 +194,7 @@ export function PackageSelectionDialog({
     open,
     onOpenChange,
     packages: packagesProp,
-    modelsComparison: modelsComparisonProp,
+    modelsComparison: _modelsComparisonProp,
     onBuy: onBuyProp,
     isPending: isPendingProp = false,
     pendingPackageId: pendingPackageIdProp,
@@ -204,13 +204,14 @@ export function PackageSelectionDialog({
     const { data: fetchedData } = usePackages();
     const checkoutMutation = useCheckout();
 
-    const packages = packagesProp ?? fetchedData?.packages ?? [];
-    const modelsComparison = modelsComparisonProp ?? fetchedData?.modelsComparison ?? { image: [], video: [] };
     const onBuy = onBuyProp ?? ((pkgId) => checkoutMutation.mutate(pkgId));
     const isPending = isPendingProp || checkoutMutation.isPending;
     const pendingPackageId = pendingPackageIdProp ?? (checkoutMutation.isPending ? checkoutMutation.variables : undefined);
 
-    const visiblePackages = useMemo(() => packages.slice(0, 3), [packages]);
+    const visiblePackages = useMemo(() => {
+        const packages = packagesProp ?? fetchedData?.packages ?? [];
+        return packages.slice(0, 3);
+    }, [packagesProp, fetchedData?.packages]);
     const [selectedPackageId, setSelectedPackageId] = useState(visiblePackages[0]?.id ?? null);
 
     useEffect(() => {

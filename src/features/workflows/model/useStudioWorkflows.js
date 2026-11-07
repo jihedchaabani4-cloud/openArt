@@ -18,18 +18,29 @@ import { selectStudioWorkflows } from "./selectStudioWorkflows";
 export function useStudioWorkflows(projectId, options = {}) {
   const queryResult = useProjectData(projectId);
 
+  const { type, domain, lifecycle, search, liked, sort, showUploaded, filters } = options;
+
   const workflows = useMemo(() => {
-    return selectStudioWorkflows(queryResult.data?.projectContents, options);
+    return selectStudioWorkflows(queryResult.data?.projectContents, {
+      type,
+      domain,
+      lifecycle,
+      search,
+      liked,
+      sort,
+      showUploaded,
+      filters,
+    });
   }, [
     queryResult.data?.projectContents,
-    options.type,
-    options.domain,
-    options.lifecycle,
-    options.search,
-    options.liked,
-    options.sort,
-    options.showUploaded,
-    options.filters,
+    type,
+    domain,
+    lifecycle,
+    search,
+    liked,
+    sort,
+    showUploaded,
+    filters,
   ]);
 
   return {

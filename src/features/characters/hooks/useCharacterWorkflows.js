@@ -20,16 +20,16 @@ export function useCharacterWorkflows(projectId) {
     });
   }, [data?.projectContents, filters]);
 
-  const rawWorkflows = data?.projectContents?.workflows ?? [];
-  const rawCharacters = data?.projectContents?.characters ?? [];
   const totalCharacters = useMemo(() => {
+    const rawWorkflows = data?.projectContents?.workflows ?? [];
+    const rawCharacters = data?.projectContents?.characters ?? [];
     return (
       rawWorkflows.filter((w) => {
         const t = String(w.workflow_type || w.workflowType || "").toUpperCase();
         return t === "CHARACTER" || t === "CHARACTER_SHEET";
       }).length || rawCharacters.length
     );
-  }, [rawWorkflows, rawCharacters]);
+  }, [data?.projectContents]);
 
   return { workflows: characterWorkflows, totalCharacters, isLoading, isError };
 }

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import React, { Suspense, act } from "react";
+import { Suspense, act } from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import CollectionDetailPage from "@/app/cinema-studio/[projectId]/collection/[collectionId]/page";

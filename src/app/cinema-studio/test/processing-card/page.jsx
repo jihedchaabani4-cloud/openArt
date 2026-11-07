@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
+import { notFound } from "next/navigation";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { ProcessingCard } from "@/shared/ui/ProcessingCard";
 import { MediaGridItem } from "@/widgets/StudioLayout/GenerationsStudio/MediaGridItem";
@@ -23,6 +24,10 @@ export default function ProcessingCardTestPage() {
     }, 1800);
     return () => clearInterval(interval);
   }, [isAutoSimulating]);
+
+  if (process.env.NODE_ENV === "production") {
+    notFound();
+  }
 
   return (
     <div className="min-h-screen bg-[#0d0e11] text-white p-6 md:p-10">

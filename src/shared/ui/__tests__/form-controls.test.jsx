@@ -1,6 +1,5 @@
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
-import * as React from "react";
 import { Input } from "@/shared/ui/input";
 import { Textarea } from "@/shared/ui/textarea";
 import {
@@ -10,7 +9,7 @@ import {
   SelectItem,
   SelectValue,
 } from "@/shared/ui/select";
-import { DropdownShell, DropdownSegmented } from "@/shared/ui/DropdownShell";
+import { DropdownSegmented } from "@/shared/ui/DropdownShell";
 
 describe("Form Controls & Menus — Runway Flat Surface Architecture", () => {
   describe("1. Input Primitive", () => {

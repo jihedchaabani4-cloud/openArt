@@ -78,7 +78,7 @@ export function useElement({ projectId, elementId } = {}) {
   }, [projectData, cleanId]);
 
   const element = workflow?.element || null;
-  const items = workflow?.items || [];
+  const items = useMemo(() => workflow?.items || [], [workflow?.items]);
 
   // Metadata & attributes
   const elementType = useMemo(() => {

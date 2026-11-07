@@ -2,7 +2,6 @@ import { useToggleWorkflowLike, useRemoveWorkflow } from "../api/workflowsApi";
 import { getItemMetadata } from "@/shared/lib/generationUtils";
 import { resolveMainMedia } from "../core/resolveMediaRef";
 import { downloadFile } from "@/shared/lib/utils";
-import { useRemoveAsset } from "@/features/media/api/mediaApi";
 import { usePathname, useRouter } from "next/navigation";
 import { canAnyModelAcceptEntity } from "@/features/studio";
 import {
@@ -37,7 +36,6 @@ export function useWorkflowActions(workflow, item = null, options = {}) {
 
   const { mutate: toggleLike } = useToggleWorkflowLike();
   const { mutate: removeWorkflow } = useRemoveWorkflow();
-  const { mutate: removeAsset } = useRemoveAsset();
 
   const effectiveProjectId = options?.projectId
     || workflow?.projectId

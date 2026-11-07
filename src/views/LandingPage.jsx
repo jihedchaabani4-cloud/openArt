@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import { useState } from "react";
 import { HeroSection } from "./landing/components/HeroSection";
 import { ModelsShowcase } from "./landing/components/ModelsShowcase";
 import { BentoFeatures } from "./landing/components/BentoFeatures";

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { useDeleteMedia, useDetachMedia } from "../api/workflowsApi";
 import { ActionBtn } from "@/shared/ui/action-button";

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useMemo } from "react";
+import { notFound } from "next/navigation";
 import { LexicalComposer } from "@lexical/react/LexicalComposer";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
@@ -256,6 +257,10 @@ export default function TestMentionPage() {
     nodes: [MentionNode],
     onError: (err) => console.error(err),
   }), []);
+
+  if (process.env.NODE_ENV === "production") {
+    notFound();
+  }
 
   const handleAddSample = () => {
     const id = `asset_${Date.now()}`;

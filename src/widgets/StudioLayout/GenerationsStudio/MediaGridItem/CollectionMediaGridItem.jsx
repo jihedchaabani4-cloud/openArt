@@ -45,13 +45,12 @@ export const CollectionMediaGridItem = React.memo(function CollectionMediaGridIt
 
   const { mutateAsync: updateFolder } = useUpdateFolder();
   const { mutateAsync: deleteFolder, isPending: isDeleting } = useDeleteFolder();
-  const { moveItem, executeMoveFromPayload } = useFolderMove(projectId);
+  const { executeMoveFromPayload } = useFolderMove(projectId);
 
   const [isDragOver, setIsDragOver] = useState(false);
   const mouseX = useMotionValue(-500);
   const mouseY = useMotionValue(-500);
   const lastPos = useRef({ x: -500, y: -500 });
-  const rafRef = useRef(null);
 
   const cardRef = useRef(null);
   const canDismissRef = useRef(false);
@@ -314,7 +313,7 @@ export const CollectionMediaGridItem = React.memo(function CollectionMediaGridIt
         router.push(`/cinema-studio/${projectId}/collection/${targetId}`);
       }
     },
-    [isRenaming, col, collection, workflow, onClick, projectId, router]
+    [isRenaming, justDraggedRef, col, collection, workflow, onClick, projectId, router]
   );
 
   return (

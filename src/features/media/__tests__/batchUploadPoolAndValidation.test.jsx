@@ -3,7 +3,7 @@ import { renderHook, act, render, fireEvent, waitFor } from "@testing-library/re
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { api } from "@/shared/api/client";
 import { toast } from "sonner";
-import { useUploadMedia, validateBatchCount } from "../model/useUploadMedia";
+import { useUploadMedia } from "../model/useUploadMedia";
 import { MAX_BATCH_UPLOAD_FILES, BATCH_UPLOAD_CONCURRENCY } from "../uploadPolicy";
 import { NavbarImportButton } from "@/widgets/StudioNavbar/ui/NavbarImportButton";
 import { useWorkflowsStore } from "@/features/workflows";

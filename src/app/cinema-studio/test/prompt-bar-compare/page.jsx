@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { notFound } from "next/navigation";
 import { motion } from "framer-motion";
 
 // ── v3 ────────────────────────────────────────────────────────────────────────
@@ -67,6 +68,10 @@ function V3Panel({ instanceLabel, color }) {
 // ── Main Page ─────────────────────────────────────────────────────────────────
 export default function PromptBarTestPage() {
   const [activeTab, setActiveTab] = useState("single");
+
+  if (process.env.NODE_ENV === "production") {
+    notFound();
+  }
 
   const tabs = [
     { id: "single",    label: "Single Instance" },

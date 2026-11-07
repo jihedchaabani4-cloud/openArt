@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useWorkflowsStore } from "@/features/workflows";
 import { useProjectData, useSetPrimaryMedia } from "@/features/workflows/api/workflowsApi";
 import { EditMediaView } from "@/widgets/EditMediaView";
 import { WorkflowMediaGallery } from "@/features/workflows/ui/WorkflowMediaGallery";

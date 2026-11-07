@@ -6,7 +6,7 @@ import { useCharacter } from "@/features/characters";
 import { useProjectData } from "@/features/workflows/api/workflowsApi";
 import { LoadingScreen } from "@/shared/ui/LoadingScreen";
 import { ConfirmDeleteDialog } from "@/shared/ui/ConfirmDeleteDialog";
-import { ImportMediaPopover } from "@/widgets/ImportMediaDialog/ImportMediaPopover";
+import { ImportMediaPopover } from "@/features/media";
 import { CharacterEditNavbar } from "@/widgets/CharacterEditNavbar/CharacterEditNavbar";
 import {
   CharacterInfoSidebar,

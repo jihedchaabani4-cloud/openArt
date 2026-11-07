@@ -20,6 +20,8 @@ import { usePromptBarSlots } from "./hooks/usePromptBarSlots.js";
 import { usePromptBarReferences } from "./hooks/usePromptBarReferences.js";
 import { usePromptBarGenerate } from "./hooks/usePromptBarGenerate.js";
 
+const NOOP = () => {};
+
 /**
  * PromptBarPlatform
  * Prompt Bar Platform — Generic, feature-agnostic renderer with Feature Mode Composition.
@@ -137,8 +139,8 @@ function PromptBarPlatformInner({
 
   const activeMode    = storeActiveMode || "image";
   const activeSubMode = storeActiveSubMode || "frames";
-  const setActiveMode = storeSetActiveMode || (() => {});
-  const setActiveSubMode = storeSetActiveSubMode || (() => {});
+  const setActiveMode = storeSetActiveMode || NOOP;
+  const setActiveSubMode = storeSetActiveSubMode || NOOP;
 
   const prompt         = usePromptBarStore((s) => s.prompt);
   const paramValues    = usePromptBarStore((s) => s.parameterValues);
