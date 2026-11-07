@@ -115,11 +115,11 @@ function SelectContent({
         data-slot="select-content"
         className={cn(
           // Layout
-          "relative z-[80] flex flex-col overflow-y-auto select-none font-sans antialiased",
+          "relative z-50 flex flex-col overflow-y-auto select-none font-sans antialiased",
           // Size
-          "min-w-[120px] max-h-[500px]",
+          "min-w-30 max-h-125",
           // Shape
-          "rounded-lg p-2",
+          "rounded-md p-2",
           // Colors
           "bg-(--background-state-90) backdrop-blur-80 border border-white/10 text-white shadow-none",
           // Shadow
@@ -146,7 +146,7 @@ function SelectContent({
           className={cn(
             "p-0.5",
             position === "popper" &&
-              "h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)] scroll-my-1"
+              "h-(--radix-select-trigger-height) w-full min-w-(--radix-select-trigger-width) scroll-my-1"
           )}
         >
           {children}
@@ -172,7 +172,7 @@ function SelectLabel({ className, ...props }) {
       data-slot="select-label"
       className={cn(
         "px-2.5 py-1.5 pb-0.5",
-        "text-[0.75rem] font-medium leading-tight text-[#737373]",
+        "text-xs font-medium leading-tight text-cool-slate",
         className
       )}
       {...props}
@@ -182,27 +182,6 @@ function SelectLabel({ className, ...props }) {
 
 /**
  * SelectItem — supports icon + label + optional subtitle
- *
- * Tokens:
- *   padding      : px-2 py-1.5  →  8px 8px 6px 8px
- *   gap          : gap-2  →  8px  (icon ↔ text block)
- *   radius       : rounded-sm
- *   text color   : #f5f5f5 (primary)
- *   icon color   : #737373 (muted) → #f5f5f5 on hover (group-hover)
- *   hover bg     : rgba(255,255,255,0.05)
- *   label font   : 0.875rem / weight 400 / leading-[18px]
- *   subtitle font: 0.7rem   / weight 400 / color #737373 / leading-[14px]
- *   checkmark    : size-3.5, color #737373
- *   inner gap    : gap-0.5  →  2px  (label ↔ subtitle)
- *
- * Usage:
- *   <SelectItem value="portrait" icon={<PortraitIcon />} subtitle="1080×1920">
- *     9:16
- *   </SelectItem>
- *
- * Props:
- *   icon      — any React node (SVG, lucide icon, etc.)
- *   subtitle  — optional secondary line below the label
  */
 function SelectItem({ className, children, icon, subtitle, badge, iconVariant = "standard", ...props }) {
   return (
@@ -210,7 +189,7 @@ function SelectItem({ className, children, icon, subtitle, badge, iconVariant = 
       data-slot="select-item"
       className={cn(
         // Layout
-        "group flex cursor-pointer items-center gap-3 min-h-[40px] px-3.5 py-2 rounded-sm outline-none select-none font-sans antialiased transition-all duration-150",
+        "group flex cursor-pointer items-center gap-3 min-h-10 px-3.5 py-2 rounded-sm outline-none select-none font-sans antialiased transition-all duration-150",
         // Text & State layers
         "text-white/90 hover:bg-white/10 hover:text-white focus:bg-white/10 focus:text-white data-[highlighted]:bg-white/10 data-[highlighted]:text-white",
         // Disabled
@@ -223,8 +202,8 @@ function SelectItem({ className, children, icon, subtitle, badge, iconVariant = 
       {icon && (
         <span 
           className={cn(
-            "shrink-0 flex items-center justify-center text-[20px] transition-colors duration-150 text-white/80",
-            iconVariant === "square" && "aspect-square h-[48px] -ml-2 -my-1.5 bg-[#171717] rounded-sm border-r border-white/5"
+            "shrink-0 flex items-center justify-center text-xl transition-colors duration-150 text-white/80",
+            iconVariant === "square" && "aspect-square h-12 -ml-2 -my-1.5 bg-surface-panel rounded-sm border-r border-white/5"
           )}
         >
           {renderIconNode(icon)}
@@ -235,7 +214,7 @@ function SelectItem({ className, children, icon, subtitle, badge, iconVariant = 
       <div className="flex-1 flex flex-col overflow-hidden">
         <div className="flex items-center gap-1.5 pt-0.5">
           <SelectPrimitive.ItemText>
-            <span className="text-[14px] font-medium leading-5 capitalize truncate">
+            <span className="text-sm font-medium leading-5 capitalize truncate">
               {children}
             </span>
           </SelectPrimitive.ItemText>
@@ -243,7 +222,7 @@ function SelectItem({ className, children, icon, subtitle, badge, iconVariant = 
         </div>
 
         {subtitle && (
-          <span className="text-[12px] font-normal leading-4 text-white/60 truncate">
+          <span className="text-xs font-normal leading-4 text-white/60 truncate">
             {subtitle}
           </span>
         )}
@@ -280,12 +259,12 @@ function SelectScrollUpButton({ className, ...props }) {
     <SelectPrimitive.ScrollUpButton
       data-slot="select-scroll-up-button"
       className={cn(
-        "flex cursor-default items-center justify-center py-1 text-[#737373]",
+        "flex cursor-default items-center justify-center py-1 text-cool-slate",
         className
       )}
       {...props}
     >
-      <GoogleIcon iconName="keyboard_arrow_up" className="text-[18px]" />
+      <GoogleIcon iconName="keyboard_arrow_up" className="text-lg" />
     </SelectPrimitive.ScrollUpButton>
   )
 }
@@ -295,12 +274,12 @@ function SelectScrollDownButton({ className, ...props }) {
     <SelectPrimitive.ScrollDownButton
       data-slot="select-scroll-down-button"
       className={cn(
-        "flex cursor-default items-center justify-center py-1 text-[#737373]",
+        "flex cursor-default items-center justify-center py-1 text-cool-slate",
         className
       )}
       {...props}
     >
-      <GoogleIcon iconName="keyboard_arrow_down" className="text-[18px]" />
+      <GoogleIcon iconName="keyboard_arrow_down" className="text-lg" />
     </SelectPrimitive.ScrollDownButton>
   )
 }

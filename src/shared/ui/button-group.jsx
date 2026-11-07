@@ -7,7 +7,7 @@ const buttonGroupVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-[var(--foreground-state-05)] rounded-sm p-1",
+        default: "bg-(--foreground-state-05) rounded-sm p-1",
         pill: "bg-white/60 backdrop-blur-md rounded-full p-1",
       },
     },

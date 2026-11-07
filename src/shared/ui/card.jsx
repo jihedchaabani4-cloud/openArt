@@ -23,7 +23,7 @@ const Card = React.forwardRef(({
       data-slot="card"
       data-variant={variant}
       className={cn(
-        "rounded-lg text-white transition-all font-sans antialiased overflow-hidden",
+        "rounded-md text-white transition-all font-sans antialiased overflow-hidden",
         variant === "default" && "bg-card border border-white/5 shadow-none",
         variant === "interactive" && "bg-card border border-white/5 hover:bg-white/10 hover:border-white/10 cursor-pointer shadow-none active:scale-95",
         variant === "glass" && "bg-white/5 border border-white/10 backdrop-blur-md shadow-none",

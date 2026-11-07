@@ -45,11 +45,12 @@ function CardItem({ label, image, isSelected, onClick }) {
     >
       <div
         className={cn(
-          "relative w-[135px] h-[135px] rounded-lg overflow-hidden transition-all duration-300",
+          "relative size-34 rounded-md overflow-hidden transition-all duration-300",
           isSelected && "outline outline-2 outline-white"
         )}
       >
         {image && (
+          /* eslint-disable-next-line @next/next/no-img-element */
           <img
             src={image}
             alt={label}
@@ -63,7 +64,7 @@ function CardItem({ label, image, isSelected, onClick }) {
       {label && (
         <span
           className={cn(
-            "text-[11px] font-bold tracking-wide uppercase transition-colors duration-300 text-white"
+            "text-2xs font-bold tracking-wide uppercase transition-colors duration-300 text-white"
           )}
         >
           {label}

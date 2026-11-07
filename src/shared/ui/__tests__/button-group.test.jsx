@@ -13,7 +13,7 @@ describe("ButtonGroup component", () => {
 
     const group = screen.getByTestId("group-default");
     expect(group.className).toContain("rounded-sm");
-    expect(group.className).toContain("bg-[var(--foreground-state-05)]");
+    expect(group.className).toContain("bg-(--foreground-state-05)");
     expect(group.className).toContain("border-0");
   });
 

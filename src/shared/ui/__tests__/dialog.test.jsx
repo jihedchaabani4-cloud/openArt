@@ -10,8 +10,8 @@ import {
 import { ConfirmDeleteDialog } from "@/shared/ui/ConfirmDeleteDialog";
 
 describe("Dialog Primitive — Runway Flat Surface Architecture", () => {
-  describe("1. Visual Token Alignment (Zero Shadows, Flat Surface, 16px Radius)", () => {
-    it("renders default variant with flat bg-(--background-state-90), border-white/10, and rounded-2xl", () => {
+  describe("1. Visual Token Alignment (Zero Shadows, Flat Surface, 6px Radius)", () => {
+    it("renders default variant with flat bg-(--background-state-90), border-white/10, and rounded-md", () => {
       render(
         <Dialog open={true}>
           <DialogContent>
@@ -25,7 +25,7 @@ describe("Dialog Primitive — Runway Flat Surface Architecture", () => {
 
       const content = screen.getByText("Project Settings").closest('[data-slot="dialog-content"]');
       expect(content).not.toBeNull();
-      expect(content?.className).toContain("rounded-2xl");
+      expect(content?.className).toContain("rounded-md");
       expect(content?.className).toContain("bg-(--background-state-90)");
       expect(content?.className).toContain("border-white/10");
       expect(content?.className).toContain("shadow-none");
@@ -46,7 +46,7 @@ describe("Dialog Primitive — Runway Flat Surface Architecture", () => {
 
       const content = screen.getByText("Glass Surface Dialog").closest('[data-slot="dialog-content"]');
       expect(content).not.toBeNull();
-      expect(content?.className).toContain("rounded-2xl");
+      expect(content?.className).toContain("rounded-md");
       expect(content?.className).toContain("bg-(--background-state-90)");
       expect(content?.className).toContain("backdrop-blur-80");
       expect(content?.className).toContain("border-white/10");
@@ -64,7 +64,7 @@ describe("Dialog Primitive — Runway Flat Surface Architecture", () => {
       );
 
       let content = screen.getByText("Small Modal").closest('[data-slot="dialog-content"]');
-      expect(content?.className).toContain("rounded-2xl");
+      expect(content?.className).toContain("rounded-md");
       expect(content?.className).toContain("bg-(--background-state-90)");
       expect(content?.className).toContain("border-white/10");
       expect(content?.className).toContain("shadow-none");
@@ -80,7 +80,7 @@ describe("Dialog Primitive — Runway Flat Surface Architecture", () => {
       );
 
       content = screen.getByText("Floating Modal").closest('[data-slot="dialog-content"]');
-      expect(content?.className).toContain("rounded-2xl");
+      expect(content?.className).toContain("rounded-md");
       expect(content?.className).toContain("bg-(--background-state-90)");
       expect(content?.className).toContain("border-white/10");
       expect(content?.className).toContain("shadow-none");

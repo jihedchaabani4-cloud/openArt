@@ -1,7 +1,7 @@
 # Runway Cinematic Design System (`design.md`)
 
 > **The Single Source of Truth** for UI architecture, tokens, components, and design encapsulation across the codebase (`my-app`).  
-> **Core Philosophy (Runway Standard):** A cinematic, photography-first AI creative platform where full-bleed imagery and video carry the entire interface. The interface retreats into near-invisibility — minimal 1px subtle borders, **zero box-shadows**, sharp geometric corners (4px buttons, 8px cards, 16px dialogs), 8px-based spacing with 48–78px section breathing room, and 1600px cinema-wide container width.  
+> **Core Philosophy (Runway Standard):** A cinematic, photography-first AI creative platform where full-bleed imagery and video carry the entire interface. The interface retreats into near-invisibility — minimal 1px subtle borders, **zero box-shadows**, sharp geometric corners (`4px` buttons, `6px` MAX for cards/menus/popovers/dialogs, `9999px` pills), 8px-based spacing with 48–78px section breathing room, and 1600px cinema-wide container width.  
 > **The Golden Law:** Decide a value once (token), build a component once (primitive with variants), use it everywhere.
 
 ---
@@ -29,36 +29,33 @@ The system operates across three distinct architectural layers:
 
 ```
 [ Layer 1: Primitive Tokens ]
-  none (0px) ── sharp (4px) ── subtle (6px) ── comfortable (8px) ── generous (16px) ── full (9999px)
+  none (0px) ── hairline/xxxs (1px) ── sharp/sm (4px) ── subtle/md (6px MAX) ── full (9999px)
                             │
                             ▼
 [ Layer 2: Component Mappings ]
-  Button, Input, Badge, Checkbox, Tooltip ──► sharp
-  Chips, Secondary Tags                   ──► subtle
-  Cards, Menus, Popovers, Panels          ──► comfortable
-  Dialogs, Modals, Large Overlays         ──► generous
-  Pills, Avatars, Radio, Sliders, Switch  ──► full
+  Media Elements (Images, Videos)                               ──► hairline (1px)
+  Button, Input, Badge, Checkbox, Tooltip, Menu Items           ──► sharp (4px)
+  Cards, Textareas, Dropdowns, Context Menus, Popovers, Dialogs ──► subtle (6px MAX)
+  Pills, Avatars, Radio, Sliders, Switch                        ──► full (9999px)
                             │
                             ▼
 [ Layer 3: Implementation Mappings ]
-  CSS Variables:        --radius-none | --radius-sharp (--radius-sm) | --radius-subtle (--radius-md) | --radius-comfortable (--radius-lg) | --radius-generous (--radius-2xl) | --radius-full
-  Tailwind Utilities:   rounded-none  | rounded-sharp (rounded-sm)   | rounded-subtle (rounded-md)   | rounded-comfortable (rounded-lg)   | rounded-generous (rounded-2xl)   | rounded-full
+  CSS Variables:        --radius-none | --radius-xxxs | --radius-sm | --radius-md | --radius-full
+  Tailwind Utilities:   rounded-none  | rounded-xxxs  | rounded-sm  | rounded-md  | rounded-full
 ```
 
 ### 2.1 The Three Layers Defined
 
-1. **Primitive Tokens (Abstract Scale):** Pure geometric concepts independent of any component (`none`, `sharp`, `subtle`, `comfortable`, `generous`, `full`).
-2. **Component Mapping (Design Intent):** Semantic association binding a UI element category to a primitive token (e.g. Action Targets $\rightarrow$ `sharp`; Surfaces & Containers $\rightarrow$ `comfortable`; Overlays $\rightarrow$ `generous`).
+1. **Primitive Tokens (Abstract Scale):** Pure geometric concepts independent of any component (`none`, `xxxs`, `sm`, `md`, `full`).
+2. **Component Mapping (Design Intent):** Semantic association binding a UI element category to a primitive token (e.g. Action Targets $\rightarrow$ `sm` 4px; Surfaces, Containers & Overlays $\rightarrow$ `md` 6px MAX; Circular & Pill Controls $\rightarrow$ `full` 9999px).
 3. **Implementation Mapping (CSS & Utility Engine):** The physical CSS variables in `:root` and corresponding Tailwind classes declared in `@theme inline` of `src/app/globals.css`.
 
 | Semantic Token | Value | Component Role | CSS Variable | Tailwind Utility |
 |---|---|---|---|---|
 | **`none`** | **0px** | Flush layouts, full-bleed media | `--radius-none` | `rounded-none` |
 | **`hairline` / `xxxs`** | **1px** | Media elements (images, videos, media layers) | `--radius-hairline` / `--radius-xxxs` | `rounded-xxxs` |
-| **`sharp`** | **4px** | Buttons, Inputs, Badges, Tooltips, Checkboxes | `--radius-sharp` / `--radius-sm` | `rounded-sharp` / `rounded-sm` |
-| **`subtle`** | **6px** | Secondary tags, intermediate chips | `--radius-subtle` / `--radius-md` | `rounded-subtle` / `rounded-md` |
-| **`comfortable`**| **8px** | Cards, Dropdowns, Context Menus, Popovers, Panels | `--radius-comfortable` / `--radius-lg` | `rounded-comfortable` / `rounded-lg` |
-| **`generous`** | **16px** | Dialogs, Modals, Full overlays, Studio compound menus | `--radius-generous` / `--radius-2xl`| `rounded-generous` / `rounded-2xl` |
+| **`sharp` / `sm`** | **4px** | Buttons, Inputs, Badges, Tooltips, Checkboxes, Menu Items | `--radius-sharp` / `--radius-sm` | `rounded-sm` |
+| **`subtle` / `md`** | **6px (MAX)** | Cards, Textareas, Dropdowns, Context Menus, Popovers, HoverCards, Dialogs, Modals, Panels | `--radius-subtle` / `--radius-md` | `rounded-md` |
 | **`full`** | **9999px**| Filter pills, Avatars, Radio dots, Slider thumbs, Switches | `--radius-full` | `rounded-full` |
 
 ### 2.2 Semantic Spacing Scale
@@ -89,22 +86,22 @@ Every shared component has explicit default bindings. Feature callsites must NOT
 | **`<Button />`** | Variant-owned (`sharp` 4px / `full` 9999px) | Variant-owned (32px standard / 40px large / 24px micro) | Variant-owned | `gap-2` | Variant-owned colors, borders, and interaction states |
 | **`<ButtonGroup />`** | `sharp` (4px) / `full` (pill) | Content-driven | `p-1` container | `gap-0.5` | `border-none shadow-none` |
 | **`<Input />`** | `sharp` (4px) | 40px (h-10) / 42px (search) | `px-3 py-2` | `gap-2` | Hairline `border-white/10`, `shadow-none` |
-| **`<Textarea />`** | `comfortable` (8px) | Min 160px, auto-resize | `p-4` | `gap-1.5` | Hairline `border-white/8`, `shadow-none` |
-| **`<Card />`** | `comfortable` (8px) | Content-driven | `p-4 sm:p-5` | `gap-1.5` | `bg-card`, hairline `border-white/5`, `shadow-none` |
+| **`<Textarea />`** | `subtle` / `md` (6px) | Min 160px, auto-resize | `p-4` | `gap-1.5` | Hairline `border-white/8`, `shadow-none` |
+| **`<Card />`** | `subtle` / `md` (6px) | Content-driven | `p-4 sm:p-5` | `gap-1.5` | `bg-card`, hairline `border-white/5`, `shadow-none` |
 | **`<Badge />`** | `sharp` (4px) / `full` (pill) | 20px (h-5) / 16px (h-4) | `px-2 py-0.5` | `gap-1` | Hairline border or solid flat, `shadow-none` |
-| **`<Dialog />`** | `generous` (16px) | Max-w-lg overlay | `p-6` | `gap-4` | `bg-background`, hairline `border-white/10`, `shadow-none` |
-| **`<DropdownMenu />`** | `comfortable` (8px) panel | Panel: min-w-48; Item: 34px | Panel: `p-1.5`; Item: `pl-3 pr-4 py-2` | `gap-0.5` | `bg-popover`, hairline `border-white/10`, `shadow-none` |
-| **`<ContextMenu />`** | `comfortable` (8px) panel | Panel: min-w-48; Item: 34px | Panel: `p-1.5`; Item: `pl-3 pr-4 py-2` | `gap-0.5` | `bg-popover`, hairline `border-white/10`, `shadow-none` |
-| **`<Select />`** | `sharp` (4px) trigger | Trigger: 40px; Panel: min-w-48 | Trigger: `px-3 py-2.5`; Item: `px-2 py-1.5`| `gap-1` | Hairline `border-white/10`, `shadow-none` |
+| **`<Dialog />`** | `subtle` / `md` (6px) | Max-w-lg overlay | `p-6` | `gap-4` | `bg-background`, hairline `border-white/10`, `shadow-none` |
+| **`<DropdownMenu />`** | `subtle` / `md` (6px) panel | Panel: min-w-48; Item: 34px | Panel: `p-1.5`; Item: `pl-3 pr-4 py-2` | `gap-0.5` | `bg-popover`, hairline `border-white/10`, `shadow-none` |
+| **`<ContextMenu />`** | `subtle` / `md` (6px) panel | Panel: min-w-48; Item: 34px | Panel: `p-1.5`; Item: `pl-3 pr-4 py-2` | `gap-0.5` | `bg-popover`, hairline `border-white/10`, `shadow-none` |
+| **`<Select />`** | `sharp` (4px) trigger / `md` (6px) panel | Trigger: 40px; Panel: min-w-48 | Trigger: `px-3 py-2.5`; Item: `px-2 py-1.5`| `gap-1` | Hairline `border-white/10`, `shadow-none` |
 | **`<Checkbox />`** | `sharp` (4px) | 16x16px (`size-4`) | `p-0` | N/A | Hairline `border-white/20`, checked `bg-white` |
 | **`<RadioGroup />`** | `full` (9999px) | 16x16px (`size-4`) | `p-0` | `gap-2.5` | Hairline `border-white/20`, checked indicator |
 | **`<Slider />`** | `full` (9999px) track & thumb | Track: 6px (h-1.5); Thumb: 16px | `p-0` | N/A | Flat track `bg-white/20`, solid thumb `bg-white` |
 | **`<Switch />`** | `full` (9999px) track & thumb | Root: 36x20px (sm) / 44x24px | `p-0.5` | N/A | Flat track `bg-white/20`, solid thumb `bg-white` |
-| **`<Tabs />`** | `full` (pills) / `comfortable` (studio) | List: 36px (h-9); Trigger: 28px (h-7) | List: `p-1`; Trigger: `px-3 py-1.5` | `gap-1` | Flat `bg-white/5`, active solid `bg-white` |
+| **`<Tabs />`** | `full` (pills) / `subtle` (6px studio) | List: 36px (h-9); Trigger: 28px (h-7) | List: `p-1`; Trigger: `px-3 py-1.5` | `gap-1` | Flat `bg-white/5`, active solid `bg-white` |
 | **`<Tooltip />`** | `sharp` (4px) | Auto fit | `px-2.5 py-1` | `gap-1.5` | `bg-card`, hairline `border-white/10`, `shadow-none` |
-| **`<Popover />`** | `comfortable` (8px) | Width: 288px (w-72) | `p-4` | `gap-2` | `bg-card`, hairline `border-white/10`, `shadow-none` |
+| **`<Popover />`** | `subtle` / `md` (6px) | Width: 288px (w-72) | `p-4` | `gap-2` | `bg-card`, hairline `border-white/10`, `shadow-none` |
 | **`<SharedGalleryGrid />`** | `hairline` / `xxxs` (1px) media | Rows-layout responsive | N/A | Dynamic: S (`xxs` 4px, default), M (`sm` 8px), L (`base` 16px) | Flat surface, hairline `border-white/10`, `shadow-none` |
-| **`<Skeleton />`** | Shape-mapped (`sharp`/`comfortable`/`full`) | Sizing via caller | `p-0` | N/A | `bg-white/5 animate-pulse`, `border-none` |
+| **`<Skeleton />`** | Shape-mapped (`sharp`/`subtle`/`full`) | Sizing via caller | `p-0` | N/A | `bg-white/5 animate-pulse`, `border-none` |
 
 > [!NOTE]
 > **Cinema Studio Media Grid Spacing:** Managed by user display settings (`StudioSettingsDropdown`, label `"Space between media"`), persisted in `localStorage` under `studio-ui-settings.gridSpacing`, and maps directly to canonical spacing tokens:
@@ -144,16 +141,16 @@ Every shared primitive in `src/shared/ui/` has an exact, verified contract.
 ### 4.1 `<Button />` (`@/shared/ui/button`)
 * **Role:** Universal interactive action target.
 * **Architecture:** 6 Core Semantic Variants (`primary`, `secondary`, `outline`, `ghost`, `danger`, `link`). Default is `ghost`.
-* **Radius Tokens:** Base variant default is `sharp` = **4px** (`rounded-sm`). Sizing and shapes (such as `rounded-full` or `rounded-2xl`) are overridden at the call site via `className` using `tailwind-merge`.
+* **Radius Tokens:** Base variant default is `sharp` = **4px** (`rounded-sm`). Sizing and shapes (such as `rounded-full` or `rounded-md`) are overridden at the call site via `className` using `tailwind-merge`.
 * **Geometry & Sizing:** Standard base dimensions: `h-8 px-3.5 text-xs` (32px height). Call sites customize height, padding, and text size via `className` (e.g. `h-10 px-6 text-sm` or `h-6 px-2 text-xs`).
 * **Icon Buttons:** Use `className="size-8 p-0"` or `className="size-9 p-0"`.
 * **Internal Spacing / Gap:** `gap-2` (`[&_svg]:size-4 shrink-0`).
-* **Border & Shadow:** `shadow-none`. Default variants have `border-none`, except `outline` which declares `border border-[var(--mat-sys-outline-variant,#444746)]`.
+* **Border & Shadow:** `shadow-none`. Default variants have `border-none`, except `outline` which declares `border border-(--mat-sys-outline-variant,#444746)`.
 * **Variants:** Strictly the 6 core semantic variants listed in Section 3.
 * **States:**
-  * **Hover:** Handled per variant (`hover:bg-white/90`, `hover:bg-[var(--foreground-state-15)]`, `hover:bg-[var(--foreground-state-10)]`).
-  * **Active:** `active:scale-[0.98]`.
-  * **Focus:** `outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2`.
+  * **Hover:** Handled per variant (`hover:bg-white/90`, `hover:bg-(--foreground-state-15)`, `hover:bg-(--foreground-state-10)`).
+  * **Active:** `active:scale-95`.
+  * **Focus:** `outline-none focus-visible:ring-2 focus-visible:ring-white/40`.
   * **Disabled:** `disabled:pointer-events-none disabled:opacity-50`.
 
 ---
@@ -199,7 +196,7 @@ Every shared primitive in `src/shared/ui/` has an exact, verified contract.
 
 ### 4.4 `<Textarea />` (`@/shared/ui/textarea`)
 * **Role:** Auto-resizing multi-line text and prompt editor.
-* **Radius Token:** `comfortable` = **8px** (`var(--radius-lg)`, `rounded-lg`) for `default` and `personality`; `sharp` = **4px** (`var(--radius-sm)`, `rounded-sm`) for `blur`.
+* **Radius Token:** `subtle` / `md` = **6px** (`var(--radius-md)`, `rounded-md`) for `default` and `personality`; `sharp` = **4px** (`var(--radius-sm)`, `rounded-sm`) for `blur`.
 * **Padding Rules:** `p-4` (default), `p-3.5 sm:p-4` (personality), `p-3` (blur).
 * **Internal Spacing / Gap:** `gap-1.5` between container label, helper, and textarea.
 * **Height & Sizing:** Dynamic auto-resizing via `scrollHeight` between `minHeight` (160px default) and `maxHeight` (300px default).
@@ -268,7 +265,7 @@ Every shared primitive in `src/shared/ui/` has an exact, verified contract.
 
 ### 4.8 `<Card />` (`@/shared/ui/card`)
 * **Role:** Content container, media grid tile, settings group.
-* **Radius Token:** `comfortable` = **8px** (`var(--radius-lg)`, `rounded-lg`).
+* **Radius Token:** `subtle` / `md` = **6px** (`var(--radius-md)`, `rounded-md`).
 * **Padding Rules:** `p-4 sm:p-5` on `CardHeader`, `CardContent`, and `CardFooter`.
 * **Internal Spacing / Gap:** `gap-1.5` (header), `gap-2` (footer).
 * **Height & Sizing:** Content driven.
@@ -296,10 +293,10 @@ Every shared primitive in `src/shared/ui/` has an exact, verified contract.
 
 ### 4.10 `<Dialog />` (`@/shared/ui/dialog`)
 * **Role:** Modal overlay, deletion confirmation, creation wizard.
-* **Radius Token:** `generous` = **16px** (`var(--radius-2xl)`, `rounded-2xl`).
+* **Radius Token:** `subtle` / `md` = **6px** (`var(--radius-md)`, `rounded-md`).
 * **Padding Rules:** `p-6` (default, Runway 24px alert container spec), `p-2` (small).
 * **Internal Spacing / Gap:** `gap-4` between title, description, content body, and action footer.
-* **Height & Sizing:** `w-full max-w-[calc(100%-2rem)] sm:max-w-6xl` (default), `max-w-[300px]` (floating), `max-w-[250px]` (small), `w-screen h-screen` (full).
+* **Height & Sizing:** `w-full max-w-[calc(100%-2rem)] sm:max-w-6xl` (default), `sm:max-w-lg` (glass), `w-75` (floating), `max-w-[250px]` (small), `w-screen h-screen` (full).
 * **Border & Shadow:** `shadow-none`. Hairline border `border border-white/10`.
 * **Overlay:** `fixed inset-0 z-50 bg-black/70 backdrop-blur-80`.
 * **Variants:** `default` (`bg-(--background-state-90) backdrop-blur-80`), `glass` (`bg-(--background-state-90) backdrop-blur-80`), `floating`, `small`, `full`.
@@ -311,7 +308,7 @@ Every shared primitive in `src/shared/ui/` has an exact, verified contract.
 ### 4.11 `<DropdownMenu />` (`@/shared/ui/dropdown-menu`)
 * **Role:** Contextual action list, selection menu.
 * **Surface & Blur:** `bg-(--background-state-90) backdrop-blur-80 border border-white/10 shadow-none`.
-* **Radius Token:** `comfortable` = **8px** (`var(--radius-lg)`, `rounded-lg`) on menu container; `sharp` = **4px** (`rounded-sm`) on menu items.
+* **Radius Token:** `subtle` / `md` = **6px** (`var(--radius-md)`, `rounded-md`) on menu container; `sharp` = **4px** (`rounded-sm`) on menu items.
 * **Padding Rules:** `p-1.5` on content container; `px-2.5 py-1.5` on items.
 * **Internal Spacing / Gap:** `gap-0.5` on item list stack; `gap-2` inside item (icon to text).
 * **Height & Sizing:** `w-52 min-w-[12rem]`.
@@ -320,25 +317,25 @@ Every shared primitive in `src/shared/ui/` has an exact, verified contract.
 * **States:**
   * **Highlight:** `focus:bg-white/10 focus:text-white`.
   * **Disabled:** `data-[disabled]:pointer-events-none data-[disabled]:opacity-40`.
-* **Exceptions:** None. All studio menus conform to canonical `rounded-lg` (8px) container shape.
+* **Exceptions:** None. All studio menus conform to canonical `rounded-md` (6px) container shape.
 
 ---
 
 ### 4.12 `<ContextMenu />` (`@/shared/ui/context-menu`)
 * **Role:** Right-click context actions on media items.
-* **Radius Token:** `comfortable` = **8px** (`var(--radius-lg)`, `rounded-lg`) on container; `sharp` = **4px** (`rounded-sm`) on items.
+* **Radius Token:** `subtle` / `md` = **6px** (`var(--radius-md)`, `rounded-md`) on container; `sharp` = **4px** (`rounded-sm`) on items.
 * **Padding Rules:** `p-1.5` on container; `px-2.5 py-1.5` on items.
 * **Internal Spacing / Gap:** `gap-0.5` on item stack; `gap-2` icon-to-text.
 * **Height & Sizing:** `min-w-[12rem] w-52`.
 * **Border & Shadow:** `border border-white/10 shadow-none`.
 * **Variants & States:** Mirrors `<DropdownMenu />`.
-* **Exceptions:** Compound selector `.flow-menu-panel.mat-mdc-menu-panel` applies `rounded-2xl` (16px) for Studio media items.
+* **Exceptions:** None. All context menus conform to canonical `rounded-md` (6px) container shape.
 
 ---
 
 ### 4.13 `<Popover />` (`@/shared/ui/popover`)
 * **Role:** Floating inspector panel, color picker, filter popdown.
-* **Radius Token:** `comfortable` = **8px** (`var(--radius-lg)`, `rounded-lg`).
+* **Radius Token:** `subtle` / `md` = **6px** (`var(--radius-md)`, `rounded-md`).
 * **Padding Rules:** `p-4` (16px).
 * **Internal Spacing / Gap:** Layout determined by interior content.
 * **Height & Sizing:** `w-72` (288px default), `sideOffset = 6`.
@@ -354,7 +351,7 @@ Every shared primitive in `src/shared/ui/` has an exact, verified contract.
 * **Radius Token:**
   * `pills`: Container `rounded-full`, trigger `rounded-full` (9999px).
   * `underline`: Flat container with `border-b border-white/10`, trigger `border-b-2 border-transparent`.
-  * `studio`: Container `rounded-lg` (8px), trigger `rounded-sm` (4px).
+  * `studio`: Container `rounded-md` (6px), trigger `rounded-sm` (4px).
 * **Padding & Sizing:**
   * `pills`: List `p-1 gap-1`, trigger `h-7 px-3.5 text-xs` (`default`) / `h-6 px-2.5 text-xs` (`sm`).
   * `underline`: List `gap-4 px-1`, trigger `h-9 text-sm pb-2` (`default`) / `h-7 text-xs pb-1` (`sm`).
@@ -396,18 +393,17 @@ Every shared primitive in `src/shared/ui/` has an exact, verified contract.
 
 ## 5. Runway 100% Token Scales (Preserved Color System)
 
-### 5.1 Border Radius Tokens (Runway Standard 4-Tier Scale)
+### 5.1 Border Radius Tokens (Runway Standard 5-Tier Scale — Max `rounded-md` + `rounded-full`)
 | UI Element Category | Base Token | Value | Canonical Tailwind Class | Description |
 |---|---|---|---|---|
+| **Flush Layouts & Full-Bleed Media** | `--radius-none` | **0px** | `rounded-none` | Edge-to-edge full-bleed canvases |
 | **Media Elements (Images, Videos, Media Layers)** | `--radius-xxxs` | **1px** (`hairline`) | `rounded-xxxs` | Hairline precision radius for media items |
 | **Buttons, Inputs, Badges, Menu Items, Tooltips** | `--radius-sm` | **4px** (`sharp`) | `rounded-sm` | Sharp geometric corners across all action targets |
-| **Subtle Chips & Secondary Tags** | `--radius-md` | **6px** (`subtle`) | `rounded-md` | Soft intermediate chip containers |
-| **Cards, Dropdowns, Menus, Panels, Popovers** | `--radius-lg` | **8px** (`comfortable`) | `rounded-lg` | Standard card and popover panels |
-| **Dialogs & Modals** | `--radius-2xl` | **16px** (`generous`) | `rounded-2xl` | Overlay confirmation dialogs and workflow containers |
-| **Pills & Avatars** | `--radius-full` | **9999px** | `rounded-full` | Filter pills and circular icons |
+| **Cards, Textareas, Dropdowns, Context Menus, Popovers, HoverCards, Dialogs, Modals, Panels** | `--radius-md` | **6px** (`subtle` / MAX) | `rounded-md` | Maximum standard container and overlay radius |
+| **Pills, Avatars, Switches, Sliders, Radios** | `--radius-full` | **9999px** | `rounded-full` | Filter pills and circular controls |
 
 > [!IMPORTANT]
-> **Single Token Class Law:** Always use the standard Tailwind class directly (`rounded-sm`, `rounded-lg`, `rounded-2xl`). Updating `--radius-sm` or `--radius-lg` in `:root` automatically cascades across all components globally.
+> **Single Token Class Law:** Always use the standard Tailwind class directly (`rounded-none`, `rounded-xxxs`, `rounded-sm`, `rounded-md`, `rounded-full`). Never use `rounded-lg`, `rounded-xl`, `rounded-2xl`, or `rounded-3xl`. Updating `--radius-sm` or `--radius-md` in `:root` automatically cascades across all components globally.
 
 ---
 

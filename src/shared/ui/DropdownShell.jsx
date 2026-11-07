@@ -193,7 +193,7 @@ export const DropdownSegmented = React.memo(({ value, onChange, options, classNa
             disabled={opt.disabled}
             style={itemStyle}
             className={cn(
-              "toggle flex-toggle rounded-sm h-8 min-h-[32px] text-[13px] font-medium transition-all flex items-center justify-center relative",
+              "toggle flex-toggle rounded-sm h-8 min-h-8 text-xs-plus font-medium transition-all flex items-center justify-center relative",
               compact ? "p-1.5 size-12 shrink-0 [&_svg]:size-full" : "flex-row gap-1.5 px-3 py-1 flex-1 min-w-fit",
               visibleCount ? "flex-none" : !compact ? "flex-1 min-w-fit" : "",
               isDragging && "pointer-events-none",
@@ -202,7 +202,7 @@ export const DropdownSegmented = React.memo(({ value, onChange, options, classNa
           >
             {opt.icon && (
               <span className={cn(
-                "flex items-center justify-center text-[16px]",
+                "flex items-center justify-center text-base",
                 isSelected && variant === "white" && "text-black",
                 compact && "size-full"
               )}>
@@ -226,11 +226,11 @@ export const DropdownSegmentedWithLabel = React.memo(({ label, value, onChange, 
   return (
     <div className={cn(
       "flex items-center gap-2 p-1 rounded-sm overflow-hidden",
-      !transparent && "bg-[rgba(218,220,224,0.05)]",
+      !transparent && "bg-white/5",
       className
     )}>
       {label && (
-        <span className="text-[13px] font-medium text-[rgba(218,220,224,0.75)] whitespace-nowrap pl-2 shrink-0">
+        <span className="text-xs-plus font-medium text-white/75 whitespace-nowrap pl-2 shrink-0">
           {label}
         </span>
       )}
@@ -246,11 +246,11 @@ export const DropdownSegmentedWithLabel = React.memo(({ label, value, onChange, 
               variant={isSelected ? (variant === "white" ? "primary" : "secondary") : "ghost"}
               onClick={() => !opt.disabled && onChange(opt.value)}
               disabled={opt.disabled}
-              className="h-8 min-h-[32px] rounded-sm text-[13px] font-medium px-3 flex-1 min-w-fit"
+              className="h-8 min-h-8 rounded-sm text-xs-plus font-medium px-3 flex-1 min-w-fit"
             >
               {opt.icon && (
                 <span className={cn(
-                  "mr-1.5 flex items-center justify-center text-[16px]",
+                  "mr-1.5 flex items-center justify-center text-base",
                   isSelected && variant === "white" && "text-black"
                 )}>
                   {renderIconNode(opt.icon)}
@@ -284,7 +284,7 @@ export function DropdownChips({ options, selected, onToggle, accent: _accent = "
             className={cn(
               "px-2.5 py-1.5 rounded-sm text-xs transition-all font-medium h-auto",
               isSelected
-                ? "bg-[#505153] text-white hover:bg-[#505153]"
+                ? "bg-surface-highest text-white hover:bg-surface-highest"
                 : "bg-white/2 text-white hover:text-white hover:bg-white/10"
             )}
           >
@@ -321,7 +321,7 @@ export function DropdownFooter({ hasBorder = true, left, right }) {
 export function DropdownStat({ count, total, label = "Showing" }) {
   return (
     <div className="flex flex-col">
-      <span className="text-[9px] text-white uppercase font-medium tracking-widest">{label}</span>
+      <span className="text-2xs text-white uppercase font-medium tracking-widest">{label}</span>
       <span className="text-xs text-white font-medium tabular-nums">
         {count} of {total} items
       </span>
@@ -338,9 +338,9 @@ export function DropdownReset({ onReset, label = "Reset", className }) {
     <Button
       variant="ghost"
       onClick={onReset}
-      className={cn("h-7 px-2 text-[11px] font-medium text-white/40 hover:text-white hover:bg-white/5", className)}
+      className={cn("h-7 px-2 text-2xs font-medium text-white/40 hover:text-white hover:bg-white/5", className)}
     >
-      <GoogleIcon iconName="close" className="mr-1.5 text-[14px]" />
+      <GoogleIcon iconName="close" className="mr-1.5 text-sm" />
       {label}
     </Button>
   );
@@ -356,7 +356,7 @@ export function DropdownClearAction({ onClick, label = "Clear" }) {
       type="button"
       variant="link"
       onClick={onClick}
-      className="text-[10px] text-white font-medium hover:underline p-0 h-auto"
+      className="text-2xs text-white font-medium hover:underline p-0 h-auto"
     >
       {label}
     </Button>
@@ -376,7 +376,7 @@ export const DropdownToggle = React.memo(({ value, onChange }) => {
         onClick={() => onChange(false)}
         className={cn(
           "px-3 py-1 rounded-sm text-xs font-medium transition-all h-auto",
-          !value ? "bg-[#505153] text-white hover:bg-[#505153]" : "text-white hover:text-white/50"
+          !value ? "bg-surface-highest text-white hover:bg-surface-highest" : "text-white hover:text-white/50"
         )}
       >
         Off
@@ -387,7 +387,7 @@ export const DropdownToggle = React.memo(({ value, onChange }) => {
         onClick={() => onChange(true)}
         className={cn(
           "px-3 py-1 rounded-sm text-xs font-medium transition-all h-auto",
-          value ? "bg-[#505153] text-white hover:bg-[#505153]" : "text-white hover:text-white/50"
+          value ? "bg-surface-highest text-white hover:bg-surface-highest" : "text-white hover:text-white/50"
         )}
       >
         On

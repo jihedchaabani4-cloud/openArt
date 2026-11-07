@@ -58,10 +58,10 @@ function DialogContent({
           // GLASS (Controlled translucent glassmorphism)
           variant === "glass" &&
             `
-            z-50 fixed top-[50%] left-[50%]
-            translate-x-[-50%] translate-y-[-50%]
-            w-full max-w-[calc(100%-2rem)]
-            rounded-2xl border border-white/10 outline-none
+            z-50 fixed top-1/2 left-1/2
+            -translate-x-1/2 -translate-y-1/2
+            w-full max-w-[calc(100%-2rem)] sm:max-w-lg p-6
+            rounded-md border border-white/10 outline-none
             bg-(--background-state-90) backdrop-blur-80 text-white
             shadow-none
             data-[state=open]:animate-in
@@ -80,11 +80,11 @@ function DialogContent({
           variant === "floating" &&
             `
             fixed z-50
-            bottom-[30%] left-1/2
-            translate-x-[-50%] translate-y-0 
-            w-[300px] max-w-[95%]
+            bottom-1/3 left-1/2
+            -translate-x-1/2 translate-y-0 
+            w-75 max-w-[95%]
             h-auto max-h-[60vh]
-            rounded-2xl bg-(--background-state-90) backdrop-blur-80 text-white shadow-none border border-white/10 overflow-hidden
+            rounded-md bg-(--background-state-90) backdrop-blur-80 text-white shadow-none border border-white/10 overflow-hidden
             flex flex-col
             data-[state=open]:animate-in
             data-[state=closed]:animate-out
@@ -98,21 +98,21 @@ function DialogContent({
           variant === "default" &&
             `
             z-50 bg-(--background-state-90) backdrop-blur-80 text-white
-            fixed top-[50%] left-[50%]
-            translate-x-[-50%] translate-y-[-50%]
+            fixed top-1/2 left-1/2
+            -translate-x-1/2 -translate-y-1/2
             w-full max-w-[calc(100%-2rem)]
             sm:max-w-6xl
-            rounded-2xl border border-white/10 p-6 shadow-none
+            rounded-md border border-white/10 p-6 shadow-none
             data-[state=open]:animate-in
             data-[state=closed]:animate-out
           `,
           variant === "small" &&
             `
             z-50 bg-(--background-state-90) backdrop-blur-80 text-white
-            fixed top-[50%] left-[50%]
-            translate-x-[-50%] translate-y-[-50%]
-            w-full max-w-[250px] max-h-[200px]
-            rounded-2xl border border-white/10 p-2 shadow-none
+            fixed top-1/2 left-1/2
+            -translate-x-1/2 -translate-y-1/2
+            w-full max-w-64 max-h-50
+            rounded-md border border-white/10 p-2 shadow-none
             data-[state=open]:animate-in
             data-[state=closed]:animate-out
           `,

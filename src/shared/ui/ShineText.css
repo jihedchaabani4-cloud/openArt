@@ -17,15 +17,15 @@
 
 .shine-text--sweep {
   background-image: linear-gradient(90deg,
-    rgba(255, 255, 255, 0.38) 0%,
-    rgba(255, 255, 255, 0.38) 38%,
-    rgba(255, 255, 255, 0.96) 50%,
-    rgba(255, 255, 255, 0.38) 62%,
-    rgba(255, 255, 255, 0.38) 100%);
+    var(--shine-text-dim) 0%,
+    var(--shine-text-dim) 38%,
+    var(--shine-text-peak) 50%,
+    var(--shine-text-dim) 62%,
+    var(--shine-text-dim) 100%);
   background-size: 250% 100%;
   background-repeat: no-repeat;
   color: transparent;
-  text-shadow: 0 0 16px rgba(255, 255, 255, 0.12);
+  text-shadow: 0 0 16px var(--shine-text-glow);
   animation-name: shineTextSweep;
   animation-duration: 2.6s;
   animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1);
@@ -39,5 +39,5 @@
 }
 
 .shine-text--idle {
-  color: rgba(255, 255, 255, 0.38);
+  color: var(--shine-text-dim);
 }

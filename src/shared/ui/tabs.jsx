@@ -46,7 +46,7 @@ function TabsList({
           "inline-flex items-center justify-center font-sans antialiased",
           variant === "pills" && "rounded-full bg-white/5 p-1 gap-1 border border-white/5",
           variant === "underline" && "gap-4 border-b border-white/10 px-1",
-          variant === "studio" && "w-full rounded-lg bg-card p-1 gap-1 border border-white/5",
+          variant === "studio" && "w-full rounded-md bg-card p-1 gap-1 border border-white/5",
           className
         )}
         {...props}

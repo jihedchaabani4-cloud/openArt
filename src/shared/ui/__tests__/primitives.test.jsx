@@ -13,6 +13,7 @@ import { Switch } from "@/shared/ui/switch";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/shared/ui/dialog";
 import { Input } from "@/shared/ui/input";
 import { Select, SelectTrigger, SelectValue } from "@/shared/ui/select";
+import { Container, Section, Stack, Inline } from "@/shared/ui/layout";
 
 beforeAll(() => {
   if (typeof global.ResizeObserver === "undefined") {
@@ -99,7 +100,7 @@ describe("Canonical Design System Primitives Suite", () => {
       expect(screen.getByText("Filter Settings")).toBeDefined();
       const content = screen.getByText("Filter Settings").closest('[data-slot="popover-content"]');
       expect(content).not.toBeNull();
-      expect(content.className).toContain("rounded-lg");
+      expect(content.className).toContain("rounded-md");
       expect(content.className).toContain("backdrop-blur-80");
     });
   });
@@ -155,7 +156,7 @@ describe("Canonical Design System Primitives Suite", () => {
       );
       const card = screen.getByText("Asset Title").closest('[data-slot="card"]');
       expect(card).not.toBeNull();
-      expect(card.className).toContain("rounded-lg");
+      expect(card.className).toContain("rounded-md");
       expect(card.className).toContain("hover:bg-white/10");
       expect(screen.getByText("Created yesterday")).toBeDefined();
       expect(screen.getByText("Body Content")).toBeDefined();
@@ -184,7 +185,7 @@ describe("Canonical Design System Primitives Suite", () => {
       render(<Skeleton variant="shimmer" shape="card" data-testid="test-skeleton" />);
       const skeleton = screen.getByTestId("test-skeleton");
       expect(skeleton.className).toContain("animate-shimmer");
-      expect(skeleton.className).toContain("rounded-lg");
+      expect(skeleton.className).toContain("rounded-md");
     });
   });
 
@@ -224,7 +225,7 @@ describe("Canonical Design System Primitives Suite", () => {
   });
 
   describe("11. Dialog Primitive", () => {
-    it("renders dialog content with canonical rounded-2xl token", () => {
+    it("renders dialog content with canonical rounded-md token", () => {
       render(
         <Dialog open={true}>
           <DialogContent>
@@ -238,7 +239,7 @@ describe("Canonical Design System Primitives Suite", () => {
       expect(title).toBeDefined();
       const content = screen.getByText("Modal Heading").closest('[data-slot="dialog-content"]');
       expect(content).not.toBeNull();
-      expect(content?.className).toContain("rounded-2xl");
+      expect(content?.className).toContain("rounded-md");
       expect(content?.className).toContain("shadow-none");
     });
   });
@@ -274,6 +275,48 @@ describe("Canonical Design System Primitives Suite", () => {
       expect(trigger).toBeDefined();
       expect(trigger.className).toContain("rounded-sm");
       expect(trigger.getAttribute("data-slot")).toBe("select-trigger");
+    });
+  });
+
+  describe("14. Layout Primitives (Container, Section, Stack, Inline)", () => {
+    it("renders Container with canonical size variants", () => {
+      const { rerender } = render(<Container size="editorial">Content</Container>);
+      const container = screen.getByText("Content");
+      expect(container.getAttribute("data-slot")).toBe("layout-container");
+      expect(container.className).toContain("max-w-6xl");
+
+      rerender(<Container size="cinema">Cinema Content</Container>);
+      expect(screen.getByText("Cinema Content").className).toContain("max-w-7xl");
+    });
+
+    it("renders Section with semantic spacing and variants", () => {
+      const { container } = render(
+        <Section spacing="lg" variant="dark">
+          <h2>Feature Headline</h2>
+        </Section>
+      );
+      const section = container.querySelector('[data-slot="layout-section"]');
+      expect(section).not.toBeNull();
+      expect(section?.className).toContain("py-12");
+      expect(section?.className).toContain("bg-surface-panel");
+    });
+
+    it("renders Stack and Inline layout primitives", () => {
+      render(
+        <Stack gap="md" data-testid="test-stack">
+          <Inline gap="sm" data-testid="test-inline">
+            <span>Item 1</span>
+            <span>Item 2</span>
+          </Inline>
+        </Stack>
+      );
+      const stack = screen.getByTestId("test-stack");
+      expect(stack.className).toContain("flex-col");
+      expect(stack.className).toContain("gap-3");
+
+      const inline = screen.getByTestId("test-inline");
+      expect(inline.className).toContain("flex-row");
+      expect(inline.className).toContain("gap-2");
     });
   });
 });

@@ -25,7 +25,7 @@ export const GoogleIcon = ({
             role="img"
             aria-hidden="true"
             data-mat-icon-type="font"
-            className={cn("mat-icon notranslate google-symbols material-symbols-outlined select-none text-[20px] inline-flex items-center justify-center leading-none align-middle shrink-0", className)}
+            className={cn("mat-icon notranslate google-symbols material-symbols-outlined select-none text-xl inline-flex items-center justify-center leading-none align-middle shrink-0", className)}
             style={{
                 fontVariationSettings: `'FILL' ${fill ? 1 : 0}, 'wght' ${weight}, 'GRAD' ${grade}, 'opsz' ${opticalSize}`
             }}

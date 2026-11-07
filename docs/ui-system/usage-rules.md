@@ -17,7 +17,7 @@
 
 3. **No arbitrary Tailwind brackets**:
    - 🚫 Prohibited: `p-[13px]`, `w-[320px]`, `rounded-[15px]`, `text-[12px]`, `bg-[#1e1f20]`.
-   - ✅ Required: Use the 4px spacing scale (`gap-1.5`, `p-2`, `p-4`), canonical text sizes (`text-xs`, `text-sm`, `text-base`), and geometric tokens (`rounded-button`, `rounded-card`, `rounded-badge`, `rounded-dialog`, `rounded-full`).
+   - ✅ Required: Use the 4px/8px spacing scale (`gap-1.5`, `p-2`, `p-4`), canonical text sizes (`text-2xs`, `text-xs`, `text-xs-plus`, `text-sm`, `text-base`), and the 5-tier geometric radius scale (`rounded-none`, `rounded-xxxs`, `rounded-sm`, `rounded-md`, `rounded-full`). Never use `rounded-lg`, `rounded-xl`, `rounded-2xl`, or `rounded-3xl`.
 
 4. **No raw color literals in JSX**:
    - 🚫 Prohibited: `#fe6e6e`, `#EFFE17`, `rgba(255,255,255,0.08)`.

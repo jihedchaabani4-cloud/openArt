@@ -7,7 +7,7 @@ export function LoadingScreen({ message = "Art", fullScreen = false }) {
   return (
     <div className={cn(
       "flex flex-col items-center justify-center overflow-hidden bg-background",
-      fullScreen ? "fixed inset-0 z-[100]" : "w-full h-full flex-1"
+      fullScreen ? "fixed inset-0 z-50" : "w-full h-full flex-1"
     )}>
       
       {/* Central Content */}
@@ -23,7 +23,7 @@ export function LoadingScreen({ message = "Art", fullScreen = false }) {
         </h1>
 
         {/* Minimal Progress Line Container */}
-        <div className="w-34 h-[2px] bg-white/5 rounded-full overflow-hidden relative">
+        <div className="w-34 h-0.5 bg-white/5 rounded-full overflow-hidden relative">
           {/* Animated Progress Fill */}
           <motion.div
             initial={{ x: "-100%" }}

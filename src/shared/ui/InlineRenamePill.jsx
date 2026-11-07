@@ -82,10 +82,10 @@ export function InlineRenamePill({
       onDragStart={(e) => { e.preventDefault(); e.stopPropagation(); }}
       className={cn(
         "flex items-center gap-3.5",
-        "bg-surface-panel border border-white/10 rounded-2xl",
+        "bg-surface-panel border border-white/10 rounded-md",
         "px-5 py-3",
         "shadow-none",
-        "min-w-[400px] max-w-[min(92vw,560px)]",
+        "min-w-100 max-w-140",
         "select-none",
         className
       )}
@@ -102,7 +102,7 @@ export function InlineRenamePill({
         disabled={isSaving}
         className={cn(
           "flex-1 min-w-0 bg-transparent border-none outline-none",
-          "text-white text-[15px] font-medium leading-normal",
+          "text-white text-sm font-medium leading-normal",
           "placeholder-white/35 focus:outline-none focus:ring-0",
           isSaving && "opacity-50"
         )}

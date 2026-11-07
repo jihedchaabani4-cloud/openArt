@@ -63,20 +63,19 @@ Fonts loaded locally via variable `@font-face`:
 
 ---
 
-## 5. Border Radius Hierarchy (Runway Standard 4-Tier Scale)
+## 5. Border Radius Hierarchy (Runway Standard 5-Tier Scale — Max `rounded-md` + `rounded-full`)
 
 Enforced strictly across all components (Single Standard Token, Zero Redundant Classes):
 
 | Geometry Tier | Value | CSS Token | Canonical Tailwind Token | Target UI Elements |
 |---|---|---|---|---|
+| **Flush** | `0px` | `--radius-none` | `rounded-none` | Full-bleed canvases, edge-to-edge layouts |
 | **Hairline / Micro** | `1px` | `--radius-xxxs` | `rounded-xxxs` | Media elements (images, videos, media layers) |
 | **Sharp** | `4px` | `--radius-sm` | `rounded-sm` | Buttons, Inputs, Badges, Micro Tags, Tooltips, Menu Items |
-| **Subtle** | `6px` | `--radius-md` | `rounded-md` | Subtle links, intermediate chips |
-| **Comfortable** | `8px` | `--radius-lg` | `rounded-lg` | Cards, Dropdowns, Context Menus, Popovers, Panels |
-| **Generous** | `16px`| `--radius-2xl` | `rounded-2xl` | Modal Dialogs, Workflow Creation Sheets |
-| **Pill / Circle** | `9999px`| `--radius-full` | `rounded-full` | Filter chips, avatar circles, switch thumbs |
+| **Subtle (MAX Container)** | `6px` | `--radius-md` | `rounded-md` | Cards, Textareas, Dropdowns, Context Menus, Popovers, HoverCards, Dialogs, Modals, Panels |
+| **Pill / Circle** | `9999px`| `--radius-full` | `rounded-full` | Filter chips, avatar circles, switch thumbs, sliders, radios |
 
-> **Global Cascade Rule:** Changing `--radius-sm` or `--radius-lg` in `:root` automatically updates all components on the entire site simultaneously. Never write custom compound classes (`rounded-card`, `rounded-button`).
+> **Global Cascade Rule:** Changing `--radius-sm` or `--radius-md` in `:root` automatically updates all components on the entire site simultaneously. Never use `rounded-lg`, `rounded-xl`, `rounded-2xl`, `rounded-3xl`, or custom compound classes.
 
 ---
 

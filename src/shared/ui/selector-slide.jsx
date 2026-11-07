@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { cn } from "@/shared/lib/utils";
 import {
   motion,
   useMotionValue,
@@ -19,11 +20,11 @@ const SNAP_SPRING = { damping: 30, stiffness: 280, mass: 0.75 };
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 function getLabelAnim(dist) {
-  if (dist === 0) return { opacity: 1,     color: "#ffffff", scale: 1.4  };
-  if (dist === 1) return { opacity: 0.435, color: "#737475", scale: 1.22 };
-  if (dist === 2) return { opacity: 0.314, color: "#737475", scale: 1.11 };
-  if (dist === 3) return { opacity: 0.211, color: "#737475", scale: 1.01 };
-  return               { opacity: 0.2,   color: "#737475", scale: 1    };
+  if (dist === 0) return { opacity: 1,     color: "var(--color-white)", scale: 1.4  };
+  if (dist === 1) return { opacity: 0.435, color: "var(--cool-slate)", scale: 1.22 };
+  if (dist === 2) return { opacity: 0.314, color: "var(--cool-slate)", scale: 1.11 };
+  if (dist === 3) return { opacity: 0.211, color: "var(--cool-slate)", scale: 1.01 };
+  return               { opacity: 0.2,   color: "var(--cool-slate)", scale: 1    };
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -33,7 +34,7 @@ export function SelectorSlide({
   value,
   onChange,
   title,
-  accentColor  = "#3b82f6",
+  accentColor  = "var(--color-accent-blue)",
   tickSpacing  = TICK_SPACING,
   ticksPerStep = TICKS_PER_STEP,
 }) {
@@ -119,7 +120,7 @@ export function SelectorSlide({
   return (
     <div className="flex flex-col w-full select-none py-6">
       {title && (
-        <p className="text-xl font-semibold text-white/70 text-center leading-7 tracking-[-0.2px] mb-3">
+        <p className="text-xl font-semibold text-white/70 text-center leading-7 tracking-tight mb-3">
           {title}
         </p>
       )}
@@ -132,8 +133,8 @@ export function SelectorSlide({
         {/* Center cursor line */}
         <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none">
           <div
-            className="rounded-full"
-            style={{ width: 4, height: 32, background: accentColor }}
+            className="rounded-full w-1 h-8"
+            style={{ background: accentColor }}
           />
         </div>
 
@@ -151,12 +152,10 @@ export function SelectorSlide({
                 style={{ left: i * tickSpacing }}
               >
                 <div
-                  className="rounded-full"
-                  style={{
-                    width:      2,
-                    height:     isMajor ? 24 : 16,
-                    background: "rgba(255,255,255,0.12)",
-                  }}
+                  className={cn(
+                    "w-0.5 rounded-full bg-white/12",
+                    isMajor ? "h-6" : "h-4"
+                  )}
                 />
               </div>
             );
@@ -180,7 +179,7 @@ export function SelectorSlide({
                 key={String(step.value)}
                 type="button"
                 onClick={() => snapToIndex(i)}
-                className="absolute top-0 -translate-x-1/2 whitespace-nowrap cursor-pointer text-xl font-medium leading-7 tracking-[-0.2px] bg-transparent border-none p-0"
+                className="absolute top-0 -translate-x-1/2 whitespace-nowrap cursor-pointer text-xl font-medium leading-7 tracking-tight bg-transparent border-none p-0"
                 style={{ left: i * stepSpacing }}
                 animate={getLabelAnim(dist)}
                 transition={{

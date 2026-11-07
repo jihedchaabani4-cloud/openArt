@@ -19,6 +19,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { Badge } from "@/shared/ui/badge";
 import { Skeleton } from "@/shared/ui/skeleton";
 import { Avatar, AvatarImage, AvatarFallback } from "@/shared/ui/avatar";
+import { Container, Section, Stack, Inline } from "@/shared/ui/layout";
 
 export default function DesignSystemShowcasePage() {
   if (process.env.NODE_ENV === "production") {
@@ -143,23 +144,23 @@ export default function DesignSystemShowcasePage() {
               <div className="flex flex-col gap-3">
                 <h3 className="text-sm font-semibold text-white/90">Surface Ladder (Dark First)</h3>
                 <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-                  <div className="p-4 rounded-lg bg-black border border-white/10 flex flex-col gap-1">
+                  <div className="p-4 rounded-md bg-black border border-white/10 flex flex-col gap-1">
                     <span className="text-xs font-semibold">Canvas</span>
                     <span className="text-xs text-muted-foreground">bg-black</span>
                   </div>
-                  <div className="p-4 rounded-lg bg-neutral-900 border border-white/10 flex flex-col gap-1">
+                  <div className="p-4 rounded-md bg-neutral-900 border border-white/10 flex flex-col gap-1">
                     <span className="text-xs font-semibold">Panel</span>
                     <span className="text-xs text-muted-foreground">bg-surface-panel</span>
                   </div>
-                  <div className="p-4 rounded-lg bg-card border border-white/10 flex flex-col gap-1">
+                  <div className="p-4 rounded-md bg-card border border-white/10 flex flex-col gap-1">
                     <span className="text-xs font-semibold">Card</span>
                     <span className="text-xs text-muted-foreground">bg-card</span>
                   </div>
-                  <div className="p-4 rounded-lg bg-surface-elevated border border-white/10 flex flex-col gap-1">
+                  <div className="p-4 rounded-md bg-surface-elevated border border-white/10 flex flex-col gap-1">
                     <span className="text-xs font-semibold">Elevated</span>
                     <span className="text-xs text-muted-foreground">bg-surface-elevated</span>
                   </div>
-                  <div className="p-4 rounded-lg bg-white/5 border border-white/10 backdrop-blur-md flex flex-col gap-1">
+                  <div className="p-4 rounded-md bg-white/5 border border-white/10 backdrop-blur-md flex flex-col gap-1">
                     <span className="text-xs font-semibold">Glass</span>
                     <span className="text-xs text-muted-foreground">backdrop-blur-md</span>
                   </div>
@@ -168,23 +169,23 @@ export default function DesignSystemShowcasePage() {
 
               {/* Border Radius Hierarchy */}
               <div className="flex flex-col gap-3">
-                <h3 className="text-sm font-semibold text-white/90">Strict Runway Border Radius Tokens</h3>
+                <h3 className="text-sm font-semibold text-white/90">Strict Runway Border Radius Tokens (Max md / 6px)</h3>
                 <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                  <div className="p-3 bg-white/5 border border-white/10 rounded-none flex flex-col items-center justify-center text-center">
+                    <span className="text-xs font-semibold">None</span>
+                    <span className="text-xs text-muted-foreground">0px (rounded-none)</span>
+                  </div>
+                  <div className="p-3 bg-white/5 border border-white/10 rounded-xxxs flex flex-col items-center justify-center text-center">
+                    <span className="text-xs font-semibold">Media</span>
+                    <span className="text-xs text-muted-foreground">1px (rounded-xxxs)</span>
+                  </div>
                   <div className="p-3 bg-white/5 border border-white/10 rounded-sm flex flex-col items-center justify-center text-center">
                     <span className="text-xs font-semibold">Sharp</span>
                     <span className="text-xs text-muted-foreground">4px (rounded-sm)</span>
                   </div>
                   <div className="p-3 bg-white/5 border border-white/10 rounded-md flex flex-col items-center justify-center text-center">
-                    <span className="text-xs font-semibold">Subtle</span>
+                    <span className="text-xs font-semibold">Subtle (MAX)</span>
                     <span className="text-xs text-muted-foreground">6px (rounded-md)</span>
-                  </div>
-                  <div className="p-3 bg-white/5 border border-white/10 rounded-lg flex flex-col items-center justify-center text-center">
-                    <span className="text-xs font-semibold">Comfortable</span>
-                    <span className="text-xs text-muted-foreground">8px (rounded-lg)</span>
-                  </div>
-                  <div className="p-3 bg-white/5 border border-white/10 rounded-2xl flex flex-col items-center justify-center text-center">
-                    <span className="text-xs font-semibold">Generous</span>
-                    <span className="text-xs text-muted-foreground">16px (rounded-2xl)</span>
                   </div>
                   <div className="p-3 bg-white/5 border border-white/10 rounded-full flex flex-col items-center justify-center text-center">
                     <span className="text-xs font-semibold">Full</span>
@@ -373,7 +374,7 @@ export default function DesignSystemShowcasePage() {
               </div>
 
               {/* Toggles, Checkboxes & Radios */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 p-4 rounded-lg bg-card border border-white/5">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 p-4 rounded-md bg-card border border-white/5">
                 {/* Switches */}
                 <div className="flex flex-col gap-3">
                   <span className="text-xs font-semibold text-muted-foreground">Switches</span>
@@ -602,11 +603,25 @@ export default function DesignSystemShowcasePage() {
                     <p className="text-xs text-muted-foreground">Subtle backdrop blur.</p>
                   </CardContent>
                   <CardFooter>
-                    <Button variant="outline"
-                  className="h-6 px-2 text-xs">Details</Button>
+                    <Button variant="outline" className="h-6 px-2 text-xs">Details</Button>
                   </CardFooter>
                 </Card>
               </div>
+
+              {/* Layout Primitives Showcase */}
+              <Section spacing="none" className="flex flex-col gap-3 pt-4 border-t border-white/10">
+                <h3 className="text-sm font-semibold text-white/90">Layer 3 Layout Primitives (Container, Section, Stack, Inline)</h3>
+                <Container size="compact" className="bg-surface-panel p-4 rounded-md border border-white/10">
+                  <Stack gap="sm">
+                    <span className="text-xs font-semibold text-white">Container (compact) + Stack (sm)</span>
+                    <Inline gap="xs" wrap={true}>
+                      <Badge variant="default">Stack item 1</Badge>
+                      <Badge variant="secondary">Stack item 2</Badge>
+                      <Badge variant="neon">Inline flow</Badge>
+                    </Inline>
+                  </Stack>
+                </Container>
+              </Section>
             </div>
           )}
 

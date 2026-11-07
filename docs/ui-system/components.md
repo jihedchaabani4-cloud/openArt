@@ -9,27 +9,20 @@
 
 ### `<Button />` (`@/shared/ui/button`)
 - **Imports**: `import { Button, buttonVariants } from "@/shared/ui/button";`
-- **Variants**:
-  - `white` / `primary`: High-contrast pure white (#fff) on black canvas.
-  - `secondary`: Dark elevated surface container (#282a2c).
-  - `outline`: Subtle bordered ghost (`border-white/10`).
-  - `ghost`: Transparent with subtle hover state.
-  - `danger`: Red ghost text & icon (#fe6e6e) for delete triggers.
-  - `destructive-filled`: Solid crimson container for permanent modal delete confirmations.
-  - `neon`: Electric lime (#EFFE17) Cinema Studio hero action.
-  - `pill` / `pill-active`: Rounded-full filter chips.
-- **Sizes**:
-  - `default`: `h-8 px-3.5 text-xs` (Universal default).
-  - `sm`: `h-8 px-3 text-xs` (Compact panels).
-  - `xs`: `h-6 px-2 text-xs` (Micro chips).
-  - `lg`: `h-10 px-6 text-sm` (Hero forms).
-  - `icon`: `size-9 p-0` (36×36px standalone icon).
-  - `icon-sm`: `size-8 p-0` (32×32px toolbar icon).
-  - `icon-xs`: `size-6 p-0` (24×24px micro icon).
+- **Variants** (6 Core Semantic Variants):
+  - `primary`: High-contrast pure white (`#fff`) on dark canvas (`rounded-sm` 4px default).
+  - `secondary`: Dark elevated surface container (`--foreground-state-05` / `#282a2c`).
+  - `outline`: Subtle bordered action button (`border-(--mat-sys-outline-variant)`).
+  - `ghost`: Transparent with subtle hover state (default variant).
+  - `danger`: Semantic danger/destructive red (`#fe6e6e`) for delete actions.
+  - `link`: Inline text action button with underline.
+- **Sizing & Geometry**:
+  - Default height is `h-8 px-3.5 text-xs` (`32px`, `rounded-sm` `4px`).
+  - Customize sizes or pill shapes via `className` (`h-10 px-6 text-sm`, `size-8 p-0`, `rounded-full`).
 - **Example**:
   ```jsx
-  <Button variant="white" size="default">Generate</Button>
-  <Button variant="ghost" size="icon" aria-label="Settings"><GoogleIcon iconName="settings" /></Button>
+  <Button variant="primary">Generate</Button>
+  <Button variant="ghost" className="size-8 p-0" aria-label="Settings"><GoogleIcon iconName="settings" /></Button>
   ```
 
 ### `<ButtonGroup />` (`@/shared/ui/button-group`)
@@ -199,9 +192,32 @@
 ### `<Skeleton />` (`@/shared/ui/skeleton`)
 - **Imports**: `import { Skeleton } from "@/shared/ui/skeleton";`
 - **Variants**: `pulse` (default opacity pulse), `shimmer` (gradient sweep).
-- **Shapes**: `default` (rounded-button), `card` (rounded-card), `circle` (rounded-full), `badge` (rounded-badge).
+- **Shapes**: `default` (`rounded-sm`), `card` (`rounded-md`), `circle` (`rounded-full`), `badge` (`rounded-sm`).
 - **Example**:
   ```jsx
   <Skeleton variant="shimmer" className="h-4 w-3/4" />
   <Skeleton shape="circle" className="size-10" />
   ```
+
+---
+
+## 6. Layout Primitives (`@/shared/ui/layout`)
+
+### `<Container />`, `<Section />`, `<Stack />`, `<Inline />`
+- **Imports**: `import { Container, Section, Stack, Inline } from "@/shared/ui/layout";`
+- **Container Tiers**: `size="cinema" | "editorial" | "compact" | "full"` (maps to `.container-cinema` 1600px, `.container-editorial` 1280px, `.container-compact` 980px, or `w-full`).
+- **Spacing Scale (`gap` / `spacing`)**: `none`, `xxs` (4px), `xs` (6px), `sm` (8px), `md` (12px), `base` (16px), `lg` (20px), `xl` (24px), `xxl` (28px), `section` (32px), `section-lg` (48px), `section-xl` (64px), `section-xxl` (78px).
+- **Example**:
+  ```jsx
+  <Section spacing="section-lg">
+    <Container size="editorial">
+      <Stack gap="lg">
+        <Inline gap="sm" align="center" justify="between">
+          <h2>Studio Overview</h2>
+          <Button variant="primary">Create</Button>
+        </Inline>
+      </Stack>
+    </Container>
+  </Section>
+  ```
+

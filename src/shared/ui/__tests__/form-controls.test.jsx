@@ -41,7 +41,7 @@ describe("Form Controls & Menus — Runway Flat Surface Architecture", () => {
       const { container } = render(
         <Textarea label="Prompt" placeholder="Describe the scene..." />
       );
-      const wrapper = container.querySelector(".rounded-lg");
+      const wrapper = container.querySelector(".rounded-md");
       expect(wrapper).not.toBeNull();
       expect(wrapper?.className).toContain("bg-surface-card");
       expect(wrapper?.className).toContain("border-white/10");

@@ -53,10 +53,10 @@ const Textarea = React.forwardRef(({
     <div 
       className={cn(
         isPersonality
-          ? "personality-textarea-wrapper relative w-full rounded-lg bg-surface-card p-3.5 sm:p-4 transition-all border border-white/10 hover:border-white/20 focus-within:border-white/30 focus-within:bg-surface-elevated"
+          ? "personality-textarea-wrapper relative w-full rounded-md bg-surface-card p-3.5 sm:p-4 transition-all border border-white/10 hover:border-white/20 focus-within:border-white/30 focus-within:bg-surface-elevated"
           : isBlur
           ? "relative w-full rounded-sm p-3 transition-all border border-white/10 bg-surface-card hover:border-white/20 focus-within:border-white/30"
-          : "relative w-full rounded-lg bg-surface-card p-4 transition-all border border-white/10 hover:border-white/20 focus-within:border-white/30 focus-within:bg-surface-elevated"
+          : "relative w-full rounded-md bg-surface-card p-4 transition-all border border-white/10 hover:border-white/20 focus-within:border-white/30 focus-within:bg-surface-elevated"
       )}
       style={undefined}
     >
@@ -67,7 +67,7 @@ const Textarea = React.forwardRef(({
         rows={rows}
         placeholder={placeholder}
         className={cn(
-          "w-full bg-transparent text-xs sm:text-sm text-white placeholder:text-cool-slate resize-none outline-none custom-scrollbar leading-relaxed font-sans transition-[height] duration-150 ease-out",
+          "w-full bg-transparent text-xs sm:text-sm text-white placeholder:text-cool-slate resize-none outline-none custom-scrollbar leading-relaxed font-sans transition-all duration-150 ease-out",
           isPersonality && "personality-textarea text-white",
           isOverflowing ? "overflow-y-auto" : "overflow-hidden",
           className
@@ -120,7 +120,7 @@ const Textarea = React.forwardRef(({
         {textareaElement}
 
         {hint && (
-          <p className="text-[11px] text-cool-slate leading-relaxed pt-0.5">
+          <p className="text-2xs text-cool-slate leading-relaxed pt-0.5">
             {hint}
           </p>
         )}

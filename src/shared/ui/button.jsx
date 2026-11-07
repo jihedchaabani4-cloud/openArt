@@ -29,12 +29,12 @@ import { Slot } from "radix-ui";
 import { cn } from "@/shared/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap font-sans text-sm font-semibold antialiased shadow-none transition-all disabled:pointer-events-none disabled:opacity-50 shrink-0 outline-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap font-sans text-sm font-semibold antialiased shadow-none transition-all disabled:pointer-events-none disabled:opacity-50 shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-white/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {
         primary:
-          "h-8 px-3.5 rounded-sm bg-white text-black hover:bg-white/90 active:scale-[0.98] border-none",
+          "h-8 px-3.5 rounded-sm bg-white text-black hover:bg-white/90 active:scale-95 border-none",
         secondary:
           "h-8 px-3.5 rounded-sm bg-surface-elevated text-white hover:bg-white/10 active:bg-white/20 border-none",
         outline:

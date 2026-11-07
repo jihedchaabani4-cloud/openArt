@@ -102,9 +102,9 @@ export const EditableDisplayName = React.forwardRef(({
           className={cn(
             "col-start-1 row-start-1 w-full bg-transparent border-none outline-none px-2 py-1 rounded-sm transition-all text-white",
             "hover:bg-white/5 focus:bg-white/10",
+            isEditing ? "cursor-text" : "cursor-pointer",
             inputClassName
           )}
-          style={{ cursor: isEditing ? "text" : "pointer" }}
           aria-label="Display name"
         />
       </div>

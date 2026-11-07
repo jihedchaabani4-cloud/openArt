@@ -6,7 +6,7 @@ import { cn } from "@/shared/lib/utils"
 const Avatar = ({ className, ...props }) => (
   <AvatarPrimitive.Root
     className={cn(
-      "relative flex h-10 w-10 shrink-0 overflow-hidden rounded-sm",
+      "relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full",
       className
     )}
     {...props}
@@ -23,7 +23,7 @@ const AvatarImage = ({ className, ...props }) => (
 const AvatarFallback = ({ className, ...props }) => (
   <AvatarPrimitive.Fallback
     className={cn(
-      "flex h-full w-full items-center justify-center rounded-sm bg-[var(--foreground-state-15)] text-[var(--mat-sys-on-surface,#e3e3e3)]",
+      "flex h-full w-full items-center justify-center rounded-full bg-(--foreground-state-15) text-foreground",
       className
     )}
     {...props}

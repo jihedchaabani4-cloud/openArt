@@ -15,7 +15,7 @@ import {
 } from "@/shared/ui/context-menu";
 
 describe("DropdownMenu and ContextMenu — Runway Flat Surface Architecture", () => {
-  it("renders DropdownMenu with width w-52, rounded-lg, flat bg-surface-card, border-white/10, and zero shadows", () => {
+  it("renders DropdownMenu with width w-52, rounded-md, flat bg-surface-card, border-white/10, and zero shadows", () => {
     render(
       <DropdownMenu open={true}>
         <DropdownMenuTrigger>Open</DropdownMenuTrigger>
@@ -32,7 +32,7 @@ describe("DropdownMenu and ContextMenu — Runway Flat Surface Architecture", ()
     expect(menuItem).not.toBeNull();
     expect(menuItem.className).toContain("min-h-[2.125rem]");
     expect(menuItem.className).toContain("rounded-sm");
-    expect(menuItem.className).toContain("text-[14px]");
+    expect(menuItem.className).toContain("text-sm");
     expect(menuItem.className).toContain("pl-3");
     expect(menuItem.className).toContain("pr-4");
     expect(menuItem.className).toContain("text-white/90");
@@ -43,7 +43,7 @@ describe("DropdownMenu and ContextMenu — Runway Flat Surface Architecture", ()
     const content = item.closest('[data-slot="dropdown-menu-content"]');
     expect(content).not.toBeNull();
     expect(content.className).toContain("w-52");
-    expect(content.className).toContain("rounded-lg");
+    expect(content.className).toContain("rounded-md");
     expect(content.className).toContain("bg-(--background-state-90)");
     expect(content.className).toContain("backdrop-blur-80");
     expect(content.className).toContain("border-white/10");

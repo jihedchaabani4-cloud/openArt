@@ -55,7 +55,7 @@ describe("CharacterEditNavbar", () => {
     const uploadMenuItem = uploadItem.closest('[data-slot="dropdown-menu-item"]');
     expect(uploadMenuItem.className).toContain("min-h-[2.125rem]");
     expect(uploadMenuItem.className).toContain("rounded-sm");
-    expect(uploadMenuItem.className).toContain("text-[14px]");
+    expect(uploadMenuItem.className).toContain("text-sm");
 
     // Clicking options triggers callbacks
     fireEvent.click(uploadItem);

@@ -108,12 +108,6 @@ const Input = React.forwardRef(({
           "flex flex-col gap-1.5 w-full font-sans antialiased",
           containerClassName
         )}
-        style={{
-          WebkitTapHighlightColor: "transparent",
-          textRendering: "optimizeSpeed",
-          boxSizing: "border-box",
-          WebkitFontSmoothing: "antialiased",
-        }}
       >
         {label && (
           <label className="text-xs font-semibold text-white">
@@ -124,23 +118,22 @@ const Input = React.forwardRef(({
           className={cn(
             "relative flex items-center justify-between w-full transition-all border-none outline-none font-sans antialiased",
             isSearch
-              ? "h-[42px] min-h-[42px] rounded-sm border border-white/10 px-2.5 gap-2 text-sm text-white shadow-none bg-surface-card hover:bg-surface-elevated focus-within:bg-surface-elevated focus-within:border-white/20"
+              ? "h-10.5 min-h-10.5 rounded-sm border border-white/10 px-2.5 gap-2 text-sm text-white shadow-none bg-surface-card hover:bg-surface-elevated focus-within:bg-surface-elevated focus-within:border-white/20"
               : isBlurInput
-              ? "h-9 min-h-[36px] rounded-sm py-[2px] pr-[10px] pl-[14px] gap-2 text-sm font-medium text-white flex-row bg-surface-card border border-white/10 hover:bg-surface-elevated focus-within:border-white/20"
-              : "min-h-[52px] rounded-sm px-3 py-2 bg-surface-panel text-white border border-white/10 hover:border-white/20 focus-within:border-white/30"
+              ? "h-9 min-h-9 rounded-sm py-0.5 pr-2.5 pl-3.5 gap-2 text-sm font-medium text-white flex-row bg-surface-card border border-white/10 hover:bg-surface-elevated focus-within:border-white/20"
+              : "min-h-13 rounded-sm px-3 py-2 bg-surface-panel text-white border border-white/10 hover:border-white/20 focus-within:border-white/30"
           )}
-          style={undefined}
         >
           {googleIcon && (
             <span className={cn("flex items-center justify-center shrink-0 select-none", isSearch ? "size-7 rounded-full text-cool-slate mr-0.5" : "text-cool-slate")}>
-              <GoogleIcon iconName={googleIcon} name={googleIcon} weight={googleIconWeight} className={cn("shrink-0", isSearch ? "text-[20px]" : "text-[1.1rem]")} />
+              <GoogleIcon iconName={googleIcon} name={googleIcon} weight={googleIconWeight} className={cn("shrink-0", isSearch ? "text-xl" : "text-lg")} />
             </span>
           )}
 
           {Icon && !googleIcon && (
             <span className={cn("flex items-center justify-center shrink-0", isSearch ? "size-7 text-cool-slate mr-0.5" : isBlurInput ? "mr-0.5" : "mr-2.5 text-cool-slate")}>
               {renderIconNode(Icon, {
-                className: cn("shrink-0", isSearch ? "text-[20px]" : "size-4 text-cool-slate"),
+                className: cn("shrink-0", isSearch ? "text-xl" : "size-4 text-cool-slate"),
                 strokeWidth: iconStrokeWidth ?? (isBlurInput ? 1.75 : 2.0),
               })}
             </span>
@@ -160,16 +153,9 @@ const Input = React.forwardRef(({
             onChange={handleChange}
             className={cn(
               "bg-transparent border-none outline-none p-0 flex-1 placeholder:text-cool-slate text-white min-w-0 font-sans antialiased shadow-none cursor-text",
-              isSearch ? "text-[13.5px] font-medium leading-normal placeholder:text-cool-slate" : "text-sm font-medium",
+              isSearch ? "text-xs-plus font-medium leading-normal placeholder:text-cool-slate" : "text-sm font-medium",
               className
             )}
-            style={{
-              borderStyle: "none",
-              borderWidth: "medium",
-              borderColor: "currentColor",
-              borderImage: "none",
-              boxShadow: "none",
-            }}
             {...props}
           />
 
@@ -187,7 +173,7 @@ const Input = React.forwardRef(({
               {ClearIcon ? (
                 renderIconNode(ClearIcon, { className: "size-4" })
               ) : (
-                <GoogleIcon iconName="close" className="text-[18px]" />
+                <GoogleIcon iconName="close" className="text-lg" />
               )}
             </Button>
           )}
@@ -200,7 +186,7 @@ const Input = React.forwardRef(({
               className="flex items-center justify-center size-7 p-1.5 rounded-md text-white/60 hover:text-white hover:bg-white/10 transition-colors shrink-0 ml-2 cursor-pointer"
               aria-label="Edit"
             >
-              <GoogleIcon iconName="edit" className="text-[1.25rem]" />
+              <GoogleIcon iconName="edit" className="text-xl" />
             </Button>
           )}
 
@@ -221,18 +207,11 @@ const Input = React.forwardRef(({
       onChange={onChange}
       className={cn(
         isNavbar
-          ? "bg-transparent border-none outline-none text-md font-medium tracking-tight text-white placeholder:text-cool-slate max-w-[260px] focus:text-white focus:ring-0 p-0 shadow-none cursor-text disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-sans antialiased"
-          : "flex min-h-[52px] w-full rounded-sm border border-white/10 bg-surface-panel px-3 py-2 text-white placeholder:text-cool-slate hover:border-white/20 focus:border-white/30 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 transition-all font-sans antialiased shadow-none cursor-text",
+          ? "bg-transparent border-none outline-none text-md font-medium tracking-tight text-white placeholder:text-cool-slate max-w-65 focus:text-white focus:ring-0 p-0 shadow-none cursor-text disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-sans antialiased"
+          : "flex min-h-13 w-full rounded-sm border border-white/10 bg-surface-panel px-3 py-2 text-white placeholder:text-cool-slate hover:border-white/20 focus:border-white/30 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 transition-all font-sans antialiased shadow-none cursor-text",
         !isNavbar && !className?.includes("text-") && "text-sm",
         className
       )}
-      style={{
-        WebkitTapHighlightColor: "transparent",
-        textRendering: "optimizeSpeed",
-        WebkitFontSmoothing: "antialiased",
-        borderStyle: "none",
-        boxShadow: "none",
-      }}
       {...props}
     />
   );
