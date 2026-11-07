@@ -17,6 +17,9 @@ export const MediaCard = React.memo(
       overlaySlot,
       footerSlot,
       isSelected = false,
+      width,
+      height,
+      style,
       className,
       onClick,
       onDoubleClick,
@@ -24,6 +27,8 @@ export const MediaCard = React.memo(
     },
     ref
   ) {
+  const cardStyle = width && height ? { width, height, ...style } : style;
+
   return (
     <div
       ref={ref}
@@ -31,8 +36,9 @@ export const MediaCard = React.memo(
       data-selected={String(isSelected)}
       onClick={onClick}
       onDoubleClick={onDoubleClick}
+      style={cardStyle}
       className={cn(
-        "group relative flex flex-col overflow-hidden rounded-lg bg-surface-card border border-white/10 transition-none hover:border-white/20 shadow-none",
+        "group relative flex flex-col overflow-hidden rounded-xxxs bg-surface-card border border-white/10 transition-none hover:border-white/20 shadow-none",
         isSelected && "ring-2 ring-primary border-transparent shadow-none",
         className
       )}
@@ -52,7 +58,7 @@ export const MediaCard = React.memo(
       )}
 
       {/* Main Media Renderer */}
-      <div className="relative w-full h-full overflow-hidden">
+      <div className="relative w-full h-full">
         <MediaRenderer
           item={item}
           className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"

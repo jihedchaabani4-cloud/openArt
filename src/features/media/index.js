@@ -9,6 +9,8 @@ export { MediaView } from "./ui/MediaView";
 export { MediaViewCard } from "./ui/MediaViewCard";
 export { SharedGalleryGrid } from "./ui/SharedGalleryGrid";
 export { AssetListItem } from "./ui/AssetListItem";
+export { ImportMediaPopover } from "./ui/ImportMediaDialog/ImportMediaPopover";
+export { ImportMediaListView } from "./ui/ImportMediaDialog/ImportMediaListView";
 export * from "./api/mediaApi";
 export * from "./uploadPolicy";
 

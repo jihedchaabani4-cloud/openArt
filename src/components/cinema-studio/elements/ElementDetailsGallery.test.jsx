@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, cleanup, fireEvent } from "@testing-library/react";
 import React from "react";
 import { ElementDetailsGallery } from "./ElementDetailsGallery";
-import { ElementMediaGalleryGrid, DEFAULT_ELEMENT_ROW_HEIGHT } from "./ElementMediaGalleryGrid";
+import { ReferenceMediaGalleryGrid, DEFAULT_REFERENCE_ROW_HEIGHT as DEFAULT_ELEMENT_ROW_HEIGHT } from "../common/ReferenceMediaGalleryGrid";
 
 // Mock router
 vi.mock("next/navigation", () => ({
@@ -169,9 +169,9 @@ describe("ElementDetailsGallery - Studio Media Grid Form", () => {
     expect(container.querySelector("[data-component='flow-character-image-preview']")).toBeNull();
   });
 
-  it("ElementMediaGalleryGrid renders reference items cleanly without forced 1:1 aspect ratio", () => {
+  it("ReferenceMediaGalleryGrid renders reference items cleanly without forced 1:1 aspect ratio", () => {
     const { container } = renderWithClient(
-      <ElementMediaGalleryGrid
+      <ReferenceMediaGalleryGrid
         items={mockItems}
         primaryMediaId="item-1"
         onUploadFiles={vi.fn()}
@@ -186,7 +186,7 @@ describe("ElementDetailsGallery - Studio Media Grid Form", () => {
     });
   });
 
-  it("ElementMediaGalleryGrid uses RowsPhotoAlbum photo layout conforming to studio media grid", () => {
+  it("ReferenceMediaGalleryGrid uses RowsPhotoAlbum photo layout conforming to studio media grid", () => {
     const multiAspectItems = [
       {
         id: "wide-1",
@@ -203,7 +203,7 @@ describe("ElementDetailsGallery - Studio Media Grid Form", () => {
     ];
 
     const { container } = renderWithClient(
-      <ElementMediaGalleryGrid
+      <ReferenceMediaGalleryGrid
         items={multiAspectItems}
         onUploadFiles={vi.fn()}
       />
@@ -223,7 +223,7 @@ describe("ElementDetailsGallery - Studio Media Grid Form", () => {
     const onDeleteImage = vi.fn();
 
     const { container } = renderWithClient(
-      <ElementMediaGalleryGrid
+      <ReferenceMediaGalleryGrid
         items={mockItems}
         primaryMediaId="item-1"
         onSetCover={onSetCover}
@@ -249,17 +249,17 @@ describe("ElementDetailsGallery - Studio Media Grid Form", () => {
     expect(deleteBtns[0].textContent).toContain("delete");
   });
 
-  it("renders cards with rounded-lg border radius matching media item standard", () => {
+  it("renders cards with rounded-xxxs border radius matching media item standard", () => {
     const { container } = renderWithClient(
-      <ElementMediaGalleryGrid
+      <ReferenceMediaGalleryGrid
         items={mockItems}
       />
     );
 
-    const cards = container.querySelectorAll(".rounded-lg");
+    const cards = container.querySelectorAll(".rounded-xxxs");
     expect(cards.length).toBeGreaterThan(0);
     cards.forEach((card) => {
-      expect(card.className).toContain("rounded-lg");
+      expect(card.className).toContain("rounded-xxxs");
       expect(card.className).not.toContain("rounded-2xl");
     });
   });
@@ -269,7 +269,7 @@ describe("ElementDetailsGallery - Studio Media Grid Form", () => {
     const onDeleteImage = vi.fn();
 
     const { container } = renderWithClient(
-      <ElementMediaGalleryGrid
+      <ReferenceMediaGalleryGrid
         items={mockItems}
         primaryMediaId="item-1"
         onSetCover={onSetCover}
@@ -287,9 +287,9 @@ describe("ElementDetailsGallery - Studio Media Grid Form", () => {
     expect(screen.getByText("Supprimer l'image")).toBeDefined();
   });
 
-  it("does not render the 'Ajouter une image' tile in ElementMediaGalleryGrid even when onUploadFiles is provided", () => {
+  it("does not render the 'Ajouter une image' tile in ReferenceMediaGalleryGrid even when onUploadFiles is provided", () => {
     renderWithClient(
-      <ElementMediaGalleryGrid
+      <ReferenceMediaGalleryGrid
         items={mockItems}
         onUploadFiles={vi.fn()}
       />

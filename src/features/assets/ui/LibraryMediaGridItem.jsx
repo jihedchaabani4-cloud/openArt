@@ -5,12 +5,12 @@ import { useRouter } from "next/navigation";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 
 import { useRemoveWorkflow, useToggleWorkflowLike } from "@/features/workflows/api/workflowsApi";
-import { ImageStatusView } from "@/features/workflows/ui/ImageStatusView";
+import { MediaView } from "@/features/media";
 import { cn } from "@/shared/lib/utils";
 import { ButtonGroup } from "@/shared/ui/button-group";
 import { Button } from "@/shared/ui/button";
-import { ConfirmDeleteDialog } from "@/widgets/dialogs/ConfirmDeleteDialog";
-import { ActionBtn } from "@/widgets/StudioLayout/GenerationsStudio/MediaGridItem/ActionBtn";
+import { ConfirmDeleteDialog } from "@/shared/ui/ConfirmDeleteDialog";
+import { ActionBtn } from "@/shared/ui/action-button";
 import { resolveLibraryEntryMedia } from "../model/assetsLibrary";
 
 function isVideoUrl(url = "") {
@@ -68,7 +68,7 @@ export function LibraryMediaGridItem({
           }
         }}
         className={cn(
-          "group relative cursor-pointer overflow-hidden rounded-lg bg-surface-card border border-white/10 shadow-none transition-none hover:border-white/20",
+          "group relative cursor-pointer overflow-hidden rounded-xxxs bg-surface-card border border-white/10 shadow-none transition-none hover:border-white/20",
           isSelected && "ring-2 ring-white shadow-none",
           className
         )}
@@ -106,30 +106,26 @@ export function LibraryMediaGridItem({
             )}
           </div>
 
-          <ImageStatusView
-            status={status}
+          <MediaView
+            item={media}
             src={media.url}
-            alt={workflow.display_name || "Library media"}
-            aspect="auto"
+            isVideo={isVideo}
+            status={status}
             error={media.error_message}
-            showOverlay
-            className="h-full w-full object-cover"
-          >
-            {isVideo && media.url ? (
-              <video
-                ref={videoRef}
-                src={media.url}
-                className="h-full w-full object-cover"
-                muted
-                loop
-                playsInline
-              />
-            ) : null}
-          </ImageStatusView>
+            fit="cover"
+            videoRef={videoRef}
+            playOnHover={true}
+            autoPlay={false}
+            showLikedBadge={false}
+            showVideoBadge={false}
+            showHoverOverlay={false}
+            className="w-full h-full rounded-none bg-transparent shadow-none border-0"
+            mediaClassName="w-full h-full object-cover"
+          />
 
           <div className="absolute inset-0 z-10 flex flex-col justify-between p-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
             <div className="flex justify-end">
-              <ButtonGroup className="pointer-events-auto bg-black/50 backdrop-blur-md border border-white/15 rounded-lg p-0.5 shadow-none">
+              <ButtonGroup variant="pill" className="pointer-events-auto bg-black/50 backdrop-blur-md border border-white/15 p-0.5 shadow-none">
                 <ActionBtn
                   className="text-white hover:bg-white/10"
                   onClick={(e) => {

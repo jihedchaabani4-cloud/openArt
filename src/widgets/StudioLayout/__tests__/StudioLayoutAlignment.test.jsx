@@ -148,20 +148,25 @@ describe("EditNavbar & NavbarCore matches StudioNavbar layout", () => {
 });
 
 describe("Media Item border radius", () => {
-  it("uses rounded-lg instead of rounded-2xl across MediaGridItem and gallery views", () => {
-    const assetsFile = fs.readFileSync(
-      path.resolve(__dirname, "../../../app/cinema-studio/[projectId]/assets/page.js"),
+  it("centralizes rounded-xxxs media surface inside MediaView without gallery or page overrides", () => {
+    const mediaViewFile = fs.readFileSync(
+      path.resolve(__dirname, "../../../features/media/ui/MediaView.jsx"),
       "utf8"
     );
     const mediaGridItemFile = fs.readFileSync(
       path.resolve(__dirname, "../GenerationsStudio/MediaGridItem/MediaGridItem.jsx"),
       "utf8"
     );
+    const sharedGalleryGridFile = fs.readFileSync(
+      path.resolve(__dirname, "../../../features/media/ui/SharedGalleryGrid.jsx"),
+      "utf8"
+    );
 
-    expect(assetsFile).toContain("rounded-lg");
-    expect(assetsFile).not.toContain("rounded-2xl");
-    expect(mediaGridItemFile).toContain("rounded-lg");
+    expect(mediaViewFile).toContain("rounded-xxxs");
+    expect(mediaViewFile).not.toContain("rounded-2xl");
+    expect(mediaGridItemFile).toContain("rounded-xxxs");
     expect(mediaGridItemFile).not.toContain("rounded-2xl");
+    expect(sharedGalleryGridFile).not.toContain('itemClassName = "rounded-lg');
   });
 });
 
@@ -219,6 +224,28 @@ describe("Header backdrop bottom smoothing", () => {
     // Verifies that the mask has smooth feathered tapering stops at the bottom
     expect(globalsCssFile).toContain(".header-backdrop");
     expect(globalsCssFile).toMatch(/mask-image:.*rgba\(0,\s*0,\s*0,\s*0\.03\)/);
+  });
+});
+
+describe("Unified Studio Gallery CardComponent wiring", () => {
+  it("wires CardComponent={MediaGridItem} across assets, characters, elements, collection, and trash screens", () => {
+    const screenPaths = [
+      "../../../app/cinema-studio/[projectId]/assets/page.js",
+      "../../../app/cinema-studio/[projectId]/characters/page.js",
+      "../../../app/cinema-studio/[projectId]/elements/page.js",
+      "../../../app/cinema-studio/[projectId]/collection/[collectionId]/page.jsx",
+      "../../../features/trash/ui/TrashView.jsx",
+    ];
+
+    for (const relPath of screenPaths) {
+      const source = fs.readFileSync(path.resolve(__dirname, relPath), "utf8");
+      expect(source, `${relPath} must pass CardComponent={MediaGridItem} to SharedGalleryGrid`).toContain(
+        "CardComponent={MediaGridItem}"
+      );
+      expect(source, `${relPath} must not duplicate card styling via itemClassName`).not.toContain(
+        "itemClassName="
+      );
+    }
   });
 });
 

@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { AtMentionMenu } from "../../ui/common/editor/AtMentionMenu.jsx";
-import { ImportMediaPopover } from "@/widgets/ImportMediaDialog/ImportMediaPopover";
+import { ImportMediaPopover } from "@/features/media";
 
 /**
  * PromptBarTopPanel

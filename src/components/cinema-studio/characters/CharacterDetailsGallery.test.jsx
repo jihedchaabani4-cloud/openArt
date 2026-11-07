@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, cleanup, fireEvent } from "@testing-library/react";
 import { CharacterDetailsGallery } from "./CharacterDetailsGallery";
-import { CharacterMediaGalleryGrid, DEFAULT_CHARACTER_ROW_HEIGHT } from "./CharacterMediaGalleryGrid";
+import { ReferenceMediaGalleryGrid, DEFAULT_REFERENCE_ROW_HEIGHT as DEFAULT_CHARACTER_ROW_HEIGHT } from "../common/ReferenceMediaGalleryGrid";
 
 // Mock router
 vi.mock("next/navigation", () => ({
@@ -196,6 +196,155 @@ describe("CharacterDetailsGallery - Studio Media Grid Form", () => {
     expect(container.querySelectorAll(".group").length).toBe(2);
   });
 
+  it("keeps AI-generated detail image visible when role is 'detail' and step_id is 'image_generation'", () => {
+    const items = [
+      {
+        id: "ai-detail-1",
+        url: "https://example.com/ai-detail.png",
+        role: "detail",
+        step_id: "image_generation",
+        status: "completed",
+      },
+      {
+        id: "ai-detail-2",
+        url: "https://example.com/ai-detail-ref.png",
+        role: "reference",
+        step_id: "image_generation",
+        status: "completed",
+      },
+    ];
+
+    const { container } = renderWithClient(
+      <CharacterDetailsGallery
+        items={items}
+      />
+    );
+
+    // Both AI-generated detail items must remain visible
+    expect(container.querySelectorAll(".group").length).toBe(2);
+  });
+
+  it("excludes character sheet and turnaround media from the details gallery", () => {
+    const items = [
+      {
+        id: "sheet-1",
+        url: "https://example.com/sheet-1.png",
+        role: "sheet",
+        status: "completed",
+      },
+      {
+        id: "turnaround-1",
+        url: "https://example.com/turnaround-1.png",
+        role: "turnaround",
+        status: "completed",
+      },
+      {
+        id: "media-role-sheet",
+        url: "https://example.com/media-role-sheet.png",
+        mediaRole: "sheet",
+        status: "completed",
+      },
+      {
+        id: "valid-detail",
+        url: "https://example.com/valid-detail.png",
+        role: "detail",
+        status: "completed",
+      },
+    ];
+
+    const { container } = renderWithClient(
+      <CharacterDetailsGallery
+        items={items}
+      />
+    );
+
+    // Only valid-detail should pass
+    expect(container.querySelectorAll(".group").length).toBe(1);
+  });
+
+  it("excludes character sheet with conflicting metadata (e.g. raw.role vs step_id)", () => {
+    const items = [
+      {
+        id: "conflict-raw-sheet",
+        url: "https://example.com/raw-sheet.png",
+        raw: { role: "sheet" },
+        step_id: "upload", // uploaded turnaround sheet
+        status: "completed",
+      },
+      {
+        id: "conflict-media-role",
+        url: "https://example.com/media-turnaround.png",
+        mediaRole: "turnaround",
+        step_id: "character_detail",
+        status: "completed",
+      },
+      {
+        id: "pure-detail",
+        url: "https://example.com/pure-detail.png",
+        raw: { role: "detail" },
+        status: "completed",
+      },
+    ];
+
+    const { container } = renderWithClient(
+      <CharacterDetailsGallery
+        items={items}
+      />
+    );
+
+    // The two conflicting sheet items must be excluded; only pure-detail survives
+    expect(container.querySelectorAll(".group").length).toBe(1);
+  });
+
+  it("handles legacy media without explicit role using step_id provenance fallback", () => {
+    const legacyItems = [
+      {
+        id: "legacy-sheet",
+        url: "https://example.com/legacy-sheet.png",
+        // no role
+        step_id: "character_sheet",
+        status: "completed",
+      },
+      {
+        id: "legacy-image-gen",
+        url: "https://example.com/legacy-gen.png",
+        // no role: legacy character generation was sheet
+        step_id: "image_generation",
+        status: "completed",
+      },
+      {
+        id: "legacy-cae",
+        url: "https://example.com/legacy-cae.png",
+        // no role: CAE sheet
+        step_id: "CAE",
+        status: "completed",
+      },
+      {
+        id: "legacy-detail",
+        url: "https://example.com/legacy-detail.png",
+        // no role: detail step
+        step_id: "character_detail",
+        status: "completed",
+      },
+      {
+        id: "legacy-upload",
+        url: "https://example.com/legacy-upload.png",
+        // no role: direct upload
+        step_id: "upload",
+        status: "completed",
+      },
+    ];
+
+    const { container } = renderWithClient(
+      <CharacterDetailsGallery
+        items={legacyItems}
+      />
+    );
+
+    // Only legacy-detail and legacy-upload should be shown (2 out of 5)
+    expect(container.querySelectorAll(".group").length).toBe(2);
+  });
+
   it("renders FlowCharacterImagePreview for selecting details when items is empty", () => {
     const { container } = renderWithClient(
       <CharacterDetailsGallery
@@ -207,9 +356,9 @@ describe("CharacterDetailsGallery - Studio Media Grid Form", () => {
     expect(container.querySelector("[data-component='flow-character-image-preview']")).not.toBeNull();
   });
 
-  it("CharacterMediaGalleryGrid renders reference items cleanly without forced 1:1 or 4:3 aspect ratio", () => {
+  it("ReferenceMediaGalleryGrid renders reference items cleanly without forced 1:1 or 4:3 aspect ratio", () => {
     const { container } = renderWithClient(
-      <CharacterMediaGalleryGrid
+      <ReferenceMediaGalleryGrid
         items={mockItems}
         primaryMediaId="item-1"
         onUploadFiles={vi.fn()}
@@ -224,7 +373,7 @@ describe("CharacterDetailsGallery - Studio Media Grid Form", () => {
     });
   });
 
-  it("CharacterMediaGalleryGrid uses RowsPhotoAlbum photo layout conforming to studio media grid", () => {
+  it("ReferenceMediaGalleryGrid uses RowsPhotoAlbum photo layout conforming to studio media grid", () => {
     const multiAspectItems = [
       {
         id: "wide-1",
@@ -241,7 +390,7 @@ describe("CharacterDetailsGallery - Studio Media Grid Form", () => {
     ];
 
     const { container } = renderWithClient(
-      <CharacterMediaGalleryGrid
+      <ReferenceMediaGalleryGrid
         items={multiAspectItems}
         onUploadFiles={vi.fn()}
       />
@@ -253,7 +402,7 @@ describe("CharacterDetailsGallery - Studio Media Grid Form", () => {
 
   it("uses the 16px reference gallery spacing by default", () => {
     const { container } = renderWithClient(
-      <CharacterMediaGalleryGrid items={mockItems} />
+      <ReferenceMediaGalleryGrid items={mockItems} />
     );
 
     const photoAlbum = container.querySelector(".react-photo-album");
@@ -265,7 +414,7 @@ describe("CharacterDetailsGallery - Studio Media Grid Form", () => {
 
   it("honors an explicit spacing prop for reference grids", () => {
     const { container } = renderWithClient(
-      <CharacterMediaGalleryGrid items={mockItems} spacing={4} />
+      <ReferenceMediaGalleryGrid items={mockItems} spacing={4} />
     );
 
     const photoAlbum = container.querySelector(".react-photo-album");
@@ -284,7 +433,7 @@ describe("CharacterDetailsGallery - Studio Media Grid Form", () => {
     const onDeleteImage = vi.fn();
 
     const { container } = renderWithClient(
-      <CharacterMediaGalleryGrid
+      <ReferenceMediaGalleryGrid
         items={mockItems}
         primaryMediaId="item-1"
         onSetCover={onSetCover}
@@ -308,17 +457,17 @@ describe("CharacterDetailsGallery - Studio Media Grid Form", () => {
     expect(deleteBtns[0].textContent).toContain("delete");
   });
 
-  it("renders cards with rounded-lg border radius matching media item standard", () => {
+  it("renders cards with rounded-xxxs border radius matching media item standard", () => {
     const { container } = renderWithClient(
-      <CharacterMediaGalleryGrid
+      <ReferenceMediaGalleryGrid
         items={mockItems}
       />
     );
 
-    const cards = container.querySelectorAll(".rounded-lg");
+    const cards = container.querySelectorAll(".rounded-xxxs");
     expect(cards.length).toBeGreaterThan(0);
     cards.forEach((card) => {
-      expect(card.className).toContain("rounded-lg");
+      expect(card.className).toContain("rounded-xxxs");
       expect(card.className).not.toContain("rounded-2xl");
     });
   });
@@ -328,7 +477,7 @@ describe("CharacterDetailsGallery - Studio Media Grid Form", () => {
     const onDeleteImage = vi.fn();
 
     const { container } = renderWithClient(
-      <CharacterMediaGalleryGrid
+      <ReferenceMediaGalleryGrid
         items={mockItems}
         primaryMediaId="item-1"
         onSetCover={onSetCover}
@@ -346,9 +495,9 @@ describe("CharacterDetailsGallery - Studio Media Grid Form", () => {
     expect(screen.getByText("Supprimer l'image")).toBeDefined();
   });
 
-  it("does not render the 'Ajouter une image' tile in CharacterMediaGalleryGrid even when onUploadFiles is provided", () => {
+  it("does not render the 'Ajouter une image' tile in ReferenceMediaGalleryGrid even when onUploadFiles is provided", () => {
     renderWithClient(
-      <CharacterMediaGalleryGrid
+      <ReferenceMediaGalleryGrid
         items={mockItems}
         onUploadFiles={vi.fn()}
       />
@@ -358,15 +507,25 @@ describe("CharacterDetailsGallery - Studio Media Grid Form", () => {
     expect(screen.queryByTitle("Ajouter une image de référence")).toBeNull();
   });
 
-  it("supports backward compatibility when passing displayDetailImages or detailPhotos", () => {
+  it("supports all existing supported detail image formats (items, displayDetailImages, detailPhotos)", () => {
+    // 1. items prop
     const { container: container1 } = renderWithClient(
       <CharacterDetailsGallery
-        displayDetailImages={mockItems}
+        items={mockItems}
       />
     );
     expect(container1.querySelectorAll(".group").length).toBe(2);
 
+    // 2. displayDetailImages prop
     const { container: container2 } = renderWithClient(
+      <CharacterDetailsGallery
+        displayDetailImages={mockItems}
+      />
+    );
+    expect(container2.querySelectorAll(".group").length).toBe(2);
+
+    // 3. detailPhotos prop with { key, src }
+    const { container: container3 } = renderWithClient(
       <CharacterDetailsGallery
         detailPhotos={[
           { key: "p-1", src: "https://example.com/p1.png" },
@@ -374,6 +533,17 @@ describe("CharacterDetailsGallery - Studio Media Grid Form", () => {
         ]}
       />
     );
-    expect(container2.querySelectorAll(".group").length).toBe(2);
+    expect(container3.querySelectorAll(".group").length).toBe(2);
+
+    // 4. detailPhotos prop with { ref }
+    const { container: container4 } = renderWithClient(
+      <CharacterDetailsGallery
+        detailPhotos={[
+          { ref: { id: "p-ref-1", url: "https://example.com/p1.png", role: "detail" } },
+          { ref: { id: "p-ref-2", url: "https://example.com/p2.png", role: "detail" } },
+        ]}
+      />
+    );
+    expect(container4.querySelectorAll(".group").length).toBe(2);
   });
 });

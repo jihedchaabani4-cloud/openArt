@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { api } from '@/shared/api/client';
 import { queryKeys } from '@/shared/api/queryKeys';
 
-export function useLibraryWorkflowDetail(workflowId, { enabled = false, initialData } = {}) {
+export function useLibraryWorkflowDetail(workflowId, { enabled = true, initialData } = {}) {
   return useQuery({
     queryKey: queryKeys.library.detail(workflowId),
     queryFn: async () => {

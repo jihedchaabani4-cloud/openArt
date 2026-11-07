@@ -5,7 +5,7 @@ import { cn } from "@/shared/lib/utils"
 import { StudioSettingsDropdown } from "./StudioSettingsDropdown"
 import { NavbarImportButton } from "./NavbarImportButton"
 import { NavbarRestoreAllButton } from "./NavbarRestoreAllButton"
-import { UserDropdown } from "./UserDropdown"
+import { UserDropdown } from "@/widgets/navigation/UserDropdown"
 
 export const StudioNavbarRight = React.memo(function StudioNavbarRight({ searchExpanded }) {
     return (

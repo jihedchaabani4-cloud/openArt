@@ -41,8 +41,8 @@ const testModels = [
     },
   },
   {
-    id: "seedance_2_5_extend",
-    name: "ByteDance Seedance 2.5 Extend",
+    id: "wan_3_0",
+    name: "Wan 3.0",
     domain: "video",
     parameters: {
       prompt: { type: "text" },
@@ -54,11 +54,11 @@ const testModels = [
 
 test("Model Classification: isFrameModel identifies models with input_image and last_frame", () => {
   const seedance = testModels.find((m) => m.id === "seedance_2_5");
-  const seedanceExtend = testModels.find((m) => m.id === "seedance_2_5_extend");
+  const wan = testModels.find((m) => m.id === "wan_3_0");
   const nanobana = testModels.find((m) => m.id === "nanobana_pro");
 
   assert.equal(isFrameModel(seedance), true);
-  assert.equal(isFrameModel(seedanceExtend), false);
+  assert.equal(isFrameModel(wan), false);
   assert.equal(isFrameModel(nanobana), false);
 });
 

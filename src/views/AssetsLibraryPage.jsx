@@ -18,7 +18,7 @@ import { useInfiniteUserLibrary } from "@/features/media";
 import { useRemoveWorkflow, useToggleWorkflowLike } from "@/features/workflows/api/workflowsApi";
 import { downloadAssetsAsZip } from "@/shared/api/assets";
 import { useAuthSession } from "@/shared/api/auth";
-import { ConfirmDeleteDialog } from "@/widgets/dialogs/ConfirmDeleteDialog";
+import { ConfirmDeleteDialog } from "@/shared/ui/ConfirmDeleteDialog";
 
 export function AssetsLibraryPage() {
   const loadMoreRef = React.useRef(null);

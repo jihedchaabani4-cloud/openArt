@@ -10,7 +10,7 @@ import { cn } from "@/shared/lib/utils"
 import { StudioNavbarLeft } from "./ui/StudioNavbarLeft"
 import { StudioNavbarCenter } from "./ui/StudioNavbarCenter"
 import { StudioNavbarRight } from "./ui/StudioNavbarRight"
-import { UserDropdown } from "./ui/UserDropdown"
+import { UserDropdown } from "@/widgets/navigation/UserDropdown"
 
 import { useNavbarSearch } from "./hooks/useNavbarSearch"
 

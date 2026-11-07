@@ -3,12 +3,12 @@
 import React, { useState } from "react";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { useDeleteMedia, useDetachMedia } from "../api/workflowsApi";
-import { ActionBtn } from "@/widgets/StudioLayout/GenerationsStudio/MediaGridItem/ActionBtn";
+import { ActionBtn } from "@/shared/ui/action-button";
 import { ButtonGroup } from "@/shared/ui/button-group";
 import { cn } from "@/shared/lib/utils";
 import { getItemMetadata } from "@/shared/lib/generationUtils";
-import { CoreMediaItemView } from "@/widgets/CoreMediaItemView";
-import { ConfirmDeleteDialog } from "@/widgets/dialogs/ConfirmDeleteDialog";
+import { MediaView } from "@/features/media";
+import { ConfirmDeleteDialog } from "@/shared/ui/ConfirmDeleteDialog";
 
 function tokenizePrompt(prompt = "") {
   const tokens = [];
@@ -107,8 +107,8 @@ function WorkflowMediaGalleryCard({
 
   return (
     <div className="flex flex-col gap-3 group/item">
-      {/* Main Media Card powered by CoreMediaItemView with integrated right-click context menu */}
-      <CoreMediaItemView
+      {/* Main Media Card powered by MediaView with integrated right-click context menu */}
+      <MediaView
         item={item}
         src={displayUrl}
         isVideo={iVideo}
@@ -140,7 +140,8 @@ function WorkflowMediaGalleryCard({
         topLeft={
           <div className="opacity-0 group-hover:opacity-100 transition-opacity">
             <ButtonGroup 
-              className="bg-white/60 backdrop-blur-md rounded-lg border-0 border-none scale-90 origin-top-left"
+              variant="pill"
+              className="bg-white/60 backdrop-blur-md border-0 border-none scale-90 origin-top-left"
               onClick={(e) => e.stopPropagation()}
             >
               <ActionBtn 
@@ -167,7 +168,7 @@ function WorkflowMediaGalleryCard({
         }
         topRight={
           iVideo ? (
-            <div className="p-1.5 bg-black/60 backdrop-blur-md rounded-lg border border-white/10">
+            <div className="p-1.5 bg-black/60 backdrop-blur-md rounded-full border border-white/10">
               <GoogleIcon iconName="play_arrow" fill={true} className="text-xs text-white" />
             </div>
           ) : null
@@ -207,7 +208,7 @@ function WorkflowMediaGalleryCard({
             return (
               <div 
                 key={idx}
-                className="relative w-10 h-10 flex items-center justify-center rounded-lg overflow-hidden border border-white/10 bg-white/5 shrink-0"
+                className="relative w-10 h-10 flex items-center justify-center rounded-sm overflow-hidden border border-white/10 bg-white/5 shrink-0"
               >
                 <GoogleIcon iconName="image" className="absolute text-base text-white/20" />
                 <img 

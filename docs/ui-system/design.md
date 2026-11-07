@@ -54,6 +54,7 @@ The system operates across three distinct architectural layers:
 | Semantic Token | Value | Component Role | CSS Variable | Tailwind Utility |
 |---|---|---|---|---|
 | **`none`** | **0px** | Flush layouts, full-bleed media | `--radius-none` | `rounded-none` |
+| **`hairline` / `xxxs`** | **1px** | Media elements (images, videos, media layers) | `--radius-hairline` / `--radius-xxxs` | `rounded-xxxs` |
 | **`sharp`** | **4px** | Buttons, Inputs, Badges, Tooltips, Checkboxes | `--radius-sharp` / `--radius-sm` | `rounded-sharp` / `rounded-sm` |
 | **`subtle`** | **6px** | Secondary tags, intermediate chips | `--radius-subtle` / `--radius-md` | `rounded-subtle` / `rounded-md` |
 | **`comfortable`**| **8px** | Cards, Dropdowns, Context Menus, Popovers, Panels | `--radius-comfortable` / `--radius-lg` | `rounded-comfortable` / `rounded-lg` |
@@ -102,7 +103,7 @@ Every shared component has explicit default bindings. Feature callsites must NOT
 | **`<Tabs />`** | `full` (pills) / `comfortable` (studio) | List: 36px (h-9); Trigger: 28px (h-7) | List: `p-1`; Trigger: `px-3 py-1.5` | `gap-1` | Flat `bg-white/5`, active solid `bg-white` |
 | **`<Tooltip />`** | `sharp` (4px) | Auto fit | `px-2.5 py-1` | `gap-1.5` | `bg-card`, hairline `border-white/10`, `shadow-none` |
 | **`<Popover />`** | `comfortable` (8px) | Width: 288px (w-72) | `p-4` | `gap-2` | `bg-card`, hairline `border-white/10`, `shadow-none` |
-| **`<SharedGalleryGrid />`** | `comfortable` (8px) card | Rows-layout responsive | N/A | Dynamic: S (`xxs` 4px, default), M (`sm` 8px), L (`base` 16px) | Flat surface, hairline `border-white/10`, `shadow-none` |
+| **`<SharedGalleryGrid />`** | `hairline` / `xxxs` (1px) media | Rows-layout responsive | N/A | Dynamic: S (`xxs` 4px, default), M (`sm` 8px), L (`base` 16px) | Flat surface, hairline `border-white/10`, `shadow-none` |
 | **`<Skeleton />`** | Shape-mapped (`sharp`/`comfortable`/`full`) | Sizing via caller | `p-0` | N/A | `bg-white/5 animate-pulse`, `border-none` |
 
 > [!NOTE]
@@ -398,6 +399,7 @@ Every shared primitive in `src/shared/ui/` has an exact, verified contract.
 ### 5.1 Border Radius Tokens (Runway Standard 4-Tier Scale)
 | UI Element Category | Base Token | Value | Canonical Tailwind Class | Description |
 |---|---|---|---|---|
+| **Media Elements (Images, Videos, Media Layers)** | `--radius-xxxs` | **1px** (`hairline`) | `rounded-xxxs` | Hairline precision radius for media items |
 | **Buttons, Inputs, Badges, Menu Items, Tooltips** | `--radius-sm` | **4px** (`sharp`) | `rounded-sm` | Sharp geometric corners across all action targets |
 | **Subtle Chips & Secondary Tags** | `--radius-md` | **6px** (`subtle`) | `rounded-md` | Soft intermediate chip containers |
 | **Cards, Dropdowns, Menus, Panels, Popovers** | `--radius-lg` | **8px** (`comfortable`) | `rounded-lg` | Standard card and popover panels |

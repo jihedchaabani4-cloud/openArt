@@ -4,14 +4,14 @@ import React, { useRef } from "react";
 import { Button } from "@/shared/ui/button";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { cn } from "@/shared/lib/utils";
-import { ElementMediaGalleryGrid } from "./ElementMediaGalleryGrid";
+import { ReferenceMediaGalleryGrid } from "../common/ReferenceMediaGalleryGrid";
 import { getAcceptedMimeTypes, ELEMENT_REFERENCE_UPLOAD_POLICY } from "@/features/media";
 
 /**
  * ElementDetailsGallery
  * Right stage for the Element edit view:
  * - Clean header with counter and compact actions (no big clumsy button)
- * - Grid of 1 to 6 reference photos powered by ElementMediaGalleryGrid & MediaItemView
+ * - Grid of 1 to 6 reference photos powered by ReferenceMediaGalleryGrid & MediaItemView
  * - Direct mediaId support on cards with authentic ratio and cover badge
  * - Sleek minimal add tile and empty state
  */
@@ -93,9 +93,9 @@ export function ElementDetailsGallery({
         </div>
       )}
 
-      {/* ── Gallery Body: Element Media Gallery Grid or Minimal Empty State ── */}
+      {/* ── Gallery Body: Reference Media Gallery Grid or Minimal Empty State ── */}
       {validItems.length > 0 ? (
-        <ElementMediaGalleryGrid
+        <ReferenceMediaGalleryGrid
           workflow={workflow}
           items={validItems}
           primaryMediaId={primaryMediaId}

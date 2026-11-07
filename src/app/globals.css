@@ -186,6 +186,7 @@ mat-icon {
 
   /* Canonical Runway Design Radius Tokens (Theme Inline) */
   --radius-none: 0px;
+  --radius-xxxs: var(--radius-xxxs, 1px);
   --radius-xs: var(--radius-xs, 2px);
   --radius-sm: var(--radius-sm, 4px);
   --radius-md: var(--radius-md, 6px);
@@ -196,6 +197,7 @@ mat-icon {
   --radius-full: var(--radius-full, 9999px);
 
   /* Named Runway Tokens */
+  --radius-hairline: var(--radius-xxxs, 1px);
   --radius-sharp: var(--radius-sm, 4px);
   --radius-subtle: var(--radius-md, 6px);
   --radius-comfortable: var(--radius-lg, 8px);
@@ -300,6 +302,7 @@ mat-icon {
      To change radiuses across the whole site, edit these base tokens:
      ═════════════════════════════════════════════════════════════════ */
   --radius-none: 0px;
+  --radius-xxxs: 1px;    /* Runway Hairline / Micro: Media elements (1px) */
   --radius-xs: 2px;
   --radius-sm: 4px;      /* Runway Sharp: Buttons, Inputs, Badges, Menu items (4px) */
   --radius-md: 6px;      /* Runway Subtle: Secondary tags & chips (6px) */
@@ -310,6 +313,7 @@ mat-icon {
   --radius-full: 9999px; /* Runway Pills & circular avatars */
 
   /* Named Runway Design Tokens */
+  --radius-hairline: var(--radius-xxxs, 1px);
   --radius-sharp: var(--radius-sm, 4px);
   --radius-subtle: var(--radius-md, 6px);
   --radius-comfortable: var(--radius-lg, 8px);
@@ -330,10 +334,11 @@ mat-icon {
   --spacing-section-xxl: 78px;
 
   /* Component bindings derived 100% from base tokens */
+  --media-border-radius: var(--radius-xxxs, 1px);
   --button-border-radius: var(--radius-sm, 4px);
-  --card-border-radius: var(--radius-lg, 8px);
+  --card-border-radius: var(--radius-xxxs, 1px);
   --badge-border-radius: var(--radius-sm, 4px);
-  --tile-border-radius: var(--radius-lg, 8px);
+  --tile-border-radius: var(--radius-xxxs, 1px);
 
   /* Aliases & Material/Flow compatibility */
   --mat-button-filled-container-shape: var(--radius-sm, 4px);
@@ -1456,18 +1461,6 @@ flow-error-tile {
 }
 
 /* ── Google VideoFX Collection Tile ── */
-.collection-tile {
-  border-radius: var(--tile-border-radius, 8px) !important;
-  box-shadow: none !important;
-  border: 1px solid rgba(255, 255, 255, 0.10) !important;
-  transition: transform 0.2s ease, border-color 0.2s ease;
-  cursor: pointer;
-}
-
-.collection-tile:hover {
-  box-shadow: none !important;
-  border-color: rgba(255, 255, 255, 0.20) !important;
-}
 
 .collection-tile-empty {
   background: var(--collection-empty-thumbnail-background, linear-gradient(1deg, #1e1f20 0.49%, #282a2c 99.15%)) !important;
@@ -1480,7 +1473,6 @@ flow-error-tile {
   background: var(--tile-scrim-gradient, linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.04) 20%, rgba(0, 0, 0, 0.12) 40%, rgba(0, 0, 0, 0.25) 60%, rgba(0, 0, 0, 0.4) 80%, rgba(0, 0, 0, 0.5)));
 }
 
-.collection-tile .title,
 .collection-title-container {
   --title-padding-top: 3rem;
   --title-padding-inline-end: 4.75rem;
@@ -1500,7 +1492,6 @@ flow-error-tile {
   -webkit-font-smoothing: antialiased;
 }
 
-.collection-tile .title .title-text,
 .collection-title-container .title-text {
   pointer-events: auto;
   cursor: pointer;
@@ -1511,13 +1502,11 @@ flow-error-tile {
   transition: color 0.15s ease;
 }
 
-.collection-tile .title .title-text:hover,
 .collection-title-container .title-text:hover {
   color: #ffffff;
 }
 
 @media (max-width: 640px) {
-  .collection-tile .title,
   .collection-title-container {
     --title-padding-top: 1.5rem;
     --title-padding-inline-end: 2rem;

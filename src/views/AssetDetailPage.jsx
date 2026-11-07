@@ -66,7 +66,7 @@ function MediaViewer({ media, alt, isVideo }) {
         autoPlay
         loop
         playsInline
-        className="block bg-black object-contain"
+        className="block bg-black object-contain rounded-xxxs"
         style={viewerStyle}
       />
     );
@@ -76,7 +76,7 @@ function MediaViewer({ media, alt, isVideo }) {
     <img
       src={media.url}
       alt={alt}
-      className="block bg-black object-contain"
+      className="block bg-black object-contain rounded-xxxs"
       style={viewerStyle}
     />
   );

@@ -292,7 +292,7 @@ export function NewElementDialog({ open, onOpenChange, projectId: propProjectId 
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
             className={cn(
-              "flex-1 min-h-[300px] h-full rounded-lg bg-surface-card flex flex-col items-center justify-center relative overflow-hidden transition-all duration-300 border border-white/5",
+              "flex-1 min-h-[300px] h-full rounded-xxxs bg-surface-card flex flex-col items-center justify-center relative overflow-hidden transition-all duration-300 border border-white/5",
               isDragging && "bg-surface-elevated scale-[0.995]"
             )}
           >
@@ -322,7 +322,7 @@ export function NewElementDialog({ open, onOpenChange, projectId: propProjectId 
               /* Media Preview Area */
               <div className="w-full h-full flex flex-col p-3 gap-3">
                 {/* Hero Preview Frame */}
-                <div className="flex-1 min-h-0 w-full relative flex items-center justify-center rounded-lg overflow-hidden bg-black/40">
+                <div className="flex-1 min-h-0 w-full relative flex items-center justify-center rounded-xxxs overflow-hidden bg-black/40">
                   {activeMedia?.isVideo ? (
                     <video
                       src={activeMedia.url}
@@ -361,7 +361,7 @@ export function NewElementDialog({ open, onOpenChange, projectId: propProjectId 
                         key={idx}
                         onClick={() => setActivePreviewIndex(idx)}
                         className={cn(
-                          "relative size-14 rounded-sm overflow-hidden cursor-pointer shrink-0 border-none transition-all",
+                          "relative size-14 rounded-xxxs overflow-hidden cursor-pointer shrink-0 border-none transition-all",
                           isSelected
                             ? "ring-2 ring-white/90 opacity-100"
                             : "opacity-50 hover:opacity-90"

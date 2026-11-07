@@ -1,6 +1,6 @@
 "use client";
 
-import { ProjectError } from "@/shared/ui/ProjectError";
+import { ProjectError } from "@/features/projects/ui/ProjectError";
 
 export default function GlobalProjectNotFound() {
   return <ProjectError />;

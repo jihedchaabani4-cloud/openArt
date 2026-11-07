@@ -69,6 +69,7 @@ Enforced strictly across all components (Single Standard Token, Zero Redundant C
 
 | Geometry Tier | Value | CSS Token | Canonical Tailwind Token | Target UI Elements |
 |---|---|---|---|---|
+| **Hairline / Micro** | `1px` | `--radius-xxxs` | `rounded-xxxs` | Media elements (images, videos, media layers) |
 | **Sharp** | `4px` | `--radius-sm` | `rounded-sm` | Buttons, Inputs, Badges, Micro Tags, Tooltips, Menu Items |
 | **Subtle** | `6px` | `--radius-md` | `rounded-md` | Subtle links, intermediate chips |
 | **Comfortable** | `8px` | `--radius-lg` | `rounded-lg` | Cards, Dropdowns, Context Menus, Popovers, Panels |

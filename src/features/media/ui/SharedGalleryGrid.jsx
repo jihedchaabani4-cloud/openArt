@@ -111,7 +111,7 @@ function computePhotoDimensions(mediaItem, workflow = null) {
         : mediaItem?.kind === "video"
         ? "16/9"
         : "3/4";
-    const [wStr, hStr] = String(aspect).split("/");
+    const [wStr, hStr] = String(aspect).replace(":", "/").split("/");
     wNum = parseFloat(wStr) || 3;
     hNum = parseFloat(hStr) || 4;
   }
@@ -140,15 +140,18 @@ export const SharedGalleryGrid = React.memo(function SharedGalleryGrid({
   gridSpacing = "sm",
   variant = "card",
   CardComponent = null,
+  cardProps = null,
   projectId = null,
+  workflow = null,
   onWorkflowClick,
   onCollectionClick,
   onItemClick,
   onSelect,
-  itemClassName = "rounded-lg border border-white/10 shadow-none",
+  itemClassName = "",
   defaultContainerWidth = 1200,
   targetRowHeight: propTargetRowHeight = null,
   spacing: propSpacing = null,
+  rowConstraints: propRowConstraints = null,
 }) {
   const density = getStudioGridDensity(gridSize, gridSpacing);
   const targetRowHeight = propTargetRowHeight ?? density.targetRowHeight;
@@ -169,7 +172,7 @@ export const SharedGalleryGrid = React.memo(function SharedGalleryGrid({
       return items.map((m, idx) => ({
         type: "media",
         data: m,
-        key: m?.id || m?.name || `media-${idx}`,
+        key: m?.id || m?.name || m?.asset_id || `media-${idx}`,
       }));
     }
     return [];
@@ -213,10 +216,10 @@ export const SharedGalleryGrid = React.memo(function SharedGalleryGrid({
         return acc;
       }
 
-      const mediaItem = resolveCachedMediaItem(entry.data ?? entry);
+      const mediaItem = resolveCachedMediaItem(entry.data ?? entry, workflow);
       if (!mediaItem) return acc;
 
-      const { width, height } = computePhotoDimensions(mediaItem, null);
+      const { width, height } = computePhotoDimensions(mediaItem, workflow);
       acc.push({
         src: mediaItem.url || EMPTY_IMAGE_SRC,
         width,
@@ -227,7 +230,7 @@ export const SharedGalleryGrid = React.memo(function SharedGalleryGrid({
       });
       return acc;
     }, []);
-  }, [normalizedEntries, collectionCoverById]);
+  }, [normalizedEntries, collectionCoverById, workflow]);
 
   const DefaultCard = variant === "tile" ? MediaTile : MediaCard;
   const ResolvedCard = CardComponent || DefaultCard;
@@ -247,6 +250,7 @@ export const SharedGalleryGrid = React.memo(function SharedGalleryGrid({
             className={itemClassName}
             width={width}
             height={height}
+            {...cardProps}
           />
         );
       }
@@ -264,6 +268,7 @@ export const SharedGalleryGrid = React.memo(function SharedGalleryGrid({
             className={itemClassName}
             width={width}
             height={height}
+            {...cardProps}
           />
         );
       }
@@ -277,6 +282,7 @@ export const SharedGalleryGrid = React.memo(function SharedGalleryGrid({
           className={itemClassName}
           width={width}
           height={height}
+          {...cardProps}
         />
       );
     },
@@ -288,6 +294,7 @@ export const SharedGalleryGrid = React.memo(function SharedGalleryGrid({
       onItemClick,
       onSelect,
       itemClassName,
+      cardProps,
     ]
   );
 
@@ -304,7 +311,7 @@ export const SharedGalleryGrid = React.memo(function SharedGalleryGrid({
       defaultContainerWidth={defaultContainerWidth}
       targetRowHeight={targetRowHeight}
       spacing={spacing}
-      rowConstraints={{ singleRowMaxHeight }}
+      rowConstraints={propRowConstraints ?? { singleRowMaxHeight }}
       render={albumRender}
     />
   );

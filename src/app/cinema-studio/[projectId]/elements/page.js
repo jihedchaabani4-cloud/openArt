@@ -16,7 +16,7 @@ import { SharedGalleryGrid } from "@/features/media";
 import { MediaGridItem } from "@/widgets/StudioLayout/GenerationsStudio/MediaGridItem";
 import { HowToDrawer, ElementsEmptyState } from "@/components/cinema-studio/elements";
 import { useWorkflowDelete } from "@/features/workflows";
-import { ConfirmDeleteDialog } from "@/widgets/dialogs/ConfirmDeleteDialog";
+import { ConfirmDeleteDialog } from "@/shared/ui/ConfirmDeleteDialog";
 import { NewElementDialog } from "@/widgets/NewElementDialog";
 
 const PAGE_SIZE = 30;
@@ -161,7 +161,6 @@ export default function ElementsPage({ params }) {
                                 projectId={projectId}
                                 CardComponent={MediaGridItem}
                                 onWorkflowClick={handleWorkflowClick}
-                                itemClassName="rounded-lg border border-white/10 shadow-none"
                             />
                             {hasMore && (
                                 <div className="flex justify-center pt-2 text-sm text-white/45">

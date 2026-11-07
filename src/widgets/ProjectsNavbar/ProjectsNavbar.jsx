@@ -7,7 +7,7 @@ import { motion, useScroll, useMotionValueEvent } from "framer-motion"
 import { Button } from "@/shared/ui/button"
 import { LoginDialog } from "@/components/LoginDialog"
 import { useAuthSession } from "@/shared/api/auth"
-import { UserDropdown } from "@/widgets/StudioNavbar/ui/UserDropdown"
+import { UserDropdown } from "@/widgets/navigation/UserDropdown"
 import { usePackages, useCheckout } from "@/features/payments/api/paymentsApi"
 import { PackageSelectionDialog } from "@/features/payments/ui/PackageSelectionDialog"
 

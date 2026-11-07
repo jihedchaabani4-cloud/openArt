@@ -1,16 +1,17 @@
 "use client";
-/* eslint-disable @next/next/no-img-element */
 
 import React, { useRef, useEffect } from "react";
 import { motion, useMotionValue, useTransform } from "framer-motion";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/button";
+import { MediaView } from "./MediaView";
 
 /**
  * MediaViewCard - High-end, clean media display and selection tile
- * Modeled after Cinema Studio's MediaGridItem (rounded-2xl, video hover scrub, sleek shadow)
- * Pure media presentation: NO menus, NO action buttons, NO text labels.
+ * Modeled after Cinema Studio's MediaGridItem (rounded-xxxs, video hover scrub, sleek shadow)
+ * Delegates media rendering and playback to CoreMediaItemView while owning
+ * Picker-specific selection, highlight, disabled states, ref forwarding, and badges.
  */
 export const MediaViewCard = React.forwardRef(function MediaViewCard({
   item,
@@ -141,7 +142,7 @@ export const MediaViewCard = React.forwardRef(function MediaViewCard({
         aspectRatio: aspectRatio || undefined,
       }}
       className={cn(
-        "group relative rounded-lg overflow-hidden bg-[#0a0a0a] select-none border-none p-0 block text-left outline-none h-auto transition-none",
+        "group relative rounded-xxxs overflow-hidden bg-[#0a0a0a] select-none border-none p-0 block text-left outline-none h-auto transition-none",
         "shadow-none",
         isHighlighted
           ? "ring-2 ring-white shadow-none z-10"
@@ -154,25 +155,34 @@ export const MediaViewCard = React.forwardRef(function MediaViewCard({
         className
       )}
     >
-      {/* Media Layer */}
-      {effectiveIsVideo ? (
-        <video
-          ref={videoRef}
-          src={effectiveUrl}
-          style={{ width: "100%", height: "100%", objectFit: "cover" }}
-          muted
-          loop
-          playsInline
-        />
-      ) : (
-        <img
-          src={effectiveUrl}
-          alt=""
-          style={{ width: "100%", height: "100%", objectFit: "cover" }}
-          loading="lazy"
-        />
-      )}
-
+      {/* Delegated Media Layer */}
+      <MediaView
+        item={item}
+        src={effectiveUrl}
+        isVideo={effectiveIsVideo}
+        status={item?.status || "completed"}
+        fit="cover"
+        videoRef={videoRef}
+        playOnHover={true}
+        autoPlay={false}
+        showLikedBadge={false}
+        showVideoBadge={false}
+        showHoverOverlay={false}
+        className="w-full h-full rounded-none bg-transparent shadow-none border-0"
+        onMouseLeave={() => {
+          progress.set(0);
+        }}
+        bottom={
+          effectiveIsVideo ? (
+            <div className="w-full h-0.5 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+              <motion.div
+                className="h-full bg-white shadow-none"
+                style={{ width: progressWidth }}
+              />
+            </div>
+          ) : null
+        }
+      >
       {/* Video Indicator Corner Badge */}
       {effectiveIsVideo && (
         <div className="absolute bottom-2.5 right-2.5 z-20 flex items-center justify-center w-7 h-7 rounded-full bg-black/40 backdrop-blur-md border border-white/10 pointer-events-none shadow-none">
@@ -194,19 +204,10 @@ export const MediaViewCard = React.forwardRef(function MediaViewCard({
         </div>
       )}
 
-      {/* Video Scrub Bar (visible on hover) */}
-      {effectiveIsVideo && (
-        <div className="absolute bottom-0 left-0 w-full h-0.5 bg-white/20 z-30 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-          <motion.div
-            className="h-full bg-white shadow-none"
-            style={{ width: progressWidth }}
-          />
-        </div>
-      )}
 
       {/* Selection Overlay & Checkmark */}
       {isSelected && (
-        <div className="absolute inset-0 bg-white/10 flex items-center justify-center z-20 pointer-events-none">
+        <div className="absolute inset-0 bg-white/10 flex items-center justify-center z-20 pointer-events-none rounded-xxxs">
           <div className="w-7 h-7 bg-white text-black rounded-full flex items-center justify-center shadow-none">
             <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
               <path d="M13.485 3.485a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0l-3.25-3.25a.75.75 0 1 1 1.06-1.06L5.75 10.19l6.72-6.705a.75.75 0 0 1 1.015 0z" />
@@ -214,6 +215,7 @@ export const MediaViewCard = React.forwardRef(function MediaViewCard({
           </div>
         </div>
       )}
+      </MediaView>
     </Button>
   );
 });

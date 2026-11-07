@@ -4,7 +4,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
-import { UserDropdown } from "@/widgets/StudioNavbar/ui/UserDropdown";
+import { UserDropdown } from "@/widgets/navigation/UserDropdown";
 
 export function AssetsNavbar({ hidden = false }) {
   return (

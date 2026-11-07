@@ -80,7 +80,7 @@ export const MediaRenderer = React.memo(
         role="status"
         aria-label="Processing media"
         className={cn(
-          "relative flex flex-col items-center justify-center overflow-hidden rounded-lg bg-neutral-900/60 p-4 text-neutral-400 select-none animate-pulse",
+          "relative flex flex-col items-center justify-center bg-neutral-900/60 p-4 text-neutral-400 select-none animate-pulse",
           className
         )}
         style={containerStyle}
@@ -100,7 +100,7 @@ export const MediaRenderer = React.memo(
         role="alert"
         aria-label="Media generation failed"
         className={cn(
-          "relative flex flex-col items-center justify-center overflow-hidden rounded-lg bg-red-950/20 border border-red-900/40 p-4 text-red-300 text-center select-none",
+          "relative flex flex-col items-center justify-center bg-red-950/20 p-4 text-red-300 text-center select-none",
           className
         )}
         style={containerStyle}
@@ -122,7 +122,7 @@ export const MediaRenderer = React.memo(
         role="img"
         aria-label="No media available"
         className={cn(
-          "relative flex flex-col items-center justify-center overflow-hidden rounded-lg bg-neutral-900/40 border border-neutral-800/60 p-4 text-neutral-500 select-none",
+          "relative flex flex-col items-center justify-center bg-neutral-900/40 p-4 text-neutral-500 select-none",
           className
         )}
         style={containerStyle}
@@ -141,7 +141,7 @@ export const MediaRenderer = React.memo(
     return (
       <div
         ref={ref}
-        className={cn("relative overflow-hidden rounded-lg bg-black", className)}
+        className={cn("relative bg-black", className)}
         style={containerStyle}
       >
         <video
@@ -169,7 +169,7 @@ export const MediaRenderer = React.memo(
   return (
     <div
       ref={ref}
-      className={cn("relative overflow-hidden rounded-lg bg-neutral-950", className)}
+      className={cn("relative bg-neutral-950", className)}
       style={containerStyle}
     >
       <img

@@ -15,7 +15,7 @@ import {
 import { Button } from "@/shared/ui/button"
 import { NavbarBackButton } from "@/widgets/NavbarCore/ui/NavbarBackButton"
 import { NavbarTitle } from "@/widgets/NavbarCore/ui/NavbarTitle"
-import { ConfirmDeleteDialog } from "@/widgets/dialogs/ConfirmDeleteDialog"
+import { ConfirmDeleteDialog } from "@/shared/ui/ConfirmDeleteDialog"
 import { useProjectFolders, useUpdateFolder, useDeleteFolder, useFolderMove, useDownloadCollection } from "@/features/folders"
 import { useWorkflowsStore } from "@/features/workflows/model/useWorkflowsStore"
 import { usePromptStore } from "@/features/prompt-bar/model/usePromptStore"

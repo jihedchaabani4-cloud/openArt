@@ -1,4 +1,11 @@
-export { MediaGridItem, CollectionMediaGridItem, CollectionGridItem } from "./MediaGridItem";
-export { CoreMediaItemView } from "@/widgets/CoreMediaItemView";
+export {
+  MediaGridItem,
+  CollectionMediaGridItem,
+  CollectionGridItem,
+  StudioMediaGridCard,
+  TrashMediaGridCard,
+  WorkflowMediaGridItem,
+} from "./MediaGridItem";
+export { MediaView as CoreMediaItemView } from "@/features/media";
 export { StudioItemDropdownMenu, StudioContextMenuContent } from "./StudioItemMenu";
 export { getStudioMenuItems, getWorkflowEntityType } from "./studioMenuConfig";

@@ -1,11 +1,11 @@
 "use client";
 
-import { CoreMediaItemView } from "./CoreMediaItemView";
+import { MediaView } from "@/features/media/ui/MediaView";
 
 /**
  * MediaItemView
  * 
- * Simple, clean, lightweight media item display component powered directly by CoreMediaItemView.
+ * Simple, clean, lightweight media item display component powered directly by MediaView.
  * Supports direct `mediaId` lookup from workflow or project contents.
  * 
  * Design & Behavior:
@@ -48,7 +48,7 @@ export function MediaItemView({
   ...props
 }) {
   return (
-    <CoreMediaItemView
+    <MediaView
       mediaId={mediaId}
       item={item}
       workflow={workflow}
@@ -77,7 +77,7 @@ export function MediaItemView({
       {...props}
     >
       {children}
-    </CoreMediaItemView>
+    </MediaView>
   );
 }
 

@@ -3,8 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { ProcessingCard } from "@/shared/ui/ProcessingCard";
-import { CharacterCardKrea } from "@/components/cinema-studio/characters/CharacterCardKrea";
-import { ElementCardKrea } from "@/components/cinema-studio/elements/ElementCardKrea";
+import { MediaGridItem } from "@/widgets/StudioLayout/GenerationsStudio/MediaGridItem";
 
 export default function ProcessingCardTestPage() {
   const [progress, setProgress] = useState(29);
@@ -177,26 +176,32 @@ export default function ProcessingCardTestPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
             {/* Character Card in Processing */}
             <div className="flex flex-col gap-2">
-              <span className="text-xs text-white/50 font-mono">CharacterCardKrea (processing)</span>
-              <CharacterCardKrea
-                character={{
+              <span className="text-xs text-white/50 font-mono">MediaGridItem (character processing)</span>
+              <MediaGridItem
+                workflow={{
+                  id: "demo-char-processing",
+                  workflow_type: "character_sheet",
                   status: "processing",
-                  name: "Cyberpunk Nomad",
-                  character_info: "Generating 3-view turnaround sheet...",
+                  display_name: "Cyberpunk Nomad",
                   progress: progress,
+                  items: [{ id: "demo-char-item", status: "processing", progress: progress }],
                 }}
+                aspect="16/9"
               />
             </div>
 
             {/* Element Card in Processing */}
             <div className="flex flex-col gap-2">
-              <span className="text-xs text-white/50 font-mono">ElementCardKrea (processing)</span>
-              <ElementCardKrea
-                element={{
+              <span className="text-xs text-white/50 font-mono">MediaGridItem (element processing)</span>
+              <MediaGridItem
+                workflow={{
+                  id: "demo-elem-processing",
+                  workflow_type: "element_sheet",
                   status: "processing",
-                  type: "object",
-                  name: "Futuristic Vehicle",
+                  display_name: "Futuristic Vehicle",
+                  items: [{ id: "demo-elem-item", status: "processing" }],
                 }}
+                aspect="4/3"
               />
             </div>
 

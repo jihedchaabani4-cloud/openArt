@@ -11,13 +11,17 @@ vi.mock("../ui/common/editor/AtMentionMenu.jsx", () => ({
   ),
 }));
 
-vi.mock("@/widgets/ImportMediaDialog/ImportMediaPopover", () => ({
-  ImportMediaPopover: ({ open, onOpenChange, mode }) => (
-    <div data-testid="import-media-popover" data-open={String(open)} data-mode={mode}>
-      <button onClick={() => onOpenChange(false)}>Close Popover</button>
-    </div>
-  ),
-}));
+vi.mock("@/features/media", async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    ImportMediaPopover: ({ open, onOpenChange, mode }) => (
+      <div data-testid="import-media-popover" data-open={String(open)} data-mode={mode}>
+        <button onClick={() => onOpenChange(false)}>Close Popover</button>
+      </div>
+    ),
+  };
+});
 
 describe("PromptBarTopPanel", () => {
   it("renders null/empty when both quick mention and dialog are closed", () => {

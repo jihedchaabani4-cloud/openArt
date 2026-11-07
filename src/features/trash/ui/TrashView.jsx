@@ -42,11 +42,6 @@ export function TrashView({ projectId }) {
     prevScrollTop.current = currentScrollTop;
   }, [setIsNavbarHidden]);
 
-  const renderCard = useCallback(
-    (cardProps) => <MediaGridItem {...cardProps} isTrash={true} />,
-    []
-  );
-
   if (isLoading) {
     return (
       <div className="flex h-full w-full overflow-hidden text-white bg-background relative">
@@ -97,8 +92,7 @@ export function TrashView({ projectId }) {
                   gridSize={gridSize}
                   gridSpacing={gridSpacing}
                   projectId={projectId}
-                  CardComponent={renderCard}
-                  itemClassName="rounded-lg border border-white/10 shadow-none"
+                  CardComponent={MediaGridItem}
                 />
               </motion.div>
             ) : (

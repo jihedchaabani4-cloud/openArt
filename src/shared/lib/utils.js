@@ -1,9 +1,32 @@
 import { clsx } from "clsx";
-import { twMerge } from "tailwind-merge";
+import { extendTailwindMerge } from "tailwind-merge";
 import { api } from "@/shared/api/client";
 
+const customTwMerge = extendTailwindMerge({
+  extend: {
+    theme: {
+      radius: [
+        "xxxs",
+        "hairline",
+        "sharp",
+        "subtle",
+        "comfortable",
+        "generous",
+      ],
+      spacing: [
+        "xxs",
+        "xxl",
+        "section",
+        "section-lg",
+        "section-xl",
+        "section-xxl",
+      ],
+    },
+  },
+});
+
 export function cn(...inputs) {
-  return twMerge(clsx(inputs));
+  return customTwMerge(clsx(inputs));
 }
 
 export function downloadBlob(blob, filename) {

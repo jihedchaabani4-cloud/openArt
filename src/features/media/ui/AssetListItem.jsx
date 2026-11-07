@@ -46,7 +46,7 @@ export function AssetListItem({
       )}
     >
       {/* Thumbnail */}
-      <div className="w-10 h-10 rounded-sm overflow-hidden bg-black/40 shrink-0 relative flex items-center justify-center">
+      <div className="w-10 h-10 rounded-xxxs overflow-hidden bg-black/40 shrink-0 relative flex items-center justify-center">
         {isVideo ? (
           <video src={itemUrl} className="w-full h-full object-cover" muted />
         ) : (

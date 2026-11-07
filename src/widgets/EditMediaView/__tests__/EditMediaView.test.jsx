@@ -2,9 +2,9 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, cleanup, fireEvent } from "@testing-library/react";
 import { EditMediaView } from "../EditMediaView";
 
-// Mock CoreMediaItemView to render children and slots without heavy sub-components
-vi.mock("@/widgets/CoreMediaItemView", () => ({
-  CoreMediaItemView: ({ bottom }) => (
+// Mock MediaView to render children and slots without heavy sub-components
+vi.mock("@/features/media", () => ({
+  MediaView: ({ bottom }) => (
     <div data-testid="core-media-view">
       {bottom}
     </div>

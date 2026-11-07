@@ -10,7 +10,7 @@ import { EditableDisplayName } from "@/shared/ui/EditableDisplayName"
 import { useUpdateWorkflow, useDeleteMedia } from "@/features/workflows/api/workflowsApi"
 import { useProjectFolders } from "@/features/folders"
 import { NavbarCore, NavbarAction } from "@/widgets/NavbarCore"
-import { ConfirmDeleteDialog } from "@/widgets/dialogs/ConfirmDeleteDialog"
+import { ConfirmDeleteDialog } from "@/shared/ui/ConfirmDeleteDialog"
 import {
     DropdownMenu,
     DropdownMenuContent,

@@ -4,7 +4,7 @@ import * as React from "react";
 import { useParams } from "next/navigation";
 import { useElementEdit } from "@/features/elements";
 import { LoadingScreen } from "@/shared/ui/LoadingScreen";
-import { ConfirmDeleteDialog } from "@/widgets/dialogs/ConfirmDeleteDialog";
+import { ConfirmDeleteDialog } from "@/shared/ui/ConfirmDeleteDialog";
 import { ImportMediaPopover } from "@/widgets/ImportMediaDialog/ImportMediaPopover";
 import { ElementEditNavbar } from "@/widgets/ElementEditNavbar/ElementEditNavbar";
 import {

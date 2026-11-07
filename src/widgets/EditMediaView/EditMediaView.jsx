@@ -4,7 +4,7 @@ import { useRef, useState, useCallback, useEffect } from "react";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/button";
-import { CoreMediaItemView } from "@/widgets/CoreMediaItemView";
+import { MediaView } from "@/features/media";
 import { useMediaViewerCore } from "@/features/workflows/core/useMediaViewerCore";
 
 /**
@@ -182,7 +182,7 @@ export function EditMediaView({
 
   return (
     <div className={cn("relative w-full h-full flex items-center justify-center p-6 select-none overflow-hidden", className)}>
-      <CoreMediaItemView
+      <MediaView
         core={core}
         workflow={workflow}
         item={item}

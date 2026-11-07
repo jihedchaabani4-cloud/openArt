@@ -272,6 +272,12 @@ describe("Media Presentation Memoization & Re-renders (100 Tiles)", () => {
       // 6. Dynamic gridSpacing="lg" (L / 16px)
       rerender(<SharedGalleryGrid entries={entries} gridSpacing="lg" />);
       expect(album.style.getPropertyValue("--react-photo-album--spacing")).toBe("16");
+
+      // 7. Default MediaCard honors RowsPhotoAlbum computed width and height on its outer box
+      const card = container.querySelector('[data-testid="media-card"]');
+      expect(card).toBeTruthy();
+      expect(parseFloat(card.style.width)).toBeGreaterThan(0);
+      expect(parseFloat(card.style.height)).toBeGreaterThan(0);
     } finally {
       clientWidthSpy.mockRestore();
     }

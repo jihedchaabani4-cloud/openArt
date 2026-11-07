@@ -6,7 +6,7 @@ import { motion } from "framer-motion"
 import { GoogleIcon } from "@/shared/ui/GoogleIcon"
 import { Button } from "@/shared/ui/button"
 import { EditableDisplayName } from "@/shared/ui/EditableDisplayName"
-import { ConfirmDeleteDialog } from "@/widgets/dialogs/ConfirmDeleteDialog"
+import { ConfirmDeleteDialog } from "@/shared/ui/ConfirmDeleteDialog"
 
 function isVideoUrl(url = "") {
     return /\.(mp4|webm|mov)$/i.test(url)
@@ -36,7 +36,7 @@ export function ProjectCard({ project, onDelete, onRename }) {
         >
             <Link href={`/cinema-studio/${project.project_id}`} className="block">
                 <div
-                    className="relative overflow-hidden rounded-lg aspect-[1.6/1]"
+                    className="relative overflow-hidden rounded-xxxs aspect-[1.6/1]"
                     onMouseEnter={() => {
                         if (isVideoThumbnail) {
                             videoRef.current?.play().catch(() => {})

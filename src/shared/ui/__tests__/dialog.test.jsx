@@ -11,7 +11,7 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/shared/ui/dialog";
-import { ConfirmDeleteDialog } from "@/widgets/dialogs/ConfirmDeleteDialog";
+import { ConfirmDeleteDialog } from "@/shared/ui/ConfirmDeleteDialog";
 
 describe("Dialog Primitive — Runway Flat Surface Architecture", () => {
   describe("1. Visual Token Alignment (Zero Shadows, Flat Surface, 16px Radius)", () => {

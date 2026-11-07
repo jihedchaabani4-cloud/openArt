@@ -3,20 +3,19 @@
 import * as React from "react";
 import { useParams, useRouter } from "next/navigation";
 import { NavbarCore, NavbarAction } from "@/widgets/NavbarCore";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/shared/ui/dropdown-menu";
+import { GoogleIcon } from "@/shared/ui/GoogleIcon";
+import { Button } from "@/shared/ui/button";
 
 /**
  * EntityEditNavbar
  * Shared layer on top of NavbarCore for editing project entities (Elements, Characters, etc.).
- *
- * @param {Object} props
- * @param {"element" | "character" | "generation"} [props.entityType="element"]
- * @param {string} [props.backUrl] - Overrides default `/cinema-studio/[projectId]/[entities]`
- * @param {Function} [props.onDelete] - Delete entity action
- * @param {Function} [props.onDone] - Done action handler
- * @param {string} [props.deleteLabel="Delete"]
- * @param {string} [props.doneLabel="Done"]
- * @param {React.ReactNode} [props.left] - Optional breadcrumb or title
- * @param {React.ReactNode} [props.actions] - Additional action buttons before Delete/Done
+ * Unifies the standard import dropdown (Upload & Assets), favorite toggle, and Delete/Done actions.
  */
 export function EntityEditNavbar({
   entityType = "element",
@@ -27,13 +26,31 @@ export function EntityEditNavbar({
   doneLabel = "Done",
   left,
   actions,
+  children,
   showUserDropdown = false,
+  onUpload,
+  onOpenAssets,
+  isAddDisabled = false,
+  isLiked = false,
+  onToggleLike,
+  importMenuOpen,
+  onImportMenuOpenChange,
 }) {
   const { projectId } = useParams();
   const router = useRouter();
 
+  const [internalOpen, setInternalOpen] = React.useState(false);
+  const isOpen = importMenuOpen !== undefined ? importMenuOpen : internalOpen;
+  const setOpen = onImportMenuOpenChange || setInternalOpen;
+
   const entityPlural = entityType === "character" ? "characters" : "elements";
   const defaultBackUrl = backUrl || `/cinema-studio/${projectId}/${entityPlural}`;
+
+  const hasImportOptions = Boolean(onUpload || onOpenAssets);
+  const likeTestId = entityType === "character" ? "like-character-button" : "like-element-button";
+  const addTitle = isAddDisabled
+    ? (entityType === "character" ? "Maximum 5 images de détail autorisées" : "Maximum d'images atteint")
+    : "Ajouter des images";
 
   const handleDone = () => {
     if (typeof onDone === "function") {
@@ -47,10 +64,64 @@ export function EntityEditNavbar({
     <NavbarCore
       onBack={() => router.push(defaultBackUrl)}
       backLabel={`Back to ${entityPlural}`}
-      left={left}
+      left={left || children}
       showUserDropdown={showUserDropdown}
       right={
         <>
+          {hasImportOptions && (
+            <DropdownMenu open={isAddDisabled ? false : isOpen} onOpenChange={isAddDisabled ? undefined : setOpen}>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="size-8 p-0"
+                  data-testid="import-dropdown-trigger"
+                  disabled={isAddDisabled}
+                  title={addTitle}
+                  aria-label={addTitle}
+                >
+                  <GoogleIcon iconName="add" className="text-xl text-white" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" sideOffset={6} className="w-52 p-1.5">
+                {onUpload && (
+                  <DropdownMenuItem
+                    onSelect={() => onUpload()}
+                  >
+                    <GoogleIcon iconName="upload" className="text-xl text-white/80 shrink-0" />
+                    <span className="font-medium">Importer depuis l'ordinateur</span>
+                  </DropdownMenuItem>
+                )}
+                {onOpenAssets && (
+                  <DropdownMenuItem
+                    onSelect={() => onOpenAssets()}
+                  >
+                    <GoogleIcon iconName="perm_media" className="text-xl text-white/80 shrink-0" />
+                    <span className="font-medium">Depuis le projet</span>
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+
+          {onToggleLike && (
+            <Button
+              type="button"
+              variant="ghost"
+              className="size-8 p-0"
+              data-testid={likeTestId}
+              onClick={onToggleLike}
+              title={isLiked ? "Retirer des favoris" : "Ajouter aux favoris"}
+              aria-label={isLiked ? "Retirer des favoris" : "Ajouter aux favoris"}
+            >
+              <GoogleIcon
+                iconName="favorite"
+                fill={isLiked}
+                className="text-xl text-white"
+              />
+            </Button>
+          )}
+
           {actions}
 
           {onDelete && (

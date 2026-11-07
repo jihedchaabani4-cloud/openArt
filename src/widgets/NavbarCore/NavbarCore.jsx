@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { motion } from "framer-motion";
-import { UserDropdown } from "@/widgets/StudioNavbar/ui/UserDropdown";
+import { UserDropdown } from "@/widgets/navigation/UserDropdown";
 import { cn } from "@/shared/lib/utils";
 import { NavbarBackButton } from "./ui/NavbarBackButton";
 import { NavbarTitle } from "./ui/NavbarTitle";

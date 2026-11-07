@@ -4,7 +4,7 @@ import { useRef, useMemo } from "react";
 import { Button } from "@/shared/ui/button";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { cn } from "@/shared/lib/utils";
-import { CharacterMediaGalleryGrid } from "./CharacterMediaGalleryGrid";
+import { ReferenceMediaGalleryGrid } from "../common/ReferenceMediaGalleryGrid";
 import { FlowCharacterImagePreview } from "./FlowCharacterImagePreview";
 import { getAcceptedMimeTypes, CHARACTER_DETAIL_UPLOAD_POLICY } from "@/features/media";
 import { isSheetMedia } from "@/features/characters/core/mediaClassification";
@@ -12,7 +12,7 @@ import { isSheetMedia } from "@/features/characters/core/mediaClassification";
 /**
  * CharacterDetailsGallery
  * Right stage for the Character detail reference photos view:
- * - Clean display powered by CharacterMediaGalleryGrid & MediaItemView (authentic aspect ratio, RowsPhotoAlbum)
+ * - Clean display powered by ReferenceMediaGalleryGrid & MediaItemView (authentic aspect ratio, RowsPhotoAlbum)
  * - Empty state uses FlowCharacterImagePreview for selecting details
  * - Actions (Upload & Assets) reside cleanly in CharacterEditNavbar matching ElementEditNavbar
  */
@@ -110,9 +110,9 @@ export function CharacterDetailsGallery({
         </div>
       )}
 
-      {/* ── Gallery Body: Character Media Gallery Grid or FlowCharacterImagePreview ── */}
+      {/* ── Gallery Body: Reference Media Gallery Grid or FlowCharacterImagePreview ── */}
       {validItems.length > 0 ? (
-        <CharacterMediaGalleryGrid
+        <ReferenceMediaGalleryGrid
           workflow={workflow}
           items={validItems}
           primaryMediaId={primaryMediaId}

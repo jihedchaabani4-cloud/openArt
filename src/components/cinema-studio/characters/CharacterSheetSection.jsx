@@ -3,7 +3,7 @@
 import { useRef, useMemo } from "react";
 import { Button } from "@/shared/ui/button";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
-import { MediaItemView } from "@/widgets/CoreMediaItemView";
+import { MediaView } from "@/features/media";
 import { ProcessingCard } from "@/shared/ui/ProcessingCard";
 import { FlowErrorTile } from "@/shared/ui/FlowErrorTile";
 import { FlowCharacterImagePreview } from "./FlowCharacterImagePreview";
@@ -205,17 +205,17 @@ export function CharacterSheetSection({
         </div>
       ) : hasImage ? (
         <div className="w-full h-full flex items-center justify-center relative border-none">
-          <MediaItemView
+          <MediaView
             workflow={workflow}
             item={item}
             src={activeSheetSrc}
             status="completed"
             fit="contain"
-            className="group/sheet relative max-w-full max-h-[520px] rounded-lg overflow-hidden border-none shadow-none flex items-center justify-center bg-transparent"
+            className="group/sheet relative max-w-full max-h-[520px] rounded-xxxs overflow-hidden border-none shadow-none flex items-center justify-center bg-transparent"
             style={{
               maxHeight: 520,
             }}
-            mediaClassName="rounded-lg object-contain max-h-[520px] w-auto h-auto"
+            mediaClassName="rounded-xxxs object-contain max-h-[520px] w-auto h-auto"
             showLikedBadge={false}
             showVideoBadge={false}
             showMenu={false}
@@ -223,7 +223,7 @@ export function CharacterSheetSection({
             onError={() => setImageLoadError && setImageLoadError(true)}
             overlay={
               isUpdatingSheet ? (
-                <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] z-40 flex flex-col items-center justify-center gap-2 rounded-lg">
+                <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] z-40 flex flex-col items-center justify-center gap-2 rounded-xxxs">
                   <GoogleIcon iconName="progress_activity" className="text-2xl text-white animate-spin" />
                   <span className="text-xs text-white/80">Updating…</span>
                 </div>

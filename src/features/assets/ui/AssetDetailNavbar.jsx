@@ -1,37 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo } from "react";
-import { useQueryClient } from "@tanstack/react-query";
-
-import { queryKeys } from "@/shared/api/queryKeys";
+import { useLibraryWorkflowDetail } from "@/features/media";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
-import { UserDropdown } from "@/widgets/StudioNavbar/ui/UserDropdown";
 
-export default function AssetDetailNavbar({ workflowId }) {
-  const queryClient = useQueryClient();
-  const displayName = useMemo(() => {
-    const detailEntry = queryClient.getQueryData(queryKeys.library.detail(workflowId));
-    if (detailEntry?.workflow?.display_name) {
-      return detailEntry.workflow.display_name;
-    }
-
-    const queries = queryClient.getQueriesData({
-      queryKey: queryKeys.library.all(),
-    });
-
-    for (const [, queryData] of queries) {
-      const pages = queryData?.pages || [];
-      for (const page of pages) {
-        const match = (page?.data || []).find((entry) => entry?.workflow?.id === workflowId);
-        if (match?.workflow?.display_name) {
-          return match.workflow.display_name;
-        }
-      }
-    }
-
-    return "Media Viewer";
-  }, [queryClient, workflowId]);
+export default function AssetDetailNavbar({ workflowId, userSlot = null }) {
+  const { data } = useLibraryWorkflowDetail(workflowId);
+  const displayName = data?.workflow?.display_name || "Media Viewer";
 
   return (
     <nav className="sticky top-0 z-[110] flex h-[75px] w-full items-center border-b border-white/6 bg-background/92 px-5 backdrop-blur-xl sm:px-6">
@@ -52,9 +27,11 @@ export default function AssetDetailNavbar({ workflowId }) {
           </div>
         </div>
 
-        <div className="shrink-0">
-          <UserDropdown />
-        </div>
+        {userSlot && (
+          <div className="shrink-0">
+            {userSlot}
+          </div>
+        )}
       </div>
     </nav>
   );

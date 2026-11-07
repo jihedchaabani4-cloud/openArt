@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useCharacter } from "@/features/characters";
 import { useProjectData } from "@/features/workflows/api/workflowsApi";
 import { LoadingScreen } from "@/shared/ui/LoadingScreen";
-import { ConfirmDeleteDialog } from "@/widgets/dialogs/ConfirmDeleteDialog";
+import { ConfirmDeleteDialog } from "@/shared/ui/ConfirmDeleteDialog";
 import { ImportMediaPopover } from "@/widgets/ImportMediaDialog/ImportMediaPopover";
 import { CharacterEditNavbar } from "@/widgets/CharacterEditNavbar/CharacterEditNavbar";
 import {
