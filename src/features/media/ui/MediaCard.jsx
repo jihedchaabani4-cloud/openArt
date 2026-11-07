@@ -2,6 +2,7 @@
 
 import React from "react";
 import { MediaRenderer } from "./MediaRenderer";
+import { Card } from "@/shared/ui/card";
 import { cn } from "@/shared/lib/utils";
 
 /**
@@ -30,15 +31,17 @@ export const MediaCard = React.memo(
   const cardStyle = width && height ? { width, height, ...style } : style;
 
   return (
-    <div
+    <Card
       ref={ref}
+      radius="xxxs"
+      tone="card"
       data-testid="media-card"
       data-selected={String(isSelected)}
       onClick={onClick}
       onDoubleClick={onDoubleClick}
       style={cardStyle}
       className={cn(
-        "group relative flex flex-col overflow-hidden rounded-xxxs bg-surface-card border border-white/10 transition-none hover:border-white/20 shadow-none",
+        "group transition-none hover:border-line-interactive shadow-none",
         isSelected && "ring-2 ring-primary border-transparent shadow-none",
         className
       )}
@@ -58,7 +61,7 @@ export const MediaCard = React.memo(
       )}
 
       {/* Main Media Renderer */}
-      <div className="relative w-full h-full">
+      <Card.Canvas className="w-full h-full">
         <MediaRenderer
           item={item}
           className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
@@ -71,15 +74,15 @@ export const MediaCard = React.memo(
             {overlaySlot}
           </div>
         )}
-      </div>
+      </Card.Canvas>
 
       {/* Bottom Footer Slot (e.g. title, metadata) */}
       {footerSlot && (
-        <div className="relative z-10 p-3 bg-surface-panel border-t border-white/10">
+        <div className="relative z-10 p-3 bg-surface-panel border-t border-line-subtle">
           {footerSlot}
         </div>
       )}
-    </div>
+    </Card>
   );
 })
 );

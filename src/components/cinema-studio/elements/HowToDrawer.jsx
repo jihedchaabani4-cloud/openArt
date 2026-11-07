@@ -3,6 +3,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { Button } from "@/shared/ui/button";
+import { Surface } from "@/shared/ui/surface";
 
 /**
  * HowToDrawer Component
@@ -24,20 +25,21 @@ export function HowToDrawer({ isOpen, onClose }) {
         />
 
         {/* Drawer Panel */}
-        <motion.div
-          initial={{ x: "100%" }}
-          animate={{ x: 0 }}
-          exit={{ x: "100%" }}
-          transition={{ type: "spring", damping: 25, stiffness: 250 }}
-          className="relative w-full max-w-md h-full bg-[#121215] border-l border-white/10 p-6 flex flex-col justify-between shadow-none z-10 overflow-y-auto"
-        >
-          <div>
-            {/* Header */}
-            <div className="flex items-center justify-between pb-6 border-b border-white/10">
-              <div className="flex items-center gap-2">
-                <GoogleIcon iconName="auto_awesome" className="text-xl text-white/80" />
-                <h2 className="text-lg font-bold text-white">How AI Elements Work</h2>
-              </div>
+        <Surface asChild tone="panel" radius="none">
+          <motion.div
+            initial={{ x: "100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "100%" }}
+            transition={{ type: "spring", damping: 25, stiffness: 250 }}
+            className="relative w-full max-w-md h-full border-y-0 border-r-0 border-l border-line-default p-6 flex flex-col justify-between shadow-none z-10 overflow-y-auto"
+          >
+            <div>
+              {/* Header */}
+              <div className="flex items-center justify-between pb-6 border-b border-line-subtle">
+                <div className="flex items-center gap-2">
+                  <GoogleIcon iconName="auto_awesome" className="text-xl text-content-base/80" />
+                  <h2 className="text-lg font-bold text-content-base">How AI Elements Work</h2>
+                </div>
               <Button
                 type="button"
                 variant="ghost"
@@ -93,7 +95,7 @@ export function HowToDrawer({ isOpen, onClose }) {
           </div>
 
           {/* Footer Action */}
-          <div className="pt-6 border-t border-white/10">
+          <div className="pt-6 border-t border-line-subtle">
             <Button
               type="button"
               variant="secondary"
@@ -104,8 +106,9 @@ export function HowToDrawer({ isOpen, onClose }) {
             </Button>
           </div>
         </motion.div>
-      </div>
-    </AnimatePresence>
+      </Surface>
+    </div>
+  </AnimatePresence>
   );
 }
 

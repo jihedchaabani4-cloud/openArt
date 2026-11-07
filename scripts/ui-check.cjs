@@ -45,6 +45,9 @@ const RULES = [
     re: /\brounded-(button|card|dialog|badge|input)\b/g },
   { id: 'U7', desc: 'positive Tailwind shadow class (shadow-xs, shadow-sm, shadow-md, shadow-lg, shadow-xl, shadow-2xl; use shadow-none or border separation)', ext: /\.(jsx?|tsx?)$/,
     re: /\bshadow-(xs|sm|md|lg|xl|2xl)\b/g },
+  { id: 'U8', desc: 'raw neutral palette utility (bg-zinc-*, text-white, border-white/10, etc; use semantic tokens)', ext: /\.(jsx?|tsx?)$/,
+    skip: (r) => TOKEN_FILES.some((t) => r.includes(t)) || PRIMITIVE_DIRS.some((p) => r.includes(p)),
+    re: /\b(bg|text|border(?:-[tblrxy])?|divide(?:-[xy])?|ring|fill|stroke|outline)-(zinc|gray|neutral|slate|stone|white|black)(?:-\d+)?(?:\/(?:\d+|\[[^\]]+\]))?\b/g },
 ];
 
 function collect() {
@@ -93,6 +96,17 @@ function main() {
   if (arg === '--shrink-baseline') {
     const next = ratchet.shrink(counts, baseline); ratchet.writeBaseline(BASELINE, next);
     console.log(`Baseline shrunk: ${Object.keys(baseline).length} -> ${Object.keys(next).length} entries (never raised).`); return 0;
+  }
+  if (arg === '--merge-baseline') {
+    let added = 0;
+    for (const [k, count] of Object.entries(counts)) {
+      if (baseline[k] === undefined) {
+        baseline[k] = count;
+        added++;
+      }
+    }
+    ratchet.writeBaseline(BASELINE, baseline);
+    console.log(`Merged ${added} new baseline entries into ui-baseline.json (${Object.keys(baseline).length} total).`); return 0;
   }
   const { fresh } = ratchet.compare(violations, baseline);
   summary(violations, baseline, fresh);

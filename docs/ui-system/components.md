@@ -160,18 +160,49 @@
   </Tabs>
   ```
 
+### `<Surface />` (`@/shared/ui/surface`)
+- **Imports**: `import { Surface, surfaceVariants } from "@/shared/ui/surface";`
+- **Props**:
+  - `tone`: `"base"` | `"panel"` | `"processing"` | `"card"` | `"elevated"` | `"highest"` | `"sunken"` | `"overlay"`
+  - `radius`: `"none"` | `"xxxs"` | `"xs"` | `"sm"` | `"md"` | `"full"`
+  - `asChild`: `boolean` (delegates rendering to child via `Slot.Root` from `radix-ui`)
+- **Example**:
+  ```jsx
+  <Surface tone="panel" radius="md" className="p-4">
+    Panel content...
+  </Surface>
+  ```
+
 ### `<Card />` (`@/shared/ui/card`)
-- **Imports**: `import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/shared/ui/card";`
-- **Variants**: `default`, `interactive` (hover-elevated), `glass`.
+- **Imports**:
+  - Compound / Dot-notation: `import { Card } from "@/shared/ui/card";`
+  - Named exports: `import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardCanvas, CardFooter } from "@/shared/ui/card";`
+- **Variants & Props**:
+  - `variant`: `"default"` | `"interactive"` | `"glass"`
+  - `tone`: `"card"` | `"base"` | `"elevated"` | `"overlay"` (or any `Surface` tone)
+  - `radius`: `"none"` | `"xxxs"` (media 1px) | `"xs"` | `"sm"` | `"md"` (container 6px) | `"full"`
+  - `interactive`: `boolean` (enables hover, active scale, and WCAG keyboard focus)
+- **Subcomponents**:
+  - `Card.Header` (`CardHeader`): Flex column title container with optional `bordered` prop.
+  - `Card.Title` (`CardTitle`): Semantic `<h3>` typography element.
+  - `Card.Description` (`CardDescription`): Muted subtitle paragraph.
+  - `Card.Canvas` (`CardCanvas`): Edge-to-edge zero-padding viewport for video, canvas, or WebGL previews.
+  - `Card.Body` / `Card.Content` (`CardContent`): Primary padded content area.
+  - `Card.Footer` (`CardFooter`): Padded action row with optional `bordered` prop.
 - **Example**:
   ```jsx
   <Card variant="interactive">
-    <CardHeader>
-      <CardTitle>Project Alpha</CardTitle>
-      <CardDescription>Created 2 hours ago</CardDescription>
-    </CardHeader>
-    <CardContent>Body preview...</CardContent>
-    <CardFooter><Button variant="white" size="xs">Open</Button></CardFooter>
+    <Card.Canvas className="aspect-video">
+      <video src="..." className="w-full h-full object-cover" />
+    </Card.Canvas>
+    <Card.Header bordered>
+      <Card.Title>Cinema Generation</Card.Title>
+      <Card.Description>Generated with Cinema Studio</Card.Description>
+    </Card.Header>
+    <Card.Body>Prompt details...</Card.Body>
+    <Card.Footer bordered>
+      <Button variant="primary" size="xs">Export</Button>
+    </Card.Footer>
   </Card>
   ```
 

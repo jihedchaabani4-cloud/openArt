@@ -14,8 +14,8 @@ import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, Dialog
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from "@/shared/ui/dropdown-menu";
 import { Popover, PopoverTrigger, PopoverContent } from "@/shared/ui/popover";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/shared/ui/tooltip";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/shared/ui/tabs";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/shared/ui/card";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardCanvas, CardFooter } from "@/shared/ui/card";
+import { Surface } from "@/shared/ui/surface";
 import { Badge } from "@/shared/ui/badge";
 import { Skeleton } from "@/shared/ui/skeleton";
 import { Avatar, AvatarImage, AvatarFallback } from "@/shared/ui/avatar";
@@ -606,6 +606,43 @@ export default function DesignSystemShowcasePage() {
                     <Button variant="outline" className="h-6 px-2 text-xs">Details</Button>
                   </CardFooter>
                 </Card>
+
+                {/* Card with Canvas Bleed Zone */}
+                <Card variant="interactive">
+                  <CardCanvas className="h-28 flex items-center justify-center">
+                    <span className="text-xs text-content-muted font-mono">Card.Canvas (16:9 / Bleed)</span>
+                  </CardCanvas>
+                  <CardHeader bordered>
+                    <CardTitle>Media Bleed Card</CardTitle>
+                    <CardDescription>Zero padding canvas viewport</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-xs text-content-muted">Clean boundary separation.</p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Surface Tones Showcase */}
+              <div className="flex flex-col gap-3 pt-4 border-t border-line-subtle">
+                <h3 className="text-sm font-semibold text-content-base">Headless Surface Tones (`tone="..."`)</h3>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  <Surface tone="panel" radius="md" className="p-3">
+                    <span className="text-xs font-semibold text-content-base">tone="panel"</span>
+                    <p className="text-2xs text-content-muted mt-1">Sidebar / Rail Surface</p>
+                  </Surface>
+                  <Surface tone="card" radius="md" className="p-3">
+                    <span className="text-xs font-semibold text-content-base">tone="card"</span>
+                    <p className="text-2xs text-content-muted mt-1">Default Card Surface</p>
+                  </Surface>
+                  <Surface tone="elevated" radius="md" className="p-3">
+                    <span className="text-xs font-semibold text-content-base">tone="elevated"</span>
+                    <p className="text-2xs text-content-muted mt-1">Popovers / Menus Surface</p>
+                  </Surface>
+                  <Surface tone="sunken" radius="md" className="p-3">
+                    <span className="text-xs font-semibold text-content-base">tone="sunken"</span>
+                    <p className="text-2xs text-content-muted mt-1">Canvas / Recessed Surface</p>
+                  </Surface>
+                </div>
               </div>
 
               {/* Layout Primitives Showcase */}

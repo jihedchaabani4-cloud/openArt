@@ -10,12 +10,27 @@ All application backgrounds derive from an OLED-black surface ladder defined in 
 
 | Token Name | CSS Variable | Hex / Value | Tailwind Utility | Intended Usage |
 |---|---|---|---|---|
-| **Canvas** | `--surface-canvas` | `#000000` | `bg-black` / `bg-surface-canvas` | Deepest viewport background / page backdrop |
+| **Canvas** | `--surface-canvas` | `#000000` | `bg-surface-canvas` / `bg-black` | Deepest viewport background / page backdrop |
 | **Panel** | `--surface-panel` | `#131314` | `bg-surface-panel` | Persistent navigation bars, sidebars, rails |
-| **Card** | `--surface-card` | `#1e1f20` | `bg-card` / `bg-surface-card` | Grid cards, media item tiles, inspector boxes |
+| **Processing** | `--surface-processing` | `#17181a` | `bg-surface-processing` | Active tasks, card hover fill, progress strips |
+| **Card / Base** | `--surface-card` / `--surface-base` | `#1e1f20` | `bg-surface-card` / `bg-surface-base` | Grid cards, media item tiles, inspector boxes |
 | **Elevated** | `--surface-elevated` | `#282a2c` | `bg-surface-elevated` | Secondary buttons, dropdown panels, popovers |
 | **Highest** | `--surface-highest` | `#333537` | `bg-surface-highest` | Active selection containers, hover elevation |
-| **Glass** | `--surface-overlay` | `rgba(22, 23, 24, 0.72)` | `backdrop-blur-md` | Modals, prompt bar floating settings |
+| **Sunken** | `--surface-sunken` | `#000000` | `bg-surface-sunken` | Card canvas viewports, media preview bleeds |
+| **Overlay / Glass** | `--surface-overlay` | `rgba(22, 23, 24, 0.85)` | `bg-surface-overlay` | Modals, prompt bar floating settings, drawers |
+
+---
+
+## 1.1 Content & Line Tokens (Semantic Tokens)
+
+| Token Name | CSS Variable | Value | Tailwind Utility | Purpose |
+|---|---|---|---|---|
+| **Content Base** | `--content-base` | `#f5f5f5` | `text-content-base` | Primary legible body and title typography |
+| **Content Muted** | `--content-muted` | `#8e8e93` | `text-content-muted` | Secondary descriptions, timestamps, subtitles |
+| **Content Subtle** | `--content-subtle` | `#636366` | `text-content-subtle` | Inactive icons, subtle hints, placeholders |
+| **Line Subtle** | `--line-subtle` | `rgba(255, 255, 255, 0.07)` | `border-line-subtle` | Resting card borders, subtle divider lines |
+| **Line Default** | `--line-default` | `rgba(255, 255, 255, 0.12)` | `border-line-default` | Standard panel boundaries, dropdown borders |
+| **Line Interactive** | `--line-interactive` | `rgba(255, 255, 255, 0.25)` | `border-line-interactive` | Hovered card borders, focus rings |
 
 ---
 

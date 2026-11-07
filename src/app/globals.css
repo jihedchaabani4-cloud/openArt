@@ -275,6 +275,19 @@ mat-icon {
   --color-mid-slate: #7d848e;
   --color-border-hairline: rgba(255, 255, 255, 0.10);
   --color-background-state-75: var(--background-state-75, rgba(22, 23, 24, 0.75));
+
+  /* Unified Semantic Design Tokens (Phase 1) */
+  --color-surface-base: var(--surface-base, var(--surface-card, #1e1f20));
+  --color-surface-sunken: var(--surface-sunken, var(--surface-canvas, #000000));
+  --color-surface-overlay: var(--surface-overlay, rgba(22, 23, 24, 0.85));
+
+  --color-content-base: var(--content-base, #f5f5f5);
+  --color-content-muted: var(--content-muted, #8e8e93);
+  --color-content-subtle: var(--content-subtle, #636366);
+
+  --color-line-subtle: var(--line-subtle, rgba(255, 255, 255, 0.07));
+  --color-line-default: var(--line-default, rgba(255, 255, 255, 0.12));
+  --color-line-interactive: var(--line-interactive, rgba(255, 255, 255, 0.25));
 }
 
 :root {
@@ -295,6 +308,22 @@ mat-icon {
   --surface-elevated: #282a2c;
   --surface-highest: #333537;
   --background-state-75: rgba(22, 23, 24, 0.75);
+
+  /* Ergonomic Surface Semantic Aliases */
+  --surface-base: var(--surface-card, #1e1f20);
+  --surface-sunken: var(--surface-canvas, #000000);
+  --surface-overlay: rgba(22, 23, 24, 0.85);
+
+  /* Content & Typography Tokens */
+  --content-base: #f5f5f5;
+  --content-muted: #8e8e93;
+  --content-subtle: #636366;
+
+  /* Line & Border Tokens (avoids stuttering border-border-*) */
+  --line-subtle: rgba(255, 255, 255, 0.07);
+  --line-default: rgba(255, 255, 255, 0.12);
+  --line-interactive: rgba(255, 255, 255, 0.25);
+
   --color-brand-neon: #EFFE17;
   --color-accent-blue: #a8c7fa;
   --color-danger: #fe6e6e;

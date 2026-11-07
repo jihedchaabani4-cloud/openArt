@@ -21,7 +21,7 @@
 
 4. **No raw color literals in JSX**:
    - 🚫 Prohibited: `#fe6e6e`, `#EFFE17`, `rgba(255,255,255,0.08)`.
-   - ✅ Required: Use semantic tokens or canonical variants (`variant="neon"`, `variant="danger"`, `text-muted-foreground`, `border-white/10`).
+   - ✅ Required: Use semantic tokens or canonical variants (`variant="neon"`, `variant="danger"`, `text-content-muted`, `border-line-subtle`, `bg-surface-elevated`).
 
 ---
 
@@ -46,5 +46,6 @@ cd my-app && npm run ui:check
 - **Rule U3**: 0 raw `<button>` outside primitives.
 - **Rule U4**: 0 `fetch()` calls inside components.
 - **Rule U5**: 0 static inline `style={{ }}`.
+- **Rule U8**: 0 raw neutral palette utilities (`bg-zinc-*`, `text-white`, `border-white/10`) outside primitives/tokens.
 
 A new violation means: **fix the code, never edit `ui-baseline.json` by hand.**

@@ -5,6 +5,23 @@ import { api } from "@/shared/api/client";
 const customTwMerge = extendTailwindMerge({
   extend: {
     theme: {
+      colors: [
+        "surface-canvas",
+        "surface-panel",
+        "surface-processing",
+        "surface-card",
+        "surface-base",
+        "surface-elevated",
+        "surface-highest",
+        "surface-sunken",
+        "surface-overlay",
+        "content-base",
+        "content-muted",
+        "content-subtle",
+        "line-subtle",
+        "line-default",
+        "line-interactive",
+      ],
       radius: [
         "xxxs",
         "hairline",
