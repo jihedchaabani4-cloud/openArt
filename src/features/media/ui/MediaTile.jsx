@@ -2,10 +2,12 @@
 
 import React from "react";
 import { MediaRenderer } from "./MediaRenderer";
+import { Card } from "@/shared/ui/card";
 import { cn } from "@/shared/lib/utils";
 
 /**
  * MediaTile - Compact selectable tile for sidebars, pickers, and asset trays.
+ * Built on top of the canonical Card primitive with M3 design tokens.
  */
 export const MediaTile = React.memo(
   React.forwardRef(function MediaTile(
@@ -21,52 +23,54 @@ export const MediaTile = React.memo(
     },
     ref
   ) {
-  const handleClick = (e) => {
-    if (onSelect) {
-      onSelect(item, e);
-    }
-    if (onClick) {
-      onClick(e);
-    }
-  };
+    const handleClick = (e) => {
+      if (onSelect) {
+        onSelect(item, e);
+      }
+      if (onClick) {
+        onClick(e);
+      }
+    };
 
-  return (
-    <div
-      ref={ref}
-      data-testid="media-tile"
-      data-selected={String(isSelected)}
-      role="button"
-      tabIndex={0}
-      onClick={handleClick}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          handleClick(e);
-        }
-      }}
-      className={cn(
-        "group relative overflow-hidden rounded-xxxs bg-neutral-900 border border-neutral-800 transition-none cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary shadow-none",
-        isSelected
-          ? "ring-2 ring-primary border-transparent shadow-none"
-          : "hover:border-neutral-700",
-        className
-      )}
-    >
-      <MediaRenderer
-        item={item}
-        aspectRatio={aspectRatio}
-        className="w-full h-full object-cover"
-        {...rendererProps}
-      />
+    return (
+      <Card
+        ref={ref}
+        radius="xxxs"
+        tone="card"
+        data-testid="media-tile"
+        data-selected={String(isSelected)}
+        role="button"
+        tabIndex={0}
+        onClick={handleClick}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            handleClick(e);
+          }
+        }}
+        className={cn(
+          "group relative overflow-hidden transition-none cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary shadow-none",
+          isSelected
+            ? "ring-2 ring-primary border-transparent shadow-none"
+            : "hover:border-line-interactive",
+          className
+        )}
+      >
+        <MediaRenderer
+          item={item}
+          aspectRatio={aspectRatio}
+          className="w-full h-full object-cover"
+          {...rendererProps}
+        />
 
-      {badge && (
-        <div className="absolute top-1.5 right-1.5 z-10 pointer-events-none">
-          {badge}
-        </div>
-      )}
-    </div>
-  );
-})
+        {badge && (
+          <div className="absolute top-1.5 right-1.5 z-10 pointer-events-none">
+            {badge}
+          </div>
+        )}
+      </Card>
+    );
+  })
 );
 MediaTile.displayName = "MediaTile";
 
