@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
-import { useStudioItemDrag, detectDropTargetAtPoint } from "../useStudioItemDrag";
+import { useStudioItemDrag, detectDropTargetAtPoint } from "../model/useStudioItemDrag";
 import { usePromptStore } from "@/features/prompt-bar/model/usePromptStore";
 
 describe("detectDropTargetAtPoint", () => {

@@ -1,4 +1,4 @@
-export { usePromptStore } from './usePromptStore';
+export { usePromptStore } from '@/features/prompt-bar/model/usePromptStore';
 export { useCharacterStore, useElementStore } from '@/features/prompt-bar/model/useCharacterStore';
 export { useLibraryFilter, extractIdentifyingKeys } from '@/features/prompt-bar/model/useLibraryFilter';
 export { getEntityImageCount } from '@/features/prompt-bar/core/entityService';
@@ -7,5 +7,5 @@ export { getActivePromptBarStore, setActivePromptBarStore, PromptBarStoreProvide
 export * as tagsService from '@/features/prompt-bar/core/tagsService';
 export * as entityService from '@/features/prompt-bar/core/entityService';
 export { adaptBackendModel, adaptBackendCatalog, getModelReferenceCapability } from '@/features/prompt-bar/core/modelManagement';
-export { useDragAutoScroll, findScrollContainer, scrollContainerBy } from './useDragAutoScroll';
-export { useStudioItemDrag, detectDropTargetAtPoint } from './useStudioItemDrag';
+export { useDragAutoScroll, findScrollContainer, scrollContainerBy } from './model/useDragAutoScroll';
+export { useStudioItemDrag, detectDropTargetAtPoint } from './model/useStudioItemDrag';

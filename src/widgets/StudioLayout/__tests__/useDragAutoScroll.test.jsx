@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderHook, act, cleanup } from "@testing-library/react";
-import { useDragAutoScroll, findScrollContainer } from "@/features/studio/useDragAutoScroll";
+import { useDragAutoScroll, findScrollContainer } from "@/features/studio";
 import { usePromptStore } from "@/features/prompt-bar/model/usePromptStore";
 
 describe("useDragAutoScroll & Mouse Wheel During Drag", () => {
