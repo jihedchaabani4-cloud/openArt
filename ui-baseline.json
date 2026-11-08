@@ -95,7 +95,7 @@
   "U3|src/app/cinema-studio/test/prompt-bar-compare/page.jsx": 1,
   "U3|src/app/cinema-studio/test/testanimation/page.jsx": 2,
   "U3|src/app/test-mention/page.jsx": 7,
-  "U4|src/features/characters/services/characterService.js": 1,
+  "U4|src/features/characters/api/characterService.js": 1,
   "U5|src/app/cinema-studio/[projectId]/assets/page.js": 1,
   "U5|src/app/cinema-studio/[projectId]/characters/new/page.js": 6,
   "U5|src/components/LoginDialog.jsx": 1,

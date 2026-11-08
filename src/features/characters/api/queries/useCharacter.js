@@ -3,13 +3,13 @@ import { useProjectData } from "@/features/workflows/api/queries/useProjectData"
 import { useWorkflowDelete } from "@/features/workflows/model/useWorkflowDelete";
 import { characterService } from "../characterService";
 import { stripWorkflowPrefix, matchMediaId } from "@/features/workflows/lib/cacheHelpers";
-import { useUpdateCharacter } from "./useUpdateCharacter";
-import { useSetCharacterSheetMedia } from "./useSetCharacterSheetMedia";
-import { useAddMediaToCharacter } from "./useAddMediaToCharacter";
-import { useRemoveMediaFromCharacter } from "./useRemoveMediaFromCharacter";
-import { useGenerateCharacterSheetMutation } from "./useGenerateCharacterSheetMutation";
+import { useUpdateCharacter } from "../mutations/useUpdateCharacter";
+import { useSetCharacterSheetMedia } from "../mutations/useSetCharacterSheetMedia";
+import { useAddMediaToCharacter } from "../mutations/useAddMediaToCharacter";
+import { useRemoveMediaFromCharacter } from "../mutations/useRemoveMediaFromCharacter";
+import { useGenerateCharacterSheetMutation } from "../mutations/useGenerateCharacterSheetMutation";
 import { resolveMainMedia } from "@/features/workflows/core/resolveMediaRef";
-import { isDetailMedia, isSheetMedia } from "../core/mediaClassification";
+import { isDetailMedia, isSheetMedia } from "../../core/mediaClassification";
 import { logger } from "@/shared/lib/logger";
 import {
   validateFilesAgainstPolicy,

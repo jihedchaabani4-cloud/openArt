@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { renderHook } from "@testing-library/react";
-import { useCharacterWorkflows } from "../useCharacterWorkflows";
+import { useCharacterWorkflows } from "../api/queries/useCharacterWorkflows";
 import { useProjectData } from "@/features/workflows/api/queries/useProjectData";
 
 vi.mock("@/features/workflows/api/queries/useProjectData", () => ({
