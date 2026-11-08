@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { queryKeys } from "@/shared/api/queryKeys";
-import { useCreateProject, useDeleteProject, useUpdateProject } from "./projectsApi";
+import { useCreateProject, useDeleteProject, useUpdateProject } from "../api/projectsApi";
 import { api } from "@/shared/api/client";
 import { toast } from "sonner";
 
