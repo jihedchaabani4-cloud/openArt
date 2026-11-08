@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { queryKeys } from "@/shared/api/queryKeys";
-import { useProjectFolders } from "@/features/folders/queries/useProjectFolders";
+import { useProjectFolders } from "@/features/folders/api/queries/useProjectFolders";
 import { useFilteredWorkflows } from "@/features/workflows/model/useFilteredWorkflows";
 import { useProjectData } from "@/features/workflows/api/queries/useProjectData";
 import { api } from "@/shared/api/client";

@@ -4,9 +4,9 @@
 // Supports both workflows and collections/folders uniformly.
 
 import * as React from "react";
-import { useProjectFolders } from "../queries/useProjectFolders";
-import { useMoveAssetToFolder } from "../mutations/useMoveAssetToFolder";
-import { useUpdateFolder } from "../mutations/useUpdateFolder";
+import { useProjectFolders } from "../api/queries/useProjectFolders";
+import { useMoveAssetToFolder } from "../api/mutations/useMoveAssetToFolder";
+import { useUpdateFolder } from "../api/mutations/useUpdateFolder";
 
 /**
  * Pure helper to find the parent folder id of a given folder.

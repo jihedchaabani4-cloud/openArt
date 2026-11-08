@@ -5,7 +5,7 @@ import { queryKeys } from "@/shared/api/queryKeys";
 import { useUpdateWorkflow } from "./useUpdateWorkflow";
 import { useUpdateCharacter } from "@/features/characters/hooks/useUpdateCharacter";
 import { useDeleteMedia } from "./useDeleteMedia";
-import { useCreateFolder } from "@/features/folders/mutations/useCreateFolder";
+import { useCreateFolder } from "@/features/folders/api/mutations/useCreateFolder";
 import { api } from "@/shared/api/client";
 import { characterService } from "@/features/characters/services/characterService";
 
