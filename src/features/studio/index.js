@@ -2,7 +2,7 @@ export { usePromptStore } from './usePromptStore';
 export { useCharacterStore, useElementStore } from '@/features/prompt-bar/model/useCharacterStore';
 export { useLibraryFilter, extractIdentifyingKeys } from '@/features/prompt-bar/model/useLibraryFilter';
 export { getEntityImageCount } from '@/features/prompt-bar/core/entityService';
-export { addMediaToPrompt, animateMedia, normalizeMediaAsset, canAnyModelAcceptEntity, setPendingPromptAction, consumePendingPromptAction } from './core/mediaReferenceService';
+export { addMediaToPrompt, animateMedia, normalizeMediaAsset, canAnyModelAcceptEntity } from './core/mediaReferenceService';
 export { getActivePromptBarStore, setActivePromptBarStore, PromptBarStoreProvider, PromptBarStoreContext } from '@/features/prompt-bar/store/PromptBarStoreContext';
 export * as tagsService from '@/features/prompt-bar/core/tagsService';
 export * as entityService from '@/features/prompt-bar/core/entityService';

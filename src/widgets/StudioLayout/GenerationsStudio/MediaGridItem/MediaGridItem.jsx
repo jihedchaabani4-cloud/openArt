@@ -7,13 +7,6 @@ import { StudioMediaGridCard } from "./StudioMediaGridCard";
 // - Corner radius geometry: rounded-xxxs
 // - Action controls: ButtonGroup variant="pill"
 
-export const WorkflowMediaGridItem = React.memo(function WorkflowMediaGridItem(props) {
-  if (props.isTrash || props.workflow?.deleted_at || props.item?.deleted_at || props.media?.deleted_at) {
-    return <TrashMediaGridCard {...props} />;
-  }
-  return <StudioMediaGridCard {...props} />;
-});
-
 export const MediaGridItem = React.memo(function MediaGridItem(props) {
   if (
     props.itemType === "collection" ||
@@ -30,6 +23,8 @@ export const MediaGridItem = React.memo(function MediaGridItem(props) {
 
   return <StudioMediaGridCard {...props} />;
 });
+
+export const WorkflowMediaGridItem = MediaGridItem;
 
 export {
   CollectionMediaGridItem,

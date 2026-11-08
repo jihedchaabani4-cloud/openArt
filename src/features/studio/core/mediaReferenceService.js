@@ -21,53 +21,6 @@
 import { promptBarService } from "@/features/prompt-bar/api/promptBarService.js";
 import { getEntityImageCount } from "@/features/prompt-bar/core/entityService.js";
 import { getModelReferenceCapability } from "@/features/prompt-bar/core/modelManagement.js";
-import * as defaultGeneratedMediaConfig from "@/features/prompt-bar/templates/generatedMedia.template.js";
-import { enqueuePendingAction } from "@/features/prompt-bar/store/pendingActions.js";
-
-const PENDING_STORAGE_KEY = "openart_pending_prompt_action";
-
-/**
- * Stores a pending prompt bar action across page navigations.
- * @param {object} action
- */
-export function setPendingPromptAction(action) {
-  try {
-    enqueuePendingAction(
-      { templateId: "generated-media", projectId: action?.projectId || "global" },
-      { actionName: action?.type || "action", args: [action], payload: action }
-    );
-  } catch {
-    // Ignore queue failure in legacy bridge
-  }
-
-  if (typeof window !== "undefined" && window.sessionStorage) {
-    try {
-      window.sessionStorage.setItem(PENDING_STORAGE_KEY, JSON.stringify(action));
-    } catch (e) {
-      console.warn("[mediaReferenceService] Failed to set pending prompt action:", e);
-    }
-  }
-}
-
-/**
- * Consumes and clears any pending prompt bar action.
- * @returns {object|null}
- */
-export function consumePendingPromptAction() {
-  if (typeof window !== "undefined" && window.sessionStorage) {
-    try {
-      const raw = window.sessionStorage.getItem(PENDING_STORAGE_KEY);
-      if (raw) {
-        window.sessionStorage.removeItem(PENDING_STORAGE_KEY);
-        return JSON.parse(raw);
-      }
-    } catch (e) {
-      console.warn("[mediaReferenceService] Failed to consume pending prompt action:", e);
-    }
-  }
-  return null;
-}
-
 /**
  * Determines whether at least one model in the catalog can accept this entity.
  * Checks image domain and model capacity (maxRefs >= requiredCount).
@@ -87,38 +40,6 @@ export function canAnyModelAcceptEntity(entity, models = []) {
     const cap = getModelReferenceCapability(m);
     return cap.supports && (cap.maxRefs || 0) >= count;
   });
-}
-
-/**
- * Finds the image model capable of accepting all constituent images of this entity,
- * prioritizing models with the highest available capacity (maxRefs).
- *
- * @param {object} entity - Character or Element entity/workflow
- * @param {Array<object>} models - Available model catalog
- * @returns {object|null}
- */
-export function findBestModelForEntity(entity, models = []) {
-  if (!entity) return null;
-  const list = Array.isArray(models) ? models : Object.values(models || {});
-  if (list.length === 0) return null;
-
-  const count = getEntityImageCount(entity);
-  const eligible = list.filter((m) => {
-    if (m.domain !== "image") return false;
-    const cap = getModelReferenceCapability(m);
-    return cap.supports && (cap.maxRefs || 0) >= count;
-  });
-
-  if (eligible.length === 0) return null;
-
-  // Sort descending by max capacity (maxRefs)
-  eligible.sort((a, b) => {
-    const capA = getModelReferenceCapability(a).maxRefs || 0;
-    const capB = getModelReferenceCapability(b).maxRefs || 0;
-    return capB - capA;
-  });
-
-  return eligible[0];
 }
 
 /**
