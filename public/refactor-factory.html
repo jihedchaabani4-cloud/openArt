@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Refactor Factory Dashboard - OpenArt / my-app</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'dark',
+      themeVariables: {
+        darkMode: true,
+        background: '#09090b',
+        primaryColor: '#3b82f6',
+        primaryTextColor: '#f8fafc',
+        primaryBorderColor: '#60a5fa',
+        lineColor: '#94a3b8',
+        secondaryColor: '#10b981',
+        tertiaryColor: '#1e293b'
+      }
+    });
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Cairo:wght@400;600;700;900&display=swap');
+    body {
+      font-family: 'Cairo', 'Plus Jakarta Sans', sans-serif;
+    }
+    .code-font {
+      font-family: 'Consolas', 'Monaco', monospace;
+    }
+  </style>
+</head>
+<body class="bg-zinc-950 text-zinc-100 min-h-screen p-6 md:p-12">
+  <div class="max-w-6xl mx-auto space-y-10">
+
+    <!-- Header Section -->
+    <header class="border-b border-zinc-800 pb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+      <div>
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-400 text-xs font-semibold uppercase tracking-wider mb-3">
+          🏭 Multi-Agent Architecture Engine
+        </div>
+        <h1 class="text-3xl md:text-5xl font-extrabold tracking-tight text-white">
+          مصنع تنظيف وتعميق المعمارية (Refactor Factory)
+        </h1>
+        <p class="text-zinc-400 text-sm md:text-base mt-2">
+          نظام تكراري آلي بالكامل (Autonomous Pipeline) يعتمد على تدرّج الـ Agents والـ Peer-Review لتطبيق FSD النقي.
+        </p>
+      </div>
+
+      <!-- Live Quality Indicators -->
+      <div class="flex items-center gap-3 bg-zinc-900 border border-zinc-800 p-4 rounded-2xl shadow-xl">
+        <div class="text-center px-4 border-l border-zinc-800">
+          <div class="text-2xl font-black text-emerald-400">903 / 903</div>
+          <div class="text-xs text-zinc-500 uppercase tracking-wider">Unit Tests Green</div>
+        </div>
+        <div class="text-center px-4 border-l border-zinc-800">
+          <div class="text-2xl font-black text-blue-400">0</div>
+          <div class="text-xs text-zinc-500 uppercase tracking-wider">UI Ratchet Violations</div>
+        </div>
+        <div class="text-center px-4">
+          <div class="text-2xl font-black text-purple-400">4</div>
+          <div class="text-xs text-zinc-500 uppercase tracking-wider">Verified Commits</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Visual Interactive Pipeline (Mermaid) -->
+    <section class="bg-zinc-900/50 border border-zinc-800/80 rounded-3xl p-6 md:p-8 backdrop-blur-sm">
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <h2 class="text-xl md:text-2xl font-bold text-white flex items-center gap-3">
+            <span>⚙️ خط الإنتاج التفاعلي (The Factory Assembly Line)</span>
+          </h2>
+          <p class="text-xs md:text-sm text-zinc-400 mt-1">مسار انتقال الميزة (Feature) من الفحص والتحليل إلى الـ Commit النهائي عبر 7 مراحل دقيقة.</p>
+        </div>
+        <span class="text-xs bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-3 py-1 rounded-full font-bold animate-pulse">
+          Active Pipeline
+        </span>
+      </div>
+
+      <div class="mermaid bg-zinc-950 p-6 rounded-2xl border border-zinc-800 flex justify-center overflow-x-auto text-left" dir="ltr">
+flowchart LR
+    subgraph S1["1. التشخيص والتخطيط"]
+        A1["🔍 Analyst Agent\n(Scan & Friction)"] --> A2["📐 Planner Agent\n(FSD Deep Slices)"]
+        A2 --> A3["🧐 Critic Agent\n(Grilling & YAGNI)"]
+    end
+
+    subgraph S2["2. التفكيك والمراجعة"]
+        A3 -->|Approved| T1["📋 Ticket Decomposer\n(to-tickets Slices)"]
+        T1 --> T2["🛡️ Ticket Reviewer\n(Check Blast Radius)"]
+    end
+
+    subgraph S3["3. التنفيذ والاعتماد"]
+        T2 --> E1["⚡ Executor Agent\n(TDD & In-place Moves)"]
+        E1 --> Q1["🧪 Quality Gate Agent\n(vitest + ui:check)"]
+        Q1 -->|PASS| C1["✅ Clean Git Commit"]
+    end
+
+    style S1 fill:#18181b,stroke:#3b82f6,stroke-width:1px
+    style S2 fill:#18181b,stroke:#8b5cf6,stroke-width:1px
+    style S3 fill:#18181b,stroke:#10b981,stroke-width:1px
+      </div>
+    </section>
+
+    <!-- Detailed 7-Stage Architecture Cards -->
+    <section class="space-y-6">
+      <h2 class="text-2xl font-bold text-white">📋 محطات خط الإنتاج (Stages Breakdown)</h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+        <!-- Card 1 -->
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 relative hover:border-blue-500/50 transition-all">
+          <div class="flex items-center justify-between mb-4">
+            <span class="w-8 h-8 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center font-black text-sm">1</span>
+            <span class="text-xs px-2 py-0.5 rounded bg-zinc-800 text-zinc-400 code-font">codebase-design</span>
+          </div>
+          <h3 class="text-lg font-bold text-white mb-2">Feature Analyst</h3>
+          <p class="text-zinc-400 text-xs leading-relaxed mb-4">
+            يفحص الـ Feature بدقة: يفرز الملفات السائبة (Loose files)، الـ hooks المخلطة مع الـ UI، ويفحص الـ Public API (`index.js`).
+          </p>
+          <div class="text-[11px] bg-zinc-950 p-2.5 rounded-lg border border-zinc-800/80 text-zinc-300">
+            <strong>المخرجات:</strong> قائمة بالـ Friction Points والـ Dependencies الخارجية.
+          </div>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 relative hover:border-blue-500/50 transition-all">
+          <div class="flex items-center justify-between mb-4">
+            <span class="w-8 h-8 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center font-black text-sm">2</span>
+            <span class="text-xs px-2 py-0.5 rounded bg-zinc-800 text-zinc-400 code-font">improve-architecture</span>
+          </div>
+          <h3 class="text-lg font-bold text-white mb-2">Architecture Planner</h3>
+          <p class="text-zinc-400 text-xs leading-relaxed mb-4">
+            يصمم المعمارية المستهدفة للـ Slice بناءً على FSD النقي: يحدد مكان الـ `model/` (الستورز والهوكس)، و `api/` (الريكوستات)، و `ui/` (الواجهات فقط).
+          </p>
+          <div class="text-[11px] bg-zinc-950 p-2.5 rounded-lg border border-zinc-800/80 text-zinc-300">
+            <strong>المخرجات:</strong> Deep Module Interface & Target File Tree.
+          </div>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 relative hover:border-blue-500/50 transition-all">
+          <div class="flex items-center justify-between mb-4">
+            <span class="w-8 h-8 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center font-black text-sm">3</span>
+            <span class="text-xs px-2 py-0.5 rounded bg-zinc-800 text-zinc-400 code-font">grilling + council</span>
+          </div>
+          <h3 class="text-lg font-bold text-white mb-2">Critic & Grilling Agent</h3>
+          <p class="text-zinc-400 text-xs leading-relaxed mb-4">
+            يمتحن المخطط بصرامة: هل فيه Over-engineering؟ هل فما خطر كسر للتستات أو الـ UI؟ هل الـ Refactor يحترم قاعدة YAGNI والـ Deletion test؟
+          </p>
+          <div class="text-[11px] bg-zinc-950 p-2.5 rounded-lg border border-zinc-800/80 text-zinc-300">
+            <strong>المخرجات:</strong> تمحيص المخطط وحذف أي تعقيد زايد قبل الكود.
+          </div>
+        </div>
+
+        <!-- Card 4 -->
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 relative hover:border-purple-500/50 transition-all">
+          <div class="flex items-center justify-between mb-4">
+            <span class="w-8 h-8 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center font-black text-sm">4</span>
+            <span class="text-xs px-2 py-0.5 rounded bg-zinc-800 text-zinc-400 code-font">to-tickets</span>
+          </div>
+          <h3 class="text-lg font-bold text-white mb-2">Ticket Decomposer</h3>
+          <p class="text-zinc-400 text-xs leading-relaxed mb-4">
+            يقسم الخطة إلى تذاكر رأسية ذرية (Atomic Tracer-Bullet Tickets): كل تذكرة عندها Scope محدد، Blocking Dependencies، وشروط نجاح حاسمة.
+          </p>
+          <div class="text-[11px] bg-zinc-950 p-2.5 rounded-lg border border-zinc-800/80 text-zinc-300">
+            <strong>المخرجات:</strong> تذاكر مرتبة ومنظمة حسب الأسبقية.
+          </div>
+        </div>
+
+        <!-- Card 5 -->
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 relative hover:border-purple-500/50 transition-all">
+          <div class="flex items-center justify-between mb-4">
+            <span class="w-8 h-8 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center font-black text-sm">5</span>
+            <span class="text-xs px-2 py-0.5 rounded bg-zinc-800 text-zinc-400 code-font">wayfinder</span>
+          </div>
+          <h3 class="text-lg font-bold text-white mb-2">Ticket Reviewer</h3>
+          <p class="text-zinc-400 text-xs leading-relaxed mb-4">
+            يتأكد أن التذاكر مصنفة صح: الـ Mechanical moves تسير بـ Expand-Contract، ولا توجد تذكرة تبدأ قبل اكتمال متطلباتها السابقة.
+          </p>
+          <div class="text-[11px] bg-zinc-950 p-2.5 rounded-lg border border-zinc-800/80 text-zinc-300">
+            <strong>المخرجات:</strong> مصادقة نهائية على خطة التنفيذ وتجنب الـ Blast Radius.
+          </div>
+        </div>
+
+        <!-- Card 6 -->
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 relative hover:border-emerald-500/50 transition-all">
+          <div class="flex items-center justify-between mb-4">
+            <span class="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-black text-sm">6</span>
+            <span class="text-xs px-2 py-0.5 rounded bg-zinc-800 text-zinc-400 code-font">implement + tdd</span>
+          </div>
+          <h3 class="text-lg font-bold text-white mb-2">Execution Agent</h3>
+          <p class="text-zinc-400 text-xs leading-relaxed mb-4">
+            ينفذ التذاكر تذكرة بتذكرة: نقل الملفات، ضبط الـ imports، تحديث التستات، والتأكد الفوري من أن كل خطوة تنتهي بنتيجة خضراء 100%.
+          </p>
+          <div class="text-[11px] bg-zinc-950 p-2.5 rounded-lg border border-zinc-800/80 text-zinc-300">
+            <strong>المخرجات:</strong> كود معدل ومنقول بدقة بدون أي تراجع وظيفي.
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Executed Batch History -->
+    <section class="bg-zinc-900 border border-zinc-800 rounded-3xl p-6 md:p-8">
+      <h2 class="text-2xl font-bold text-white mb-6">🏆 نتائج الـ Batches المنجزة بنجاح بالمصنع</h2>
+      
+      <div class="space-y-4">
+        <!-- Item 1 -->
+        <div class="bg-zinc-950 border border-zinc-800/80 p-5 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div class="space-y-1">
+            <div class="flex items-center gap-3">
+              <span class="px-2.5 py-1 rounded bg-emerald-500/20 text-emerald-400 text-xs font-bold">COMPLETED</span>
+              <h3 class="text-base font-bold text-white">Batch #1: Clean Studio Hooks & Exports</h3>
+              <span class="text-xs text-zinc-500 code-font">commit: e0d223f</span>
+            </div>
+            <p class="text-xs text-zinc-400">
+              نقل `useDragAutoScroll` و `useStudioItemDrag` إلى `features/studio/model/` وحذف `usePromptStore` الزائد وتوحيد الاستيراد.
+            </p>
+          </div>
+          <div class="flex items-center gap-2 text-xs text-zinc-400">
+            <span class="bg-zinc-900 px-3 py-1.5 rounded-lg border border-zinc-800">14/14 Tests Passed</span>
+            <span class="bg-zinc-900 px-3 py-1.5 rounded-lg border border-zinc-800">0 Ratchet Viols</span>
+          </div>
+        </div>
+
+        <!-- Item 2 -->
+        <div class="bg-zinc-950 border border-zinc-800/80 p-5 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div class="space-y-1">
+            <div class="flex items-center gap-3">
+              <span class="px-2.5 py-1 rounded bg-emerald-500/20 text-emerald-400 text-xs font-bold">COMPLETED</span>
+              <h3 class="text-base font-bold text-white">Batch #2: Unify Folders API Subdirectory</h3>
+              <span class="text-xs text-zinc-500 code-font">commit: 6ea2175</span>
+            </div>
+            <p class="text-xs text-zinc-400">
+              جمع `mutations/` و `queries/` داخل `features/folders/api/` وتحديث جميع الـ relative imports في `useFolderMove`.
+            </p>
+          </div>
+          <div class="flex items-center gap-2 text-xs text-zinc-400">
+            <span class="bg-zinc-900 px-3 py-1.5 rounded-lg border border-zinc-800">36/36 Tests Passed</span>
+            <span class="bg-zinc-900 px-3 py-1.5 rounded-lg border border-zinc-800">FSD Compliant</span>
+          </div>
+        </div>
+
+        <!-- Item 3 -->
+        <div class="bg-zinc-950 border border-zinc-800/80 p-5 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div class="space-y-1">
+            <div class="flex items-center gap-3">
+              <span class="px-2.5 py-1 rounded bg-emerald-500/20 text-emerald-400 text-xs font-bold">COMPLETED</span>
+              <h3 class="text-base font-bold text-white">Batch #3: Projects Test Relocation</h3>
+              <span class="text-xs text-zinc-500 code-font">commit: a78aad1</span>
+            </div>
+            <p class="text-xs text-zinc-400">
+              نقل `projectsMutations.test.jsx` من داخل مجلد الـ `api/` إلى المجلد القياسي `features/projects/__tests__/`.
+            </p>
+          </div>
+          <div class="flex items-center gap-2 text-xs text-zinc-400">
+            <span class="bg-zinc-900 px-3 py-1.5 rounded-lg border border-zinc-800">6/6 Tests Passed</span>
+            <span class="bg-zinc-900 px-3 py-1.5 rounded-lg border border-zinc-800">Standardized</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="text-center text-xs text-zinc-500 pt-6 border-t border-zinc-900">
+      Multi-Agent Refactor Factory • Labveil OpenArt Engine • All Rights Reserved
+    </footer>
+  </div>
+</body>
+</html>
