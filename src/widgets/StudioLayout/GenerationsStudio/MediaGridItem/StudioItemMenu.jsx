@@ -59,7 +59,7 @@ export function StudioItemDropdownMenu({
     return (
       trigger || (
         <ActionBtn onClick={(e) => e.stopPropagation()} title="More options">
-          <GoogleIcon iconName="more_vert" className="text-[13px] text-[#303031]" />
+          <GoogleIcon iconName="more_vert" className="text-xs" />
         </ActionBtn>
       )
     );
@@ -70,7 +70,7 @@ export function StudioItemDropdownMenu({
       <DropdownMenuTrigger asChild>
         {trigger || (
           <ActionBtn onClick={(e) => e.stopPropagation()} title="More options">
-            <GoogleIcon iconName="more_vert" className="text-[13px] text-[#303031]" />
+            <GoogleIcon iconName="more_vert" className="text-xs" />
           </ActionBtn>
         )}
       </DropdownMenuTrigger>

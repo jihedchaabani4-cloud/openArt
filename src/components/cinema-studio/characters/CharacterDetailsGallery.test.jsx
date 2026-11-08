@@ -449,8 +449,7 @@ describe("CharacterDetailsGallery - Studio Media Grid Form", () => {
     const coverBtns = screen.getAllByTitle(/couverture/i);
     expect(coverBtns.length).toBeGreaterThan(0);
     expect(coverBtns[0].textContent).toContain("bookmark");
-    const coverIcon = coverBtns[0].querySelector("[role='img']");
-    expect(coverIcon?.className).toContain("text-[#303031]");
+    expect(coverBtns[0].className).toContain("text-neutral-800");
 
     const deleteBtns = screen.getAllByTitle(/supprimer/i);
     expect(deleteBtns.length).toBeGreaterThan(0);

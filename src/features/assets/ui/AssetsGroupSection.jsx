@@ -24,10 +24,10 @@ export function AssetsGroupSection({
           variant="ghost"
           onClick={() => onToggleGroupSelection(group.photos)}
           className={`
-            flex h-6 w-6 items-center justify-center rounded-md border transition p-0
+            flex h-6 w-6 items-center justify-center rounded-sm border transition p-0
             ${selectedCount > 0
-              ? "border-white bg-white text-[#050505] hover:bg-white/90"
-              : "border-white/12 bg-white/[0.03] text-white/32 hover:border-white/24 hover:text-white/72"}
+              ? "border-white bg-white text-black hover:bg-white/90"
+              : "border-outline-variant bg-white/[0.03] text-on-surface-subtle hover:border-outline hover:text-on-surface"}
           `}
           aria-label={`Select ${group.label}`}
         >
@@ -37,7 +37,7 @@ export function AssetsGroupSection({
             <GoogleIcon iconName="remove" className="text-sm font-bold" />
           ) : null}
         </Button>
-        <h2 className="text-[28px] font-semibold tracking-tight text-white">
+        <h2 className="text-2xl font-semibold tracking-tight text-on-surface">
           {group.label}
         </h2>
       </div>

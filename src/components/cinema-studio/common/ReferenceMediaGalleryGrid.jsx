@@ -109,7 +109,7 @@ export function ReferenceMediaCard({
                   <GoogleIcon
                     iconName="bookmark"
                     fill={isCover}
-                    className="text-[14px] text-[#303031]"
+                    className="text-xs"
                   />
                 </ActionBtn>
               )}
@@ -121,9 +121,9 @@ export function ReferenceMediaCard({
                   }}
                   title="Supprimer l'image"
                   aria-label="Supprimer"
-                  className="hover:text-red-600"
+                  className="hover:text-error"
                 >
-                  <GoogleIcon iconName="delete" className="text-[14px] text-[#303031]" />
+                  <GoogleIcon iconName="delete" className="text-xs hover:text-error" />
                 </ActionBtn>
               )}
             </ButtonGroup>

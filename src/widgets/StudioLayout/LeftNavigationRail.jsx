@@ -93,8 +93,8 @@ export function LeftNavigationRail() {
       className={cn(
         "flex items-center h-[42px] rounded-sm transition-colors duration-100 w-full select-none outline-none overflow-hidden font-sans font-medium text-sm leading-5 antialiased",
         item.isActive
-          ? "bg-[#2a2a2a] text-white shadow-none"
-          : "text-white/80 hover:text-white hover:bg-white/[0.06]"
+          ? "bg-surface-elevated text-on-surface shadow-none"
+          : "text-on-surface-variant hover:text-on-surface hover:bg-white/[0.06]"
       )}
       title={!isExpanded ? item.label : undefined}
     >

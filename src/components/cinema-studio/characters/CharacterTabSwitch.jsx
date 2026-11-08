@@ -22,13 +22,13 @@ export function CharacterTabSwitch({
       <Button
         type="button"
         variant="ghost"
-        className="h-8 px-2.5 bg-white/5 border-none text-white/80 hover:text-white hover:bg-white/10 text-xs"
+        className="h-8 px-2.5 bg-white/5 border-none text-on-surface-variant hover:text-on-surface hover:bg-white/10 text-xs"
         onClick={() => setActiveTab("sheet")}
         aria-label="Body Sheet"
       >
         <div
           className={`size-8 rounded-md overflow-hidden shrink-0 flex items-center justify-center ${
-            activeTab === "sheet" ? "bg-white" : "bg-[#38383c]"
+            activeTab === "sheet" ? "bg-white text-black" : "bg-surface-elevated text-on-surface"
           }`}
         >
           {activeSheetSrc && !imageLoadError ? (
@@ -41,7 +41,7 @@ export function CharacterTabSwitch({
           ) : (
             <GoogleIcon
               iconName="portrait"
-              className={`text-[1.2rem] ${activeTab === "sheet" ? "text-black" : "text-white"}`}
+              className={`text-lg ${activeTab === "sheet" ? "text-black" : "text-on-surface"}`}
             />
           )}
         </div>
@@ -52,13 +52,13 @@ export function CharacterTabSwitch({
       <Button
         type="button"
         variant="ghost"
-        className="h-8 px-2.5 bg-white/5 border-none text-white/80 hover:text-white hover:bg-white/10 text-xs"
+        className="h-8 px-2.5 bg-white/5 border-none text-on-surface-variant hover:text-on-surface hover:bg-white/10 text-xs"
         onClick={() => setActiveTab("details")}
         aria-label="More Details"
       >
         <div
           className={`size-8 rounded-md overflow-hidden shrink-0 flex items-center justify-center ${
-            activeTab === "details" ? "bg-white text-black" : "bg-[#38383c] text-white"
+            activeTab === "details" ? "bg-white text-black" : "bg-surface-elevated text-on-surface"
           }`}
         >
           {firstDetailPhotoSrc ? (
@@ -68,7 +68,7 @@ export function CharacterTabSwitch({
               className="w-full h-full object-cover"
             />
           ) : (
-            <GoogleIcon iconName="accessibility_new" className="text-[1.2rem]" />
+            <GoogleIcon iconName="accessibility_new" className="text-lg" />
           )}
         </div>
         <span className="font-medium pr-1">More Details</span>

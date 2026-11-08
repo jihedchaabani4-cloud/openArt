@@ -38,8 +38,8 @@ export function AssetListItem({
       className={cn(
         "group w-full h-12 rounded-sm pl-1 pr-4 py-0 flex items-center gap-3 justify-start text-left border-none select-none relative cursor-pointer",
         isActive
-          ? "bg-[#444746] text-white shadow-none"
-          : "bg-transparent hover:bg-white/5 text-white/90",
+          ? "bg-surface-container-high text-on-surface shadow-none"
+          : "bg-transparent hover:bg-white/5 text-on-surface-variant hover:text-on-surface",
         isDisabled && "opacity-40",
         className
       )}
@@ -55,10 +55,10 @@ export function AssetListItem({
 
       {/* Asset Text: Title and Uniform Type Subtitle */}
       <div className="flex-1 min-w-0 flex flex-col justify-center text-left">
-        <span className="text-[13px] font-medium text-[#e3e3e3] truncate leading-tight font-sans antialiased">
+        <span className="text-sm font-medium text-on-surface truncate leading-tight font-sans antialiased">
           {title}
         </span>
-        <span className="text-[11px] font-normal text-[#c4c7c5] truncate font-sans antialiased mt-0.5">
+        <span className="text-xs font-normal text-on-surface-subtle truncate font-sans antialiased mt-0.5">
           {typeLabel}
         </span>
       </div>
