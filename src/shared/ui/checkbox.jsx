@@ -39,13 +39,11 @@ const Checkbox = React.forwardRef(({
         "disabled:cursor-not-allowed disabled:opacity-50",
         isLg ? "size-5" : "size-4",
         // Resting border and background
-        "border-white/20 bg-white/5 hover:border-white/40 hover:bg-white/10",
+        "border-outline-variant bg-surface-container hover:border-outline hover:bg-surface-container-high",
         // Checked state
         isNeon
           ? "data-[state=checked]:bg-lime-400 data-[state=checked]:border-lime-400 data-[state=checked]:text-black"
-          : variant === "primary"
-          ? "data-[state=checked]:bg-primary data-[state=checked]:border-primary data-[state=checked]:text-black"
-          : "data-[state=checked]:bg-white data-[state=checked]:border-white data-[state=checked]:text-black",
+          : "data-[state=checked]:bg-primary data-[state=checked]:border-primary data-[state=checked]:text-on-primary",
         className
       )}
       {...props}

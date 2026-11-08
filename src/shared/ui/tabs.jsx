@@ -44,9 +44,9 @@ function TabsList({
         data-size={size}
         className={cn(
           "inline-flex items-center justify-center font-sans antialiased",
-          variant === "pills" && "rounded-full bg-white/5 p-1 gap-1 border border-white/5",
-          variant === "underline" && "gap-4 border-b border-white/10 px-1",
-          variant === "studio" && "w-full rounded-md bg-card p-1 gap-1 border border-white/5",
+          variant === "pills" && "rounded-full bg-surface-container p-1 gap-1 border border-outline-variant",
+          variant === "underline" && "gap-4 border-b border-outline-variant px-1",
+          variant === "studio" && "w-full rounded-md bg-surface-container p-1 gap-1 border border-outline-variant",
           className
         )}
         {...props}
@@ -71,19 +71,19 @@ function TabsTrigger({
         // Pills variant
         variant === "pills" && [
           isSm ? "h-6 px-2.5 text-xs rounded-full" : "h-7 px-3.5 text-xs rounded-full",
-          "text-white/60 hover:text-white hover:bg-white/5",
-          "data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:font-semibold",
+          "text-on-surface-subtle hover:text-on-surface hover:bg-white/[0.08]",
+          "data-[state=active]:bg-primary data-[state=active]:text-on-primary data-[state=active]:font-semibold",
         ],
         // Underline variant
         variant === "underline" && [
           isSm ? "h-7 text-xs pb-1" : "h-9 text-sm pb-2",
-          "text-white/60 hover:text-white border-b-2 border-transparent",
-          "data-[state=active]:border-white data-[state=active]:text-white data-[state=active]:font-semibold",
+          "text-on-surface-subtle hover:text-on-surface border-b-2 border-transparent",
+          "data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:font-semibold",
         ],
         // Studio variant
         variant === "studio" && [
           "flex-1 py-1.5 rounded-sm text-xs uppercase tracking-wider font-semibold",
-          "text-white/60 hover:text-white hover:bg-white/5",
+          "text-on-surface-subtle hover:text-on-surface hover:bg-white/[0.08]",
           "data-[state=active]:bg-lime-400 data-[state=active]:text-black",
         ],
         className

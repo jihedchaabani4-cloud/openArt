@@ -19,14 +19,14 @@ export const surfaceVariants = cva(
   {
     variants: {
       tone: {
-        base: "bg-surface-base text-content-base border-line-subtle",
-        panel: "bg-surface-panel text-content-base border-line-default",
-        processing: "bg-surface-processing text-content-base border-line-subtle",
-        card: "bg-surface-card text-content-base border-line-subtle",
-        elevated: "bg-surface-elevated text-content-base border-line-default",
-        highest: "bg-surface-highest text-content-base border-line-default",
-        sunken: "bg-surface-sunken text-content-base border-line-subtle",
-        overlay: "bg-surface-overlay text-content-base border-line-default backdrop-blur-md",
+        base: "bg-surface text-on-surface border-outline-variant",
+        panel: "bg-surface-container-low text-on-surface border-outline-variant",
+        processing: "bg-surface-container-lowest text-on-surface border-outline-variant",
+        card: "bg-surface-container text-on-surface border-outline-variant",
+        elevated: "bg-surface-container-high text-on-surface border-outline-variant",
+        highest: "bg-surface-container-highest text-on-surface border-outline",
+        sunken: "bg-surface-container-lowest text-on-surface border-outline-variant",
+        overlay: "bg-surface-container-high/90 text-on-surface border-outline-variant backdrop-blur-md",
         // Google Flow Material 3 surface ladder
         surface: "bg-surface text-on-surface border-outline-variant",
         "container-lowest": "bg-surface-container-lowest text-on-surface border-outline-variant",

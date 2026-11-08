@@ -19,8 +19,8 @@ describe("Form Controls & Menus — Runway Flat Surface Architecture", () => {
       );
       const wrapper = container.querySelector(".rounded-sm");
       expect(wrapper).not.toBeNull();
-      expect(wrapper?.className).toContain("bg-surface-card");
-      expect(wrapper?.className).toContain("border-white/10");
+      expect(wrapper?.className).toContain("bg-surface-container");
+      expect(wrapper?.className).toContain("border-outline-variant");
       expect(wrapper?.className).not.toContain("backdrop-blur");
     });
 
@@ -30,8 +30,8 @@ describe("Form Controls & Menus — Runway Flat Surface Architecture", () => {
       );
       const wrapper = container.querySelector(".rounded-sm");
       expect(wrapper).not.toBeNull();
-      expect(wrapper?.className).toContain("bg-surface-card");
-      expect(wrapper?.className).toContain("border-white/10");
+      expect(wrapper?.className).toContain("bg-surface-container");
+      expect(wrapper?.className).toContain("border-outline-variant");
       expect(wrapper?.className).not.toContain("backdrop-blur");
     });
   });
@@ -43,12 +43,12 @@ describe("Form Controls & Menus — Runway Flat Surface Architecture", () => {
       );
       const wrapper = container.querySelector(".rounded-md");
       expect(wrapper).not.toBeNull();
-      expect(wrapper?.className).toContain("bg-surface-card");
-      expect(wrapper?.className).toContain("border-white/10");
+      expect(wrapper?.className).toContain("bg-surface-container");
+      expect(wrapper?.className).toContain("border-outline-variant");
       expect(wrapper?.className).not.toContain("backdrop-blur");
 
       const textarea = screen.getByPlaceholderText("Describe the scene...");
-      expect(textarea.className).toContain("text-white");
+      expect(textarea.className).toContain("text-on-surface");
     });
 
     it("renders blur variant mapped to flat dark surface without blur", () => {
@@ -57,8 +57,8 @@ describe("Form Controls & Menus — Runway Flat Surface Architecture", () => {
       );
       const wrapper = container.querySelector(".rounded-sm");
       expect(wrapper).not.toBeNull();
-      expect(wrapper?.className).toContain("bg-surface-card");
-      expect(wrapper?.className).toContain("border-white/10");
+      expect(wrapper?.className).toContain("bg-surface-container");
+      expect(wrapper?.className).toContain("border-outline-variant");
       expect(wrapper?.className).not.toContain("backdrop-blur");
     });
   });
@@ -77,8 +77,8 @@ describe("Form Controls & Menus — Runway Flat Surface Architecture", () => {
       );
       const trigger = screen.getByRole("combobox");
       expect(trigger.className).toContain("rounded-sm");
-      expect(trigger.className).toContain("bg-surface-elevated");
-      expect(trigger.className).toContain("border-white/10");
+      expect(trigger.className).toContain("bg-surface-container");
+      expect(trigger.className).toContain("border-outline-variant");
       expect(trigger.className).not.toContain("backdrop-blur");
     });
   });

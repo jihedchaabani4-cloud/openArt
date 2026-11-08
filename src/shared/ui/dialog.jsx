@@ -124,7 +124,7 @@ function DialogContent({
 
         {showCloseButton && (
           <DialogPrimitive.Close
-            className="absolute top-4 right-4 text-cool-slate hover:text-white transition flex items-center justify-center cursor-pointer"
+            className="absolute top-4 right-4 text-on-surface-subtle hover:text-on-surface transition flex items-center justify-center cursor-pointer"
           >
             <GoogleIcon iconName="close" className="text-xl" />
             <span className="sr-only">Close</span>
@@ -174,7 +174,7 @@ function DialogTitle({ className, ...props }) {
   return (
     <DialogPrimitive.Title
       data-slot="dialog-title"
-      className={cn("text-lg font-semibold text-white tracking-tight", className)}
+      className={cn("text-lg font-semibold text-on-surface tracking-tight font-sans", className)}
       {...props}
     />
   )
@@ -185,7 +185,7 @@ function DialogDescription({ className, ...props }) {
   return (
     <DialogPrimitive.Description
       data-slot="dialog-description"
-      className={cn("text-sm text-cool-slate leading-relaxed", className)}
+      className={cn("text-sm text-on-surface-variant leading-relaxed", className)}
       {...props}
     />
   )

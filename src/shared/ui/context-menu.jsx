@@ -61,7 +61,7 @@ function ContextMenuSubTrigger({
       )}
       {...props}>
       {children}
-      <GoogleIcon iconName="chevron_right" className="ml-auto text-base text-cool-slate" />
+      <GoogleIcon iconName="chevron_right" className="ml-auto text-base text-on-surface-subtle" />
     </ContextMenuPrimitive.SubTrigger>
   );
 }
@@ -76,7 +76,7 @@ function ContextMenuSubContent({
       data-slot="context-menu-sub-content"
       style={style}
       className={cn(
-        "z-50 w-52 min-w-[12rem] rounded-md origin-(--radix-context-menu-content-transform-origin) overflow-hidden p-1.5 flex flex-col gap-0.5 font-sans antialiased bg-(--background-state-90) backdrop-blur-80 border border-white/10 text-white shadow-none",
+        "z-50 w-52 min-w-[12rem] rounded-md origin-(--radix-context-menu-content-transform-origin) overflow-hidden p-1.5 flex flex-col gap-0.5 font-sans antialiased bg-surface-container-high border border-outline-variant text-on-surface shadow-none",
         "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
         className
       )}
@@ -96,7 +96,7 @@ function ContextMenuContent({
         style={style}
         className={cn(
           // Layout & shape
-          "z-50 w-52 min-w-[12rem] rounded-md overflow-hidden p-1.5 flex flex-col gap-0.5 font-sans antialiased bg-(--background-state-90) backdrop-blur-80 border border-white/10 text-white shadow-none",
+          "z-50 w-52 min-w-[12rem] rounded-md overflow-hidden p-1.5 flex flex-col gap-0.5 font-sans antialiased bg-surface-container-high border border-outline-variant text-on-surface shadow-none",
           "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
           className
         )}
@@ -120,14 +120,14 @@ function ContextMenuItem({
         // Layout
         "relative flex cursor-pointer items-center gap-3 rounded-sm pl-3 pr-4 py-2 min-h-[2.125rem] text-sm leading-5 font-medium outline-hidden select-none font-sans antialiased",
         // Theme defaults: on-surface text, state layers for hover & focus
-        "text-white/90 hover:text-white hover:bg-white/10 focus:bg-white/10 focus:text-white active:bg-white/15 transition-colors duration-100 ease-in-out",
+        "text-on-surface hover:bg-white/[0.08] focus:bg-white/[0.08] focus:text-on-surface active:bg-white/[0.12] transition-colors duration-100 ease-in-out",
         // Icon defaults
-        "[&_svg:not([class*='text-'])]:text-white/80 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-5",
+        "[&_svg:not([class*='text-'])]:text-on-surface-variant [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-5",
         // Disabled & inset
         "data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[inset]:pl-8",
         // Destructive / Danger variant (pure text & icon red, NO red background, ghost hover layer)
-        "data-[variant=destructive]:!text-danger data-[variant=destructive]:hover:!text-danger data-[variant=destructive]:focus:!text-danger data-[variant=destructive]:hover:bg-white/10 data-[variant=destructive]:focus:bg-white/10 data-[variant=destructive]:[&_svg]:!text-danger",
-        "data-[variant=danger]:!text-danger data-[variant=danger]:hover:!text-danger data-[variant=danger]:focus:!text-danger data-[variant=danger]:hover:bg-white/10 data-[variant=danger]:focus:bg-white/10 data-[variant=danger]:[&_svg]:!text-danger",
+        "data-[variant=destructive]:!text-error data-[variant=destructive]:hover:!text-error data-[variant=destructive]:focus:!text-error data-[variant=destructive]:hover:bg-white/[0.08] data-[variant=destructive]:focus:bg-white/[0.08] data-[variant=destructive]:[&_svg]:!text-error",
+        "data-[variant=danger]:!text-error data-[variant=danger]:hover:!text-error data-[variant=danger]:focus:!text-error data-[variant=danger]:hover:bg-white/[0.08] data-[variant=danger]:focus:bg-white/[0.08] data-[variant=danger]:[&_svg]:!text-error",
         className
       )}
       {...props} />
@@ -145,7 +145,7 @@ function ContextMenuCheckboxItem({
       data-slot="context-menu-checkbox-item"
       className={cn(
         "relative flex cursor-pointer items-center gap-2 rounded-sm py-2.5 pr-2 pl-8 text-sm outline-hidden select-none",
-        "text-white hover:bg-white/10 focus:bg-white/10 focus:text-white",
+        "text-on-surface hover:bg-white/[0.08] focus:bg-white/[0.08] focus:text-on-surface",
         "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         "data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
         className
@@ -172,7 +172,7 @@ function ContextMenuRadioItem({
       data-slot="context-menu-radio-item"
       className={cn(
         "relative flex cursor-pointer items-center gap-2 rounded-sm py-2.5 pr-2 pl-8 text-sm outline-hidden select-none",
-        "text-white hover:bg-white/10 focus:bg-white/10 focus:text-white",
+        "text-on-surface hover:bg-white/[0.08] focus:bg-white/[0.08] focus:text-on-surface",
         "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         "data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
         className
@@ -198,7 +198,7 @@ function ContextMenuLabel({
       data-slot="context-menu-label"
       data-inset={inset}
       className={cn(
-        "px-2 py-1.5 text-xs font-medium text-cool-slate data-[inset]:pl-8",
+        "px-2 py-1.5 text-xs font-medium text-on-surface-subtle data-[inset]:pl-8",
         className
       )}
       {...props} />
@@ -212,7 +212,7 @@ function ContextMenuSeparator({
   return (
     <ContextMenuPrimitive.Separator
       data-slot="context-menu-separator"
-      className={cn("-mx-1 my-1.5 h-px bg-white/10", className)}
+      className={cn("-mx-1 my-1.5 h-px bg-outline-variant", className)}
       {...props} />
   );
 }
@@ -224,7 +224,7 @@ function ContextMenuShortcut({
   return (
     <span
       data-slot="context-menu-shortcut"
-      className={cn("ml-auto text-xs tracking-widest text-cool-slate", className)}
+      className={cn("ml-auto text-xs tracking-widest text-on-surface-subtle", className)}
       {...props} />
   );
 }

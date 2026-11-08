@@ -298,7 +298,7 @@ describe("Canonical Design System Primitives Suite", () => {
       const section = container.querySelector('[data-slot="layout-section"]');
       expect(section).not.toBeNull();
       expect(section?.className).toContain("py-12");
-      expect(section?.className).toContain("bg-surface-panel");
+      expect(section?.className).toContain("bg-surface-container-low");
     });
 
     it("renders Stack and Inline layout primitives", () => {

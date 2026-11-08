@@ -47,15 +47,15 @@ const RadioGroupItem = React.forwardRef(({
       data-size={size}
       className={cn(
         // Base geometry
-        "peer aspect-square shrink-0 cursor-pointer rounded-full border border-white/20 bg-white/5 transition-colors outline-none",
-        "hover:border-white/40 hover:bg-white/10",
+        "peer aspect-square shrink-0 cursor-pointer rounded-full border border-outline-variant bg-surface-container transition-colors outline-none",
+        "hover:border-outline hover:bg-surface-container-high",
         "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-black",
         "disabled:cursor-not-allowed disabled:opacity-50",
         isLg ? "size-5" : "size-4",
         // Checked border
         isNeon
           ? "data-[state=checked]:border-lime-400"
-          : "data-[state=checked]:border-white",
+          : "data-[state=checked]:border-primary",
         className
       )}
       {...props}
@@ -68,7 +68,7 @@ const RadioGroupItem = React.forwardRef(({
           className={cn(
             "rounded-full transition-transform scale-100",
             isLg ? "size-2.5" : "size-2",
-            isNeon ? "bg-lime-400" : "bg-white"
+            isNeon ? "bg-lime-400" : "bg-primary"
           )}
         />
       </RadioGroupPrimitive.Indicator>

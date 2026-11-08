@@ -62,8 +62,8 @@ const sectionVariants = cva(
         xxl: "py-20 sm:py-24",
       },
       variant: {
-        default: "bg-transparent text-white",
-        dark: "bg-surface-panel text-white border-y border-white/5",
+        default: "bg-transparent text-on-surface",
+        dark: "bg-surface-container-low text-on-surface border-y border-outline-variant",
         light: "bg-white text-black",
       },
     },

@@ -35,18 +35,17 @@ describe("DropdownMenu and ContextMenu — Runway Flat Surface Architecture", ()
     expect(menuItem.className).toContain("text-sm");
     expect(menuItem.className).toContain("pl-3");
     expect(menuItem.className).toContain("pr-4");
-    expect(menuItem.className).toContain("text-white/90");
+    expect(menuItem.className).toContain("text-on-surface");
 
     const deleteItem = screen.getByText("Delete").closest('[data-slot="dropdown-menu-item"]');
-    expect(deleteItem?.className).toContain("data-[variant=destructive]:!text-danger");
+    expect(deleteItem?.className).toContain("data-[variant=destructive]:!text-error");
 
     const content = item.closest('[data-slot="dropdown-menu-content"]');
     expect(content).not.toBeNull();
     expect(content.className).toContain("w-52");
     expect(content.className).toContain("rounded-md");
-    expect(content.className).toContain("bg-(--background-state-90)");
-    expect(content.className).toContain("backdrop-blur-80");
-    expect(content.className).toContain("border-white/10");
+    expect(content.className).toContain("bg-surface-container-high");
+    expect(content.className).toContain("border-outline-variant");
     expect(content.className).toContain("shadow-none");
   });
 

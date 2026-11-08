@@ -80,9 +80,9 @@ function SelectTrigger({ className, size = "default", variant = "default", asChi
         // Shape
         "rounded-sm",
         // Colors
-        variant === "blur" ? "bg-surface-elevated text-white hover:bg-white/10 border border-white/10" : "bg-transparent hover:bg-white/10 text-white",
+        variant === "blur" ? "bg-surface-container text-on-surface hover:bg-surface-container-high border border-outline-variant" : "bg-transparent hover:bg-white/[0.08] text-on-surface",
         // Text
-        "text-sm font-medium text-white",
+        "text-sm font-medium text-on-surface",
         "hover:cursor-pointer transition-colors outline-none",
 
         // Disabled
@@ -121,7 +121,7 @@ function SelectContent({
           // Shape
           "rounded-md p-2",
           // Colors
-          "bg-(--background-state-90) backdrop-blur-80 border border-white/10 text-white shadow-none",
+          "bg-surface-container-high border border-outline-variant text-on-surface shadow-none",
           // Shadow
           "shadow-none",
           // Animations — open
@@ -172,7 +172,7 @@ function SelectLabel({ className, ...props }) {
       data-slot="select-label"
       className={cn(
         "px-2.5 py-1.5 pb-0.5",
-        "text-xs font-medium leading-tight text-cool-slate",
+        "text-xs font-medium leading-tight text-on-surface-subtle",
         className
       )}
       {...props}
@@ -191,7 +191,7 @@ function SelectItem({ className, children, icon, subtitle, badge, iconVariant = 
         // Layout
         "group flex cursor-pointer items-center gap-3 min-h-10 px-3.5 py-2 rounded-sm outline-none select-none font-sans antialiased transition-all duration-150",
         // Text & State layers
-        "text-white/90 hover:bg-white/10 hover:text-white focus:bg-white/10 focus:text-white data-[highlighted]:bg-white/10 data-[highlighted]:text-white",
+        "text-on-surface hover:bg-white/[0.08] hover:text-on-surface focus:bg-white/[0.08] focus:text-on-surface data-[highlighted]:bg-white/[0.08] data-[highlighted]:text-on-surface",
         // Disabled
         "data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
         className
@@ -202,8 +202,8 @@ function SelectItem({ className, children, icon, subtitle, badge, iconVariant = 
       {icon && (
         <span 
           className={cn(
-            "shrink-0 flex items-center justify-center text-xl transition-colors duration-150 text-white/80",
-            iconVariant === "square" && "aspect-square h-12 -ml-2 -my-1.5 bg-surface-panel rounded-sm border-r border-white/5"
+            "shrink-0 flex items-center justify-center text-xl transition-colors duration-150 text-on-surface-variant",
+            iconVariant === "square" && "aspect-square h-12 -ml-2 -my-1.5 bg-surface-container-low rounded-sm border-r border-outline-variant"
           )}
         >
           {renderIconNode(icon)}
@@ -222,14 +222,14 @@ function SelectItem({ className, children, icon, subtitle, badge, iconVariant = 
         </div>
 
         {subtitle && (
-          <span className="text-xs font-normal leading-4 text-white/60 truncate">
+          <span className="text-xs font-normal leading-4 text-on-surface-subtle truncate">
             {subtitle}
           </span>
         )}
       </div>
 
       {/* ── Checkmark ─────────────────────────────────────────────────────── */}
-      <span className="shrink-0 flex size-4 items-center justify-center text-white/80">
+      <span className="shrink-0 flex size-4 items-center justify-center text-on-surface-variant">
         <SelectPrimitive.ItemIndicator>
           <GoogleIcon iconName="check" className="text-sm font-bold" />
         </SelectPrimitive.ItemIndicator>
@@ -246,7 +246,7 @@ function SelectSeparator({ className, ...props }) {
     <SelectPrimitive.Separator
       data-slot="select-separator"
       className={cn(
-        "pointer-events-none -mx-1 my-1.5 h-px bg-white/10",
+        "pointer-events-none -mx-1 my-1.5 h-px bg-outline-variant",
         className
       )}
       {...props}
@@ -259,7 +259,7 @@ function SelectScrollUpButton({ className, ...props }) {
     <SelectPrimitive.ScrollUpButton
       data-slot="select-scroll-up-button"
       className={cn(
-        "flex cursor-default items-center justify-center py-1 text-cool-slate",
+        "flex cursor-default items-center justify-center py-1 text-on-surface-subtle",
         className
       )}
       {...props}
@@ -274,7 +274,7 @@ function SelectScrollDownButton({ className, ...props }) {
     <SelectPrimitive.ScrollDownButton
       data-slot="select-scroll-down-button"
       className={cn(
-        "flex cursor-default items-center justify-center py-1 text-cool-slate",
+        "flex cursor-default items-center justify-center py-1 text-on-surface-subtle",
         className
       )}
       {...props}
