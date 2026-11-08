@@ -64,6 +64,7 @@ export default function RootLayout({ children }) {
           dangerouslySetInnerHTML={{
             __html: `
               if (typeof window !== 'undefined') {
+                // Suppress browser extension unhandled rejections
                 window.addEventListener('unhandledrejection', function(e) {
                   var reason = e && (e.reason || e.detail);
                   var str = (reason && (reason.stack || reason.message || '' + reason)) || '';
@@ -72,6 +73,23 @@ export default function RootLayout({ children }) {
                     e.stopImmediatePropagation();
                   }
                 }, true);
+
+                // Filter out hydration mismatch warnings caused by browser extensions injecting bis_skin_checked
+                var filterBisLog = function(origFn) {
+                  return function() {
+                    for (var i = 0; i < arguments.length; i++) {
+                      var arg = arguments[i];
+                      var str = (arg && (arg.stack || arg.message || '' + arg)) || '';
+                      if (str.indexOf('bis_skin_checked') !== -1) {
+                        return;
+                      }
+                    }
+                    origFn.apply(console, arguments);
+                  };
+                };
+                if (console.error) console.error = filterBisLog(console.error);
+                if (console.warn) console.warn = filterBisLog(console.warn);
+
                 if (typeof MutationObserver !== 'undefined') {
                   var obs = new MutationObserver(function(mutations) {
                     for (var i = 0; i < mutations.length; i++) {
