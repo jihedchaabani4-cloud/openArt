@@ -1,4 +1,3 @@
-export { useMediaStore } from "./model/useMediaStore";
 export { useUploadMedia, uploadMediaAsset, validateBatchCount } from "./model/useUploadMedia";
 export { MediaRenderer } from "./ui/MediaRenderer";
 export { MediaCard } from "./ui/MediaCard";
