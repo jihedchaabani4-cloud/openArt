@@ -5,7 +5,6 @@ Component package providing implementations for `src/features/media/api`.
 
 ## Interface
 - [index.js] `useAssets` (re-export)
-- [index.js] `useUserLibrary` (re-export)
 - [index.js] `useInfiniteUserLibrary` (re-export)
 - [index.js] `useLibraryWorkflowDetail` (re-export)
 - [index.js] `useBatchUploadAssets` (re-export)

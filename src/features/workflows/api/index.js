@@ -11,7 +11,6 @@
 // ── Queries
 export { useProjectData } from "./queries/useProjectData";
 export { useAssets } from "./queries/useAssets";
-export { useUserLibrary } from "./queries/useUserLibrary";
 export { useInfiniteUserLibrary } from "./queries/useInfiniteUserLibrary";
 export { useLibraryWorkflowDetail } from "@/features/media";
 

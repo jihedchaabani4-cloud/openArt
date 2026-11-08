@@ -15,8 +15,6 @@ Component package providing implementations for `src/features/elements/hooks`.
 - [useAddImageToElement.js] `useAddImageToElement` (function)
 - [useAddImageToElement.js] `default` (default export)
 - [useAnalyzeElementVision.js] `useAnalyzeElementVision` (function)
-- [useCreateElementForm.js] `useCreateElementForm` (function)
-- [useCreateElementForm.js] `default` (default export)
 - [useCreateElementSheetMutation.js] `useCreateElementSheetMutation` (function)
 - [useDeleteMediaItem.js] `useDeleteMediaItem` (function)
 - [useDeleteMediaItem.js] `default` (default export)

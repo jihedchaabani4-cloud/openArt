@@ -4,7 +4,6 @@
 //   2 mutations (useBatchUploadAssets, useRemoveAsset)
 //   1 utility (downloadMediaItem)
 export { useAssets } from "./queries/useAssets";
-export { useUserLibrary } from "./queries/useUserLibrary";
 export { useInfiniteUserLibrary } from "./queries/useInfiniteUserLibrary";
 export { useLibraryWorkflowDetail } from "./queries/useLibraryWorkflowDetail";
 export { useBatchUploadAssets } from "./mutations/useBatchUploadAssets";

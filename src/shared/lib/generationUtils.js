@@ -3,7 +3,7 @@
 //     Import directly from referenceUtils or displayUtils instead.
 //     This file exists only so old imports don't break during migration.
 
-export { adaptReferences, validateReference, buildReferencesPayload, getGenerationConfig } from "./referenceUtils";
+export { getGenerationConfig } from "./referenceUtils";
 export {
   getGridClass,
   formatGenerationDate,

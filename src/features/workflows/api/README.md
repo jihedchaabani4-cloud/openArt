@@ -6,7 +6,6 @@ Component package providing implementations for `src/features/workflows/api`.
 ## Interface
 - [index.js] `useProjectData` (re-export)
 - [index.js] `useAssets` (re-export)
-- [index.js] `useUserLibrary` (re-export)
 - [index.js] `useInfiniteUserLibrary` (re-export)
 - [index.js] `useLibraryWorkflowDetail` (re-export)
 - [index.js] `useGenerateMutation` (re-export)
