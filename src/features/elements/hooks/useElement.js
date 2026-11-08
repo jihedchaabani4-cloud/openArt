@@ -1,4 +1,3 @@
-// [FSD Layer: features/elements/hooks] — Shim for backward compatibility (Phase-E).
-// All imports from "@/features/elements/hooks/useElement" resolve here → barrel → individual files.
-// Do not add logic to this file. Edit useElementComposer.js for the composer hook.
-export * from "./index";
+// Backward-compatibility shim: re-exports useElement from model
+export * from "../model/useElementComposer";
+export { default } from "../model/useElementComposer";

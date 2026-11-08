@@ -3,7 +3,7 @@ import { renderHook, act, cleanup } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { api } from "@/shared/api/client";
 import { queryKeys } from "@/shared/api/queryKeys";
-import { useAddImageToElement } from "../hooks/useAddImageToElement";
+import { useAddImageToElement } from "../api/mutations/useAddImageToElement";
 
 vi.mock("@/shared/api/client", () => ({
   api: {

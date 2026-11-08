@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Refactor Factory Live Dashboard - OpenArt</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Cairo:wght@400;600;700;900&display=swap');
+    body { font-family: 'Cairo', 'Plus Jakarta Sans', sans-serif; }
+    .code-font { font-family: 'Consolas', 'Monaco', monospace; }
+  </style>
+</head>
+<body class="bg-zinc-950 text-zinc-100 min-h-screen p-6 md:p-10">
+  <div class="max-w-6xl mx-auto space-y-8">
+
+    <!-- Header Section -->
+    <header class="border-b border-zinc-800 pb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+      <div>
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-400 text-xs font-semibold uppercase tracking-wider mb-2">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+          LIVE FACTORY AGENTS MONITOR
+        </div>
+        <h1 class="text-3xl md:text-4xl font-extrabold text-white">
+          لوحة المراقبة الحية لمصنع الـ Agents
+        </h1>
+        <p class="text-zinc-400 text-sm mt-1">
+          متابعة مباشرة لنشاط الـ Subagents والمراحل في الوقت الفعلي (Real-time Tracker).
+        </p>
+      </div>
+
+      <!-- Live Quality Indicators -->
+      <div class="flex items-center gap-3 bg-zinc-900 border border-zinc-800 p-4 rounded-2xl shadow-xl">
+        <div class="text-center px-4 border-l border-zinc-800">
+          <div id="statTests" class="text-2xl font-black text-emerald-400">903 / 903</div>
+          <div class="text-[11px] text-zinc-500 uppercase">Unit Tests</div>
+        </div>
+        <div class="text-center px-4 border-l border-zinc-800">
+          <div id="statViolations" class="text-2xl font-black text-blue-400">0</div>
+          <div class="text-[11px] text-zinc-500 uppercase">Ratchet Viols</div>
+        </div>
+        <div class="text-center px-4">
+          <div id="statFeature" class="text-2xl font-black text-purple-400">elements</div>
+          <div class="text-[11px] text-zinc-500 uppercase">Active Feature</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Currently Active Subagent Banner -->
+    <section class="bg-gradient-to-r from-blue-950/40 via-zinc-900 to-zinc-900 border border-blue-500/30 rounded-3xl p-6 md:p-8 relative overflow-hidden shadow-2xl">
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <span class="text-xs font-bold text-blue-400 uppercase tracking-widest flex items-center gap-2 mb-2">
+            <span class="relative flex h-3 w-3">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span>
+            </span>
+            الـ Subagent النشط حالياً في الـ Background
+          </span>
+          <h2 id="subagentRole" class="text-2xl md:text-3xl font-extrabold text-white">Elements Architectural Analyst</h2>
+          <p id="subagentStatus" class="text-zinc-400 text-sm mt-1">يفحص مكونات وهيكلة features/elements ويجمع الـ dependencies...</p>
+        </div>
+
+        <div class="bg-zinc-950/80 border border-zinc-800 px-4 py-3 rounded-xl flex items-center gap-4 text-xs">
+          <div>
+            <div class="text-zinc-500">النوع (Type):</div>
+            <div id="subagentType" class="font-bold text-zinc-200 code-font">research subagent</div>
+          </div>
+          <div class="border-r border-zinc-800 h-8"></div>
+          <div>
+            <div class="text-zinc-500">المرحلة:</div>
+            <div id="stageName" class="font-bold text-emerald-400">Stage 1 / 7</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7 Stages Progress Grid -->
+    <section class="space-y-4">
+      <h3 class="text-xl font-bold text-white flex items-center justify-between">
+        <span>مراحل خط الإنتاج الحالية (Stage by Stage)</span>
+        <span class="text-xs text-zinc-500 font-normal">Auto-refreshes every 2.5s</span>
+      </h3>
+
+      <div id="stagesContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Rendered dynamically -->
+      </div>
+    </section>
+
+    <!-- Activity Live Logs -->
+    <section class="bg-zinc-900/60 border border-zinc-800 rounded-3xl p-6">
+      <h3 class="text-lg font-bold text-white mb-3 flex items-center gap-2">
+        <span>📜 سجل العمليات الحية (Live Factory Logs)</span>
+      </h3>
+      <div id="logsContainer" class="bg-zinc-950 border border-zinc-800/80 rounded-xl p-4 font-mono text-xs text-zinc-300 space-y-1.5 max-h-48 overflow-y-auto">
+        <div>Loading logs...</div>
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    async function updateDashboard() {
+      try {
+        const res = await fetch('factory-state.json?t=' + Date.now());
+        if (!res.ok) return;
+        const data = await res.json();
+
+        // Stats
+        document.getElementById('statTests').innerText = data.metrics.totalTests;
+        document.getElementById('statViolations').innerText = data.metrics.uiViolations;
+        document.getElementById('statFeature').innerText = data.activeFeature;
+
+        // Active Agent
+        document.getElementById('subagentRole').innerText = data.subagent.role;
+        document.getElementById('subagentStatus').innerText = data.subagent.status;
+        document.getElementById('subagentType').innerText = data.subagent.typeName;
+        document.getElementById('stageName').innerText = data.stageName;
+
+        // Stages
+        const container = document.getElementById('stagesContainer');
+        container.innerHTML = data.stages.map(st => {
+          let badge = '<span class="px-2 py-0.5 rounded text-[10px] bg-zinc-800 text-zinc-500">PENDING</span>';
+          let border = 'border-zinc-800/80 bg-zinc-900/40 opacity-70';
+          if (st.status === 'running') {
+            badge = '<span class="px-2 py-0.5 rounded text-[10px] bg-blue-500/20 text-blue-400 font-bold border border-blue-500/40 animate-pulse">RUNNING NOW</span>';
+            border = 'border-blue-500/50 bg-blue-950/20 shadow-lg';
+          } else if (st.status === 'done') {
+            badge = '<span class="px-2 py-0.5 rounded text-[10px] bg-emerald-500/20 text-emerald-400 font-bold border border-emerald-500/40">DONE</span>';
+            border = 'border-emerald-500/40 bg-emerald-950/10';
+          }
+
+          return `
+            <div class="border ${border} rounded-2xl p-4 transition-all">
+              <div class="flex items-center justify-between mb-2">
+                <span class="w-6 h-6 rounded-full bg-zinc-800 text-zinc-300 flex items-center justify-center font-bold text-xs">${st.id}</span>
+                ${badge}
+              </div>
+              <h4 class="font-bold text-sm text-white">${st.title}</h4>
+              <p class="text-xs text-zinc-400 mt-1">${st.desc}</p>
+              <div class="mt-3 pt-2 border-t border-zinc-800 text-[11px] text-zinc-500">Agent: <span class="text-zinc-300">${st.agent}</span></div>
+            </div>
+          `;
+        }).join('');
+
+        // Logs
+        const logsEl = document.getElementById('logsContainer');
+        logsEl.innerHTML = data.logs.map(l => `<div class="flex gap-2"><span class="text-blue-400">➜</span><span>${l}</span></div>`).join('');
+      } catch (e) {
+        console.error("Dashboard poll error:", e);
+      }
+    }
+
+    updateDashboard();
+    setInterval(updateDashboard, 2500);
+  </script>
+</body>
+</html>

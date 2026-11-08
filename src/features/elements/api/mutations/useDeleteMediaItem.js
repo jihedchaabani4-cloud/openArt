@@ -1,7 +1,7 @@
 // [FSD Layer: features/elements/hooks] — Delete element media item (1 hook/file).
 // Optimistically removes media item from projectData cache.
 import { api } from "@/shared/api/client";
-import { elementService } from "@/features/elements/services/elementService";
+import { elementService } from "../elementService";
 import { queryKeys } from "@/shared/api/queryKeys";
 import { matchMediaId } from "@/features/workflows/lib/cacheHelpers";
 import { useOptimisticMutation } from "@/shared/lib/optimistic/useOptimisticMutation";

@@ -6,10 +6,10 @@ import { useProjectData } from "@/features/workflows/api/queries/useProjectData"
 import { useWorkflowDelete } from "@/features/workflows/model/useWorkflowDelete";
 import { ELEMENT_TYPES } from "@/features/workflows/model/elementSheetConfig";
 import { stripWorkflowPrefix } from "@/features/workflows/lib/cacheHelpers";
-import { useUpdateElementMetadata } from "./useUpdateElementMetadata";
-import { useAddImageToElement } from "./useAddImageToElement";
-import { useDeleteMediaItem } from "./useDeleteMediaItem";
-import { useAnalyzeElementVision } from "./useAnalyzeElementVision";
+import { useUpdateElementMetadata } from "../api/mutations/useUpdateElementMetadata";
+import { useAddImageToElement } from "../api/mutations/useAddImageToElement";
+import { useDeleteMediaItem } from "../api/mutations/useDeleteMediaItem";
+import { useAnalyzeElementVision } from "../api/mutations/useAnalyzeElementVision";
 
 /**
  * useElement (composer)

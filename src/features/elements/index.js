@@ -1,6 +1,5 @@
-export * from "./hooks/useElement";
-export * from "./hooks/useElementEdit";
-export * from "./hooks/useNewElement";
+export * from "./api";
+export * from "./model";
 export * from "./ui";
-export { elementService } from "./services/elementService";
-export { default } from "./hooks/useElement";
+export { elementService } from "./api/elementService";
+export { default } from "./model/useElementComposer";
