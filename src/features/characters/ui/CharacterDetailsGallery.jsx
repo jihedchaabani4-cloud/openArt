@@ -4,7 +4,7 @@ import { useRef, useMemo } from "react";
 import { Button } from "@/shared/ui/button";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { cn } from "@/shared/lib/utils";
-import { ReferenceMediaGalleryGrid } from "../common/ReferenceMediaGalleryGrid";
+import { ReferenceMediaGalleryGrid } from "@/features/media";
 import { FlowCharacterImagePreview } from "./FlowCharacterImagePreview";
 import { getAcceptedMimeTypes, CHARACTER_DETAIL_UPLOAD_POLICY } from "@/features/media";
 import { isSheetMedia } from "@/features/characters/core/mediaClassification";

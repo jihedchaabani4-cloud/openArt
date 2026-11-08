@@ -12,7 +12,7 @@ import { LoadingScreen } from "@/shared/ui/LoadingScreen"
 
 import { SharedGalleryGrid } from "@/features/media"
 import { MediaGridItem } from "@/widgets/StudioLayout/GenerationsStudio/MediaGridItem"
-import { HowToDrawer } from "@/components/cinema-studio/elements/HowToDrawer"
+import { HowToDrawer } from "@/features/elements";
 import { useWorkflowDelete } from "@/features/workflows"
 import { ConfirmDeleteDialog } from "@/shared/ui/ConfirmDeleteDialog"
 import { Button } from "@/shared/ui/button"

@@ -7,9 +7,6 @@ Component package providing implementations for `src/components`.
 - [LoginDialog.jsx] `LoginDialog` (function)
 - [LoginDialog.jsx] `default` (default export)
 
-### Subdirectories
-- **[cinema-studio](./cinema-studio/README.md)**
-
 ## Invariants
 - None
 

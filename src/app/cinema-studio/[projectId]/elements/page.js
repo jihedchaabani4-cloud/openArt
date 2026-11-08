@@ -14,7 +14,7 @@ import { LoadingScreen } from "@/shared/ui/LoadingScreen";
 
 import { SharedGalleryGrid } from "@/features/media";
 import { MediaGridItem } from "@/widgets/StudioLayout/GenerationsStudio/MediaGridItem";
-import { HowToDrawer, ElementsEmptyState } from "@/components/cinema-studio/elements";
+import { HowToDrawer, ElementsEmptyState } from "@/features/elements";
 import { useWorkflowDelete } from "@/features/workflows";
 import { ConfirmDeleteDialog } from "@/shared/ui/ConfirmDeleteDialog";
 import { NewElementDialog } from "@/widgets/NewElementDialog";

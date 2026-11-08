@@ -8,6 +8,7 @@ export { SharedGalleryGrid } from "./ui/SharedGalleryGrid";
 export { AssetListItem } from "./ui/AssetListItem";
 export { ImportMediaPopover } from "./ui/ImportMediaDialog/ImportMediaPopover";
 export { ImportMediaListView } from "./ui/ImportMediaDialog/ImportMediaListView";
+export { ReferenceMediaGalleryGrid, ReferenceMediaCard, DEFAULT_REFERENCE_ROW_HEIGHT, DEFAULT_CHARACTER_ROW_HEIGHT } from "./ui/ReferenceMediaGalleryGrid";
 export * from "./api/mediaApi";
 export * from "./uploadPolicy";
 

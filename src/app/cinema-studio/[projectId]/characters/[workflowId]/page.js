@@ -2,18 +2,18 @@
 
 import * as React from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useCharacter } from "@/features/characters";
 import { useProjectData } from "@/features/workflows/api/workflowsApi";
 import { LoadingScreen } from "@/shared/ui/LoadingScreen";
 import { ConfirmDeleteDialog } from "@/shared/ui/ConfirmDeleteDialog";
 import { ImportMediaPopover } from "@/features/media";
 import { CharacterEditNavbar } from "@/widgets/CharacterEditNavbar/CharacterEditNavbar";
 import {
+  useCharacter,
   CharacterInfoSidebar,
   CharacterSheetSection,
   CharacterDetailsGallery,
   CharacterTabSwitch,
-} from "@/components/cinema-studio/characters";
+} from "@/features/characters";
 import { cn } from "@/shared/lib/utils";
 
 export default function CharacterDetailPage() {

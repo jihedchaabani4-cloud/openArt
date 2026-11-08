@@ -4,7 +4,7 @@ import { useRef } from "react";
 import { Button } from "@/shared/ui/button";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { cn } from "@/shared/lib/utils";
-import { ReferenceMediaGalleryGrid } from "../common/ReferenceMediaGalleryGrid";
+import { ReferenceMediaGalleryGrid } from "@/features/media";
 import { getAcceptedMimeTypes, ELEMENT_REFERENCE_UPLOAD_POLICY } from "@/features/media";
 
 /**

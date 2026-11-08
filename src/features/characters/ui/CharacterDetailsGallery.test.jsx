@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, cleanup, fireEvent } from "@testing-library/react";
 import { CharacterDetailsGallery } from "./CharacterDetailsGallery";
-import { ReferenceMediaGalleryGrid, DEFAULT_REFERENCE_ROW_HEIGHT as DEFAULT_CHARACTER_ROW_HEIGHT } from "../common/ReferenceMediaGalleryGrid";
+import { ReferenceMediaGalleryGrid, DEFAULT_REFERENCE_ROW_HEIGHT as DEFAULT_CHARACTER_ROW_HEIGHT } from "@/features/media";
 
 // Mock router
 vi.mock("next/navigation", () => ({

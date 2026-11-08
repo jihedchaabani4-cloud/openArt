@@ -2,15 +2,15 @@
 
 import * as React from "react";
 import { useParams } from "next/navigation";
-import { useElementEdit } from "@/features/elements";
 import { LoadingScreen } from "@/shared/ui/LoadingScreen";
 import { ConfirmDeleteDialog } from "@/shared/ui/ConfirmDeleteDialog";
 import { ImportMediaPopover } from "@/features/media";
 import { ElementEditNavbar } from "@/widgets/ElementEditNavbar/ElementEditNavbar";
 import {
+  useElementEdit,
   ElementInfoSidebar,
   ElementDetailsGallery,
-} from "@/components/cinema-studio/elements";
+} from "@/features/elements";
 
 /**
  * ElementWorkflowEditPage

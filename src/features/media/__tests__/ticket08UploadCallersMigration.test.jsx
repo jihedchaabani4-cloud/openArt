@@ -10,7 +10,7 @@ import {
   CHARACTER_DETAIL_UPLOAD_POLICY,
   getAcceptedMimeTypes,
 } from "../uploadPolicy";
-import { CharacterDetailsGallery } from "@/components/cinema-studio/characters/CharacterDetailsGallery";
+import { CharacterDetailsGallery } from "@/features/characters";
 import { CharacterEditNavbar } from "@/widgets/CharacterEditNavbar/CharacterEditNavbar";
 import { api } from "@/shared/api/client";
 
