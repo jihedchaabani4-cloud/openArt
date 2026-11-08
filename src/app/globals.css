@@ -3,6 +3,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+@import "./google-flow-tokens.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -276,10 +277,25 @@ mat-icon {
   --color-border-hairline: rgba(255, 255, 255, 0.10);
   --color-background-state-75: var(--background-state-75, rgba(22, 23, 24, 0.75));
 
+  /* Google Flow & Material 3 Official Tokens */
+  --color-surface-container-lowest: var(--surface-container-lowest, #000000);
+  --color-surface: var(--surface, #131314);
+  --color-surface-container-low: var(--surface-container-low, #1b1b1b);
+  --color-surface-container: var(--surface-container, #1e1f20);
+  --color-surface-container-high: var(--surface-container-high, #282a2c);
+  --color-surface-container-highest: var(--surface-container-highest, #333537);
+  --color-surface-bright: var(--surface-bright, #37393b);
+  --color-on-surface: var(--on-surface, #f5f5f5);
+  --color-on-surface-variant: var(--on-surface-variant, #8e8e93);
+  --color-on-surface-subtle: var(--on-surface-subtle, #636366);
+  --color-outline-variant: var(--outline-variant, rgba(218, 220, 224, 0.05));
+  --color-outline: var(--outline, rgba(218, 220, 224, 0.14));
+  --color-outline-interactive: var(--outline-interactive, rgba(255, 255, 255, 0.25));
+
   /* Unified Semantic Design Tokens (Phase 1) */
   --color-surface-base: var(--surface-base, var(--surface-card, #1e1f20));
   --color-surface-sunken: var(--surface-sunken, var(--surface-canvas, #000000));
-  --color-surface-overlay: var(--surface-overlay, rgba(22, 23, 24, 0.85));
+  --color-surface-overlay: var(--surface-overlay, rgba(22, 23, 24, 0.90));
 
   --color-content-base: var(--content-base, #f5f5f5);
   --color-content-muted: var(--content-muted, #8e8e93);
@@ -300,29 +316,46 @@ mat-icon {
   --color-neutral-primary-reverted-5: rgba(255, 255, 255, 0.05);
   --color-neutral-primary-reverted-10: rgba(255, 255, 255, 0.1);
 
+  /* Google Flow Material 3 Surface Ladder */
+  --surface-container-lowest: #000000;
+  --surface: #131314;
+  --surface-container-low: #1b1b1b;
+  --surface-container: #1e1f20;
+  --surface-container-high: #282a2c;
+  --surface-container-highest: #333537;
+  --surface-bright: #37393b;
+  --surface-overlay: rgba(22, 23, 24, 0.90);
+
+  /* Google Flow Content & Outline Tokens */
+  --on-surface: #f5f5f5;
+  --on-surface-variant: #8e8e93;
+  --on-surface-subtle: #636366;
+  --outline-variant: rgba(218, 220, 224, 0.05);
+  --outline: rgba(218, 220, 224, 0.14);
+  --outline-interactive: rgba(255, 255, 255, 0.25);
+
   /* Canonical Design System Semantic Surfaces & Accents */
-  --surface-canvas: #000000;
-  --surface-panel: #131314;
+  --surface-canvas: var(--surface-container-lowest);
+  --surface-panel: var(--surface);
   --surface-processing: #17181a;
-  --surface-card: #1e1f20;
-  --surface-elevated: #282a2c;
-  --surface-highest: #333537;
+  --surface-card: var(--surface-container);
+  --surface-elevated: var(--surface-container-high);
+  --surface-highest: var(--surface-container-highest);
   --background-state-75: rgba(22, 23, 24, 0.75);
 
   /* Ergonomic Surface Semantic Aliases */
-  --surface-base: var(--surface-card, #1e1f20);
-  --surface-sunken: var(--surface-canvas, #000000);
-  --surface-overlay: rgba(22, 23, 24, 0.85);
+  --surface-base: var(--surface-container);
+  --surface-sunken: var(--surface-container-lowest);
 
   /* Content & Typography Tokens */
-  --content-base: #f5f5f5;
-  --content-muted: #8e8e93;
-  --content-subtle: #636366;
+  --content-base: var(--on-surface);
+  --content-muted: var(--on-surface-variant);
+  --content-subtle: var(--on-surface-subtle);
 
   /* Line & Border Tokens (avoids stuttering border-border-*) */
-  --line-subtle: rgba(255, 255, 255, 0.07);
-  --line-default: rgba(255, 255, 255, 0.12);
-  --line-interactive: rgba(255, 255, 255, 0.25);
+  --line-subtle: var(--outline-variant);
+  --line-default: var(--outline);
+  --line-interactive: var(--outline-interactive);
 
   --color-brand-neon: #EFFE17;
   --color-accent-blue: #a8c7fa;

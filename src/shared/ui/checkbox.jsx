@@ -43,6 +43,8 @@ const Checkbox = React.forwardRef(({
         // Checked state
         isNeon
           ? "data-[state=checked]:bg-lime-400 data-[state=checked]:border-lime-400 data-[state=checked]:text-black"
+          : variant === "primary"
+          ? "data-[state=checked]:bg-primary data-[state=checked]:border-primary data-[state=checked]:text-black"
           : "data-[state=checked]:bg-white data-[state=checked]:border-white data-[state=checked]:text-black",
         className
       )}

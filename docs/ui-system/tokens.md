@@ -1,133 +1,94 @@
-# Centralized Design Tokens (`tokens.md`)
+# Google Flow Design Tokens (`tokens.md`)
 
-> **Single Source of Truth** for color, surface, typography, spacing, radius, and elevation tokens across the frontend application (`my-app`).
+> **Single Source of Truth** for color, surface, typography, spacing, radius, and component tokens across the application (`my-app`).
 
 ---
 
-## 1. Surface Palette (Dark Mode First)
+## 1. Surface Palette (Google Flow Material 3 Dark Ladder)
 
-All application backgrounds derive from an OLED-black surface ladder defined in `src/app/globals.css`:
+All backgrounds derive from the Google Flow OLED surface ladder defined in `src/app/globals.css`:
 
-| Token Name | CSS Variable | Hex / Value | Tailwind Utility | Intended Usage |
+| Token Name | CSS Variable | Hex / RGBA Value | Tailwind Utility | Role & Application |
 |---|---|---|---|---|
-| **Canvas** | `--surface-canvas` | `#000000` | `bg-surface-canvas` / `bg-black` | Deepest viewport background / page backdrop |
-| **Panel** | `--surface-panel` | `#131314` | `bg-surface-panel` | Persistent navigation bars, sidebars, rails |
-| **Processing** | `--surface-processing` | `#17181a` | `bg-surface-processing` | Active tasks, card hover fill, progress strips |
-| **Card / Base** | `--surface-card` / `--surface-base` | `#1e1f20` | `bg-surface-card` / `bg-surface-base` | Grid cards, media item tiles, inspector boxes |
-| **Elevated** | `--surface-elevated` | `#282a2c` | `bg-surface-elevated` | Secondary buttons, dropdown panels, popovers |
-| **Highest** | `--surface-highest` | `#333537` | `bg-surface-highest` | Active selection containers, hover elevation |
-| **Sunken** | `--surface-sunken` | `#000000` | `bg-surface-sunken` | Card canvas viewports, media preview bleeds |
-| **Overlay / Glass** | `--surface-overlay` | `rgba(22, 23, 24, 0.85)` | `bg-surface-overlay` | Modals, prompt bar floating settings, drawers |
+| **Canvas** | `--surface-container-lowest` | `#000000` | `bg-surface-container-lowest` / `bg-black` | Deepest viewport background / page backdrop |
+| **Surface** | `--surface` | `#131314` | `bg-surface` | Persistent navigation bars, sidebars, desktop header |
+| **Sunken** | `--surface-container-low` | `#1b1b1b` | `bg-surface-container-low` | Recessed toolbars, inactive panel zones |
+| **Container (Card)** | `--surface-container` | `#1e1f20` | `bg-surface-container` | Grid cards, media item tiles, inspector boxes |
+| **High Container** | `--surface-container-high` | `#282a2c` | `bg-surface-container-high` | Dropdown panels, popovers, floating controls |
+| **Highest Container**| `--surface-container-highest`| `#333537` | `bg-surface-container-highest` | Active selection containers, modal dialogs |
+| **Surface Bright** | `--surface-bright` | `#37393b` | `bg-surface-bright` | Active tab background, high-contrast pills |
+| **Glass Overlay** | `--surface-overlay` | `rgba(22, 23, 24, 0.90)` | `bg-surface-overlay` | Prompt box floating container (`backdrop-blur-[40px]`) |
 
 ---
 
-## 1.1 Content & Line Tokens (Semantic Tokens)
+## 2. Content & Typography Tokens (On-Surface)
 
 | Token Name | CSS Variable | Value | Tailwind Utility | Purpose |
 |---|---|---|---|---|
-| **Content Base** | `--content-base` | `#f5f5f5` | `text-content-base` | Primary legible body and title typography |
-| **Content Muted** | `--content-muted` | `#8e8e93` | `text-content-muted` | Secondary descriptions, timestamps, subtitles |
-| **Content Subtle** | `--content-subtle` | `#636366` | `text-content-subtle` | Inactive icons, subtle hints, placeholders |
-| **Line Subtle** | `--line-subtle` | `rgba(255, 255, 255, 0.07)` | `border-line-subtle` | Resting card borders, subtle divider lines |
-| **Line Default** | `--line-default` | `rgba(255, 255, 255, 0.12)` | `border-line-default` | Standard panel boundaries, dropdown borders |
-| **Line Interactive** | `--line-interactive` | `rgba(255, 255, 255, 0.25)` | `border-line-interactive` | Hovered card borders, focus rings |
+| **On Surface (Base)** | `--on-surface` | `#f5f5f5` / `#e3e3e3` | `text-on-surface` | Primary legible body and title typography |
+| **On Surface Variant**| `--on-surface-variant` | `#8e8e93` / `#c4c7c5` | `text-on-surface-variant` | Secondary descriptions, timestamps, subtitles |
+| **On Surface Subtle** | `--on-surface-subtle` | `#636366` | `text-on-surface-subtle` | Inactive icons, subtle hints, placeholders |
 
 ---
 
-## 2. Interactive Alpha State Layers
+## 3. Line & Outline Tokens
 
-Consistent white opacity layers used for interactive states (hover, focus, pressed):
-
-| Layer Token | Value | Tailwind Class Equivalent | Purpose |
-|---|---|---|---|
-| `--foreground-state-05` | `rgba(218, 220, 224, 0.05)` | `bg-white/5` | Resting surface fill / hairline border |
-| `--foreground-state-08` | `rgba(218, 220, 224, 0.08)` | `hover:bg-white/8` | Subtle menu item hover |
-| `--foreground-state-10` | `rgba(218, 220, 224, 0.10)` | `hover:bg-white/10` | Standard button/input hover fill |
-| `--foreground-state-15` | `rgba(218, 220, 224, 0.15)` | `active:bg-white/15` | Secondary button surface |
-| `--foreground-state-25` | `rgba(218, 220, 224, 0.25)` | `bg-white/25` | Selected toggle pill / active tab |
-
----
-
-## 3. Brand & Semantic Colors
-
-| Accent Role | Token | Color Value | Tailwind Safe Class | Usage |
+| Token Name | CSS Variable | Value | Tailwind Utility | Purpose |
 |---|---|---|---|---|
-| **Cinema Neon** | `--color-brand-neon` | `#EFFE17` | `bg-lime-400` / `text-lime-400` | Cinema Studio hero CTA, active Studio tabs |
-| **Google Blue** | `--color-accent-blue` | `#a8c7fa` | `text-primary` | Focused input border, selected chips |
-| **Danger / Error** | `--color-danger` | `#fe6e6e` | `text-danger` / `bg-red-950/70` | Delete buttons, error badges, form validation |
-| **Success** | `--color-success` | `#80da88` | `text-emerald-300` / `bg-emerald-950/70` | Success badges, upload checkmarks |
-| **Warning** | `--color-warning` | `#fcbd00` | `text-amber-300` / `bg-amber-950/70` | Quota alerts, rate limit notices |
+| **Outline Variant** | `--outline-variant` | `rgba(218, 220, 224, 0.05)` | `border-outline-variant` | Hairline card separation, subtle divider lines |
+| **Outline Default** | `--outline` | `rgba(218, 220, 224, 0.14)` | `border-outline` | Standard panel boundaries, dropdown borders |
+| **Outline Interactive**| `--outline-interactive`| `rgba(255, 255, 255, 0.25)` | `border-outline-interactive` | Hovered card borders, focus rings |
 
 ---
 
-## 4. Typography Scale
+## 4. Brand & Semantic Colors
 
-Fonts loaded locally via variable `@font-face`:
-- Primary Sans: **Google Sans Text** / **Google Sans** (`font-sans`)
-- Monospace: **Geist Mono** (`font-mono`)
-- Symbols: **Google Symbols** / Material Symbols (`.google-symbols`)
-
-| Typography Role | Size / Line Height | Tailwind Class | Usage |
-|---|---|---|---|
-| **Micro / Subtitle** | `10px / 14px` | `text-xs` | Badge labels, timeline labels |
-| **Caption / Meta** | `12px / 16px` | `text-xs` | Button text, input descriptions, chips |
-| **Body Standard** | `14px / 20px` | `text-sm` | Dialog text, form input value, dropdown item |
-| **Body Large** | `16px / 24px` | `text-base` | Card titles, modal body |
-| **Header Section** | `20px / 28px` | `text-xl` | Sidebar section headers, dialog titles |
-| **Display Hero** | `24px+ / 32px` | `text-2xl` | Landing hero, studio header titles |
+| Accent Role | CSS Variable | Hex Value | Tailwind Safe Class | Usage |
+|---|---|---|---|---|
+| **Google Primary** | `--primary` | `#a8c7fa` | `text-primary` / `bg-primary` | Focused input border, selected chips, CTA |
+| **Primary Container**| `--primary-container` | `#0842a0` | `bg-primary-container` | Active selected filter pill background |
+| **On Primary** | `--on-primary` | `#062e6f` | `text-on-primary` | Label text when placed over solid primary fill |
+| **Cinema Neon** | `--brand-neon` | `#EFFE17` | `text-brand-neon` / `bg-brand-neon` | High-impact CTA, generation badges |
+| **Error** | `--error` | `#fe6e6e` | `text-error` | Validation errors, delete confirmations |
+| **Error Container** | `--error-container` | `#8c1d18` | `bg-error-container` | Error toast banner background |
+| **Success** | `--success` | `#80da88` | `text-success` | Generation completed, upload verified |
+| **Warning** | `--warning` | `#fcbd00` | `text-warning` | Rate limit alerts, credits threshold |
 
 ---
 
-## 5. Border Radius Hierarchy (Runway Standard 5-Tier Scale — Max `rounded-md` + `rounded-full`)
-
-Enforced strictly across all components (Single Standard Token, Zero Redundant Classes):
+## 5. Border Radius Hierarchy (User Frozen Standard)
 
 | Geometry Tier | Value | CSS Token | Canonical Tailwind Token | Target UI Elements |
 |---|---|---|---|---|
-| **Flush** | `0px` | `--radius-none` | `rounded-none` | Full-bleed canvases, edge-to-edge layouts |
-| **Hairline / Micro** | `1px` | `--radius-xxxs` | `rounded-xxxs` | Media elements (images, videos, media layers) |
-| **Sharp** | `4px` | `--radius-sm` | `rounded-sm` | Buttons, Inputs, Badges, Micro Tags, Tooltips, Menu Items |
-| **Subtle (MAX Container)** | `6px` | `--radius-md` | `rounded-md` | Cards, Textareas, Dropdowns, Context Menus, Popovers, HoverCards, Dialogs, Modals, Panels |
-| **Pill / Circle** | `9999px`| `--radius-full` | `rounded-full` | Filter chips, avatar circles, switch thumbs, sliders, radios |
-
-> **Global Cascade Rule:** Changing `--radius-sm` or `--radius-md` in `:root` automatically updates all components on the entire site simultaneously. Never use `rounded-lg`, `rounded-xl`, `rounded-2xl`, `rounded-3xl`, or custom compound classes.
+| **Sharp** | `4px` | `--radius-sm` | `rounded-sm` | Buttons, Inputs, Badges, Micro Tags, Menu Items |
+| **Container (MAX)** | `6px` | `--radius-md` | `rounded-md` | Cards, Textareas, Dropdowns, Context Menus, Modals |
+| **Pill / Circle** | `9999px`| `--radius-full` | `rounded-full` | Filter chips, avatar circles, switch thumbs, generate buttons |
 
 ---
 
-## 6. Elevation & Shadows (Runway Zero Box-Shadow Law)
+## 6. Spacing Scale (User 8px Base Scale)
 
-The entire design system enforces **zero box-shadow** (`shadow-none`).
-Depth is achieved via:
-- High-contrast photographic compositions and full-bleed video.
-- 1px hairline border containment (`border-white/10`).
-- Alternation of dark surface layers (`#000000`, `#131314`, `#1e1f20`, `#282a2c`).
-
----
-
-## 7. Spacing Scale (Runway 8px Base Grid + Micro Steps)
-
-| Spacing Token | Value | Tailwind Class Equivalent | Runway Intended Usage |
+| Token | Pixels | Tailwind Utility | Application |
 |---|---|---|---|
-| `xxs` | **4px** | `gap-1`, `p-1`, `space-x-1` | Micro labels, icon-label offsets |
-| `xs` | **6px** | `gap-1.5`, `py-1.5`, `px-2` | Button content gaps, badge internal padding |
-| `sm` | **8px** | `gap-2`, `p-2` | Base unit: card interior gaps, item groups |
-| `md` | **12px** | `gap-3`, `p-3` | Form field stacks, toolbar groupings |
-| `base` | **16px** | `gap-4`, `p-4` | Standard card internal padding, navigation tap targets |
-| `lg` | **20px** | `gap-5`, `p-5` | Component group separations, medium cards |
-| `xl` | **24px** | `gap-6`, `p-6` | Alert container padding, modal footer action rows |
-| `xxl` | **28px** | `gap-7`, `p-7` | Large card interiors |
-| `section` | **32px** | `py-8` | Compact section separators |
-| `section-lg` | **48px** | `py-12` | Major section vertical padding |
-| `section-xl` | **64px** | `py-16` | Light editorial section padding (`light-section`) |
-| `section-xxl` | **78px** | `py-[78px]` | Cinematic hero and mission statement bands (`dark-section`) |
+| `xxs` | 4px | `p-xxs`, `gap-xxs` | Micro badge margins, icon-text gap |
+| `xs` | 6px | `p-xs`, `gap-xs` | Compact list items, button inner gutters |
+| `sm` | 8px | `p-sm`, `gap-sm` | Standard element gap, chip padding |
+| `md` | 12px | `p-md`, `gap-md` | Form field spacing, panel interior padding |
+| `base` | 16px | `p-base`, `gap-base` | Card interior padding, dialog gutter |
+| `lg` | 20px | `p-lg`, `gap-lg` | Card exterior padding, studio panel gaps |
+| `xl` | 24px | `p-xl`, `gap-xl` | Modal header spacing, section margins |
+| `xxl` | 28px | `p-xxl`, `gap-xxl` | Module separations |
+| `section` | 32px | `p-section`, `gap-section`| Block breathing room |
 
 ---
 
-## 8. Container Max Widths (Runway Cinema Hierarchy)
+## 7. Google Flow Component Geometry
 
-| Container Tier | Max Width | Utility Class | Purpose |
+| Dimension Role | CSS Variable | Value | Description |
 |---|---|---|---|
-| **Cinema Wide** | **1600px** | `.container-cinema` / `max-w-[1600px]` | Maximum viewport width for full-bleed studio layout |
-| **Editorial Content** | **1280px** | `.container-editorial` / `max-w-[1280px]` | Centered desktop content container |
-| **Compact Container** | **980px** | `.container-compact` / `max-w-[980px]` | Focused inspector panels, media info strips, form cards |
-| **Modal / Dialog** | **960px / 480px** | `max-w-4xl` / `max-w-md` | Standard confirmation & workflow creation dialogs |
+| **Prompt Box Max Width** | `--prompt-box-max-width` | `37.5rem` (600px) | Maximum reading/typing width |
+| **Prompt Box Compact Width** | `--prompt-box-compact-max-width` | `41.25rem` (660px) | Viewport-adaptive width |
+| **Prompt Box Min Height** | `--prompt-box-min-height` | `5.625rem` (90px) | Collapsed resting prompt bar |
+| **Settings Panel Width** | `--prompt-box-settings-width` | `17.5rem` (280px) | Standard parameters flyout |
+| **Settings Panel Wide** | `--prompt-box-settings-width-wide`| `21rem` (336px) | Extended parameters flyout |
+| **Desktop Header Height** | `--header-desktop-height` | `5rem` (80px) | Persistent studio header |

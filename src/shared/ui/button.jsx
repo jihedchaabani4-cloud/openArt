@@ -45,6 +45,14 @@ const buttonVariants = cva(
           "h-8 px-3.5 rounded-sm bg-transparent text-danger hover:text-danger hover:bg-danger/10 active:bg-danger/20 border-none",
         link:
           "p-0 h-auto bg-transparent text-accent-blue underline-offset-4 hover:underline font-medium cursor-pointer border-none",
+        "flow-primary":
+          "h-8 px-3.5 rounded-sm bg-primary text-on-primary font-medium hover:bg-primary/90 active:scale-95 border-none",
+        "flow-chip":
+          "h-7 px-2.5 rounded-sm bg-white/5 text-on-surface-variant text-xs font-medium hover:bg-white/10 hover:text-on-surface border-none",
+        "flow-generate":
+          "rounded-full bg-primary text-on-primary hover:bg-primary/90 disabled:bg-white/5 disabled:text-white/40 border-none",
+        "flow-ghost":
+          "h-8 px-2 rounded-sm bg-transparent text-on-surface-variant hover:bg-white/[0.08] hover:text-on-surface border-none",
       },
     },
     defaultVariants: {
