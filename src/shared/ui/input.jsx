@@ -162,11 +162,11 @@ const Input = React.forwardRef(({
           {onClear && (
             <Button
               type="button"
-              variant="ghost"
+              variant="flow-ghost"
               onClick={onClear}
               className={cn(
-                "p-1 size-7 rounded-md text-white/60 hover:text-white transition-colors shrink-0 ml-1 cursor-pointer",
-                isSearch && "size-6 rounded-full hover:bg-white/10"
+                "p-1 size-7 rounded-md shrink-0 ml-1 cursor-pointer",
+                isSearch && "size-6 rounded-full"
               )}
               aria-label="Clear input"
             >
@@ -181,9 +181,9 @@ const Input = React.forwardRef(({
           {showEditButton && (
             <Button
               type="button"
-              variant="ghost"
+              variant="flow-ghost"
               onClick={handleEditClick}
-              className="flex items-center justify-center size-7 p-1.5 rounded-md text-white/60 hover:text-white hover:bg-white/10 transition-colors shrink-0 ml-2 cursor-pointer"
+              className="flex items-center justify-center size-7 p-1.5 rounded-md shrink-0 ml-2 cursor-pointer"
               aria-label="Edit"
             >
               <GoogleIcon iconName="edit" className="text-xl" />

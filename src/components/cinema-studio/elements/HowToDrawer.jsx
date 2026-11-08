@@ -43,7 +43,7 @@ export function HowToDrawer({ isOpen, onClose }) {
               <Button
                 type="button"
                 variant="ghost"
-                className="size-9 p-0 rounded-full hover:bg-white/10 text-white"
+                className="size-9 p-0 rounded-full"
                 onClick={onClose}
                 aria-label="Close"
               >

@@ -9,7 +9,7 @@ export function ProjectsFloatingAction({ onCreate, isLoading }) {
             <Button
                 type="button"
                 variant="secondary"
-                className="h-auto px-6 py-4 rounded-2xl bg-neutral-800 hover:bg-neutral-700 text-neutral-200 hover:text-white active:scale-95 border-none backdrop-blur-md text-sm font-medium"
+                className="h-auto px-6 py-3.5 rounded-full backdrop-blur-md text-sm font-medium gap-2"
                 onClick={onCreate}
                 disabled={isLoading}
             >

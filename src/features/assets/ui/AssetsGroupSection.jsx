@@ -21,14 +21,9 @@ export function AssetsGroupSection({
       <div className="flex items-center gap-3">
         <Button
           type="button"
-          variant="ghost"
+          variant={selectedCount > 0 ? "primary" : "outline"}
           onClick={() => onToggleGroupSelection(group.photos)}
-          className={`
-            flex h-6 w-6 items-center justify-center rounded-sm border transition p-0
-            ${selectedCount > 0
-              ? "border-white bg-white text-black hover:bg-white/90"
-              : "border-outline-variant bg-white/[0.03] text-on-surface-subtle hover:border-outline hover:text-on-surface"}
-          `}
+          className="size-6 p-0"
           aria-label={`Select ${group.label}`}
         >
           {isAllSelected ? (

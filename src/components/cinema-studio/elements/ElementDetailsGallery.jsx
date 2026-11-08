@@ -67,8 +67,8 @@ export function ElementDetailsGallery({
         <div className="flex items-center justify-end gap-2 w-full shrink-0">
           <Button
             type="button"
-            variant="ghost"
-            className="h-8 px-4 rounded-full bg-white/10 hover:bg-white/15 text-white/60 hover:text-white border-none"
+            variant="secondary"
+            className="rounded-full"
             disabled={isFull}
             onClick={() => !isFull && fileInputRef.current?.click()}
             title="Importer depuis l'ordinateur"
@@ -80,8 +80,8 @@ export function ElementDetailsGallery({
           {onOpenAssets && (
             <Button
               type="button"
-              variant="ghost"
-            className="h-8 px-4 rounded-full bg-white/10 hover:bg-white/15 text-white/60 hover:text-white border-none"
+              variant="secondary"
+              className="rounded-full"
               disabled={isFull}
               onClick={!isFull ? onOpenAssets : undefined}
               title="Ajouter à partir du projet"

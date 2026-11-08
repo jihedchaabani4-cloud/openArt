@@ -84,8 +84,8 @@ export function CharacterDetailsGallery({
         <div className="flex items-center justify-end gap-2 w-full shrink-0">
           <Button
             type="button"
-            variant="ghost"
-            className="h-8 px-4 rounded-full bg-white/10 hover:bg-white/15 text-white/60 hover:text-white border-none"
+            variant="secondary"
+            className="rounded-full"
             disabled={atLimit}
             onClick={() => fileInputRef.current?.click()}
             title={atLimit ? "Maximum 5 images autorisées" : "Importer depuis l'ordinateur"}
@@ -97,8 +97,8 @@ export function CharacterDetailsGallery({
           {onOpenAssets && (
             <Button
               type="button"
-              variant="ghost"
-            className="h-8 px-4 rounded-full bg-white/10 hover:bg-white/15 text-white/60 hover:text-white border-none"
+              variant="secondary"
+              className="rounded-full"
               disabled={atLimit}
               onClick={onOpenAssets}
               title={atLimit ? "Maximum 5 images autorisées" : "Ajouter à partir du projet"}

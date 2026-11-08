@@ -41,15 +41,13 @@ export function PromptBarControlsRow({
           <Button
             ref={tuneButtonRef}
             type="button"
-            variant="ghost"
+            variant="flow-chip"
             aria-label="Déclencheur des paramètres"
             title="Paramètres de génération et modèles"
             onClick={onToggleDrawer}
             className={cn(
-              "settings-trigger-button h-8 px-2.5 bg-white/5 flex items-center gap-1.5 transition-all cursor-pointer select-none text-[12px] font-medium text-white",
-              drawerOpen
-                ? "bg-white/15 border border-white/20 shadow-none text-white"
-                : "border-transparent text-white hover:text-white"
+              "settings-trigger-button flex items-center gap-1.5 cursor-pointer select-none",
+              drawerOpen && "is-active bg-white/15 border border-white/20 text-white"
             )}
           >
             {currentModel && (

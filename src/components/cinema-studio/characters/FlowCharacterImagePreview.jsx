@@ -39,10 +39,10 @@ export function FlowCharacterImagePreview({
           {/* Button 1: Importer (Upload) */}
           <Button
             type="button"
-            variant="ghost"
+            variant="secondary"
             disabled={isUploading}
             onClick={onUpload}
-            className="h-10 px-5 rounded-full bg-white/5 backdrop-blur-md text-white/80 hover:text-white hover:bg-white/10 active:bg-white/20 border-none text-xs font-medium gap-2"
+            className="h-10 px-5 rounded-full backdrop-blur-md text-xs font-medium gap-2"
           >
             <GoogleIcon iconName="upload" className="text-[19px]" />
             <span>Importer</span>
@@ -51,10 +51,10 @@ export function FlowCharacterImagePreview({
           {/* Button 2: Ajouter à partir du projet (Project Assets) */}
           <Button
             type="button"
-            variant="ghost"
+            variant="secondary"
             disabled={isUploading}
             onClick={onSelectProject}
-            className="h-10 px-5 rounded-full bg-white/5 backdrop-blur-md text-white/80 hover:text-white hover:bg-white/10 active:bg-white/20 border-none text-xs font-medium gap-2"
+            className="h-10 px-5 rounded-full backdrop-blur-md text-xs font-medium gap-2"
           >
             <GoogleIcon iconName="add" className="text-[19px]" />
             <span>Ajouter à partir du projet</span>

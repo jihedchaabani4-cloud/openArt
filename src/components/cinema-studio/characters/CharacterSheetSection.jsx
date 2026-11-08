@@ -130,8 +130,8 @@ export function CharacterSheetSection({
           <div className="absolute top-3 right-3 opacity-0 group-hover/sheet:opacity-100 transition-opacity duration-200 pointer-events-auto flex items-center gap-2 z-30">
             <Button
               type="button"
-              variant="ghost"
-              className="size-9 p-0 bg-black/40 backdrop-blur-md text-white/80 hover:text-white hover:bg-black/65 active:scale-95 border border-white/10"
+              variant="outline"
+              className="size-9 p-0 bg-black/40 backdrop-blur-md"
               onClick={() => fileInputRef.current?.click()}
               title="Importer une image de corps (Turnaround)"
             >
@@ -140,8 +140,8 @@ export function CharacterSheetSection({
             {onOpenAssets && (
               <Button
                 type="button"
-                variant="ghost"
-              className="size-9 p-0 bg-black/40 backdrop-blur-md text-white/80 hover:text-white hover:bg-black/65 active:scale-95 border border-white/10"
+                variant="outline"
+              className="size-9 p-0 bg-black/40 backdrop-blur-md"
                 onClick={onOpenAssets}
                 title="Select Body Sheet from assets"
               >
@@ -151,8 +151,8 @@ export function CharacterSheetSection({
             {onDelete && (
               <Button
                 type="button"
-                variant="ghost"
-              className="size-9 p-0 bg-black/40 backdrop-blur-md text-white/80 hover:text-white hover:bg-black/65 active:scale-95 border border-white/10"
+                variant="outline"
+              className="size-9 p-0 bg-black/40 backdrop-blur-md"
                 onClick={onDelete}
                 title="Delete character"
               >
@@ -172,8 +172,8 @@ export function CharacterSheetSection({
           <div className="absolute top-3 right-3 opacity-0 group-hover/sheet:opacity-100 transition-opacity duration-200 pointer-events-auto flex items-center gap-2 z-30">
             <Button
               type="button"
-              variant="ghost"
-              className="size-9 p-0 bg-black/40 backdrop-blur-md text-white/80 hover:text-white hover:bg-black/65 active:scale-95 border border-white/10"
+              variant="outline"
+              className="size-9 p-0 bg-black/40 backdrop-blur-md"
               onClick={() => fileInputRef.current?.click()}
               title="Importer une image de corps (Turnaround)"
             >
@@ -182,8 +182,8 @@ export function CharacterSheetSection({
             {onOpenAssets && (
               <Button
                 type="button"
-                variant="ghost"
-              className="size-9 p-0 bg-black/40 backdrop-blur-md text-white/80 hover:text-white hover:bg-black/65 active:scale-95 border border-white/10"
+                variant="outline"
+              className="size-9 p-0 bg-black/40 backdrop-blur-md"
                 onClick={onOpenAssets}
                 title="Select Body Sheet from assets"
               >
@@ -193,8 +193,8 @@ export function CharacterSheetSection({
             {onDelete && (
               <Button
                 type="button"
-                variant="ghost"
-              className="size-9 p-0 bg-black/40 backdrop-blur-md text-white/80 hover:text-white hover:bg-black/65 active:scale-95 border border-white/10"
+                variant="outline"
+              className="size-9 p-0 bg-black/40 backdrop-blur-md"
                 onClick={onDelete}
                 title="Delete character"
               >
@@ -233,8 +233,8 @@ export function CharacterSheetSection({
               <div className="opacity-0 group-hover:opacity-100 group-hover/sheet:opacity-100 transition-opacity duration-200 pointer-events-auto flex items-center gap-2">
                 <Button
                   type="button"
-                  variant="ghost"
-              className="size-9 p-0 bg-black/40 backdrop-blur-md text-white/80 hover:text-white hover:bg-black/65 active:scale-95 border border-white/10"
+                  variant="outline"
+              className="size-9 p-0 bg-black/40 backdrop-blur-md"
                   onClick={() => fileInputRef.current?.click()}
                   title="Importer une image de corps (Turnaround)"
                 >
@@ -243,8 +243,8 @@ export function CharacterSheetSection({
                 {onOpenAssets && (
                   <Button
                     type="button"
-                    variant="ghost"
-              className="size-9 p-0 bg-black/40 backdrop-blur-md text-white/80 hover:text-white hover:bg-black/65 active:scale-95 border border-white/10"
+                    variant="outline"
+              className="size-9 p-0 bg-black/40 backdrop-blur-md"
                     onClick={onOpenAssets}
                     title="Select Body Sheet from assets"
                   >
@@ -254,8 +254,8 @@ export function CharacterSheetSection({
                 {onDownload && (
                   <Button
                     type="button"
-                    variant="ghost"
-              className="size-9 p-0 bg-black/40 backdrop-blur-md text-white/80 hover:text-white hover:bg-black/65 active:scale-95 border border-white/10"
+                    variant="outline"
+              className="size-9 p-0 bg-black/40 backdrop-blur-md"
                     onClick={onDownload}
                     title="Download character sheet"
                   >
@@ -265,8 +265,8 @@ export function CharacterSheetSection({
                 {onDelete && (
                   <Button
                     type="button"
-                    variant="ghost"
-              className="size-9 p-0 bg-black/40 backdrop-blur-md text-white/80 hover:text-white hover:bg-black/65 active:scale-95 border border-white/10"
+                    variant="outline"
+              className="size-9 p-0 bg-black/40 backdrop-blur-md"
                     onClick={onDelete}
                     title="Delete character"
                   >

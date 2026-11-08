@@ -219,7 +219,7 @@ export function MediaInput({
             variant="ghost"
             data-testid="media-input-dismiss-btn"
             onClick={handleDismissFailed}
-            className="absolute top-0.5 right-0.5 size-4 p-0 rounded-full hover:bg-white/10 text-white"
+            className="absolute top-0.5 right-0.5 size-4 p-0 rounded-full"
             title="Dismiss error"
             aria-label="Dismiss error"
           >

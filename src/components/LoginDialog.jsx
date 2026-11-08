@@ -235,7 +235,7 @@ export function LoginDialog({ open, onClose }) {
           type="button"
           variant="ghost"
           onClick={onClose}
-          className="absolute right-3 top-3 z-20 size-9 p-0 rounded-full hover:bg-white/10 text-white"
+          className="absolute right-3 top-3 z-20 size-9 p-0 rounded-full"
           aria-label="Close login dialog"
         >
           <GoogleIcon iconName="close" className="text-xl" />

@@ -133,12 +133,8 @@ export function ElementInfoSidebar({
           <DropdownMenuTrigger asChild>
             <Button
               type="button"
-              variant="ghost"
-              className={cn(
-                "flex items-center gap-2.5 w-full h-auto px-3.5 py-2.5 rounded-sm text-sm font-medium transition-all duration-200 text-left outline-none select-none justify-start cursor-pointer",
-                "bg-white/5 text-white hover:bg-white/[0.08] hover:text-white",
-                typeOpen && "bg-white/[0.08]"
-              )}
+              variant="secondary"
+              className="flex items-center gap-2.5 w-full h-auto px-3.5 py-2.5 rounded-sm text-sm font-medium text-left justify-start"
             >
               <GoogleIcon
                 iconName={currentType.googleIcon}
@@ -249,9 +245,9 @@ export function ElementInfoSidebar({
           {draftGuidelines?.trim() && (
             <Button
               type="button"
-              variant="ghost"
+              variant="flow-ghost"
               onClick={copyGuidelines}
-              className="text-[var(--mat-sys-on-surface-variant,#8e918f)] hover:text-white"
+              className="size-7 p-0"
               title="Copier les directives"
             >
               {copied ? (

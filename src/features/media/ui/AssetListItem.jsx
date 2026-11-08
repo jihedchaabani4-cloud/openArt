@@ -6,9 +6,8 @@ import { cn } from "@/shared/lib/utils";
 /**
  * AssetListItem
  * Pure Google Flow asset list item:
- * - Clicking activates preview in hero pane.
- * - Exact Google Flow typography, rounded thumbnail, no extraneous buttons.
- * - Frosted blur feedback on active click identical to Button nav-tab.
+ * - Uses canonical Button variants (secondary for active, flow-ghost for idle)
+ * - Exact Google Flow typography and rounded thumbnail
  */
 export function AssetListItem({
   item: _item,
@@ -24,7 +23,7 @@ export function AssetListItem({
 }) {
   return (
     <Button
-      variant="ghost"
+      variant={isActive ? "secondary" : "flow-ghost"}
       type="button"
       role="option"
       aria-selected={isActive}
@@ -36,10 +35,7 @@ export function AssetListItem({
         }
       }}
       className={cn(
-        "group w-full h-12 rounded-sm pl-1 pr-4 py-0 flex items-center gap-3 justify-start text-left border-none select-none relative cursor-pointer",
-        isActive
-          ? "bg-surface-container-high text-on-surface shadow-none"
-          : "bg-transparent hover:bg-white/5 text-on-surface-variant hover:text-on-surface",
+        "group w-full h-12 justify-start pl-1 pr-4 py-0 text-left select-none",
         isDisabled && "opacity-40",
         className
       )}
@@ -65,3 +61,5 @@ export function AssetListItem({
     </Button>
   );
 }
+
+export default AssetListItem;

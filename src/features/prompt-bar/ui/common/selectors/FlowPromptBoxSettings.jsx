@@ -73,8 +73,8 @@ export function FlowSelect({
         <PopoverTrigger asChild>
           <Button
             type="button"
-            variant="ghost"
-            className="w-full h-9 px-3 bg-white/5 hover:bg-white/10 active:bg-white/15 text-white rounded-sm border border-white/10 flex items-center justify-between transition-all"
+            variant="outline"
+            className="w-full h-9 px-3 flex items-center justify-between transition-all"
             aria-label={ariaLabel || label || displayValue}
           >
             <span className="flex items-center gap-1.5 truncate text-white">

@@ -8,12 +8,9 @@ export function SidebarFilterButton({ label, icon: Icon, active = false, onClick
   return (
     <Button
       type="button"
-      variant="ghost"
+      variant={active ? "secondary" : "ghost"}
       onClick={onClick}
-      className={cn(
-        "flex h-8 w-full items-center justify-between rounded-sm px-3 text-left text-[14px] transition",
-        active ? "bg-white/12 text-white hover:bg-white/12" : "hover:bg-white/6"
-      )}
+      className="w-full justify-between px-3 text-left text-[14px]"
     >
       <span className="flex items-center gap-2.5">
         {Icon ? (typeof Icon === "string" ? <GoogleIcon iconName={Icon} className="text-base" /> : React.isValidElement(Icon) ? Icon : typeof Icon === "function" ? React.createElement(Icon, { className: "text-base" }) : null) : null}
@@ -27,15 +24,12 @@ export function SidebarDropdownButton({ label, active = false, onClick }) {
   return (
     <Button
       type="button"
-      variant="ghost"
+      variant={active ? "secondary" : "ghost"}
       onClick={onClick}
-      className={cn(
-        "flex h-8 w-full items-center justify-between rounded-sm px-3 text-left text-[14px] transition",
-        active ? "bg-white/12 text-white hover:bg-white/12" : "hover:bg-white/6 hover:text-white/88"
-      )}
+      className="w-full justify-between px-3 text-left text-[14px]"
     >
       <span>{label}</span>
-      <GoogleIcon iconName="keyboard_arrow_down" className="text-base rotate-[-90deg] text-white/32" />
+      <GoogleIcon iconName="keyboard_arrow_down" className="text-base -rotate-90 text-on-surface-subtle" />
     </Button>
   );
 }
