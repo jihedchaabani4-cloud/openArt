@@ -1,14 +1,13 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { GoogleIcon } from "@/shared/ui/GoogleIcon"
-import { cn } from "@/shared/lib/utils"
+import * as React from "react";
+import { cn } from "@/shared/lib/utils";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
-} from "@/shared/ui/dropdown-menu"
-import { Button } from "@/shared/ui/button"
+} from "@/shared/ui/dropdown-menu";
+import { Button } from "@/shared/ui/button";
 
 function renderIconNode(IconCandidate, props = {}) {
   if (!IconCandidate) return null;
@@ -29,7 +28,7 @@ function renderIconNode(IconCandidate, props = {}) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// DropdownShell — base template for all studio dropdowns (filter, settings…)
+// DropdownShell — base Radix dropdown wrapper
 // ─────────────────────────────────────────────────────────────────────────────
 
 export function DropdownShell({
@@ -44,7 +43,6 @@ export function DropdownShell({
 }) {
   return (
     <DropdownMenu open={open} onOpenChange={onOpenChange}>
-      {/* ── Trigger ── */}
       <DropdownMenuTrigger asChild>
         <Button
           type="button"
@@ -52,53 +50,39 @@ export function DropdownShell({
           className={cn(
             "size-9 rounded-sm flex items-center justify-center transition-all p-0",
             isActive
-              ? "bg-transparent text-white/90"
-              : "text-white/90 hover:bg-white/10 hover:text-white"
+              ? "bg-transparent text-on-surface"
+              : "text-on-surface-variant hover:bg-white/[0.08] hover:text-on-surface"
           )}
         >
           {trigger}
         </Button>
       </DropdownMenuTrigger>
 
-      {/* ── Panel ── */}
       <DropdownMenuContent
         align={align}
         sideOffset={8}
         onCloseAutoFocus={(e) => e.preventDefault()}
-        className={cn(
-          panelWidth,
-          className
-        )}
+        className={cn(panelWidth, className)}
       >
         {children}
       </DropdownMenuContent>
     </DropdownMenu>
-  )
+  );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// DropdownSection — labelled section inside the panel
+// DropdownSegmented — horizontal segmented toggle group
 // ─────────────────────────────────────────────────────────────────────────────
 
-export function DropdownSection({ label, action, className, children }) {
-  return (
-    <div className={cn("mb-4", className)}>
-      <div className="flex items-center justify-between mb-2">
-        <p className="text-xs font-medium text-white/90">
-          {label}
-        </p>
-        {action}
-      </div>
-      {children}
-    </div>
-  )
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// DropdownSegmented — pill-style segmented control
-// ─────────────────────────────────────────────────────────────────────────────
-
-export const DropdownSegmented = React.memo(({ value, onChange, options, className, variant = "default", compact = false, visibleCount = null }) => {
+export const DropdownSegmented = React.memo(function DropdownSegmented({
+  value,
+  onChange,
+  options,
+  className,
+  variant = "default",
+  compact = false,
+  visibleCount = null,
+}) {
   const containerRef = React.useRef(null);
   const [isDragging, setIsDragging] = React.useState(false);
 
@@ -125,24 +109,19 @@ export const DropdownSegmented = React.memo(({ value, onChange, options, classNa
 
     const handleMouseUp = () => {
       isDown = false;
-      // Slight delay so child click handlers can detect isDragging
-      setTimeout(() => {
-        setIsDragging(false);
-      }, 50);
+      setTimeout(() => setIsDragging(false), 50);
     };
 
     const handleMouseMove = (e) => {
       if (!isDown) return;
+      e.preventDefault();
       const x = e.pageX - el.offsetLeft;
-      const walk = x - startX;
+      const walk = (x - startX) * 1.5;
       if (Math.abs(walk) > 5) {
-        if (!hasMoved) {
-          hasMoved = true;
-          setIsDragging(true);
-        }
-        e.preventDefault();
-        el.scrollLeft = scrollLeft - walk;
+        hasMoved = true;
+        setIsDragging(true);
       }
+      el.scrollLeft = scrollLeft - walk;
     };
 
     el.addEventListener("mousedown", handleMouseDown);
@@ -158,8 +137,6 @@ export const DropdownSegmented = React.memo(({ value, onChange, options, classNa
     };
   }, []);
 
-  // When visibleCount is set: each item is exactly 1/N of visible area
-  // container has p-1 (4px each side = 8px) and gap-1 (4px) between items
   const itemStyle = visibleCount
     ? { flexShrink: 0, flexGrow: 0, width: `calc((100% - 8px - ${(visibleCount - 1) * 4}px) / ${visibleCount})` }
     : {};
@@ -176,67 +153,9 @@ export const DropdownSegmented = React.memo(({ value, onChange, options, classNa
         ref={containerRef}
         className="flex gap-1 w-full overflow-x-auto scrollbar-hide cursor-grab active:cursor-grabbing select-none"
       >
-      {options.map((opt) => {
-        const isSelected = value === opt.value && !opt.disabled;
-
-        return (
-          <Button
-            key={opt.value}
-            type="button"
-            role="radio"
-            aria-checked={isSelected}
-            variant={isSelected ? (variant === "white" ? "primary" : "secondary") : "ghost"}
-            onClick={() => {
-              if (isDragging) return;
-              if (!opt.disabled) onChange(opt.value);
-            }}
-            disabled={opt.disabled}
-            style={itemStyle}
-            className={cn(
-              "toggle flex-toggle rounded-sm h-8 min-h-8 text-xs-plus font-medium transition-all flex items-center justify-center relative",
-              compact ? "p-1.5 size-12 shrink-0 [&_svg]:size-full" : "flex-row gap-1.5 px-3 py-1 flex-1 min-w-fit",
-              visibleCount ? "flex-none" : !compact ? "flex-1 min-w-fit" : "",
-              isDragging && "pointer-events-none",
-              opt.disabled && "opacity-30 cursor-not-allowed pointer-events-none"
-            )}
-          >
-            {opt.icon && (
-              <span className={cn(
-                "flex items-center justify-center text-base",
-                isSelected && variant === "white" && "text-black",
-                compact && "size-full"
-              )}>
-                {renderIconNode(opt.icon)}
-              </span>
-            )}
-            <span className="truncate">{opt.label}</span>
-          </Button>
-        );
-      })}
-      </div>
-    </div>
-  )
-})
-
-// ─────────────────────────────────────────────────────────────────────────────
-// DropdownSegmentedWithLabel — segmented control with a left-side label
-// ─────────────────────────────────────────────────────────────────────────────
-
-export const DropdownSegmentedWithLabel = React.memo(({ label, value, onChange, options, className, variant = "default", transparent = false }) => {
-  return (
-    <div className={cn(
-      "flex items-center gap-2 p-1 rounded-sm overflow-hidden",
-      !transparent && "bg-white/5",
-      className
-    )}>
-      {label && (
-        <span className="text-xs-plus font-medium text-white/75 whitespace-nowrap pl-2 shrink-0">
-          {label}
-        </span>
-      )}
-      <div className="flex gap-1 flex-1 overflow-x-auto scrollbar-hide">
         {options.map((opt) => {
           const isSelected = value === opt.value && !opt.disabled;
+
           return (
             <Button
               key={opt.value}
@@ -244,15 +163,28 @@ export const DropdownSegmentedWithLabel = React.memo(({ label, value, onChange, 
               role="radio"
               aria-checked={isSelected}
               variant={isSelected ? (variant === "white" ? "primary" : "secondary") : "ghost"}
-              onClick={() => !opt.disabled && onChange(opt.value)}
+              onClick={() => {
+                if (isDragging) return;
+                if (!opt.disabled) onChange(opt.value);
+              }}
               disabled={opt.disabled}
-              className="h-8 min-h-8 rounded-sm text-xs-plus font-medium px-3 flex-1 min-w-fit"
+              style={itemStyle}
+              className={cn(
+                "toggle flex-toggle rounded-sm h-8 min-h-8 text-xs-plus font-medium transition-all flex items-center justify-center relative",
+                compact ? "p-1.5 size-12 shrink-0 [&_svg]:size-full" : "flex-row gap-1.5 px-3 py-1 flex-1 min-w-fit",
+                visibleCount ? "flex-none" : !compact ? "flex-1 min-w-fit" : "",
+                isDragging && "pointer-events-none",
+                opt.disabled && "opacity-30 cursor-not-allowed pointer-events-none"
+              )}
             >
               {opt.icon && (
-                <span className={cn(
-                  "mr-1.5 flex items-center justify-center text-base",
-                  isSelected && variant === "white" && "text-black"
-                )}>
+                <span
+                  className={cn(
+                    "flex items-center justify-center text-base",
+                    isSelected && variant === "white" && "text-black",
+                    compact && "size-full"
+                  )}
+                >
                   {renderIconNode(opt.icon)}
                 </span>
               )}
@@ -262,154 +194,5 @@ export const DropdownSegmentedWithLabel = React.memo(({ label, value, onChange, 
         })}
       </div>
     </div>
-  )
-})
-
-
-// ─────────────────────────────────────────────────────────────────────────────
-// DropdownChips — multi-select chip group
-// ─────────────────────────────────────────────────────────────────────────────
-
-export function DropdownChips({ options, selected, onToggle, accent: _accent = "lime" }) {
-  return (
-    <div className="flex flex-wrap gap-1.5">
-      {options.map((opt) => {
-        const isSelected = selected.includes(opt)
-        return (
-          <Button
-            key={opt}
-            type="button"
-            variant="ghost"
-            onClick={() => onToggle(opt)}
-            className={cn(
-              "px-2.5 py-1.5 rounded-sm text-xs transition-all font-medium h-auto",
-              isSelected
-                ? "bg-surface-highest text-white hover:bg-surface-highest"
-                : "bg-white/2 text-white hover:text-white hover:bg-white/10"
-            )}
-          >
-            {opt}
-          </Button>
-        )
-      })}
-    </div>
-  )
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// DropdownFooter — statistics + reset row
-// ─────────────────────────────────────────────────────────────────────────────
-
-export function DropdownFooter({ hasBorder = true, left, right }) {
-  return (
-    <div
-      className={cn(
-        "flex items-center justify-between pt-4",
-        hasBorder && "border-t border-white/5"
-      )}
-    >
-      <div>{left}</div>
-      <div>{right}</div>
-    </div>
-  )
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// DropdownStat — "Showing X of Y" label
-// ─────────────────────────────────────────────────────────────────────────────
-
-export function DropdownStat({ count, total, label = "Showing" }) {
-  return (
-    <div className="flex flex-col">
-      <span className="text-2xs text-white uppercase font-medium tracking-widest">{label}</span>
-      <span className="text-xs text-white font-medium tabular-nums">
-        {count} of {total} items
-      </span>
-    </div>
-  )
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// DropdownReset — "Reset all" button
-// ─────────────────────────────────────────────────────────────────────────────
-
-export function DropdownReset({ onReset, label = "Reset", className }) {
-  return (
-    <Button
-      variant="ghost"
-      onClick={onReset}
-      className={cn("h-7 px-2 text-2xs font-medium text-white/40 hover:text-white hover:bg-white/5", className)}
-    >
-      <GoogleIcon iconName="close" className="mr-1.5 text-sm" />
-      {label}
-    </Button>
   );
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// DropdownClearAction — small "Clear" link
-// ─────────────────────────────────────────────────────────────────────────────
-
-export function DropdownClearAction({ onClick, label = "Clear" }) {
-  return (
-    <Button
-      type="button"
-      variant="link"
-      onClick={onClick}
-      className="text-2xs text-white font-medium hover:underline p-0 h-auto"
-    >
-      {label}
-    </Button>
-  )
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// DropdownToggle — Off/On pill toggle
-// ─────────────────────────────────────────────────────────────────────────────
-
-export const DropdownToggle = React.memo(({ value, onChange }) => {
-  return (
-    <div className="flex gap-0.5 bg-white/5 p-0.5 rounded-sm">
-      <Button
-        type="button"
-        variant="ghost"
-        onClick={() => onChange(false)}
-        className={cn(
-          "px-3 py-1 rounded-sm text-xs font-medium transition-all h-auto",
-          !value ? "bg-surface-highest text-white hover:bg-surface-highest" : "text-white hover:text-white/50"
-        )}
-      >
-        Off
-      </Button>
-      <Button
-        type="button"
-        variant="ghost"
-        onClick={() => onChange(true)}
-        className={cn(
-          "px-3 py-1 rounded-sm text-xs font-medium transition-all h-auto",
-          value ? "bg-surface-highest text-white hover:bg-surface-highest" : "text-white hover:text-white/50"
-        )}
-      >
-        On
-      </Button>
-    </div>
-  )
-})
-
-// ─────────────────────────────────────────────────────────────────────────────
-// DropdownRow — icon + label + right-slot row
-// ─────────────────────────────────────────────────────────────────────────────
-
-export function DropdownRow({ icon, label, children, className }) {
-  return (
-    <div className={cn("flex items-center justify-between py-2", className)}>
-      <div className="flex items-center gap-3 text-white/50">
-        <span className="size-4 flex items-center justify-center [&>svg]:size-4">
-          {renderIconNode(icon)}
-        </span>
-        <span className="text-sm text-white">{label}</span>
-      </div>
-      {children}
-    </div>
-  )
-}
+});

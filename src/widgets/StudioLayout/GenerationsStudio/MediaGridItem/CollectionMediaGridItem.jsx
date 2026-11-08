@@ -7,7 +7,7 @@ import { cn } from "@/shared/lib/utils";
 import { ButtonGroup } from "@/shared/ui/button-group";
 import { ConfirmDeleteDialog } from "@/shared/ui/ConfirmDeleteDialog";
 import { InlineRenamePill } from "@/shared/ui/InlineRenamePill";
-import { ActionBtn } from "./ActionBtn";
+import { ActionBtn } from "@/shared/ui/action-button";
 import { StudioItemDropdownMenu } from "./StudioItemMenu";
 import { getStudioMenuItems } from "./studioMenuConfig";
 import { MediaView } from "@/features/media";

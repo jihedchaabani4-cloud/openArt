@@ -10,7 +10,7 @@ import { useWorkflowActions } from "@/features/workflows/model/useMediaActions";
 import { useUpdateWorkflow } from "@/features/workflows/api/workflowsApi";
 import { usePromptStore, useStudioItemDrag } from "@/features/studio";
 import { useWorkflowsStore } from "@/features/workflows/model/useWorkflowsStore";
-import { ActionBtn } from "./ActionBtn";
+import { ActionBtn } from "@/shared/ui/action-button";
 import { StudioItemDropdownMenu } from "./StudioItemMenu";
 import { getStudioMenuItems, getWorkflowEntityType } from "./studioMenuConfig";
 import { MediaView } from "@/features/media";

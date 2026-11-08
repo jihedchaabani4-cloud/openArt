@@ -22,6 +22,5 @@ export { AssetsNavbar } from "./ui/AssetsNavbar";
 export { AssetsSelectionBar } from "./ui/AssetsSelectionBar";
 export { AssetsSidebar } from "./ui/AssetsSidebar";
 export { LibraryMediaGridItem } from "./ui/LibraryMediaGridItem";
-export { MediaInfoStrip } from "./ui/MediaInfoStrip";
 export { SidebarDropdownButton, SidebarFilterButton } from "./ui/SidebarFilterButton";
 export { default as AssetDetailNavbar } from "./ui/AssetDetailNavbar";

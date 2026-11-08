@@ -13,7 +13,7 @@ import {
   ContextMenuItem,
   ContextMenuSeparator,
 } from "@/shared/ui/context-menu";
-import { ActionBtn } from "./ActionBtn";
+import { ActionBtn } from "@/shared/ui/action-button";
 
 function filterActiveMenuItems(items = []) {
   if (!items || !items.length) return [];
