@@ -5,9 +5,6 @@ Component package providing implementations for `src/features/prompt-bar/ui/comm
 
 ## Interface
 - [BaseSelector.jsx] `BaseSelector` (const)
-- [DropdownEngine.jsx] `RatioIcon` (const)
-- [DropdownEngine.jsx] `useSelectLogic` (function)
-- [DropdownEngine.jsx] `BaseSelect` (function)
 - [DurationSelector.jsx] `DurationSelector` (const)
 - [FeatureModeSelector.jsx] `FeatureModeSelector` (function)
 - [FlowPromptBoxSettings.jsx] `getRatioIcon` (function)
@@ -15,16 +12,16 @@ Component package providing implementations for `src/features/prompt-bar/ui/comm
 - [FlowPromptBoxSettings.jsx] `FlowSelect` (function)
 - [FlowPromptBoxSettings.jsx] `FlowPromptBoxSettings` (function)
 - [QualitySelector.jsx] `QualitySelector` (const)
+- [RatioSelector.jsx] `RatioIcon` (const)
 - [RatioSelector.jsx] `RatioSelector` (const)
 - [VariationSelector.jsx] `VariationSelector` (const)
 - [VideoResolutionSelector.jsx] `VideoResolutionSelector` (const)
 
 ## Invariants
-- [DropdownEngine.jsx] Guard clauses return `null` when required state or props are absent.
 - [FlowPromptBoxSettings.jsx] Guard clauses return `null` when required state or props are absent.
 
 ## Side Effects
-- [DropdownEngine.jsx] Registers global window/DOM event listeners.
+- None
 
 ## Verification
 - Run: `npm test`
