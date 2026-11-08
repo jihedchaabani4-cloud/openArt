@@ -12,13 +12,4 @@ export const MEDIA_STATUS = {
   FAILED: "failed",
 };
 
-export function isSpecialWorkflow(workflowType) {
-  const type = String(workflowType || "").toUpperCase();
-  return (
-    type === WORKFLOW_TYPES.ELEMENT ||
-    type === WORKFLOW_TYPES.CHARACTER ||
-    type === WORKFLOW_TYPES.CHAR_SHEET
-  );
-}
-
 export default WORKFLOW_TYPES;
