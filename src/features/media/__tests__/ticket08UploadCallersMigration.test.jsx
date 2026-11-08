@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, cleanup, renderHook } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { elementService } from "@/features/elements/services/elementService";
-import { characterService } from "@/features/characters/services/characterService";
+import { characterService } from "@/features/characters/api/characterService";
 import { useUploadMedia } from "../model/useUploadMedia";
 import {
   validateFilesAgainstPolicy,

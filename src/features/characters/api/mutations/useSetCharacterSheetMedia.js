@@ -1,7 +1,7 @@
 // [FSD Layer: features/characters/hooks] — Set primary character sheet media mutation (1 hook/file).
 // Optimistically previews blob image with status "uploading", revokes URL on settled.
 import { queryKeys } from "@/shared/api/queryKeys";
-import { characterService } from "../services/characterService";
+import { characterService } from "../characterService";
 import { useOptimisticMutation } from "@/shared/lib/optimistic/useOptimisticMutation";
 
 /**

@@ -1,7 +1,7 @@
 // [FSD Layer: features/characters/hooks] — Generate AI character description mutation (1 hook/file).
 // Body copied VERBATIM from features/characters/hooks/useCharacter.js useGenerateCharacterDescriptionMutation.
 import { useMutation } from "@tanstack/react-query";
-import { characterService } from "../services/characterService";
+import { characterService } from "../characterService";
 
 /**
  * useGenerateCharacterDescriptionMutation

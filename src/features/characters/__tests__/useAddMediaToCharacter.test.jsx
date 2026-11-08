@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderHook, act, cleanup } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { characterService } from "../services/characterService";
+import { characterService } from "../api/characterService";
 import { queryKeys } from "@/shared/api/queryKeys";
-import { useAddMediaToCharacter } from "../hooks/useAddMediaToCharacter";
+import { useAddMediaToCharacter } from "../api/mutations/useAddMediaToCharacter";
 
-vi.mock("../services/characterService", () => ({
+vi.mock("../api/characterService", () => ({
   characterService: {
     addDetailMedia: vi.fn(),
   },

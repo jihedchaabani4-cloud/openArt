@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook } from "@testing-library/react";
-import { useCharacter } from "../useCharacter";
+import { useCharacter } from "../api/queries/useCharacter";
 
 // Mocks
 vi.mock("@/features/workflows/api/queries/useProjectData", () => ({
@@ -23,19 +23,19 @@ const { mockAddMediaMutate, stableAddMediaMutation } = vi.hoisted(() => {
 });
 const mockSetSheetMediaMutate = vi.fn();
 
-vi.mock("../useUpdateCharacter", () => ({
+vi.mock("../api/mutations/useUpdateCharacter", () => ({
   useUpdateCharacter: () => ({ mutateAsync: vi.fn() }),
 }));
-vi.mock("../useSetCharacterSheetMedia", () => ({
+vi.mock("../api/mutations/useSetCharacterSheetMedia", () => ({
   useSetCharacterSheetMedia: () => ({ mutateAsync: mockSetSheetMediaMutate }),
 }));
-vi.mock("../useAddMediaToCharacter", () => ({
+vi.mock("../api/mutations/useAddMediaToCharacter", () => ({
   useAddMediaToCharacter: () => stableAddMediaMutation,
 }));
-vi.mock("../useRemoveMediaFromCharacter", () => ({
+vi.mock("../api/mutations/useRemoveMediaFromCharacter", () => ({
   useRemoveMediaFromCharacter: () => ({ mutateAsync: vi.fn() }),
 }));
-vi.mock("../useGenerateCharacterSheetMutation", () => ({
+vi.mock("../api/mutations/useGenerateCharacterSheetMutation", () => ({
   useGenerateCharacterSheetMutation: () => ({ mutateAsync: vi.fn() }),
 }));
 

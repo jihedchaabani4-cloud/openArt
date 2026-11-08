@@ -7,7 +7,7 @@ import { queryKeys } from "@/shared/api/queryKeys";
 import { api } from "@/shared/api/client";
 import { useFilteredWorkflows } from "@/features/workflows/model/useFilteredWorkflows";
 import { useElementSheetWorkflows } from "@/features/elements/hooks/useElementSheetWorkflows";
-import { useCharacterWorkflows } from "@/features/characters/hooks/useCharacterWorkflows";
+import { useCharacterWorkflows } from "@/features/characters/api/queries/useCharacterWorkflows";
 
 const mockPush = vi.fn();
 vi.mock("next/navigation", () => ({

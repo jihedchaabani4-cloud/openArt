@@ -5,10 +5,10 @@ import { queryKeys } from "@/shared/api/queryKeys";
 import { useSetPrimaryMedia } from "./useSetPrimaryMedia";
 import { useDetachMedia } from "./useDetachMedia";
 import { useAddImageToElement } from "@/features/elements/hooks/useAddImageToElement";
-import { useAddMediaToCharacter } from "@/features/characters/hooks/useAddMediaToCharacter";
-import { useSetCharacterSheetMedia } from "@/features/characters/hooks/useSetCharacterSheetMedia";
+import { useAddMediaToCharacter } from "@/features/characters/api/mutations/useAddMediaToCharacter";
+import { useSetCharacterSheetMedia } from "@/features/characters/api/mutations/useSetCharacterSheetMedia";
 import { api } from "@/shared/api/client";
-import { characterService } from "@/features/characters/services/characterService";
+import { characterService } from "@/features/characters/api/characterService";
 
 vi.mock("@/shared/api/client", () => ({
   api: {
@@ -17,7 +17,7 @@ vi.mock("@/shared/api/client", () => ({
   },
 }));
 
-vi.mock("@/features/characters/services/characterService", () => ({
+vi.mock("@/features/characters/api/characterService", () => ({
   characterService: {
     addDetailMedia: vi.fn(),
     setSheetMedia: vi.fn(),

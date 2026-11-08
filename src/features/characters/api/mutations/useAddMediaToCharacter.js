@@ -2,7 +2,7 @@
 // Optimistically adds detail media with status "processing" and transitions to "success" on return.
 import { useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/shared/api/queryKeys";
-import { characterService } from "../services/characterService";
+import { characterService } from "../characterService";
 import { useOptimisticMutation } from "@/shared/lib/optimistic/useOptimisticMutation";
 
 /**

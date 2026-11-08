@@ -1,7 +1,7 @@
 // [FSD Layer: features/characters/hooks] — Remove detail media from character (1 hook/file).
 // Optimistically removes the media item from the cache; rolls back if API fails.
 import { queryKeys } from "@/shared/api/queryKeys";
-import { characterService } from "../services/characterService";
+import { characterService } from "../characterService";
 import { mediaEntity } from "@/shared/lib/optimistic/entityKeys";
 import { useOptimisticMutation } from "@/shared/lib/optimistic/useOptimisticMutation";
 

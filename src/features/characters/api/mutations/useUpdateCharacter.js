@@ -1,6 +1,6 @@
 // [FSD Layer: features/characters/hooks] — Update character mutation (1 hook/file).
 // Optimistically updates character and workflow in projectData cache.
-import { characterService } from "../services/characterService";
+import { characterService } from "../characterService";
 import { stripWorkflowPrefix } from "@/features/workflows/lib/cacheHelpers";
 import { queryKeys } from "@/shared/api/queryKeys";
 import { useOptimisticMutation } from "@/shared/lib/optimistic/useOptimisticMutation";

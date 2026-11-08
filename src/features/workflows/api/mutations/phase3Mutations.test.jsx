@@ -3,11 +3,11 @@ import { renderHook, act } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { queryKeys } from "@/shared/api/queryKeys";
 import { useUpdateWorkflow } from "./useUpdateWorkflow";
-import { useUpdateCharacter } from "@/features/characters/hooks/useUpdateCharacter";
+import { useUpdateCharacter } from "@/features/characters/api/mutations/useUpdateCharacter";
 import { useDeleteMedia } from "./useDeleteMedia";
 import { useCreateFolder } from "@/features/folders/api/mutations/useCreateFolder";
 import { api } from "@/shared/api/client";
-import { characterService } from "@/features/characters/services/characterService";
+import { characterService } from "@/features/characters/api/characterService";
 
 vi.mock("@/shared/api/client", () => ({
   api: {
@@ -17,7 +17,7 @@ vi.mock("@/shared/api/client", () => ({
   },
 }));
 
-vi.mock("@/features/characters/services/characterService", () => ({
+vi.mock("@/features/characters/api/characterService", () => ({
   characterService: {
     updateCharacter: vi.fn(),
   },

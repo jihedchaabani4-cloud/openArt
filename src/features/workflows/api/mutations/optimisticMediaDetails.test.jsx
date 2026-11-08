@@ -3,9 +3,9 @@ import { renderHook, act } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { queryKeys } from "@/shared/api/queryKeys";
 import { useAddImageToElement } from "@/features/elements/hooks/useAddImageToElement";
-import { useAddMediaToCharacter } from "@/features/characters/hooks/useAddMediaToCharacter";
+import { useAddMediaToCharacter } from "@/features/characters/api/mutations/useAddMediaToCharacter";
 import { api } from "@/shared/api/client";
-import { characterService } from "@/features/characters/services/characterService";
+import { characterService } from "@/features/characters/api/characterService";
 
 vi.mock("@/shared/api/client", () => ({
   api: {
@@ -13,7 +13,7 @@ vi.mock("@/shared/api/client", () => ({
   },
 }));
 
-vi.mock("@/features/characters/services/characterService", () => ({
+vi.mock("@/features/characters/api/characterService", () => ({
   characterService: {
     addDetailMedia: vi.fn(),
   },

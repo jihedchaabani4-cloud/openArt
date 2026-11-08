@@ -3,7 +3,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/shared/api/queryKeys";
 import { useWorkflowsStore } from "@/features/workflows/model/useWorkflowsStore";
-import { characterService } from "../services/characterService";
+import { characterService } from "../characterService";
 import { logger } from "@/shared/lib/logger";
 
 /**

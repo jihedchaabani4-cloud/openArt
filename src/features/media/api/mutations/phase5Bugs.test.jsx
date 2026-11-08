@@ -2,16 +2,16 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { queryKeys } from "@/shared/api/queryKeys";
-import { useRemoveMediaFromCharacter } from "@/features/characters/hooks/useRemoveMediaFromCharacter";
+import { useRemoveMediaFromCharacter } from "@/features/characters/api/mutations/useRemoveMediaFromCharacter";
 import { useBatchUploadAssets } from "./useBatchUploadAssets";
-import { characterService } from "@/features/characters/services/characterService";
+import { characterService } from "@/features/characters/api/characterService";
 import { api } from "@/shared/api/client";
 
 vi.mock("@/shared/api/client", () => ({
   api: { postForm: vi.fn() },
 }));
 
-vi.mock("@/features/characters/services/characterService", () => ({
+vi.mock("@/features/characters/api/characterService", () => ({
   characterService: { removeDetailMedia: vi.fn() },
 }));
 
