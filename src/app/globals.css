@@ -1664,3 +1664,7 @@ flow-error-tile {
   max-width: var(--container-compact, 980px);
   margin-inline: auto;
 }
+
+.folder-swatch-white {
+  background-color: #ffffff;
+}

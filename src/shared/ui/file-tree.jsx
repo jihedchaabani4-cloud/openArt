@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useCallback, forwardRef } f
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/shared/ui/collapsible";
 import { Button } from "@/shared/ui/button";
+import { ContextMenu, ContextMenuTrigger } from "@/shared/ui/context-menu";
 import { cn } from "@/shared/lib/utils";
 
 const TreeContext = createContext(null);
@@ -99,7 +100,9 @@ const Folder = forwardRef(function Folder(
     children,
     openIcon,
     closeIcon,
+    icon,
     actions,
+    contextMenu,
     ...props
   },
   ref
@@ -118,10 +121,11 @@ const Folder = forwardRef(function Folder(
   const isExpanded = expandedItems.includes(value);
   const isSelected = selectedId === value;
 
-  const resolvedOpenIcon = openIcon || treeOpenIcon || "folder_open";
-  const resolvedCloseIcon = closeIcon || treeCloseIcon || "folder";
+  const resolvedOpenIcon = openIcon || icon || treeOpenIcon || "folder_open";
+  const resolvedCloseIcon = closeIcon || icon || treeCloseIcon || "folder";
   const resolvedVariant = variant || (isSelected ? "secondary" : "ghost");
   const resolvedSize = size || treeSize || "m";
+  const activeFolderIcon = isExpanded ? resolvedOpenIcon : resolvedCloseIcon;
 
   const onRowClick = (e) => {
     if (isSelectable) {
@@ -130,44 +134,58 @@ const Folder = forwardRef(function Folder(
     toggleExpanded(value);
   };
 
+  const rowButton = (
+    <Button
+      ref={ref}
+      type="button"
+      variant={resolvedVariant}
+      size={resolvedSize}
+      role="treeitem"
+      aria-selected={isSelected}
+      aria-expanded={isExpanded}
+      onClick={onRowClick}
+      className={cn("w-full justify-start", className)}
+      {...props}
+    >
+      <span className="flex items-center justify-center size-5 shrink-0 mr-1.5 text-on-surface-variant group-hover:text-on-surface">
+        {React.isValidElement(activeFolderIcon) ? (
+          activeFolderIcon
+        ) : (
+          <GoogleIcon iconName={activeFolderIcon} className="text-base" />
+        )}
+      </span>
+
+      <span className="truncate flex-1 text-left font-medium">
+        {element}
+      </span>
+
+      {actions && (
+        <div
+          onClick={(e) => e.stopPropagation()}
+          className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center ml-auto"
+        >
+          {actions}
+        </div>
+      )}
+    </Button>
+  );
+
   return (
     <Collapsible
       open={isExpanded}
       onOpenChange={() => toggleExpanded(value)}
       className="w-full"
     >
-      <Button
-        ref={ref}
-        type="button"
-        variant={resolvedVariant}
-        size={resolvedSize}
-        role="treeitem"
-        aria-selected={isSelected}
-        aria-expanded={isExpanded}
-        onClick={onRowClick}
-        className={cn("w-full justify-start", className)}
-        {...props}
-      >
-        <span className="flex items-center justify-center size-5 shrink-0 mr-1.5 text-on-surface-variant group-hover:text-on-surface">
-          <GoogleIcon
-            iconName={openIcon ? (isExpanded ? resolvedOpenIcon : resolvedCloseIcon) : (closeIcon || "folder")}
-            className="text-base"
-          />
-        </span>
-
-        <span className="truncate flex-1 text-left font-medium">
-          {element}
-        </span>
-
-        {actions && (
-          <div
-            onClick={(e) => e.stopPropagation()}
-            className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center ml-auto"
-          >
-            {actions}
-          </div>
-        )}
-      </Button>
+      {contextMenu ? (
+        <ContextMenu>
+          <ContextMenuTrigger asChild>
+            {rowButton}
+          </ContextMenuTrigger>
+          {contextMenu}
+        </ContextMenu>
+      ) : (
+        rowButton
+      )}
 
       <CollapsibleContent
         className={cn(
@@ -197,7 +215,9 @@ const File = forwardRef(function File(
     variant,
     size,
     fileIcon = "description",
+    icon,
     actions,
+    contextMenu,
     onClick,
     ...props
   },
@@ -207,6 +227,7 @@ const File = forwardRef(function File(
   const isSelected = selectedId === value;
   const resolvedVariant = variant || (isSelected ? "secondary" : "ghost");
   const resolvedSize = size || treeSize || "m";
+  const activeFileIcon = icon || fileIcon;
 
   const handleClick = (e) => {
     if (isSelectable) {
@@ -215,7 +236,7 @@ const File = forwardRef(function File(
     onClick?.(e);
   };
 
-  return (
+  const fileButton = (
     <Button
       ref={ref}
       type="button"
@@ -228,7 +249,11 @@ const File = forwardRef(function File(
       {...props}
     >
       <span className="flex items-center justify-center size-5 shrink-0 mr-1.5 text-on-surface-variant group-hover:text-on-surface">
-        <GoogleIcon iconName={fileIcon} className="text-base" />
+        {React.isValidElement(activeFileIcon) ? (
+          activeFileIcon
+        ) : (
+          <GoogleIcon iconName={activeFileIcon} className="text-base" />
+        )}
       </span>
 
       <span className="truncate flex-1 text-left font-medium">
@@ -245,6 +270,19 @@ const File = forwardRef(function File(
       )}
     </Button>
   );
+
+  if (contextMenu) {
+    return (
+      <ContextMenu>
+        <ContextMenuTrigger asChild>
+          {fileButton}
+        </ContextMenuTrigger>
+        {contextMenu}
+      </ContextMenu>
+    );
+  }
+
+  return fileButton;
 });
 File.displayName = "File";
 

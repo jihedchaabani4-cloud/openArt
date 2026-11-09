@@ -80,4 +80,40 @@ describe("FileTree Component (shadcn.io/ui/file-tree)", () => {
     // file-custom has explicit size="l" -> h-button-l
     expect(buttons[2].className).toContain("h-button-l");
   });
+
+  it("renders custom FolderGlyphIcon with white default or collection color", async () => {
+    const { FolderGlyphIcon } = await import("../FolderGlyphIcon");
+    const { getFolderColorGradient } = await import("@/features/folders/model/folder-color-tokens");
+
+    // When color is falsy or undefined -> defaults to white
+    const defaultGrad = getFolderColorGradient(undefined);
+    expect(defaultGrad.id).toBe("white");
+    expect(defaultGrad.frontTop).toBe("#ffffff");
+
+    // When collection data has a color (e.g. lime #d1fe17) -> uses that color
+    const limeGrad = getFolderColorGradient("#d1fe17");
+    expect(limeGrad.id).toBe("lime");
+    expect(limeGrad.frontBottom).toBe("#d1fe17");
+
+    // Render inside FileTreeFolder
+    const { container } = render(
+      <FileTree>
+        <FileTreeFolder
+          value="f-white"
+          element="Default White Folder"
+          icon={<FolderGlyphIcon data-testid="white-icon" />}
+        />
+        <FileTreeItem
+          value="f-lime"
+          element="Lime Folder"
+          icon={<FolderGlyphIcon color="#d1fe17" data-testid="lime-icon" />}
+        />
+      </FileTree>
+    );
+
+    expect(screen.getByText("Default White Folder")).toBeDefined();
+    expect(screen.getByText("Lime Folder")).toBeDefined();
+    expect(container.querySelector('[data-testid="white-icon"]')).toBeDefined();
+    expect(container.querySelector('[data-testid="lime-icon"]')).toBeDefined();
+  });
 });

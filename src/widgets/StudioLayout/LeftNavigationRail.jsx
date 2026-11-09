@@ -7,11 +7,28 @@ import { motion } from "framer-motion";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { Button } from "@/shared/ui/button";
 import { FileTree, FileTreeFolder, FileTreeItem } from "@/shared/ui/file-tree";
+import { FolderGlyphIcon } from "@/shared/ui/FolderGlyphIcon";
+import {
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuSub,
+  ContextMenuSubTrigger,
+  ContextMenuSubContent,
+} from "@/shared/ui/context-menu";
+import { CreateFolderDialog } from "@/shared/ui/CreateFolderDialog";
+import { ConfirmDeleteDialog } from "@/shared/ui/ConfirmDeleteDialog";
 import { cn } from "@/shared/lib/utils";
 import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows";
 import { useCharacterWorkflows } from "@/features/characters";
 import { useElementSheetWorkflows } from "@/features/elements";
-import { useProjectFolders } from "@/features/folders";
+import {
+  useProjectFolders,
+  useUpdateFolder,
+  useDeleteFolder,
+  FOLDER_COLOR_OPTIONS,
+  DEFAULT_FOLDER_GRADIENT,
+} from "@/features/folders";
 
 /**
  * LeftNavigationRail
@@ -73,6 +90,64 @@ export function LeftNavigationRail() {
   const handleSelectCollection = (collectionId) => {
     if (collectionId) {
       router.push(`/cinema-studio/${selectedProjectId}/collection/${collectionId}`);
+    }
+  };
+
+  const { mutateAsync: updateFolder } = useUpdateFolder();
+  const { mutateAsync: deleteFolder } = useDeleteFolder();
+
+  const [createSubfolderParentId, setCreateSubfolderParentId] = useState(null);
+  const [deletingFolder, setDeletingFolder] = useState(null);
+  const [renamingFolderId, setRenamingFolderId] = useState(null);
+  const [renameValue, setRenameValue] = useState("");
+
+  const handleStartRename = (node) => {
+    setRenamingFolderId(node.id);
+    setRenameValue(node.name || node.folder_name || "");
+  };
+
+  const handleSaveRename = async (folderId) => {
+    const trimmed = renameValue?.trim();
+    setRenamingFolderId(null);
+    if (!trimmed || !folderId || !selectedProjectId) return;
+    try {
+      await updateFolder({
+        folderId,
+        patch: { name: trimmed },
+        projectId: selectedProjectId,
+      });
+    } catch {
+      // Optimistic rollback handled
+    }
+  };
+
+  const handleSetColor = async (folderId, colorHex) => {
+    if (!folderId || !selectedProjectId) return;
+    try {
+      await updateFolder({
+        folderId,
+        patch: { color: colorHex },
+        projectId: selectedProjectId,
+      });
+    } catch {
+      // Optimistic rollback handled
+    }
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deletingFolder || !selectedProjectId) return;
+    const deletedId = deletingFolder.id;
+    try {
+      await deleteFolder({
+        folderId: deletedId,
+        projectId: selectedProjectId,
+      });
+      setDeletingFolder(null);
+      if (activeCollectionId === deletedId) {
+        router.push(`/cinema-studio/${selectedProjectId}`);
+      }
+    } catch {
+      // ConfirmDeleteDialog retains state
     }
   };
 
@@ -177,17 +252,94 @@ export function LeftNavigationRail() {
     const folderName = node.name || node.folder_name || "Collection";
     const hasChildren = Array.isArray(node.children) && node.children.length > 0;
     const folderColor = node.color || null;
+    const isRenaming = renamingFolderId === node.id;
 
-    const labelElement = (
-      <span className="flex items-center gap-1.5 truncate">
-        {folderColor && (
-          <span
-            className="size-2 rounded-full shrink-0"
-            style={folderColor ? { backgroundColor: folderColor } : undefined}
-          />
-        )}
-        <span className="truncate">{folderName}</span>
-      </span>
+    const folderIconElement = (
+      <FolderGlyphIcon color={folderColor} size={18} />
+    );
+
+    const labelElement = isRenaming ? (
+      <input
+        type="text"
+        autoFocus
+        value={renameValue}
+        onChange={(e) => setRenameValue(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            handleSaveRename(node.id);
+          } else if (e.key === "Escape") {
+            setRenamingFolderId(null);
+          }
+        }}
+        onBlur={() => handleSaveRename(node.id)}
+        onClick={(e) => e.stopPropagation()}
+        className="w-full bg-surface-elevated text-on-surface rounded px-1.5 py-0.5 text-xs outline-none focus:ring-1 focus:ring-outline-variant"
+      />
+    ) : (
+      <span className="truncate">{folderName}</span>
+    );
+
+    const folderContextMenu = (
+      <ContextMenuContent className="w-52">
+        <ContextMenuItem onClick={() => handleSelectCollection(node.id)}>
+          <GoogleIcon iconName="folder_open" className="text-base" />
+          <span>Ouvrir</span>
+        </ContextMenuItem>
+        <ContextMenuItem onClick={() => setCreateSubfolderParentId(node.id)}>
+          <GoogleIcon iconName="create_new_folder" className="text-base" />
+          <span>Nouveau sous-dossier</span>
+        </ContextMenuItem>
+        <ContextMenuItem
+          onClick={() => {
+            setRenamingFolderId(node.id);
+            setRenameValue(folderName);
+          }}
+        >
+          <GoogleIcon iconName="edit" className="text-base" />
+          <span>Renommer</span>
+        </ContextMenuItem>
+        <ContextMenuSeparator />
+        <ContextMenuSub>
+          <ContextMenuSubTrigger>
+            <GoogleIcon iconName="palette" className="text-base" />
+            <span>Couleur</span>
+          </ContextMenuSubTrigger>
+          <ContextMenuSubContent className="w-44 p-1">
+            {FOLDER_COLOR_OPTIONS.map((c) => (
+              <ContextMenuItem
+                key={c.id}
+                onClick={() => handleSetColor(node.id, c.hex)}
+                className="flex items-center gap-2"
+              >
+                <span className={cn("size-3 rounded-full shrink-0", c.bgClass)} />
+                <span className="truncate">{c.label}</span>
+                {node.color?.toLowerCase() === c.hex.toLowerCase() && (
+                  <GoogleIcon iconName="check" className="text-xs ml-auto text-on-surface" />
+                )}
+              </ContextMenuItem>
+            ))}
+            <ContextMenuSeparator />
+            <ContextMenuItem
+              onClick={() => handleSetColor(node.id, null)}
+              className="flex items-center gap-2"
+            >
+              <span className="size-3 rounded-full shrink-0 border border-border folder-swatch-white" />
+              <span>Blanc (Défaut)</span>
+              {(!node.color || node.color.toLowerCase() === DEFAULT_FOLDER_GRADIENT.hex.toLowerCase()) && (
+                <GoogleIcon iconName="check" className="text-xs ml-auto text-on-surface" />
+              )}
+            </ContextMenuItem>
+          </ContextMenuSubContent>
+        </ContextMenuSub>
+        <ContextMenuSeparator />
+        <ContextMenuItem
+          variant="destructive"
+          onClick={() => setDeletingFolder(node)}
+        >
+          <GoogleIcon iconName="delete" className="text-base" />
+          <span>Supprimer</span>
+        </ContextMenuItem>
+      </ContextMenuContent>
     );
 
     if (hasChildren) {
@@ -196,6 +348,8 @@ export function LeftNavigationRail() {
           key={node.id}
           value={node.id}
           element={labelElement}
+          icon={folderIconElement}
+          contextMenu={folderContextMenu}
           isSelectable
         >
           {node.children.map(renderFolderNode)}
@@ -208,7 +362,8 @@ export function LeftNavigationRail() {
         key={node.id}
         value={node.id}
         element={labelElement}
-        fileIcon="folder"
+        icon={folderIconElement}
+        contextMenu={folderContextMenu}
         isSelectable
       />
     );
@@ -298,6 +453,30 @@ export function LeftNavigationRail() {
           </span>
         </Button>
       </div>
+
+      {createSubfolderParentId && (
+        <CreateFolderDialog
+          open={Boolean(createSubfolderParentId)}
+          onOpenChange={(open) => {
+            if (!open) setCreateSubfolderParentId(null);
+          }}
+          parentId={createSubfolderParentId}
+          projectId={selectedProjectId}
+          title="Nouveau sous-dossier"
+        />
+      )}
+
+      {deletingFolder && (
+        <ConfirmDeleteDialog
+          open={Boolean(deletingFolder)}
+          onOpenChange={(open) => {
+            if (!open) setDeletingFolder(null);
+          }}
+          onConfirm={handleConfirmDelete}
+          title="Supprimer la collection"
+          description={`Êtes-vous sûr de vouloir supprimer "${deletingFolder.name || deletingFolder.folder_name || "cette collection"}" ?`}
+        />
+      )}
     </aside>
   );
 }

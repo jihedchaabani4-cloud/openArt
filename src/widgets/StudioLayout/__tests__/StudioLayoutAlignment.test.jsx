@@ -29,9 +29,15 @@ vi.mock("@/features/elements", () => ({
   useElementSheetWorkflows: () => ({ workflows: [] }),
 }));
 
-vi.mock("@/features/folders", () => ({
-  useProjectFolders: () => ({ data: [] }),
-}));
+vi.mock("@/features/folders", async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    useProjectFolders: () => ({ data: [] }),
+    useUpdateFolder: () => ({ mutateAsync: vi.fn() }),
+    useDeleteFolder: () => ({ mutateAsync: vi.fn() }),
+  };
+});
 
 describe("LeftNavigationRail & Media Grid Baseline Alignment", () => {
   it("LeftNavigationRail aside removes py-3 / pt-3 and uses pt-0 so menu items sit cleanly under spacer", () => {
