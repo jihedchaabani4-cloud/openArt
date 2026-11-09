@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useCallback, forwardRef } from "react";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/shared/ui/collapsible";
+import { Button } from "@/shared/ui/button";
 import { cn } from "@/shared/lib/utils";
 
 const TreeContext = createContext(null);
@@ -128,16 +129,18 @@ const Folder = forwardRef(function Folder(
       onOpenChange={() => toggleExpanded(value)}
       className="w-full"
     >
-      <div
+      <Button
         ref={ref}
+        type="button"
+        variant="ghost"
         role="treeitem"
         aria-selected={isSelected}
         aria-expanded={isExpanded}
         onClick={onRowClick}
         className={cn(
-          "group flex items-center h-8 px-2 rounded-md transition-colors duration-150 cursor-pointer font-sans text-sm",
+          "w-full justify-start h-8 px-2 rounded-md font-sans text-sm font-medium transition-colors duration-150 select-none",
           isSelected
-            ? "bg-surface-elevated text-on-surface font-medium"
+            ? "bg-surface-elevated text-on-surface"
             : "text-on-surface-variant hover:text-on-surface hover:bg-white/[0.06]",
           className
         )}
@@ -162,7 +165,7 @@ const Folder = forwardRef(function Folder(
             {actions}
           </div>
         )}
-      </div>
+      </Button>
 
       <CollapsibleContent
         className={cn(
@@ -207,15 +210,17 @@ const File = forwardRef(function File(
   };
 
   return (
-    <div
+    <Button
       ref={ref}
+      type="button"
+      variant="ghost"
       role="treeitem"
       aria-selected={isSelected}
       onClick={handleClick}
       className={cn(
-        "group flex items-center h-8 px-2 rounded-md transition-colors duration-150 cursor-pointer font-sans text-sm",
+        "w-full justify-start h-8 px-2 rounded-md font-sans text-sm font-medium transition-colors duration-150 select-none",
         isSelected
-          ? "bg-surface-elevated text-on-surface font-medium"
+          ? "bg-surface-elevated text-on-surface"
           : "text-on-surface-variant hover:text-on-surface hover:bg-white/[0.06]",
         className
       )}
@@ -237,7 +242,7 @@ const File = forwardRef(function File(
           {actions}
         </div>
       )}
-    </div>
+    </Button>
   );
 });
 File.displayName = "File";
