@@ -24,6 +24,7 @@ const Tree = forwardRef(function Tree(
   {
     className,
     children,
+    size = "m",
     initialSelectedId,
     selectedId: controlledSelectedId,
     onSelectChange,
@@ -67,6 +68,7 @@ const Tree = forwardRef(function Tree(
         direction: dir,
         openIcon,
         closeIcon,
+        size,
       }}
     >
       <div
@@ -92,6 +94,8 @@ const Folder = forwardRef(function Folder(
     element,
     value,
     isSelectable = true,
+    variant,
+    size,
     children,
     openIcon,
     closeIcon,
@@ -108,6 +112,7 @@ const Folder = forwardRef(function Folder(
     indicator,
     openIcon: treeOpenIcon,
     closeIcon: treeCloseIcon,
+    size: treeSize,
   } = useTree();
 
   const isExpanded = expandedItems.includes(value);
@@ -115,6 +120,8 @@ const Folder = forwardRef(function Folder(
 
   const resolvedOpenIcon = openIcon || treeOpenIcon || "folder_open";
   const resolvedCloseIcon = closeIcon || treeCloseIcon || "folder";
+  const resolvedVariant = variant || (isSelected ? "secondary" : "ghost");
+  const resolvedSize = size || treeSize || "m";
 
   const onRowClick = (e) => {
     if (isSelectable) {
@@ -132,18 +139,13 @@ const Folder = forwardRef(function Folder(
       <Button
         ref={ref}
         type="button"
-        variant="ghost"
+        variant={resolvedVariant}
+        size={resolvedSize}
         role="treeitem"
         aria-selected={isSelected}
         aria-expanded={isExpanded}
         onClick={onRowClick}
-        className={cn(
-          "w-full justify-start h-8 px-2 rounded-md font-sans text-sm font-medium transition-colors duration-150 select-none",
-          isSelected
-            ? "bg-surface-elevated text-on-surface"
-            : "text-on-surface-variant hover:text-on-surface hover:bg-white/[0.06]",
-          className
-        )}
+        className={cn("w-full justify-start", className)}
         {...props}
       >
         <span className="flex items-center justify-center size-5 shrink-0 mr-1.5 text-on-surface-variant group-hover:text-on-surface">
@@ -192,6 +194,8 @@ const File = forwardRef(function File(
     element,
     value,
     isSelectable = true,
+    variant,
+    size,
     fileIcon = "description",
     actions,
     onClick,
@@ -199,8 +203,10 @@ const File = forwardRef(function File(
   },
   ref
 ) {
-  const { selectedId, handleSelect } = useTree();
+  const { selectedId, handleSelect, size: treeSize } = useTree();
   const isSelected = selectedId === value;
+  const resolvedVariant = variant || (isSelected ? "secondary" : "ghost");
+  const resolvedSize = size || treeSize || "m";
 
   const handleClick = (e) => {
     if (isSelectable) {
@@ -213,17 +219,12 @@ const File = forwardRef(function File(
     <Button
       ref={ref}
       type="button"
-      variant="ghost"
+      variant={resolvedVariant}
+      size={resolvedSize}
       role="treeitem"
       aria-selected={isSelected}
       onClick={handleClick}
-      className={cn(
-        "w-full justify-start h-8 px-2 rounded-md font-sans text-sm font-medium transition-colors duration-150 select-none",
-        isSelected
-          ? "bg-surface-elevated text-on-surface"
-          : "text-on-surface-variant hover:text-on-surface hover:bg-white/[0.06]",
-        className
-      )}
+      className={cn("w-full justify-start", className)}
       {...props}
     >
       <span className="flex items-center justify-center size-5 shrink-0 mr-1.5 text-on-surface-variant group-hover:text-on-surface">
@@ -252,10 +253,11 @@ File.displayName = "File";
  * Helper button to collapse all expanded folders.
  */
 const CollapseButton = forwardRef(function CollapseButton(
-  { className, elements = [], children, ...props },
+  { className, elements = [], children, variant = "ghost", size, ...props },
   ref
 ) {
-  const { setExpandedItems, expandedItems } = useTree();
+  const { setExpandedItems, expandedItems, size: treeSize } = useTree();
+  const resolvedSize = size || treeSize || "m";
 
   const handleToggleAll = (e) => {
     e.stopPropagation();
@@ -267,18 +269,17 @@ const CollapseButton = forwardRef(function CollapseButton(
   };
 
   return (
-    <button
+    <Button
       ref={ref}
       type="button"
+      variant={variant}
+      size={resolvedSize}
       onClick={handleToggleAll}
-      className={cn(
-        "text-xs text-on-surface-variant hover:text-on-surface transition-colors flex items-center gap-1",
-        className
-      )}
+      className={className}
       {...props}
     >
       {children || (expandedItems.length > 0 ? "Tout réduire" : "Tout développer")}
-    </button>
+    </Button>
   );
 });
 CollapseButton.displayName = "CollapseButton";

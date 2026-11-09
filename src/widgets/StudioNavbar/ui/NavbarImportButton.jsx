@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { useUploadMedia } from "@/features/media";
-import { useCreateFolder } from "@/features/folders";
+import { CreateFolderDialog } from "@/shared/ui/CreateFolderDialog";
 import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows";
 import { Button } from "@/shared/ui/button";
 import { toast } from "sonner";
@@ -27,8 +27,8 @@ export function NavbarImportButton() {
   const currentCollectionId = collectionMatch ? collectionMatch[1] : null;
 
   const { uploadMedia, isUploading } = useUploadMedia();
-  const { mutateAsync: createFolder, isPending: isCreatingFolder } = useCreateFolder();
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [isCreateFolderOpen, setIsCreateFolderOpen] = useState(false);
 
   if (activeStudioTab !== "assets" && activeStudioTab !== "generations" && activeStudioTab !== "collection") return null;
 
@@ -38,22 +38,10 @@ export function NavbarImportButton() {
     fileInputRef.current?.click();
   };
 
-  const handleCreateCollectionClick = async () => {
+  const handleCreateCollectionClick = () => {
     setDropdownOpen(false);
     if (!projectId) return;
-
-    try {
-      const created = await createFolder({
-        projectId,
-        name: "Untitled collection",
-        parentId: currentCollectionId || null,
-      });
-      if (created?.id) {
-        setActiveCollectionId(created.id);
-      }
-    } catch (err) {
-      logger.error("navbar_create_collection_failed", { message: err?.message });
-    }
+    setIsCreateFolderOpen(true);
   };
 
   const handleFileChange = async (e) => {
@@ -88,12 +76,12 @@ export function NavbarImportButton() {
       <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
         <DropdownMenuTrigger asChild>
           <Button
-            disabled={isUploading || isCreatingFolder || !projectId}
+            disabled={isUploading || !projectId}
             variant="ghost"
             className="size-8 sm:size-9 max-h-full p-0 aspect-square"
             title={projectId ? "Add or Upload" : "Project is still loading"}
           >
-            {isUploading || isCreatingFolder ? (
+            {isUploading ? (
               <GoogleIcon iconName="progress_activity" className="text-[13px] animate-spin text-white/40" />
             ) : (
               <GoogleIcon iconName="add" className="text-[13px]" />
@@ -115,7 +103,7 @@ export function NavbarImportButton() {
 
           <DropdownMenuItem
             onClick={handleCreateCollectionClick}
-            disabled={isCreatingFolder}
+            disabled={!projectId}
             className="flex items-center gap-3 cursor-pointer pl-3 pr-4 py-2 hover:bg-white/10 text-white min-h-[2.125rem] text-[14px] leading-5 font-medium transition-colors duration-100 ease-in-out"
           >
             <GoogleIcon iconName="create_new_folder" className="text-[20px] text-white/80 shrink-0" />
@@ -123,6 +111,13 @@ export function NavbarImportButton() {
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+
+      <CreateFolderDialog
+        open={isCreateFolderOpen}
+        onOpenChange={setIsCreateFolderOpen}
+        projectId={projectId}
+        parentId={currentCollectionId || null}
+      />
     </>
   );
 }

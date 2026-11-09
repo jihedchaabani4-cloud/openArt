@@ -283,6 +283,12 @@ export function StudioNavbarLeft({
                                 Assets
                             </span>
                             <span className="text-on-surface-subtle">/</span>
+                            {activeCollection?.color && (
+                                <span
+                                    className="size-2 rounded-full shrink-0"
+                                    style={activeCollection?.color ? { backgroundColor: activeCollection.color } : undefined}
+                                />
+                            )}
                             <EditableDisplayName
                                 ref={nameRef}
                                 displayName={displayName}

@@ -54,9 +54,15 @@ const buttonVariants = cva(
         "flow-ghost":
           "h-8 px-2 rounded-sm bg-transparent text-on-surface-variant hover:bg-white/[0.08] hover:text-on-surface border-none",
       },
+      size: {
+        s: "h-button-s",
+        m: "h-button-m",
+        l: "h-button-l",
+      },
     },
     defaultVariants: {
       variant: "ghost",
+      size: "m",
     },
   }
 );
@@ -65,6 +71,7 @@ const Button = React.forwardRef(function Button(
   {
     className,
     variant = "ghost",
+    size = "m",
     asChild = false,
     ...props
   },
@@ -72,13 +79,14 @@ const Button = React.forwardRef(function Button(
 ) {
   const Comp = asChild ? Slot.Root : "button";
   const resolvedVariant = variant === "default" || !variant ? "ghost" : variant;
+  const resolvedSize = size ? String(size).toLowerCase() : "m";
 
   return (
     <Comp
       ref={ref}
       data-slot="button"
       data-variant={resolvedVariant}
-      className={cn(buttonVariants({ variant: resolvedVariant }), className)}
+      className={cn(buttonVariants({ variant: resolvedVariant, size: resolvedSize }), className)}
       {...props}
     />
   );

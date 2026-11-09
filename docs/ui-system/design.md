@@ -128,6 +128,10 @@ Enforced strictly across all UI components:
 * **Generation Snake Glow Animation:** Houdini `@property --border-glow-snake-progress` rotating gradient light during inference.
 
 ### 8.2 Buttons & Action Controls
+* **Button Height Scale (`size` parameter — defaults to `m`):**
+  - **Small (`s`):** `--button-height-s: 32px;` (Tailwind `h-button-s`). Compact density actions, tree items, dense toolbars.
+  - **Medium (`m` — Default):** `--button-height-m: 36px;` (Tailwind `h-button-m`). Standard studio controls, navbar action items, default button height.
+  - **Large (`l`):** `--button-height-l: 42px;` (Tailwind `h-button-l`). Symmetrical sidebar navigation items, prominent modal actions, menu drawer controls.
 * **Settings Trigger Chip (`flow-button-chip`):** Background `rgba(218, 220, 224, 0.05)`, text `rgba(218, 220, 224, 0.75)`, 11px font size, font-weight 500, no borders.
 * **Generate Button (`flow-button-generate`):** Circular `rounded-full`, primary or neon state when valid, disabled state `rgba(218, 220, 224, 0.05)` with 50% opacity icon.
 * **Transparent Icon Button (`flow-icon-button-transparent`):** Zero background, hover state `hover:bg-white/[0.08]`.

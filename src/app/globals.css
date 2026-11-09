@@ -133,6 +133,17 @@ mat-icon {
   padding-right: var(--studio-sidebar-padding, 0px) !important;
 }
 
+/* ── Button Height Utilities (s / m / l) ── */
+.h-button-s {
+  height: var(--button-height-s, 32px);
+}
+.h-button-m {
+  height: var(--button-height-m, 36px);
+}
+.h-button-l {
+  height: var(--button-height-l, 42px);
+}
+
 /* ── Custom Scrollbar (Minimalist) ── */
 ::-webkit-scrollbar {
   width: 5px;
@@ -244,6 +255,11 @@ mat-icon {
   --spacing-studio-navbar-padding: 5px;
   --spacing-studio-sidebar-padding: 0px;
 
+  /* Button Sizing Tokens (s / m / l) */
+  --spacing-button-s: var(--button-height-s, 32px);
+  --spacing-button-m: var(--button-height-m, 36px);
+  --spacing-button-l: var(--button-height-l, 42px);
+
   /* Runway Cinema Max-Widths */
   --container-cinema: 1600px;
   --container-editorial: 1280px;
@@ -284,6 +300,7 @@ mat-icon {
   --color-surface-elevated: var(--surface-elevated, #282a2c);
   --color-surface-highest: var(--surface-highest, #333537);
   --color-brand-neon: var(--color-brand-neon, #EFFE17);
+  --color-lime: var(--color-lime, #d1fe17);
   --color-accent-blue: var(--color-accent-blue, #a8c7fa);
   --color-danger: var(--color-danger, #fe6e6e);
   --color-success: var(--color-success, #80da88);

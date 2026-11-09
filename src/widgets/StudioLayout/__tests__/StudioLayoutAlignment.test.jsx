@@ -76,6 +76,19 @@ describe("LeftNavigationRail & Media Grid Baseline Alignment", () => {
     expect(bottomReduceBtn.className).toContain("gap-0");
     expect(bottomReduceBtn.querySelector("span.w-\\[48px\\]")).toBeDefined();
 
+    // Verify px-0.5 on containers and size M (h-button-m) on buttons
+    const topContainer = topNav.parentElement;
+    expect(topContainer?.className).toContain("px-0.5");
+    expect(bottomContainer?.className).toContain("px-0.5");
+
+    const topButtons = Array.from(topNav.querySelectorAll("a[data-slot='button']"));
+    expect(topButtons.length).toBe(4);
+    topButtons.forEach((btn) => {
+      expect(btn.className).toContain("h-button-m");
+    });
+    expect(bottomTrashLink.className).toContain("h-button-m");
+    expect(bottomReduceBtn.className).toContain("h-button-m");
+
     // Verify Corbeille precedes Réduire in DOM order (placed above it)
     expect(bottomTrashLink.compareDocumentPosition(bottomReduceBtn) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });

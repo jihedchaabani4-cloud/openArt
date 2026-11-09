@@ -3,12 +3,14 @@ import { renderHook, act } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { queryKeys } from "@/shared/api/queryKeys";
 import { useMoveAssetToFolder } from "./useMoveAssetToFolder";
+import { useCreateFolder } from "./useCreateFolder";
 import { useUpdateFolder } from "./useUpdateFolder";
 import { useDeleteFolder } from "./useDeleteFolder";
 import { api } from "@/shared/api/client";
 
 vi.mock("@/shared/api/client", () => ({
   api: {
+    post: vi.fn(),
     patch: vi.fn(),
     delete: vi.fn(),
   },
@@ -213,6 +215,152 @@ describe("Folder optimistic mutations", () => {
       const restored = queryClient.getQueryData(fKey);
       expect(restored).toHaveLength(1);
       expect(restored[0].name).toBe("Non Empty");
+    });
+  });
+
+  describe("useCreateFolder (POST /api/projects/:projectId/folders)", () => {
+    it("creates collection with custom color, description, and parentId", async () => {
+      const { queryClient, wrapper } = createWrapper();
+      const pKey = queryKeys.projectData.byProject("proj-1");
+
+      const initialProject = {
+        projectContents: {
+          collections: [],
+          workflows: [],
+          media: [],
+        },
+      };
+      queryClient.setQueryData(pKey, initialProject);
+
+      api.post.mockResolvedValueOnce({
+        id: "col-new-1",
+        name: "Summer Drop 2026",
+        color: "#3B82F6",
+        description: "Hero images and b-rolls",
+        parentId: null,
+        assetCount: 0,
+      });
+
+      const { result } = renderHook(() => useCreateFolder(), { wrapper });
+
+      await act(async () => {
+        await result.current.mutateAsync({
+          projectId: "proj-1",
+          name: "Summer Drop 2026",
+          color: "#3B82F6",
+          description: "Hero images and b-rolls",
+          parentId: null,
+        });
+      });
+
+      expect(api.post).toHaveBeenCalledWith("/projects/proj-1/folders", {
+        name: "Summer Drop 2026",
+        color: "#3B82F6",
+        description: "Hero images and b-rolls",
+        parentId: null,
+      });
+
+      const updated = queryClient.getQueryData(pKey);
+      expect(updated.projectContents.collections).toHaveLength(1);
+      expect(updated.projectContents.collections[0].color).toBe("#3B82F6");
+      expect(updated.projectContents.collections[0].description).toBe("Hero images and b-rolls");
+    });
+  });
+
+  describe("useUpdateFolder (PATCH /api/folders/:folderId dynamic patch)", () => {
+    it("dynamically updates color and description in projectData and folders cache", async () => {
+      const { queryClient, wrapper } = createWrapper();
+      const pKey = queryKeys.projectData.byProject("proj-1");
+
+      const initialProject = {
+        projectContents: {
+          collections: [
+            {
+              id: "col-1",
+              name: "Social Media Assets",
+              color: null,
+              description: null,
+              parentId: null,
+            },
+          ],
+        },
+      };
+      queryClient.setQueryData(pKey, initialProject);
+
+      api.patch.mockResolvedValueOnce({
+        id: "col-1",
+        name: "Social Media Assets",
+        color: "#EC4899",
+        description: "High resolution visual assets for Instagram and TikTok",
+      });
+
+      const { result } = renderHook(() => useUpdateFolder(), { wrapper });
+
+      await act(async () => {
+        await result.current.mutateAsync({
+          folderId: "col-1",
+          patch: {
+            color: "#EC4899",
+            description: "High resolution visual assets for Instagram and TikTok",
+          },
+          projectId: "proj-1",
+        });
+      });
+
+      expect(api.patch).toHaveBeenCalledWith("/folders/col-1", {
+        color: "#EC4899",
+        description: "High resolution visual assets for Instagram and TikTok",
+      });
+
+      const updated = queryClient.getQueryData(pKey);
+      expect(updated.projectContents.collections[0].color).toBe("#EC4899");
+      expect(updated.projectContents.collections[0].description).toBe(
+        "High resolution visual assets for Instagram and TikTok"
+      );
+    });
+
+    it("resets / clears color and description when null is passed", async () => {
+      const { queryClient, wrapper } = createWrapper();
+      const pKey = queryKeys.projectData.byProject("proj-1");
+
+      const initialProject = {
+        projectContents: {
+          collections: [
+            {
+              id: "col-1",
+              name: "Social Media Assets",
+              color: "#EC4899",
+              description: "Previous note",
+            },
+          ],
+        },
+      };
+      queryClient.setQueryData(pKey, initialProject);
+
+      api.patch.mockResolvedValueOnce({
+        id: "col-1",
+        color: null,
+        description: null,
+      });
+
+      const { result } = renderHook(() => useUpdateFolder(), { wrapper });
+
+      await act(async () => {
+        await result.current.mutateAsync({
+          folderId: "col-1",
+          patch: { color: null, description: null },
+          projectId: "proj-1",
+        });
+      });
+
+      expect(api.patch).toHaveBeenCalledWith("/folders/col-1", {
+        color: null,
+        description: null,
+      });
+
+      const updated = queryClient.getQueryData(pKey);
+      expect(updated.projectContents.collections[0].color).toBeNull();
+      expect(updated.projectContents.collections[0].description).toBeNull();
     });
   });
 });

@@ -134,49 +134,68 @@ export function LeftNavigationRail() {
   };
 
   const renderNavItem = (item) => (
-    <Link
+    <Button
       key={item.id}
-      href={item.href}
-      prefetch={true}
-      onClick={() => setOptimisticTab(item.id)}
+      asChild
+      size="m"
+      variant="ghost"
       className={cn(
-        "flex items-center h-[42px] rounded-lg transition-colors duration-100 w-full select-none outline-none overflow-hidden font-sans font-medium text-sm leading-5 antialiased p-0",
+        "w-full justify-start p-0 gap-0 rounded-lg transition-colors duration-100 select-none outline-none overflow-hidden font-sans font-medium text-sm leading-5 antialiased",
         item.isActive
-          ? "bg-surface-elevated text-on-surface shadow-none"
+          ? "bg-surface-elevated text-on-surface shadow-none hover:bg-surface-elevated hover:text-on-surface"
           : "text-on-surface-variant hover:text-on-surface hover:bg-white/[0.06]"
       )}
       title={!isExpanded ? item.label : undefined}
     >
-      <span className="w-[48px] h-full shrink-0 flex items-center justify-center">
-        <GoogleIcon
-          iconName={item.icon}
-          className={cn(
-            "text-xl shrink-0",
-            item.isActive ? "text-white" : "text-white/80"
-          )}
-        />
-      </span>
-      <span
-        className={cn(
-          "tracking-normal truncate flex-1 pr-2 whitespace-nowrap rail-label-transition",
-          isExpanded ? "opacity-100" : "opacity-0 pointer-events-none"
-        )}
+      <Link
+        href={item.href}
+        prefetch={true}
+        onClick={() => setOptimisticTab(item.id)}
       >
-        {item.label}
-      </span>
-    </Link>
+        <span className="w-[48px] h-full shrink-0 flex items-center justify-center">
+          <GoogleIcon
+            iconName={item.icon}
+            className={cn(
+              "text-xl shrink-0",
+              item.isActive ? "text-white" : "text-white/80"
+            )}
+          />
+        </span>
+        <span
+          className={cn(
+            "tracking-normal truncate flex-1 pr-2 whitespace-nowrap rail-label-transition",
+            isExpanded ? "opacity-100" : "opacity-0 pointer-events-none"
+          )}
+        >
+          {item.label}
+        </span>
+      </Link>
+    </Button>
   );
 
   const renderFolderNode = (node) => {
     const folderName = node.name || node.folder_name || "Collection";
     const hasChildren = Array.isArray(node.children) && node.children.length > 0;
+    const folderColor = node.color || null;
+
+    const labelElement = (
+      <span className="flex items-center gap-1.5 truncate">
+        {folderColor && (
+          <span
+            className="size-2 rounded-full shrink-0"
+            style={folderColor ? { backgroundColor: folderColor } : undefined}
+          />
+        )}
+        <span className="truncate">{folderName}</span>
+      </span>
+    );
 
     if (hasChildren) {
       return (
         <FileTreeFolder
           key={node.id}
           value={node.id}
-          element={folderName}
+          element={labelElement}
           isSelectable
         >
           {node.children.map(renderFolderNode)}
@@ -188,7 +207,7 @@ export function LeftNavigationRail() {
       <FileTreeItem
         key={node.id}
         value={node.id}
-        element={folderName}
+        element={labelElement}
         fileIcon="folder"
         isSelectable
       />
@@ -207,9 +226,11 @@ export function LeftNavigationRail() {
       <div className="w-full shrink-0 h-4" />
 
       {/* ── Top Navigation Items: Générations, Éléments, Personnages ── */}
-      <nav className="flex flex-col gap-1.5 w-full shrink-0">
-        {mainNavItems.map(renderNavItem)}
-      </nav>
+      <div className="w-full shrink-0 px-0.5">
+        <nav className="flex flex-col gap-1.5 w-full">
+          {mainNavItems.map(renderNavItem)}
+        </nav>
+      </div>
 
       {/* ── Collections Tree Section (when expanded) ── */}
       {isExpanded ? (
@@ -230,6 +251,7 @@ export function LeftNavigationRail() {
               <FileTree
                 selectedId={activeCollectionId}
                 onSelectChange={handleSelectCollection}
+                size="m"
                 className="w-full"
               >
                 {folderTree.map(renderFolderNode)}
@@ -247,14 +269,15 @@ export function LeftNavigationRail() {
       )}
 
       {/* ── Dedicated Bottom Actions: Corbeille (Trash) & Toggle Button ── */}
-      <div className="mt-auto flex flex-col gap-1.5 pt-2 pb-2 mb-[30px] w-full shrink-0">
+      <div className="mt-auto flex flex-col gap-1.5 pt-2 pb-2 mb-[30px] w-full shrink-0 px-0.5">
         {renderNavItem(trashItem)}
 
         <Button
           type="button"
           variant="ghost"
+          size="m"
           onClick={handleToggleExpand}
-          className="w-full h-[42px] p-0 gap-0 justify-start overflow-hidden font-medium text-sm leading-5"
+          className="w-full p-0 gap-0 justify-start overflow-hidden font-medium text-sm leading-5 rounded-lg text-on-surface-variant hover:text-on-surface"
           title={isExpanded ? "Réduire la barre" : "Développer la barre"}
           aria-label={isExpanded ? "Réduire la barre" : "Développer la barre"}
         >

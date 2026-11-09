@@ -61,4 +61,23 @@ describe("FileTree Component (shadcn.io/ui/file-tree)", () => {
     fireEvent.click(screen.getByText("Toggle Folder"));
     expect(folderRow?.getAttribute("aria-expanded")).toBe("false");
   });
+
+  it("passes size prop down to Folder and File buttons", () => {
+    const { container } = render(
+      <FileTree size="s" initialExpandedItems={["folder-1"]}>
+        <FileTreeFolder value="folder-1" element="Documents">
+          <FileTreeItem value="doc-1" element="Report.pdf" />
+        </FileTreeFolder>
+        <FileTreeItem value="file-custom" size="l" element="Custom Large" />
+      </FileTree>
+    );
+
+    const buttons = container.querySelectorAll("button");
+    // folder-1 should inherit size="s" -> h-button-s
+    expect(buttons[0].className).toContain("h-button-s");
+    // doc-1 should inherit size="s" -> h-button-s
+    expect(buttons[1].className).toContain("h-button-s");
+    // file-custom has explicit size="l" -> h-button-l
+    expect(buttons[2].className).toContain("h-button-l");
+  });
 });
