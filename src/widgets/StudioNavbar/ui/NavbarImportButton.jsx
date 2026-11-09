@@ -90,7 +90,7 @@ export function NavbarImportButton() {
           <Button
             disabled={isUploading || isCreatingFolder || !projectId}
             variant="ghost"
-            className="size-9 p-0"
+            className="size-8 sm:size-9 max-h-full p-0 aspect-square"
             title={projectId ? "Add or Upload" : "Project is still loading"}
           >
             {isUploading || isCreatingFolder ? (

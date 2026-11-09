@@ -38,7 +38,7 @@ export function NavbarRestoreAllButton() {
       variant="outline"
       onClick={handleRestoreAll}
       disabled={isPending || !hasTrashed}
-      className="flex items-center gap-1.5 cursor-pointer"
+      className="flex items-center gap-1.5 cursor-pointer h-8 sm:h-9 max-h-full"
     >
       <GoogleIcon iconName="restore" className="text-base" />
       <span>{isPending ? "Restauration..." : "Tout restaurer"}</span>

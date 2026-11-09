@@ -133,9 +133,25 @@ Enforced strictly across all UI components:
 * **Transparent Icon Button (`flow-icon-button-transparent`):** Zero background, hover state `hover:bg-white/[0.08]`.
 
 ### 8.3 The Studio Header (`header-base`)
-* **Height:** `5rem` (80px desktop).
-* **Background:** `bg-surface` (`#131314`).
-* **Title:** Inline seamless `editable-text-input` without border outlines until focused.
+* **Height:** `52px` (`var(--studio-navbar-height)`, `h-studio-navbar`, `max-h-studio-navbar`).
+* **Background:** Transparent with feathered backdrop gradient overlay (`.header-backdrop.header-backdrop-visible`).
+* **Title & Breadcrumb:** Inline seamless navigation breadcrumbs (`Assets`, `Assets / [collection]`, `Elements`, `Characters`, `Trash`) with `EditableDisplayName`.
+* **Controls Sizing:** Action buttons and search inputs scale dynamically to `h-8` / `h-9` with `max-h-full` to prevent vertical container overflow.
+
+### 8.4 Studio Layout Dimensions & Rail Geometry
+* **Studio Navbar Height:** `52px` (`--studio-navbar-height: 52px;`, Tailwind utility `h-studio-navbar` / `max-h-studio-navbar`).
+  - Sits as a `relative shrink-0` static flex item directly preceding the content column.
+  - Constant horizontal padding: `5px` (`--studio-navbar-padding: 5px;`, Tailwind utility `px-studio-navbar-padding`), perfectly aligning with the 5px sidebar padding.
+  - Controls (`Input`, `Button`, `DropdownMenuTrigger`) are bounded by `max-h-full min-h-0` for fluid dynamic shrinking.
+* **Studio Sidebar Rail Width (Collapsed):** `52px` (`--studio-sidebar-width: 52px;`, Tailwind utility `w-studio-sidebar`).
+  - Forms a symmetrical 52px × 52px geometric alignment with the 52px Studio Navbar at the top-left corner.
+  - Constant horizontal padding: `5px` (`--studio-sidebar-padding: 5px;`, Tailwind utility `px-studio-sidebar-padding`), cleanly accommodating centered 48px navigation item icons (`w-[48px]`) without layout jump or disappearing padding during expand/collapse.
+  - Default state: Collapsed rail (`isExpanded: false`).
+* **Studio Sidebar Width (Expanded):** `230px` (`--studio-sidebar-width-expanded: 230px;`, Tailwind utility `w-studio-sidebar-expanded`).
+  - Constant horizontal padding: `px-studio-sidebar-padding` (5px) with full typographic labels and smooth bezier width animations (`rail-smooth-transition`).
+* **Zero-Padding Flex Flow Law:**
+  - Content containers (`assets`, `collection`, `elements`, `characters`, `trash`) stack directly below the 52px navbar in a normal `flex flex-col` document flow without artificial top padding (`pt-0`, no `pt-[72px]`).
+  - Gallery scroll containers use `p-0` (zero horizontal and zero vertical padding), allowing media tiles and collections to bleed cleanly edge-to-edge against the sidebar rail and viewport boundaries.
 
 ---
 

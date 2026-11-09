@@ -239,7 +239,7 @@ export function StudioNavbarLeft({
 
     return (
         <div className={cn(
-            "flex min-w-0 items-center gap-2 transition-opacity duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] flex-1",
+            "flex min-w-0 items-center gap-2 transition-opacity duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] flex-1 h-full max-h-full",
             searchExpanded ? "opacity-0 pointer-events-none" : "opacity-100"
         )}>
             {isCollectionPage && isDragging ? (
@@ -252,76 +252,52 @@ export function StudioNavbarLeft({
                     onDragLeave={handleBackDragLeave}
                     onDrop={handleBackDrop}
                     onClick={() => router.push(backHref)}
-                    className="shrink-0 select-none"
+                    className="shrink-0 select-none h-8 max-h-full"
                     title="Drop here to move out of collection"
                 >
                     <span className="pointer-events-none select-none">Move out of collection</span>
                 </Button>
             ) : (
                 <>
-                    <NavbarBackButton
-                        href={backHref}
-                        label={backLabel}
-                        iconName={backIcon}
-                        className="transition-all shrink-0 border-0 border-transparent shadow-none"
-                        onDragOver={isCollectionPage ? handleBackDragOver : undefined}
-                        onDragEnter={isCollectionPage ? handleBackDragEnter : undefined}
-                        onDragLeave={isCollectionPage ? handleBackDragLeave : undefined}
-                        onDrop={isCollectionPage ? handleBackDrop : undefined}
-                    />
+                    {(isCollectionPage || isTrashPage) && (
+                        <NavbarBackButton
+                            href={backHref}
+                            label={backLabel}
+                            iconName={backIcon}
+                            className="transition-all shrink-0 border-0 border-transparent shadow-none h-8 sm:h-9 max-h-full"
+                            onDragOver={isCollectionPage ? handleBackDragOver : undefined}
+                            onDragEnter={isCollectionPage ? handleBackDragEnter : undefined}
+                            onDragLeave={isCollectionPage ? handleBackDragLeave : undefined}
+                            onDrop={isCollectionPage ? handleBackDrop : undefined}
+                        />
+                    )}
 
                     {isTrashPage ? (
                         <NavbarTitle>Trash</NavbarTitle>
-                    ) : (
-                        <div className="flex min-w-0 items-center gap-1">
+                    ) : isCollectionPage ? (
+                        <div className="flex min-w-0 items-center gap-1.5 text-sm font-medium h-full max-h-full">
+                            <span
+                                onClick={() => router.push(`/cinema-studio/${projectId}/assets`)}
+                                className="text-on-surface-variant hover:text-on-surface cursor-pointer transition-colors"
+                            >
+                                Assets
+                            </span>
+                            <span className="text-on-surface-subtle">/</span>
                             <EditableDisplayName
                                 ref={nameRef}
                                 displayName={displayName}
-                                placeholder={isCollectionPage ? "Untitled collection" : "Untitled"}
+                                placeholder="Untitled collection"
                                 onSave={handleSaveName}
-                                inputClassName="text-md font-medium max-w-[160px] sm:max-w-[220px] focus:text-white transition-all"
+                                inputClassName="text-md font-medium max-w-[160px] sm:max-w-[220px] focus:text-on-surface transition-all text-on-surface h-8 max-h-full"
                             />
-
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Button
-                                        variant="ghost"
-                                        className="size-6 p-0 shrink-0"
-                                        aria-label="More options"
-                                    >
-                                        <GoogleIcon iconName="more_vert" className="text-[16px]" />
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="start" className="w-52 p-1.5">
-                                    {isCollectionPage && (
-                                        <>
-                                            <DropdownMenuItem onClick={handleToggleLike}>
-                                                <GoogleIcon
-                                                    iconName="favorite"
-                                                    fill={isLiked}
-                                                    className={cn("text-[13px]", isLiked ? "text-red-400 fill-red-400" : "")}
-                                                />
-                                                {isLiked ? "Unlike collection" : "Like collection"}
-                                            </DropdownMenuItem>
-                                            <DropdownMenuItem onClick={handleDownloadCollection} disabled={isDownloading}>
-                                                <GoogleIcon iconName="download" className="text-[13px]" />
-                                                {isDownloading ? "Downloading..." : "Download collection"}
-                                            </DropdownMenuItem>
-                                        </>
-                                    )}
-                                    <DropdownMenuItem onClick={() => nameRef.current?.startEditing()}>
-                                        <GoogleIcon iconName="edit" className="text-[13px]" />
-                                        Rename
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem 
-                                        variant="destructive"
-                                        onClick={() => setIsDeleteDialogOpen(true)}
-                                    >
-                                        <GoogleIcon iconName="delete" className="text-[13px]" />
-                                        Delete
-                                    </DropdownMenuItem>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
+                        </div>
+                    ) : pathname.includes("/elements") ? (
+                        <NavbarTitle>Elements</NavbarTitle>
+                    ) : pathname.includes("/characters") ? (
+                        <NavbarTitle>Characters</NavbarTitle>
+                    ) : (
+                        <div className="flex min-w-0 items-center gap-1">
+                            <NavbarTitle>Assets</NavbarTitle>
                         </div>
                     )}
                 </>

@@ -48,7 +48,7 @@ export function StudioSettingsDropdown(props) {
         <Button
           type="button"
           variant="ghost"
-          className="size-9 p-0"
+          className="size-8 sm:size-9 max-h-full p-0 aspect-square"
           title="Paramètres d'affichage"
           aria-label="Paramètres de la grille de blocs"
           aria-haspopup="menu"

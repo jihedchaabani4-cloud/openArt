@@ -29,7 +29,7 @@ import { Slot } from "radix-ui";
 import { cn } from "@/shared/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap font-sans text-sm font-semibold antialiased shadow-none transition-all disabled:pointer-events-none disabled:opacity-50 shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-white/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap font-sans text-sm font-semibold antialiased shadow-none transition-all disabled:pointer-events-none disabled:opacity-50 shrink-0 max-h-full min-h-0 outline-none focus-visible:ring-2 focus-visible:ring-white/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {
