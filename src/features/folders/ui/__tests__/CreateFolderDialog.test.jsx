@@ -11,6 +11,14 @@ vi.mock("@/features/folders/api/mutations/useCreateFolder", () => ({
   }),
 }));
 
+const mockUpdateMutateAsync = vi.fn();
+vi.mock("@/features/folders/api/mutations/useUpdateFolder", () => ({
+  useUpdateFolder: () => ({
+    mutateAsync: mockUpdateMutateAsync,
+    isPending: false,
+  }),
+}));
+
 const mockSetActiveCollectionId = vi.fn();
 vi.mock("@/features/workflows/model/useWorkflowsStore", () => ({
   useWorkflowsStore: (selector) =>
@@ -106,6 +114,71 @@ describe("CreateFolderDialog Component", () => {
         parentId: "parent-folder",
       });
       expect(mockSetActiveCollectionId).toHaveBeenCalledWith("new-folder-1");
+      expect(onOpenChange).toHaveBeenCalledWith(false);
+    });
+  });
+
+  it("handles edit mode: pre-populates data, disables Update until modified, and sends only changed patch", async () => {
+    mockUpdateMutateAsync.mockResolvedValueOnce({ id: "f-123", name: "Updated Name" });
+    const onOpenChange = vi.fn();
+
+    const existingFolder = {
+      id: "f-123",
+      name: "Original Name",
+      description: "Original Description",
+      color: "#d1fe17", // Lime
+    };
+
+    renderWithClient(
+      <CreateFolderDialog
+        open={true}
+        onOpenChange={onOpenChange}
+        projectId="proj-123"
+        folder={existingFolder}
+      />
+    );
+
+    // Initial state check
+    expect(screen.getByText("Edit folder")).toBeDefined();
+    const nameInput = screen.getByLabelText("Folder name");
+    expect(nameInput.value).toBe("Original Name");
+
+    const descInput = screen.getByLabelText("Folder description");
+    expect(descInput.value).toBe("Original Description");
+
+    // Update button is initially disabled (no changes yet)
+    const updateBtn = screen.getByRole("button", { name: "Update" });
+    expect(updateBtn.disabled).toBe(true);
+
+    // Modify only the name
+    fireEvent.change(nameInput, { target: { value: "Updated Name" } });
+    expect(updateBtn.disabled).toBe(false);
+
+    // Revert name back to original -> disabled again
+    fireEvent.change(nameInput, { target: { value: "Original Name" } });
+    expect(updateBtn.disabled).toBe(true);
+
+    // Modify color to Cyan (#67e8f9)
+    const cyanBtn = screen.getByLabelText("Folder color Cyan");
+    fireEvent.click(cyanBtn);
+    expect(updateBtn.disabled).toBe(false);
+
+    // Also modify name
+    fireEvent.change(nameInput, { target: { value: "Final Collection" } });
+
+    // Submit
+    fireEvent.click(updateBtn);
+
+    await waitFor(() => {
+      expect(mockUpdateMutateAsync).toHaveBeenCalledWith({
+        folderId: "f-123",
+        projectId: "proj-123",
+        patch: {
+          name: "Final Collection",
+          color: "#67e8f9",
+          // description did NOT change, so it's not sent!
+        },
+      });
       expect(onOpenChange).toHaveBeenCalledWith(false);
     });
   });

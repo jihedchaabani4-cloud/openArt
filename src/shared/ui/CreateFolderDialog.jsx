@@ -11,13 +11,14 @@ import { Textarea } from "@/shared/ui/textarea";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { cn } from "@/shared/lib/utils";
 import { useCreateFolder } from "@/features/folders/api/mutations/useCreateFolder";
+import { useUpdateFolder } from "@/features/folders/api/mutations/useUpdateFolder";
 import { FOLDER_COLOR_OPTIONS, DEFAULT_FOLDER_COLOR } from "@/features/folders/model/folder-color-tokens";
 import { useWorkflowsStore } from "@/features/workflows/model/useWorkflowsStore";
 import { logger } from "@/shared/lib/logger";
 
 /**
  * CreateFolderDialog
- * Clean design-system compliant modal for "New folder" / "Create collection".
+ * Clean design-system compliant modal for "New folder" / "Create collection" and editing existing folders.
  * Uses canonical Dialog, Button, Textarea primitives and Google Flow semantic tokens.
  */
 export function CreateFolderDialog({
@@ -25,12 +26,16 @@ export function CreateFolderDialog({
   onOpenChange,
   projectId: propProjectId,
   parentId = null,
-  title = "New folder",
+  title,
+  folder = null,
   onSuccess,
 }) {
   const storeProjectId = useWorkflowsStore((s) => s.selectedProjectId);
   const setActiveCollectionId = useWorkflowsStore((s) => s.setActiveCollectionId);
   const projectId = propProjectId || storeProjectId;
+
+  const isEditMode = Boolean(folder);
+  const resolvedTitle = title || (isEditMode ? "Edit folder" : "New folder");
 
   const [name, setName] = React.useState("");
   const [description, setDescription] = React.useState("");
@@ -39,21 +44,73 @@ export function CreateFolderDialog({
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const { mutateAsync: createFolder } = useCreateFolder();
+  const { mutateAsync: updateFolder } = useUpdateFolder();
 
-  // Reset form when dialog opens
+  // Reset/Initialize form when dialog opens
   React.useEffect(() => {
     if (open) {
-      setName("");
-      setDescription("");
-      setIsDescriptionExpanded(false);
-      setSelectedColor(DEFAULT_FOLDER_COLOR);
+      if (isEditMode) {
+        setName(folder?.name || folder?.folder_name || "");
+        setDescription(folder?.description || "");
+        setIsDescriptionExpanded(Boolean(folder?.description));
+        setSelectedColor(folder?.color || null);
+      } else {
+        setName("");
+        setDescription("");
+        setIsDescriptionExpanded(false);
+        setSelectedColor(DEFAULT_FOLDER_COLOR);
+      }
       setIsSubmitting(false);
     }
-  }, [open]);
+  }, [open, isEditMode, folder]);
+
+  const initialName = isEditMode ? (folder?.name || folder?.folder_name || "") : "";
+  const initialDesc = isEditMode ? (folder?.description || "") : "";
+  const initialColor = isEditMode ? (folder?.color || null) : DEFAULT_FOLDER_COLOR;
+
+  const hasNameChanged = name.trim() !== initialName.trim();
+  const hasDescChanged = (description.trim() || null) !== (initialDesc.trim() || null);
+  const hasColorChanged = (selectedColor || null) !== (initialColor || null);
+  const isDirty = hasNameChanged || hasDescChanged || hasColorChanged;
+
+  const isSubmitDisabled =
+    isSubmitting || (isEditMode ? !isDirty || name.trim().length === 0 : false);
 
   const handleSubmit = async (e) => {
     e?.preventDefault?.();
     if (!projectId || isSubmitting) return;
+
+    if (isEditMode) {
+      if (!isDirty || name.trim().length === 0) return;
+      const folderId = folder?.id || folder?._id;
+      if (!folderId) return;
+
+      const patch = {};
+      if (hasNameChanged) patch.name = name.trim();
+      if (hasDescChanged) patch.description = description.trim() || null;
+      if (hasColorChanged) patch.color = selectedColor || null;
+
+      if (Object.keys(patch).length === 0) {
+        onOpenChange?.(false);
+        return;
+      }
+
+      setIsSubmitting(true);
+      try {
+        const updated = await updateFolder({
+          folderId,
+          patch,
+          projectId,
+        });
+        onSuccess?.(updated);
+        onOpenChange?.(false);
+      } catch (err) {
+        logger.error("update_folder_dialog_failed", { message: err?.message });
+      } finally {
+        setIsSubmitting(false);
+      }
+      return;
+    }
 
     const trimmedName = name.trim() || "My folder";
     const trimmedDesc = description.trim() || null;
@@ -91,7 +148,7 @@ export function CreateFolderDialog({
         {/* Header */}
         <div className="flex w-full items-center justify-between gap-3">
           <DialogTitle className="text-lg font-semibold text-on-surface tracking-tight">
-            {title}
+            {resolvedTitle}
           </DialogTitle>
           <Button
             type="button"
@@ -195,15 +252,21 @@ export function CreateFolderDialog({
             </div>
           </div>
 
-          {/* Create Submit Button */}
+          {/* Submit Button */}
           <Button
             type="submit"
             variant="primary"
             size="l"
-            disabled={isSubmitting}
+            disabled={isSubmitDisabled}
             className="w-full rounded-md font-semibold text-sm mt-2"
           >
-            {isSubmitting ? "Creating..." : "Create"}
+            {isEditMode
+              ? isSubmitting
+                ? "Updating..."
+                : "Update"
+              : isSubmitting
+                ? "Creating..."
+                : "Create"}
           </Button>
         </form>
       </DialogContent>

@@ -93,33 +93,22 @@ export function LeftNavigationRail() {
     }
   };
 
+  const handleOpenCollectionInNewTab = (collectionId) => {
+    if (collectionId && selectedProjectId && typeof window !== "undefined") {
+      window.open(
+        `/cinema-studio/${selectedProjectId}/collection/${collectionId}`,
+        "_blank",
+        "noopener,noreferrer"
+      );
+    }
+  };
+
   const { mutateAsync: updateFolder } = useUpdateFolder();
   const { mutateAsync: deleteFolder } = useDeleteFolder();
 
   const [createSubfolderParentId, setCreateSubfolderParentId] = useState(null);
   const [deletingFolder, setDeletingFolder] = useState(null);
-  const [renamingFolderId, setRenamingFolderId] = useState(null);
-  const [renameValue, setRenameValue] = useState("");
-
-  const handleStartRename = (node) => {
-    setRenamingFolderId(node.id);
-    setRenameValue(node.name || node.folder_name || "");
-  };
-
-  const handleSaveRename = async (folderId) => {
-    const trimmed = renameValue?.trim();
-    setRenamingFolderId(null);
-    if (!trimmed || !folderId || !selectedProjectId) return;
-    try {
-      await updateFolder({
-        folderId,
-        patch: { name: trimmed },
-        projectId: selectedProjectId,
-      });
-    } catch {
-      // Optimistic rollback handled
-    }
-  };
+  const [editingFolder, setEditingFolder] = useState(null);
 
   const handleSetColor = async (folderId, colorHex) => {
     if (!folderId || !selectedProjectId) return;
@@ -252,51 +241,28 @@ export function LeftNavigationRail() {
     const folderName = node.name || node.folder_name || "Collection";
     const hasChildren = Array.isArray(node.children) && node.children.length > 0;
     const folderColor = node.color || null;
-    const isRenaming = renamingFolderId === node.id;
 
     const folderIconElement = (
       <FolderGlyphIcon color={folderColor} size={18} />
     );
 
-    const labelElement = isRenaming ? (
-      <input
-        type="text"
-        autoFocus
-        value={renameValue}
-        onChange={(e) => setRenameValue(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === "Enter") {
-            handleSaveRename(node.id);
-          } else if (e.key === "Escape") {
-            setRenamingFolderId(null);
-          }
-        }}
-        onBlur={() => handleSaveRename(node.id)}
-        onClick={(e) => e.stopPropagation()}
-        className="w-full bg-surface-elevated text-on-surface rounded px-1.5 py-0.5 text-xs outline-none focus:ring-1 focus:ring-outline-variant"
-      />
-    ) : (
+    const labelElement = (
       <span className="truncate">{folderName}</span>
     );
 
     const folderContextMenu = (
       <ContextMenuContent className="w-52">
-        <ContextMenuItem onClick={() => handleSelectCollection(node.id)}>
-          <GoogleIcon iconName="folder_open" className="text-base" />
-          <span>Ouvrir</span>
+        <ContextMenuItem onClick={() => handleOpenCollectionInNewTab(node.id)}>
+          <GoogleIcon iconName="open_in_new" className="text-base" />
+          <span>Ouvrir dans un nouvel onglet</span>
         </ContextMenuItem>
         <ContextMenuItem onClick={() => setCreateSubfolderParentId(node.id)}>
           <GoogleIcon iconName="create_new_folder" className="text-base" />
           <span>Nouveau sous-dossier</span>
         </ContextMenuItem>
-        <ContextMenuItem
-          onClick={() => {
-            setRenamingFolderId(node.id);
-            setRenameValue(folderName);
-          }}
-        >
+        <ContextMenuItem onClick={() => setEditingFolder(node)}>
           <GoogleIcon iconName="edit" className="text-base" />
-          <span>Renommer</span>
+          <span>Edit</span>
         </ContextMenuItem>
         <ContextMenuSeparator />
         <ContextMenuSub>
@@ -463,6 +429,18 @@ export function LeftNavigationRail() {
           parentId={createSubfolderParentId}
           projectId={selectedProjectId}
           title="Nouveau sous-dossier"
+        />
+      )}
+
+      {editingFolder && (
+        <CreateFolderDialog
+          open={Boolean(editingFolder)}
+          onOpenChange={(open) => {
+            if (!open) setEditingFolder(null);
+          }}
+          folder={editingFolder}
+          projectId={selectedProjectId}
+          title="Edit folder"
         />
       )}
 
