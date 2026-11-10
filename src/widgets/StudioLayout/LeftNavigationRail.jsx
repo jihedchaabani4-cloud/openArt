@@ -27,6 +27,7 @@ import {
   useProjectFolders,
   useUpdateFolder,
   useDeleteFolder,
+  useDownloadCollection,
   FOLDER_COLOR_OPTIONS,
   DEFAULT_FOLDER_GRADIENT,
 } from "@/features/folders";
@@ -41,6 +42,9 @@ import {
  */
 export function LeftNavigationRail() {
   const selectedProjectId = useGenerationsStore((s) => s.selectedProjectId);
+  const favoriteFolderIds = useGenerationsStore((s) => s.favoriteFolderIds || {});
+  const toggleFavoriteFolder = useGenerationsStore((s) => s.toggleFavoriteFolder);
+  const { downloadCollection, isDownloading } = useDownloadCollection();
   const pathname = usePathname();
   const router = useRouter();
 
@@ -122,6 +126,20 @@ export function LeftNavigationRail() {
       });
     } catch {
       // Optimistic rollback handled
+    }
+  };
+
+  const handleToggleLike = (folderId) => {
+    if (folderId) toggleFavoriteFolder?.(folderId);
+  };
+
+  const handleDownload = (folder) => {
+    if (folder?.id && selectedProjectId) {
+      downloadCollection({
+        collectionId: folder.id,
+        collectionName: folder.name || folder.folder_name || "Collection",
+        projectId: selectedProjectId,
+      });
     }
   };
 
@@ -243,6 +261,7 @@ export function LeftNavigationRail() {
     const folderName = node.name || node.folder_name || "Collection";
     const hasChildren = Array.isArray(node.children) && node.children.length > 0;
     const folderColor = node.color || null;
+    const isNodeLiked = Boolean(favoriteFolderIds[node.id] ?? node.favorited ?? node.is_liked);
 
     const folderIconElement = (
       <FolderGlyphIcon color={folderColor} size={18} />
@@ -269,6 +288,18 @@ export function LeftNavigationRail() {
         <ContextMenuItem onClick={() => setMovingFolder(node)}>
           <GoogleIcon iconName="drive_file_move" className="text-base" />
           <span>Déplacer vers...</span>
+        </ContextMenuItem>
+        <ContextMenuItem onClick={() => handleToggleLike(node.id)}>
+          <GoogleIcon
+            iconName="favorite"
+            fill={isNodeLiked}
+            className={cn("text-base", isNodeLiked && "text-red-400 fill-red-400")}
+          />
+          <span>{isNodeLiked ? "Unlike collection" : "Like collection"}</span>
+        </ContextMenuItem>
+        <ContextMenuItem onClick={() => handleDownload(node)} disabled={isDownloading}>
+          <GoogleIcon iconName="download" className="text-base" />
+          <span>{isDownloading ? "Downloading..." : "Download collection"}</span>
         </ContextMenuItem>
         <ContextMenuSeparator />
         <ContextMenuSub>

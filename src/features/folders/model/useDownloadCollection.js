@@ -364,7 +364,12 @@ export async function downloadCollectionAsZip({
  * Custom hook providing download collection capabilities.
  */
 export function useDownloadCollection() {
-  const queryClient = useQueryClient();
+  let queryClient = null;
+  try {
+    queryClient = useQueryClient();
+  } catch {
+    // Graceful fallback when rendered outside a QueryClientProvider (e.g. isolated test environments)
+  }
   const [isDownloading, setIsDownloading] = useState(false);
 
   const downloadCollection = useCallback(
