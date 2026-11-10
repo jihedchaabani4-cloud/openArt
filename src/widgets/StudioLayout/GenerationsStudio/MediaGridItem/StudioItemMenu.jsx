@@ -7,11 +7,17 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
 } from "@/shared/ui/dropdown-menu";
 import {
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuSeparator,
+  ContextMenuSub,
+  ContextMenuSubTrigger,
+  ContextMenuSubContent,
 } from "@/shared/ui/context-menu";
 import { ActionBtn } from "@/shared/ui/action-button";
 
@@ -79,6 +85,64 @@ export function StudioItemDropdownMenu({
           if (m.key === "separator" || m.type === "separator") {
             return <DropdownMenuSeparator key={m.key || `sep-${i}`} className="my-1.5" />;
           }
+          if (m.subItems && m.subItems.length > 0) {
+            return (
+              <DropdownMenuSub key={m.key || i}>
+                <DropdownMenuSubTrigger
+                  className={cn(
+                    "cursor-pointer mat-mdc-menu-item flow-internal-menu-item",
+                    m.variant === "destructive" && "delete-button"
+                  )}
+                >
+                  <span className="mat-mdc-menu-item-text">
+                    <span className="left-content">
+                      {m.icon && (
+                        typeof m.icon === "string" ? (
+                          <GoogleIcon
+                            iconName={m.icon}
+                            className={cn("text-[20px] shrink-0 mat-icon google-symbols", m.iconClassName)}
+                            fill={m.fill}
+                          />
+                        ) : (
+                          m.icon
+                        )
+                      )}
+                      <span className="item-text min-w-0 flex-1 truncate">
+                        <span className="label font-medium">{m.label}</span>
+                      </span>
+                    </span>
+                  </span>
+                </DropdownMenuSubTrigger>
+                <DropdownMenuSubContent className="w-44 p-1">
+                  {m.subItems.map((sub, j) => {
+                    if (sub.type === "separator" || sub.key === "separator" || sub.key?.startsWith("sep-")) {
+                      return <DropdownMenuSeparator key={sub.key || `sub-sep-${j}`} className="my-1.5" />;
+                    }
+                    return (
+                      <DropdownMenuItem
+                        key={sub.key || j}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (sub.disabled) return;
+                          if (onOpenChange) onOpenChange(false);
+                          sub.onClick?.(e);
+                        }}
+                        className="flex items-center gap-2 cursor-pointer"
+                      >
+                        {sub.bgClass && (
+                          <span className={cn("size-3 rounded-full shrink-0", sub.bgClass)} />
+                        )}
+                        <span className="truncate">{sub.label}</span>
+                        {sub.checked && (
+                          <GoogleIcon iconName="check" className="text-xs ml-auto text-on-surface" />
+                        )}
+                      </DropdownMenuItem>
+                    );
+                  })}
+                </DropdownMenuSubContent>
+              </DropdownMenuSub>
+            );
+          }
           return (
             <DropdownMenuItem
               key={m.key || i}
@@ -136,6 +200,63 @@ export function StudioContextMenuContent({
       {activeItems.map((m, i) => {
         if (m.key === "separator" || m.type === "separator") {
           return <ContextMenuSeparator key={m.key || `ctx-sep-${i}`} className="my-1.5" />;
+        }
+        if (m.subItems && m.subItems.length > 0) {
+          return (
+            <ContextMenuSub key={m.key || i}>
+              <ContextMenuSubTrigger
+                className={cn(
+                  "cursor-pointer mat-mdc-menu-item flow-internal-menu-item",
+                  m.variant === "destructive" && "delete-button"
+                )}
+              >
+                <span className="mat-mdc-menu-item-text">
+                  <span className="left-content">
+                    {m.icon && (
+                      typeof m.icon === "string" ? (
+                        <GoogleIcon
+                          iconName={m.icon}
+                          className={cn("text-[20px] shrink-0 mat-icon google-symbols", m.iconClassName)}
+                          fill={m.fill}
+                        />
+                      ) : (
+                        m.icon
+                      )
+                    )}
+                    <span className="item-text min-w-0 flex-1 truncate">
+                      <span className="label font-medium">{m.label}</span>
+                    </span>
+                  </span>
+                </span>
+              </ContextMenuSubTrigger>
+              <ContextMenuSubContent className="w-44 p-1">
+                {m.subItems.map((sub, j) => {
+                  if (sub.type === "separator" || sub.key === "separator" || sub.key?.startsWith("sep-")) {
+                    return <ContextMenuSeparator key={sub.key || `sub-sep-${j}`} className="my-1.5" />;
+                  }
+                  return (
+                    <ContextMenuItem
+                      key={sub.key || j}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (sub.disabled) return;
+                        sub.onClick?.(e);
+                      }}
+                      className="flex items-center gap-2 cursor-pointer"
+                    >
+                      {sub.bgClass && (
+                        <span className={cn("size-3 rounded-full shrink-0", sub.bgClass)} />
+                      )}
+                      <span className="truncate">{sub.label}</span>
+                      {sub.checked && (
+                        <GoogleIcon iconName="check" className="text-xs ml-auto text-on-surface" />
+                      )}
+                    </ContextMenuItem>
+                  );
+                })}
+              </ContextMenuSubContent>
+            </ContextMenuSub>
+          );
         }
         return (
           <ContextMenuItem

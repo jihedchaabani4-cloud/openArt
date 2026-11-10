@@ -1,146 +1,88 @@
-# Google Flow Studio Design System (`design.md`)
+# Modern SaaS Studio Design System (`design.md`)
 
-> **The Single Source of Truth** for UI architecture, design tokens, component primitives, and visual engineering across the codebase (`my-app`).  
-> **Core Visual Philosophy:** Inspired directly by **Google Flow** (VideoFX / ImageFX / Google Labs AI Studio) and Material Design 3 (M3). A dark-first, cinematic, generative workspace engineered for high-density creativity. The interface recedes into the background using deep OLED canvas (`#000000`), subtle dark surface container elevations (`#131314` to `#333537`), frosted dark glass overlays (`rgba(22, 23, 24, 0.90)` with `blur(40px)`), hairline white borders (`rgba(218, 220, 224, 0.05)`), typography powered by **Google Sans Text**, and **zero drop-shadows**.
+> **The Single Source of Truth** for UI architecture, visual engineering, component primitives, and styling standards across the codebase (`my-app`).  
+> **Core Visual Philosophy:** Dark-first, studio-grade creative workspace with high aesthetic fidelity. Base viewport canvas (`#0f1113`), main studio panels (`#131416`), elevated card surfaces (`#1c1e20`), micro-action layers (`rgba(255, 255, 255, 0.05)`), subtle 5% white borders (`rgba(255, 255, 255, 0.05)`), high-visibility lime accent (`#d1fe17`), and modern geometric corner radiuses (`8px` buttons, `12px` cards, `16px` sidebars, `20px` prompt bar).
 
 ---
 
 ## 1. Core Architectural Laws
 
-1. **Token Encapsulation Law:** Never hardcode arbitrary hex colors (`#1a1a1a`), pixel paddings (`p-[13px]`), or custom radiuses in call-site JSX. All visual variables derive 100% from CSS variables in `src/app/globals.css` and their mapped Tailwind classes.
-2. **Zero Box-Shadow Law:** Elevation and depth come exclusively from surface container contrast (`surface-container`, `surface-container-high`, `surface-container-highest`) and 1px hairline borders (`outline-variant`), never from blurry drop shadows.
-3. **Primitive Ownership:** All HTML controls (`button`, `input`, `textarea`, `dropdown`, `card`, `dialog`) are owned by canonical primitives in `src/shared/ui/`. Features and pages never reconstruct controls from raw HTML.
-4. **Dual Scalability:** The system honors Google Flow's authentic color palette and dimensions while strictly respecting the project's geometric radius scale (4px / 6px / 9999px) and 8px base spacing scale.
+1. **Token Encapsulation Law:** Never hardcode arbitrary hex colors or rogue pixel radiuses in call-site JSX. All visual variables derive 100% from CSS variables in `src/app/globals.css` and their mapped Tailwind classes.
+2. **Surface Ladder Law:** UI hierarchy is strictly organized through surface tiers:
+   - Level 0 (Root Base): `#0f1113`
+   - Level 1 (Studio Workspace): `#131416`
+   - Level 2 (Elevated Cards / Composer): `#1c1e20`
+   - Level 3 (Micro Action Chips & Inputs): `rgba(255, 255, 255, 0.05)`
+   - Level 4 (Brand CTA): `#d1fe17` (Lime)
+3. **5% Border Law:** All subtle cards, sidebar separators, and modal outlines use `rgba(255, 255, 255, 0.05)` (represented as `border-white/5` or `border-outline-variant`).
+4. **Modern Radius Hierarchy Law:**
+   - Buttons and Inputs: `rounded-lg` (`8px`) or `rounded-md` (`6px`)
+   - Cards and Popovers: `rounded-xl` (`12px`)
+   - Sidebar and Panels: `rounded-2xl` (`16px`)
+   - PromptBar Outer Container: `rounded-[20px]` (`20px`)
+   - Pills and Circular Actions: `rounded-full` (`9999px`)
+5. **Primitive Ownership:** All HTML controls (`button`, `input`, `textarea`, `dropdown`, `card`, `dialog`, `surface`) are owned by canonical primitives in `src/shared/ui/`. Features and pages never reconstruct controls from raw HTML.
 
 ---
 
-## 2. Token Architecture: Google Flow Material 3 Hierarchy
+## 2. Token Architecture Overview
 
 ```
-[ Layer 1: Google Flow Surface Ladder ]
-  Lowest (#000000) ── Base (#131314) ── Low (#1b1b1b) ── Container (#1e1f20) ── High (#282a2c) ── Highest (#333537)
-                                      │
-                                      ▼
-[ Layer 2: Semantic Roles in Tailwind ]
-  Canvas:           bg-surface-container-lowest / bg-black
-  Panel / Shell:    bg-surface (#131314)
-  Card / Tile:      bg-surface-container (#1e1f20)
-  Prompt Bar / Pop: bg-surface-container-high (#282a2c) / bg-surface-overlay (glass)
-  Active / Modal:   bg-surface-container-highest (#333537)
-                                      │
-                                      ▼
-[ Layer 3: Interaction & Outlines ]
-  Hairline Border:  border-outline-variant (5% white / #444746)
-  Default Border:   border-outline (14% white / #8e918f)
-  Interactive Ring: border-outline-interactive (25% white)
-  Hover Layer:      hover:bg-white/[0.08]
-  Focus Layer:      focus-visible:ring-1 focus-visible:ring-primary
+[ Root Viewport Canvas: #0f1113 ]
+           │
+           ▼
+[ Studio Canvas Shell: #131416 ]
+   ├── LeftNavigationRail (rounded-2xl, bg-transparent/panel, border-white/5)
+   └── Main Viewport
+           │
+           ▼
+[ Elevated Surface Card: #1c1e20 ]
+   ├── PromptBarShell (rounded-[20px], bg-[#1c1e20], border-white/5)
+   └── Generation Cards & Panels (rounded-xl, bg-[#1c1e20], border-white/5)
+           │
+           ▼
+[ Interactive Micro-Elements: rgba(255, 255, 255, 0.05) ]
+   ├── Action Chips & Selector Pills (rounded-lg, hover:bg-white/10)
+   ├── Input Fields & Textareas (rounded-xl, bg-white/5 or bg-[#1c1e20])
+   └── Brand Action Button: #d1fe17 (Lime) with dark inverted text #131517
 ```
 
 ---
 
-## 3. Surface & Elevation Palette (Dark Mode M3)
+## 3. Surface & Elevation Palette
 
-| Token Name | CSS Variable | Hex / RGBA Value | Tailwind Utility | Component Role |
-|---|---|---|---|---|
-| **Canvas** | `--surface-container-lowest` | `#000000` | `bg-surface-container-lowest` | Deepest viewport background / media bleed canvas |
-| **Surface** | `--surface` | `#131314` | `bg-surface` | Persistent App Shell, Desktop Header, Sidebars |
-| **Sunken** | `--surface-container-low` | `#1b1b1b` | `bg-surface-container-low` | Recessed toolbars, inactive panel zones |
-| **Container (Card)** | `--surface-container` | `#1e1f20` | `bg-surface-container` | Standard cards, media tiles, inspectors |
-| **High Container** | `--surface-container-high` | `#282a2c` | `bg-surface-container-high` | Floating toolbars, dropdown menus, popovers |
-| **Highest Container**| `--surface-container-highest`| `#333537` | `bg-surface-container-highest` | Active selected state, modals, focused cards |
-| **Surface Bright** | `--surface-bright` | `#37393b` | `bg-surface-bright` | High-contrast container fill, active tabs |
-| **Glass Overlay** | `--surface-overlay` | `rgba(22, 23, 24, 0.90)` | `bg-surface-overlay` | Prompt Bar frosted glass (`backdrop-blur-[40px]`) |
-
----
-
-## 4. Typography & Content Tokens
-
-The typography is rendered using variable **Google Sans Text** (body, controls) and **Google Sans** (headings, titles):
-
-| Role | CSS Variable | Hex Value | Tailwind Class | Usage |
-|---|---|---|---|---|
-| **On Surface (Base)** | `--on-surface` | `#f5f5f5` / `#e3e3e3` | `text-on-surface` | Primary headlines, prompt input text, active labels |
-| **On Surface Variant** | `--on-surface-variant`| `#8e8e93` / `#c4c7c5` | `text-on-surface-variant`| Descriptions, secondary labels, settings text |
-| **On Surface Subtle** | `--on-surface-subtle` | `#636366` | `text-on-surface-subtle` | Inactive placeholders, shortcut keys, disabled meta |
-
----
-
-## 5. Line & Outline Tokens
-
-| Role | CSS Variable | Value | Tailwind Class | Usage |
-|---|---|---|---|---|
-| **Outline Variant** | `--outline-variant` | `rgba(218, 220, 224, 0.05)` | `border-outline-variant` | Hairline card separation, subtle divider lines |
-| **Outline Default** | `--outline` | `rgba(218, 220, 224, 0.14)` | `border-outline` | Standard input borders, panel frames |
-| **Outline Interactive**| `--outline-interactive`| `rgba(255, 255, 255, 0.25)` | `border-outline-interactive`| Hovered card borders, active input rings |
-
----
-
-## 6. Accents, Brand & Status Tokens
-
-| Accent Role | CSS Variable | Hex Value | Tailwind Utility | Application |
-|---|---|---|---|---|
-| **Google Primary** | `--primary` | `#a8c7fa` | `text-primary` / `bg-primary` | Focused ring, primary action submit, active chips |
-| **Primary Container**| `--primary-container` | `#0842a0` | `bg-primary-container` | Active selected filter pill background |
-| **On Primary** | `--on-primary` | `#062e6f` | `text-on-primary` | Label text when placed over solid primary fill |
-| **Cinema Neon** | `--brand-neon` | `#EFFE17` | `text-brand-neon` / `bg-brand-neon` | High-impact CTA, generation badges |
-| **Error** | `--error` | `#fe6e6e` | `text-error` | Validation errors, delete confirmations |
-| **Error Container** | `--error-container` | `#8c1d18` | `bg-error-container` | Error toast banner background |
-| **Success** | `--success` | `#80da88` | `text-success` | Generation completed, upload verified |
-| **Warning** | `--warning` | `#fcbd00` | `text-warning` | Rate limit alerts, credits threshold |
-
----
-
-## 7. Geometric Scales: Radius & Spacing
-
-### 7.1 Border Radius Hierarchy (Frozen Standards)
-Enforced strictly across all UI components:
-
-| Geometry Role | Value | CSS Token | Tailwind Utility | Allowed UI Components |
-|---|---|---|---|---|
-| **Sharp** | `4px` | `--radius-sm` | `rounded-sm` | Buttons, Inputs, Badges, Dropdown Items, Tooltips |
-| **Container (MAX)** | `6px` | `--radius-md` | `rounded-md` | Cards, Textareas, Menus, Popovers, Dialogs, Drawers |
-| **Pill / Circle** | `9999px`| `--radius-full` | `rounded-full` | Filter Pills, Avatars, Generate Icon Button, Toggles |
-
-### 7.2 Semantic Spacing Ladder (8px Base Scale)
-| Token | Pixels | Tailwind Utility | Application |
+| Token Name | Hex / RGBA Value | Tailwind Class | Semantic Role |
 |---|---|---|---|
-| `xxs` | 4px | `p-xxs`, `gap-xxs` | Micro badge margins, icon-text gap |
-| `xs` | 6px | `p-xs`, `gap-xs` | Compact list items, button inner gutters |
-| `sm` | 8px | `p-sm`, `gap-sm` | Standard element gap, chip padding |
-| `md` | 12px | `p-md`, `gap-md` | Form field spacing, panel interior padding |
-| `base` | 16px | `p-base`, `gap-base` | Card interior padding, dialog gutter |
-| `lg` | 20px | `p-lg`, `gap-lg` | Card exterior padding, studio panel gaps |
-| `xl` | 24px | `p-xl`, `gap-xl` | Modal header spacing, section margins |
-| `xxl` | 28px | `p-xxl`, `gap-xxl` | Module separations |
-| `section` | 32px | `p-section`, `gap-section`| Block breathing room |
+| **Root Canvas** | `#0f1113` | `bg-[#0f1113]`, `bg-surface-tertiary` | Viewport backdrop (`html`, body base) |
+| **Studio Canvas** | `#131416` | `bg-[#131416]`, `bg-surface-panel` | Workspace background, sidebars |
+| **Surface Card** | `#1c1e20` | `bg-[#1c1e20]`, `bg-surface-card` | Cards, PromptBar, dialogs |
+| **Highest Surface** | `#282a2c` | `bg-[#282a2c]`, `bg-surface-highest`| Floating modals, popovers |
+| **Chip / Input Layer** | `rgba(255, 255, 255, 0.05)` | `bg-white/5`, `bg-neutral-primary-reverted-5` | In-card input fills, action chips |
+| **Brand Surface** | `#d1fe17` | `bg-lime`, `bg-surface-brand`, `bg-primary` | Generate CTA, active indicator |
 
 ---
 
-## 8. Google Flow Component Specifications
+## 4. Typography Standards
 
-### 8.1 The Frosted Prompt Box (`flow-prompt-box`)
-* **Container Width:** Max `37.5rem` (600px), compact `41.25rem` (660px).
-* **Min Height:** `5.625rem` (90px), expanding dynamically up to `min(28.75rem, 65vh)`.
-* **Surface Fill:** `rgba(22, 23, 24, 0.90)` with `backdrop-filter: blur(40px)`.
-* **Border:** `1px solid rgba(218, 220, 224, 0.05)`.
-* **Settings Flyout Panel:** Width `17.5rem` (280px), wide `21rem` (336px).
-* **Generation Snake Glow Animation:** Houdini `@property --border-glow-snake-progress` rotating gradient light during inference.
-
-### 8.2 Buttons & Action Controls
-* **Settings Trigger Chip (`flow-button-chip`):** Background `rgba(218, 220, 224, 0.05)`, text `rgba(218, 220, 224, 0.75)`, 11px font size, font-weight 500, no borders.
-* **Generate Button (`flow-button-generate`):** Circular `rounded-full`, primary or neon state when valid, disabled state `rgba(218, 220, 224, 0.05)` with 50% opacity icon.
-* **Transparent Icon Button (`flow-icon-button-transparent`):** Zero background, hover state `hover:bg-white/[0.08]`.
-
-### 8.3 The Studio Header (`header-base`)
-* **Height:** `5rem` (80px desktop).
-* **Background:** `bg-surface` (`#131314`).
-* **Title:** Inline seamless `editable-text-input` without border outlines until focused.
+- **Primary Typeface:** `Inter, ui-sans-serif, system-ui, sans-serif`
+- **Display Accent:** `"Space Grotesk", ui-sans-serif, system-ui, sans-serif`
+- **Text Primary:** `#f7f7f8` / `#ffffff` (`text-font-primary`, `text-white`)
+- **Text Secondary:** `#898a8b` / `#828282` (`text-font-secondary`, `text-white/70`)
+- **Text Inverted:** `#131517` / `#2F3907` (Text on Lime buttons)
 
 ---
 
-## 9. Rule Enforcement & Developer Guide
+## 5. Border & Radius Standards
 
-1. **No inline styles for static design:** Always use token classes (`bg-surface-container`, `text-on-surface`, `border-outline-variant`).
-2. **Never install ad-hoc CSS:** If a new component requires styling, consult this document and compose from the existing token primitives.
-3. **Run `npm run ui:check`:** Ensures 0 new raw color literals, 0 new arbitrary values, and full token compliance.
+- **Borders:**
+  - Subtle (Card, Sidebar, Separators): `rgba(255, 255, 255, 0.05)` (`border-white/5`)
+  - Interactive (Inputs, Hover): `rgba(255, 255, 255, 0.10)` (`border-white/10`)
+  - Focus Ring: `#d1fe17` (`ring-lime`, `border-lime`)
+- **Radiuses:**
+  - `rounded-sm`: `6px`
+  - `rounded-md`: `8px`
+  - `rounded-lg`: `12px`
+  - `rounded-xl`: `16px`
+  - `rounded-2xl`: `20px`
+  - `rounded-3xl`: `24px`
+  - `rounded-full`: `9999px`

@@ -1,6 +1,6 @@
 /* ═════════════════════════════════════════════════════════════════════════════
-   GOOGLE FLOW COMPLETE DESIGN SYSTEM SPECIFICATION
-   Direct Extraction: Tokens, Material 3 Ladder, Layout Variables, & Component Rules
+   SAAS STUDIO COMPLETE DESIGN SYSTEM SPECIFICATION
+   Direct Extraction from pasted-text-3.txt: Tokens, Surface Hierarchy, & Classes
    ═════════════════════════════════════════════════════════════════════════════ */
 
 @property --border-glow-snake-progress {
@@ -10,305 +10,193 @@
 }
 
 :root {
-  /* ── 1. Glass & Panels ── */
-  --glass-raised-box-shadow: 0 16px 32px -8px rgba(0, 0, 0, 0.4);
-  --flow-panel-border-radius: 20px;
+  /* ── 0. Studio Layout Dimensions ── */
+  --studio-navbar-height: 52px;
+  --studio-sidebar-width: 52px;
+  --studio-sidebar-width-expanded: 230px;
+  --studio-navbar-padding: 5px;
+  --studio-sidebar-padding: 0px;
 
-  /* ── 2. Foreground Hierarchy ── */
-  --foreground-color-100: #202124;
-  --foreground-color-200: #3c4043;
-  --foreground-color-300: #80868b;
-  --foreground-neutral-000: #000000;
-  --foreground-neutral-100: #202124;
-  --foreground-neutral-200: #3c4043;
-  --foreground-neutral-300: #5f6368;
-  --foreground-neutral-400: #80868b;
-  --foreground-state-90: rgba(22, 23, 24, 0.90);
-  --foreground-state-75: rgba(22, 23, 24, 0.75);
-  --foreground-state-60: rgba(22, 23, 24, 0.60);
-  --foreground-state-50: rgba(22, 23, 24, 0.50);
-  --foreground-state-25: rgba(22, 23, 24, 0.25);
-  --foreground-state-15: rgba(22, 23, 24, 0.15);
-  --foreground-state-10: rgba(22, 23, 24, 0.10);
-  --foreground-state-08: rgba(22, 23, 24, 0.08);
-  --foreground-state-05: rgba(22, 23, 24, 0.05);
-  --foreground-state-base: #161718;
-  --foreground-color-danger: #fe6e6e;
+  /* Button Sizing Tokens */
+  --button-height-s: 28px;
+  --button-height-m: 32px;
+  --button-height-l: 36px;
+  --button-height-xl: 44px;
 
-  /* ── 3. Background Hierarchy ── */
-  --background-color-100: #f1f3f4;
-  --background-color-200: #e8eaed;
-  --background-color-300: #dadce0;
-  --background-neutral-000: #ffffff;
-  --background-neutral-100: #f1f3f4;
-  --background-neutral-200: #e8eaed;
-  --background-neutral-300: #dadce0;
-  --background-neutral-400: #bdc1c6;
-  --background-state-90: rgba(218, 220, 224, 0.90);
-  --background-state-75: rgba(218, 220, 224, 0.75);
-  --background-state-50: rgba(218, 220, 224, 0.50);
-  --background-state-25: rgba(218, 220, 224, 0.25);
-  --background-state-15: rgba(218, 220, 224, 0.15);
-  --background-state-10: rgba(218, 220, 224, 0.10);
-  --background-state-05: rgba(218, 220, 224, 0.05);
-  --background-color-danger: #b22f25;
+  /* ── 1. Brand & Accent Tokens ── */
+  --color-lime: #d1fe17;
+  --color-lime--rgb: 209, 254, 23;
+  --color-brand-neon: #d1fe17;
+  --surface-brand: #d1fe17;
+  --color-accent-blue: #a8c7fa;
+  --color-danger: #fe6e6e;
+  --color-success: #80da88;
+  --color-warning: #fcbd00;
 
-  /* ── 4. Gradients & Scrims ── */
-  --header-blur-background: linear-gradient(180deg, #fff, color-mix(in srgb, #fff 50%, transparent) 75%, transparent);
-  --gradient-foreground-90: rgba(0, 0, 0, 0.90);
-  --gradient-foreground-70: rgba(0, 0, 0, 0.70);
-  --gradient-foreground-45: rgba(0, 0, 0, 0.45);
-  --gradient-foreground-25: rgba(0, 0, 0, 0.25);
-  --gradient-foreground-0: rgba(0, 0, 0, 0.00);
-  --gradient-background-90: rgba(0, 0, 0, 0.90);
-  --gradient-background-70: rgba(0, 0, 0, 0.70);
-  --gradient-background-45: rgba(0, 0, 0, 0.45);
-  --gradient-background-25: rgba(0, 0, 0, 0.25);
-  --gradient-background-0: rgba(0, 0, 0, 0.00);
-  --shadow-color-soft: rgba(0, 0, 0, 0.25);
-  --shadow-color-harsh: rgba(0, 0, 0, 0.40);
-  --error-page-foreground: rgba(255, 255, 255, 0.90);
-  --error-page-primary-button-background: #ba8bfc;
-  --error-page-primary-button-foreground: #000000;
-  --error-page-action-button-background: rgba(255, 255, 255, 0.05);
-  --error-page-action-button-border: rgba(255, 255, 255, 0.15);
-  --error-page-scrim-background: linear-gradient(180deg, rgba(0, 0, 0, 1), rgba(0, 0, 0, 0.3) 50%, rgba(0, 0, 0, 0));
-  --snackbar-foreground-accent-color: #989aff;
-  --snackbar-foreground-error-color: #fe6e6e;
-  --snackbar-foreground-warning-color: #f6c024;
-  --announcement-banner-background: #2b6ad2;
-  --announcement-banner-border: rgba(66, 133, 244, 0.25);
-  --tooltip-background-color: #f1f3f4;
-  --prompt-warning-icon-color: #d4633e;
-  --instruction-card-gradient-amber: linear-gradient(180deg, #8b9b5d, #e24400);
-  --instruction-card-gradient-pink: linear-gradient(160deg, #c2185b, #d32f2f 50%, #e65100);
-  --instruction-card-gradient-purple: linear-gradient(160deg, #7b1fa2, #5c6bc0 50%, #81d4fa);
+  /* ── 2. Surface & Canvas Ladder Hierarchy (pasted-text-3.txt) ── */
+  --surface-canvas: #0f1113;                      /* rgb(15, 17, 19) - html base */
+  --surface-tertiary: #0f1113;                    /* rgb(15, 17, 19) */
+  --color-surface-tertiary: #0f1113;
+  --surface-panel: #131416;                       /* rgb(19, 20, 22) - body / sidebar */
+  --surface: #131416;
+  --surface-card: #1c1e20;                        /* rgb(28, 30, 32) - prompt bar / cards */
+  --surface-elevated: #1c1e20;                    /* rgb(28, 30, 32) */
+  --surface-highest: #282a2c;                     /* rgb(40, 42, 44) - popovers / modals */
+  --surface-overlay: rgba(28, 30, 32, 0.95);
 
-  /* ── 5. Color Palette & Alphas ── */
-  --color-white: #ffffff;
-  --color-white-90: rgba(255, 255, 255, 0.90);
-  --color-white-75: rgba(255, 255, 255, 0.75);
-  --color-white-50: rgba(255, 255, 255, 0.50);
-  --color-white-25: rgba(255, 255, 255, 0.25);
-  --color-white-15: rgba(255, 255, 255, 0.15);
-  --color-white-05: rgba(255, 255, 255, 0.05);
-  --color-black: #000000;
-  --color-black-50: rgba(0, 0, 0, 0.50);
-  --color-grey-90: rgba(22, 23, 24, 0.90);
-  --color-blue-500: #2b6ad2;
-  --color-grey-75: rgba(22, 23, 24, 0.75);
-  --tile-scrim-gradient: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.04) 20%, rgba(0, 0, 0, 0.12) 40%, rgba(0, 0, 0, 0.25) 60%, rgba(0, 0, 0, 0.4) 80%, rgba(0, 0, 0, 0.5));
-  --collection-empty-thumbnail-background: linear-gradient(1deg, #333 0.49%, #4e4e4e 99.15%);
-
-  /* Collaborator Colors */
-  --collaborator-color-0: #1a73e8;
-  --collaborator-color-1: #9334e6;
-  --collaborator-color-2: #e8710a;
-  --collaborator-color-3: #0d9488;
-  --collaborator-color-4: #e52592;
-  --collaborator-color-5: #9a6700;
-  --collaborator-color-6: #1e8e3e;
-  --collaborator-color-7: #d93025;
-
-  /* ── 6. Layout & Sizing Heights (Exact Google Flow Dimensions) ── */
-  --header-desktop-height: 5rem;                            /* 80px */
-  --project-header-desktop-height: 4.75rem;                  /* 76px */
-  --project-header-with-chips-desktop-height: 6.625rem;     /* 106px */
-  --header-mobile-height: 6.75rem;                          /* 108px */
-  --header-mobile-top-row-height: 3.75rem;                  /* 60px */
-  --filter-chips-bar-height: 2.5rem;                        /* 40px */
-  --trash-action-bar-height: 2.5rem;                        /* 40px */
-  --page-padding: 1rem;                                     /* 16px */
-  --prompt-box-min-height: 5.625rem;                        /* 90px */
-  --prompt-box-max-height: min(28.75rem, 65vh);             /* 460px / 65vh */
-  --prompt-box-max-width: 37.5rem;                          /* 600px */
-  --prompt-box-compact-max-width: 41.25rem;                  /* 660px */
-  --prompt-box-settings-width: 17.5rem;                     /* 280px */
-  --prompt-box-settings-width-wide: 21rem;                  /* 336px */
-  --prompt-box-bottom-spacing: 2rem;                        /* 32px */
-  --prompt-box-footer-padding: 5rem;                        /* 80px */
-  --prompt-box-bottom-control-height: 2rem;                 /* 32px */
-  --ogb-account-switcher-block-size: 2.5rem;
-  --ogb-account-switcher-z-index: 1000;
-  --account-panel-overlay-z-index: 1001;
-
-  /* ── 7. Material Design 3 (M3) System Tokens (Dark Mode) ── */
-  --mat-sys-background: #131314;
-  --mat-sys-surface: #131314;
-  --mat-sys-surface-dim: #131313;
+  /* Material 3 Compatibility Aliases */
+  --mat-sys-surface: #131416;
+  --mat-sys-background: #131416;
+  --mat-sys-surface-dim: #0f1113;
   --mat-sys-surface-bright: #37393b;
-  --mat-sys-surface-container-lowest: #000000;
-  --mat-sys-surface-container-low: #1b1b1b;
-  --mat-sys-surface-container: #1e1f20;
-  --mat-sys-surface-container-high: #282a2c;
-  --mat-sys-surface-container-highest: #333537;
-  --mat-sys-surface-variant: #444746;
-  --mat-sys-inverse-surface: #e3e3e3;
-  --mat-sys-inverse-on-surface: #303030;
+  --mat-sys-surface-container-lowest: #0f1113;
+  --mat-sys-surface-container-low: #131416;
+  --mat-sys-surface-container: #1c1e20;
+  --mat-sys-surface-container-high: #1c1e20;
+  --mat-sys-surface-container-highest: #282a2c;
 
-  /* Content & On-Surface */
-  --mat-sys-on-background: #e3e3e3;
-  --mat-sys-on-surface: #e3e3e3;
-  --mat-sys-on-surface-variant: #c4c7c5;
-  --mat-sys-outline: #8e918f;
-  --mat-sys-outline-variant: #444746;
+  /* ── 3. Foreground & Typography Hierarchy ── */
+  --color-q-text-primary: #f7f7f8;                /* rgb(247, 247, 248) */
+  --color-q-text-secondary: rgb(137, 138, 139);   /* rgb(137, 138, 139) */
+  --text-font-primary: #f7f7f8;
+  --text-font-secondary: rgb(137, 138, 139);
+  --text-icon-primary: #f7f7f8;
+  --text-icon-secondary: rgb(137, 138, 139);
+  --text-icon-primary-reverted: #131517;
+  --on-surface: #f7f7f8;
+  --on-surface-variant: rgb(137, 138, 139);
+  --on-surface-subtle: #828282;
 
-  /* Accents */
-  --mat-sys-primary: #a8c7fa;
-  --mat-sys-primary-container: #0842a0;
-  --mat-sys-on-primary: #062e6f;
-  --mat-sys-on-primary-container: #d3e3fd;
-  --mat-sys-inverse-primary: #0b57d0;
+  /* ── 4. Micro Element Layers ── */
+  --color-neutral-primary-reverted-5: rgba(255, 255, 255, 0.05);
+  --color-neutral-primary-reverted-10: rgba(255, 255, 255, 0.10);
+  --color-neutral-primary-reverted-20: rgba(255, 255, 255, 0.20);
+  --color-qc-background-primary: #131416;
+  --color-qc-border-subtle: rgba(255, 255, 255, 0.05);
+  --separator-card: rgba(217, 217, 217, 0.04);
 
-  --mat-sys-secondary: #7fcfff;
-  --mat-sys-secondary-container: #004a77;
-  --mat-sys-on-secondary: #003355;
-  --mat-sys-on-secondary-container: #c2e7ff;
+  /* ── 5. Borders & Outlines ── */
+  --border-subtle: rgba(255, 255, 255, 0.05);
+  --border-default: rgba(255, 255, 255, 0.10);
+  --outline-variant: rgba(255, 255, 255, 0.05);
+  --outline: rgba(255, 255, 255, 0.10);
+  --outline-interactive: rgba(255, 255, 255, 0.25);
+  --ring: #d1fe17;
 
-  --mat-sys-tertiary: #6dd58c;
-  --mat-sys-tertiary-container: #0f5223;
-  --mat-sys-on-tertiary: #0a3818;
-  --mat-sys-on-tertiary-container: #c4eed0;
+  /* ── 6. Radius Scale Hierarchy ── */
+  --radius-none: 0px;
+  --radius-xs: 2px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 20px;
+  --radius-3xl: 24px;
+  --radius-full: 9999px;
 
-  --mat-sys-error: #f2b8b5;
-  --mat-sys-error-container: #8c1d18;
-  --mat-sys-on-error: #601410;
-  --mat-sys-on-error-container: #f9dedc;
+  --card-border-radius: var(--radius-lg, 12px);
+  --dialog-border-radius: var(--radius-xl, 16px);
+  --panel-border-radius: var(--radius-xl, 16px);
+  --button-border-radius: var(--radius-md, 8px);
+  --tile-border-radius: var(--radius-lg, 12px);
+  --mat-button-filled-container-shape: var(--radius-md, 8px);
+  --mat-dialog-container-shape: var(--radius-xl, 16px);
+  --mat-menu-container-shape: var(--radius-lg, 12px);
 
-  --mat-sys-success: #80da88;
-  --mat-sys-warning: #fcbd00;
-  --mat-sys-info: #a1c9ff;
-
-  /* State Layer Opacities */
-  --mat-sys-hover-state-layer-opacity: 0.08;
-  --mat-sys-focus-state-layer-opacity: 0.12;
-  --mat-sys-pressed-state-layer-opacity: 0.12;
-  --mat-sys-dragged-state-layer-opacity: 0.16;
+  /* ── 7. Scrims & Shadows ── */
+  --header-blur-background: transparent;
+  --brand-button-shadow: rgba(0, 0, 0, 0.15) 0px 32px 12px 0px, rgb(130, 155, 25) 0px -3px 0px 0px inset;
 }
 
 /* ═════════════════════════════════════════════════════════════════════════════
-   GOOGLE FLOW COMPONENT CLASSES (Production Replicas)
+   PRODUCTION COMPONENT UTILITIES (Mapped directly to pasted-text-3.txt)
    ═════════════════════════════════════════════════════════════════════════════ */
 
-/* ── 1. The Frosted Base Prompt Box ── */
-.flow-prompt-box-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-  max-width: var(--prompt-box-max-width, 37.5rem);
-  margin: 0 auto;
+/* Studio Workspace & Canvas */
+.bg-qc-background-primary {
+  background-color: #131416 !important;
 }
 
-.base-prompt-box {
-  backdrop-filter: blur(40px);
-  -webkit-backdrop-filter: blur(40px);
-  background-color: rgba(22, 23, 24, 0.90);
-  border: 1px solid rgba(218, 220, 224, 0.05);
-  border-radius: var(--radius-md, 6px);
-  color: #e3e3e3;
-  font-family: var(--font-sans);
-  width: 100%;
-  transition: all 0.2s ease;
+.border-qc-border-subtle {
+  border-color: rgba(255, 255, 255, 0.05) !important;
 }
 
-/* ── 2. Settings Trigger Chip (11px, 5% fill) ── */
-.settings-trigger-button,
-.flow-button-chip {
-  appearance: none;
-  background-color: rgba(218, 220, 224, 0.05);
-  border: none;
-  border-radius: var(--radius-sm, 4px);
-  color: rgba(218, 220, 224, 0.75);
-  font-family: var(--font-sans);
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.1px;
-  line-height: 24px;
-  padding: 0 10px;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  transition: background-color 0.15s ease, color 0.15s ease;
+.border-separator-card {
+  border-color: rgba(217, 217, 217, 0.04) !important;
 }
 
-.settings-trigger-button:hover,
-.flow-button-chip:hover {
-  background-color: rgba(218, 220, 224, 0.10);
-  color: #ffffff;
+/* Brand & Interactive Surfaces */
+.bg-surface-brand {
+  background-color: #d1fe17 !important;
+  color: #131517 !important;
 }
 
-/* ── 3. Circular Generate Action Button ── */
-.generate-icon-button,
-.flow-button-generate {
-  border-radius: 9999px;
-  border: none;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background-color: var(--mat-sys-primary, #a8c7fa);
-  color: #062e6f;
-  transition: all 0.2s ease;
+.bg-surface-primary {
+  background-color: #1c1e20 !important;
 }
 
-.generate-icon-button:disabled,
-.flow-button-generate:disabled {
-  background-color: rgba(218, 220, 224, 0.05);
-  color: rgba(218, 220, 224, 0.50);
-  cursor: not-allowed;
-  pointer-events: none;
+.bg-neutral-primary-reverted-5 {
+  background-color: rgba(255, 255, 255, 0.05) !important;
 }
 
-/* ── 4. Transparent Icon Button ── */
-.flow-icon-button-transparent {
-  background: transparent;
-  border: none;
-  color: rgba(218, 220, 224, 0.75);
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--radius-sm, 4px);
-  padding: 8px;
-  transition: background-color 0.15s ease, color 0.15s ease;
+.bg-neutral-primary-reverted-10 {
+  background-color: rgba(255, 255, 255, 0.10) !important;
 }
 
-.flow-icon-button-transparent:hover {
-  background-color: rgba(255, 255, 255, 0.08);
-  color: #ffffff;
+/* Typography Helpers */
+.text-font-primary {
+  color: #f7f7f8 !important;
 }
 
-/* ── 5. Studio Header & Title ── */
-.header-desktop {
-  height: var(--header-desktop-height, 5rem);
-  background-color: var(--mat-sys-surface, #131314);
-  border-bottom: 1px solid rgba(218, 220, 224, 0.05);
-  display: flex;
-  align-items: center;
-  padding: 0 1.5rem;
-  width: 100%;
+.text-font-secondary {
+  color: rgb(137, 138, 139) !important;
 }
 
-.editable-text-input {
-  background: transparent;
-  border: none;
-  color: #ffffff;
-  font-family: var(--font-sans);
-  font-size: 1rem;
-  font-weight: 500;
-  outline: none;
-  padding: 4px 8px;
-  border-radius: var(--radius-sm, 4px);
-  transition: background-color 0.15s ease;
+.text-icon-primary {
+  color: #f7f7f8 !important;
 }
 
-.editable-text-input:hover {
-  background-color: rgba(255, 255, 255, 0.05);
+.text-icon-secondary {
+  color: rgb(137, 138, 139) !important;
 }
 
-.editable-text-input:focus {
-  background-color: rgba(255, 255, 255, 0.08);
-  box-shadow: inset 0 0 0 1px var(--mat-sys-primary, #a8c7fa);
+.text-icon-primary-reverted {
+  color: #131517 !important;
+}
+
+.text-qc-text-primary {
+  color: #f7f7f8 !important;
+}
+
+.text-qc-text-secondary {
+  color: rgb(137, 138, 139) !important;
+}
+
+/* Tactile Brand Generate Button */
+.btn-generate-tactile {
+  background-color: #d1fe17;
+  color: #131517;
+  box-shadow: 0 -3px 0 0 #829b19 inset, 0 32px 12px 0 rgba(0, 0, 0, 0.15);
+  border-radius: 12px;
+  font-weight: 600;
+  transition: all 0.15s ease;
+}
+
+.btn-generate-tactile:hover {
+  filter: brightness(0.95);
+}
+
+.btn-generate-tactile:active {
+  transform: translateY(1px);
+  filter: brightness(0.9);
+}
+
+/* Prompt Bar Card Shell */
+.prompt-box-card {
+  background-color: #1c1e20;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 20px;
+  box-shadow: 0 12px 8px 0 rgba(0, 0, 0, 0.08);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }

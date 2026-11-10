@@ -116,6 +116,36 @@ function DialogContent({
             data-[state=open]:animate-in
             data-[state=closed]:animate-out
           `,
+          variant === "folder" &&
+            `
+            z-50 fixed top-1/2 left-1/2
+            -translate-x-1/2 -translate-y-1/2
+            w-96 max-w-full p-6
+            rounded-md border border-white/10 outline-none
+            bg-(--background-state-90) backdrop-blur-80 text-white
+            shadow-none
+            data-[state=open]:animate-in
+            data-[state=closed]:animate-out
+            data-[state=open]:fade-in-0
+            data-[state=closed]:fade-out-0
+            data-[state=open]:zoom-in-95
+            data-[state=closed]:zoom-out-95
+          `,
+          variant === "modal" &&
+            `
+            z-50 fixed top-1/2 left-1/2
+            -translate-x-1/2 -translate-y-1/2
+            w-112 max-w-[calc(100vw-2rem)] max-h-[85vh] p-0 overflow-hidden
+            rounded-xl border border-white/10 outline-none
+            bg-(--background-state-90) backdrop-blur-80 text-white
+            shadow-none flex flex-col
+            data-[state=open]:animate-in
+            data-[state=closed]:animate-out
+            data-[state=open]:fade-in-0
+            data-[state=closed]:fade-out-0
+            data-[state=open]:zoom-in-95
+            data-[state=closed]:zoom-out-95
+          `,
           className
         )}
         {...props}

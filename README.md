@@ -22,5 +22,8 @@ LabVeil App is a Next.js (React 19, Tailwind CSS v4) creative studio and media g
 - Interacts with backend API endpoints for asset generation, project storage, and billing.
 - Manages local client cache and Zustand global state.
 
+## Antigravity Support
+The repository supports the Antigravity autonomous factory through T3 Code integration and headless wave execution for automated building, testing, and reviewing across pipeline lanes.
+
 ## System Verification
 - Run: `npm test`

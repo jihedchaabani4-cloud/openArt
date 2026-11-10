@@ -114,14 +114,14 @@ describe("Trash Page Standalone Layout & Navbar Header", () => {
     expect(container.textContent).not.toContain("more_vert");
   });
 
-  it("keeps the home button, editable project name, and 3-dots menu on normal project routes like /assets", () => {
+  it("displays active page title 'Assets' on /assets route and collection breadcrumb inside collection", () => {
     mockPathname = "/cinema-studio/proj-1/assets";
     useWorkflowsStore.setState({
       selectedProjectId: "proj-1",
       activeStudioTab: "assets",
     });
 
-    const { container } = renderWithClient(
+    const { container, rerender } = renderWithClient(
       <StudioNavbarLeft
         searchExpanded={false}
         selectedProjectName="My Project"
@@ -130,14 +130,10 @@ describe("Trash Page Standalone Layout & Navbar Header", () => {
       />
     );
 
-    const homeLink = screen.getByRole("link", { name: /accueil/i });
-    expect(homeLink.getAttribute("href")).toBe("/cinema-studio");
-    expect(homeLink.textContent).toContain("home");
-
-    const input = container.querySelector("input[aria-label='Display name']");
-    expect(input).not.toBeNull();
-    expect(input.value).toBe("My Project");
-    expect(container.textContent).toContain("more_vert");
+    const homeLink = screen.queryByRole("link", { name: /accueil/i });
+    expect(homeLink).toBeNull();
+    expect(container.textContent).toContain("Assets");
+    expect(container.textContent).not.toContain("more_vert");
   });
 
   it("keeps center search bar and right actions (Tout restaurer, settings) in StudioNavbar on the trash route", () => {

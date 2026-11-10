@@ -157,36 +157,93 @@ describe("studioMenuConfig - Per-type menu list & animate exclusions", () => {
     expect(labels).not.toContain("Ajouter au prompt");
   });
 
-  it("provides dedicated menu list for folder / collection items", () => {
+  it("provides unified menu list for folder / collection items across all surfaces", () => {
+    const handleOpenInNewTab = vi.fn();
+    const handleCreateSubfolder = vi.fn();
+    const handleEdit = vi.fn();
+    const handleMoveTo = vi.fn();
     const handleLike = vi.fn();
     const handleDownload = vi.fn();
-    const onRename = vi.fn();
+    const handleSetColor = vi.fn();
     const onDelete = vi.fn();
 
     const items = getStudioMenuItems({
       type: "collection",
       actions: {
+        handleOpenInNewTab,
+        handleCreateSubfolder,
+        handleEdit,
+        handleMoveTo,
         handleLike,
         handleDownload,
-        onRename,
+        handleSetColor,
         onDelete,
       },
       state: {
         isLiked: true,
+        isDownloading: false,
       },
     });
 
     const keys = items.map((i) => i.key);
+
+    // Must contain all unified actions
+    expect(keys).toContain("open_in_new");
+    expect(keys).toContain("create_new_folder");
+    expect(keys).toContain("edit");
+    expect(keys).toContain("drive_file_move");
     expect(keys).toContain("like");
     expect(keys).toContain("download");
-    expect(keys).toContain("rename");
+    expect(keys).toContain("color");
     expect(keys).toContain("delete");
 
-    // Must NOT have media/generation-specific actions
+    // Must NOT have rename or media-specific actions
+    expect(keys).not.toContain("rename");
     expect(keys).not.toContain("animate");
     expect(keys).not.toContain("reuse");
     expect(keys).not.toContain("add");
     expect(keys).not.toContain("cover");
+
+    // Verify icons
+    expect(items.find((i) => i.key === "open_in_new")?.icon).toBe("open_in_new");
+    expect(items.find((i) => i.key === "create_new_folder")?.icon).toBe("create_new_folder");
+    expect(items.find((i) => i.key === "edit")?.icon).toBe("edit");
+    expect(items.find((i) => i.key === "drive_file_move")?.icon).toBe("drive_file_move");
+    expect(items.find((i) => i.key === "like")?.icon).toBe("favorite");
+    expect(items.find((i) => i.key === "download")?.icon).toBe("download");
+    expect(items.find((i) => i.key === "color")?.icon).toBe("palette");
+    expect(items.find((i) => i.key === "delete")?.icon).toBe("delete");
+
+    // Verify handlers
+    items.find((i) => i.key === "open_in_new")?.onClick();
+    expect(handleOpenInNewTab).toHaveBeenCalledTimes(1);
+
+    items.find((i) => i.key === "create_new_folder")?.onClick();
+    expect(handleCreateSubfolder).toHaveBeenCalledTimes(1);
+
+    items.find((i) => i.key === "edit")?.onClick();
+    expect(handleEdit).toHaveBeenCalledTimes(1);
+
+    items.find((i) => i.key === "drive_file_move")?.onClick();
+    expect(handleMoveTo).toHaveBeenCalledTimes(1);
+
+    items.find((i) => i.key === "like")?.onClick();
+    expect(handleLike).toHaveBeenCalledTimes(1);
+
+    items.find((i) => i.key === "download")?.onClick();
+    expect(handleDownload).toHaveBeenCalledTimes(1);
+
+    items.find((i) => i.key === "delete")?.onClick();
+    expect(onDelete).toHaveBeenCalledTimes(1);
+
+    // Color item has subItems for color swatches
+    const colorItem = items.find((i) => i.key === "color");
+    expect(colorItem.subItems).toBeDefined();
+    expect(colorItem.subItems.length).toBeGreaterThan(0);
+    const limeSwatch = colorItem.subItems.find((s) => s.key === "color-lime");
+    expect(limeSwatch).toBeDefined();
+    limeSwatch.onClick();
+    expect(handleSetColor).toHaveBeenCalledWith("#d1fe17");
   });
 
   it("detects collection entity type in getWorkflowEntityType", () => {

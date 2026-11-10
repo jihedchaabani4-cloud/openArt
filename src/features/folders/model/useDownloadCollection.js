@@ -122,16 +122,15 @@ export async function downloadCollectionAsZip({
     if (Array.isArray(cached)) allFolders = cached;
     else if (Array.isArray(cached?.items)) allFolders = cached.items;
   }
-  if ((!allFolders || allFolders.length === 0) && effectiveProjectId) {
-    try {
-      const res = await api.get(`/projects/${effectiveProjectId}/folders`);
-      const items = res?.items ?? res?.data ?? (Array.isArray(res) ? res : []);
-      if (Array.isArray(items) && items.length > 0) {
-        allFolders = items;
-        queryClient?.setQueryData(queryKeys.folders.byProject(effectiveProjectId), items);
-      }
-    } catch (err) {
-      logger.warn("download_collection_fetch_folders_failed", { error: err?.message });
+  if ((!allFolders || allFolders.length === 0) && queryClient && effectiveProjectId) {
+    const cachedProject = queryClient.getQueryData(queryKeys.projectData.byProject(effectiveProjectId));
+    const projectFolders =
+      cachedProject?.projectContents?.collections ||
+      cachedProject?.collections ||
+      cachedProject?.projectContents?.folders ||
+      cachedProject?.folders;
+    if (Array.isArray(projectFolders) && projectFolders.length > 0) {
+      allFolders = projectFolders;
     }
   }
   if (!allFolders) allFolders = [];
@@ -156,6 +155,16 @@ export async function downloadCollectionAsZip({
       if (data?.projectContents) {
         projectContents = data.projectContents;
         queryClient?.setQueryData(queryKeys.projectData.byProject(effectiveProjectId), data);
+        if (!allFolders || allFolders.length === 0) {
+          const fromContents =
+            projectContents.collections ||
+            projectContents.folders ||
+            data.collections ||
+            data.folders;
+          if (Array.isArray(fromContents) && fromContents.length > 0) {
+            allFolders = fromContents;
+          }
+        }
       }
     } catch (err) {
       logger.warn("download_collection_fetch_project_data_failed", { error: err?.message });
@@ -355,7 +364,12 @@ export async function downloadCollectionAsZip({
  * Custom hook providing download collection capabilities.
  */
 export function useDownloadCollection() {
-  const queryClient = useQueryClient();
+  let queryClient = null;
+  try {
+    queryClient = useQueryClient();
+  } catch {
+    // Graceful fallback when rendered outside a QueryClientProvider (e.g. isolated test environments)
+  }
   const [isDownloading, setIsDownloading] = useState(false);
 
   const downloadCollection = useCallback(

@@ -116,11 +116,11 @@ const Input = React.forwardRef(({
         )}
         <div 
           className={cn(
-            "relative flex items-center justify-between w-full transition-all border-none outline-none font-sans antialiased",
+            "relative flex items-center justify-between w-full max-h-full transition-all border-none outline-none font-sans antialiased",
             isSearch
-              ? "h-10.5 min-h-10.5 rounded-sm border border-outline-variant px-2.5 gap-2 text-sm text-on-surface shadow-none bg-surface-container hover:bg-surface-container-high focus-within:bg-surface-container-high focus-within:border-primary"
+              ? "h-9 min-h-0 max-h-full rounded-sm border border-outline-variant px-2.5 gap-2 text-sm text-on-surface shadow-none bg-surface-container hover:bg-surface-container-high focus-within:bg-surface-container-high focus-within:border-primary"
               : isBlurInput
-              ? "h-9 min-h-9 rounded-sm py-0.5 pr-2.5 pl-3.5 gap-2 text-sm font-medium text-on-surface flex-row bg-surface-container border border-outline-variant hover:bg-surface-container-high focus-within:border-primary"
+              ? "h-9 min-h-0 max-h-full rounded-sm py-0.5 pr-2.5 pl-3.5 gap-2 text-sm font-medium text-on-surface flex-row bg-surface-container border border-outline-variant hover:bg-surface-container-high focus-within:border-primary"
               : "min-h-13 rounded-sm px-3 py-2 bg-surface text-on-surface border border-outline-variant hover:border-outline focus-within:border-primary"
           )}
         >

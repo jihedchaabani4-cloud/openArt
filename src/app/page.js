@@ -19,7 +19,7 @@ export default function HomePage() {
   if (authLoading) {
     return (
       <div
-        className="min-h-screen bg-black flex flex-col items-center justify-center text-white/50"
+        className="min-h-screen bg-background flex flex-col items-center justify-center text-white/50"
         suppressHydrationWarning
       >
         <GoogleIcon iconName="progress_activity" className="text-4xl animate-spin text-white mb-4" />

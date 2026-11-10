@@ -1,7 +1,6 @@
 "use client"
 
 import * as React from "react"
-import { motion } from "framer-motion"
 import { usePathname } from "next/navigation"
 import { useProjects, useUpdateProject } from "@/features/projects/api/projectsApi"
 import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows"
@@ -18,7 +17,6 @@ export function StudioNavbar() {
     const activeProjectId = useGenerationsStore(s => s.selectedProjectId);
     const filters = useGenerationsStore(s => s.filters);
     const setFilter = useGenerationsStore(s => s.setFilter);
-    const isNavbarHidden = useGenerationsStore(s => s.isNavbarHidden);
 
     const pathname = usePathname() || "";
     const isCleanNavbarTab = pathname.includes("/edit/") || pathname.endsWith("/new");
@@ -48,17 +46,11 @@ export function StudioNavbar() {
     }
 
     return (
-        <motion.nav
-            variants={{
-                visible: { y: 0 },
-                hidden: { y: "-100%" },
-            }}
-            animate={isNavbarHidden ? "hidden" : "visible"}
-            transition={{ duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
-            className="absolute top-0 left-0 pl-3 pr-4 sm:pr-6 h-16 w-full z-50 flex flex-col justify-center bg-transparent overflow-hidden"
+        <nav
+            className="relative shrink-0 w-full px-studio-navbar-padding h-studio-navbar max-h-studio-navbar z-30 flex flex-col justify-center bg-transparent overflow-hidden"
         >
             <div className="header-backdrop header-backdrop-visible" aria-hidden="true" />
-            <div className="relative flex items-center h-16 w-full min-w-0">
+            <div className="relative flex items-center h-full max-h-studio-navbar w-full min-w-0">
                 <StudioNavbarLeft
                     searchExpanded={searchExpanded}
                     selectedProjectName={selectedProjectName}
@@ -94,6 +86,6 @@ export function StudioNavbar() {
                     </div>
                 )}
             </div>
-        </motion.nav>
+        </nav>
     )
 }

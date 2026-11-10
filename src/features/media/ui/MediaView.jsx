@@ -11,6 +11,9 @@ import {
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuSeparator,
+  ContextMenuSub,
+  ContextMenuSubTrigger,
+  ContextMenuSubContent,
 } from "@/shared/ui/context-menu";
 import { useMediaViewerCore } from "@/features/workflows/core/useMediaViewerCore";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
@@ -426,6 +429,52 @@ export const CoreMediaItemPresenter = memo(
               {activeCtxItems.map((m, i) => {
                 if (m.key === "separator" || m.type === "separator") {
                   return <ContextMenuSeparator key={m.key || `ctx-sep-${i}`} className="my-1.5" />;
+                }
+                if (m.subItems && m.subItems.length > 0) {
+                  return (
+                    <ContextMenuSub key={m.key || m.id || i}>
+                      <ContextMenuSubTrigger className="cursor-pointer">
+                        {m.icon && (
+                          typeof m.icon === "string" ? (
+                            <GoogleIcon
+                              iconName={m.icon}
+                              className={cn("text-base shrink-0", m.iconClassName)}
+                              fill={m.fill}
+                            />
+                          ) : (
+                            m.icon
+                          )
+                        )}
+                        <span className="truncate">{m.label}</span>
+                      </ContextMenuSubTrigger>
+                      <ContextMenuSubContent className="w-44 p-1">
+                        {m.subItems.map((sub, j) => {
+                          if (sub.type === "separator" || sub.key === "separator" || sub.key?.startsWith("sep-")) {
+                            return <ContextMenuSeparator key={sub.key || `sub-sep-${j}`} className="my-1.5" />;
+                          }
+                          return (
+                            <ContextMenuItem
+                              key={sub.key || j}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (sub.disabled) return;
+                                sub.onClick?.(e);
+                              }}
+                              className="flex items-center gap-2 cursor-pointer"
+                            >
+                              {sub.bgClass && (
+                                <span className={cn("size-3 rounded-full shrink-0", sub.bgClass)} />
+                              )}
+                              <span className="truncate">{sub.label}</span>
+                              {sub.checked && (
+                                <GoogleIcon iconName="check" className="text-xs ml-auto text-on-surface" />
+                              )}
+                            </ContextMenuItem>
+                          );
+                        })}
+                      </ContextMenuSubContent>
+                    </ContextMenuSub>
+                  );
                 }
                 return (
                   <ContextMenuItem

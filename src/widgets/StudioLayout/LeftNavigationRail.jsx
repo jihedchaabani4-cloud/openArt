@@ -1,38 +1,164 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { Button } from "@/shared/ui/button";
+import { FileTree, FileTreeFolder, FileTreeItem } from "@/shared/ui/file-tree";
+import { FolderGlyphIcon } from "@/shared/ui/FolderGlyphIcon";
+import {
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuSub,
+  ContextMenuSubTrigger,
+  ContextMenuSubContent,
+} from "@/shared/ui/context-menu";
+import { CreateFolderDialog } from "@/shared/ui/CreateFolderDialog";
+import { ConfirmDeleteDialog } from "@/shared/ui/ConfirmDeleteDialog";
+import { MoveToDialog } from "@/shared/ui/MoveToDialog";
 import { cn } from "@/shared/lib/utils";
 import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows";
 import { useCharacterWorkflows } from "@/features/characters";
 import { useElementSheetWorkflows } from "@/features/elements";
+import {
+  useProjectFolders,
+  useUpdateFolder,
+  useDeleteFolder,
+  useDownloadCollection,
+  FOLDER_COLOR_OPTIONS,
+  DEFAULT_FOLDER_GRADIENT,
+} from "@/features/folders";
 
 /**
  * LeftNavigationRail
  * Clean studio sidebar featuring:
  * - Top items: Générations (Generation Space), Éléments, Personnages
+ * - Middle: Project Collections hierarchy with FileTree component (when expanded)
  * - Bottom: Prominent toggle button (PanelLeftClose / PanelLeftOpen) to open & close
  * - Borderless, clean animations, no hover-open
  */
 export function LeftNavigationRail() {
   const selectedProjectId = useGenerationsStore((s) => s.selectedProjectId);
-  const isNavbarHidden = useGenerationsStore((s) => s.isNavbarHidden);
+  const favoriteFolderIds = useGenerationsStore((s) => s.favoriteFolderIds || {});
+  const toggleFavoriteFolder = useGenerationsStore((s) => s.toggleFavoriteFolder);
+  const { downloadCollection, isDownloading } = useDownloadCollection();
   const pathname = usePathname();
+  const router = useRouter();
 
   const { workflows: characters = [] } = useCharacterWorkflows(selectedProjectId);
   useElementSheetWorkflows(selectedProjectId);
 
+  const { data: rawFolders = [] } = useProjectFolders(selectedProjectId);
+
   // Expands / collapses only via explicit button click (Réduire / Développer)
-  const [isExpanded, setIsExpanded] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false);
   const [optimisticTab, setOptimisticTab] = useState(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     setOptimisticTab(null);
   }, [pathname]);
+
+  const rawFoldersList = useMemo(() => {
+    if (Array.isArray(rawFolders)) return rawFolders;
+    if (Array.isArray(rawFolders?.items)) return rawFolders.items;
+    return [];
+  }, [rawFolders]);
+
+  const folderTree = useMemo(() => {
+    const map = new Map();
+    const roots = [];
+
+    rawFoldersList.forEach((folder) => {
+      map.set(folder.id, { ...folder, children: [] });
+    });
+
+    rawFoldersList.forEach((folder) => {
+      const parentId = folder.parent_id || folder.parentId;
+      if (parentId && map.has(parentId)) {
+        map.get(parentId).children.push(map.get(folder.id));
+      } else {
+        roots.push(map.get(folder.id));
+      }
+    });
+
+    return roots;
+  }, [rawFoldersList]);
+
+  const activeCollectionId = useMemo(() => {
+    const match = pathname?.match(/\/collection\/([^/]+)/);
+    return match ? match[1] : null;
+  }, [pathname]);
+
+  const handleSelectCollection = (collectionId) => {
+    if (collectionId) {
+      router.push(`/cinema-studio/${selectedProjectId}/collection/${collectionId}`);
+    }
+  };
+
+  const handleOpenCollectionInNewTab = (collectionId) => {
+    if (collectionId && selectedProjectId && typeof window !== "undefined") {
+      window.open(
+        `/cinema-studio/${selectedProjectId}/collection/${collectionId}`,
+        "_blank",
+        "noopener,noreferrer"
+      );
+    }
+  };
+
+  const { mutateAsync: updateFolder } = useUpdateFolder();
+  const { mutateAsync: deleteFolder } = useDeleteFolder();
+
+  const [createSubfolderParentId, setCreateSubfolderParentId] = useState(null);
+  const [deletingFolder, setDeletingFolder] = useState(null);
+  const [editingFolder, setEditingFolder] = useState(null);
+  const [movingFolder, setMovingFolder] = useState(null);
+
+  const handleSetColor = async (folderId, colorHex) => {
+    if (!folderId || !selectedProjectId) return;
+    try {
+      await updateFolder({
+        folderId,
+        patch: { color: colorHex },
+        projectId: selectedProjectId,
+      });
+    } catch {
+      // Optimistic rollback handled
+    }
+  };
+
+  const handleToggleLike = (folderId) => {
+    if (folderId) toggleFavoriteFolder?.(folderId);
+  };
+
+  const handleDownload = (folder) => {
+    if (folder?.id && selectedProjectId) {
+      downloadCollection({
+        collectionId: folder.id,
+        collectionName: folder.name || folder.folder_name || "Collection",
+        projectId: selectedProjectId,
+      });
+    }
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deletingFolder || !selectedProjectId) return;
+    const deletedId = deletingFolder.id;
+    try {
+      await deleteFolder({
+        folderId: deletedId,
+        projectId: selectedProjectId,
+      });
+      setDeletingFolder(null);
+      if (activeCollectionId === deletedId) {
+        router.push(`/cinema-studio/${selectedProjectId}`);
+      }
+    } catch {
+      // ConfirmDeleteDialog retains state
+    }
+  };
 
   const isCharactersActive = pathname?.includes("/characters");
   const isElementsActive = pathname?.includes("/elements");
@@ -53,6 +179,13 @@ export function LeftNavigationRail() {
     : `/cinema-studio/${selectedProjectId}/characters/new`;
 
   const mainNavItems = [
+    {
+      id: "home",
+      label: "Accueil",
+      icon: "home",
+      href: "/cinema-studio",
+      isActive: false,
+    },
     {
       id: "assets",
       label: "Assets",
@@ -85,72 +218,224 @@ export function LeftNavigationRail() {
   };
 
   const renderNavItem = (item) => (
-    <Link
+    <Button
       key={item.id}
-      href={item.href}
-      prefetch={true}
-      onClick={() => setOptimisticTab(item.id)}
+      asChild
+      size="m"
+      variant="ghost"
       className={cn(
-        "flex items-center h-[42px] rounded-sm transition-colors duration-100 w-full select-none outline-none overflow-hidden font-sans font-medium text-sm leading-5 antialiased",
+        "w-full justify-start p-0 gap-0 rounded-lg transition-colors duration-100 select-none outline-none overflow-hidden font-sans font-medium text-sm leading-5 antialiased",
         item.isActive
-          ? "bg-surface-elevated text-on-surface shadow-none"
+          ? "bg-surface-elevated text-on-surface shadow-none hover:bg-surface-elevated hover:text-on-surface"
           : "text-on-surface-variant hover:text-on-surface hover:bg-white/[0.06]"
       )}
       title={!isExpanded ? item.label : undefined}
     >
-      <span className="w-[48px] h-full shrink-0 flex items-center justify-center">
-        <GoogleIcon
-          iconName={item.icon}
-          className={cn(
-            "text-xl shrink-0",
-            item.isActive ? "text-white" : "text-white/80"
-          )}
-        />
-      </span>
-      <span
-        className={cn(
-          "tracking-normal truncate flex-1 pr-2 whitespace-nowrap rail-label-transition",
-          isExpanded ? "opacity-100" : "opacity-0 pointer-events-none"
-        )}
+      <Link
+        href={item.href}
+        prefetch={true}
+        onClick={() => setOptimisticTab(item.id)}
       >
-        {item.label}
-      </span>
-    </Link>
+        <span className="w-[48px] h-full shrink-0 flex items-center justify-center">
+          <GoogleIcon
+            iconName={item.icon}
+            className={cn(
+              "text-xl shrink-0",
+              item.isActive ? "text-white" : "text-white/80"
+            )}
+          />
+        </span>
+        <span
+          className={cn(
+            "tracking-normal truncate flex-1 pr-2 whitespace-nowrap rail-label-transition",
+            isExpanded ? "opacity-100" : "opacity-0 pointer-events-none"
+          )}
+        >
+          {item.label}
+        </span>
+      </Link>
+    </Button>
   );
+
+  const renderFolderNode = (node) => {
+    const folderName = node.name || node.folder_name || "Collection";
+    const hasChildren = Array.isArray(node.children) && node.children.length > 0;
+    const folderColor = node.color || null;
+    const isNodeLiked = Boolean(favoriteFolderIds[node.id] ?? node.favorited ?? node.is_liked);
+
+    const folderIconElement = (
+      <FolderGlyphIcon color={folderColor} size={18} />
+    );
+
+    const labelElement = (
+      <span className="truncate">{folderName}</span>
+    );
+
+    const folderContextMenu = (
+      <ContextMenuContent className="w-52">
+        <ContextMenuItem onClick={() => handleOpenCollectionInNewTab(node.id)}>
+          <GoogleIcon iconName="open_in_new" className="text-base" />
+          <span>Ouvrir dans un nouvel onglet</span>
+        </ContextMenuItem>
+        <ContextMenuItem onClick={() => setCreateSubfolderParentId(node.id)}>
+          <GoogleIcon iconName="create_new_folder" className="text-base" />
+          <span>Nouveau sous-dossier</span>
+        </ContextMenuItem>
+        <ContextMenuItem onClick={() => setEditingFolder(node)}>
+          <GoogleIcon iconName="edit" className="text-base" />
+          <span>Edit</span>
+        </ContextMenuItem>
+        <ContextMenuItem onClick={() => setMovingFolder(node)}>
+          <GoogleIcon iconName="drive_file_move" className="text-base" />
+          <span>Déplacer vers...</span>
+        </ContextMenuItem>
+        <ContextMenuItem onClick={() => handleToggleLike(node.id)}>
+          <GoogleIcon
+            iconName="favorite"
+            fill={isNodeLiked}
+            className={cn("text-base", isNodeLiked && "text-red-400 fill-red-400")}
+          />
+          <span>{isNodeLiked ? "Unlike collection" : "Like collection"}</span>
+        </ContextMenuItem>
+        <ContextMenuItem onClick={() => handleDownload(node)} disabled={isDownloading}>
+          <GoogleIcon iconName="download" className="text-base" />
+          <span>{isDownloading ? "Downloading..." : "Download collection"}</span>
+        </ContextMenuItem>
+        <ContextMenuSeparator />
+        <ContextMenuSub>
+          <ContextMenuSubTrigger>
+            <GoogleIcon iconName="palette" className="text-base" />
+            <span>Couleur</span>
+          </ContextMenuSubTrigger>
+          <ContextMenuSubContent className="w-44 p-1">
+            {FOLDER_COLOR_OPTIONS.map((c) => (
+              <ContextMenuItem
+                key={c.id}
+                onClick={() => handleSetColor(node.id, c.hex)}
+                className="flex items-center gap-2"
+              >
+                <span className={cn("size-3 rounded-full shrink-0", c.bgClass)} />
+                <span className="truncate">{c.label}</span>
+                {node.color?.toLowerCase() === c.hex.toLowerCase() && (
+                  <GoogleIcon iconName="check" className="text-xs ml-auto text-on-surface" />
+                )}
+              </ContextMenuItem>
+            ))}
+            <ContextMenuSeparator />
+            <ContextMenuItem
+              onClick={() => handleSetColor(node.id, null)}
+              className="flex items-center gap-2"
+            >
+              <span className="size-3 rounded-full shrink-0 border border-border folder-swatch-white" />
+              <span>Blanc (Défaut)</span>
+              {(!node.color || node.color.toLowerCase() === DEFAULT_FOLDER_GRADIENT.hex.toLowerCase()) && (
+                <GoogleIcon iconName="check" className="text-xs ml-auto text-on-surface" />
+              )}
+            </ContextMenuItem>
+          </ContextMenuSubContent>
+        </ContextMenuSub>
+        <ContextMenuSeparator />
+        <ContextMenuItem
+          variant="destructive"
+          onClick={() => setDeletingFolder(node)}
+        >
+          <GoogleIcon iconName="delete" className="text-base" />
+          <span>Supprimer</span>
+        </ContextMenuItem>
+      </ContextMenuContent>
+    );
+
+    if (hasChildren) {
+      return (
+        <FileTreeFolder
+          key={node.id}
+          value={node.id}
+          element={labelElement}
+          icon={folderIconElement}
+          contextMenu={folderContextMenu}
+          isSelectable
+        >
+          {node.children.map(renderFolderNode)}
+        </FileTreeFolder>
+      );
+    }
+
+    return (
+      <FileTreeItem
+        key={node.id}
+        value={node.id}
+        element={labelElement}
+        icon={folderIconElement}
+        contextMenu={folderContextMenu}
+        isSelectable
+      />
+    );
+  };
 
   return (
     <aside
       aria-label="Navigation Studio"
       style={{
-        width: isExpanded ? 230 : 64,
+        width: isExpanded ? "var(--studio-sidebar-width-expanded, 230px)" : "var(--studio-sidebar-width, 52px)",
       }}
-      className="h-full shrink-0 relative z-40 bg-black flex flex-col select-none pt-0 pb-3 px-2 overflow-hidden border-none rail-smooth-transition"
+      className="h-full shrink-0 relative z-40 bg-transparent flex flex-col select-none pt-0 pb-3 px-0 overflow-hidden rounded-2xl border border-border rail-smooth-transition"
     >
-      {/* ── Top Spacer (animates cleanly with StudioNavbar hide/show) ── */}
-      <motion.div
-        initial={false}
-        animate={{ height: isNavbarHidden ? 8 : 72 }}
-        transition={{ duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
-        className="w-full shrink-0 overflow-hidden"
-      />
+      {/* ── Fixed Top Spacer (independent of scroll) ── */}
+      <div className="w-full shrink-0 h-4" />
 
       {/* ── Top Navigation Items: Générations, Éléments, Personnages ── */}
-      <nav className="flex flex-col gap-1.5 w-full shrink-0">
-        {mainNavItems.map(renderNavItem)}
-      </nav>
+      <div className="w-full shrink-0 px-0.5">
+        <nav className="flex flex-col gap-1.5 w-full">
+          {mainNavItems.map(renderNavItem)}
+        </nav>
+      </div>
 
-      {/* ── Flexible Space (pushes bottom section to bottom) ── */}
-      <div className="flex-1 min-h-[20px]" />
+      {/* ── Collections Tree Section (when expanded) ── */}
+      {isExpanded ? (
+        <div className="flex flex-col flex-1 min-h-0 mt-3 pt-3 border-t border-border/40 px-2 overflow-hidden">
+          <div className="flex items-center justify-between px-2 pb-1.5 shrink-0">
+            <span className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">
+              Collections
+            </span>
+            {rawFoldersList.length > 0 && (
+              <span className="text-xs text-on-surface-variant/70 font-normal">
+                {rawFoldersList.length}
+              </span>
+            )}
+          </div>
+
+          <div className="flex-1 overflow-y-auto overflow-x-hidden min-h-0 pr-1 rail-smooth-transition">
+            {folderTree.length > 0 ? (
+              <FileTree
+                selectedId={activeCollectionId}
+                onSelectChange={handleSelectCollection}
+                size="m"
+                className="w-full"
+              >
+                {folderTree.map(renderFolderNode)}
+              </FileTree>
+            ) : (
+              <div className="px-2 py-3 text-xs text-on-surface-variant/60 italic text-left">
+                Aucune collection
+              </div>
+            )}
+          </div>
+        </div>
+      ) : (
+        /* ── Flexible Space (pushes bottom section to bottom) ── */
+        <div className="flex-1 min-h-[20px]" />
+      )}
 
       {/* ── Dedicated Bottom Actions: Corbeille (Trash) & Toggle Button ── */}
-      <div className="mt-auto flex flex-col gap-1.5 pt-2 pb-2 mb-[30px] w-full shrink-0">
+      <div className="mt-auto flex flex-col gap-1.5 pt-2 pb-2 mb-[30px] w-full shrink-0 px-0.5">
         {renderNavItem(trashItem)}
 
         <Button
           type="button"
           variant="ghost"
+          size="m"
           onClick={handleToggleExpand}
-          className="w-full h-[42px] p-0 gap-0 justify-start overflow-hidden font-medium text-sm leading-5"
+          className="w-full p-0 gap-0 justify-start overflow-hidden font-medium text-sm leading-5 rounded-lg text-on-surface-variant hover:text-on-surface"
           title={isExpanded ? "Réduire la barre" : "Développer la barre"}
           aria-label={isExpanded ? "Réduire la barre" : "Développer la barre"}
         >
@@ -171,6 +456,54 @@ export function LeftNavigationRail() {
           </span>
         </Button>
       </div>
+
+      {createSubfolderParentId && (
+        <CreateFolderDialog
+          open={Boolean(createSubfolderParentId)}
+          onOpenChange={(open) => {
+            if (!open) setCreateSubfolderParentId(null);
+          }}
+          parentId={createSubfolderParentId}
+          projectId={selectedProjectId}
+          title="Nouveau sous-dossier"
+        />
+      )}
+
+      {editingFolder && (
+        <CreateFolderDialog
+          open={Boolean(editingFolder)}
+          onOpenChange={(open) => {
+            if (!open) setEditingFolder(null);
+          }}
+          folder={editingFolder}
+          projectId={selectedProjectId}
+          title="Edit folder"
+        />
+      )}
+
+      {movingFolder && (
+        <MoveToDialog
+          open={Boolean(movingFolder)}
+          onOpenChange={(open) => {
+            if (!open) setMovingFolder(null);
+          }}
+          projectId={selectedProjectId}
+          itemType="collection"
+          item={movingFolder}
+        />
+      )}
+
+      {deletingFolder && (
+        <ConfirmDeleteDialog
+          open={Boolean(deletingFolder)}
+          onOpenChange={(open) => {
+            if (!open) setDeletingFolder(null);
+          }}
+          onConfirm={handleConfirmDelete}
+          title="Supprimer la collection"
+          description={`Êtes-vous sûr de vouloir supprimer "${deletingFolder.name || deletingFolder.folder_name || "cette collection"}" ?`}
+        />
+      )}
     </aside>
   );
 }

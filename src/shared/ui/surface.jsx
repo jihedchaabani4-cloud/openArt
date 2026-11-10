@@ -27,6 +27,8 @@ export const surfaceVariants = cva(
         highest: "bg-surface-container-highest text-on-surface border-outline",
         sunken: "bg-surface-container-lowest text-on-surface border-outline-variant",
         overlay: "bg-surface-container-high/90 text-on-surface border-outline-variant backdrop-blur-md",
+        tertiary: "bg-surface-tertiary text-on-surface border-outline-variant",
+        brand: "bg-lime text-black border-transparent",
         // Google Flow Material 3 surface ladder
         surface: "bg-surface text-on-surface border-outline-variant",
         "container-lowest": "bg-surface-container-lowest text-on-surface border-outline-variant",
@@ -42,12 +44,16 @@ export const surfaceVariants = cva(
         xs: "rounded-xs",
         sm: "rounded-sm",
         md: "rounded-md",
+        lg: "rounded-lg",
+        xl: "rounded-xl",
+        "2xl": "rounded-2xl",
+        "3xl": "rounded-3xl",
         full: "rounded-full",
       },
     },
     defaultVariants: {
       tone: "base",
-      radius: "md",
+      radius: "lg",
     },
   }
 );

@@ -58,7 +58,7 @@ export function UserDropdown({ className }) {
   });
 
   if (isLoading) {
-    return <div className={cn("size-9 animate-pulse rounded-full bg-white/5", className)} />;
+    return <div className={cn("size-8 sm:size-9 max-h-full aspect-square animate-pulse rounded-full bg-white/5", className)} />;
   }
 
   if (!currentUser) {
@@ -68,7 +68,7 @@ export function UserDropdown({ className }) {
           onClick={() => setLoginOpen(true)}
           variant="ghost"
           size="sm"
-          className={cn("h-9 px-5 text-sm font-semibold text-white", className)}
+          className={cn("h-8 sm:h-9 max-h-full px-5 text-sm font-semibold text-white", className)}
         >
           Login
         </Button>
@@ -89,7 +89,7 @@ export function UserDropdown({ className }) {
           <Button
             type="button"
             variant="ghost"
-            className={cn("size-9 min-w-9 min-h-9 p-0", className)}
+            className={cn("size-8 sm:size-9 max-h-full aspect-square p-0", className)}
             aria-label="Open user menu"
           >
             <Avatar className="size-full rounded-full bg-transparent">

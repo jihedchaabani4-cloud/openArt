@@ -182,4 +182,35 @@ describe("Button Primitive — 6 Core Semantic Variants Architecture", () => {
       });
     });
   });
+
+  describe("5. Sizing Parameter (s, m, l)", () => {
+    it("applies default size 'm' (h-button-m)", () => {
+      render(<Button>Default Size</Button>);
+      const btn = screen.getByRole("button", { name: "Default Size" });
+      expect(btn.className).toContain("h-button-m");
+    });
+
+    it("applies size 's' (h-button-s)", () => {
+      render(<Button size="s">Small Button</Button>);
+      const btn = screen.getByRole("button", { name: "Small Button" });
+      expect(btn.className).toContain("h-button-s");
+    });
+
+    it("applies size 'l' (h-button-l)", () => {
+      render(<Button size="l">Large Button</Button>);
+      const btn = screen.getByRole("button", { name: "Large Button" });
+      expect(btn.className).toContain("h-button-l");
+    });
+
+    it("handles uppercase size values case-insensitively ('S', 'M', 'L')", () => {
+      const { rerender } = render(<Button size="S">Upper S</Button>);
+      expect(screen.getByRole("button", { name: "Upper S" }).className).toContain("h-button-s");
+
+      rerender(<Button size="M">Upper M</Button>);
+      expect(screen.getByRole("button", { name: "Upper M" }).className).toContain("h-button-m");
+
+      rerender(<Button size="L">Upper L</Button>);
+      expect(screen.getByRole("button", { name: "Upper L" }).className).toContain("h-button-l");
+    });
+  });
 });

@@ -6,7 +6,8 @@ import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { cn } from "@/shared/lib/utils";
 import { ButtonGroup } from "@/shared/ui/button-group";
 import { ConfirmDeleteDialog } from "@/shared/ui/ConfirmDeleteDialog";
-import { InlineRenamePill } from "@/shared/ui/InlineRenamePill";
+import { CreateFolderDialog } from "@/shared/ui/CreateFolderDialog";
+import { MoveToDialog } from "@/shared/ui/MoveToDialog";
 import { ActionBtn } from "@/shared/ui/action-button";
 import { StudioItemDropdownMenu } from "./StudioItemMenu";
 import { getStudioMenuItems } from "./studioMenuConfig";
@@ -40,8 +41,9 @@ export const CollectionMediaGridItem = React.memo(function CollectionMediaGridIt
   const { downloadCollection, isDownloading } = useDownloadCollection();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
-  const [isRenaming, setIsRenaming] = useState(false);
-  const [cardRect, setCardRect] = useState(null);
+  const [createSubfolderParentId, setCreateSubfolderParentId] = useState(null);
+  const [editingFolder, setEditingFolder] = useState(null);
+  const [movingFolder, setMovingFolder] = useState(null);
 
   const { mutateAsync: updateFolder } = useUpdateFolder();
   const { mutateAsync: deleteFolder, isPending: isDeleting } = useDeleteFolder();
@@ -51,9 +53,6 @@ export const CollectionMediaGridItem = React.memo(function CollectionMediaGridIt
   const mouseX = useMotionValue(-500);
   const mouseY = useMotionValue(-500);
   const lastPos = useRef({ x: -500, y: -500 });
-
-  const cardRef = useRef(null);
-  const canDismissRef = useRef(false);
 
   const ghostMotionStyle = {
     x: mouseX,
@@ -65,6 +64,9 @@ export const CollectionMediaGridItem = React.memo(function CollectionMediaGridIt
   };
 
   const collectionName = col?.name || "Untitled collection";
+  const collectionColor = col?.color || null;
+  const collectionDescription = col?.description || null;
+  const collectionAssetCount = typeof col?.assetCount === "number" ? col.assetCount : null;
   const collectionTileOverlay = (
     <div className="collection-tile-scrim" />
   );
@@ -103,7 +105,7 @@ export const CollectionMediaGridItem = React.memo(function CollectionMediaGridIt
     item: col,
     itemId: col?.id,
     isDraggable: true,
-    isRenaming,
+    isRenaming: false,
     mouseX,
     mouseY,
     lastPos,
@@ -159,60 +161,27 @@ export const CollectionMediaGridItem = React.memo(function CollectionMediaGridIt
     });
   };
 
-  // Dynamically track card position while rename is open
-  useEffect(() => {
-    if (!isRenaming) {
-      setCardRect(null);
-      return;
+  const handleOpenInNewTab = () => {
+    if (folderId && projectId && typeof window !== "undefined") {
+      window.open(
+        `/cinema-studio/${projectId}/collection/${folderId}`,
+        "_blank",
+        "noopener,noreferrer"
+      );
     }
-    const updateRect = () => {
-      if (cardRef.current) {
-        const r = cardRef.current.getBoundingClientRect();
-        setCardRect({
-          top: r.top,
-          left: r.left,
-          width: r.width,
-          height: r.height,
-          bottom: r.bottom,
-          right: r.right,
-        });
-      }
-    };
-    updateRect();
-    window.addEventListener("scroll", updateRect, true);
-    window.addEventListener("resize", updateRect);
-    return () => {
-      window.removeEventListener("scroll", updateRect, true);
-      window.removeEventListener("resize", updateRect);
-    };
-  }, [isRenaming]);
+  };
 
-  const startRename = useCallback(() => {
-    if (cardRef.current) {
-      const r = cardRef.current.getBoundingClientRect();
-      setCardRect({
-        top: r.top,
-        left: r.left,
-        width: r.width,
-        height: r.height,
-        bottom: r.bottom,
-        right: r.right,
+  const handleSetColor = async (colorHex) => {
+    if (!folderId || !projectId) return;
+    try {
+      await updateFolder({
+        folderId,
+        patch: { color: colorHex },
+        projectId,
       });
+    } catch {
+      // handled
     }
-    canDismissRef.current = false;
-    setIsRenaming(true);
-    setTimeout(() => {
-      canDismissRef.current = true;
-    }, 150);
-  }, []);
-
-  const handleRename = (newName) => {
-    if (!col?.id || !projectId) return;
-    updateFolder({
-      folderId: col.id,
-      patch: { name: newName },
-      projectId,
-    });
   };
 
   const handleDelete = async () => {
@@ -238,21 +207,6 @@ export const CollectionMediaGridItem = React.memo(function CollectionMediaGridIt
     }
   };
 
-  const getPillPosition = () => {
-    if (!cardRect || typeof window === "undefined" || !cardRect.width) {
-      return { bottom: "32px", left: "50%", transform: "translateX(-50%)" };
-    }
-    const PADDING = 10;
-    const PILL_HEIGHT = 56;
-    const spaceBelow = window.innerHeight - cardRect.bottom;
-    let top = cardRect.bottom + PADDING;
-    if (spaceBelow < PILL_HEIGHT + 20) {
-      top = Math.max(12, cardRect.bottom - PILL_HEIGHT - PADDING);
-    }
-    const left = Math.max(12, Math.min(cardRect.left, window.innerWidth - 580));
-    return { top: `${top}px`, left: `${left}px` };
-  };
-
   const handleToggleLike = (e) => {
     e?.stopPropagation?.();
     if (folderId) toggleFavoriteFolder?.(folderId);
@@ -273,14 +227,19 @@ export const CollectionMediaGridItem = React.memo(function CollectionMediaGridIt
     type: "collection",
     item: col,
     actions: {
+      handleOpenInNewTab,
+      handleCreateSubfolder: () => setCreateSubfolderParentId(folderId),
+      handleEdit: () => setEditingFolder(col),
+      handleMoveTo: () => setMovingFolder(col),
       handleLike: handleToggleLike,
       handleDownload,
-      onRename: startRename,
+      handleSetColor,
       onDelete: () => setIsDeleteConfirmOpen(true),
     },
     state: {
       isLiked,
       isDownloading,
+      folderColor: collectionColor,
     },
   });
 
@@ -304,7 +263,7 @@ export const CollectionMediaGridItem = React.memo(function CollectionMediaGridIt
 
   const handleNavigate = useCallback(
     (e) => {
-      if (isRenaming || justDraggedRef.current) return;
+      if (justDraggedRef.current) return;
       const targetCol = col || collection || workflow;
       const targetId = targetCol?.id || targetCol?.name;
       if (onClick) {
@@ -313,7 +272,7 @@ export const CollectionMediaGridItem = React.memo(function CollectionMediaGridIt
         router.push(`/cinema-studio/${projectId}/collection/${targetId}`);
       }
     },
-    [isRenaming, justDraggedRef, col, collection, workflow, onClick, projectId, router]
+    [justDraggedRef, col, collection, workflow, onClick, projectId, router]
   );
 
   return (
@@ -328,7 +287,7 @@ export const CollectionMediaGridItem = React.memo(function CollectionMediaGridIt
         onLikeToggle={handleToggleLike}
         draggable={false}
         data-collection-drop-id={col?.id}
-        onPointerDown={!isRenaming ? handlePointerDown : undefined}
+        onPointerDown={handlePointerDown}
         onDragOver={handleDragOver}
         onDragEnter={handleDragEnter}
         onDragLeave={handleDragLeave}
@@ -369,21 +328,30 @@ export const CollectionMediaGridItem = React.memo(function CollectionMediaGridIt
           </div>
         }
         bottom={
-          !isRenaming && (
-            <div className="collection-title-container">
-              <span
-                className="title-text"
-                title={collectionName}
-                onClick={handleNavigate}
-                onDoubleClick={(e) => {
-                  e.stopPropagation();
-                  startRename();
-                }}
-              >
-                {collectionName}
-              </span>
-            </div>
-          )
+          <div className="collection-title-container">
+            <span
+              className="title-text flex items-center gap-1.5"
+              title={collectionDescription ? `${collectionName} — ${collectionDescription}` : collectionName}
+              onClick={handleNavigate}
+              onDoubleClick={(e) => {
+                e.stopPropagation();
+                setEditingFolder(col);
+              }}
+            >
+              {collectionColor && (
+                <span
+                  className="size-2 rounded-full shrink-0"
+                  style={collectionColor ? { backgroundColor: collectionColor } : undefined}
+                />
+              )}
+              <span className="truncate">{collectionName}</span>
+              {collectionAssetCount !== null && (
+                <span className="text-xs text-on-surface-subtle ml-auto font-normal">
+                  {collectionAssetCount}
+                </span>
+              )}
+            </span>
+          </div>
         }
       >
         {coverUrl && (
@@ -396,7 +364,6 @@ export const CollectionMediaGridItem = React.memo(function CollectionMediaGridIt
           </div>
         )}
         {collectionTileOverlay}
-        <div ref={cardRef} className="absolute inset-0 pointer-events-none -z-10" />
       </MediaView>
 
       <ConfirmDeleteDialog
@@ -408,34 +375,40 @@ export const CollectionMediaGridItem = React.memo(function CollectionMediaGridIt
         loading={isDeleting}
       />
 
-      {isRenaming && typeof window !== "undefined" && createPortal(
-        <div className="fixed inset-0 z-50">
-          <div
-            className="fixed inset-0 bg-black/40 backdrop-blur-sm cursor-default"
-            onPointerDown={(e) => {
-              e.stopPropagation();
-              if (canDismissRef.current) setIsRenaming(false);
-            }}
-            onClick={(e) => {
-              e.stopPropagation();
-              if (canDismissRef.current) setIsRenaming(false);
-            }}
-          />
-          <div
-            className="fixed z-50 pointer-events-auto"
-            style={getPillPosition()}
-            onClick={(e) => e.stopPropagation()}
-            onMouseDown={(e) => e.stopPropagation()}
-            onPointerDown={(e) => e.stopPropagation()}
-          >
-            <InlineRenamePill
-              initialName={collectionName}
-              onSave={handleRename}
-              onCancel={() => setIsRenaming(false)}
-            />
-          </div>
-        </div>,
-        document.body
+      {createSubfolderParentId && (
+        <CreateFolderDialog
+          open={Boolean(createSubfolderParentId)}
+          onOpenChange={(open) => {
+            if (!open) setCreateSubfolderParentId(null);
+          }}
+          parentId={createSubfolderParentId}
+          projectId={projectId}
+          title="Nouveau sous-dossier"
+        />
+      )}
+
+      {editingFolder && (
+        <CreateFolderDialog
+          open={Boolean(editingFolder)}
+          onOpenChange={(open) => {
+            if (!open) setEditingFolder(null);
+          }}
+          folder={editingFolder}
+          projectId={projectId}
+          title="Edit folder"
+        />
+      )}
+
+      {movingFolder && (
+        <MoveToDialog
+          open={Boolean(movingFolder)}
+          onOpenChange={(open) => {
+            if (!open) setMovingFolder(null);
+          }}
+          projectId={projectId}
+          itemType="collection"
+          item={movingFolder}
+        />
       )}
 
       {/* ── Collection drag ghost portal ── */}
