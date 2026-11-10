@@ -155,10 +155,10 @@ describe("StudioNavbar Layout & Collection Page Header", () => {
     expect(expandedWrapper.className).not.toContain("flex-1");
   });
 
-  it("enforces padding-left: 3 (pl-3) permanently so back button aligns directly above sidebar menu icons", () => {
+  it("enforces standardized studio padding token (px-studio-navbar-padding) matching sidebar padding", () => {
     const { container } = renderWithClient(<StudioNavbar />);
     const nav = container.querySelector("nav");
-    expect(nav.className).toContain("pl-3");
+    expect(nav.className).toContain("px-studio-navbar-padding");
     expect(nav.className).not.toContain("px-3 sm:px-6");
     expect(nav.className).not.toContain("sm:pl-6");
   });

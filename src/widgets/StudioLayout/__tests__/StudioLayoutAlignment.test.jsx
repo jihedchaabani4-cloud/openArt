@@ -29,6 +29,16 @@ vi.mock("@/features/elements", () => ({
   useElementSheetWorkflows: () => ({ workflows: [] }),
 }));
 
+vi.mock("@/features/folders", async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    useProjectFolders: () => ({ data: [] }),
+    useUpdateFolder: () => ({ mutateAsync: vi.fn() }),
+    useDeleteFolder: () => ({ mutateAsync: vi.fn() }),
+  };
+});
+
 describe("LeftNavigationRail & Media Grid Baseline Alignment", () => {
   it("LeftNavigationRail aside removes py-3 / pt-3 and uses pt-0 so menu items sit cleanly under spacer", () => {
     mockNavbarHidden = false;
@@ -40,22 +50,23 @@ describe("LeftNavigationRail & Media Grid Baseline Alignment", () => {
     expect(aside.className).toContain("pt-0");
   });
 
-  it("LeftNavigationRail top spacer animates to 72px when navbar is visible", () => {
+  it("LeftNavigationRail has fixed top spacing independent of scroll and default width of 52px matching navbar height", () => {
     mockNavbarHidden = false;
-    const railFile = fs.readFileSync(
-      path.resolve(__dirname, "../LeftNavigationRail.jsx"),
-      "utf8"
-    );
-    // Spacer height must be 72 when navbar is visible (isNavbarHidden ? ... : 72)
-    expect(railFile).toMatch(/animate=\{\{\s*height:\s*isNavbarHidden\s*\?\s*\d+\s*:\s*72\s*\}\}/);
+    const { container } = render(<LeftNavigationRail />);
+    const aside = container.querySelector("aside");
+    expect(aside).toBeDefined();
+    expect(aside.style.width).toMatch(/52px/);
+
+    const spacer = container.querySelector("aside > div.shrink-0");
+    expect(spacer).toBeDefined();
   });
 
-  it("renders top nav items (Assets, Éléments, Personnages) and places Corbeille (Trash) at the bottom above Réduire", () => {
+  it("renders top nav items (Accueil, Assets, Éléments, Personnages) and places Corbeille (Trash) at the bottom above Réduire", () => {
     mockNavbarHidden = false;
     const { container } = render(<LeftNavigationRail />);
     const topNav = container.querySelector("nav");
     const topLinks = Array.from(topNav.querySelectorAll("a span.tracking-normal")).map((s) => s.textContent?.trim());
-    expect(topLinks).toEqual(["Assets", "Éléments", "Personnages"]);
+    expect(topLinks).toEqual(["Accueil", "Assets", "Éléments", "Personnages"]);
 
     const bottomContainer = container.querySelector("div.mt-auto");
     expect(bottomContainer).toBeDefined();
@@ -71,11 +82,24 @@ describe("LeftNavigationRail & Media Grid Baseline Alignment", () => {
     expect(bottomReduceBtn.className).toContain("gap-0");
     expect(bottomReduceBtn.querySelector("span.w-\\[48px\\]")).toBeDefined();
 
+    // Verify px-0.5 on containers and size M (h-button-m) on buttons
+    const topContainer = topNav.parentElement;
+    expect(topContainer?.className).toContain("px-0.5");
+    expect(bottomContainer?.className).toContain("px-0.5");
+
+    const topButtons = Array.from(topNav.querySelectorAll("a[data-slot='button']"));
+    expect(topButtons.length).toBe(4);
+    topButtons.forEach((btn) => {
+      expect(btn.className).toContain("h-button-m");
+    });
+    expect(bottomTrashLink.className).toContain("h-button-m");
+    expect(bottomReduceBtn.className).toContain("h-button-m");
+
     // Verify Corbeille precedes Réduire in DOM order (placed above it)
     expect(bottomTrashLink.compareDocumentPosition(bottomReduceBtn) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
-  it("Media grid scroll containers use pt-[72px] and remove py-3 / pt-4 across all studio views", () => {
+  it("Media grid scroll containers sit directly under navbar in flex column without artificial top padding", () => {
     const assetsFile = fs.readFileSync(
       path.resolve(__dirname, "../../../app/cinema-studio/[projectId]/assets/page.js"),
       "utf8"
@@ -93,27 +117,21 @@ describe("LeftNavigationRail & Media Grid Baseline Alignment", () => {
       "utf8"
     );
 
-    // Assets page: pt-[72px], no py-3
-    expect(assetsFile).toContain("pt-[72px]");
+    // Assets page: no artificial top padding
+    expect(assetsFile).not.toMatch(/pt-\[72px\]/);
     expect(assetsFile).not.toMatch(/pt-\[64px\]/);
-    expect(assetsFile).not.toMatch(/pt-\[72px\][^\n]*\bpy-3\b/);
 
-    // Collection page: pt-[72px], no py-3
-    expect(collectionFile).toContain("pt-[72px]");
+    // Collection page: no artificial top padding
+    expect(collectionFile).not.toMatch(/pt-\[72px\]/);
     expect(collectionFile).not.toMatch(/pt-\[64px\]/);
-    expect(collectionFile).not.toMatch(/pt-\[72px\][^\n]*\bpy-3\b/);
 
-    // Elements page: pt-[72px], no py-3, no pt-4 on grid
-    expect(elementsFile).toContain("pt-[72px]");
+    // Elements page: no artificial top padding
+    expect(elementsFile).not.toMatch(/pt-\[72px\]/);
     expect(elementsFile).not.toMatch(/pt-\[64px\]/);
-    expect(elementsFile).not.toMatch(/pt-\[72px\][^\n]*\bpy-3\b/);
-    expect(elementsFile).not.toMatch(/pb-32\s+pt-4/);
 
-    // Characters page: pt-[72px], no py-3, no pt-4 on grid
-    expect(charactersFile).toContain("pt-[72px]");
+    // Characters page: no artificial top padding
+    expect(charactersFile).not.toMatch(/pt-\[72px\]/);
     expect(charactersFile).not.toMatch(/pt-\[64px\]/);
-    expect(charactersFile).not.toMatch(/pt-\[72px\][^\n]*\bpy-3\b/);
-    expect(charactersFile).not.toMatch(/pb-32\s+pt-4/);
   });
 });
 

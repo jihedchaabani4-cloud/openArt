@@ -65,6 +65,9 @@ export const CollectionMediaGridItem = React.memo(function CollectionMediaGridIt
   };
 
   const collectionName = col?.name || "Untitled collection";
+  const collectionColor = col?.color || null;
+  const collectionDescription = col?.description || null;
+  const collectionAssetCount = typeof col?.assetCount === "number" ? col.assetCount : null;
   const collectionTileOverlay = (
     <div className="collection-tile-scrim" />
   );
@@ -372,15 +375,26 @@ export const CollectionMediaGridItem = React.memo(function CollectionMediaGridIt
           !isRenaming && (
             <div className="collection-title-container">
               <span
-                className="title-text"
-                title={collectionName}
+                className="title-text flex items-center gap-1.5"
+                title={collectionDescription ? `${collectionName} — ${collectionDescription}` : collectionName}
                 onClick={handleNavigate}
                 onDoubleClick={(e) => {
                   e.stopPropagation();
                   startRename();
                 }}
               >
-                {collectionName}
+                {collectionColor && (
+                  <span
+                    className="size-2 rounded-full shrink-0"
+                    style={collectionColor ? { backgroundColor: collectionColor } : undefined}
+                  />
+                )}
+                <span className="truncate">{collectionName}</span>
+                {collectionAssetCount !== null && (
+                  <span className="text-xs text-on-surface-subtle ml-auto font-normal">
+                    {collectionAssetCount}
+                  </span>
+                )}
               </span>
             </div>
           )

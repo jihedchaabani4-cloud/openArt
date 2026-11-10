@@ -23,7 +23,7 @@ export function getPromptBarVariant(variant = "generation") {
 export function getPromptBarContainerClassName(hideBackground = false) {
   return hideBackground
     ? "relative w-full flex flex-col"
-    : "fixed bottom-8 left-1/2 -translate-x-1/2 w-full z-50 flex items-center justify-center max-w-[650px] px-6";
+    : "absolute bottom-8 left-1/2 -translate-x-1/2 w-full z-50 flex items-center justify-center max-w-[650px] px-6";
 }
 
 export function getPromptBarContentClassName() {

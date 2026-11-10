@@ -27,20 +27,13 @@ export function TrashView({ projectId }) {
   const scrollRef = useRef(null);
   const prevScrollTop = useRef(0);
 
-  // ─── 144Hz responsive navbar toggle & scroll handler ─────
   const handleScroll = useCallback(() => {
     const el = scrollRef.current;
     if (!el) return;
 
     const currentScrollTop = el.scrollTop;
-    const isCurrentlyHidden = useGenerationsStore.getState().isNavbarHidden;
-    if (currentScrollTop > prevScrollTop.current && currentScrollTop > 80) {
-      if (!isCurrentlyHidden) setIsNavbarHidden(true);
-    } else if (currentScrollTop < prevScrollTop.current) {
-      if (isCurrentlyHidden) setIsNavbarHidden(false);
-    }
     prevScrollTop.current = currentScrollTop;
-  }, [setIsNavbarHidden]);
+  }, []);
 
   if (isLoading) {
     return (
@@ -75,7 +68,7 @@ export function TrashView({ projectId }) {
           ref={scrollRef}
           onScroll={handleScroll}
           data-scroll-container="true"
-          className="flex-1 overflow-y-auto pt-18 overflow-x-hidden px-6 sm:px-10 lg:px-14 custom-scrollbar w-full"
+          className="flex-1 overflow-y-auto overflow-x-hidden px-6 sm:px-10 lg:px-14 custom-scrollbar w-full"
         >
           <AnimatePresence mode="wait">
             {trashedWorkflows.length > 0 ? (

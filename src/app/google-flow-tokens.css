@@ -10,6 +10,22 @@
 }
 
 :root {
+  /* ── 0. Studio Layout Dimensions ── */
+  --studio-navbar-height: 52px;
+  --studio-sidebar-width: 52px;
+  --studio-sidebar-width-expanded: 230px;
+  --studio-navbar-padding: 5px;
+  --studio-sidebar-padding: 0px;
+
+  /* ── 0.1 Button Sizing Tokens (s / m / l) ── */
+  --button-height-s: 32px;
+  --button-height-m: 36px;
+  --button-height-l: 42px;
+
+  /* ── 0.2 Folder & Brand Color Tokens ── */
+  --color-lime: #d1fe17;
+  --color-lime--rgb: 209, 254, 23;
+
   /* ── 1. Glass & Panels ── */
   --glass-raised-box-shadow: 0 16px 32px -8px rgba(0, 0, 0, 0.4);
   --flow-panel-border-radius: 20px;

@@ -20,10 +20,30 @@ export function useDeleteFolder() {
       }
       return folderId;
     },
-    getCacheKeys: ({ projectId }) => (projectId ? [queryKeys.folders.byProject(projectId)] : []),
+    getCacheKeys: ({ projectId }) =>
+      projectId
+        ? [queryKeys.folders.byProject(projectId), queryKeys.projectData.byProject(projectId)]
+        : [],
     getEntityKey: ({ folderId }) => folderEntity(folderId),
-    applyOptimistic: (oldFolders, { folderId }) => {
-      return removeById(oldFolders, folderId, matchFolderId);
+    applyOptimistic: (oldData, { folderId }) => {
+      if (Array.isArray(oldData)) {
+        return removeById(oldData, folderId, matchFolderId);
+      }
+
+      if (oldData?.projectContents) {
+        const currentCols = oldData.projectContents.collections || oldData.projectContents.folders || [];
+        const updated = removeById(currentCols, folderId, matchFolderId);
+        return {
+          ...oldData,
+          projectContents: {
+            ...oldData.projectContents,
+            collections: updated,
+            folders: updated,
+          },
+        };
+      }
+
+      return oldData;
     },
     invalidateKeys: ({ projectId }) => [
       ...(projectId

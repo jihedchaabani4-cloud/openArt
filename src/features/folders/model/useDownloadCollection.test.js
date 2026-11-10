@@ -170,15 +170,13 @@ describe("downloadCollectionAsZip", () => {
     api.getBlob.mockResolvedValue(mockBlob);
 
     api.get.mockImplementation(async (endpoint) => {
-      if (endpoint === "/projects/proj-remote/folders") {
-        return { items: [{ id: "col-remote", name: "Remote Col", parentId: null }] };
-      }
       if (endpoint === "/workflows/project-data/proj-remote") {
         return {
           result: {
             data: {
               json: {
                 projectContents: {
+                  collections: [{ id: "col-remote", name: "Remote Col", parentId: null }],
                   workflows: [
                     { id: "wf-remote-1", folder_id: "col-remote", title: "Fetched Art" },
                   ],
@@ -207,7 +205,6 @@ describe("downloadCollectionAsZip", () => {
 
     expect(result.success).toBe(true);
     expect(result.totalFiles).toBe(1);
-    expect(api.get).toHaveBeenCalledWith("/projects/proj-remote/folders");
     expect(api.get).toHaveBeenCalledWith("/workflows/project-data/proj-remote");
     expect(downloadBlob).toHaveBeenCalledWith(expect.any(Blob), "Remote Col.zip");
   });

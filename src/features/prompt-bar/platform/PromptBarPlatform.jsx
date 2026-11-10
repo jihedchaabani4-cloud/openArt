@@ -473,7 +473,7 @@ function PromptBarPlatformInner({
   return (
     <div
       ref={containerRef}
-      className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 w-full max-w-[650px] px-6 flex flex-col items-center gap-2 pointer-events-none"
+      className="absolute bottom-8 left-1/2 -translate-x-1/2 z-50 w-full max-w-[650px] px-6 flex flex-col items-center gap-2 pointer-events-none"
     >
       {topPanelZone}
       <div className="w-full pointer-events-auto">

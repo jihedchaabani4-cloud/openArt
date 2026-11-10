@@ -28,7 +28,6 @@ import { logger } from "@/shared/lib/logger";
 
 const PAGE_SIZE = 30;
 
-// Media grid scroll container aligns with assets/elements/characters: pt-[72px]
 export default function CollectionDetailPage({ params }) {
   const { projectId, collectionId } = React.use(params);
   const router = useRouter();
@@ -205,12 +204,6 @@ export default function CollectionDetailPage({ params }) {
     if (!el) return;
 
     const currentScrollTop = el.scrollTop;
-    const isCurrentlyHidden = useGenerationsStore.getState().isNavbarHidden;
-    if (currentScrollTop > prevScrollTop.current && currentScrollTop > 80) {
-      if (!isCurrentlyHidden) setIsNavbarHidden(true);
-    } else if (currentScrollTop < prevScrollTop.current) {
-      if (isCurrentlyHidden) setIsNavbarHidden(false);
-    }
     prevScrollTop.current = currentScrollTop;
 
     if (hasMore) {
@@ -219,7 +212,7 @@ export default function CollectionDetailPage({ params }) {
         loadMore();
       }
     }
-  }, [hasMore, loadMore, setIsNavbarHidden]);
+  }, [hasMore, loadMore]);
 
   // Upload handler for this collection
   const fileInputRef = React.useRef(null);
@@ -322,7 +315,7 @@ export default function CollectionDetailPage({ params }) {
           ref={scrollRef}
           onScroll={handleScroll}
           data-scroll-container="true"
-          className="flex-1 overflow-y-auto pt-18 overflow-x-hidden px-3 custom-scrollbar"
+          className="flex-1 overflow-y-auto overflow-x-hidden p-0 custom-scrollbar"
         >
           {/* Root drop zone (move out of collection) */}
           <AnimatePresence>

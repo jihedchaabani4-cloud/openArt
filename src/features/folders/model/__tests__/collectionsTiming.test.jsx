@@ -29,59 +29,12 @@ function createWrapper() {
   return { queryClient, wrapper };
 }
 
-describe("Collections vs Workflows Initial Load Timing Analysis", () => {
+describe("Collections Centralized Data Architecture (GET /api/workflows/project-data/:projectId)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it("exposes the timing gap: workflows are immediately available from layout cache while folders are still in-flight", async () => {
-    const { queryClient, wrapper } = createWrapper();
-
-    // 1. Simulate StudioLayout having already fetched and cached projectData:
-    queryClient.setQueryData(queryKeys.projectData.byProject("proj-1"), {
-      projectName: "Test Project",
-      projectId: "proj-1",
-      projectContents: {
-        workflows: [
-          { id: "wf-1", name: "Workflow 1", workflow_type: "GENERATION" },
-          { id: "wf-2", name: "Workflow 2", workflow_type: "GENERATION" },
-        ],
-        media: [],
-      },
-    });
-
-    // 2. Folders API has latency (takes a delay to resolve):
-    let resolveFolders;
-    const foldersPromise = new Promise((resolve) => {
-      resolveFolders = resolve;
-    });
-    api.get.mockReturnValueOnce(foldersPromise);
-
-    // 3. Render both hooks as AssetsPage does:
-    const { result: workflowsHook } = renderHook(() => useFilteredWorkflows("proj-1"), { wrapper });
-    const { result: foldersHook } = renderHook(() => useProjectFolders("proj-1"), { wrapper });
-
-    // VERIFICATION OF THE BUG:
-    // Workflows are IMMEDIATELY ready (0ms) because StudioLayout pre-cached them:
-    expect(workflowsHook.current.filteredCount).toBe(2);
-    expect(workflowsHook.current.isLoading).toBe(false);
-
-    // But folders are STILL LOADING because StudioLayout never fetched them:
-    expect(foldersHook.current.isLoading).toBe(true);
-    expect(foldersHook.current.data).toBeUndefined();
-
-    // Resolve folders now:
-    resolveFolders([
-      { id: "col-1", name: "Collection 1", parentId: null },
-    ]);
-
-    await waitFor(() => {
-      expect(foldersHook.current.isLoading).toBe(false);
-      expect(foldersHook.current.data).toHaveLength(1);
-    });
-  });
-
-  it("verifies the fix: when StudioLayout fetches both queries concurrently, both arrive together with 0ms delay", async () => {
+  it("verifies centralized loading: collections and workflows arrive simultaneously from project-data with no separate /folders request", async () => {
     const { wrapper } = createWrapper();
 
     api.get.mockImplementation(async (url) => {
@@ -91,14 +44,21 @@ describe("Collections vs Workflows Initial Load Timing Analysis", () => {
             projectName: "Test Project",
             projectId: "proj-1",
             projectContents: {
+              collections: [
+                {
+                  id: "col-1",
+                  name: "Collection 1",
+                  color: "#EC4899",
+                  description: "Test description",
+                  parentId: null,
+                  assetCount: 1,
+                },
+              ],
               workflows: [{ id: "wf-1", name: "Workflow 1", workflow_type: "GENERATION" }],
               media: [],
             },
           },
         };
-      }
-      if (url.includes("/folders")) {
-        return [{ id: "col-1", name: "Collection 1", parentId: null }];
       }
       return null;
     });
@@ -117,16 +77,22 @@ describe("Collections vs Workflows Initial Load Timing Analysis", () => {
     // Initially loading
     expect(layoutQueries.current.isLoading).toBe(true);
 
-    // Wait until both queries resolve in parallel
+    // Wait until project-data resolves
     await waitFor(() => {
       expect(layoutQueries.current.isLoading).toBe(false);
     });
 
-    // When layout finishes loading, BOTH datasets are completely populated simultaneously:
+    // Verify BOTH datasets are populated from a single network call:
     expect(layoutQueries.current.project.data?.projectContents?.workflows).toHaveLength(1);
     expect(layoutQueries.current.folders.data).toHaveLength(1);
+    expect(layoutQueries.current.folders.data[0].color).toBe("#EC4899");
+    expect(layoutQueries.current.folders.data[0].assetCount).toBe(1);
 
-    // Now, any child page (like AssetsPage) reading from cache immediately gets both on frame 0:
+    // Verify that NO standalone /folders API call was made
+    const calls = api.get.mock.calls.map(([url]) => url);
+    expect(calls.some((url) => url.includes("/projects/proj-1/folders"))).toBe(false);
+
+    // Child components reading from cache immediately get both on frame 0:
     const { result: childWorkflows } = renderHook(() => useFilteredWorkflows("proj-1"), { wrapper });
     const { result: childFolders } = renderHook(() => useProjectFolders("proj-1"), { wrapper });
 
@@ -134,5 +100,36 @@ describe("Collections vs Workflows Initial Load Timing Analysis", () => {
     expect(childFolders.current.isLoading).toBe(false);
     expect(childWorkflows.current.filteredCount).toBe(1);
     expect(childFolders.current.data).toHaveLength(1);
+    expect(childFolders.current.data[0].name).toBe("Collection 1");
+  });
+
+  it("instant cache hydration: when projectData is already in cache, useProjectFolders returns collections on frame 0", () => {
+    const { queryClient, wrapper } = createWrapper();
+
+    queryClient.setQueryData(queryKeys.projectData.byProject("proj-1"), {
+      projectName: "Test Project",
+      projectId: "proj-1",
+      projectContents: {
+        collections: [
+          {
+            id: "col-1",
+            name: "Collection 1",
+            color: "#3B82F6",
+            description: "Instant cache collection",
+            parentId: null,
+            assetCount: 5,
+          },
+        ],
+        workflows: [{ id: "wf-1", name: "Workflow 1" }],
+        media: [],
+      },
+    });
+
+    const { result: foldersHook } = renderHook(() => useProjectFolders("proj-1"), { wrapper });
+
+    expect(foldersHook.current.isLoading).toBe(false);
+    expect(foldersHook.current.data).toHaveLength(1);
+    expect(foldersHook.current.data[0].id).toBe("col-1");
+    expect(foldersHook.current.data[0].color).toBe("#3B82F6");
   });
 });

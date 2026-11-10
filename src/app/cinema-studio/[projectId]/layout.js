@@ -139,11 +139,11 @@ export default function StudioLayout({ children }) {
                         className="flex-1 flex flex-col overflow-hidden"
                     >
                         {!isEditPage ? (
-                            <div className="flex-1 min-h-0 flex flex-col relative overflow-hidden">
-                                <StudioNavbar />
-                                <div className="flex-1 min-h-0 flex overflow-hidden relative">
-                                    {!isTrashPage && <LeftNavigationRail />}
-                                    <div className="flex-1 min-w-0 flex flex-col relative overflow-hidden">
+                            <div className="flex-1 min-h-0 flex overflow-hidden relative w-full h-full p-2 gap-2 bg-background">
+                                {!isTrashPage && <LeftNavigationRail />}
+                                <div className="flex-1 min-w-0 flex flex-col relative overflow-hidden h-full rounded-3xl border border-border bg-background">
+                                    <StudioNavbar />
+                                    <div className="flex-1 min-h-0 relative overflow-hidden flex flex-col">
                                         {children}
                                     </div>
                                 </div>
