@@ -48,7 +48,7 @@ export function DropdownShell({
           type="button"
           variant="ghost"
           className={cn(
-            "size-9 rounded-sm flex items-center justify-center transition-all p-0",
+            "size-9 rounded-lg flex items-center justify-center transition-all p-0",
             isActive
               ? "bg-transparent text-on-surface"
               : "text-on-surface-variant hover:bg-white/[0.08] hover:text-on-surface"
@@ -170,7 +170,7 @@ export const DropdownSegmented = React.memo(function DropdownSegmented({
               disabled={opt.disabled}
               style={itemStyle}
               className={cn(
-                "toggle flex-toggle rounded-sm h-8 min-h-8 text-xs-plus font-medium transition-all flex items-center justify-center relative",
+                "toggle flex-toggle rounded-lg h-8 min-h-8 text-xs-plus font-medium transition-all flex items-center justify-center relative",
                 compact ? "p-1.5 size-12 shrink-0 [&_svg]:size-full" : "flex-row gap-1.5 px-3 py-1 flex-1 min-w-fit",
                 visibleCount ? "flex-none" : !compact ? "flex-1 min-w-fit" : "",
                 isDragging && "pointer-events-none",

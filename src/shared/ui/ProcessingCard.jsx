@@ -31,7 +31,7 @@ export function ProcessingCard({
   return (
     <div
       className={cn(
-        "relative overflow-hidden rounded-xxxs bg-(--surface-processing) select-none",
+        "relative overflow-hidden rounded-2xl border border-qc-border-subtle bg-surface-primary select-none",
         !aspectRatio && !className?.includes("aspect-") && !style?.aspectRatio ? "aspect-video" : "",
         className
       )}

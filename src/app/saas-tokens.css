@@ -1,0 +1,132 @@
+/**
+ * SaaS Design System Tokens & Utility Classes
+ * Extracted directly from Production Specifications (pasted-text-4.txt & pasted-text-6.txt)
+ *
+ * ═══════════════════════════════════════════════════════════════════════════════
+ * ARCHITECTURAL HIERARCHY:
+ * 1. SURFACE LADDER:
+ *    - Canvas (HTML Root): #0f1113 (rgb(15, 17, 19))
+ *    - Panel / Studio Canvas: #131416 (rgb(19, 20, 22), .bg-qc-background-primary)
+ *    - Card / Composer Container: #1c1e20 (rgb(28, 30, 32), .bg-surface-card)
+ *    - Elevated / Modal Container: #1c1e20 (backdrop blur, 16px/20px radius)
+ *    - Micro Layers / Action Chips: rgba(255, 255, 255, 0.05) (.bg-neutral-primary-reverted-5)
+ *    - Micro Layers Hover: rgba(255, 255, 255, 0.10) (.hover:bg-neutral-primary-reverted-10)
+ *
+ * 2. BRAND & ACCENT:
+ *    - Brand Neon Lime: #d1fe17 (rgb(209, 254, 23), .bg-surface-brand, .bg-primary)
+ *    - Brand Contrast Foreground: #131517 / #2F3907 (.text-font-brand-secondary)
+ *    - Tactile Generate Shadow: inset 0 -3px 0 0 #829b19
+ *
+ * 3. FOREGROUND & TYPOGRAPHY:
+ *    - Primary Text: #f7f7f8 (.text-qc-text-primary, .text-font-primary)
+ *    - Secondary Text: #898a8b (.text-qc-text-secondary, .text-font-secondary)
+ *    - Subtle Text: #828282 (.text-q-text-secondary, .text-on-surface-subtle)
+ *    - White Reverted: #ffffff (.text-font-primary-reverted)
+ *
+ * 4. BORDERS & SEPARATORS:
+ *    - Subtle Border: rgba(255, 255, 255, 0.05) (.border-qc-border-subtle, border-white/5)
+ *    - Card Separator: rgba(255, 255, 255, 0.05) (.border-separator-card)
+ *    - Default Border: rgba(255, 255, 255, 0.10) (.border-q-border-default)
+ *
+ * 5. RADIUS SCALE:
+ *    - 6px: rounded-sm (compact chips, mini badges)
+ *    - 8px: rounded-md / rounded-lg (standard buttons, select triggers, icons)
+ *    - 12px: rounded-xl (cards, action chips, dropdown menus)
+ *    - 16px: rounded-2xl (sidebars, dialogs, media cards)
+ *    - 20px: rounded-[20px] (prompt bar container shell)
+ *    - 24px: rounded-3xl (expanded panels)
+ *    - 9999px: rounded-full (pills, circular avatar/action buttons)
+ * ═══════════════════════════════════════════════════════════════════════════════
+ */
+
+@layer utilities {
+  /* ── Background Utilities ── */
+  .bg-qc-background-primary {
+    background-color: var(--surface-panel, #131416) !important;
+  }
+  .bg-qc-background-secondary {
+    background-color: var(--surface-card, #1c1e20) !important;
+  }
+  .bg-surface-primary {
+    background-color: var(--surface-panel, #131416);
+  }
+  .bg-surface-card {
+    background-color: var(--surface-card, #1c1e20);
+  }
+  .bg-surface-canvas {
+    background-color: var(--surface-canvas, #0f1113);
+  }
+  .bg-surface-brand {
+    background-color: var(--color-lime, #d1fe17);
+  }
+  .bg-neutral-primary-reverted-5,
+  .bg-neutral-primary-reverted\/5 {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+  .hover\:bg-neutral-primary-reverted-10:hover,
+  .hover\:bg-neutral-primary-reverted\/10:hover {
+    background-color: rgba(255, 255, 255, 0.10);
+  }
+  .hover\:bg-qc-overlay-hover:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+
+  /* ── Foreground / Text Utilities ── */
+  .text-qc-text-primary,
+  .text-font-primary {
+    color: var(--color-q-text-primary, #f7f7f8);
+  }
+  .text-qc-text-secondary,
+  .text-font-secondary {
+    color: var(--color-q-text-secondary, #898a8b);
+  }
+  .text-q-text-secondary {
+    color: #828282;
+  }
+  .text-font-primary-reverted {
+    color: #ffffff;
+  }
+  .text-font-brand-secondary {
+    color: #2F3907;
+  }
+
+  /* ── Border & Outline Utilities ── */
+  .border-qc-border-subtle {
+    border-color: rgba(255, 255, 255, 0.05);
+  }
+  .border-separator-card {
+    border-color: rgba(255, 255, 255, 0.05);
+  }
+  .border-q-border-default {
+    border-color: rgba(255, 255, 255, 0.10);
+  }
+
+  /* ── Tactile Brand CTA Utility ── */
+  .btn-generate-tactile {
+    background-color: #d1fe17;
+    color: #131517;
+    box-shadow: inset 0 -3px 0 0 #829b19;
+    font-weight: 600;
+    transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .btn-generate-tactile:hover {
+    filter: brightness(1.05);
+  }
+  .btn-generate-tactile:active {
+    transform: scale(0.97);
+    box-shadow: inset 0 -1px 0 0 #829b19;
+  }
+  .btn-generate-tactile:disabled {
+    opacity: 0.4;
+    box-shadow: none;
+    pointer-events: none;
+  }
+
+  /* ── Interactive Tap Feedback ── */
+  .interactive-tap {
+    transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.15s ease;
+  }
+  .interactive-tap:active {
+    transform: scale(0.96);
+  }
+}
