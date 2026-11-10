@@ -29,7 +29,7 @@ import { Slot } from "radix-ui";
 import { cn } from "@/shared/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap font-sans text-sm font-semibold antialiased shadow-none transition-all disabled:pointer-events-none disabled:opacity-50 shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-white/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap font-sans text-sm font-semibold antialiased shadow-none transition-all disabled:pointer-events-none disabled:opacity-50 shrink-0 max-h-full min-h-0 outline-none focus-visible:ring-2 focus-visible:ring-white/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {
@@ -54,9 +54,15 @@ const buttonVariants = cva(
         "flow-ghost":
           "h-8 px-2 rounded-sm bg-transparent text-on-surface-variant hover:bg-white/[0.08] hover:text-on-surface border-none",
       },
+      size: {
+        s: "h-button-s",
+        m: "h-button-m",
+        l: "h-button-l",
+      },
     },
     defaultVariants: {
       variant: "ghost",
+      size: "m",
     },
   }
 );
@@ -65,6 +71,7 @@ const Button = React.forwardRef(function Button(
   {
     className,
     variant = "ghost",
+    size = "m",
     asChild = false,
     ...props
   },
@@ -72,13 +79,14 @@ const Button = React.forwardRef(function Button(
 ) {
   const Comp = asChild ? Slot.Root : "button";
   const resolvedVariant = variant === "default" || !variant ? "ghost" : variant;
+  const resolvedSize = size ? String(size).toLowerCase() : "m";
 
   return (
     <Comp
       ref={ref}
       data-slot="button"
       data-variant={resolvedVariant}
-      className={cn(buttonVariants({ variant: resolvedVariant }), className)}
+      className={cn(buttonVariants({ variant: resolvedVariant, size: resolvedSize }), className)}
       {...props}
     />
   );

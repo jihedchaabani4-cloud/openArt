@@ -85,20 +85,12 @@ export default function CharactersPage({ params }) {
         setIsNavbarHidden(false);
     }, [projectId, sheetsListKey, setIsNavbarHidden]);
 
-    // ─── 144Hz responsive navbar toggle & scroll handler ─────
+    // ─── 144Hz responsive infinite scroll handler ─────
     const handleScroll = React.useCallback(() => {
         const el = scrollRef.current;
         if (!el) return;
 
         const currentScrollTop = el.scrollTop;
-
-        // Navbar auto-hide on scroll down (> 80px), reveal on scroll up
-        const isCurrentlyHidden = useGenerationsStore.getState().isNavbarHidden;
-        if (currentScrollTop > prevScrollTop.current && currentScrollTop > 80) {
-            if (!isCurrentlyHidden) setIsNavbarHidden(true);
-        } else if (currentScrollTop < prevScrollTop.current) {
-            if (isCurrentlyHidden) setIsNavbarHidden(false);
-        }
         prevScrollTop.current = currentScrollTop;
 
         if (hasMore) {
@@ -107,7 +99,7 @@ export default function CharactersPage({ params }) {
                 loadMore();
             }
         }
-    }, [hasMore, loadMore, setIsNavbarHidden]);
+    }, [hasMore, loadMore]);
 
     React.useEffect(() => {
         const el = scrollRef.current;
@@ -140,7 +132,7 @@ export default function CharactersPage({ params }) {
                     ref={scrollRef}
                     onScroll={handleScroll}
                     data-scroll-container="true"
-                    className="flex-1 overflow-y-auto pt-[72px] overflow-x-hidden px-3 custom-scrollbar w-full"
+                    className="flex-1 overflow-y-auto overflow-x-hidden p-0 custom-scrollbar w-full"
                 >
                     {visibleSheets.length === 0 ? (
                         <div className="w-full flex flex-col items-center justify-center py-28 text-center">

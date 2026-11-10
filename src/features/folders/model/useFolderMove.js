@@ -56,6 +56,19 @@ export function resolveMoveOutTarget({ folders = [], currentFolderId, itemType, 
   }
 
   return null;
+}/**
+ * Returns true if targetId is the folder itself or any descendant of folderId.
+ */
+export function isFolderDescendant(folders, folderId, targetId) {
+  if (!folderId || !targetId || !Array.isArray(folders)) return false;
+  if (folderId === targetId) return true;
+
+  let currentParentId = getParentFolderId(folders, targetId);
+  while (currentParentId) {
+    if (currentParentId === folderId) return true;
+    currentParentId = getParentFolderId(folders, currentParentId);
+  }
+  return false;
 }
 
 /**

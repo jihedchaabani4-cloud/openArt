@@ -20,24 +20,48 @@ export function useUpdateFolder() {
       }
       return res?.data ?? res;
     },
-    getCacheKeys: ({ projectId }) => (projectId ? [queryKeys.folders.byProject(projectId)] : []),
+    getCacheKeys: ({ projectId }) =>
+      projectId
+        ? [queryKeys.folders.byProject(projectId), queryKeys.projectData.byProject(projectId)]
+        : [],
     getEntityKey: ({ folderId }) => folderEntity(folderId),
-    applyOptimistic: (oldFolders, { folderId, patch }) => {
-      if (!Array.isArray(oldFolders)) return oldFolders;
-      return oldFolders.map((f) => {
-        if (matchFolderId(f, folderId)) {
-          let updated = f;
-          if (patch?.name !== undefined) {
-            updated = patchFolderName(updated, patch.name);
+    applyOptimistic: (oldData, { folderId, patch }) => {
+      const updateList = (list) => {
+        if (!Array.isArray(list)) return list;
+        return list.map((f) => {
+          if (matchFolderId(f, folderId)) {
+            let updated = f;
+            if (patch?.name !== undefined) {
+              updated = patchFolderName(updated, patch.name);
+            }
+            if (patch?.parentId !== undefined || patch?.parent_id !== undefined) {
+              const pId = patch.parentId !== undefined ? patch.parentId : patch.parent_id;
+              updated = patchFolderParent(updated, pId);
+            }
+            return { ...updated, ...patch };
           }
-          if (patch?.parentId !== undefined || patch?.parent_id !== undefined) {
-            const pId = patch.parentId !== undefined ? patch.parentId : patch.parent_id;
-            updated = patchFolderParent(updated, pId);
-          }
-          return { ...updated, ...patch };
-        }
-        return f;
-      });
+          return f;
+        });
+      };
+
+      if (Array.isArray(oldData)) {
+        return updateList(oldData);
+      }
+
+      if (oldData?.projectContents) {
+        const currentCols = oldData.projectContents.collections || oldData.projectContents.folders || [];
+        const updated = updateList(currentCols);
+        return {
+          ...oldData,
+          projectContents: {
+            ...oldData.projectContents,
+            collections: updated,
+            folders: updated,
+          },
+        };
+      }
+
+      return oldData;
     },
     invalidateKeys: ({ projectId }) => [
       ...(projectId
