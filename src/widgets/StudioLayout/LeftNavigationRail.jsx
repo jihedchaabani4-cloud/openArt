@@ -18,6 +18,7 @@ import {
 } from "@/shared/ui/context-menu";
 import { CreateFolderDialog } from "@/shared/ui/CreateFolderDialog";
 import { ConfirmDeleteDialog } from "@/shared/ui/ConfirmDeleteDialog";
+import { MoveToDialog } from "@/shared/ui/MoveToDialog";
 import { cn } from "@/shared/lib/utils";
 import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows";
 import { useCharacterWorkflows } from "@/features/characters";
@@ -109,6 +110,7 @@ export function LeftNavigationRail() {
   const [createSubfolderParentId, setCreateSubfolderParentId] = useState(null);
   const [deletingFolder, setDeletingFolder] = useState(null);
   const [editingFolder, setEditingFolder] = useState(null);
+  const [movingFolder, setMovingFolder] = useState(null);
 
   const handleSetColor = async (folderId, colorHex) => {
     if (!folderId || !selectedProjectId) return;
@@ -263,6 +265,10 @@ export function LeftNavigationRail() {
         <ContextMenuItem onClick={() => setEditingFolder(node)}>
           <GoogleIcon iconName="edit" className="text-base" />
           <span>Edit</span>
+        </ContextMenuItem>
+        <ContextMenuItem onClick={() => setMovingFolder(node)}>
+          <GoogleIcon iconName="drive_file_move" className="text-base" />
+          <span>Déplacer vers...</span>
         </ContextMenuItem>
         <ContextMenuSeparator />
         <ContextMenuSub>
@@ -441,6 +447,18 @@ export function LeftNavigationRail() {
           folder={editingFolder}
           projectId={selectedProjectId}
           title="Edit folder"
+        />
+      )}
+
+      {movingFolder && (
+        <MoveToDialog
+          open={Boolean(movingFolder)}
+          onOpenChange={(open) => {
+            if (!open) setMovingFolder(null);
+          }}
+          projectId={selectedProjectId}
+          itemType="collection"
+          item={movingFolder}
         />
       )}
 
