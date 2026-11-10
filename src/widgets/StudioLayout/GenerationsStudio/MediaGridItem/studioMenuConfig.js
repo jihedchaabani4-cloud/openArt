@@ -1,3 +1,5 @@
+import { FOLDER_COLOR_OPTIONS, DEFAULT_FOLDER_GRADIENT } from "@/features/folders/model/folder-color-tokens";
+
 /**
  * Detects the entity type of a workflow:
  * - "character"
@@ -79,7 +81,7 @@ function sanitizeSeparators(items) {
 export function getStudioMenuItems({
   type = "generation",
   workflow: _workflow = null,
-  item: _item = null,
+  item = null,
   actions = {},
   state = {},
 }) {
@@ -95,7 +97,23 @@ export function getStudioMenuItems({
     onDelete,
     toggleTileDetails,
     onRename,
+    handleOpenInNewTab,
+    onOpenInNewTab,
+    handleCreateSubfolder,
+    onCreateSubfolder,
+    handleEdit,
+    onEdit,
+    handleMoveTo,
+    onMoveTo,
+    handleSetColor,
+    onSetColor,
   } = actions;
+
+  const openInNewTabAction = handleOpenInNewTab || onOpenInNewTab;
+  const createSubfolderAction = handleCreateSubfolder || onCreateSubfolder;
+  const editAction = handleEdit || onEdit;
+  const moveToAction = handleMoveTo || onMoveTo;
+  const setColorAction = handleSetColor || onSetColor;
 
   const {
     isLiked = false,
@@ -203,6 +221,34 @@ export function getStudioMenuItems({
   });
 
   // Folder / Collection specific items
+  const itemFolderOpenInNewTab = {
+    key: "open_in_new",
+    label: "Open in new tab",
+    icon: "open_in_new",
+    onClick: openInNewTabAction,
+  };
+
+  const itemFolderNewSubfolder = {
+    key: "create_new_folder",
+    label: "New subfolder",
+    icon: "create_new_folder",
+    onClick: createSubfolderAction,
+  };
+
+  const itemFolderEdit = {
+    key: "edit",
+    label: "Edit",
+    icon: "edit",
+    onClick: editAction,
+  };
+
+  const itemFolderMoveTo = {
+    key: "drive_file_move",
+    label: "Move to...",
+    icon: "drive_file_move",
+    onClick: moveToAction,
+  };
+
   const itemFolderLike = {
     key: "like",
     label: isLiked ? "Unlike collection" : "Like collection",
@@ -218,6 +264,34 @@ export function getStudioMenuItems({
     icon: "download",
     disabled: isDownloading,
     onClick: handleDownload,
+  };
+
+  const folderColor = state.folderColor || (item?.color ?? null);
+  const colorSubItems = (FOLDER_COLOR_OPTIONS || []).map((c) => ({
+    key: `color-${c.id}`,
+    label: c.label,
+    hex: c.hex,
+    bgClass: c.bgClass,
+    checked: folderColor?.toLowerCase() === c.hex.toLowerCase(),
+    onClick: () => setColorAction?.(c.hex),
+  })).concat([
+    { key: "sep-color-default", type: "separator" },
+    {
+      key: "color-default",
+      label: "Blanc (Défaut)",
+      hex: null,
+      bgClass: "border border-border folder-swatch-white",
+      checked: !folderColor || folderColor.toLowerCase() === DEFAULT_FOLDER_GRADIENT?.hex?.toLowerCase(),
+      onClick: () => setColorAction?.(null),
+    },
+  ]);
+
+  const itemFolderColor = {
+    key: "color",
+    label: "Color",
+    icon: "palette",
+    onClick: setColorAction,
+    subItems: colorSubItems,
   };
 
   const itemFolderDelete = {
@@ -236,9 +310,15 @@ export function getStudioMenuItems({
     case "collection":
     case "folder":
       rawItems = [
+        itemFolderOpenInNewTab,
+        itemFolderNewSubfolder,
+        itemFolderEdit,
+        itemFolderMoveTo,
         itemFolderLike,
-        ...(handleDownload ? [itemFolderDownload] : []),
-        ...(onRename ? [itemRename] : []),
+        itemFolderDownload,
+        separator("color"),
+        itemFolderColor,
+        separator("delete"),
         itemFolderDelete,
       ];
       break;

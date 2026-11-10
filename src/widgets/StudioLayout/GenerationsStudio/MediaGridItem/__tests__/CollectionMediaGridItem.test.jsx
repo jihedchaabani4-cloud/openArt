@@ -23,12 +23,16 @@ vi.mock("@/features/workflows/model/useWorkflowsStore", () => ({
 const mockDownloadCollection = vi.fn();
 const mockDeleteFolder = vi.fn();
 let mockIsDeleting = false;
-vi.mock("@/features/folders", () => ({
-  useUpdateFolder: () => ({ mutateAsync: vi.fn() }),
-  useDeleteFolder: () => ({ mutateAsync: mockDeleteFolder, isPending: mockIsDeleting }),
-  useFolderMove: () => ({ moveItem: vi.fn(), executeMoveFromPayload: vi.fn() }),
-  useDownloadCollection: () => ({ downloadCollection: mockDownloadCollection, isDownloading: false }),
-}));
+vi.mock("@/features/folders", async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    useUpdateFolder: () => ({ mutateAsync: vi.fn() }),
+    useDeleteFolder: () => ({ mutateAsync: mockDeleteFolder, isPending: mockIsDeleting }),
+    useFolderMove: () => ({ moveItem: vi.fn(), executeMoveFromPayload: vi.fn() }),
+    useDownloadCollection: () => ({ downloadCollection: mockDownloadCollection, isDownloading: false }),
+  };
+});
 
 vi.mock("@/features/studio", () => ({
   usePromptStore: Object.assign(
