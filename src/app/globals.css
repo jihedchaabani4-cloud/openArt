@@ -225,7 +225,7 @@ mat-icon {
   --radius-comfortable: var(--radius-md, 8px);
   --radius-generous: var(--radius-lg, 12px);
 
-  /* Runway Zero Box-Shadow Law (depth from contrast & photography, not elevation) */
+  /* SaaS Flat & Subtle Depth System (depth from surface contrast, not heavy elevation) */
   --shadow-2xs: none;
   --shadow-xs: none;
   --shadow-sm: none;
@@ -235,7 +235,7 @@ mat-icon {
   --shadow-2xl: none;
   --shadow: none;
 
-  /* Runway Spacing Scale (8px Base Scale with Micro Steps) */
+  /* SaaS Spacing Scale */
   --spacing-xxs: 4px;
   --spacing-xs: 6px;
   --spacing-sm: 8px;
@@ -261,7 +261,7 @@ mat-icon {
   --spacing-button-m: var(--button-height-m, 36px);
   --spacing-button-l: var(--button-height-l, 42px);
 
-  /* Runway Cinema Max-Widths */
+  /* Studio Layout Max-Widths */
   --container-cinema: 1600px;
   --container-editorial: 1280px;
   --container-compact: 980px;
@@ -315,7 +315,7 @@ mat-icon {
   --color-border-default: rgba(255, 255, 255, 0.10);
   --color-background-state-75: var(--background-state-75, rgba(22, 23, 24, 0.75));
 
-  /* Google Flow & Material 3 Official Tokens */
+  /* SaaS Official Tokens (pasted-text-3.txt) */
   --color-surface-container-lowest: var(--surface-container-lowest, #0f1113);
   --color-surface: var(--surface, #131416);
   --color-surface-container-low: var(--surface-container-low, #131416);
@@ -330,7 +330,7 @@ mat-icon {
   --color-outline: var(--outline, rgba(255, 255, 255, 0.10));
   --color-outline-interactive: var(--outline-interactive, rgba(255, 255, 255, 0.25));
 
-  /* Unified Semantic Design Tokens (Phase 1) */
+  /* Unified Semantic Design Tokens */
   --color-surface-base: var(--surface-base, var(--surface-card, #1c1e20));
   --color-surface-sunken: var(--surface-sunken, var(--surface-canvas, #0f1113));
   --color-surface-overlay: var(--surface-overlay, rgba(28, 30, 32, 0.90));
@@ -359,7 +359,7 @@ mat-icon {
   --studio-navbar-padding: 5px;
   --studio-sidebar-padding: 0px;
 
-  /* Google Flow Material 3 Surface Ladder */
+  /* SaaS Surface Ladder Hierarchy (pasted-text-3.txt) */
   --surface-container-lowest: #0f1113;
   --surface: #131416;
   --surface-container-low: #131416;
@@ -370,7 +370,7 @@ mat-icon {
   --surface-overlay: rgba(28, 30, 32, 0.90);
   --surface-brand: #d1fe17;
 
-  /* Google Flow Content & Outline Tokens */
+  /* SaaS Content & Outline Tokens */
   --on-surface: #f7f7f8;
   --on-surface-variant: #898a8b;
   --on-surface-subtle: #828282;
@@ -418,7 +418,7 @@ mat-icon {
   --text-xs-plus: 0.8125rem;
 
   /* ═════════════════════════════════════════════════════════════════
-     GLOBAL SAAS DESIGN TOKENS (Base Radius Hierarchy — 8px Base + Rounded Containers)
+     SAAS DESIGN TOKENS (Base Radius Hierarchy — pasted-text-3.txt)
      ═════════════════════════════════════════════════════════════════ */
   --radius-none: 0px;
   --radius-xxxs: 1px;    /* Micro / hairline: 1px */
@@ -433,12 +433,12 @@ mat-icon {
 
   /* Named Design Tokens */
   --radius-hairline: var(--radius-xxxs, 1px);
-  --radius-sharp: var(--radius-xs, 4px);
+  --radius-sharp: var(--radius-xs, 2px);
   --radius-subtle: var(--radius-sm, 6px);
   --radius-comfortable: var(--radius-md, 8px);
   --radius-generous: var(--radius-lg, 12px);
 
-  /* Runway Spacing Scale (8px Base Scale with Micro Steps) */
+  /* Spacing Scale (Base Scale with Micro Steps) */
   --spacing-xxs: 4px;
   --spacing-xs: 6px;
   --spacing-sm: 8px;
@@ -452,9 +452,9 @@ mat-icon {
   --spacing-section-xl: 64px;
   --spacing-section-xxl: 78px;
 
-  /* Component bindings derived 100% from base tokens */
+  /* Component bindings derived from base tokens */
   --media-border-radius: var(--radius-xs, 2px);
-  --button-border-radius: var(--radius-sm, 4px);
+  --button-border-radius: var(--radius-md, 8px);
   --card-border-radius: var(--radius-lg, 12px);
   --dialog-border-radius: var(--radius-xl, 16px);
   --panel-border-radius: var(--radius-xl, 16px);
@@ -462,35 +462,36 @@ mat-icon {
   --badge-border-radius: var(--radius-md, 8px);
   --tile-border-radius: var(--radius-lg, 12px);
 
-  /* Aliases & Material/Flow compatibility */
+  /* Aliases & Compatibility */
   --mat-button-filled-container-shape: var(--radius-sm, 4px);
+  --button-border-radius: var(--radius-sm, 4px);
   --mat-dialog-container-shape: var(--radius-xl, 16px);
   --mat-menu-container-shape: var(--radius-lg, 12px);
 
-  /* Google Flow Design Tokens */
+  /* SaaS Studio Settings & Surface Dimensions */
   --prompt-box-settings-width: 17.5rem;
   --glass-raised-box-shadow: none;
-  --background-state-90: rgba(22, 23, 24, 0.9);
+  --background-state-90: rgba(28, 30, 32, 0.95);
   --background-state-75: rgba(22, 23, 24, 0.75);
 
   --foreground-neutral-000: #fff;
-  --foreground-state-90: rgba(218, 220, 224, 0.9);
-  --foreground-state-75: rgba(218, 220, 224, 0.75);
-  --foreground-state-25: rgba(218, 220, 224, 0.25);
-  --foreground-state-15: rgba(218, 220, 224, 0.15);
-  --foreground-state-10: rgba(218, 220, 224, 0.1);
-  --foreground-state-05: rgba(218, 220, 224, 0.05);
+  --foreground-state-90: #f7f7f8;
+  --foreground-state-75: rgba(247, 247, 248, 0.75);
+  --foreground-state-25: rgba(255, 255, 255, 0.25);
+  --foreground-state-15: rgba(255, 255, 255, 0.15);
+  --foreground-state-10: rgba(255, 255, 255, 0.10);
+  --foreground-state-05: rgba(255, 255, 255, 0.05);
 
-  /* Collection Tile Tokens (Google VideoFX / ImageFX) */
+  /* Collection Tile Tokens */
   --title-padding-top: 3rem;
   --title-padding-inline-end: 4.75rem;
-  --tile-border-radius: var(--card-border-radius, 8px);
+  --tile-border-radius: var(--card-border-radius, 12px);
   --tile-scrim-gradient: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.04) 20%, rgba(0, 0, 0, 0.12) 40%, rgba(0, 0, 0, 0.25) 60%, rgba(0, 0, 0, 0.4) 80%, rgba(0, 0, 0, 0.5));
-  --collection-empty-thumbnail-background: linear-gradient(1deg, #333 0.49%, #4e4e4e 99.15%);
+  --collection-empty-thumbnail-background: linear-gradient(1deg, #1c1e20 0.49%, #282a2c 99.15%);
 
-  /* Google Flow Prompt Box & Button Layout Tokens */
+  /* Prompt Box & Button Layout Tokens */
   --prompt-box-bottom-control-height: 2rem;
-  --mat-button-filled-container-shape: var(--button-border-radius, 4px);
+  --mat-button-filled-container-shape: var(--button-border-radius, 8px);
   --mat-button-filled-horizontal-padding: 0.75rem;
   --mat-button-filled-container-color: var(--foreground-state-05);
   --mat-button-filled-label-text-size: 0.75rem;
@@ -944,19 +945,19 @@ img {
   will-change: transform;
 }
 
-/* ── Google Flow Prompt Box Settings Glassmorphism & Custom Elements ── */
+/* ── SaaS Prompt Box Settings & Custom Elements ── */
 flow-prompt-box-settings,
 .flow-prompt-box-settings,
 .settings-content-overlay {
   display: block;
   box-sizing: border-box;
   width: var(--prompt-box-settings-width, 17.5rem);
-  border-radius: var(--mat-menu-container-shape, 8px) !important;
-  background-color: var(--background-state-90, rgba(22, 23, 24, 0.9)) !important;
-  -webkit-backdrop-filter: blur(80px) !important;
-  backdrop-filter: blur(80px) !important;
-  border: 1px solid var(--border-dark, rgba(255, 255, 255, 0.1)) !important;
-  box-shadow: var(--mat-menu-container-elevation-shadow, none) !important;
+  border-radius: var(--radius-lg, 12px) !important;
+  background-color: #1c1e20 !important;
+  -webkit-backdrop-filter: blur(40px) !important;
+  backdrop-filter: blur(40px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  box-shadow: 0 12px 24px -4px rgba(0, 0, 0, 0.4) !important;
   padding: 0.5rem !important;
   color-scheme: dark;
   pointer-events: auto;
@@ -984,14 +985,14 @@ flow-credit-cost-label {
   box-sizing: border-box;
 }
 
-/* ── Google Flow Menu & Model Picker Panel ── */
+/* ── SaaS Menu & Model Picker Panel ── */
 .flow-menu-panel.mat-mdc-menu-panel {
-  border-radius: var(--radius-md, 6px) !important;
-  background-color: var(--mat-menu-container-color, var(--background-state-90, rgba(22, 23, 24, 0.9))) !important;
-  backdrop-filter: blur(80px) !important;
-  -webkit-backdrop-filter: blur(80px) !important;
-  border: 1px solid var(--border-dark, rgba(255, 255, 255, 0.1)) !important;
-  box-shadow: var(--mat-menu-container-elevation-shadow, none) !important;
+  border-radius: var(--radius-lg, 12px) !important;
+  background-color: #1c1e20 !important;
+  backdrop-filter: blur(40px) !important;
+  -webkit-backdrop-filter: blur(40px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  box-shadow: 0 12px 24px -4px rgba(0, 0, 0, 0.4) !important;
   padding: 0.375rem !important;
   min-width: var(--flow-menu-panel-min-width, 12rem) !important;
   width: var(--flow-menu-panel-width, 13rem) !important;
