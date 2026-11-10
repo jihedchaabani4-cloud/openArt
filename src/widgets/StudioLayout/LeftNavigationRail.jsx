@@ -347,7 +347,7 @@ export function LeftNavigationRail() {
       style={{
         width: isExpanded ? "var(--studio-sidebar-width-expanded, 230px)" : "var(--studio-sidebar-width, 52px)",
       }}
-      className="h-full shrink-0 relative z-40 bg-black flex flex-col select-none pt-0 pb-3 px-0 overflow-hidden rounded-3xl border border-border rail-smooth-transition"
+      className="h-full shrink-0 relative z-40 bg-transparent flex flex-col select-none pt-0 pb-3 px-0 overflow-hidden rounded-2xl border border-border rail-smooth-transition"
     >
       {/* ── Fixed Top Spacer (independent of scroll) ── */}
       <div className="w-full shrink-0 h-4" />
