@@ -52,6 +52,8 @@
   --foreground-color-danger: #fe6e6e;
 
   /* ── 3. Background Hierarchy ── */
+  --color-surface-tertiary: #0f1113;
+  --surface-tertiary: #0f1113;
   --background-color-100: #f1f3f4;
   --background-color-200: #e8eaed;
   --background-color-300: #dadce0;
