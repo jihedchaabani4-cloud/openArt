@@ -151,25 +151,25 @@
   --account-panel-overlay-z-index: 1001;
 
   /* ── 7. Material Design 3 (M3) System Tokens (Dark Mode) ── */
-  --mat-sys-background: #131314;
-  --mat-sys-surface: #131314;
-  --mat-sys-surface-dim: #131313;
+  --mat-sys-background: #131416;
+  --mat-sys-surface: #131416;
+  --mat-sys-surface-dim: #0f1113;
   --mat-sys-surface-bright: #37393b;
-  --mat-sys-surface-container-lowest: #000000;
-  --mat-sys-surface-container-low: #1b1b1b;
-  --mat-sys-surface-container: #1e1f20;
-  --mat-sys-surface-container-high: #282a2c;
-  --mat-sys-surface-container-highest: #333537;
-  --mat-sys-surface-variant: #444746;
-  --mat-sys-inverse-surface: #e3e3e3;
-  --mat-sys-inverse-on-surface: #303030;
+  --mat-sys-surface-container-lowest: #0f1113;
+  --mat-sys-surface-container-low: #131416;
+  --mat-sys-surface-container: #1c1e20;
+  --mat-sys-surface-container-high: #1c1e20;
+  --mat-sys-surface-container-highest: #282a2c;
+  --mat-sys-surface-variant: #282a2c;
+  --mat-sys-inverse-surface: #f7f7f8;
+  --mat-sys-inverse-on-surface: #131517;
 
   /* Content & On-Surface */
-  --mat-sys-on-background: #e3e3e3;
-  --mat-sys-on-surface: #e3e3e3;
-  --mat-sys-on-surface-variant: #c4c7c5;
-  --mat-sys-outline: #8e918f;
-  --mat-sys-outline-variant: #444746;
+  --mat-sys-on-background: #f7f7f8;
+  --mat-sys-on-surface: #f7f7f8;
+  --mat-sys-on-surface-variant: #898a8b;
+  --mat-sys-outline: rgba(255, 255, 255, 0.10);
+  --mat-sys-outline-variant: rgba(255, 255, 255, 0.05);
 
   /* Accents */
   --mat-sys-primary: #a8c7fa;
@@ -221,10 +221,10 @@
 .base-prompt-box {
   backdrop-filter: blur(40px);
   -webkit-backdrop-filter: blur(40px);
-  background-color: rgba(22, 23, 24, 0.90);
-  border: 1px solid rgba(218, 220, 224, 0.05);
-  border-radius: var(--radius-md, 6px);
-  color: #e3e3e3;
+  background-color: rgba(28, 30, 32, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-2xl, 20px);
+  color: #f7f7f8;
   font-family: var(--font-sans);
   width: 100%;
   transition: all 0.2s ease;
@@ -234,10 +234,10 @@
 .settings-trigger-button,
 .flow-button-chip {
   appearance: none;
-  background-color: rgba(218, 220, 224, 0.05);
+  background-color: rgba(255, 255, 255, 0.05);
   border: none;
-  border-radius: var(--radius-sm, 4px);
-  color: rgba(218, 220, 224, 0.75);
+  border-radius: var(--radius-md, 8px);
+  color: rgba(247, 247, 248, 0.75);
   font-family: var(--font-sans);
   font-size: 11px;
   font-weight: 500;
@@ -253,7 +253,7 @@
 
 .settings-trigger-button:hover,
 .flow-button-chip:hover {
-  background-color: rgba(218, 220, 224, 0.10);
+  background-color: rgba(255, 255, 255, 0.10);
   color: #ffffff;
 }
 
@@ -266,15 +266,15 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background-color: var(--mat-sys-primary, #a8c7fa);
-  color: #062e6f;
+  background-color: var(--color-lime, #d1fe17);
+  color: #131517;
   transition: all 0.2s ease;
 }
 
 .generate-icon-button:disabled,
 .flow-button-generate:disabled {
-  background-color: rgba(218, 220, 224, 0.05);
-  color: rgba(218, 220, 224, 0.50);
+  background-color: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.40);
   cursor: not-allowed;
   pointer-events: none;
 }
@@ -283,12 +283,12 @@
 .flow-icon-button-transparent {
   background: transparent;
   border: none;
-  color: rgba(218, 220, 224, 0.75);
+  color: rgba(247, 247, 248, 0.75);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--radius-sm, 4px);
+  border-radius: var(--radius-md, 8px);
   padding: 8px;
   transition: background-color 0.15s ease, color 0.15s ease;
 }
@@ -301,8 +301,8 @@
 /* ── 5. Studio Header & Title ── */
 .header-desktop {
   height: var(--header-desktop-height, 5rem);
-  background-color: var(--mat-sys-surface, #131314);
-  border-bottom: 1px solid rgba(218, 220, 224, 0.05);
+  background-color: var(--mat-sys-surface, #131416);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   display: flex;
   align-items: center;
   padding: 0 1.5rem;
@@ -318,7 +318,7 @@
   font-weight: 500;
   outline: none;
   padding: 4px 8px;
-  border-radius: var(--radius-sm, 4px);
+  border-radius: var(--radius-md, 8px);
   transition: background-color 0.15s ease;
 }
 

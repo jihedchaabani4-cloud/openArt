@@ -19,10 +19,10 @@ describe("Theme Background Tokens - Pure Black (#000000)", () => {
     expect(cssContent).not.toMatch(/--ig-primary-background:\s*12,\s*16,\s*20;/);
   });
 
-  it("enforces bg-black on LeftNavigationRail for consistent dark canvas layout", () => {
+  it("enforces transparent background on LeftNavigationRail for seamless canvas layout", () => {
     const railContent = fs.readFileSync(leftRailPath, "utf-8");
 
-    expect(railContent).toMatch(/bg-black/);
+    expect(railContent).toMatch(/bg-transparent/);
   });
 
   it("enforces canonical 4px sharp radius for button container shape and button border radius in globals.css", () => {
