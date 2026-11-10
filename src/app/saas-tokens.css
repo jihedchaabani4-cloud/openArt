@@ -1,6 +1,6 @@
 /**
  * SaaS Design System Tokens & Utility Classes
- * Extracted directly from Production Specifications (pasted-text-4.txt & pasted-text-6.txt)
+ * Extracted directly from Production Specifications (pasted-text-4.txt, pasted-text-6.txt & pasted-text-7.txt)
  *
  * ═══════════════════════════════════════════════════════════════════════════════
  * ARCHITECTURAL HIERARCHY:
@@ -29,15 +29,75 @@
  *    - Default Border: rgba(255, 255, 255, 0.10) (.border-q-border-default)
  *
  * 5. RADIUS SCALE:
+ *    - 2px: rounded-xs (micro tags)
  *    - 6px: rounded-sm (compact chips, mini badges)
  *    - 8px: rounded-md / rounded-lg (standard buttons, select triggers, icons)
+ *    - 10px: rounded-[10px] (compact cards)
  *    - 12px: rounded-xl (cards, action chips, dropdown menus)
+ *    - 14px: rounded-[14px] (pill media overlays)
  *    - 16px: rounded-2xl (sidebars, dialogs, media cards)
  *    - 20px: rounded-[20px] (prompt bar container shell)
  *    - 24px: rounded-3xl (expanded panels)
  *    - 9999px: rounded-full (pills, circular avatar/action buttons)
  * ═══════════════════════════════════════════════════════════════════════════════
  */
+
+:root {
+  /* ── Surface Ladder (pasted-text-7.txt) ── */
+  --surface-tertiary: #0f1113;
+  --color-surface-tertiary: #0f1113;
+  --surface-canvas: #0f1113;
+  --surface-panel: #131416;
+  --surface-card: #1c1e20;
+  --surface-elevated: #1c1e20;
+  --surface-highest: #282a2c;
+  --surface-bright: #37393b;
+  --surface-brand: #d1fe17;
+  --color-lime: #d1fe17;
+
+  /* ── Exact RGB Values from pasted-text-7.txt ── */
+  --color-bg-html: rgb(15, 17, 19);
+  --color-bg-body: rgb(19, 20, 22);
+  --color-bg-card: rgb(28, 30, 32);
+  --color-bg-card-alt: rgb(28, 30, 33);
+  --color-bg-brand: rgb(209, 254, 23);
+  --color-bg-brand-alt: rgb(205, 255, 0);
+
+  /* ── Content & Typography (pasted-text-7.txt) ── */
+  --color-q-text-primary: #f7f7f8;
+  --color-q-text-secondary: #898a8b;
+  --color-text-subtle: #828282;
+  --color-text-white: rgb(255, 255, 255);
+  --color-text-offwhite: rgb(247, 247, 248);
+  --color-text-brand-dark: rgb(47, 57, 7);
+  --color-text-brand-charcoal: rgb(19, 21, 23);
+
+  /* ── Micro Layers & Hover (pasted-text-7.txt) ── */
+  --color-neutral-primary-reverted-5: rgba(255, 255, 255, 0.05);
+  --color-neutral-primary-reverted-10: rgba(255, 255, 255, 0.10);
+  --color-qc-overlay-hover: rgba(255, 255, 255, 0.05);
+  --color-qc-border-subtle: rgba(255, 255, 255, 0.05);
+  --color-qc-border-hairline: rgba(217, 217, 217, 0.04);
+  --color-separator-card: rgba(255, 255, 255, 0.05);
+
+  /* ── Shadows (pasted-text-7.txt) ── */
+  --shadow-generate-tactile: inset 0 -3px 0 0 #829b19;
+  --shadow-chip: 0 2px 8px 0 rgba(0, 0, 0, 0.06);
+  --shadow-promptbar: 0 12px 8px 0 rgba(0, 0, 0, 0.20), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+  --shadow-menu: 0 4px 16px rgba(0, 0, 0, 0.4);
+
+  /* ── Exact Radius Scale (pasted-text-7.txt) ── */
+  --radius-xs: 2px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-10px: 10px;
+  --radius-lg: 12px;
+  --radius-14px: 14px;
+  --radius-xl: 16px;
+  --radius-2xl: 20px;
+  --radius-3xl: 24px;
+  --radius-full: 9999px;
+}
 
 @layer utilities {
   /* ── Background Utilities ── */
