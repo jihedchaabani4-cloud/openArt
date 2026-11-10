@@ -13,6 +13,7 @@ html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  background-color: var(--color-surface-tertiary, #0f1113);
 }
 
 /* ── Google Sans & Google Sans Text Variable Fonts ── */
@@ -299,6 +300,7 @@ mat-icon {
   --color-surface-card: var(--surface-card, #1e1f20);
   --color-surface-elevated: var(--surface-elevated, #282a2c);
   --color-surface-highest: var(--surface-highest, #333537);
+  --color-surface-tertiary: var(--surface-tertiary, #0f1113);
   --color-brand-neon: var(--color-brand-neon, #EFFE17);
   --color-lime: var(--color-lime, #d1fe17);
   --color-accent-blue: var(--color-accent-blue, #a8c7fa);
@@ -379,6 +381,8 @@ mat-icon {
   --surface-card: var(--surface-container);
   --surface-elevated: var(--surface-container-high);
   --surface-highest: var(--surface-container-highest);
+  --surface-tertiary: #0f1113;
+  --color-surface-tertiary: #0f1113;
   --background-state-75: rgba(22, 23, 24, 0.75);
 
   /* Ergonomic Surface Semantic Aliases */
@@ -487,7 +491,7 @@ mat-icon {
   --mat-button-filled-label-text-weight: 500;
   --mat-button-filled-label-text-color: var(--foreground-state-75);
 
-  --background: var(--background-primary);
+  --background: var(--color-surface-tertiary, #0f1113);
   --foreground: oklch(0.985 0 0);
   --card: var(--background-primary);
   --card-foreground: oklch(0.985 0 0);
@@ -673,7 +677,7 @@ mat-icon {
 }
 
 .dark {
-  --background: var(--mat-sys-background);
+  --background: var(--color-surface-tertiary, #0f1113);
   --foreground: var(--mat-sys-on-background);
   --card: var(--mat-sys-surface-container);
   --card-foreground: var(--mat-sys-on-surface);
@@ -711,7 +715,7 @@ mat-icon {
     @apply border-border outline-ring/50;
   }
   body {
-    background-color: var(--mat-sys-background);
+    background-color: var(--color-surface-tertiary, #0f1113);
     color: var(--mat-sys-on-background);
     font-size: var(--mat-sys-body-large-size, 1rem);
     line-height: var(--mat-sys-body-large-line-height, 1.5rem);
