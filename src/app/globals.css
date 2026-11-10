@@ -5,7 +5,6 @@
 @import "shadcn/tailwind.css";
 @import "./google-flow-tokens.css";
 @import "./saas-tokens.css";
-@import "./saas-computed.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -126,7 +125,7 @@ mat-icon {
   background: transparent !important;
 }
 
-/* ── Studio Layout Padding Utilities ── */
+/* ── Studio Layout Padding & Dimension Utilities ── */
 .px-studio-navbar-padding {
   padding-left: var(--studio-navbar-padding, 5px) !important;
   padding-right: var(--studio-navbar-padding, 5px) !important;
@@ -134,6 +133,12 @@ mat-icon {
 .px-studio-sidebar-padding {
   padding-left: var(--studio-sidebar-padding, 0px) !important;
   padding-right: var(--studio-sidebar-padding, 0px) !important;
+}
+.h-studio-navbar {
+  height: var(--studio-navbar-height, 52px) !important;
+}
+.max-h-studio-navbar {
+  max-height: var(--studio-navbar-height, 52px) !important;
 }
 
 /* ── Button Height Utilities (s / m / l) ── */
@@ -687,36 +692,36 @@ mat-icon {
 
 .dark {
   --background: var(--color-surface-tertiary, #0f1113);
-  --foreground: var(--mat-sys-on-background);
-  --card: var(--mat-sys-surface-container);
-  --card-foreground: var(--mat-sys-on-surface);
-  --popover: var(--mat-sys-surface-container-high);
-  --popover-foreground: var(--mat-sys-on-surface);
-  --primary: var(--mat-sys-primary);
-  --primary-foreground: var(--mat-sys-on-primary);
-  --secondary: var(--mat-sys-surface-container-high);
-  --secondary-foreground: var(--mat-sys-on-surface);
-  --muted: var(--mat-sys-surface-container);
-  --muted-foreground: var(--mat-sys-on-surface-variant);
-  --accent: var(--mat-sys-surface-container-high);
-  --accent-foreground: var(--mat-sys-on-surface);
-  --destructive: var(--mat-sys-error);
-  --border: var(--mat-sys-outline-variant);
-  --input: var(--mat-sys-surface-container-highest);
-  --ring: var(--mat-sys-primary);
+  --foreground: var(--on-surface, #f7f7f8);
+  --card: var(--surface-card, #1c1e20);
+  --card-foreground: var(--on-surface, #f7f7f8);
+  --popover: var(--surface-card, #1c1e20);
+  --popover-foreground: var(--on-surface, #f7f7f8);
+  --primary: var(--color-lime, #d1fe17);
+  --primary-foreground: #131517;
+  --secondary: rgba(255, 255, 255, 0.05);
+  --secondary-foreground: var(--on-surface, #f7f7f8);
+  --muted: rgba(255, 255, 255, 0.05);
+  --muted-foreground: var(--on-surface-variant, #898a8b);
+  --accent: rgba(255, 255, 255, 0.05);
+  --accent-foreground: var(--on-surface, #f7f7f8);
+  --destructive: var(--color-danger, #fe6e6e);
+  --border: rgba(255, 255, 255, 0.05);
+  --input: rgba(255, 255, 255, 0.05);
+  --ring: var(--color-lime, #d1fe17);
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: var(--mat-sys-surface-container-low);
-  --sidebar-foreground: var(--mat-sys-on-surface);
-  --sidebar-primary: var(--mat-sys-primary);
-  --sidebar-primary-foreground: var(--mat-sys-on-primary);
-  --sidebar-accent: var(--mat-sys-surface-container);
-  --sidebar-accent-foreground: var(--mat-sys-on-surface);
-  --sidebar-border: var(--mat-sys-outline-variant);
-  --sidebar-ring: var(--mat-sys-primary);
+  --sidebar: var(--surface-canvas, #0f1113);
+  --sidebar-foreground: var(--on-surface, #f7f7f8);
+  --sidebar-primary: var(--color-lime, #d1fe17);
+  --sidebar-primary-foreground: #131517;
+  --sidebar-accent: rgba(255, 255, 255, 0.05);
+  --sidebar-accent-foreground: var(--on-surface, #f7f7f8);
+  --sidebar-border: rgba(255, 255, 255, 0.05);
+  --sidebar-ring: var(--color-lime, #d1fe17);
 }
 
 @layer base {

@@ -13,9 +13,9 @@ export default function ProjectsLayout({ children }) {
     const isListing = pathname === "/cinema-studio" || pathname === "/cinema-studio/new"
 
     return (
-        <div className="min-h-screen flex flex-col bg-background">
+        <div className={isListing ? "min-h-screen flex flex-col bg-background" : "h-screen overflow-hidden flex flex-col bg-background"}>
             {isListing && <ProjectsNavbar />}
-            <main className={isListing ? "pt-[75px] flex-1 flex flex-col" : "flex-1 flex flex-col"}>
+            <main className={isListing ? "pt-[75px] flex-1 flex flex-col" : "flex-1 flex flex-col min-h-0 overflow-hidden"}>
                 {children}
             </main>
         </div>
