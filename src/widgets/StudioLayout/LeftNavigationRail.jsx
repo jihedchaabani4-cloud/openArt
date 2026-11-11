@@ -233,7 +233,7 @@ export function LeftNavigationRail() {
     {
       id: "home",
       label: "Accueil",
-      icon: "home",
+      icon: "chevron_left",
       href: "/cinema-studio",
       isActive: false,
     },
@@ -277,39 +277,19 @@ export function LeftNavigationRail() {
             size="m"
             variant="sidebar-back"
             data-tour="sidebar-back"
-            className={cn(
-              "group/back flex min-w-0 flex-1 items-center gap-2 rounded-xl p-1.5 text-left transition-colors duration-150 hover:bg-qc-overlay-hover hover:transition-none cursor-pointer border-none bg-transparent",
-              "h-button-m"
-            )}
             title={!isExpanded ? item.label : undefined}
           >
             <Link
               href={item.href}
               prefetch={true}
-              data-tour="sidebar-back"
               onClick={() => setOptimisticTab(item.id)}
             >
               <span className="flex size-6 shrink-0 items-center justify-center text-icon-primary">
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="size-4"
-                >
-                  <path
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="1.5"
-                    d="M14.5 18.25 8.25 12l6.25-6.25"
-                  />
-                </svg>
+                <GoogleIcon iconName={item.icon || "chevron_left"} className="text-xl shrink-0" />
               </span>
               <span
                 className={cn(
-                  "min-w-0 flex-1 truncate text-qc-body-sm-medium text-qc-text-primary tracking-normal whitespace-nowrap rail-label-transition",
+                  "tracking-normal truncate flex-1 text-qc-body-sm-medium text-qc-text-primary whitespace-nowrap rail-label-transition",
                   isExpanded ? "opacity-100" : "opacity-0 pointer-events-none"
                 )}
               >
@@ -327,13 +307,7 @@ export function LeftNavigationRail() {
         key={item.id}
         asChild
         size="m"
-        variant="ghost"
-        className={cn(
-          "w-full justify-start p-0 gap-0 rounded-lg transition-colors duration-100 select-none outline-none overflow-hidden font-sans font-medium text-sm leading-5 antialiased",
-          item.isActive
-            ? "bg-surface-elevated text-on-surface shadow-none hover:bg-surface-elevated hover:text-on-surface"
-            : "text-on-surface-variant hover:text-on-surface hover:bg-white/[0.06]"
-        )}
+        variant={item.isActive ? "sidebar-item-active" : "sidebar-item"}
         title={!isExpanded ? item.label : undefined}
       >
         <Link
@@ -542,10 +516,9 @@ export function LeftNavigationRail() {
 
         <Button
           type="button"
-          variant="ghost"
+          variant="sidebar-item"
           size="m"
           onClick={handleToggleExpand}
-          className="w-full p-0 gap-0 justify-start overflow-hidden font-medium text-sm leading-5 rounded-lg text-on-surface-variant hover:text-on-surface"
           title={isExpanded ? "Réduire la barre" : "Développer la barre"}
           aria-label={isExpanded ? "Réduire la barre" : "Développer la barre"}
         >

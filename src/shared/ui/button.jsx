@@ -68,9 +68,13 @@ const buttonVariants = cva(
         "flow-ghost":
           "h-8 px-2 rounded-sm bg-transparent text-on-surface-variant hover:bg-white/[0.08] hover:text-on-surface border-none",
         "sidebar-back":
-          "group/back flex min-w-0 flex-1 items-center gap-2 rounded-xl p-1.5 text-left transition-colors duration-150 hover:bg-qc-overlay-hover hover:transition-none border-none text-qc-text-primary bg-transparent",
+          "group/back flex min-w-0 flex-1 items-center gap-2 rounded-xl p-1.5 text-left transition-colors duration-150 hover:bg-qc-overlay-hover hover:transition-none border-none text-qc-text-primary bg-transparent font-medium",
         "qc-back":
-          "group/back flex min-w-0 flex-1 items-center gap-2 rounded-xl p-1.5 text-left transition-colors duration-150 hover:bg-qc-overlay-hover hover:transition-none border-none text-qc-text-primary bg-transparent",
+          "group/back flex min-w-0 flex-1 items-center gap-2 rounded-xl p-1.5 text-left transition-colors duration-150 hover:bg-qc-overlay-hover hover:transition-none border-none text-qc-text-primary bg-transparent font-medium",
+        "sidebar-item":
+          "w-full justify-start p-0 gap-0 rounded-lg transition-colors duration-100 select-none outline-none overflow-hidden font-sans font-medium text-sm leading-5 antialiased text-on-surface-variant hover:text-on-surface hover:bg-white/[0.06] border-none bg-transparent",
+        "sidebar-item-active":
+          "w-full justify-start p-0 gap-0 rounded-lg transition-colors duration-100 select-none outline-none overflow-hidden font-sans font-medium text-sm leading-5 antialiased bg-surface-elevated text-on-surface shadow-none hover:bg-surface-elevated hover:text-on-surface border-none",
       },
       size: {
         s: "h-button-s",
