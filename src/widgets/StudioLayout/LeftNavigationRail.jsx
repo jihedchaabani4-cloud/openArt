@@ -53,9 +53,60 @@ export function LeftNavigationRail() {
 
   const { data: rawFolders = [] } = useProjectFolders(selectedProjectId);
 
-  // Expands / collapses only via explicit button click (Réduire / Développer)
+  // Expands / collapses via toggle button or interactive drag resize
+  const DEFAULT_EXPANDED_WIDTH = 239;
   const [isExpanded, setIsExpanded] = useState(false);
+  const [sidebarWidth, setSidebarWidth] = useState(DEFAULT_EXPANDED_WIDTH);
+  const [isResizing, setIsResizing] = useState(false);
+  const asideRef = React.useRef(null);
   const [optimisticTab, setOptimisticTab] = useState(null);
+
+  const handleResizeStart = React.useCallback((clientX) => {
+    setIsResizing(true);
+    const asideRect = asideRef.current?.getBoundingClientRect();
+    const left = asideRect?.left || 0;
+
+    const onPointerMove = (e) => {
+      const currentX = e.touches ? e.touches[0].clientX : e.clientX;
+      const newWidth = currentX - left;
+      if (newWidth < 100) {
+        setIsExpanded(false);
+      } else {
+        setIsExpanded(true);
+        const clamped = Math.max(170, Math.min(newWidth, 450));
+        setSidebarWidth(clamped);
+      }
+    };
+
+    const onPointerUp = () => {
+      setIsResizing(false);
+      window.removeEventListener("mousemove", onPointerMove);
+      window.removeEventListener("mouseup", onPointerUp);
+      window.removeEventListener("touchmove", onPointerMove);
+      window.removeEventListener("touchend", onPointerUp);
+    };
+
+    window.addEventListener("mousemove", onPointerMove);
+    window.addEventListener("mouseup", onPointerUp);
+    window.addEventListener("touchmove", onPointerMove, { passive: true });
+    window.addEventListener("touchend", onPointerUp);
+  }, []);
+
+  const handleResizeMouseDown = React.useCallback((e) => {
+    e.preventDefault();
+    handleResizeStart(e.clientX);
+  }, [handleResizeStart]);
+
+  const handleResizeTouchStart = React.useCallback((e) => {
+    if (e.touches && e.touches[0]) {
+      handleResizeStart(e.touches[0].clientX);
+    }
+  }, [handleResizeStart]);
+
+  const handleResizeDoubleClick = React.useCallback(() => {
+    setIsExpanded((prev) => !prev);
+    setSidebarWidth(DEFAULT_EXPANDED_WIDTH);
+  }, []);
 
   useEffect(() => {
     setOptimisticTab(null);
@@ -374,11 +425,15 @@ export function LeftNavigationRail() {
 
   return (
     <aside
+      ref={asideRef}
       aria-label="Navigation Studio"
       style={{
-        width: isExpanded ? "var(--studio-sidebar-width-expanded, 230px)" : "var(--studio-sidebar-width, 52px)",
+        width: isExpanded ? `${sidebarWidth}px` : "var(--studio-sidebar-width, 52px)",
       }}
-      className="h-full shrink-0 relative z-40 bg-transparent flex flex-col select-none pt-0 pb-3 px-0 overflow-hidden rounded-2xl border border-border rail-smooth-transition"
+      className={cn(
+        "h-full shrink-0 relative z-40 bg-transparent flex flex-col select-none pt-0 pb-3 px-0 rounded-2xl border border-border",
+        isResizing ? "transition-none select-none" : "rail-smooth-transition"
+      )}
     >
       {/* ── Fixed Top Spacer (independent of scroll) ── */}
       <div className="w-full shrink-0 h-4" />
@@ -504,6 +559,26 @@ export function LeftNavigationRail() {
           description={`Êtes-vous sûr de vouloir supprimer "${deletingFolder.name || deletingFolder.folder_name || "cette collection"}" ?`}
         />
       )}
+
+      {/* ── Vertical Resize Handle (Draggable Splitter) ── */}
+      <div
+        data-vertical-resize-handle="true"
+        role="separator"
+        aria-orientation="vertical"
+        aria-label="Redimensionner la barre latérale"
+        tabIndex={0}
+        onMouseDown={handleResizeMouseDown}
+        onTouchStart={handleResizeTouchStart}
+        onDoubleClick={handleResizeDoubleClick}
+        className="group/resize pointer-events-auto absolute inset-y-0 z-100 w-3 touch-none select-none -right-1.5 cursor-ew-resize flex items-center justify-center"
+      >
+        <div
+          className={cn(
+            "pointer-events-none absolute inset-y-4 left-1/2 w-px -translate-x-1/2 bg-[linear-gradient(to_bottom,transparent_0%,rgba(255,255,255,0.2)_18%,rgba(255,255,255,0.2)_82%,transparent_100%)] transition-opacity duration-150 group-hover/resize:opacity-100",
+            isResizing ? "opacity-100" : "opacity-0"
+          )}
+        />
+      </div>
     </aside>
   );
 }

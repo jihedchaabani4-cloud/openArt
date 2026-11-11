@@ -51,6 +51,14 @@ const buttonVariants = cva(
           "h-8 px-3.5 rounded-full bg-[#131416] text-font-primary border border-white/5 hover:opacity-90 active:scale-95",
         chip:
           "h-9 px-3 rounded-xl bg-neutral-primary-reverted/5 text-font-primary hover:bg-neutral-primary-reverted/10 border-none",
+        tactile:
+          "h-9 px-4 rounded-full btn-generate-tactile border-none font-semibold",
+        hf:
+          "h-8 px-3.5 rounded-lg bg-white/5 text-font-primary hover:bg-white/10 active:scale-95 border border-white/5 font-medium",
+        "hf-brand":
+          "h-9 px-4 rounded-full btn-generate-tactile border-none font-semibold text-[#131517]",
+        "hf-secondary":
+          "h-8 px-3.5 rounded-lg bg-[#1c1e20] text-white hover:bg-white/10 active:bg-white/15 border border-white/5 font-medium",
         "flow-primary":
           "h-8 px-3.5 rounded-sm bg-primary text-on-primary font-medium hover:bg-primary/90 active:scale-95 border-none",
         "flow-chip":

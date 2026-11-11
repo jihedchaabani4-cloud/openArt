@@ -144,10 +144,16 @@ const Folder = forwardRef(function Folder(
       aria-selected={isSelected}
       aria-expanded={isExpanded}
       onClick={onRowClick}
-      className={cn("w-full justify-start", className)}
+      className={cn(
+        "w-full justify-start rounded-lg text-xs font-medium px-2 py-1.5 transition-all duration-150 group",
+        isSelected
+          ? "bg-white/10 text-white font-semibold"
+          : "text-white/70 hover:text-white hover:bg-white/5",
+        className
+      )}
       {...props}
     >
-      <span className="flex items-center justify-center size-5 shrink-0 mr-1.5 text-on-surface-variant group-hover:text-on-surface">
+      <span className="flex items-center justify-center size-5 shrink-0 mr-1.5 text-white/60 group-hover:text-white transition-colors">
         {React.isValidElement(activeFolderIcon) ? (
           activeFolderIcon
         ) : (
@@ -245,10 +251,16 @@ const File = forwardRef(function File(
       role="treeitem"
       aria-selected={isSelected}
       onClick={handleClick}
-      className={cn("w-full justify-start", className)}
+      className={cn(
+        "w-full justify-start rounded-lg text-xs font-medium px-2 py-1.5 transition-all duration-150 group",
+        isSelected
+          ? "bg-white/10 text-white font-semibold"
+          : "text-white/70 hover:text-white hover:bg-white/5",
+        className
+      )}
       {...props}
     >
-      <span className="flex items-center justify-center size-5 shrink-0 mr-1.5 text-on-surface-variant group-hover:text-on-surface">
+      <span className="flex items-center justify-center size-5 shrink-0 mr-1.5 text-white/60 group-hover:text-white transition-colors">
         {React.isValidElement(activeFileIcon) ? (
           activeFileIcon
         ) : (
