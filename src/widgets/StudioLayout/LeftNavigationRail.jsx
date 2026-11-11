@@ -275,8 +275,12 @@ export function LeftNavigationRail() {
           <Button
             asChild
             size="m"
-            variant="sidebar-back"
+            variant="ghost"
             data-tour="sidebar-back"
+            className={cn(
+              "w-full justify-start rounded-lg text-xs font-medium px-2 py-1.5 transition-all duration-150 group flex items-center text-white/70 hover:text-white hover:bg-white/5 border-none",
+              "h-button-m"
+            )}
             title={!isExpanded ? item.label : undefined}
           >
             <Link
@@ -284,12 +288,17 @@ export function LeftNavigationRail() {
               prefetch={true}
               onClick={() => setOptimisticTab(item.id)}
             >
-              <span className="flex size-6 shrink-0 items-center justify-center text-icon-primary">
-                <GoogleIcon iconName={item.icon || "chevron_left"} className="text-xl shrink-0" />
+              <span
+                className={cn(
+                  "flex items-center justify-center size-5 shrink-0 text-white/60 group-hover:text-white transition-colors",
+                  isExpanded && "mr-1.5"
+                )}
+              >
+                <GoogleIcon iconName={item.icon || "chevron_left"} className="text-base" />
               </span>
               <span
                 className={cn(
-                  "tracking-normal truncate flex-1 text-qc-body-sm-medium text-qc-text-primary whitespace-nowrap rail-label-transition",
+                  "tracking-normal truncate flex-1 text-left font-medium whitespace-nowrap rail-label-transition",
                   isExpanded ? "opacity-100" : "opacity-0 pointer-events-none"
                 )}
               >
@@ -307,7 +316,13 @@ export function LeftNavigationRail() {
         key={item.id}
         asChild
         size="m"
-        variant={item.isActive ? "sidebar-item-active" : "sidebar-item"}
+        variant="ghost"
+        className={cn(
+          "w-full justify-start p-0 gap-0 rounded-lg transition-colors duration-100 select-none outline-none overflow-hidden font-sans font-medium text-sm leading-5 antialiased",
+          item.isActive
+            ? "bg-surface-elevated text-on-surface shadow-none hover:bg-surface-elevated hover:text-on-surface"
+            : "text-on-surface-variant hover:text-on-surface hover:bg-white/[0.06]"
+        )}
         title={!isExpanded ? item.label : undefined}
       >
         <Link
@@ -516,9 +531,10 @@ export function LeftNavigationRail() {
 
         <Button
           type="button"
-          variant="sidebar-item"
+          variant="ghost"
           size="m"
           onClick={handleToggleExpand}
+          className="w-full p-0 gap-0 justify-start overflow-hidden font-medium text-sm leading-5 rounded-lg text-on-surface-variant hover:text-on-surface"
           title={isExpanded ? "Réduire la barre" : "Développer la barre"}
           aria-label={isExpanded ? "Réduire la barre" : "Développer la barre"}
         >
