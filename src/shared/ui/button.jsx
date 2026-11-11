@@ -67,6 +67,10 @@ const buttonVariants = cva(
           "rounded-full btn-generate-tactile disabled:opacity-40 disabled:pointer-events-none border-none",
         "flow-ghost":
           "h-8 px-2 rounded-sm bg-transparent text-on-surface-variant hover:bg-white/[0.08] hover:text-on-surface border-none",
+        "sidebar-back":
+          "group/back flex min-w-0 flex-1 items-center gap-2 rounded-xl p-1.5 text-left transition-colors duration-150 hover:bg-qc-overlay-hover hover:transition-none border-none text-qc-text-primary bg-transparent",
+        "qc-back":
+          "group/back flex min-w-0 flex-1 items-center gap-2 rounded-xl p-1.5 text-left transition-colors duration-150 hover:bg-qc-overlay-hover hover:transition-none border-none text-qc-text-primary bg-transparent",
       },
       size: {
         s: "h-button-s",

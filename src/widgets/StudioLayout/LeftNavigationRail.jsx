@@ -268,45 +268,100 @@ export function LeftNavigationRail() {
     isActive: currentActiveTab === "trash",
   };
 
-  const renderNavItem = (item) => (
-    <Button
-      key={item.id}
-      asChild
-      size="m"
-      variant="ghost"
-      className={cn(
-        "w-full justify-start p-0 gap-0 rounded-lg transition-colors duration-100 select-none outline-none overflow-hidden font-sans font-medium text-sm leading-5 antialiased",
-        item.isActive
-          ? "bg-surface-elevated text-on-surface shadow-none hover:bg-surface-elevated hover:text-on-surface"
-          : "text-on-surface-variant hover:text-on-surface hover:bg-white/[0.06]"
-      )}
-      title={!isExpanded ? item.label : undefined}
-    >
-      <Link
-        href={item.href}
-        prefetch={true}
-        onClick={() => setOptimisticTab(item.id)}
-      >
-        <span className="w-[48px] h-full shrink-0 flex items-center justify-center">
-          <GoogleIcon
-            iconName={item.icon}
+  const renderNavItem = (item) => {
+    if (item.id === "home") {
+      return (
+        <div key={item.id} className="flex h-12 shrink-0 items-center gap-2 px-2" bis_skin_checked="1">
+          <Button
+            asChild
+            size="m"
+            variant="sidebar-back"
+            data-tour="sidebar-back"
             className={cn(
-              "text-xl shrink-0",
-              item.isActive ? "text-white" : "text-white/80"
+              "group/back flex min-w-0 flex-1 items-center gap-2 rounded-xl p-1.5 text-left transition-colors duration-150 hover:bg-qc-overlay-hover hover:transition-none cursor-pointer border-none bg-transparent",
+              "h-button-m"
             )}
-          />
-        </span>
-        <span
-          className={cn(
-            "tracking-normal truncate flex-1 pr-2 whitespace-nowrap rail-label-transition",
-            isExpanded ? "opacity-100" : "opacity-0 pointer-events-none"
-          )}
+            title={!isExpanded ? item.label : undefined}
+          >
+            <Link
+              href={item.href}
+              prefetch={true}
+              data-tour="sidebar-back"
+              onClick={() => setOptimisticTab(item.id)}
+            >
+              <span className="flex size-6 shrink-0 items-center justify-center text-icon-primary">
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="size-4"
+                >
+                  <path
+                    stroke="currentColor"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="1.5"
+                    d="M14.5 18.25 8.25 12l6.25-6.25"
+                  />
+                </svg>
+              </span>
+              <span
+                className={cn(
+                  "min-w-0 flex-1 truncate text-qc-body-sm-medium text-qc-text-primary tracking-normal whitespace-nowrap rail-label-transition",
+                  isExpanded ? "opacity-100" : "opacity-0 pointer-events-none"
+                )}
+              >
+                {item.label}
+              </span>
+            </Link>
+          </Button>
+          <div aria-hidden="true" className={cn("size-7 shrink-0", !isExpanded && "hidden")} bis_skin_checked="1" />
+        </div>
+      );
+    }
+
+    return (
+      <Button
+        key={item.id}
+        asChild
+        size="m"
+        variant="ghost"
+        className={cn(
+          "w-full justify-start p-0 gap-0 rounded-lg transition-colors duration-100 select-none outline-none overflow-hidden font-sans font-medium text-sm leading-5 antialiased",
+          item.isActive
+            ? "bg-surface-elevated text-on-surface shadow-none hover:bg-surface-elevated hover:text-on-surface"
+            : "text-on-surface-variant hover:text-on-surface hover:bg-white/[0.06]"
+        )}
+        title={!isExpanded ? item.label : undefined}
+      >
+        <Link
+          href={item.href}
+          prefetch={true}
+          onClick={() => setOptimisticTab(item.id)}
         >
-          {item.label}
-        </span>
-      </Link>
-    </Button>
-  );
+          <span className="w-[48px] h-full shrink-0 flex items-center justify-center">
+            <GoogleIcon
+              iconName={item.icon}
+              className={cn(
+                "text-xl shrink-0",
+                item.isActive ? "text-white" : "text-white/80"
+              )}
+            />
+          </span>
+          <span
+            className={cn(
+              "tracking-normal truncate flex-1 pr-2 whitespace-nowrap rail-label-transition",
+              isExpanded ? "opacity-100" : "opacity-0 pointer-events-none"
+            )}
+          >
+            {item.label}
+          </span>
+        </Link>
+      </Button>
+    );
+  };
 
   const renderFolderNode = (node) => {
     const folderName = node.name || node.folder_name || "Collection";

@@ -2900,8 +2900,19 @@
   .hover\:bg-qc-overlay-hover:hover {
     background-color: rgba(255, 255, 255, 0.05);
   }
+  .hover\:transition-none:hover {
+    transition-property: none !important;
+  }
 
   /* ── Foreground / Text Utilities ── */
+  .text-icon-primary {
+    color: var(--color-icon-primary, #ffffff);
+  }
+  .text-qc-body-sm-medium {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    font-weight: 500;
+  }
   .text-qc-text-primary,
   .text-font-primary {
     color: var(--color-q-text-primary, #f7f7f8);
