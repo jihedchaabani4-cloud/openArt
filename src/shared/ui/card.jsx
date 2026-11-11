@@ -1,27 +1,21 @@
-/**
- * Card Primitive — OpenArt / Labveil Unified Design System
- * 
- * ═══════════════════════════════════════════════════════════════════════════════
- * STRICT ARCHITECTURAL RULES:
- * 1. ZERO CALL-SITE RESTYLING: Card borders, corners, and surface colors are standard.
- * 2. USE CANONICAL VARIANTS: `variant="default" | "interactive" | "glass"` or `tone / radius`.
- * 3. DUAL EXPORT & SYNONYM PATTERN: Full backward compatibility for named exports
- *    alongside ergonomic compound dot-notation (`Card.Header`, `Card.Canvas`, `Card.Body`).
- * 4. `className` IS EXCLUSIVELY FOR LAYOUT (e.g. `col-span-1`, `w-full`).
- * ═══════════════════════════════════════════════════════════════════════════════
- */
-
 import * as React from "react";
 import { Surface } from "./surface";
 import { cn } from "@/shared/lib/utils";
 
+/**
+ * Card Primitive — design-system.md §7
+ * - Project card (grid): padding 4px 4px 6px, radius 16px (--r-xl)
+ * - Hover bg: rgba(255,255,255,.05) (--overlay-5)
+ * - Active: scale(0.99)
+ * - Focus: ring 2px rgba(255,255,255,.30) (--ring-focus)
+ */
 const Card = React.forwardRef(function Card(
   {
     className,
     variant = "default",
     interactive,
     tone,
-    radius = "md",
+    radius = "xl",
     ...props
   },
   ref
@@ -39,8 +33,9 @@ const Card = React.forwardRef(function Card(
       tabIndex={isInteractive ? 0 : undefined}
       role={isInteractive ? "button" : undefined}
       className={cn(
-        "text-content-base transition-all font-sans antialiased overflow-hidden flex flex-col relative",
-        isInteractive && "cursor-pointer hover:bg-white/10 hover:border-line-interactive focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-line-interactive transition-all active:scale-95",
+        "text-[var(--text-body)] transition-all font-sans antialiased overflow-hidden flex flex-col relative",
+        isInteractive &&
+          "cursor-pointer hover:bg-[var(--overlay-5)] hover:border-[var(--border-default)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-focus)] active:scale-[0.99]",
         className
       )}
       {...props}
@@ -59,7 +54,7 @@ const CardHeader = React.forwardRef(function CardHeader(
       data-slot="card-header"
       className={cn(
         "flex flex-col gap-1.5 p-4 sm:p-5",
-        bordered && "border-b border-line-subtle pb-3",
+        bordered && "border-b border-[var(--border-subtle)] pb-3",
         className
       )}
       {...props}
@@ -76,7 +71,7 @@ const CardTitle = React.forwardRef(function CardTitle(
     <h3
       ref={ref}
       data-slot="card-title"
-      className={cn("text-base font-semibold tracking-tight text-content-base leading-snug", className)}
+      className={cn("text-base font-semibold tracking-tight text-[var(--text-primary)] leading-snug", className)}
       {...props}
     />
   );
@@ -91,7 +86,7 @@ const CardDescription = React.forwardRef(function CardDescription(
     <p
       ref={ref}
       data-slot="card-description"
-      className={cn("text-xs text-content-muted leading-relaxed", className)}
+      className={cn("text-xs text-[var(--text-tertiary)] leading-relaxed", className)}
       {...props}
     />
   );
@@ -102,12 +97,11 @@ const CardCanvas = React.forwardRef(function CardCanvas(
   { className, ...props },
   ref
 ) {
-  // Edge-to-edge bleed zone with zero padding for video, WebGL, or scrubbers
   return (
     <div
       ref={ref}
       data-slot="card-canvas"
-      className={cn("relative w-full overflow-hidden bg-surface-sunken", className)}
+      className={cn("relative w-full overflow-hidden bg-[var(--bg-root)]", className)}
       {...props}
     />
   );
@@ -139,7 +133,7 @@ const CardFooter = React.forwardRef(function CardFooter(
       data-slot="card-footer"
       className={cn(
         "flex items-center p-4 sm:p-5 pt-0 sm:pt-0 gap-2 shrink-0",
-        bordered && "border-t border-line-subtle pt-3",
+        bordered && "border-t border-[var(--border-subtle)] pt-3",
         className
       )}
       {...props}
@@ -148,12 +142,11 @@ const CardFooter = React.forwardRef(function CardFooter(
 });
 CardFooter.displayName = "CardFooter";
 
-// Attach dot-notation compound aliases to Card
 Card.Header = CardHeader;
 Card.Title = CardTitle;
 Card.Description = CardDescription;
 Card.Content = CardContent;
-Card.Body = CardContent; // Ergonomic alias for CardContent
+Card.Body = CardContent;
 Card.Canvas = CardCanvas;
 Card.Footer = CardFooter;
 
@@ -166,3 +159,4 @@ export {
   CardCanvas,
   CardFooter,
 };
+export default Card;

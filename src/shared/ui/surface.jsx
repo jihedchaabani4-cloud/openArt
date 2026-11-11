@@ -1,53 +1,44 @@
-/**
- * Surface Primitive — OpenArt / Labveil Unified Design System
- * 
- * ═══════════════════════════════════════════════════════════════════════════════
- * STRICT ARCHITECTURAL RULES:
- * 1. ZERO REACT CONTEXT: 100% Server Component safe, zero hydration penalty.
- * 2. RADIX DELEGATION: Supports asChild via radix-ui Slot.Root.
- * 3. CANONICAL UTILITIES: Uses cn from @/shared/lib/utils for token awareness.
- * ═══════════════════════════════════════════════════════════════════════════════
- */
-
 import * as React from "react";
 import { Slot } from "radix-ui";
 import { cva } from "class-variance-authority";
 import { cn } from "@/shared/lib/utils";
 
+/**
+ * Surface Primitive — Higgsfield Cinema Studio Design System
+ * Single Source of Truth: design-system.md §1 & §10
+ */
 export const surfaceVariants = cva(
-  "transition-colors duration-150 border",
+  "transition-colors duration-150 border text-[var(--text-body)]",
   {
     variants: {
       tone: {
-        base: "bg-surface text-on-surface border-outline-variant",
-        panel: "bg-surface-container-low text-on-surface border-outline-variant",
-        processing: "bg-surface-container-lowest text-on-surface border-outline-variant",
-        card: "bg-surface-container text-on-surface border-outline-variant",
-        elevated: "bg-surface-container-high text-on-surface border-outline-variant",
-        highest: "bg-surface-container-highest text-on-surface border-outline",
-        sunken: "bg-surface-container-lowest text-on-surface border-outline-variant",
-        overlay: "bg-surface-container-high/90 text-on-surface border-outline-variant backdrop-blur-md",
-        tertiary: "bg-surface-tertiary text-on-surface border-outline-variant",
-        brand: "bg-lime text-black border-transparent",
-        // Google Flow Material 3 surface ladder
-        surface: "bg-surface text-on-surface border-outline-variant",
-        "container-lowest": "bg-surface-container-lowest text-on-surface border-outline-variant",
-        "container-low": "bg-surface-container-low text-on-surface border-outline-variant",
-        container: "bg-surface-container text-on-surface border-outline-variant",
-        "container-high": "bg-surface-container-high text-on-surface border-outline",
-        "container-highest": "bg-surface-container-highest text-on-surface border-outline",
-        bright: "bg-surface-bright text-on-surface border-outline",
+        base: "bg-[var(--bg-page)] border-[var(--border-subtle)] text-[var(--text-body)]",
+        panel: "bg-[var(--bg-page)] border-[var(--border-subtle)] text-[var(--text-body)]",
+        card: "bg-[var(--bg-surface)] border-[var(--border-subtle)] text-[var(--text-primary)]",
+        elevated: "bg-[var(--bg-surface)] border-[var(--border-default)] text-[var(--text-primary)]",
+        highest: "bg-[var(--bg-surface)] border-[var(--border-default)] text-[var(--text-primary)]",
+        sunken: "bg-[var(--bg-root)] border-[var(--border-subtle)] text-[var(--text-body)]",
+        overlay: "bg-[var(--bg-surface)] border-[var(--border-default)] text-[var(--text-primary)] backdrop-blur-md",
+        tertiary: "bg-[var(--bg-root)] border-[var(--border-subtle)] text-[var(--text-body)]",
+        brand: "bg-[var(--brand)] text-[var(--text-on-brand)] border-transparent",
+        surface: "bg-[var(--bg-page)] border-[var(--border-subtle)] text-[var(--text-body)]",
+        "container-lowest": "bg-[var(--bg-root)] border-[var(--border-subtle)] text-[var(--text-body)]",
+        "container-low": "bg-[var(--bg-page)] border-[var(--border-subtle)] text-[var(--text-body)]",
+        container: "bg-[var(--bg-surface)] border-[var(--border-subtle)] text-[var(--text-primary)]",
+        "container-high": "bg-[var(--bg-surface)] border-[var(--border-default)] text-[var(--text-primary)]",
+        "container-highest": "bg-[var(--bg-surface)] border-[var(--border-default)] text-[var(--text-primary)]",
+        bright: "bg-[var(--bg-surface)] border-[var(--border-default)] text-[var(--text-primary)]",
       },
       radius: {
         none: "rounded-none",
-        xxxs: "rounded-xxxs",
-        xs: "rounded-xs",
-        sm: "rounded-sm",
-        md: "rounded-md",
-        lg: "rounded-lg",
-        xl: "rounded-xl",
-        "2xl": "rounded-2xl",
-        "3xl": "rounded-3xl",
+        xxxs: "rounded-[var(--r-xs)]",
+        xs: "rounded-[var(--r-xs)]",
+        sm: "rounded-[var(--r-sm)]",
+        md: "rounded-[var(--r-md)]",
+        lg: "rounded-[var(--r-lg)]",
+        xl: "rounded-[var(--r-xl)]",
+        "2xl": "rounded-[var(--r-2xl)]",
+        "3xl": "rounded-[var(--r-3xl)]",
         full: "rounded-full",
       },
     },
@@ -72,4 +63,6 @@ export const Surface = React.forwardRef(function Surface(
     />
   );
 });
+
 Surface.displayName = "Surface";
+export default Surface;

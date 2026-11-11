@@ -96,7 +96,7 @@ export function ReferenceMediaCard({
       topRight={
         (onSetCover || onDeleteImage) ? (
           <div className="opacity-0 group-hover:opacity-100 transition-opacity pointer-events-auto">
-            <ButtonGroup variant="pill">
+            <ButtonGroup variant="pill" className="bg-white/60">
               {onSetCover && (
                 <ActionBtn
                   onClick={(e) => {

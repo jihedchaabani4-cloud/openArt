@@ -80,40 +80,40 @@ export function HeroSection({ user, authLoading, onCTA }) {
           <div className="relative flex justify-center items-center">
             <div className="absolute w-[110%] h-[70%] bg-white/20 blur-[120px] rounded-full pointer-events-none" />
             <div className="absolute w-[80%] h-[50%] bg-white/30 blur-[120px] rounded-full pointer-events-none" />
-            <h1 className="text-[100px] md:text-[140px] lg:text-[200px] font-medium text-white tracking-tighter leading-none m-0 relative z-10 cursor-default flex items-center justify-center pointer-events-auto">
-              {appName}
-            </h1>
-          </div>
+              <h1 className="display-hero text-[100px] md:text-[140px] lg:text-[200px] tracking-tighter leading-none m-0 relative z-10 cursor-default flex items-center justify-center pointer-events-auto">
+                {appName}
+              </h1>
+            </div>
 
-          <motion.p
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.3 }}
-            className="mt-2 text-xl md:text-[28px] font-medium text-white/90 max-w-2xl px-6 leading-tight"
-          >
-            Where the next wave of storytelling happens
-          </motion.p>
-
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-            className="pointer-events-auto"
-          >
-            <Button
-              onClick={!authLoading ? onCTA : undefined}
-              disabled={authLoading}
-              variant="primary"
-              className="mt-8 flex items-center gap-2 h-10 px-6 text-sm"
+            <motion.p
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.3 }}
+              className="mt-2 text-xl md:text-[28px] font-medium text-[var(--text-body)] max-w-2xl px-6 leading-tight"
             >
-              {authLoading ? (
-                <><GoogleIcon iconName="progress_activity" className="text-xl animate-spin" /> Connexion...</>
-              ) : user ? (
-                "Cinema Studio"
-              ) : (
-                "Se connecter"
-              )}
-            </Button>
+              Where the next wave of storytelling happens
+            </motion.p>
+
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.4 }}
+              className="pointer-events-auto"
+            >
+              <Button
+                onClick={!authLoading ? onCTA : undefined}
+                disabled={authLoading}
+                variant="primary"
+                className="mt-8 flex items-center gap-2 h-10 px-6 text-sm"
+              >
+                {authLoading ? (
+                  <><GoogleIcon iconName="progress_activity" className="text-xl animate-spin text-[var(--text-on-brand)]" /> Connexion...</>
+                ) : user ? (
+                  "Cinema Studio"
+                ) : (
+                  "Se connecter"
+                )}
+              </Button>
           </motion.div>
         </div>
       </div>

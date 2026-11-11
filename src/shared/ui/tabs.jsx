@@ -1,14 +1,3 @@
-/**
- * Tabs Primitive — OpenArt / Labveil Unified Design System
- * 
- * ═══════════════════════════════════════════════════════════════════════════════
- * STRICT ARCHITECTURAL RULES:
- * 1. ZERO CALL-SITE RESTYLING: Tab triggers and lists follow canonical variants.
- * 2. USE CANONICAL VARIANTS: `variant="pills" | "underline" | "studio"`.
- * 3. USE CANONICAL SIZES: `size="default" | "sm"`.
- * ═══════════════════════════════════════════════════════════════════════════════
- */
-
 "use client";
 
 import * as React from "react";
@@ -44,9 +33,9 @@ function TabsList({
         data-size={size}
         className={cn(
           "inline-flex items-center justify-center font-sans antialiased",
-          variant === "pills" && "rounded-full bg-surface-container p-1 gap-1 border border-outline-variant",
-          variant === "underline" && "gap-4 border-b border-outline-variant px-1",
-          variant === "studio" && "w-full rounded-md bg-surface-container p-1 gap-1 border border-outline-variant",
+          variant === "pills" && "rounded-full bg-[var(--overlay-5)] p-1 gap-1 border border-[var(--border-subtle)]",
+          variant === "underline" && "gap-4 border-b border-[var(--border-subtle)] px-1",
+          variant === "studio" && "w-full rounded-[var(--r-sm)] bg-[var(--bg-surface)] p-1 gap-1 border border-[var(--border-subtle)]",
           className
         )}
         {...props}
@@ -67,24 +56,24 @@ function TabsTrigger({
       data-slot="tabs-trigger"
       className={cn(
         "inline-flex cursor-pointer items-center justify-center whitespace-nowrap font-medium transition-all outline-none",
-        "disabled:pointer-events-none disabled:opacity-50",
+        "disabled:pointer-events-none disabled:opacity-40",
         // Pills variant
         variant === "pills" && [
           isSm ? "h-6 px-2.5 text-xs rounded-full" : "h-7 px-3.5 text-xs rounded-full",
-          "text-on-surface-subtle hover:text-on-surface hover:bg-white/[0.08]",
-          "data-[state=active]:bg-primary data-[state=active]:text-on-primary data-[state=active]:font-semibold",
+          "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--overlay-10)]",
+          "data-[state=active]:bg-[var(--brand)] data-[state=active]:text-[var(--text-on-brand)] data-[state=active]:font-semibold",
         ],
         // Underline variant
         variant === "underline" && [
           isSm ? "h-7 text-xs pb-1" : "h-9 text-sm pb-2",
-          "text-on-surface-subtle hover:text-on-surface border-b-2 border-transparent",
-          "data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:font-semibold",
+          "text-[var(--text-secondary)] hover:text-[var(--text-primary)] border-b-2 border-transparent",
+          "data-[state=active]:border-[var(--brand)] data-[state=active]:text-[var(--brand)] data-[state=active]:font-semibold",
         ],
         // Studio variant
         variant === "studio" && [
-          "flex-1 py-1.5 rounded-sm text-xs uppercase tracking-wider font-semibold",
-          "text-on-surface-subtle hover:text-on-surface hover:bg-white/[0.08]",
-          "data-[state=active]:bg-lime-400 data-[state=active]:text-black",
+          "flex-1 py-1.5 rounded-[var(--r-xs)] text-xs uppercase tracking-wider font-semibold",
+          "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--overlay-10)]",
+          "data-[state=active]:bg-[var(--brand)] data-[state=active]:text-[var(--text-on-brand)]",
         ],
         className
       )}
@@ -101,7 +90,7 @@ function TabsContent({
     <TabsPrimitive.Content
       data-slot="tabs-content"
       className={cn(
-        "outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+        "outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-focus)]",
         className
       )}
       {...props}
@@ -110,3 +99,4 @@ function TabsContent({
 }
 
 export { Tabs, TabsList, TabsTrigger, TabsContent };
+export default Tabs;

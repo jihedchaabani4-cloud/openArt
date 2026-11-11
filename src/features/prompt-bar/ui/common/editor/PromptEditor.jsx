@@ -26,7 +26,7 @@ import {
 import { SHINE_TEXT_SWEEP_MS } from "@/shared/ui/ShineText";
 
 const theme = {
-  paragraph: "text-white/90 text-[14.5px] leading-relaxed",
+  paragraph: "text-[var(--text-primary)] text-sm leading-5 font-sans",
 };
 
 // ── Sync external value + Enter to submit ────────────────────────────────────
@@ -306,11 +306,11 @@ export function PromptEditor({
       <div className="relative min-h-[38px] w-full items-start">
         <RichTextPlugin
           contentEditable={
-            <ContentEditable className={"outline-none text-white text-[14.5px] leading-relaxed min-h-[36px] py-1.5 max-h-[200px] overflow-y-auto scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent" + (sweeping ? " shine-text--sweep shine-text--sweep--once" : "")} />
+            <ContentEditable className={"outline-none text-[var(--text-primary)] text-sm leading-5 min-h-[36px] py-1.5 max-h-[200px] overflow-y-auto scrollbar-thin scrollbar-thumb-[var(--overlay-10)] scrollbar-track-transparent font-sans" + (sweeping ? " shine-text--sweep shine-text--sweep--once" : "")} />
           }
           placeholder={
             !value && (
-              <span className="absolute top-1.5 left-0 text-cool-slate/50 text-[14.5px] pointer-events-none">
+              <span className="absolute top-1.5 left-0 text-[var(--text-tertiary)] text-sm leading-5 pointer-events-none font-sans">
                 {placeholder}
               </span>
             )

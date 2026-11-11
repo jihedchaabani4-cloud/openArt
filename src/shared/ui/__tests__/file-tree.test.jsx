@@ -73,12 +73,12 @@ describe("FileTree Component (shadcn.io/ui/file-tree)", () => {
     );
 
     const buttons = container.querySelectorAll("button");
-    // folder-1 should inherit size="s" -> h-button-s
-    expect(buttons[0].className).toContain("h-button-s");
-    // doc-1 should inherit size="s" -> h-button-s
-    expect(buttons[1].className).toContain("h-button-s");
-    // file-custom has explicit size="l" -> h-button-l
-    expect(buttons[2].className).toContain("h-button-l");
+    // folder-1 should inherit size="s" -> h-7
+    expect(buttons[0].className).toContain("h-7");
+    // doc-1 should inherit size="s" -> h-7
+    expect(buttons[1].className).toContain("h-7");
+    // file-custom has explicit size="l" -> h-10
+    expect(buttons[2].className).toContain("h-10");
   });
 
   it("renders custom FolderGlyphIcon with white default or collection color", async () => {

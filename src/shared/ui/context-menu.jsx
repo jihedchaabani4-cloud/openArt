@@ -1,43 +1,31 @@
-"use client"
+"use client";
 
-import { GoogleIcon } from "@/shared/ui/GoogleIcon";
-import { ContextMenu as ContextMenuPrimitive } from "radix-ui"
+import * as React from "react";
+import { ContextMenu as ContextMenuPrimitive } from "radix-ui";
+import { Icon } from "@/shared/ui/Icon";
+import { cn } from "@/shared/lib/utils";
 
-import { cn } from "@/shared/lib/utils"
-
-function ContextMenu({
-  ...props
-}) {
+function ContextMenu({ ...props }) {
   return <ContextMenuPrimitive.Root data-slot="context-menu" {...props} />;
 }
 
-function ContextMenuTrigger({
-  ...props
-}) {
+function ContextMenuTrigger({ ...props }) {
   return <ContextMenuPrimitive.Trigger data-slot="context-menu-trigger" {...props} />;
 }
 
-function ContextMenuGroup({
-  ...props
-}) {
+function ContextMenuGroup({ ...props }) {
   return <ContextMenuPrimitive.Group data-slot="context-menu-group" {...props} />;
 }
 
-function ContextMenuPortal({
-  ...props
-}) {
+function ContextMenuPortal({ ...props }) {
   return <ContextMenuPrimitive.Portal data-slot="context-menu-portal" {...props} />;
 }
 
-function ContextMenuSub({
-  ...props
-}) {
+function ContextMenuSub({ ...props }) {
   return <ContextMenuPrimitive.Sub data-slot="context-menu-sub" {...props} />;
 }
 
-function ContextMenuRadioGroup({
-  ...props
-}) {
+function ContextMenuRadioGroup({ ...props }) {
   return <ContextMenuPrimitive.RadioGroup data-slot="context-menu-radio-group" {...props} />;
 }
 
@@ -52,16 +40,15 @@ function ContextMenuSubTrigger({
       data-slot="context-menu-sub-trigger"
       data-inset={inset}
       className={cn(
-        "flex cursor-pointer items-center gap-3 rounded-sm pl-3 pr-4 py-2 min-h-[2.125rem] text-sm leading-5 font-medium outline-hidden select-none font-sans antialiased",
-        "text-white/90 hover:bg-white/10 hover:text-white focus:bg-white/10 focus:text-white",
-        "data-[state=open]:bg-white/10 data-[state=open]:text-white transition-colors duration-100 ease-in-out",
-        "[&_svg:not([class*='text-'])]:text-white/70 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-5",
+        "flex cursor-pointer items-center gap-2 rounded-[var(--r-sm)] px-[10px] h-[36px] text-[14px] leading-[20px] font-medium outline-hidden select-none font-sans antialiased",
+        "text-[var(--text-primary)] hover:bg-[var(--overlay-5)] focus:bg-[var(--overlay-5)] data-[state=open]:bg-[var(--overlay-5)]",
         "data-[inset]:pl-8",
         className
       )}
-      {...props}>
+      {...props}
+    >
       {children}
-      <GoogleIcon iconName="chevron_right" className="ml-auto text-base text-on-surface-subtle" />
+      <Icon name="chevron_right" size={14} className="ml-auto text-[var(--text-secondary)]" />
     </ContextMenuPrimitive.SubTrigger>
   );
 }
@@ -76,11 +63,13 @@ function ContextMenuSubContent({
       data-slot="context-menu-sub-content"
       style={style}
       className={cn(
-        "z-50 w-52 min-w-[12rem] rounded-md origin-(--radix-context-menu-content-transform-origin) overflow-hidden p-1.5 flex flex-col gap-0.5 font-sans antialiased bg-surface-container-high border border-outline-variant text-on-surface shadow-none",
-        "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
+        "z-[100] min-w-[200px] rounded-[var(--r-lg)] p-1 flex flex-col gap-0.5 font-sans antialiased",
+        "bg-[var(--bg-surface)] border border-[var(--border-default)] text-[var(--text-primary)]",
+        "shadow-[0_16px_32px_rgba(0,0,0,0.40),0_4px_8px_rgba(0,0,0,0.24)]",
         className
       )}
-      {...props} />
+      {...props}
+    />
   );
 }
 
@@ -95,12 +84,14 @@ function ContextMenuContent({
         data-slot="context-menu-content"
         style={style}
         className={cn(
-          // Layout & shape
-          "z-50 w-52 min-w-[12rem] rounded-md overflow-hidden p-1.5 flex flex-col gap-0.5 font-sans antialiased bg-surface-container-high border border-outline-variant text-on-surface shadow-none",
-          "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
+          "z-[100] min-w-[200px] rounded-[var(--r-lg)] p-1 flex flex-col gap-0.5 font-sans antialiased",
+          "bg-[var(--bg-surface)] border border-[var(--border-default)] text-[var(--text-primary)]",
+          "shadow-[0_16px_32px_rgba(0,0,0,0.40),0_4px_8px_rgba(0,0,0,0.24)]",
+          "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
           className
         )}
-        {...props} />
+        {...props}
+      />
     </ContextMenuPrimitive.Portal>
   );
 }
@@ -117,20 +108,14 @@ function ContextMenuItem({
       data-inset={inset}
       data-variant={variant}
       className={cn(
-        // Layout
-        "relative flex cursor-pointer items-center gap-3 rounded-sm pl-3 pr-4 py-2 min-h-[2.125rem] text-sm leading-5 font-medium outline-hidden select-none font-sans antialiased",
-        // Theme defaults: on-surface text, state layers for hover & focus
-        "text-on-surface hover:bg-white/[0.08] focus:bg-white/[0.08] focus:text-on-surface active:bg-white/[0.12] transition-colors duration-100 ease-in-out",
-        // Icon defaults
-        "[&_svg:not([class*='text-'])]:text-on-surface-variant [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-5",
-        // Disabled & inset
-        "data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[inset]:pl-8",
-        // Destructive / Danger variant (pure text & icon red, NO red background, ghost hover layer)
-        "data-[variant=destructive]:!text-error data-[variant=destructive]:hover:!text-error data-[variant=destructive]:focus:!text-error data-[variant=destructive]:hover:bg-white/[0.08] data-[variant=destructive]:focus:bg-white/[0.08] data-[variant=destructive]:[&_svg]:!text-error",
-        "data-[variant=danger]:!text-error data-[variant=danger]:hover:!text-error data-[variant=danger]:focus:!text-error data-[variant=danger]:hover:bg-white/[0.08] data-[variant=danger]:focus:bg-white/[0.08] data-[variant=danger]:[&_svg]:!text-error",
+        "relative flex cursor-pointer items-center gap-2 rounded-[var(--r-sm)] px-[10px] h-[36px] text-[14px] leading-[20px] font-medium outline-hidden select-none font-sans antialiased transition-colors duration-150",
+        "text-[var(--text-primary)] hover:bg-[var(--overlay-5)] focus:bg-[var(--overlay-5)] active:bg-[var(--overlay-10)]",
+        "data-[disabled]:pointer-events-none data-[disabled]:opacity-40 data-[inset]:pl-8",
+        (variant === "danger" || variant === "destructive") && "!text-[var(--pink-400)] hover:!text-[var(--pink-400)] [&_svg]:!text-[var(--pink-400)]",
         className
       )}
-      {...props} />
+      {...props}
+    />
   );
 }
 
@@ -144,17 +129,15 @@ function ContextMenuCheckboxItem({
     <ContextMenuPrimitive.CheckboxItem
       data-slot="context-menu-checkbox-item"
       className={cn(
-        "relative flex cursor-pointer items-center gap-2 rounded-sm py-2.5 pr-2 pl-8 text-sm outline-hidden select-none",
-        "text-on-surface hover:bg-white/[0.08] focus:bg-white/[0.08] focus:text-on-surface",
-        "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
-        "data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+        "relative flex cursor-pointer items-center gap-2 rounded-[var(--r-sm)] px-[10px] pl-8 h-[36px] text-[14px] leading-[20px] font-medium outline-hidden select-none text-[var(--text-primary)] hover:bg-[var(--overlay-5)] focus:bg-[var(--overlay-5)] data-[disabled]:opacity-40",
         className
       )}
       checked={checked}
-      {...props}>
-      <span className="absolute left-2 flex size-3.5 items-center justify-center">
+      {...props}
+    >
+      <span className="pointer-events-none absolute left-2.5 flex size-3.5 items-center justify-center">
         <ContextMenuPrimitive.ItemIndicator>
-          <GoogleIcon iconName="check" className="text-sm font-bold" />
+          <Icon name="check" size={14} className="text-[var(--brand)] font-bold" />
         </ContextMenuPrimitive.ItemIndicator>
       </span>
       {children}
@@ -171,16 +154,14 @@ function ContextMenuRadioItem({
     <ContextMenuPrimitive.RadioItem
       data-slot="context-menu-radio-item"
       className={cn(
-        "relative flex cursor-pointer items-center gap-2 rounded-sm py-2.5 pr-2 pl-8 text-sm outline-hidden select-none",
-        "text-on-surface hover:bg-white/[0.08] focus:bg-white/[0.08] focus:text-on-surface",
-        "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
-        "data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+        "relative flex cursor-pointer items-center gap-2 rounded-[var(--r-sm)] px-[10px] pl-8 h-[36px] text-[14px] leading-[20px] font-medium outline-hidden select-none text-[var(--text-primary)] hover:bg-[var(--overlay-5)] focus:bg-[var(--overlay-5)] data-[disabled]:opacity-40",
         className
       )}
-      {...props}>
-      <span className="absolute left-2 flex size-3.5 items-center justify-center">
+      {...props}
+    >
+      <span className="pointer-events-none absolute left-2.5 flex size-3.5 items-center justify-center">
         <ContextMenuPrimitive.ItemIndicator>
-          <GoogleIcon iconName="circle" fill={true} className="text-xs" />
+          <Icon name="circle" size={8} className="fill-[var(--brand)] text-[var(--brand)]" />
         </ContextMenuPrimitive.ItemIndicator>
       </span>
       {children}
@@ -198,10 +179,11 @@ function ContextMenuLabel({
       data-slot="context-menu-label"
       data-inset={inset}
       className={cn(
-        "px-2 py-1.5 text-xs font-medium text-on-surface-subtle data-[inset]:pl-8",
+        "px-[10px] py-1.5 text-[12px] leading-[16px] font-medium text-[var(--text-tertiary)] data-[inset]:pl-8",
         className
       )}
-      {...props} />
+      {...props}
+    />
   );
 }
 
@@ -212,8 +194,9 @@ function ContextMenuSeparator({
   return (
     <ContextMenuPrimitive.Separator
       data-slot="context-menu-separator"
-      className={cn("-mx-1 my-1.5 h-px bg-outline-variant", className)}
-      {...props} />
+      className={cn("h-px my-1 bg-[var(--border-subtle)]", className)}
+      {...props}
+    />
   );
 }
 
@@ -224,8 +207,9 @@ function ContextMenuShortcut({
   return (
     <span
       data-slot="context-menu-shortcut"
-      className={cn("ml-auto text-xs tracking-widest text-on-surface-subtle", className)}
-      {...props} />
+      className={cn("ml-auto text-xs tracking-widest text-[var(--text-tertiary)]", className)}
+      {...props}
+    />
   );
 }
 
@@ -242,7 +226,8 @@ export {
   ContextMenuGroup,
   ContextMenuPortal,
   ContextMenuSub,
-  ContextMenuSubTrigger,
   ContextMenuSubContent,
+  ContextMenuSubTrigger,
   ContextMenuRadioGroup,
-}
+};
+export default ContextMenu;

@@ -271,15 +271,14 @@ export function LeftNavigationRail() {
   const renderNavItem = (item) => {
     if (item.id === "home") {
       return (
-        <div key={item.id} className="flex h-12 shrink-0 items-center gap-2 px-2" bis_skin_checked="1">
+        <div key={item.id} className="flex h-12 shrink-0 items-center gap-2 px-2">
           <Button
             asChild
             size="m"
             variant="ghost"
             data-tour="sidebar-back"
             className={cn(
-              "w-full justify-start rounded-lg text-xs font-medium px-2 py-1.5 transition-all duration-150 group flex items-center text-white/70 hover:text-white hover:bg-white/5 border-none",
-              "h-button-m"
+              "w-full justify-start rounded-[var(--r-lg)] text-xs font-medium px-2 py-1.5 transition-all duration-150 group flex items-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--overlay-5)] border-none"
             )}
             title={!isExpanded ? item.label : undefined}
           >
@@ -290,7 +289,7 @@ export function LeftNavigationRail() {
             >
               <span
                 className={cn(
-                  "flex items-center justify-center size-5 shrink-0 text-white/60 group-hover:text-white transition-colors",
+                  "flex items-center justify-center size-5 shrink-0 text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors",
                   isExpanded && "mr-1.5"
                 )}
               >
@@ -306,7 +305,7 @@ export function LeftNavigationRail() {
               </span>
             </Link>
           </Button>
-          <div aria-hidden="true" className={cn("size-7 shrink-0", !isExpanded && "hidden")} bis_skin_checked="1" />
+          <div aria-hidden="true" className={cn("size-7 shrink-0", !isExpanded && "hidden")} />
         </div>
       );
     }
@@ -318,10 +317,10 @@ export function LeftNavigationRail() {
         size="m"
         variant="ghost"
         className={cn(
-          "w-full justify-start p-0 gap-0 rounded-lg transition-colors duration-100 select-none outline-none overflow-hidden font-sans font-medium text-sm leading-5 antialiased",
+          "w-full justify-start p-0 gap-0 rounded-[var(--r-lg)] transition-colors duration-100 select-none outline-none overflow-hidden font-sans font-medium text-sm leading-5 antialiased",
           item.isActive
-            ? "bg-surface-elevated text-on-surface shadow-none hover:bg-surface-elevated hover:text-on-surface"
-            : "text-on-surface-variant hover:text-on-surface hover:bg-white/[0.06]"
+            ? "bg-[var(--overlay-10)] text-[var(--text-primary)] shadow-none hover:bg-[var(--overlay-10)] hover:text-[var(--text-primary)]"
+            : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--overlay-5)]"
         )}
         title={!isExpanded ? item.label : undefined}
       >
@@ -335,7 +334,7 @@ export function LeftNavigationRail() {
               iconName={item.icon}
               className={cn(
                 "text-xl shrink-0",
-                item.isActive ? "text-white" : "text-white/80"
+                item.isActive ? "text-[var(--text-primary)]" : "text-[var(--text-secondary)]"
               )}
             />
           </span>
@@ -475,7 +474,7 @@ export function LeftNavigationRail() {
         width: isExpanded ? `${sidebarWidth}px` : "var(--studio-sidebar-width, 52px)",
       }}
       className={cn(
-        "h-full shrink-0 relative z-40 bg-transparent flex flex-col select-none pt-0 pb-3 px-0 rounded-2xl border border-border",
+        "h-full shrink-0 relative z-40 bg-transparent flex flex-col select-none pt-0 pb-3 px-0 rounded-2xl border border-[var(--border-subtle)]",
         isResizing ? "transition-none select-none" : "rail-smooth-transition"
       )}
     >
@@ -491,13 +490,13 @@ export function LeftNavigationRail() {
 
       {/* ── Collections Tree Section (when expanded) ── */}
       {isExpanded ? (
-        <div className="flex flex-col flex-1 min-h-0 mt-3 pt-3 border-t border-border/40 px-2 overflow-hidden">
+        <div className="flex flex-col flex-1 min-h-0 mt-3 pt-3 border-t border-[var(--border-subtle)] px-2 overflow-hidden">
           <div className="flex items-center justify-between px-2 pb-1.5 shrink-0">
-            <span className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">
+            <span className="text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
               Collections
             </span>
             {rawFoldersList.length > 0 && (
-              <span className="text-xs text-on-surface-variant/70 font-normal">
+              <span className="text-xs text-[var(--text-secondary)]/70 font-normal">
                 {rawFoldersList.length}
               </span>
             )}
@@ -514,7 +513,7 @@ export function LeftNavigationRail() {
                 {folderTree.map(renderFolderNode)}
               </FileTree>
             ) : (
-              <div className="px-2 py-3 text-xs text-on-surface-variant/60 italic text-left">
+              <div className="px-2 py-3 text-xs text-[var(--text-secondary)]/60 italic text-left">
                 Aucune collection
               </div>
             )}
@@ -534,15 +533,15 @@ export function LeftNavigationRail() {
           variant="ghost"
           size="m"
           onClick={handleToggleExpand}
-          className="w-full p-0 gap-0 justify-start overflow-hidden font-medium text-sm leading-5 rounded-lg text-on-surface-variant hover:text-on-surface"
+          className="w-full p-0 gap-0 justify-start overflow-hidden font-medium text-sm leading-5 rounded-[var(--r-lg)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
           title={isExpanded ? "Réduire la barre" : "Développer la barre"}
           aria-label={isExpanded ? "Réduire la barre" : "Développer la barre"}
         >
           <span className="w-[48px] h-full shrink-0 flex items-center justify-center">
             {isExpanded ? (
-              <GoogleIcon iconName="left_panel_close" className="text-xl text-white/80 shrink-0" />
+              <GoogleIcon iconName="left_panel_close" className="text-xl text-[var(--text-secondary)] shrink-0" />
             ) : (
-              <GoogleIcon iconName="left_panel_open" className="text-xl text-white/80 shrink-0" />
+              <GoogleIcon iconName="left_panel_open" className="text-xl text-[var(--text-secondary)] shrink-0" />
             )}
           </span>
           <span

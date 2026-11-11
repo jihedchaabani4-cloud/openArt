@@ -1,13 +1,3 @@
-/**
- * Layout Primitives — OpenArt / Labveil Unified Design System
- * 
- * Layer 3 Layout Primitives:
- * - Container: Page-level responsive width constraints (cinema, editorial, compact, full).
- * - Section: Vertical page slices with rhythm tokens (none, sm, default, lg, xl, xxl).
- * - Stack: Vertical flex composition layout with semantic gaps.
- * - Inline: Horizontal flex composition layout with alignment and wrap controls.
- */
-
 "use client";
 
 import * as React from "react";
@@ -19,8 +9,8 @@ const containerVariants = cva(
   {
     variants: {
       size: {
-        cinema: "max-w-7xl 2xl:max-w-400 lg:px-8",
-        editorial: "max-w-6xl",
+        cinema: "max-w-[var(--content-max)] lg:px-8",
+        editorial: "max-w-[var(--hero-max)]",
         compact: "max-w-4xl",
         full: "max-w-full",
       },
@@ -62,9 +52,8 @@ const sectionVariants = cva(
         xxl: "py-20 sm:py-24",
       },
       variant: {
-        default: "bg-transparent text-on-surface",
-        dark: "bg-surface-container-low text-on-surface border-y border-outline-variant",
-        light: "bg-white text-black",
+        default: "bg-transparent text-[var(--text-body)]",
+        dark: "bg-[var(--bg-page)] text-[var(--text-body)] border-y border-[var(--border-subtle)]",
       },
     },
     defaultVariants: {

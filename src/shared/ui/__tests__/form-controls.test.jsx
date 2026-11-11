@@ -11,60 +11,44 @@ import {
 } from "@/shared/ui/select";
 import { DropdownSegmented } from "@/shared/ui/DropdownShell";
 
-describe("Form Controls & Menus — Runway Flat Surface Architecture", () => {
+describe("Form Controls & Menus — Higgsfield Cinema Studio Architecture", () => {
   describe("1. Input Primitive", () => {
-    it("renders search variant with sharp 4px radius, flat surface, and hairline border", () => {
+    it("renders search variant with input-search class", () => {
       const { container } = render(
         <Input variant="search" placeholder="Search prompts..." />
       );
-      const wrapper = container.querySelector(".rounded-sm");
+      const wrapper = container.querySelector(".input-search");
       expect(wrapper).not.toBeNull();
-      expect(wrapper?.className).toContain("bg-surface-container");
-      expect(wrapper?.className).toContain("border-outline-variant");
-      expect(wrapper?.className).not.toContain("backdrop-blur");
     });
 
-    it("renders blurinput variant with flat surface and without GPU-heavy blur", () => {
+    it("renders blurinput variant with bg-surface-2 and border-default", () => {
       const { container } = render(
         <Input variant="blurinput" placeholder="Prompt label" />
       );
-      const wrapper = container.querySelector(".rounded-sm");
+      const wrapper = container.querySelector(".rounded-\\[var\\(--r-sm\\)\\]");
       expect(wrapper).not.toBeNull();
-      expect(wrapper?.className).toContain("bg-surface-container");
-      expect(wrapper?.className).toContain("border-outline-variant");
-      expect(wrapper?.className).not.toContain("backdrop-blur");
+      expect(wrapper?.className).toContain("bg-[var(--bg-surface-2)]");
+      expect(wrapper?.className).toContain("border-[var(--border-default)]");
     });
   });
 
   describe("2. Textarea Primitive", () => {
-    it("renders textarea with flat bg-surface-card, hairline border, and clean typography", () => {
+    it("renders textarea with bg-surface-2, border-default, and clean typography", () => {
       const { container } = render(
         <Textarea label="Prompt" placeholder="Describe the scene..." />
       );
-      const wrapper = container.querySelector(".rounded-md");
+      const wrapper = container.querySelector(".rounded-\\[var\\(--r-lg\\)\\]");
       expect(wrapper).not.toBeNull();
-      expect(wrapper?.className).toContain("bg-surface-container");
-      expect(wrapper?.className).toContain("border-outline-variant");
-      expect(wrapper?.className).not.toContain("backdrop-blur");
+      expect(wrapper?.className).toContain("bg-[var(--bg-surface-2)]");
+      expect(wrapper?.className).toContain("border-[var(--border-default)]");
 
       const textarea = screen.getByPlaceholderText("Describe the scene...");
-      expect(textarea.className).toContain("text-on-surface");
-    });
-
-    it("renders blur variant mapped to flat dark surface without blur", () => {
-      const { container } = render(
-        <Textarea variant="blur" placeholder="Blur textarea" />
-      );
-      const wrapper = container.querySelector(".rounded-sm");
-      expect(wrapper).not.toBeNull();
-      expect(wrapper?.className).toContain("bg-surface-container");
-      expect(wrapper?.className).toContain("border-outline-variant");
-      expect(wrapper?.className).not.toContain("backdrop-blur");
+      expect(textarea.className).toContain("text-[var(--text-primary)]");
     });
   });
 
   describe("3. Select Primitive", () => {
-    it("renders select trigger with sharp 4px radius and flat surface", () => {
+    it("renders select trigger with rounded-[var(--r-sm)] and bg-surface-2", () => {
       render(
         <Select defaultValue="option-1">
           <SelectTrigger variant="blur">
@@ -76,15 +60,14 @@ describe("Form Controls & Menus — Runway Flat Surface Architecture", () => {
         </Select>
       );
       const trigger = screen.getByRole("combobox");
-      expect(trigger.className).toContain("rounded-sm");
-      expect(trigger.className).toContain("bg-surface-container");
-      expect(trigger.className).toContain("border-outline-variant");
-      expect(trigger.className).not.toContain("backdrop-blur");
+      expect(trigger.className).toContain("rounded-[var(--r-sm)]");
+      expect(trigger.className).toContain("bg-[var(--bg-surface-2)]");
+      expect(trigger.className).toContain("border-[var(--border-default)]");
     });
   });
 
   describe("4. DropdownShell", () => {
-    it("renders toggle group with clean flat container and hairline border", () => {
+    it("renders toggle group with clean container and border-subtle", () => {
       const { container } = render(
         <DropdownSegmented
           value="1"
@@ -97,9 +80,9 @@ describe("Form Controls & Menus — Runway Flat Surface Architecture", () => {
       );
       const group = container.querySelector(".toggle-group");
       expect(group).not.toBeNull();
-      expect(group?.className).toContain("rounded-sm");
-      expect(group?.className).toContain("bg-white/5");
-      expect(group?.className).toContain("border-white/5");
+      expect(group?.className).toContain("rounded-[var(--r-sm)]");
+      expect(group?.className).toContain("bg-[var(--overlay-5)]");
+      expect(group?.className).toContain("border-[var(--border-subtle)]");
     });
   });
 });

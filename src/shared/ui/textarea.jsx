@@ -24,7 +24,6 @@ const Textarea = React.forwardRef(({
 
   const [isOverflowing, setIsOverflowing] = React.useState(false);
 
-  // Auto-resize logic based on scrollHeight
   const adjustHeight = React.useCallback(() => {
     const el = innerRef.current;
     if (!el) return;
@@ -45,20 +44,20 @@ const Textarea = React.forwardRef(({
   };
 
   const hasContainer = !!label || !!hint;
-
   const isBlur = variant === "blur" || variant === "blurinput";
   const isPersonality = variant === "personality" || variant === "flow";
 
   const textareaElement = (
     <div 
       className={cn(
+        "relative w-full transition-all border outline-none font-sans antialiased",
+        "bg-[var(--bg-surface-2)] border-[var(--border-default)] hover:border-[var(--border-subtle)] focus-within:border-[var(--brand)]",
         isPersonality
-          ? "personality-textarea-wrapper relative w-full rounded-md bg-surface-container p-3.5 sm:p-4 transition-all border border-outline-variant hover:border-outline focus-within:border-primary focus-within:bg-surface-container-high"
+          ? "personality-textarea-wrapper rounded-[var(--r-lg)] p-3.5 sm:p-4"
           : isBlur
-          ? "relative w-full rounded-sm p-3 transition-all border border-outline-variant bg-surface-container hover:border-outline focus-within:border-primary"
-          : "relative w-full rounded-md bg-surface-container p-4 transition-all border border-outline-variant hover:border-outline focus-within:border-primary focus-within:bg-surface-container-high"
+          ? "rounded-[var(--r-sm)] p-3"
+          : "rounded-[var(--r-lg)] p-4"
       )}
-      style={undefined}
     >
       <textarea
         ref={innerRef}
@@ -67,8 +66,8 @@ const Textarea = React.forwardRef(({
         rows={rows}
         placeholder={placeholder}
         className={cn(
-          "w-full bg-transparent text-xs sm:text-sm text-on-surface placeholder:text-on-surface-subtle resize-none outline-none custom-scrollbar leading-relaxed font-sans transition-all duration-150 ease-out",
-          isPersonality && "personality-textarea text-on-surface",
+          "w-full bg-transparent text-sm text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] resize-none outline-none leading-relaxed font-sans transition-all duration-150 ease-out scrollbar-hide",
+          isPersonality && "personality-textarea",
           isOverflowing ? "overflow-y-auto" : "overflow-hidden",
           className
         )}
@@ -84,13 +83,13 @@ const Textarea = React.forwardRef(({
   if (hasContainer) {
     if (isPersonality) {
       return (
-        <div className={cn("personality-section", containerClassName)}>
+        <div className={cn("personality-section flex flex-col gap-2 w-full", containerClassName)}>
           {label && (
-            <div className="label-row">
+            <div className="label-row flex items-center justify-between text-xs font-semibold text-[var(--text-primary)]">
               <span className="field-label">
                 <span>{label}</span>
                 {labelExtra && (
-                  <span className="field-label-optional pl-1">
+                  <span className="field-label-optional pl-1 font-normal text-[var(--text-tertiary)]">
                     {labelExtra}
                   </span>
                 )}
@@ -101,8 +100,8 @@ const Textarea = React.forwardRef(({
           {textareaElement}
 
           {hint && (
-            <div className="disclaimer-overflow">
-              <span className="disclaimer-text">{hint}</span>
+            <div className="disclaimer-overflow pt-0.5">
+              <span className="disclaimer-text text-xs text-[var(--text-tertiary)] leading-relaxed">{hint}</span>
             </div>
           )}
         </div>
@@ -112,15 +111,15 @@ const Textarea = React.forwardRef(({
     return (
       <div className={cn("flex flex-col gap-2 w-full", containerClassName)}>
         {label && (
-          <label className="text-xs font-semibold text-on-surface flex items-center justify-between">
-            <span>{label} {labelExtra && <span className="font-normal text-on-surface-subtle">{labelExtra}</span>}</span>
+          <label className="text-xs font-semibold text-[var(--text-primary)] flex items-center justify-between">
+            <span>{label} {labelExtra && <span className="font-normal text-[var(--text-tertiary)]">{labelExtra}</span>}</span>
           </label>
         )}
 
         {textareaElement}
 
         {hint && (
-          <p className="text-2xs text-on-surface-subtle leading-relaxed pt-0.5">
+          <p className="text-xs text-[var(--text-tertiary)] leading-relaxed pt-0.5">
             {hint}
           </p>
         )}
@@ -134,3 +133,4 @@ const Textarea = React.forwardRef(({
 Textarea.displayName = "Textarea";
 
 export { Textarea };
+export default Textarea;

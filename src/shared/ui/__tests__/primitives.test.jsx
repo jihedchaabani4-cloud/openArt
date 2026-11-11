@@ -27,11 +27,11 @@ beforeAll(() => {
 
 describe("Canonical Design System Primitives Suite", () => {
   describe("1. Checkbox Primitive", () => {
-    it("renders with role='checkbox' and canonical token rounded-sm", () => {
+    it("renders with role='checkbox' and canonical token rounded-[var(--r-xs)]", () => {
       render(<Checkbox aria-label="Accept Terms" />);
       const checkbox = screen.getByRole("checkbox", { name: "Accept Terms" });
       expect(checkbox).toBeDefined();
-      expect(checkbox.className).toContain("rounded-sm");
+      expect(checkbox.className).toContain("rounded-[var(--r-xs)]");
       expect(checkbox.getAttribute("data-slot")).toBe("checkbox");
     });
 
@@ -100,8 +100,8 @@ describe("Canonical Design System Primitives Suite", () => {
       expect(screen.getByText("Filter Settings")).toBeDefined();
       const content = screen.getByText("Filter Settings").closest('[data-slot="popover-content"]');
       expect(content).not.toBeNull();
-      expect(content.className).toContain("rounded-md");
-      expect(content.className).toContain("backdrop-blur-80");
+      expect(content.className).toContain("rounded-[var(--r-lg)]");
+      expect(content.className).toContain("bg-[var(--bg-surface)]");
     });
   });
 
@@ -156,26 +156,26 @@ describe("Canonical Design System Primitives Suite", () => {
       );
       const card = screen.getByText("Asset Title").closest('[data-slot="card"]');
       expect(card).not.toBeNull();
-      expect(card.className).toContain("rounded-md");
-      expect(card.className).toContain("hover:bg-white/10");
+      expect(card.className).toContain("rounded-[var(--r-xl)]");
+      expect(card.className).toContain("hover:bg-[var(--overlay-5)]");
       expect(screen.getByText("Created yesterday")).toBeDefined();
       expect(screen.getByText("Body Content")).toBeDefined();
     });
   });
 
   describe("7. Badge Primitive", () => {
-    it("renders badge with rounded-sm and canonical variants", () => {
+    it("renders badge with rounded-[var(--r-sm)] and canonical variants", () => {
       const { rerender } = render(<Badge variant="default">New</Badge>);
       const badge = screen.getByText("New");
-      expect(badge.className).toContain("rounded-sm");
+      expect(badge.className).toContain("rounded-[var(--r-sm)]");
       expect(badge.className).toContain("h-5");
 
       rerender(<Badge variant="neon">Pro</Badge>);
-      expect(screen.getByText("Pro").className).toContain("bg-lime-400");
+      expect(screen.getByText("Pro").className).toContain("bg-[var(--brand)]");
 
       rerender(<Badge variant="success" size="sm">Active</Badge>);
       const successBadge = screen.getByText("Active");
-      expect(successBadge.className).toContain("text-emerald-300");
+      expect(successBadge.className).toContain("text-[var(--brand)]");
       expect(successBadge.className).toContain("h-4");
     });
   });
@@ -185,7 +185,7 @@ describe("Canonical Design System Primitives Suite", () => {
       render(<Skeleton variant="shimmer" shape="card" data-testid="test-skeleton" />);
       const skeleton = screen.getByTestId("test-skeleton");
       expect(skeleton.className).toContain("animate-shimmer");
-      expect(skeleton.className).toContain("rounded-md");
+      expect(skeleton.className).toContain("rounded-[var(--r-lg)]");
     });
   });
 
@@ -225,7 +225,7 @@ describe("Canonical Design System Primitives Suite", () => {
   });
 
   describe("11. Dialog Primitive", () => {
-    it("renders dialog content with canonical rounded-md token", () => {
+    it("renders dialog content with canonical rounded-[var(--r-xl)] token", () => {
       render(
         <Dialog open={true}>
           <DialogContent>
@@ -239,31 +239,31 @@ describe("Canonical Design System Primitives Suite", () => {
       expect(title).toBeDefined();
       const content = screen.getByText("Modal Heading").closest('[data-slot="dialog-content"]');
       expect(content).not.toBeNull();
-      expect(content?.className).toContain("rounded-md");
-      expect(content?.className).toContain("shadow-none");
+      expect(content?.className).toContain("rounded-[var(--r-xl)]");
+      expect(content?.className).toContain("bg-[var(--bg-surface)]");
     });
   });
 
   describe("12. Input Primitive", () => {
-    it("renders standard input with sharp 4px radius", () => {
+    it("renders standard input with canonical 8px radius", () => {
       render(<Input placeholder="Enter prompt..." />);
       const input = screen.getByPlaceholderText("Enter prompt...");
       expect(input).toBeDefined();
-      expect(input.className).toContain("rounded-sm");
+      expect(input.className).toContain("rounded-[var(--r-sm)]");
     });
 
     it("renders search variant container with icon support", () => {
       const { container } = render(
         <Input variant="search" placeholder="Search prompts..." googleIcon="search" />
       );
-      const wrapper = container.querySelector('.rounded-sm');
+      const wrapper = container.querySelector('.input-search');
       expect(wrapper).not.toBeNull();
       expect(screen.getByPlaceholderText("Search prompts...")).toBeDefined();
     });
   });
 
   describe("13. Select Primitive", () => {
-    it("renders select trigger with sharp 4px radius", () => {
+    it("renders select trigger with canonical 8px radius", () => {
       render(
         <Select defaultValue="opt1">
           <SelectTrigger aria-label="Options">
@@ -273,7 +273,7 @@ describe("Canonical Design System Primitives Suite", () => {
       );
       const trigger = screen.getByRole("combobox", { name: "Options" });
       expect(trigger).toBeDefined();
-      expect(trigger.className).toContain("rounded-sm");
+      expect(trigger.className).toContain("rounded-[var(--r-sm)]");
       expect(trigger.getAttribute("data-slot")).toBe("select-trigger");
     });
   });
@@ -283,10 +283,10 @@ describe("Canonical Design System Primitives Suite", () => {
       const { rerender } = render(<Container size="editorial">Content</Container>);
       const container = screen.getByText("Content");
       expect(container.getAttribute("data-slot")).toBe("layout-container");
-      expect(container.className).toContain("max-w-6xl");
+      expect(container.className).toContain("max-w-[var(--hero-max)]");
 
       rerender(<Container size="cinema">Cinema Content</Container>);
-      expect(screen.getByText("Cinema Content").className).toContain("max-w-7xl");
+      expect(screen.getByText("Cinema Content").className).toContain("max-w-[var(--content-max)]");
     });
 
     it("renders Section with semantic spacing and variants", () => {
@@ -298,7 +298,7 @@ describe("Canonical Design System Primitives Suite", () => {
       const section = container.querySelector('[data-slot="layout-section"]');
       expect(section).not.toBeNull();
       expect(section?.className).toContain("py-12");
-      expect(section?.className).toContain("bg-surface-container-low");
+      expect(section?.className).toContain("bg-[var(--bg-page)]");
     });
 
     it("renders Stack and Inline layout primitives", () => {

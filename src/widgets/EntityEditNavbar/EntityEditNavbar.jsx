@@ -74,7 +74,7 @@ export function EntityEditNavbar({
                 <Button
                   type="button"
                   variant="ghost"
-                  className="size-8 p-0"
+                  className="size-8 p-0 bg-transparent text-white rounded-sm"
                   data-testid="import-dropdown-trigger"
                   disabled={isAddDisabled}
                   title={addTitle}
@@ -108,7 +108,7 @@ export function EntityEditNavbar({
             <Button
               type="button"
               variant="ghost"
-              className="size-8 p-0"
+              className="size-8 p-0 text-white rounded-sm"
               data-testid={likeTestId}
               onClick={onToggleLike}
               title={isLiked ? "Retirer des favoris" : "Ajouter aux favoris"}

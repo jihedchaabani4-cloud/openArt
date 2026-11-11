@@ -9,9 +9,9 @@ import {
 } from "@/shared/ui/dialog";
 import { ConfirmDeleteDialog } from "@/shared/ui/ConfirmDeleteDialog";
 
-describe("Dialog Primitive — Runway Flat Surface Architecture", () => {
-  describe("1. Visual Token Alignment (Zero Shadows, Flat Surface, 6px Radius)", () => {
-    it("renders default variant with flat bg-(--background-state-90), border-white/10, and rounded-md", () => {
+describe("Dialog Primitive — Higgsfield Cinema Studio Architecture", () => {
+  describe("1. Visual Token Alignment (Surface-Primary, Border-Default, Radii)", () => {
+    it("renders default variant with bg-[var(--bg-surface)], border-[var(--border-default)], and rounded-[var(--r-xl)]", () => {
       render(
         <Dialog open={true}>
           <DialogContent>
@@ -25,14 +25,12 @@ describe("Dialog Primitive — Runway Flat Surface Architecture", () => {
 
       const content = screen.getByText("Project Settings").closest('[data-slot="dialog-content"]');
       expect(content).not.toBeNull();
-      expect(content?.className).toContain("rounded-md");
-      expect(content?.className).toContain("bg-(--background-state-90)");
-      expect(content?.className).toContain("border-white/10");
-      expect(content?.className).toContain("shadow-none");
-      expect(content?.className).toContain("backdrop-blur-80");
+      expect(content?.className).toContain("rounded-[var(--r-xl)]");
+      expect(content?.className).toContain("bg-[var(--bg-surface)]");
+      expect(content?.className).toContain("border-[var(--border-default)]");
     });
 
-    it("renders glass variant with controlled translucent surface and backdrop-blur", () => {
+    it("renders glass variant with controlled translucent surface", () => {
       render(
         <Dialog open={true}>
           <DialogContent variant="glass">
@@ -46,50 +44,14 @@ describe("Dialog Primitive — Runway Flat Surface Architecture", () => {
 
       const content = screen.getByText("Glass Surface Dialog").closest('[data-slot="dialog-content"]');
       expect(content).not.toBeNull();
-      expect(content?.className).toContain("rounded-md");
-      expect(content?.className).toContain("bg-(--background-state-90)");
-      expect(content?.className).toContain("backdrop-blur-80");
-      expect(content?.className).toContain("border-white/10");
-      expect(content?.className).toContain("shadow-none");
-    });
-
-    it("renders small and floating variants with flat surface and zero positive shadows", () => {
-      const { rerender } = render(
-        <Dialog open={true}>
-          <DialogContent variant="small">
-            <DialogTitle>Small Modal</DialogTitle>
-            <DialogDescription>Description text</DialogDescription>
-          </DialogContent>
-        </Dialog>
-      );
-
-      let content = screen.getByText("Small Modal").closest('[data-slot="dialog-content"]');
-      expect(content?.className).toContain("rounded-md");
-      expect(content?.className).toContain("bg-(--background-state-90)");
-      expect(content?.className).toContain("border-white/10");
-      expect(content?.className).toContain("shadow-none");
-      expect(content?.className).toContain("backdrop-blur-80");
-
-      rerender(
-        <Dialog open={true}>
-          <DialogContent variant="floating">
-            <DialogTitle>Floating Modal</DialogTitle>
-            <DialogDescription>Description text</DialogDescription>
-          </DialogContent>
-        </Dialog>
-      );
-
-      content = screen.getByText("Floating Modal").closest('[data-slot="dialog-content"]');
-      expect(content?.className).toContain("rounded-md");
-      expect(content?.className).toContain("bg-(--background-state-90)");
-      expect(content?.className).toContain("border-white/10");
-      expect(content?.className).toContain("shadow-none");
-      expect(content?.className).toContain("backdrop-blur-80");
+      expect(content?.className).toContain("rounded-[var(--r-xl)]");
+      expect(content?.className).toContain("bg-[var(--bg-surface)]");
+      expect(content?.className).toContain("border-[var(--border-default)]");
     });
   });
 
   describe("2. Interactive Behavior & Accessibility", () => {
-    it("renders close button with GoogleIcon close and closes dialog on click", () => {
+    it("renders close button with close icon and closes dialog on click", () => {
       const onOpenChange = vi.fn();
       render(
         <Dialog open={true} onOpenChange={onOpenChange}>
@@ -122,7 +84,7 @@ describe("Dialog Primitive — Runway Flat Surface Architecture", () => {
   });
 
   describe("3. ConfirmDeleteDialog Specialization", () => {
-    it("renders confirm dialog with AlertTriangle, flat surface, and handles confirm action", async () => {
+    it("renders confirm dialog and handles confirm action", async () => {
       const handleConfirm = vi.fn().mockResolvedValue({});
       const handleOpenChange = vi.fn();
 

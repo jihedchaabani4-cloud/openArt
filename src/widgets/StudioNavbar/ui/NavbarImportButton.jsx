@@ -78,11 +78,11 @@ export function NavbarImportButton() {
           <Button
             disabled={isUploading || !projectId}
             variant="ghost"
-            className="size-8 sm:size-9 max-h-full p-0 aspect-square"
+            className="size-8 sm:size-9 max-h-full p-0 aspect-square text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--overlay-5)] rounded-[var(--r-sm)]"
             title={projectId ? "Add or Upload" : "Project is still loading"}
           >
             {isUploading ? (
-              <GoogleIcon iconName="progress_activity" className="text-[13px] animate-spin text-white/40" />
+              <GoogleIcon iconName="progress_activity" className="text-[13px] animate-spin text-[var(--text-tertiary)]" />
             ) : (
               <GoogleIcon iconName="add" className="text-[13px]" />
             )}
@@ -95,18 +95,18 @@ export function NavbarImportButton() {
         >
           <DropdownMenuItem
             onClick={handleUploadClick}
-            className="flex items-center gap-3 cursor-pointer pl-3 pr-4 py-2 hover:bg-white/10 text-white min-h-[2.125rem] text-[14px] leading-5 font-medium transition-colors duration-100 ease-in-out"
+            className="flex items-center gap-3 cursor-pointer pl-3 pr-4 py-2 hover:bg-[var(--overlay-5)] text-[var(--text-primary)] min-h-[2.125rem] text-[14px] leading-5 font-medium transition-colors duration-100 ease-in-out"
           >
-            <GoogleIcon iconName="upload" className="text-[20px] text-white/80 shrink-0" />
+            <GoogleIcon iconName="upload" className="text-[20px] text-[var(--text-secondary)] shrink-0" />
             <span className="font-medium">Upload media</span>
           </DropdownMenuItem>
 
           <DropdownMenuItem
             onClick={handleCreateCollectionClick}
             disabled={!projectId}
-            className="flex items-center gap-3 cursor-pointer pl-3 pr-4 py-2 hover:bg-white/10 text-white min-h-[2.125rem] text-[14px] leading-5 font-medium transition-colors duration-100 ease-in-out"
+            className="flex items-center gap-3 cursor-pointer pl-3 pr-4 py-2 hover:bg-[var(--overlay-5)] text-[var(--text-primary)] min-h-[2.125rem] text-[14px] leading-5 font-medium transition-colors duration-100 ease-in-out"
           >
-            <GoogleIcon iconName="create_new_folder" className="text-[20px] text-white/80 shrink-0" />
+            <GoogleIcon iconName="create_new_folder" className="text-[20px] text-[var(--text-secondary)] shrink-0" />
             <span className="font-medium">Create collection</span>
           </DropdownMenuItem>
         </DropdownMenuContent>

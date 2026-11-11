@@ -72,10 +72,8 @@ describe("FlowSelect component", () => {
 
     const listbox = screen.getByRole("listbox");
     expect(listbox.getAttribute("data-slot")).toBe("popover-content");
-    expect(listbox.className).toContain("bg-surface-container-high");
-    expect(listbox.className).toContain("backdrop-blur-80");
-    expect(listbox.className).toContain("rounded-md");
-    expect(listbox.className).toContain("border-outline-variant");
+    expect(listbox.className).toContain("bg-[var(--bg-surface)]");
+    expect(listbox.className).toContain("rounded-[var(--r-lg)]");
     expect(listbox.className).toContain("p-1");
     expect(listbox.style.width).toBe("240px");
   });
@@ -122,10 +120,10 @@ describe("FlowSelect component", () => {
     const optionButtons = within(listbox).getAllByRole("button");
     const selectedOption = optionButtons.find((btn) => btn.textContent.includes("High Quality"));
     expect(selectedOption).toBeDefined();
-    expect(selectedOption.textContent).toContain("check");
+    expect(selectedOption.querySelector('svg')).not.toBeNull();
 
     const unselectedOption = optionButtons.find((btn) => btn.textContent.includes("Fast Mode"));
     expect(unselectedOption).toBeDefined();
-    expect(unselectedOption.textContent).not.toContain("check");
+    expect(unselectedOption.querySelector('svg')).toBeNull();
   });
 });

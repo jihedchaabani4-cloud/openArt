@@ -278,11 +278,11 @@ export function StudioNavbarLeft({
                         <div className="flex min-w-0 items-center gap-1.5 text-sm font-medium h-full max-h-full">
                             <span
                                 onClick={() => router.push(`/cinema-studio/${projectId}/assets`)}
-                                className="text-on-surface-variant hover:text-on-surface cursor-pointer transition-colors"
+                                className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer transition-colors"
                             >
                                 Assets
                             </span>
-                            <span className="text-on-surface-subtle">/</span>
+                            <span className="text-[var(--text-tertiary)]">/</span>
                             {activeCollection?.color && (
                                 <span
                                     className="size-2 rounded-full shrink-0"
@@ -294,7 +294,7 @@ export function StudioNavbarLeft({
                                 displayName={displayName}
                                 placeholder="Untitled collection"
                                 onSave={handleSaveName}
-                                inputClassName="text-md font-medium max-w-[160px] sm:max-w-[220px] focus:text-on-surface transition-all text-on-surface h-8 max-h-full"
+                                inputClassName="text-md font-medium max-w-[160px] sm:max-w-[220px] focus:text-[var(--text-primary)] transition-all text-[var(--text-primary)] h-8 max-h-full"
                             />
                         </div>
                     ) : pathname.includes("/elements") ? (

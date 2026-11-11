@@ -2,21 +2,20 @@ import { describe, it, expect } from "vitest";
 import fs from "fs";
 import path from "path";
 
-describe("Theme Background Tokens - Pure Black (#000000)", () => {
+describe("Theme Canvas Tokens - Cinema Dark (#0F1113 / #131416)", () => {
   const globalsCssPath = path.resolve(__dirname, "../globals.css");
+  const tokensPath = path.resolve(__dirname, "../tokens.css");
   const leftRailPath = path.resolve(__dirname, "../../widgets/StudioLayout/LeftNavigationRail.jsx");
 
-  it("enforces pure black (#000000) for primary and material background tokens in globals.css", () => {
-    const cssContent = fs.readFileSync(globalsCssPath, "utf-8");
+  it("enforces cinema dark (#0F1113 / #131416) for primary root canvas tokens in tokens.css and globals.css", () => {
+    const tokensContent = fs.readFileSync(tokensPath, "utf-8");
+    const globalsContent = fs.readFileSync(globalsCssPath, "utf-8");
 
-    // Primary background tokens must be pure black #000000
-    expect(cssContent).toMatch(/--background-primary:\s*#000000;/);
-    expect(cssContent).toMatch(/--background-base-primary:\s*#000000;/);
-    expect(cssContent).toMatch(/--mat-sys-background:\s*#000000;/);
-
-    // Must not have non-black rgb(12, 16, 20) background override
-    expect(cssContent).not.toMatch(/--background-primary:\s*rgb\(12,\s*16,\s*20\);/);
-    expect(cssContent).not.toMatch(/--ig-primary-background:\s*12,\s*16,\s*20;/);
+    // Canvas background tokens from design-system.md §1
+    expect(tokensContent).toMatch(/--bg-root:\s*#0F1113;/i);
+    expect(tokensContent).toMatch(/--bg-page:\s*#131416;/i);
+    expect(globalsContent).toMatch(/background-color:\s*var\(--bg-root\);/);
+    expect(globalsContent).toMatch(/background-color:\s*var\(--bg-page\);/);
   });
 
   it("enforces transparent background on LeftNavigationRail for seamless canvas layout", () => {
@@ -25,10 +24,9 @@ describe("Theme Background Tokens - Pure Black (#000000)", () => {
     expect(railContent).toMatch(/bg-transparent/);
   });
 
-  it("enforces canonical 4px sharp radius for button container shape and button border radius in globals.css", () => {
-    const cssContent = fs.readFileSync(globalsCssPath, "utf-8");
+  it("enforces canonical 8px radius for standard button shape in tokens.css", () => {
+    const tokensContent = fs.readFileSync(tokensPath, "utf-8");
 
-    expect(cssContent).toMatch(/--mat-button-filled-container-shape:\s*var\(--radius-sm,\s*4px\);/);
-    expect(cssContent).toMatch(/--button-border-radius:\s*var\(--radius-sm,\s*4px\);/);
+    expect(tokensContent).toMatch(/--r-sm:\s*8px;/);
   });
 });

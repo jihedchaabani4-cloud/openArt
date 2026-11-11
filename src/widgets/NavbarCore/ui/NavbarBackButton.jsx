@@ -39,7 +39,7 @@ export function NavbarBackButton({
         variant="ghost"
         disabled={disabled}
         className={cn(
-          "cursor-pointer shrink-0 text-[var(--mat-sys-on-surface,#e3e3e3)] hover:text-white transition-all",
+          "cursor-pointer shrink-0 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--overlay-5)] rounded-[var(--r-sm)] transition-all",
           children ? "h-8 sm:h-9 max-h-full px-3.5 gap-2 font-medium text-sm" : "size-8 sm:size-9 max-h-full aspect-square",
           className
         )}
@@ -71,7 +71,7 @@ export function NavbarBackButton({
       variant="ghost"
       disabled={disabled}
       className={cn(
-        "cursor-pointer shrink-0 text-[var(--mat-sys-on-surface,#e3e3e3)] hover:text-white transition-all",
+        "cursor-pointer shrink-0 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--overlay-5)] rounded-[var(--r-sm)] transition-all",
         children ? "h-8 sm:h-9 max-h-full px-3.5 gap-2 font-medium text-sm" : "size-8 sm:size-9 max-h-full aspect-square",
         className
       )}

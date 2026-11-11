@@ -72,6 +72,7 @@ export function NavbarAction({
       disabled={disabled || loading}
       onClick={onClick}
       className={cn(
+        "rounded-sm",
         isIcon && "size-9 p-0",
         variant === "neon" && "bg-brand-neon text-black hover:opacity-80 active:opacity-60",
         className

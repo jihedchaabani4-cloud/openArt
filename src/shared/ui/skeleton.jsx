@@ -1,14 +1,4 @@
-/**
- * Skeleton Primitive — OpenArt / Labveil Unified Design System
- * 
- * ═══════════════════════════════════════════════════════════════════════════════
- * STRICT ARCHITECTURAL RULES:
- * 1. ZERO CALL-SITE RESTYLING: Loading shimmer and opacity pulses are standard.
- * 2. USE CANONICAL SHAPES: `shape="default" | "card" | "circle" | "badge"`.
- * 3. `className` IS EXCLUSIVELY FOR SIZING/LAYOUT (e.g. `w-full h-8`).
- * ═══════════════════════════════════════════════════════════════════════════════
- */
-
+import * as React from "react";
 import { cn } from "@/shared/lib/utils";
 
 function Skeleton({
@@ -23,13 +13,13 @@ function Skeleton({
       data-variant={variant}
       data-shape={shape}
       className={cn(
-        "bg-white/5 pointer-events-none",
+        "bg-[var(--overlay-5)] pointer-events-none",
         variant === "pulse" && "animate-pulse",
-        variant === "shimmer" && "animate-shimmer bg-gradient-to-r from-white/5 via-white/10 to-white/5",
-        shape === "default" && "rounded-sm",
-        shape === "card" && "rounded-md",
+        variant === "shimmer" && "animate-shimmer bg-gradient-to-r from-[var(--overlay-5)] via-[var(--overlay-10)] to-[var(--overlay-5)]",
+        shape === "default" && "rounded-[var(--r-sm)]",
+        shape === "card" && "rounded-[var(--r-lg)]",
         shape === "circle" && "rounded-full",
-        shape === "badge" && "rounded-sm",
+        shape === "badge" && "rounded-[var(--r-xs)]",
         shape === "pill" && "rounded-full",
         className
       )}
@@ -39,3 +29,4 @@ function Skeleton({
 }
 
 export { Skeleton };
+export default Skeleton;

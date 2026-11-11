@@ -1,13 +1,3 @@
-/**
- * Slider Primitive — OpenArt / Labveil Unified Design System
- * 
- * STRICT ARCHITECTURAL RULES:
- * 1. ZERO CALL-SITE RESTYLING: Never add ad-hoc background, border, or thumb colors.
- * 2. USE CANONICAL VARIANTS: `variant="default" | "bar"`.
- * 3. USE CANONICAL SIZES: `size="default" | "sm"`.
- * 4. `className` IS EXCLUSIVELY FOR LAYOUT (e.g. `w-full`, `py-1`).
- */
-
 "use client";
 
 import * as React from "react";
@@ -30,7 +20,6 @@ const Slider = React.forwardRef(({
   const isSm = size === "sm";
   const isBar = variant === "bar";
 
-  // Normalize single number to array for Radix Slider
   const normalizedValue = React.useMemo(() => {
     if (value === undefined) return undefined;
     return Array.isArray(value) ? value : [Number(value) || 0];
@@ -57,7 +46,7 @@ const Slider = React.forwardRef(({
       className={cn(
         "relative flex w-full touch-none select-none items-center",
         isBar ? "h-8" : isSm ? "h-3" : "h-5",
-        disabled && "opacity-50 cursor-not-allowed",
+        disabled && "opacity-40 cursor-not-allowed",
         className
       )}
       {...props}
@@ -67,25 +56,25 @@ const Slider = React.forwardRef(({
         className={cn(
           "relative w-full grow overflow-hidden transition-colors",
           isBar
-            ? "h-full rounded-sm bg-transparent"
-            : cn("rounded-full bg-white/20 hover:bg-white/30", isSm ? "h-1" : "h-1.5")
+            ? "h-full rounded-[var(--r-sm)] bg-transparent"
+            : cn("rounded-full bg-[var(--overlay-20)] hover:bg-[var(--overlay-10)]", isSm ? "h-1" : "h-1.5")
         )}
       >
         <SliderPrimitive.Range
           data-slot="slider-range"
           className={cn(
             "absolute h-full transition-all",
-            isBar ? "bg-white/15" : "bg-white"
+            isBar ? "bg-[var(--overlay-10)]" : "bg-[var(--brand)]"
           )}
         />
       </SliderPrimitive.Track>
       <SliderPrimitive.Thumb
         data-slot="slider-thumb"
         className={cn(
-          "block transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-black disabled:pointer-events-none cursor-pointer",
+          "block transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-border-on)] disabled:pointer-events-none cursor-pointer",
           isBar
-            ? "w-1 h-5 rounded-full bg-white shadow-none"
-            : cn("rounded-full bg-white hover:scale-110", isSm ? "size-3" : "size-4")
+            ? "w-1.5 h-5 rounded-full bg-[var(--text-primary)] shadow-none"
+            : cn("rounded-full bg-[var(--text-primary)] hover:scale-110", isSm ? "size-3" : "size-4")
         )}
       />
     </SliderPrimitive.Root>
@@ -95,3 +84,4 @@ const Slider = React.forwardRef(({
 Slider.displayName = "Slider";
 
 export { Slider };
+export default Slider;

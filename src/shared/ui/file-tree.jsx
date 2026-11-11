@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useCallback, forwardRef } from "react";
-import { GoogleIcon } from "@/shared/ui/GoogleIcon";
+import { Icon } from "@/shared/ui/Icon";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/shared/ui/collapsible";
 import { Button } from "@/shared/ui/button";
 import { ContextMenu, ContextMenuTrigger } from "@/shared/ui/context-menu";
@@ -18,8 +18,7 @@ const useTree = () => {
 };
 
 /**
- * FileTree / Tree component (shadcn.io/ui/file-tree)
- * Root container managing expansion and selection state.
+ * FileTree / Tree component
  */
 const Tree = forwardRef(function Tree(
   {
@@ -87,7 +86,6 @@ Tree.displayName = "Tree";
 
 /**
  * Folder component
- * Renders a collapsible folder item with expand/collapse chevron and folder icons.
  */
 const Folder = forwardRef(function Folder(
   {
@@ -127,7 +125,7 @@ const Folder = forwardRef(function Folder(
   const resolvedSize = size || treeSize || "m";
   const activeFolderIcon = isExpanded ? resolvedOpenIcon : resolvedCloseIcon;
 
-  const onRowClick = (e) => {
+  const onRowClick = () => {
     if (isSelectable) {
       handleSelect(value);
     }
@@ -145,19 +143,19 @@ const Folder = forwardRef(function Folder(
       aria-expanded={isExpanded}
       onClick={onRowClick}
       className={cn(
-        "w-full justify-start rounded-lg text-xs font-medium px-2 py-1.5 transition-all duration-150 group",
+        "w-full justify-start rounded-[var(--r-sm)] text-xs font-medium px-2 py-1.5 transition-all duration-150 group",
         isSelected
-          ? "bg-white/10 text-white font-semibold"
-          : "text-white/70 hover:text-white hover:bg-white/5",
+          ? "bg-[var(--overlay-10)] text-[var(--text-primary)] font-semibold"
+          : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--overlay-5)]",
         className
       )}
       {...props}
     >
-      <span className="flex items-center justify-center size-5 shrink-0 mr-1.5 text-white/60 group-hover:text-white transition-colors">
+      <span className="flex items-center justify-center size-5 shrink-0 mr-1.5 text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors">
         {React.isValidElement(activeFolderIcon) ? (
           activeFolderIcon
         ) : (
-          <GoogleIcon iconName={activeFolderIcon} className="text-base" />
+          <Icon name={activeFolderIcon} size={16} />
         )}
       </span>
 
@@ -210,7 +208,6 @@ Folder.displayName = "Folder";
 
 /**
  * File component
- * Renders a leaf item in the file tree.
  */
 const File = forwardRef(function File(
   {
@@ -252,19 +249,19 @@ const File = forwardRef(function File(
       aria-selected={isSelected}
       onClick={handleClick}
       className={cn(
-        "w-full justify-start rounded-lg text-xs font-medium px-2 py-1.5 transition-all duration-150 group",
+        "w-full justify-start rounded-[var(--r-sm)] text-xs font-medium px-2 py-1.5 transition-all duration-150 group",
         isSelected
-          ? "bg-white/10 text-white font-semibold"
-          : "text-white/70 hover:text-white hover:bg-white/5",
+          ? "bg-[var(--overlay-10)] text-[var(--text-primary)] font-semibold"
+          : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--overlay-5)]",
         className
       )}
       {...props}
     >
-      <span className="flex items-center justify-center size-5 shrink-0 mr-1.5 text-white/60 group-hover:text-white transition-colors">
+      <span className="flex items-center justify-center size-5 shrink-0 mr-1.5 text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors">
         {React.isValidElement(activeFileIcon) ? (
           activeFileIcon
         ) : (
-          <GoogleIcon iconName={activeFileIcon} className="text-base" />
+          <Icon name={activeFileIcon} size={16} />
         )}
       </span>
 
@@ -300,7 +297,6 @@ File.displayName = "File";
 
 /**
  * CollapseButton component
- * Helper button to collapse all expanded folders.
  */
 const CollapseButton = forwardRef(function CollapseButton(
   { className, elements = [], children, variant = "ghost", size, ...props },
@@ -334,7 +330,6 @@ const CollapseButton = forwardRef(function CollapseButton(
 });
 CollapseButton.displayName = "CollapseButton";
 
-// Export standard shadcn names and FileTree aliases
 const FileTree = Tree;
 const FileTreeFolder = Folder;
 const FileTreeItem = File;

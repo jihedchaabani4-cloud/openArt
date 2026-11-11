@@ -90,10 +90,10 @@ describe("LeftNavigationRail & Media Grid Baseline Alignment", () => {
     const topButtons = Array.from(topNav.querySelectorAll("a[data-slot='button']"));
     expect(topButtons.length).toBe(4);
     topButtons.forEach((btn) => {
-      expect(btn.className).toContain("h-button-m");
+      expect(btn.className).toContain("h-8");
     });
-    expect(bottomTrashLink.className).toContain("h-button-m");
-    expect(bottomReduceBtn.className).toContain("h-button-m");
+    expect(bottomTrashLink.className).toContain("h-8");
+    expect(bottomReduceBtn.className).toContain("h-8");
 
     // Verify Corbeille precedes Réduire in DOM order (placed above it)
     expect(bottomTrashLink.compareDocumentPosition(bottomReduceBtn) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();

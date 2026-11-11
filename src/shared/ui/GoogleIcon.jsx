@@ -1,39 +1,34 @@
+import * as React from "react";
+import { Icon } from "./Icon";
 import { cn } from "@/shared/lib/utils";
 
 /**
- * GoogleIcon component for Material Symbols Outlined
- * @param {string} iconName - The name of the icon (snake_case usually)
- * @param {string} className - Additional classes for styling
- * @param {boolean} fill - Whether the icon should be filled
- * @param {number} weight - Font weight (100-700)
- * @param {number} grade - Grade (-25-200)
- * @param {number} opticalSize - Optical size (20-48)
+ * GoogleIcon adapter — delegates directly to the SVG Icon primitive.
+ * Eliminates all external Google/Material Symbol font dependencies
+ * while preserving legacy font-span hooks and accessibility.
  */
-export const GoogleIcon = ({ 
-    iconName, 
-    name,
-    className, 
-    fill = false, 
-    weight = 400, 
-    grade = 0, 
-    opticalSize = 34,
-    ...props
+export const GoogleIcon = ({
+  iconName,
+  name,
+  className,
+  size,
+  style,
+  ...props
 }) => {
-    const finalName = iconName || name;
-    return (
-        <span 
-            role="img"
-            aria-hidden="true"
-            data-mat-icon-type="font"
-            className={cn("mat-icon notranslate google-symbols material-symbols-outlined select-none text-xl inline-flex items-center justify-center leading-none align-middle shrink-0", className)}
-            style={{
-                fontVariationSettings: `'FILL' ${fill ? 1 : 0}, 'wght' ${weight}, 'GRAD' ${grade}, 'opsz' ${opticalSize}`
-            }}
-            {...props}
-        >
-            {finalName}
-        </span>
-    );
+  const finalName = iconName || name;
+  return (
+    <span
+      data-mat-icon-type="font"
+      className={cn("inline-flex items-center justify-center select-none shrink-0 text-white", className)}
+      style={style}
+    >
+      <Icon
+        name={finalName}
+        size={size}
+        {...props}
+      />
+    </span>
+  );
 };
 
 export default GoogleIcon;

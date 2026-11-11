@@ -14,8 +14,8 @@ import {
   ContextMenuItem,
 } from "@/shared/ui/context-menu";
 
-describe("DropdownMenu and ContextMenu — Runway Flat Surface Architecture", () => {
-  it("renders DropdownMenu with width w-52, rounded-md, flat bg-surface-card, border-white/10, and zero shadows", () => {
+describe("DropdownMenu and ContextMenu — Higgsfield Cinema Studio Architecture", () => {
+  it("renders DropdownMenu with min-w-[200px], rounded-[var(--r-lg)], bg-[var(--bg-surface)], and border-[var(--border-default)]", () => {
     render(
       <DropdownMenu open={true}>
         <DropdownMenuTrigger>Open</DropdownMenuTrigger>
@@ -30,26 +30,22 @@ describe("DropdownMenu and ContextMenu — Runway Flat Surface Architecture", ()
     const item = screen.getByText("Option 1");
     const menuItem = item.closest('[data-slot="dropdown-menu-item"]');
     expect(menuItem).not.toBeNull();
-    expect(menuItem.className).toContain("min-h-[2.125rem]");
-    expect(menuItem.className).toContain("rounded-sm");
-    expect(menuItem.className).toContain("text-sm");
-    expect(menuItem.className).toContain("pl-3");
-    expect(menuItem.className).toContain("pr-4");
-    expect(menuItem.className).toContain("text-on-surface");
+    expect(menuItem.className).toContain("h-[36px]");
+    expect(menuItem.className).toContain("rounded-[var(--r-sm)]");
+    expect(menuItem.className).toContain("text-[var(--text-primary)]");
 
     const deleteItem = screen.getByText("Delete").closest('[data-slot="dropdown-menu-item"]');
-    expect(deleteItem?.className).toContain("data-[variant=destructive]:!text-error");
+    expect(deleteItem?.className).toContain("!text-[var(--pink-400)]");
 
     const content = item.closest('[data-slot="dropdown-menu-content"]');
     expect(content).not.toBeNull();
-    expect(content.className).toContain("w-52");
-    expect(content.className).toContain("rounded-md");
-    expect(content.className).toContain("bg-surface-container-high");
-    expect(content.className).toContain("border-outline-variant");
-    expect(content.className).toContain("shadow-none");
+    expect(content.className).toContain("min-w-[200px]");
+    expect(content.className).toContain("rounded-[var(--r-lg)]");
+    expect(content.className).toContain("bg-[var(--bg-surface)]");
+    expect(content.className).toContain("border-[var(--border-default)]");
   });
 
-  it("renders ContextMenu trigger and content structure conforming to Runway flat surfaces", () => {
+  it("renders ContextMenu trigger and content structure conforming to Cinema Studio surfaces", () => {
     render(
       <ContextMenu>
         <ContextMenuTrigger>Right click</ContextMenuTrigger>

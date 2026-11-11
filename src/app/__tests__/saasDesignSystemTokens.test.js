@@ -2,9 +2,9 @@ import { describe, it, expect } from "vitest";
 import fs from "fs";
 import path from "path";
 
-describe("SaaS Design System Tokens & Hierarchy (Higgsfield / Supercomputer Alignment)", () => {
+describe("SaaS Design System Tokens & Hierarchy (Higgsfield Cinema Studio Alignment)", () => {
   const globalsCssPath = path.resolve(__dirname, "../globals.css");
-  const flowTokensPath = path.resolve(__dirname, "../google-flow-tokens.css");
+  const tokensPath = path.resolve(__dirname, "../tokens.css");
   const promptBarLayoutPath = path.resolve(
     __dirname,
     "../../features/prompt-bar/model/core/promptBarLayout.js"
@@ -15,55 +15,45 @@ describe("SaaS Design System Tokens & Hierarchy (Higgsfield / Supercomputer Alig
   );
 
   describe("1. Background & Surface Ladder Hierarchy", () => {
-    it("enforces #0f1113 as root canvas background across html, body and tertiary tokens", () => {
+    it("enforces #0F1113 as root canvas background across tokens and globals", () => {
+      const tokens = fs.readFileSync(tokensPath, "utf-8");
       const globals = fs.readFileSync(globalsCssPath, "utf-8");
-      expect(globals).toMatch(/--surface-tertiary:\s*#0f1113;/);
-      expect(globals).toMatch(/--color-surface-tertiary:\s*(var\(--surface-tertiary,\s*#0f1113\)|#0f1113);/);
-      expect(globals).toMatch(/html\s*\{[^}]*background-color:\s*var\(--color-surface-tertiary,\s*#0f1113\);/);
+
+      expect(tokens).toMatch(/--bg-root:\s*#0F1113;/i);
+      expect(tokens).toMatch(/--bg-page:\s*#131416;/i);
+      expect(globals).toMatch(/background-color:\s*var\(--bg-root\);/);
+      expect(globals).toMatch(/background-color:\s*var\(--bg-page\);/);
     });
 
-    it("enforces #131416 as studio canvas / panel background and #1c1e20 as card / composer background", () => {
-      const globals = fs.readFileSync(globalsCssPath, "utf-8");
-      const tokens = fs.readFileSync(flowTokensPath, "utf-8");
+    it("enforces #131416 as studio canvas / panel background and #1C1E20 as card / composer background", () => {
+      const tokens = fs.readFileSync(tokensPath, "utf-8");
 
-      expect(globals).toMatch(/--surface-panel:\s*#131416;/);
-      expect(globals).toMatch(/--surface-card:\s*#1c1e20;/);
-      expect(globals).toMatch(/--surface-elevated:\s*#1c1e20;/);
-      expect(globals).toMatch(/--card:\s*var\(--surface-card,\s*#1c1e20\);/);
-      expect(globals).toMatch(/--sidebar:\s*var\(--surface-panel,\s*#131416\);/);
-
-      expect(tokens).toMatch(/--mat-sys-surface:\s*#131416;/);
-      expect(tokens).toMatch(/--mat-sys-surface-container:\s*#1c1e20;/);
+      expect(tokens).toMatch(/--bg-surface:\s*#1C1E20;/i);
+      expect(tokens).toMatch(/--bg-surface-2:\s*#1C1E21;/i);
     });
 
-    it("enforces lime accent #d1fe17 for brand surfaces, generate button and focus rings", () => {
-      const globals = fs.readFileSync(globalsCssPath, "utf-8");
-      expect(globals).toMatch(/--color-lime:\s*(var\(--color-lime,\s*#d1fe17\)|#d1fe17);/);
-      expect(globals).toMatch(/--primary:\s*#d1fe17;/);
-      expect(globals).toMatch(/--ring:\s*#d1fe17;/);
-      expect(globals).toMatch(/--sidebar-primary:\s*#d1fe17;/);
+    it("enforces lime accent #D1FE17 for brand surfaces and generate button", () => {
+      const tokens = fs.readFileSync(tokensPath, "utf-8");
+      expect(tokens).toMatch(/--brand:\s*#D1FE17;/i);
     });
   });
 
   describe("2. Border & Subtle Separator Hierarchy", () => {
-    it("enforces rgba(255, 255, 255, 0.05) as subtle border and outline variant across app", () => {
-      const globals = fs.readFileSync(globalsCssPath, "utf-8");
-      expect(globals).toMatch(/--border:\s*rgba\(255,\s*255,\s*255,\s*0\.05\);/);
-      expect(globals).toMatch(/--outline-variant:\s*rgba\(255,\s*255,\s*255,\s*0\.05\);/);
-      expect(globals).toMatch(/--line-subtle:\s*var\(--outline-variant\);/);
+    it("enforces rgba(255, 255, 255, 0.05) as subtle border across app", () => {
+      const tokens = fs.readFileSync(tokensPath, "utf-8");
+      expect(tokens).toMatch(/--border-subtle:\s*rgba\(255,\s*255,\s*255,\s*0\.05\);/);
     });
   });
 
   describe("3. Radius Scale Hierarchy", () => {
-    it("enforces rounded-lg (12px), rounded-xl (16px), rounded-2xl (20px), and rounded-3xl (24px) scale", () => {
-      const globals = fs.readFileSync(globalsCssPath, "utf-8");
-      expect(globals).toMatch(/--radius-lg:\s*12px;/);
-      expect(globals).toMatch(/--radius-xl:\s*16px;/);
-      expect(globals).toMatch(/--radius-2xl:\s*20px;/);
-      expect(globals).toMatch(/--radius-3xl:\s*24px;/);
-      expect(globals).toMatch(/--card-border-radius:\s*var\(--radius-lg,\s*12px\);/);
-      expect(globals).toMatch(/--panel-border-radius:\s*var\(--radius-xl,\s*16px\);/);
-      expect(globals).toMatch(/--dialog-border-radius:\s*var\(--radius-xl,\s*16px\);/);
+    it("enforces r-sm (8px), r-md (10px), r-lg (12px), r-xl (16px), r-2xl (20px), and r-3xl (24px) scale", () => {
+      const tokens = fs.readFileSync(tokensPath, "utf-8");
+      expect(tokens).toMatch(/--r-sm:\s*8px;/);
+      expect(tokens).toMatch(/--r-md:\s*10px;/);
+      expect(tokens).toMatch(/--r-lg:\s*12px;/);
+      expect(tokens).toMatch(/--r-xl:\s*16px;/);
+      expect(tokens).toMatch(/--r-2xl:\s*20px;/);
+      expect(tokens).toMatch(/--r-3xl:\s*24px;/);
     });
 
     it("configures PromptBar container with rounded-[20px] and #1c1e20 surface", () => {
