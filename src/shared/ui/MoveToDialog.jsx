@@ -318,7 +318,7 @@ export function MoveToDialog({
                 if (e.key === "Escape") setCreatingInFolderId(null);
               }}
               placeholder="New folder name..."
-              className="flex-1 bg-surface-elevated text-on-surface text-xs rounded px-2 py-1 outline-none border border-border focus:border-white/30"
+              className="flex-1 bg-[var(--bg-surface-elevated)] text-[var(--text-primary)] text-xs rounded px-2 py-1 outline-none border border-[var(--border-default)] focus:border-white/30"
             />
             <Button
               type="button"

@@ -291,8 +291,8 @@ export function NewElementDialog({ open, onOpenChange, projectId: propProjectId 
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
             className={cn(
-              "flex-1 min-h-[300px] h-full rounded-xxxs bg-surface-card flex flex-col items-center justify-center relative overflow-hidden transition-all duration-300 border border-white/5",
-              isDragging && "bg-surface-elevated scale-[0.995]"
+              "flex-1 min-h-[300px] h-full rounded-xxxs bg-[var(--bg-surface)] flex flex-col items-center justify-center relative overflow-hidden transition-all duration-300 border border-white/5",
+              isDragging && "bg-[var(--bg-surface-elevated)] scale-[0.995]"
             )}
           >
             {mediaItems.length === 0 ? (
@@ -344,7 +344,7 @@ export function NewElementDialog({ open, onOpenChange, projectId: propProjectId 
                     type="button"
                     variant="ghost"
                     onClick={(e) => handleRemoveMedia(activePreviewIndex, e)}
-                    className="absolute top-3 right-3 size-8 p-0 rounded-full bg-surface-elevated/80 text-white/80 hover:text-white hover:bg-surface-elevated border border-white/10"
+                    className="absolute top-3 right-3 size-8 p-0 rounded-full bg-[var(--bg-surface-elevated)]/80 text-white/80 hover:text-white hover:bg-[var(--bg-surface-elevated)] border border-white/10"
                     title="Supprimer ce fichier"
                   >
                     <GoogleIcon iconName="close" className="text-base" />

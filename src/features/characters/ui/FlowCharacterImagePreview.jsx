@@ -26,7 +26,7 @@ export function FlowCharacterImagePreview({
     <div
       data-component="flow-character-image-preview"
       className={cn(
-        "relative aspect-video w-full max-w-[850px] mx-auto rounded-2xl bg-surface-panel border border-white/10 shadow-none flex flex-col items-center justify-center p-6 sm:p-10 select-none",
+        "relative aspect-video w-full max-w-[850px] mx-auto rounded-2xl bg-[var(--bg-surface)] border border-white/10 shadow-none flex flex-col items-center justify-center p-6 sm:p-10 select-none",
         className
       )}
     >

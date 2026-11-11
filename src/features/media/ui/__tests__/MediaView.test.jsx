@@ -432,7 +432,7 @@ describe("Canonical MediaView", () => {
   });
 
   describe("10. Surface Variant Ownership", () => {
-    it("applies canonical card surface tokens (rounded-xxxs, bg-surface-card, border-white/10) only when surface='card'", () => {
+    it("applies canonical card surface tokens (rounded-xxxs, bg-[var(--bg-surface)], border-white/10) only when surface='card'", () => {
       const media = {
         id: "m-surface",
         url: "https://example.com/surface.png",
@@ -446,7 +446,7 @@ describe("Canonical MediaView", () => {
 
       rerender(<MediaView ref={defaultRef} media={media} surface="card" />);
       expect(defaultRef.current.className).toContain("rounded-xxxs");
-      expect(defaultRef.current.className).toContain("bg-surface-card");
+      expect(defaultRef.current.className).toContain("bg-[var(--bg-surface)]");
       expect(defaultRef.current.className).toContain("border-white/10");
       expect(defaultRef.current.className).toContain("hover:border-white/20");
     });

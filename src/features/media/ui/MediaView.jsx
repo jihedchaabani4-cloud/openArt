@@ -225,7 +225,7 @@ export const CoreMediaItemPresenter = memo(
         className={cn(
           "group relative select-none items-center justify-center overflow-hidden rounded-xxxs shadow-none",
           surface === "card"
-            ? "bg-surface-card border border-white/10 hover:border-white/20 transition-none"
+            ? "bg-[var(--bg-surface)] border border-white/10 hover:border-white/20 transition-none"
             : "bg-black/40",
           isContain ? "inline-flex w-fit h-fit max-w-full max-h-full shrink-0" : "flex w-full h-full",
           draggable ? "cursor-grab active:cursor-grabbing" : onClick ? "cursor-pointer" : "",
@@ -265,7 +265,7 @@ export const CoreMediaItemPresenter = memo(
           {isCompleted && !isVideo && (
             <div className={cn("relative flex items-center justify-center", isContain ? "w-fit h-fit max-w-full max-h-full" : "w-full h-full")}>
               {core.isMediaLoaded === false && (
-                <div className="absolute inset-0 bg-surface-panel animate-pulse" />
+                <div className="absolute inset-0 bg-[var(--bg-surface)] animate-pulse" />
               )}
               <img
                 ref={(el) => {

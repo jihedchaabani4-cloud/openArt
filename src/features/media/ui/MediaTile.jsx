@@ -52,7 +52,7 @@ export const MediaTile = React.memo(
           "group relative overflow-hidden transition-none cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary shadow-none",
           isSelected
             ? "ring-2 ring-primary border-transparent shadow-none"
-            : "hover:border-line-interactive",
+            : "hover:border-[var(--border-strong)]",
           className
         )}
       >

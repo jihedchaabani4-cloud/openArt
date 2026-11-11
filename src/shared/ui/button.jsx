@@ -16,18 +16,24 @@ const buttonVariants = cva(
           "h-8 px-3.5 rounded-[var(--r-sm)] bg-[var(--brand)] text-[var(--text-on-brand)] font-semibold hover:brightness-90 active:brightness-80 border-0",
         generate:
           "btn-generate",
+        "generate-hero":
+          "btn-generate-hero",
         "generate-compact":
           "btn-generate-compact",
+        "mobile-create":
+          "btn-mobile-create",
         marketing:
           "btn-marketing",
         pill:
-          "btn-pill-dark",
+          "btn-pill",
         secondary:
           "h-8 px-3.5 rounded-[var(--r-sm)] bg-[var(--overlay-5)] text-[var(--text-primary)] hover:bg-[var(--overlay-10)] active:bg-[var(--overlay-20)] border-0",
         outline:
           "h-8 px-3.5 rounded-[var(--r-sm)] border border-[var(--border-default)] bg-transparent text-[var(--text-primary)] hover:bg-[var(--overlay-5)] active:bg-[var(--overlay-10)]",
         ghost:
           "h-8 px-3.5 rounded-[var(--r-sm)] bg-transparent text-[var(--text-primary)] hover:bg-[var(--overlay-5)] active:bg-[var(--overlay-10)] border-0",
+        quiet:
+          "h-8 px-3.5 rounded-[var(--r-sm)] bg-transparent text-[var(--text-primary)] hover:bg-[var(--overlay-10)] active:bg-[var(--overlay-20)] border-0",
         chip:
           "h-[28px] px-2 rounded-[var(--r-sm)] bg-[var(--overlay-5)] text-[var(--text-primary)] text-[12px] leading-[18px] hover:bg-[var(--overlay-10)] active:bg-[var(--overlay-20)] border-0",
         "chip-highlight":
@@ -38,6 +44,14 @@ const buttonVariants = cva(
           "!h-auto !p-0 bg-transparent text-[var(--text-primary)] underline-offset-4 hover:underline font-medium border-0",
         icon:
           "w-[24px] h-[24px] p-0 rounded-[var(--r-sm)] text-[var(--text-secondary)] hover:bg-[var(--overlay-5)] hover:text-[var(--text-primary)] active:scale-95 border-0",
+        "toolbar-icon":
+          "w-[24px] h-[24px] p-0 rounded-[var(--r-sm)] text-[var(--text-tertiary)] hover:bg-[var(--overlay-10)] hover:text-[var(--text-primary)] active:bg-[var(--overlay-20)] border-0",
+        close:
+          "w-[24px] h-[24px] p-0 rounded-[var(--r-xs)] text-[var(--text-secondary)] hover:bg-[var(--overlay-10)] hover:text-[var(--text-primary)] active:bg-[var(--overlay-20)] border-0",
+        collapse:
+          "w-[36px] h-[36px] p-0 rounded-[var(--r-lg)] bg-[var(--overlay-5)] text-[var(--text-tertiary)] hover:bg-[var(--overlay-10)] hover:text-[var(--text-primary)] active:bg-[var(--overlay-20)] border-0",
+        notification:
+          "w-[36px] h-[36px] p-0 rounded-full bg-[var(--overlay-5)] text-[var(--text-footer)] hover:bg-[var(--overlay-10)] hover:text-[var(--text-primary)] active:bg-[var(--overlay-20)] border-0",
       },
       size: {
         s: "h-7 px-2.5 text-xs",

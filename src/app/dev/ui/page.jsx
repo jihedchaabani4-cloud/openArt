@@ -150,15 +150,15 @@ export default function DesignSystemShowcasePage() {
                   </div>
                   <div className="p-4 rounded-md bg-neutral-900 border border-white/10 flex flex-col gap-1">
                     <span className="text-xs font-semibold">Panel</span>
-                    <span className="text-xs text-muted-foreground">bg-surface-panel</span>
+                    <span className="text-xs text-muted-foreground">bg-[var(--bg-surface)]</span>
                   </div>
                   <div className="p-4 rounded-md bg-card border border-white/10 flex flex-col gap-1">
                     <span className="text-xs font-semibold">Card</span>
                     <span className="text-xs text-muted-foreground">bg-card</span>
                   </div>
-                  <div className="p-4 rounded-md bg-surface-elevated border border-white/10 flex flex-col gap-1">
+                  <div className="p-4 rounded-md bg-[var(--bg-surface-elevated)] border border-white/10 flex flex-col gap-1">
                     <span className="text-xs font-semibold">Elevated</span>
-                    <span className="text-xs text-muted-foreground">bg-surface-elevated</span>
+                    <span className="text-xs text-muted-foreground">bg-[var(--bg-surface-elevated)]</span>
                   </div>
                   <div className="p-4 rounded-md bg-white/5 border border-white/10 backdrop-blur-md flex flex-col gap-1">
                     <span className="text-xs font-semibold">Glass</span>
@@ -610,37 +610,37 @@ export default function DesignSystemShowcasePage() {
                 {/* Card with Canvas Bleed Zone */}
                 <Card variant="interactive">
                   <CardCanvas className="h-28 flex items-center justify-center">
-                    <span className="text-xs text-content-muted font-mono">Card.Canvas (16:9 / Bleed)</span>
+                    <span className="text-xs text-[var(--text-secondary)] font-mono">Card.Canvas (16:9 / Bleed)</span>
                   </CardCanvas>
                   <CardHeader bordered>
                     <CardTitle>Media Bleed Card</CardTitle>
                     <CardDescription>Zero padding canvas viewport</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-xs text-content-muted">Clean boundary separation.</p>
+                    <p className="text-xs text-[var(--text-secondary)]">Clean boundary separation.</p>
                   </CardContent>
                 </Card>
               </div>
 
               {/* Surface Tones Showcase */}
-              <div className="flex flex-col gap-3 pt-4 border-t border-line-subtle">
-                <h3 className="text-sm font-semibold text-content-base">Headless Surface Tones (`tone="..."`)</h3>
+              <div className="flex flex-col gap-3 pt-4 border-t border-[var(--border-subtle)]">
+                <h3 className="text-sm font-semibold text-[var(--text-primary)]">Headless Surface Tones (`tone="..."`)</h3>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   <Surface tone="panel" radius="md" className="p-3">
-                    <span className="text-xs font-semibold text-content-base">tone="panel"</span>
-                    <p className="text-2xs text-content-muted mt-1">Sidebar / Rail Surface</p>
+                    <span className="text-xs font-semibold text-[var(--text-primary)]">tone="panel"</span>
+                    <p className="text-2xs text-[var(--text-secondary)] mt-1">Sidebar / Rail Surface</p>
                   </Surface>
                   <Surface tone="card" radius="md" className="p-3">
-                    <span className="text-xs font-semibold text-content-base">tone="card"</span>
-                    <p className="text-2xs text-content-muted mt-1">Default Card Surface</p>
+                    <span className="text-xs font-semibold text-[var(--text-primary)]">tone="card"</span>
+                    <p className="text-2xs text-[var(--text-secondary)] mt-1">Default Card Surface</p>
                   </Surface>
                   <Surface tone="elevated" radius="md" className="p-3">
-                    <span className="text-xs font-semibold text-content-base">tone="elevated"</span>
-                    <p className="text-2xs text-content-muted mt-1">Popovers / Menus Surface</p>
+                    <span className="text-xs font-semibold text-[var(--text-primary)]">tone="elevated"</span>
+                    <p className="text-2xs text-[var(--text-secondary)] mt-1">Popovers / Menus Surface</p>
                   </Surface>
                   <Surface tone="sunken" radius="md" className="p-3">
-                    <span className="text-xs font-semibold text-content-base">tone="sunken"</span>
-                    <p className="text-2xs text-content-muted mt-1">Canvas / Recessed Surface</p>
+                    <span className="text-xs font-semibold text-[var(--text-primary)]">tone="sunken"</span>
+                    <p className="text-2xs text-[var(--text-secondary)] mt-1">Canvas / Recessed Surface</p>
                   </Surface>
                 </div>
               </div>
@@ -648,7 +648,7 @@ export default function DesignSystemShowcasePage() {
               {/* Layout Primitives Showcase */}
               <Section spacing="none" className="flex flex-col gap-3 pt-4 border-t border-white/10">
                 <h3 className="text-sm font-semibold text-white/90">Layer 3 Layout Primitives (Container, Section, Stack, Inline)</h3>
-                <Container size="compact" className="bg-surface-panel p-4 rounded-md border border-white/10">
+                <Container size="compact" className="bg-[var(--bg-surface)] p-4 rounded-md border border-white/10">
                   <Stack gap="sm">
                     <span className="text-xs font-semibold text-white">Container (compact) + Stack (sm)</span>
                     <Inline gap="xs" wrap={true}>

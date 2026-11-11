@@ -9,6 +9,7 @@ const buttonGroupVariants = cva(
       variant: {
         default: "bg-[var(--overlay-5)] rounded-[var(--r-sm)] p-1",
         pill: "bg-[var(--overlay-20)] backdrop-blur-md rounded-full p-1",
+        chip: "chip-group",
       },
     },
     defaultVariants: {
@@ -32,5 +33,7 @@ const ButtonGroup = React.forwardRef(({ className, variant, children, ...props }
 });
 ButtonGroup.displayName = "ButtonGroup";
 
-export { ButtonGroup, buttonGroupVariants };
+const ChipGroup = ButtonGroup;
+
+export { ButtonGroup, ChipGroup, buttonGroupVariants };
 export default ButtonGroup;

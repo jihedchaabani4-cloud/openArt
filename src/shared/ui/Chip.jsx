@@ -51,4 +51,22 @@ export const Chip = React.forwardRef(function Chip(
 });
 
 Chip.displayName = "Chip";
+
+export const ChipGroup = React.forwardRef(function ChipGroup(
+  { children, className, disabled = false, ...props },
+  ref
+) {
+  return (
+    <div
+      ref={ref}
+      aria-disabled={disabled}
+      className={cn("chip-group", className)}
+      {...props}
+    >
+      {children}
+    </div>
+  );
+});
+ChipGroup.displayName = "ChipGroup";
+
 export default Chip;

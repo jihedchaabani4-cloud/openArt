@@ -522,7 +522,7 @@ export const StudioMediaGridCard = React.memo(function StudioMediaGridCard({
               initial={{ opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.12 }}
-              className="px-3 py-1.5 rounded-sm bg-surface-elevated border border-white/20 text-white text-xs font-medium whitespace-nowrap shadow-none"
+              className="px-3 py-1.5 rounded-sm bg-[var(--bg-surface-elevated)] border border-white/20 text-white text-xs font-medium whitespace-nowrap shadow-none"
             >
               {dragTarget === "add-to-collection" ? "Add to collection" : "Move out of collection"}
             </motion.div>

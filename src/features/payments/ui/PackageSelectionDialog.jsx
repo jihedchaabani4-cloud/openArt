@@ -284,7 +284,7 @@ export function PackageSelectionDialog({
                                         className={cn(
                                             "w-full h-auto p-3 sm:p-4 rounded-lg border text-left transition-all duration-200 block justify-start",
                                             isSelected
-                                                ? "border-white/90 bg-surface-card"
+                                                ? "border-white/90 bg-[var(--bg-surface-2)]"
                                                 : "border-white/10 bg-transparent hover:bg-white/5"
                                         )}
                                     >

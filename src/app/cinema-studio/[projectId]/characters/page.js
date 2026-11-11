@@ -167,7 +167,7 @@ export default function CharactersPage({ params }) {
                     <Button
                         type="button"
                         onClick={() => router.push(`/cinema-studio/${projectId}/characters/new`)}
-                        className="flex items-center gap-2 px-6 py-4 h-auto rounded-full bg-surface-card hover:bg-surface-elevated text-white transition-all active:scale-95 border border-white/10 shadow-none cursor-pointer"
+                        className="flex items-center gap-2 px-6 py-4 h-auto rounded-full bg-[var(--bg-surface)] hover:bg-[var(--bg-surface-elevated)] text-[var(--text-primary)] transition-all active:scale-95 border border-[var(--border-default)] shadow-none cursor-pointer"
                     >
                         <GoogleIcon iconName="add" className="text-xl" />
                         <span className="font-medium text-[15px]">New character</span>

@@ -85,7 +85,7 @@ export default function LoginPage() {
             </div>
 
             {/* Card Container */}
-            <div className="bg-surface-panel border border-white/10 p-8 rounded-2xl shadow-none relative overflow-hidden">
+            <div className="bg-[var(--bg-surface)] border border-white/10 p-8 rounded-2xl shadow-none relative overflow-hidden">
               
               {/* Shine effect on card */}
               <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
