@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Icon } from "@/shared/ui/Icon"
+import { GoogleIcon } from "@/shared/ui/GoogleIcon"
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -48,86 +48,88 @@ export function StudioSettingsDropdown(props) {
         <Button
           type="button"
           variant="ghost"
-          className="size-8 sm:size-9 max-h-full p-0 aspect-square text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--overlay-5)] rounded-[var(--r-sm)]"
+          className="size-8 sm:size-9 max-h-full p-0 aspect-square"
           title="Paramètres d'affichage"
           aria-label="Paramètres de la grille de blocs"
           aria-haspopup="menu"
           aria-expanded={open}
         >
-          <Icon name="settings_2" size={20} />
+          <GoogleIcon iconName="settings_2" className="text-xl" />
         </Button>
       </DropdownMenuTrigger>
       
-      <DropdownMenuContent align="end" className="w-72 p-2 flex flex-col gap-1.5 font-sans antialiased bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-[var(--r-lg)] shadow-[0_16px_32px_rgba(0,0,0,0.40),0_4px_8px_rgba(0,0,0,0.24)]">
-        {/* ── 1. Grid Size Selector ── */}
-        <div className="flex flex-col gap-1 px-1 mb-1">
-          <span className="text-xs font-medium text-[var(--text-secondary)]">
+      <DropdownMenuContent align="end" className="w-72 p-1.5 flex flex-col gap-1 font-sans antialiased">
+        {/* ── 1. Grid Size Selector (styled like Prompt Bar Parameter Selector) ── */}
+        <div className="flex flex-col gap-1 px-0.5 mb-1">
+          <span className="text-xs font-medium text-white/75">
             Taille de la grille
           </span>
-          <div
-            className="flex items-center gap-1 p-0.5 bg-[var(--overlay-5)] rounded-[var(--r-sm)] w-full select-none"
-            role="radiogroup"
-            aria-label="Taille de la grille"
-          >
-            {[
-              { value: "sm", label: "S" },
-              { value: "md", label: "M" },
-              { value: "lg", label: "L" },
-            ].map((opt) => {
-              const isChecked = gridSize === opt.value;
-              return (
-                <Button
-                  key={opt.value}
-                  type="button"
-                  role="radio"
-                  aria-checked={isChecked}
-                  variant={isChecked ? "secondary" : "ghost"}
-                  onClick={() => setGridSize?.(opt.value)}
-                  className="flex-1 h-7 text-xs font-medium rounded-[var(--r-xs)]"
-                >
-                  <span>{opt.label}</span>
-                </Button>
-              );
-            })}
-          </div>
+          <flow-toggles aria-label="Taille de la grille" class="block w-full">
+            <div
+              className="mat-button-toggle-group toggle-group flex items-center gap-0.5 p-0.5 bg-white/5 rounded-sm w-full select-none"
+              role="radiogroup"
+            >
+              {[
+                { value: "sm", label: "S" },
+                { value: "md", label: "M" },
+                { value: "lg", label: "L" },
+              ].map((opt) => {
+                const isChecked = gridSize === opt.value;
+                return (
+                  <Button
+                    key={opt.value}
+                    type="button"
+                    role="radio"
+                    aria-checked={isChecked}
+                    variant={isChecked ? "secondary" : "ghost"}
+                    onClick={() => setGridSize?.(opt.value)}
+                    className="mat-button-toggle toggle flex-toggle flex-1 h-8 text-[13px] font-medium"
+                  >
+                    <span>{opt.label}</span>
+                  </Button>
+                );
+              })}
+            </div>
+          </flow-toggles>
         </div>
 
-        {/* ── 2. Space Between Media ── */}
-        <div className="flex flex-col gap-1 px-1 mb-1">
-          <span className="text-xs font-medium text-[var(--text-secondary)]">
+        {/* ── 2. Space Between Media (S: 4px, M: 8px, L: 16px) ── */}
+        <div className="flex flex-col gap-1 px-0.5 mb-1">
+          <span className="text-xs font-medium text-white/75">
             Space between media
           </span>
-          <div
-            className="flex items-center gap-1 p-0.5 bg-[var(--overlay-5)] rounded-[var(--r-sm)] w-full select-none"
-            role="radiogroup"
-            aria-label="Space between media"
-          >
-            {[
-              { value: "sm", label: "S" },
-              { value: "md", label: "M" },
-              { value: "lg", label: "L" },
-            ].map((opt) => {
-              const isChecked = gridSpacing === opt.value;
-              return (
-                <Button
-                  key={opt.value}
-                  type="button"
-                  role="radio"
-                  aria-checked={isChecked}
-                  variant={isChecked ? "secondary" : "ghost"}
-                  onClick={() => setGridSpacing?.(opt.value)}
-                  className="flex-1 h-7 text-xs font-medium rounded-[var(--r-xs)]"
-                >
-                  <span>{opt.label}</span>
-                </Button>
-              );
-            })}
-          </div>
+          <flow-toggles aria-label="Space between media" class="block w-full">
+            <div
+              className="mat-button-toggle-group toggle-group flex items-center gap-0.5 p-0.5 bg-white/5 rounded-sm w-full select-none"
+              role="radiogroup"
+            >
+              {[
+                { value: "sm", label: "S" },
+                { value: "md", label: "M" },
+                { value: "lg", label: "L" },
+              ].map((opt) => {
+                const isChecked = gridSpacing === opt.value;
+                return (
+                  <Button
+                    key={opt.value}
+                    type="button"
+                    role="radio"
+                    aria-checked={isChecked}
+                    variant={isChecked ? "secondary" : "ghost"}
+                    onClick={() => setGridSpacing?.(opt.value)}
+                    className="mat-button-toggle toggle flex-toggle flex-1 h-8 text-[13px] font-medium"
+                  >
+                    <span>{opt.label}</span>
+                  </Button>
+                );
+              })}
+            </div>
+          </flow-toggles>
         </div>
 
-        <DropdownMenuSeparator className="my-1 bg-[var(--border-subtle)]" />
+        <DropdownMenuSeparator className="my-1.5 bg-[var(--mat-menu-divider-color,var(--foreground-state-15))]" />
 
-        {/* ── 3. Display Toggles ── */}
+        {/* ── 2. Display Toggles with Material 3 Slide Toggle ── */}
         <div className="flex flex-col gap-0.5">
           {setShowUploadedMedia && (
             <DropdownMenuItem 
@@ -135,11 +137,11 @@ export function StudioSettingsDropdown(props) {
                 e.preventDefault()
                 setShowUploadedMedia(!showUploadedMedia)
               }}
-              className="flex items-center justify-between cursor-pointer px-2.5 py-1.5 rounded-[var(--r-sm)] hover:bg-[var(--overlay-5)] transition-colors"
+              className="flex items-center justify-between cursor-pointer pl-3 pr-4 py-2 min-h-[2.125rem] hover:bg-[var(--mat-menu-item-hover-state-layer-color,var(--foreground-state-10))] transition-colors duration-100 ease-in-out"
             >
-              <div className="flex items-center gap-2.5">
-                <Icon name="upload" size={18} className="text-[var(--text-secondary)] shrink-0" />
-                <span className="text-sm font-medium text-[var(--text-primary)]">
+              <div className="flex items-center gap-3">
+                <GoogleIcon iconName="upload" className="text-[20px] text-[var(--foreground-neutral-000,#fff)] shrink-0" />
+                <span className="text-[14px] leading-5 font-medium text-[var(--foreground-neutral-000,#fff)]">
                   Médias importés
                 </span>
               </div>
@@ -153,11 +155,11 @@ export function StudioSettingsDropdown(props) {
                 e.preventDefault()
                 setShowTileDetails(!showTileDetails)
               }}
-              className="flex items-center justify-between cursor-pointer px-2.5 py-1.5 rounded-[var(--r-sm)] hover:bg-[var(--overlay-5)] transition-colors"
+              className="flex items-center justify-between cursor-pointer pl-3 pr-4 py-2 min-h-[2.125rem] hover:bg-[var(--mat-menu-item-hover-state-layer-color,var(--foreground-state-10))] transition-colors duration-100 ease-in-out"
             >
-              <div className="flex items-center gap-2.5">
-                <Icon name="visibility" size={18} className="text-[var(--text-secondary)] shrink-0" />
-                <span className="text-sm font-medium text-[var(--text-primary)]">
+              <div className="flex items-center gap-3">
+                <GoogleIcon iconName="visibility" className="text-[20px] text-[var(--foreground-neutral-000,#fff)] shrink-0" />
+                <span className="text-[14px] leading-5 font-medium text-[var(--foreground-neutral-000,#fff)]">
                   Détails des blocs
                 </span>
               </div>
@@ -171,11 +173,11 @@ export function StudioSettingsDropdown(props) {
                 e.preventDefault()
                 setSoundOnHover(!soundOnHover)
               }}
-              className="flex items-center justify-between cursor-pointer px-2.5 py-1.5 rounded-[var(--r-sm)] hover:bg-[var(--overlay-5)] transition-colors"
+              className="flex items-center justify-between cursor-pointer pl-3 pr-4 py-2 min-h-[2.125rem] hover:bg-[var(--mat-menu-item-hover-state-layer-color,var(--foreground-state-10))] transition-colors duration-100 ease-in-out"
             >
-              <div className="flex items-center gap-2.5">
-                <Icon name="volume_up" size={18} className="text-[var(--text-secondary)] shrink-0" />
-                <span className="text-sm font-medium text-[var(--text-primary)]">
+              <div className="flex items-center gap-3">
+                <GoogleIcon iconName="volume_up" className="text-[20px] text-[var(--foreground-neutral-000,#fff)] shrink-0" />
+                <span className="text-[14px] leading-5 font-medium text-[var(--foreground-neutral-000,#fff)]">
                   Son au survol
                 </span>
               </div>
@@ -189,11 +191,11 @@ export function StudioSettingsDropdown(props) {
                 e.preventDefault()
                 setClearPromptOnSubmit(!clearPromptOnSubmit)
               }}
-              className="flex items-center justify-between cursor-pointer px-2.5 py-1.5 rounded-[var(--r-sm)] hover:bg-[var(--overlay-5)] transition-colors"
+              className="flex items-center justify-between cursor-pointer pl-3 pr-4 py-2 min-h-[2.125rem] hover:bg-[var(--mat-menu-item-hover-state-layer-color,var(--foreground-state-10))] transition-colors duration-100 ease-in-out"
             >
-              <div className="flex items-center gap-2.5">
-                <Icon name="backspace" size={18} className="text-[var(--text-secondary)] shrink-0" />
-                <span className="text-sm font-medium text-[var(--text-primary)]">
+              <div className="flex items-center gap-3">
+                <GoogleIcon iconName="backspace" className="text-[20px] text-[var(--foreground-neutral-000,#fff)] shrink-0" />
+                <span className="text-[14px] leading-5 font-medium text-[var(--foreground-neutral-000,#fff)]">
                   Effacer le prompt
                 </span>
               </div>

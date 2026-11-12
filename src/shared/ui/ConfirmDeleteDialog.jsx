@@ -10,11 +10,11 @@ import {
   DialogClose,
   DialogTrigger,
 } from "@/shared/ui/dialog";
-import { Icon } from "@/shared/ui/Icon";
+import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { Button } from "@/shared/ui/button";
 
 /**
- * Generic delete confirmation dialog.
+ * Generic delete confirmation dialog. Use it anywhere you need a simple "Are you sure?" delete flow.
  */
 export function ConfirmDeleteDialog({
   open,
@@ -28,7 +28,7 @@ export function ConfirmDeleteDialog({
   children,
 }) {
   const [internalOpen, setInternalOpen] = React.useState(false);
-
+  
   const isControlled = open !== undefined;
   const isOpen = isControlled ? open : internalOpen;
   const setIsOpen = isControlled ? onOpenChange : setInternalOpen;
@@ -38,7 +38,7 @@ export function ConfirmDeleteDialog({
       await onConfirm();
       setIsOpen(false);
     } catch {
-      // Keep open on failure
+      // Keep the dialog open when delete fails (e.g. collection not empty).
     }
   };
 
@@ -47,22 +47,22 @@ export function ConfirmDeleteDialog({
       {children && <DialogTrigger asChild>{children}</DialogTrigger>}
       <DialogContent
         variant="small"
-        className="max-w-xs p-5"
+        className="max-w-64"
         showCloseButton={false}
       >
         <div className="flex flex-col items-center text-center">
           <div className="mb-3">
-            <Icon name="warning" size={32} className="text-[var(--pink-400)]" />
+            <GoogleIcon iconName="warning" className="text-3xl text-danger" />
           </div>
-
+          
           <DialogHeader className="space-y-1">
             <DialogTitle className="sr-only">{title || "Confirm Deletion"}</DialogTitle>
-            <DialogDescription className="text-[var(--text-body)] text-sm font-normal text-center leading-snug">
+            <DialogDescription className="text-white/90 text-sm font-normal text-center leading-snug">
               {description}
             </DialogDescription>
           </DialogHeader>
 
-          <div className="mt-4 flex gap-2 w-full">
+          <div className="mt-2 flex gap-2.5 w-full">
             <DialogClose asChild>
               <Button
                 type="button"

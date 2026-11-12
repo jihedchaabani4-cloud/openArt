@@ -1,14 +1,15 @@
 import { cn } from "@/shared/lib/utils";
-import { Icon } from "@/shared/ui/Icon";
+import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { Button } from "@/shared/ui/button";
 
 /**
  * PromptBarControlsRow
  *
  * Pure presentational component for the prompt bar controls / bottom row.
- * Design-system alignment:
- * - Generate Button: Compact 36x36 lime button (§3.2)
- * - Settings Trigger: Chip (§3.7) with overlay-5 background, 8px radius
+ * Houses the left spacer, center spacer, settings trigger button
+ * (displaying current model icon/name, aspect ratio icon, and variations count),
+ * optional renderRightActions, and the circular generate button with spinner/arrow.
+ * Props only — no store access.
  */
 export function PromptBarControlsRow({
   renderRightActions,
@@ -40,13 +41,13 @@ export function PromptBarControlsRow({
           <Button
             ref={tuneButtonRef}
             type="button"
-            variant="chip"
+            variant="flow-chip"
             aria-label="Déclencheur des paramètres"
             title="Paramètres de génération et modèles"
             onClick={onToggleDrawer}
             className={cn(
-              "settings-trigger-button flex items-center gap-1.5 cursor-pointer select-none h-[28px] px-2.5 rounded-[var(--r-sm)] bg-[var(--overlay-5)] text-[var(--text-primary)] hover:bg-[var(--overlay-10)] active:bg-[var(--overlay-20)] border border-[var(--border-subtle)] transition-all",
-              drawerOpen && "bg-white/15 bg-[var(--overlay-15)] border-[var(--brand)] text-[var(--brand)]"
+              "settings-trigger-button flex items-center gap-1.5 cursor-pointer select-none",
+              drawerOpen && "is-active bg-white/15 border border-white/20 text-white"
             )}
           >
             {currentModel && (
@@ -55,23 +56,22 @@ export function PromptBarControlsRow({
                   <img
                     src={currentModelIcon}
                     alt=""
-                    className="size-3.5 rounded-[var(--r-xs)] object-contain brightness-0 invert shrink-0"
+                    className="size-3.5 rounded-sm object-contain brightness-0 invert shrink-0"
                     onError={(e) => {
                       e.currentTarget.style.display = "none";
                     }}
                   />
                 )}
-                <span className="font-medium text-[12px] leading-[18px] truncate text-[var(--text-primary)]">
+                <span className="font-medium text-[12px] truncate text-white">
                   {currentModel.name || currentModel.displayName || currentModel.id}
                 </span>
               </div>
             )}
-            <Icon
-              name={currentRatioIcon || "crop_16_9"}
-              size={14}
-              className="shrink-0 text-[var(--text-secondary)]"
+            <GoogleIcon
+              iconName={currentRatioIcon}
+              className="text-[15px] leading-none shrink-0 text-white"
             />
-            <span className="leading-[18px] shrink-0 font-medium text-[12px] text-[var(--text-primary)]">
+            <span className="leading-none shrink-0 font-medium text-[12px] text-white">
               x{currentCount}
             </span>
           </Button>
@@ -79,20 +79,22 @@ export function PromptBarControlsRow({
 
         <Button
           type="button"
-          variant="generate-compact"
+          variant="primary"
           aria-label="Generate"
           title={estimatedCredits > 0 ? `Generate (${estimatedCredits} cr)` : "Generate"}
           onClick={handleGenerate}
           disabled={isGenerateDisabled}
           className={cn(
-            "btn-generate-compact shrink-0",
-            isGenerateDisabled && "opacity-40 cursor-not-allowed filter-none"
+            "size-8 p-0 rounded-full shrink-0 border-none",
+            isGenerateDisabled
+              ? "bg-white/10 text-white/30 cursor-not-allowed"
+              : "bg-white text-black hover:bg-white/90 active:scale-95 shadow-none"
           )}
         >
           {isGenerating ? (
-            <span className="size-3.5 rounded-full border-2 border-[var(--text-on-brand)]/30 border-t-[var(--text-on-brand)] animate-spin" />
+            <span className="size-3.5 rounded-full border-2 border-black/30 border-t-black animate-spin" />
           ) : (
-            <Icon name="arrow_forward" size={16} className="shrink-0 font-bold text-[var(--text-on-brand)]" />
+            <GoogleIcon iconName="arrow_forward" className="text-base shrink-0 font-bold" />
           )}
         </Button>
       </div>

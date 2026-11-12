@@ -1,8 +1,17 @@
+/**
+ * Input Primitive — OpenArt / Labveil Unified Design System
+ * 
+ * STRICT ARCHITECTURAL RULES:
+ * 1. ZERO CALL-SITE RESTYLING: Never add ad-hoc border/bg/color/padding classes.
+ * 2. USE CANONICAL VARIANTS: `default`, `search`, `blurinput`.
+ * 3. `className` IS EXCLUSIVELY FOR LAYOUT (e.g. `w-full`, `max-w-md`).
+ */
+
 "use client";
 
 import * as React from "react";
 import { cn } from "@/shared/lib/utils";
-import { Icon } from "@/shared/ui/Icon";
+import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { Button } from "@/shared/ui/button";
 
 function renderIconNode(IconCandidate, props) {
@@ -17,9 +26,6 @@ function renderIconNode(IconCandidate, props) {
     const Component = IconCandidate;
     return <Component {...props} />;
   }
-  if (typeof IconCandidate === "string" || typeof IconCandidate === "number") {
-    return IconCandidate;
-  }
   return null;
 }
 
@@ -29,7 +35,7 @@ const Input = React.forwardRef(({
   variant = "default",
   type = "text",
   label,
-  icon: IconProp,
+  icon: Icon,
   iconStrokeWidth,
   googleIcon,
   googleIconWeight = 300,
@@ -85,9 +91,15 @@ const Input = React.forwardRef(({
 
   const isBlurInput = variant === "blurinput";
   const isSearch = variant === "search";
-  const hasWrapper = isSearch || isBlurInput || !!IconProp || !!googleIcon || !!onClear || showEditButton || !!rightElement || !!label || hasPrefix;
+  const hasWrapper = isSearch || isBlurInput || !!Icon || !!googleIcon || !!onClear || showEditButton || !!rightElement || !!label || hasPrefix;
 
-  const iconName = googleIcon || (typeof IconProp === "string" ? IconProp : null);
+  const textClasses = React.useMemo(() => {
+    if (!className) return "";
+    return className
+      .split(" ")
+      .filter((c) => c.startsWith("text-") || c.startsWith("font-") || c.startsWith("tracking-") || c.startsWith("leading-"))
+      .join(" ");
+  }, [className]);
 
   if (hasWrapper) {
     return (
@@ -98,37 +110,37 @@ const Input = React.forwardRef(({
         )}
       >
         {label && (
-          <label className="text-xs font-semibold text-[var(--text-primary)]">
+          <label className="text-xs font-semibold text-on-surface">
             {label}
           </label>
         )}
         <div 
           className={cn(
-            "relative flex items-center justify-between w-full max-h-full transition-all outline-none font-sans antialiased",
+            "relative flex items-center justify-between w-full max-h-full transition-all border-none outline-none font-sans antialiased",
             isSearch
-              ? "input-search h-9 rounded-sm shadow-none"
+              ? "h-9 min-h-0 max-h-full rounded-sm border border-outline-variant px-2.5 gap-2 text-sm text-on-surface shadow-none bg-surface-container hover:bg-surface-container-high focus-within:bg-surface-container-high focus-within:border-primary"
               : isBlurInput
-              ? "h-9 rounded-[var(--r-sm)] py-0.5 pr-2.5 pl-3.5 gap-2 text-sm font-medium text-[var(--text-primary)] bg-[var(--bg-surface-2)] border border-[var(--border-default)] hover:border-[var(--border-subtle)] focus-within:border-[var(--brand)]"
-              : "min-h-[44px] rounded-[var(--r-sm)] px-3 py-2 bg-[var(--bg-surface-2)] text-[var(--text-primary)] border border-[var(--border-default)] hover:border-[var(--border-subtle)] focus-within:border-[var(--brand)]"
+              ? "h-9 min-h-0 max-h-full rounded-sm py-0.5 pr-2.5 pl-3.5 gap-2 text-sm font-medium text-on-surface flex-row bg-surface-container border border-outline-variant hover:bg-surface-container-high focus-within:border-primary"
+              : "min-h-13 rounded-sm px-3 py-2 bg-surface text-on-surface border border-outline-variant hover:border-outline focus-within:border-primary"
           )}
         >
-          {iconName && (
-            <span className={cn("flex items-center justify-center shrink-0 select-none", isSearch ? "size-6 text-[var(--text-tertiary)] mr-1" : "text-[var(--text-tertiary)] mr-2")}>
-              <Icon name={iconName} size={isSearch ? 16 : 18} />
+          {googleIcon && (
+            <span className={cn("flex items-center justify-center shrink-0 select-none", isSearch ? "size-7 rounded-full text-on-surface-subtle mr-0.5" : "text-on-surface-subtle")}>
+              <GoogleIcon iconName={googleIcon} name={googleIcon} weight={googleIconWeight} className={cn("shrink-0", isSearch ? "text-xl" : "text-lg")} />
             </span>
           )}
 
-          {!iconName && IconProp && (
-            <span className={cn("flex items-center justify-center shrink-0", isSearch ? "size-6 text-[var(--text-tertiary)] mr-1" : "mr-2 text-[var(--text-tertiary)]")}>
-              {renderIconNode(IconProp, {
-                className: "size-4 text-[var(--text-tertiary)] shrink-0",
-                strokeWidth: iconStrokeWidth ?? 1.5,
+          {Icon && !googleIcon && (
+            <span className={cn("flex items-center justify-center shrink-0", isSearch ? "size-7 text-on-surface-subtle mr-0.5" : isBlurInput ? "mr-0.5" : "mr-2.5 text-on-surface-subtle")}>
+              {renderIconNode(Icon, {
+                className: cn("shrink-0", isSearch ? "text-xl" : "size-4 text-on-surface-subtle"),
+                strokeWidth: iconStrokeWidth ?? (isBlurInput ? 1.75 : 2.0),
               })}
             </span>
           )}
 
           {hasPrefix && (
-            <span className="text-[var(--text-tertiary)] select-none shrink-0 pointer-events-none mr-0.5 font-sans text-sm">
+            <span className={cn("text-on-surface-subtle select-none shrink-0 pointer-events-none mr-0.5 font-sans", textClasses || "text-sm")}>
               {prefixStr}
             </span>
           )}
@@ -140,39 +152,42 @@ const Input = React.forwardRef(({
             value={hasPrefix ? displayValue : value}
             onChange={handleChange}
             className={cn(
-              "bg-transparent border-none outline-none p-0 flex-1 placeholder:text-[var(--text-tertiary)] text-[var(--text-primary)] min-w-0 font-sans antialiased shadow-none cursor-text",
-              isSearch ? "text-[14px] leading-[16px] font-medium" : "text-sm font-medium",
+              "bg-transparent border-none outline-none p-0 flex-1 placeholder:text-on-surface-subtle text-on-surface min-w-0 font-sans antialiased shadow-none cursor-text",
+              isSearch ? "text-xs-plus font-medium leading-normal placeholder:text-on-surface-subtle" : "text-sm font-medium",
               className
             )}
             {...props}
           />
 
           {onClear && (
-            <button
+            <Button
               type="button"
+              variant="flow-ghost"
               onClick={onClear}
               className={cn(
-                "p-1 size-6 rounded-[var(--r-xs)] text-[var(--text-secondary)] hover:bg-[var(--overlay-10)] hover:text-[var(--text-primary)] shrink-0 ml-1 cursor-pointer transition-colors flex items-center justify-center"
+                "p-1 size-7 rounded-md shrink-0 ml-1 cursor-pointer",
+                isSearch && "size-6 rounded-full"
               )}
               aria-label="Clear input"
             >
               {ClearIcon ? (
-                renderIconNode(ClearIcon, { className: "size-3.5" })
+                renderIconNode(ClearIcon, { className: "size-4" })
               ) : (
-                <Icon name="close" size={14} />
+                <GoogleIcon iconName="close" className="text-lg" />
               )}
-            </button>
+            </Button>
           )}
 
           {showEditButton && (
-            <button
+            <Button
               type="button"
+              variant="flow-ghost"
               onClick={handleEditClick}
-              className="flex items-center justify-center size-6 p-1 rounded-[var(--r-xs)] text-[var(--text-secondary)] hover:bg-[var(--overlay-10)] hover:text-[var(--text-primary)] shrink-0 ml-2 cursor-pointer transition-colors"
+              className="flex items-center justify-center size-7 p-1.5 rounded-md shrink-0 ml-2 cursor-pointer"
               aria-label="Edit"
             >
-              <Icon name="edit" size={16} />
-            </button>
+              <GoogleIcon iconName="edit" className="text-xl" />
+            </Button>
           )}
 
           {rightElement}
@@ -192,8 +207,8 @@ const Input = React.forwardRef(({
       onChange={onChange}
       className={cn(
         isNavbar
-          ? "bg-transparent border-none outline-none text-[14px] font-medium text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] max-w-65 p-0 shadow-none cursor-text disabled:opacity-40 disabled:cursor-not-allowed transition-colors font-sans antialiased"
-          : "flex min-h-[40px] w-full rounded-[var(--r-sm)] border border-[var(--border-default)] bg-[var(--bg-surface-2)] px-3 py-2 text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] hover:border-[var(--border-subtle)] focus:border-[var(--brand)] focus:outline-none disabled:cursor-not-allowed disabled:opacity-40 transition-all font-sans antialiased shadow-none cursor-text",
+          ? "bg-transparent border-none outline-none text-md font-medium tracking-tight text-on-surface placeholder:text-on-surface-subtle max-w-65 focus:text-on-surface focus:ring-0 p-0 shadow-none cursor-text disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-sans antialiased"
+          : "flex min-h-13 w-full rounded-sm border border-outline-variant bg-surface px-3 py-2 text-on-surface placeholder:text-on-surface-subtle hover:border-outline focus:border-primary focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 transition-all font-sans antialiased shadow-none cursor-text",
         !isNavbar && !className?.includes("text-") && "text-sm",
         className
       )}
@@ -205,4 +220,3 @@ const Input = React.forwardRef(({
 Input.displayName = "Input";
 
 export { Input };
-export default Input;

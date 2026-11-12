@@ -1,3 +1,14 @@
+/**
+ * Radio Group Primitive — OpenArt / Labveil Unified Design System
+ * 
+ * ═══════════════════════════════════════════════════════════════════════════════
+ * STRICT ARCHITECTURAL RULES:
+ * 1. ZERO CALL-SITE RESTYLING: Never add ad-hoc background or indicator styling.
+ * 2. USE CANONICAL VARIANTS: `variant="default" | "neon"`.
+ * 3. USE CANONICAL SIZES: `size="default" | "lg"`.
+ * ═══════════════════════════════════════════════════════════════════════════════
+ */
+
 "use client";
 
 import * as React from "react";
@@ -26,6 +37,7 @@ const RadioGroupItem = React.forwardRef(({
   ...props
 }, ref) => {
   const isLg = size === "lg";
+  const isNeon = variant === "neon";
 
   return (
     <RadioGroupPrimitive.Item
@@ -34,12 +46,16 @@ const RadioGroupItem = React.forwardRef(({
       data-variant={variant}
       data-size={size}
       className={cn(
-        "peer aspect-square shrink-0 cursor-pointer rounded-full border border-[var(--border-default)] bg-[var(--bg-surface-2)] transition-colors outline-none",
-        "hover:border-[var(--border-subtle)]",
-        "focus-visible:ring-2 focus-visible:ring-[var(--brand-border-on)]",
-        "disabled:cursor-not-allowed disabled:opacity-40",
+        // Base geometry
+        "peer aspect-square shrink-0 cursor-pointer rounded-full border border-outline-variant bg-surface-container transition-colors outline-none",
+        "hover:border-outline hover:bg-surface-container-high",
+        "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-black",
+        "disabled:cursor-not-allowed disabled:opacity-50",
         isLg ? "size-5" : "size-4",
-        "data-[state=checked]:border-[var(--brand)]",
+        // Checked border
+        isNeon
+          ? "data-[state=checked]:border-lime-400"
+          : "data-[state=checked]:border-primary",
         className
       )}
       {...props}
@@ -50,8 +66,9 @@ const RadioGroupItem = React.forwardRef(({
       >
         <span
           className={cn(
-            "rounded-full transition-transform scale-100 bg-[var(--brand)]",
-            isLg ? "size-2.5" : "size-2"
+            "rounded-full transition-transform scale-100",
+            isLg ? "size-2.5" : "size-2",
+            isNeon ? "bg-lime-400" : "bg-primary"
           )}
         />
       </RadioGroupPrimitive.Indicator>
@@ -61,4 +78,3 @@ const RadioGroupItem = React.forwardRef(({
 RadioGroupItem.displayName = "RadioGroupItem";
 
 export { RadioGroup, RadioGroupItem };
-export default RadioGroup;
