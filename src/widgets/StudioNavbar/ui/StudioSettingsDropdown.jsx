@@ -9,8 +9,8 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from "@/shared/ui/dropdown-menu"
-import { Button } from "@/shared/ui/button"
-import { Switch } from "@/shared/ui/switch"
+import { Button } from "@/components/ui/button"
+import { Switch } from "@/components/ui/switch"
 import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows"
 
 export function StudioSettingsDropdown(props) {
@@ -48,7 +48,7 @@ export function StudioSettingsDropdown(props) {
         <Button
           type="button"
           variant="ghost"
-          className="size-8 sm:size-9 max-h-full p-0 aspect-square"
+          size="icon"
           title="Paramètres d'affichage"
           aria-label="Paramètres de la grille de blocs"
           aria-haspopup="menu"
@@ -59,38 +59,37 @@ export function StudioSettingsDropdown(props) {
       </DropdownMenuTrigger>
       
       <DropdownMenuContent align="end" className="w-72 p-1.5 flex flex-col gap-1 font-sans antialiased">
-        {/* ── 1. Grid Size Selector (styled like Prompt Bar Parameter Selector) ── */}
+        {/* ── 1. Grid Size Selector ── */}
         <div className="flex flex-col gap-1 px-0.5 mb-1">
           <span className="text-xs font-medium text-white/75">
             Taille de la grille
           </span>
-          <flow-toggles aria-label="Taille de la grille" class="block w-full">
-            <div
-              className="mat-button-toggle-group toggle-group flex items-center gap-0.5 p-0.5 bg-white/5 rounded-sm w-full select-none"
-              role="radiogroup"
-            >
-              {[
-                { value: "sm", label: "S" },
-                { value: "md", label: "M" },
-                { value: "lg", label: "L" },
-              ].map((opt) => {
-                const isChecked = gridSize === opt.value;
-                return (
-                  <Button
-                    key={opt.value}
-                    type="button"
-                    role="radio"
-                    aria-checked={isChecked}
-                    variant={isChecked ? "secondary" : "ghost"}
-                    onClick={() => setGridSize?.(opt.value)}
-                    className="mat-button-toggle toggle flex-toggle flex-1 h-8 text-[13px] font-medium"
-                  >
-                    <span>{opt.label}</span>
-                  </Button>
-                );
-              })}
-            </div>
-          </flow-toggles>
+          <div
+            className="flex items-center gap-1 p-1 bg-white/5 border border-white/10 rounded-xl w-full select-none"
+            role="radiogroup"
+            aria-label="Taille de la grille"
+          >
+            {[
+              { value: "sm", label: "S" },
+              { value: "md", label: "M" },
+              { value: "lg", label: "L" },
+            ].map((opt) => {
+              const isChecked = gridSize === opt.value;
+              return (
+                <Button
+                  key={opt.value}
+                  type="button"
+                  role="radio"
+                  aria-checked={isChecked}
+                  variant={isChecked ? "secondary" : "ghost"}
+                  onClick={() => setGridSize?.(opt.value)}
+                  className="flex-1"
+                >
+                  <span>{opt.label}</span>
+                </Button>
+              );
+            })}
+          </div>
         </div>
 
         {/* ── 2. Space Between Media (S: 4px, M: 8px, L: 16px) ── */}
@@ -98,38 +97,37 @@ export function StudioSettingsDropdown(props) {
           <span className="text-xs font-medium text-white/75">
             Space between media
           </span>
-          <flow-toggles aria-label="Space between media" class="block w-full">
-            <div
-              className="mat-button-toggle-group toggle-group flex items-center gap-0.5 p-0.5 bg-white/5 rounded-sm w-full select-none"
-              role="radiogroup"
-            >
-              {[
-                { value: "sm", label: "S" },
-                { value: "md", label: "M" },
-                { value: "lg", label: "L" },
-              ].map((opt) => {
-                const isChecked = gridSpacing === opt.value;
-                return (
-                  <Button
-                    key={opt.value}
-                    type="button"
-                    role="radio"
-                    aria-checked={isChecked}
-                    variant={isChecked ? "secondary" : "ghost"}
-                    onClick={() => setGridSpacing?.(opt.value)}
-                    className="mat-button-toggle toggle flex-toggle flex-1 h-8 text-[13px] font-medium"
-                  >
-                    <span>{opt.label}</span>
-                  </Button>
-                );
-              })}
-            </div>
-          </flow-toggles>
+          <div
+            className="flex items-center gap-1 p-1 bg-white/5 border border-white/10 rounded-xl w-full select-none"
+            role="radiogroup"
+            aria-label="Space between media"
+          >
+            {[
+              { value: "sm", label: "S" },
+              { value: "md", label: "M" },
+              { value: "lg", label: "L" },
+            ].map((opt) => {
+              const isChecked = gridSpacing === opt.value;
+              return (
+                <Button
+                  key={opt.value}
+                  type="button"
+                  role="radio"
+                  aria-checked={isChecked}
+                  variant={isChecked ? "secondary" : "ghost"}
+                  onClick={() => setGridSpacing?.(opt.value)}
+                  className="flex-1"
+                >
+                  <span>{opt.label}</span>
+                </Button>
+              );
+            })}
+          </div>
         </div>
 
         <DropdownMenuSeparator className="my-1.5 bg-white/10" />
 
-        {/* ── 2. Display Toggles with Slide Toggle ── */}
+        {/* ── 3. Display Toggles with Base UI Switch ── */}
         <div className="flex flex-col gap-0.5">
           {setShowUploadedMedia && (
             <DropdownMenuItem 
