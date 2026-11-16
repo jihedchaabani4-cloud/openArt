@@ -22,10 +22,6 @@ const buttonVariants = cva(
           "h-[34px] p-2 rounded-[10px] border border-[#27272A] bg-transparent text-sm font-medium text-[#FAFAFA] shadow-sm hover:bg-[#27272A]/50 focus-visible:ring-2 focus-visible:ring-white/70",
         link:
           "p-0 h-auto bg-transparent text-sm text-white/50 hover:text-white underline-offset-4 hover:underline",
-        destructive:
-          "h-9.5 px-4 rounded-[10px] bg-transparent text-[#E5484D] hover:bg-[#E5484D]/10 text-sm font-medium",
-        danger:
-          "h-9.5 px-4 rounded-[10px] bg-transparent text-[#E5484D] hover:bg-[#E5484D]/10 text-sm font-medium",
       },
       size: {
         default: "",
