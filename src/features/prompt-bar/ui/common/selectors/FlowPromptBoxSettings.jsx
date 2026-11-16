@@ -5,7 +5,6 @@ import { cn } from "@/shared/lib/utils";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { Button } from "@/shared/ui/button";
 import { Slider } from "@/shared/ui/slider";
-import { Switch } from "@/shared/ui/switch";
 import { Popover, PopoverTrigger, PopoverContent } from "@/shared/ui/popover";
 import { resolveModelIcon } from "../../../core/modelManagement.js";
 import { calculateModelCredits } from "../../../core/creditCalculationService.js";
@@ -53,7 +52,7 @@ export function formatParamLabel(str) {
 
 /**
  * Unified FlowSelect dropdown component
- * Powered by Radix Popover and SaaS Dark UI styling.
+ * Powered by collision-aware Radix Popover and canonical Button primitives.
  */
 export function FlowSelect({
   value,
@@ -75,17 +74,17 @@ export function FlowSelect({
           <Button
             type="button"
             variant="outline"
-            className="w-full h-9 px-3 flex items-center justify-between transition-all bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20 rounded-xl"
+            className="w-full h-9 px-3 flex items-center justify-between transition-all"
             aria-label={ariaLabel || label || displayValue}
           >
             <span className="flex items-center gap-1.5 truncate text-white">
               {icon}
-              {label && <span className="text-white/50 font-normal">{label}:</span>}
+              {label && <span className="text-white/60 font-normal">{label}:</span>}
               <span className="truncate text-white font-medium">{displayValue}</span>
             </span>
             <GoogleIcon
               iconName="arrow_drop_down"
-              className={cn("text-[20px] text-white/70 transition-transform shrink-0", open && "rotate-180")}
+              className={cn("text-[20px] text-white transition-transform shrink-0", open && "rotate-180")}
             />
           </Button>
         </PopoverTrigger>
@@ -112,10 +111,7 @@ export function FlowSelect({
                 key={String(item.value)}
                 type="button"
                 variant={isSelected ? "secondary" : "ghost"}
-                className={cn(
-                  "w-full h-9 justify-between px-2.5 rounded-lg text-xs font-medium transition-colors",
-                  isSelected ? "bg-white/15 text-white" : "text-white/80 hover:bg-white/10 hover:text-white"
-                )}
+                className="w-full justify-between"
                 onClick={() => {
                   onChange?.(item.value);
                   setOpen(false);
@@ -177,10 +173,10 @@ function FlowParamSelect({ paramKey, def, value, onChange }) {
 /**
  * FlowPromptBoxSettings
  *
- * SaaS Dark UI compliant Prompt Bar Settings panel:
- * - Uses Base UI Button, Slider, Switch, Popover primitives
- * - Surface glass / dark translucent container with 1px border-white/10
- * - Semantic HTML with accessible radio and dialog roles
+ * Prompt Bar Settings Dropdown:
+ * - Uses Base UI Button, Slider, Popover primitives strictly with canonical variants ("secondary", "ghost", "outline")
+ * - Translucent surface glass background with 1px border-white/10
+ * - Preserves exact original dimensions and layout
  */
 export function FlowPromptBoxSettings({
   activeMode = "image",
@@ -296,31 +292,30 @@ export function FlowPromptBoxSettings({
   return (
     <div
       data-slot="prompt-box-settings"
-      role="region"
-      aria-label="Paramètres de génération"
       className={cn(
-        "flow-prompt-box-settings w-72 rounded-2xl p-2.5",
-        "bg-[#242426]/95 backdrop-blur-2xl border border-white/10 shadow-2xl",
+        "settings-content-overlay flow-prompt-box-settings block w-[var(--prompt-box-settings-width,17.5rem)] rounded-lg p-2",
+        "bg-[#1A1A1A]/95 backdrop-blur-2xl border border-white/10 shadow-none",
         "text-white select-none font-sans antialiased",
         className
       )}
       style={{
+        display: "block",
         boxSizing: "border-box",
-        width: "var(--prompt-box-settings-width, 18rem)",
-        borderRadius: "16px",
-        padding: "0.625rem",
+        width: "var(--prompt-box-settings-width, 17.5rem)",
+        borderRadius: "8px",
+        padding: "0.5rem",
         colorScheme: "dark",
         pointerEvents: "auto",
         WebkitFontSmoothing: "antialiased",
       }}
     >
-      <div className="settings-content flex flex-col gap-2.5">
-        {/* ── 1. MODE TOGGLES (Image vs Video) ── */}
+      <div className="settings-content flex flex-col gap-2">
+        {/* ── 1. MODE TOGGLES ── */}
         {hasModes && modeOptions.length > 0 && (
           <div
             role="radiogroup"
             aria-label="Mode"
-            className="flex items-center gap-1 p-1 bg-white/5 border border-white/10 rounded-xl w-full"
+            className="flex items-center gap-1 p-1 bg-white/5 rounded-sm w-full"
           >
             {modeOptions.map((opt) => {
               const isChecked = activeMode === opt.value;
@@ -328,22 +323,22 @@ export function FlowPromptBoxSettings({
                 <Button
                   key={opt.value}
                   type="button"
-                  variant={isChecked ? "primary" : "ghost"}
+                  variant={isChecked ? "secondary" : "ghost"}
                   onClick={() => onModeChange?.(opt.value)}
                   role="radio"
                   aria-checked={isChecked}
                   className={cn(
-                    "flex-1 h-8 rounded-lg text-xs transition-all gap-1.5",
-                    isChecked
-                      ? "bg-white text-black font-semibold shadow hover:bg-white/90"
-                      : "text-white/70 hover:text-white hover:bg-white/10 font-medium"
+                    "flex-1 h-8 text-white rounded-sm",
+                    isChecked ? "font-semibold" : "font-medium"
                   )}
                 >
-                  <GoogleIcon
-                    iconName={opt.icon}
-                    className="text-[16px] leading-none"
-                  />
-                  <span>{opt.label}</span>
+                  <span className="flex items-center justify-center gap-1.5 w-full">
+                    <GoogleIcon
+                      iconName={opt.icon}
+                      className="text-[16px] leading-none text-white"
+                    />
+                    <span className="leading-none text-white">{opt.label}</span>
+                  </span>
                 </Button>
               );
             })}
@@ -355,7 +350,7 @@ export function FlowPromptBoxSettings({
           <div
             role="radiogroup"
             aria-label="Type de vidéo"
-            className="flex items-center gap-1 p-1 bg-white/5 border border-white/10 rounded-xl w-full"
+            className="flex items-center gap-1 p-1 bg-white/5 rounded-sm w-full"
           >
             {subModeOptions.map((opt) => {
               const isChecked = activeSubMode === opt.value;
@@ -363,22 +358,22 @@ export function FlowPromptBoxSettings({
                 <Button
                   key={opt.value}
                   type="button"
-                  variant={isChecked ? "primary" : "ghost"}
+                  variant={isChecked ? "secondary" : "ghost"}
                   onClick={() => onSubModeChange?.(opt.value)}
                   role="radio"
                   aria-checked={isChecked}
                   className={cn(
-                    "flex-1 h-8 rounded-lg text-xs transition-all gap-1.5",
-                    isChecked
-                      ? "bg-white text-black font-semibold shadow hover:bg-white/90"
-                      : "text-white/70 hover:text-white hover:bg-white/10 font-medium"
+                    "flex-1 h-8 text-white rounded-sm",
+                    isChecked ? "font-semibold" : "font-medium"
                   )}
                 >
-                  <GoogleIcon
-                    iconName={opt.icon}
-                    className="text-[16px] leading-none"
-                  />
-                  <span>{opt.label}</span>
+                  <span className="flex items-center justify-center gap-1.5 w-full">
+                    <GoogleIcon
+                      iconName={opt.icon}
+                      className="text-[16px] leading-none text-white"
+                    />
+                    <span className="leading-none text-white">{opt.label}</span>
+                  </span>
                 </Button>
               );
             })}
@@ -390,7 +385,7 @@ export function FlowPromptBoxSettings({
           <div
             role="radiogroup"
             aria-label="Format"
-            className="grid grid-cols-5 gap-1 p-1 bg-white/5 border border-white/10 rounded-xl w-full"
+            className="flex flex-wrap items-center gap-1 p-1 bg-white/5 rounded-sm w-full"
           >
             {ratioOptions.map((ratio) => {
               const isChecked = currentRatio === ratio;
@@ -400,29 +395,29 @@ export function FlowPromptBoxSettings({
                 <Button
                   key={ratio}
                   type="button"
-                  variant={isChecked ? "primary" : "ghost"}
+                  variant={isChecked ? "secondary" : "ghost"}
                   onClick={() => handleRatioClick(ratio)}
                   role="radio"
                   aria-checked={isChecked}
                   className={cn(
-                    "flex flex-col items-center justify-center min-w-[44px] h-[52px] rounded-lg p-1 transition-all",
-                    isChecked
-                      ? "bg-white text-black font-semibold shadow hover:bg-white/90"
-                      : "text-white/70 hover:text-white hover:bg-white/10 font-medium"
+                    "flex-1 min-w-[44px] h-[54px] rounded-sm text-white",
+                    isChecked ? "font-semibold" : "font-medium"
                   )}
                 >
-                  <GoogleIcon
-                    iconName={iconName}
-                    className="text-[18px] leading-none mb-0.5"
-                  />
-                  <span className="text-[10px] leading-tight font-mono">{ratio}</span>
+                  <span className="flex flex-col items-center justify-center gap-1">
+                    <GoogleIcon
+                      iconName={iconName}
+                      className="text-[18px] leading-none text-white"
+                    />
+                    <span className="text-[11px] leading-tight text-white">{ratio}</span>
+                  </span>
                 </Button>
               );
             })}
           </div>
         )}
 
-        {/* ── 3. DYNAMIC PARAMETERS (Quality, Video Resolution, Duration, Sliders, Switches) ── */}
+        {/* ── 3. DYNAMIC PARAMETERS (Quality, Video Resolution, Duration, etc.) ── */}
         {otherParams.length > 0 && (
           <div className="flex flex-col gap-2">
             {otherParams.map(([key, def]) => {
@@ -458,7 +453,7 @@ export function FlowPromptBoxSettings({
                     role="radiogroup"
                     aria-label={def.label || key}
                     className={cn(
-                      "p-1 bg-white/5 border border-white/10 rounded-xl w-full max-w-full",
+                      "p-1 bg-white/5 rounded-sm w-full max-w-full",
                       isGrid ? cn("grid", gridColsClass, "gap-1") : "flex items-center gap-1"
                     )}
                   >
@@ -478,28 +473,26 @@ export function FlowPromptBoxSettings({
                         <Button
                           key={String(itemVal)}
                           type="button"
-                          variant={isChecked ? "primary" : "ghost"}
+                          variant={isChecked ? "secondary" : "ghost"}
                           onClick={() => onParamChange?.(key, itemVal)}
                           role="radio"
                           aria-checked={isChecked}
                           aria-description={infoText || undefined}
                           className={cn(
-                            "h-8 rounded-lg text-xs transition-all px-1.5",
+                            "h-8 rounded-sm text-white px-1",
                             !isGrid && "flex-1",
-                            isChecked
-                              ? "bg-white text-black font-semibold shadow hover:bg-white/90"
-                              : "text-white/70 hover:text-white hover:bg-white/10 font-medium"
+                            isChecked ? "font-semibold" : "font-medium"
                           )}
                         >
                           <span className="flex items-center justify-center gap-1 truncate w-full text-center">
-                            <span className="truncate">{itemLabel}</span>
+                            <span className="truncate text-white">{itemLabel}</span>
                             {hasInfo && (
                               <GoogleIcon
                                 iconName="info"
                                 role="img"
                                 aria-hidden={false}
                                 aria-label={infoText}
-                                className="text-[13px] opacity-70"
+                                className="text-[14px] text-white hover:text-white"
                               />
                             )}
                           </span>
@@ -510,27 +503,37 @@ export function FlowPromptBoxSettings({
                 );
               }
 
-              // Render Boolean Toggles with canonical Switch primitive
+              // Render Boolean Toggles (On / Off) using canonical Button variants
               if (def.type === "boolean") {
+                const isChecked = Boolean(val);
                 return (
-                  <div
-                    key={key}
-                    className="flex items-center justify-between px-2.5 py-2 rounded-xl bg-white/5 border border-white/10"
-                  >
-                    <span className="text-xs text-white/90 font-medium">
-                      {def.label || formatParamLabel(key)}
+                  <div key={key} className="flex items-center justify-between px-1">
+                    <span className="text-[12px] text-white font-medium">
+                      {def.label || key}
                     </span>
-                    <Switch
-                      size="sm"
-                      checked={Boolean(val)}
-                      onCheckedChange={(checked) => onParamChange?.(key, checked)}
-                      aria-label={def.label || formatParamLabel(key)}
-                    />
+                    <div className="flex items-center gap-1 p-1 bg-white/5 rounded-sm">
+                      <Button
+                        type="button"
+                        variant={!isChecked ? "secondary" : "ghost"}
+                        className="px-2.5 py-0.5 text-xs font-medium h-7 rounded-sm"
+                        onClick={() => onParamChange?.(key, false)}
+                      >
+                        Off
+                      </Button>
+                      <Button
+                        type="button"
+                        variant={isChecked ? "secondary" : "ghost"}
+                        className="px-2.5 py-0.5 text-xs font-semibold h-7 rounded-sm"
+                        onClick={() => onParamChange?.(key, true)}
+                      >
+                        On
+                      </Button>
+                    </div>
                   </div>
                 );
               }
 
-              // Numeric Slider Control with canonical Slider primitive
+              // Numeric Slider Control
               if (def.type === "number") {
                 const min = def.min ?? 0;
                 const max = def.max ?? 100;
@@ -538,9 +541,9 @@ export function FlowPromptBoxSettings({
                 const numVal = val !== undefined && val !== null ? Number(val) : (def.default ?? min);
 
                 return (
-                  <div key={key} className="flex flex-col gap-1.5 p-2 bg-white/5 border border-white/10 rounded-xl px-2.5">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="text-white/80 font-medium">{def.label || formatParamLabel(key)}</span>
+                  <div key={key} className="flex flex-col gap-1 p-1 bg-white/5 rounded-sm px-2.5 py-2">
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="text-white font-medium">{def.label || key}</span>
                       <span className="font-mono text-white font-semibold tabular-nums">{numVal}</span>
                     </div>
                     <Slider
@@ -549,7 +552,7 @@ export function FlowPromptBoxSettings({
                       step={step}
                       value={[Number.isNaN(numVal) ? min : numVal]}
                       onValueChange={([newVal]) => onParamChange?.(key, newVal)}
-                      className="w-full py-1"
+                      className="w-full py-1.5"
                     />
                   </div>
                 );
@@ -600,7 +603,7 @@ export function FlowPromptBoxSettings({
               )
             }
             displayValue={currentModel?.name || "Model"}
-            width={260}
+            width={240}
             maxHeightLimit={320}
             ariaLabel="Sélectionner une famille de modèles"
           />
@@ -611,7 +614,7 @@ export function FlowPromptBoxSettings({
           <div
             role="radiogroup"
             aria-label="Nombre de sorties"
-            className="flex items-center gap-1 p-1 bg-white/5 border border-white/10 rounded-xl w-full"
+            className="flex items-center gap-1 p-1 bg-white/5 rounded-sm w-full"
           >
             {[1, 2, 3, 4].map((countVal) => {
               const isChecked = currentCount === countVal;
@@ -620,18 +623,16 @@ export function FlowPromptBoxSettings({
                 <Button
                   key={countVal}
                   type="button"
-                  variant={isChecked ? "primary" : "ghost"}
+                  variant={isChecked ? "secondary" : "ghost"}
                   onClick={() => handleCountClick(countVal)}
                   role="radio"
                   aria-checked={isChecked}
                   className={cn(
-                    "flex-1 h-8 rounded-lg text-xs transition-all",
-                    isChecked
-                      ? "bg-white text-black font-semibold shadow hover:bg-white/90"
-                      : "text-white/70 hover:text-white hover:bg-white/10 font-medium"
+                    "flex-1 h-8 text-white rounded-sm",
+                    isChecked ? "font-semibold" : "font-medium"
                   )}
                 >
-                  x{countVal}
+                  <span className="font-semibold text-white">x{countVal}</span>
                 </Button>
               );
             })}
@@ -640,24 +641,26 @@ export function FlowPromptBoxSettings({
 
         {/* ── 6. CREDIT COST LABEL ── */}
         {models && models.length > 0 && currentModel && (
-          <div className="pt-0.5 text-center">
-            <p className="text-[11px] text-white/50">
-              La génération utilisera{" "}
-              <a
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-accent-yellow underline underline-offset-2 hover:text-accent-yellow/80 transition-colors font-medium"
-                href="https://support.google.com/googleone?p=g1_ai_credit_menu"
-              >
-                {displayCredits}&nbsp;{displayCredits === 1 ? "crédit" : "crédits"}
-              </a>
-            </p>
+          <div className="settings-credit-cost block text-center">
+            <span className="credit-cost-label block text-[11px] text-white/60">
+              <span>
+                La génération utilisera{" "}
+                <a
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="credit-cost-link text-white underline underline-offset-2 hover:text-white/80 transition-colors font-medium"
+                  href="https://support.google.com/googleone?p=g1_ai_credit_menu"
+                >
+                  {displayCredits}&nbsp;{displayCredits === 1 ? "crédit" : "crédits"}
+                </a>
+              </span>
+            </span>
           </div>
         )}
 
         {/* ── Empty notice if no models available for this mode ── */}
         {(!models || models.length === 0) && (
-          <div className="py-3 px-2 text-center text-xs text-white/50">
+          <div className="py-3 px-2 text-center text-[12px] text-white">
             Aucun modèle disponible
           </div>
         )}
