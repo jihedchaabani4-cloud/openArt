@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { cn } from "@/shared/lib/utils";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
-import { Button } from "@/shared/ui/button";
+import { Button } from "@/components/ui/button";
 import { Slider } from "@/shared/ui/slider";
 import { Popover, PopoverTrigger, PopoverContent } from "@/shared/ui/popover";
 import { resolveModelIcon } from "../../../core/modelManagement.js";
@@ -52,7 +52,7 @@ export function formatParamLabel(str) {
 
 /**
  * Unified FlowSelect dropdown component
- * Powered by collision-aware Radix Popover and canonical Button primitives.
+ * Powered by collision-aware Radix Popover and canonical Base UI Button primitive.
  */
 export function FlowSelect({
   value,
@@ -74,7 +74,7 @@ export function FlowSelect({
           <Button
             type="button"
             variant="outline"
-            className="w-full h-9 px-3 flex items-center justify-between transition-all"
+            className="w-full justify-between"
             aria-label={ariaLabel || label || displayValue}
           >
             <span className="flex items-center gap-1.5 truncate text-white">
@@ -173,10 +173,9 @@ function FlowParamSelect({ paramKey, def, value, onChange }) {
 /**
  * FlowPromptBoxSettings
  *
- * Prompt Bar Settings Dropdown:
- * - Uses Base UI Button, Slider, Popover primitives strictly with canonical variants ("secondary", "ghost", "outline")
- * - Translucent surface glass background with 1px border-white/10
- * - Preserves exact original dimensions and layout
+ * Clean SaaS Dark UI Settings Dropdown using pure Base UI components and canonical variants:
+ * - Zero custom inline styling classes on Button (pure variant="secondary" | "ghost" | "outline")
+ * - Layout classes only on flex/grid containers
  */
 export function FlowPromptBoxSettings({
   activeMode = "image",
@@ -327,18 +326,13 @@ export function FlowPromptBoxSettings({
                   onClick={() => onModeChange?.(opt.value)}
                   role="radio"
                   aria-checked={isChecked}
-                  className={cn(
-                    "flex-1 h-8 text-white rounded-sm",
-                    isChecked ? "font-semibold" : "font-medium"
-                  )}
+                  className="flex-1"
                 >
-                  <span className="flex items-center justify-center gap-1.5 w-full">
-                    <GoogleIcon
-                      iconName={opt.icon}
-                      className="text-[16px] leading-none text-white"
-                    />
-                    <span className="leading-none text-white">{opt.label}</span>
-                  </span>
+                  <GoogleIcon
+                    iconName={opt.icon}
+                    className="text-[16px] leading-none text-white"
+                  />
+                  <span>{opt.label}</span>
                 </Button>
               );
             })}
@@ -362,18 +356,13 @@ export function FlowPromptBoxSettings({
                   onClick={() => onSubModeChange?.(opt.value)}
                   role="radio"
                   aria-checked={isChecked}
-                  className={cn(
-                    "flex-1 h-8 text-white rounded-sm",
-                    isChecked ? "font-semibold" : "font-medium"
-                  )}
+                  className="flex-1"
                 >
-                  <span className="flex items-center justify-center gap-1.5 w-full">
-                    <GoogleIcon
-                      iconName={opt.icon}
-                      className="text-[16px] leading-none text-white"
-                    />
-                    <span className="leading-none text-white">{opt.label}</span>
-                  </span>
+                  <GoogleIcon
+                    iconName={opt.icon}
+                    className="text-[16px] leading-none text-white"
+                  />
+                  <span>{opt.label}</span>
                 </Button>
               );
             })}
@@ -399,18 +388,13 @@ export function FlowPromptBoxSettings({
                   onClick={() => handleRatioClick(ratio)}
                   role="radio"
                   aria-checked={isChecked}
-                  className={cn(
-                    "flex-1 min-w-[44px] h-[54px] rounded-sm text-white",
-                    isChecked ? "font-semibold" : "font-medium"
-                  )}
+                  className="flex-1 min-w-[44px] h-[54px] flex-col gap-1 p-1"
                 >
-                  <span className="flex flex-col items-center justify-center gap-1">
-                    <GoogleIcon
-                      iconName={iconName}
-                      className="text-[18px] leading-none text-white"
-                    />
-                    <span className="text-[11px] leading-tight text-white">{ratio}</span>
-                  </span>
+                  <GoogleIcon
+                    iconName={iconName}
+                    className="text-[18px] leading-none text-white"
+                  />
+                  <span className="text-[11px] leading-tight text-white">{ratio}</span>
                 </Button>
               );
             })}
@@ -478,11 +462,7 @@ export function FlowPromptBoxSettings({
                           role="radio"
                           aria-checked={isChecked}
                           aria-description={infoText || undefined}
-                          className={cn(
-                            "h-8 rounded-sm text-white px-1",
-                            !isGrid && "flex-1",
-                            isChecked ? "font-semibold" : "font-medium"
-                          )}
+                          className={!isGrid ? "flex-1" : undefined}
                         >
                           <span className="flex items-center justify-center gap-1 truncate w-full text-center">
                             <span className="truncate text-white">{itemLabel}</span>
@@ -515,7 +495,6 @@ export function FlowPromptBoxSettings({
                       <Button
                         type="button"
                         variant={!isChecked ? "secondary" : "ghost"}
-                        className="px-2.5 py-0.5 text-xs font-medium h-7 rounded-sm"
                         onClick={() => onParamChange?.(key, false)}
                       >
                         Off
@@ -523,7 +502,6 @@ export function FlowPromptBoxSettings({
                       <Button
                         type="button"
                         variant={isChecked ? "secondary" : "ghost"}
-                        className="px-2.5 py-0.5 text-xs font-semibold h-7 rounded-sm"
                         onClick={() => onParamChange?.(key, true)}
                       >
                         On
@@ -627,10 +605,7 @@ export function FlowPromptBoxSettings({
                   onClick={() => handleCountClick(countVal)}
                   role="radio"
                   aria-checked={isChecked}
-                  className={cn(
-                    "flex-1 h-8 text-white rounded-sm",
-                    isChecked ? "font-semibold" : "font-medium"
-                  )}
+                  className="flex-1"
                 >
                   <span className="font-semibold text-white">x{countVal}</span>
                 </Button>
