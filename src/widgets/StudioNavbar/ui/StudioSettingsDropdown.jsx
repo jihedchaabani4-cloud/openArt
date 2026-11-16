@@ -127,9 +127,9 @@ export function StudioSettingsDropdown(props) {
           </flow-toggles>
         </div>
 
-        <DropdownMenuSeparator className="my-1.5 bg-[var(--mat-menu-divider-color,var(--foreground-state-15))]" />
+        <DropdownMenuSeparator className="my-1.5 bg-white/10" />
 
-        {/* ── 2. Display Toggles with Material 3 Slide Toggle ── */}
+        {/* ── 2. Display Toggles with Slide Toggle ── */}
         <div className="flex flex-col gap-0.5">
           {setShowUploadedMedia && (
             <DropdownMenuItem 
@@ -137,11 +137,11 @@ export function StudioSettingsDropdown(props) {
                 e.preventDefault()
                 setShowUploadedMedia(!showUploadedMedia)
               }}
-              className="flex items-center justify-between cursor-pointer pl-3 pr-4 py-2 min-h-[2.125rem] hover:bg-[var(--mat-menu-item-hover-state-layer-color,var(--foreground-state-10))] transition-colors duration-100 ease-in-out"
+              className="flex items-center justify-between cursor-pointer px-2.5 h-[36px] rounded-xl hover:bg-white/20 transition-colors"
             >
-              <div className="flex items-center gap-3">
-                <GoogleIcon iconName="upload" className="text-[20px] text-[var(--foreground-neutral-000,#fff)] shrink-0" />
-                <span className="text-[14px] leading-5 font-medium text-[var(--foreground-neutral-000,#fff)]">
+              <div className="flex items-center gap-2.5">
+                <GoogleIcon iconName="upload" className="text-lg text-white/70 shrink-0" />
+                <span className="text-sm font-medium text-white">
                   Médias importés
                 </span>
               </div>
@@ -155,11 +155,11 @@ export function StudioSettingsDropdown(props) {
                 e.preventDefault()
                 setShowTileDetails(!showTileDetails)
               }}
-              className="flex items-center justify-between cursor-pointer pl-3 pr-4 py-2 min-h-[2.125rem] hover:bg-[var(--mat-menu-item-hover-state-layer-color,var(--foreground-state-10))] transition-colors duration-100 ease-in-out"
+              className="flex items-center justify-between cursor-pointer px-2.5 h-[36px] rounded-xl hover:bg-white/20 transition-colors"
             >
-              <div className="flex items-center gap-3">
-                <GoogleIcon iconName="visibility" className="text-[20px] text-[var(--foreground-neutral-000,#fff)] shrink-0" />
-                <span className="text-[14px] leading-5 font-medium text-[var(--foreground-neutral-000,#fff)]">
+              <div className="flex items-center gap-2.5">
+                <GoogleIcon iconName="visibility" className="text-lg text-white/70 shrink-0" />
+                <span className="text-sm font-medium text-white">
                   Détails des blocs
                 </span>
               </div>
@@ -173,11 +173,11 @@ export function StudioSettingsDropdown(props) {
                 e.preventDefault()
                 setSoundOnHover(!soundOnHover)
               }}
-              className="flex items-center justify-between cursor-pointer pl-3 pr-4 py-2 min-h-[2.125rem] hover:bg-[var(--mat-menu-item-hover-state-layer-color,var(--foreground-state-10))] transition-colors duration-100 ease-in-out"
+              className="flex items-center justify-between cursor-pointer px-2.5 h-[36px] rounded-xl hover:bg-white/20 transition-colors"
             >
-              <div className="flex items-center gap-3">
-                <GoogleIcon iconName="volume_up" className="text-[20px] text-[var(--foreground-neutral-000,#fff)] shrink-0" />
-                <span className="text-[14px] leading-5 font-medium text-[var(--foreground-neutral-000,#fff)]">
+              <div className="flex items-center gap-2.5">
+                <GoogleIcon iconName="volume_up" className="text-lg text-white/70 shrink-0" />
+                <span className="text-sm font-medium text-white">
                   Son au survol
                 </span>
               </div>
@@ -191,11 +191,11 @@ export function StudioSettingsDropdown(props) {
                 e.preventDefault()
                 setClearPromptOnSubmit(!clearPromptOnSubmit)
               }}
-              className="flex items-center justify-between cursor-pointer pl-3 pr-4 py-2 min-h-[2.125rem] hover:bg-[var(--mat-menu-item-hover-state-layer-color,var(--foreground-state-10))] transition-colors duration-100 ease-in-out"
+              className="flex items-center justify-between cursor-pointer px-2.5 h-[36px] rounded-xl hover:bg-white/20 transition-colors"
             >
-              <div className="flex items-center gap-3">
-                <GoogleIcon iconName="backspace" className="text-[20px] text-[var(--foreground-neutral-000,#fff)] shrink-0" />
-                <span className="text-[14px] leading-5 font-medium text-[var(--foreground-neutral-000,#fff)]">
+              <div className="flex items-center gap-2.5">
+                <GoogleIcon iconName="backspace" className="text-lg text-white/70 shrink-0" />
+                <span className="text-sm font-medium text-white">
                   Effacer le prompt
                 </span>
               </div>

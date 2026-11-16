@@ -1,10 +1,9 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { GoogleIcon } from "@/shared/ui/GoogleIcon"
-import * as SelectPrimitive from "@radix-ui/react-select"
-
-import { cn } from "@/shared/lib/utils"
+import * as React from "react";
+import * as SelectPrimitive from "@radix-ui/react-select";
+import { GoogleIcon } from "@/shared/ui/GoogleIcon";
+import { cn } from "@/shared/lib/utils";
 
 function renderIconNode(IconCandidate, props = {}) {
   if (!IconCandidate) return null;
@@ -24,46 +23,16 @@ function renderIconNode(IconCandidate, props = {}) {
   return null;
 }
 
-// ─── Design Tokens ────────────────────────────────────────────────────────────
-// bg-panel         → #292929
-// border-subtle    → rgba(255,255,255,0.05)   (white/5)
-// border-focus     → rgba(255,255,255,0.20)   (white/20)
-// text-primary     → #f5f5f5   (neutral-100)
-// text-muted       → #737373   (neutral-500)
-// hover-bg         → rgba(255,255,255,0.05)   (white/5)
-//
-// Typography:
-//   group label    → 0.75rem / weight 500 / leading-tight
-//   item text      → 0.875rem / weight 400 / leading-[18px]
-//   subtitle       → 0.7rem   / weight 400 / leading-[14px]
-//
-// Spacing:
-//   trigger        → h-11 (44px), px-3 py-2.5
-//   item           → px-2 py-1.5, gap-2 (icon↔text)
-//   item inner     → gap-0.5 (label↔subtitle)
-//   label          → px-2.5 py-1.5 pb-0.5
-//   content        → px-1, viewport p-1
-//   side-offset    → 4px
-//
-// Radius:
-//   trigger        → rounded-lg (8px)
-//   panel          → rounded-lg
-//   item           → rounded-sm
-//
-// Shadow (panel):
-//   0px 4px 4px rgba(0,0,0,.05), 0px 20px 25px -5px rgba(0,0,0,.05)
-// ─────────────────────────────────────────────────────────────────────────────
-
 function Select({ ...props }) {
-  return <SelectPrimitive.Root data-slot="select" {...props} />
+  return <SelectPrimitive.Root data-slot="select" {...props} />;
 }
 
 function SelectGroup({ ...props }) {
-  return <SelectPrimitive.Group data-slot="select-group" {...props} />
+  return <SelectPrimitive.Group data-slot="select-group" {...props} />;
 }
 
 function SelectValue({ ...props }) {
-  return <SelectPrimitive.Value data-slot="select-value" {...props} />
+  return <SelectPrimitive.Value data-slot="select-value" {...props} />;
 }
 
 function SelectTrigger({ className, size = "default", variant = "default", asChild = false, children, ...props }) {
@@ -74,30 +43,20 @@ function SelectTrigger({ className, size = "default", variant = "default", asChi
       data-size={size}
       data-variant={variant}
       className={cn(
-        // Layout
-        "flex items-center",
-        variant === "blur" ? "w-full h-10 px-3.5 justify-between" : "w-auto max-w-fit px-3 py-2.5",
-        // Shape
-        "rounded-sm",
-        // Colors
-        variant === "blur" ? "bg-surface-container text-on-surface hover:bg-surface-container-high border border-outline-variant" : "bg-transparent hover:bg-white/[0.08] text-on-surface",
-        // Text
-        "text-sm font-medium text-on-surface",
-        "hover:cursor-pointer transition-colors outline-none",
-
-        // Disabled
-        "disabled:cursor-not-allowed disabled:opacity-50",
+        "flex items-center justify-between text-white transition-colors outline-none cursor-pointer disabled:cursor-not-allowed disabled:opacity-50",
+        variant === "pill"
+          ? "h-9.5 w-[200px] rounded-full bg-white/10 pl-5 pr-4 text-base font-medium hover:bg-white/15 focus-visible:ring-2 focus-visible:ring-white/70"
+          : "h-9.5 px-3.5 rounded-sm bg-white/10 text-sm font-medium hover:bg-white/15 focus-visible:ring-2 focus-visible:ring-white/70",
         className
       )}
-      style={undefined}
       {...props}
     >
       {children}
       <SelectPrimitive.Icon asChild>
-        <GoogleIcon iconName="keyboard_arrow_down" className="text-base opacity-60 shrink-0 ml-2" />
+        <GoogleIcon iconName="keyboard_arrow_down" className="text-base text-white/50 shrink-0 ml-2" />
       </SelectPrimitive.Icon>
     </SelectPrimitive.Trigger>
-  )
+  );
 }
 
 function SelectContent({
@@ -105,7 +64,7 @@ function SelectContent({
   children,
   position = "popper",
   align = "center",
-  side = "top",
+  side = "bottom",
   sideOffset = 4,
   ...props
 }) {
@@ -114,25 +73,13 @@ function SelectContent({
       <SelectPrimitive.Content
         data-slot="select-content"
         className={cn(
-          // Layout
           "relative z-50 flex flex-col overflow-y-auto select-none font-sans antialiased",
-          // Size
-          "min-w-30 max-h-125",
-          // Shape
-          "rounded-md p-2",
-          // Colors
-          "bg-surface-container-high border border-outline-variant text-on-surface shadow-none",
-          // Shadow
-          "shadow-none",
-          // Animations — open
+          "min-w-30 max-h-96 rounded-2xl p-1.5",
+          "bg-[#242426]/95 backdrop-blur-2xl border border-white/10 text-white shadow-xl",
           "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95",
-          // Animations — close
           "data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95",
-          // Slide directions
           "data-[side=bottom]:slide-in-from-top-2 data-[side=top]:slide-in-from-bottom-2",
-          // Popper offset compensation
-          position === "popper" &&
-            "data-[side=bottom]:translate-y-1 data-[side=top]:-translate-y-1",
+          position === "popper" && "data-[side=bottom]:translate-y-1 data-[side=top]:-translate-y-1",
           className
         )}
         position={position}
@@ -154,65 +101,38 @@ function SelectContent({
         <SelectScrollDownButton />
       </SelectPrimitive.Content>
     </SelectPrimitive.Portal>
-  )
+  );
 }
 
-/**
- * SelectLabel — group heading
- *
- * Tokens:
- *   font-size   : 0.75rem (text-xs)
- *   font-weight : 500 (medium)
- *   color       : #737373 (neutral-500 / muted)
- *   padding     : px-2.5 py-1.5 pb-0.5  →  10px 10px 2px 10px
- */
 function SelectLabel({ className, ...props }) {
   return (
     <SelectPrimitive.Label
       data-slot="select-label"
-      className={cn(
-        "px-2.5 py-1.5 pb-0.5",
-        "text-xs font-medium leading-tight text-on-surface-subtle",
-        className
-      )}
+      className={cn("px-2.5 py-1.5 text-xs font-semibold text-white/50 uppercase tracking-wider", className)}
       {...props}
     />
-  )
+  );
 }
 
-/**
- * SelectItem — supports icon + label + optional subtitle
- */
-function SelectItem({ className, children, icon, subtitle, badge, iconVariant = "standard", ...props }) {
+function SelectItem({ className, children, icon, subtitle, badge, ...props }) {
   return (
     <SelectPrimitive.Item
       data-slot="select-item"
       className={cn(
-        // Layout
-        "group flex cursor-pointer items-center gap-3 min-h-10 px-3.5 py-2 rounded-sm outline-none select-none font-sans antialiased transition-all duration-150",
-        // Text & State layers
-        "text-on-surface hover:bg-white/[0.08] hover:text-on-surface focus:bg-white/[0.08] focus:text-on-surface data-[highlighted]:bg-white/[0.08] data-[highlighted]:text-on-surface",
-        // Disabled
+        "group flex cursor-pointer items-center gap-2.5 h-[36px] px-2.5 rounded-xl outline-none select-none font-sans antialiased transition-colors text-white hover:bg-white/20 focus:bg-white/20 data-[highlighted]:bg-white/20",
         "data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
         className
       )}
       {...props}
     >
-      {/* ── Icon slot ─────────────────────────────────────────────────────── */}
       {icon && (
-        <span 
-          className={cn(
-            "shrink-0 flex items-center justify-center text-xl transition-colors duration-150 text-on-surface-variant",
-            iconVariant === "square" && "aspect-square h-12 -ml-2 -my-1.5 bg-surface-container-low rounded-sm border-r border-outline-variant"
-          )}
-        >
+        <span className="shrink-0 flex items-center justify-center text-lg text-white/70">
           {renderIconNode(icon)}
         </span>
       )}
 
-      {/* ── Label + subtitle block ─────────────────────────────────────────── */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        <div className="flex items-center gap-1.5 pt-0.5">
+        <div className="flex items-center gap-1.5">
           <SelectPrimitive.ItemText>
             <span className="text-sm font-medium leading-5 capitalize truncate">
               {children}
@@ -222,66 +142,53 @@ function SelectItem({ className, children, icon, subtitle, badge, iconVariant = 
         </div>
 
         {subtitle && (
-          <span className="text-xs font-normal leading-4 text-on-surface-subtle truncate">
+          <span className="text-xs font-normal text-white/50 truncate">
             {subtitle}
           </span>
         )}
       </div>
 
-      {/* ── Checkmark ─────────────────────────────────────────────────────── */}
-      <span className="shrink-0 flex size-4 items-center justify-center text-on-surface-variant">
+      <span className="shrink-0 flex size-4 items-center justify-center text-white">
         <SelectPrimitive.ItemIndicator>
           <GoogleIcon iconName="check" className="text-sm font-bold" />
         </SelectPrimitive.ItemIndicator>
       </span>
     </SelectPrimitive.Item>
-  )
+  );
 }
 
-/**
- * SelectSeparator — thin divider between groups
- */
 function SelectSeparator({ className, ...props }) {
   return (
     <SelectPrimitive.Separator
       data-slot="select-separator"
-      className={cn(
-        "pointer-events-none -mx-1 my-1.5 h-px bg-outline-variant",
-        className
-      )}
+      className={cn("pointer-events-none -mx-1 my-1.5 h-px bg-white/10", className)}
       {...props}
     />
-  )
+  );
 }
 
 function SelectScrollUpButton({ className, ...props }) {
   return (
     <SelectPrimitive.ScrollUpButton
       data-slot="select-scroll-up-button"
-      className={cn(
-        "flex cursor-default items-center justify-center py-1 text-on-surface-subtle",
-        className
-      )}
+      className={cn("flex cursor-default items-center justify-center py-1 text-white/50", className)}
       {...props}
     >
-      <GoogleIcon iconName="keyboard_arrow_up" className="text-lg" />
+      <GoogleIcon iconName="keyboard_arrow_up" className="text-base" />
     </SelectPrimitive.ScrollUpButton>
-  )
+  );
 }
 
 function SelectScrollDownButton({ className, ...props }) {
   return (
     <SelectPrimitive.ScrollDownButton
       data-slot="select-scroll-down-button"
-      className={cn(
-        "flex cursor-default items-center justify-center py-1 text-on-surface-subtle",
-        className
-      )}
+      className={cn("flex cursor-default items-center justify-center py-1 text-white/50", className)}
       {...props}
     >
-      <GoogleIcon iconName="keyboard_arrow_down" className="text-lg" />
+      <GoogleIcon iconName="keyboard_arrow_down" className="text-base" />
     </SelectPrimitive.ScrollDownButton>
-  )
+  );
 }
 
 export {
@@ -295,4 +202,4 @@ export {
   SelectSeparator,
   SelectTrigger,
   SelectValue,
-}
+};

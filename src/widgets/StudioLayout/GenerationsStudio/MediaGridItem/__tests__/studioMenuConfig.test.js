@@ -240,10 +240,10 @@ describe("studioMenuConfig - Per-type menu list & animate exclusions", () => {
     const colorItem = items.find((i) => i.key === "color");
     expect(colorItem.subItems).toBeDefined();
     expect(colorItem.subItems.length).toBeGreaterThan(0);
-    const limeSwatch = colorItem.subItems.find((s) => s.key === "color-lime");
-    expect(limeSwatch).toBeDefined();
-    limeSwatch.onClick();
-    expect(handleSetColor).toHaveBeenCalledWith("#d1fe17");
+    const amberSwatch = colorItem.subItems.find((s) => s.key === "color-amber");
+    expect(amberSwatch).toBeDefined();
+    amberSwatch.onClick();
+    expect(handleSetColor).toHaveBeenCalledWith("#FFC241");
   });
 
   it("detects collection entity type in getWorkflowEntityType", () => {

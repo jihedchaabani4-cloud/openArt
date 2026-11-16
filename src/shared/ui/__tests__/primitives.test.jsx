@@ -170,8 +170,8 @@ describe("Canonical Design System Primitives Suite", () => {
       expect(badge.className).toContain("rounded-sm");
       expect(badge.className).toContain("h-5");
 
-      rerender(<Badge variant="neon">Pro</Badge>);
-      expect(screen.getByText("Pro").className).toContain("bg-lime-400");
+      rerender(<Badge variant="pro">Pro</Badge>);
+      expect(screen.getByText("Pro").className).toContain("text-[#FFC241]");
 
       rerender(<Badge variant="success" size="sm">Active</Badge>);
       const successBadge = screen.getByText("Active");

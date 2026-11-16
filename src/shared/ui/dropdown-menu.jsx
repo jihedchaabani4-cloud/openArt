@@ -1,26 +1,20 @@
-"use client"
+"use client";
 
+import * as React from "react";
+import { DropdownMenu as DropdownMenuPrimitive } from "radix-ui";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
-import { DropdownMenu as DropdownMenuPrimitive } from "radix-ui"
+import { cn } from "@/shared/lib/utils";
 
-import { cn } from "@/shared/lib/utils"
-
-function DropdownMenu({
-  ...props
-}) {
+function DropdownMenu({ ...props }) {
   return <DropdownMenuPrimitive.Root data-slot="dropdown-menu" {...props} />;
 }
 
-function DropdownMenuPortal({
-  ...props
-}) {
-  return (<DropdownMenuPrimitive.Portal data-slot="dropdown-menu-portal" {...props} />);
+function DropdownMenuPortal({ ...props }) {
+  return <DropdownMenuPrimitive.Portal data-slot="dropdown-menu-portal" {...props} />;
 }
 
-function DropdownMenuTrigger({
-  ...props
-}) {
-  return (<DropdownMenuPrimitive.Trigger data-slot="dropdown-menu-trigger" {...props} />);
+function DropdownMenuTrigger({ ...props }) {
+  return <DropdownMenuPrimitive.Trigger data-slot="dropdown-menu-trigger" {...props} />;
 }
 
 function DropdownMenuContent({
@@ -36,19 +30,18 @@ function DropdownMenuContent({
         sideOffset={sideOffset}
         style={style}
         className={cn(
-          "z-50 max-h-(--radix-dropdown-menu-content-available-height) w-52 min-w-[12rem] rounded-md origin-(--radix-dropdown-menu-content-transform-origin) overflow-x-hidden overflow-y-auto p-1.5 flex flex-col gap-0.5 font-sans antialiased bg-surface-container-high border border-outline-variant text-on-surface shadow-none",
+          "z-50 max-h-(--radix-dropdown-menu-content-available-height) w-52 min-w-[12rem] rounded-2xl origin-(--radix-dropdown-menu-content-transform-origin) overflow-x-hidden overflow-y-auto p-1.5 flex flex-col gap-0.5 font-sans antialiased surface-glass border border-white/10 text-white shadow-xl",
           "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
           className
         )}
-        {...props} />
+        {...props}
+      />
     </DropdownMenuPrimitive.Portal>
   );
 }
 
-function DropdownMenuGroup({
-  ...props
-}) {
-  return (<DropdownMenuPrimitive.Group data-slot="dropdown-menu-group" {...props} />);
+function DropdownMenuGroup({ ...props }) {
+  return <DropdownMenuPrimitive.Group data-slot="dropdown-menu-group" {...props} />;
 }
 
 function DropdownMenuItem({
@@ -63,20 +56,15 @@ function DropdownMenuItem({
       data-inset={inset}
       data-variant={variant}
       className={cn(
-        // Layout
-        "relative flex cursor-pointer items-center gap-3 rounded-sm pl-3 pr-4 py-2 min-h-[2.125rem] text-sm leading-5 font-medium outline-hidden select-none font-sans antialiased",
-        // Theme defaults: on-surface text, state layers for hover/focus/active
-        "text-on-surface hover:bg-white/[0.08] focus:bg-white/[0.08] focus:text-on-surface active:bg-white/[0.12] transition-colors duration-100 ease-in-out",
-        // Icon defaults
-        "[&_svg:not([class*='text-'])]:text-on-surface-variant [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-5",
-        // Disabled & inset
+        "relative flex cursor-pointer items-center gap-2.5 h-[36px] px-2.5 rounded-xl text-sm font-medium outline-none select-none font-sans antialiased text-white hover:bg-white/20 focus:bg-white/20 transition-colors",
+        "[&_svg:not([class*='text-'])]:text-white/70 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         "data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[inset]:pl-8",
-        // Destructive / Danger variant (pure text & icon red, NO red background, ghost hover layer)
-        "data-[variant=destructive]:!text-error data-[variant=destructive]:hover:!text-error data-[variant=destructive]:focus:!text-error data-[variant=destructive]:hover:bg-white/[0.08] data-[variant=destructive]:focus:bg-white/[0.08] data-[variant=destructive]:[&_svg]:!text-error",
-        "data-[variant=danger]:!text-error data-[variant=danger]:hover:!text-error data-[variant=danger]:focus:!text-error data-[variant=danger]:hover:bg-white/[0.08] data-[variant=danger]:focus:bg-white/[0.08] data-[variant=danger]:[&_svg]:!text-error",
+        "data-[variant=destructive]:text-[#E5484D] data-[variant=destructive]:hover:text-[#E5484D] data-[variant=destructive]:focus:text-[#E5484D] data-[variant=destructive]:hover:bg-white/10 data-[variant=destructive]:[&_svg]:text-[#E5484D]",
+        "data-[variant=danger]:text-[#E5484D] data-[variant=danger]:hover:text-[#E5484D] data-[variant=danger]:focus:text-[#E5484D] data-[variant=danger]:hover:bg-white/10 data-[variant=danger]:[&_svg]:text-[#E5484D]",
         className
       )}
-      {...props} />
+      {...props}
+    />
   );
 }
 
@@ -90,17 +78,16 @@ function DropdownMenuCheckboxItem({
     <DropdownMenuPrimitive.CheckboxItem
       data-slot="dropdown-menu-checkbox-item"
       className={cn(
-        "relative flex cursor-pointer items-center gap-2 rounded-sm py-2.5 pr-2 pl-8 text-sm outline-hidden select-none",
-        "text-on-surface hover:bg-white/[0.08] focus:bg-white/[0.08] focus:text-on-surface",
-        "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        "relative flex cursor-pointer items-center gap-2 h-[36px] pr-2.5 pl-8 rounded-xl text-sm font-medium outline-none select-none text-white hover:bg-white/20 focus:bg-white/20 transition-colors",
         "data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
         className
       )}
       checked={checked}
-      {...props}>
-      <span className="pointer-events-none absolute left-2 flex size-3.5 items-center justify-center">
+      {...props}
+    >
+      <span className="pointer-events-none absolute left-2.5 flex size-4 items-center justify-center">
         <DropdownMenuPrimitive.ItemIndicator>
-          <GoogleIcon iconName="check" className="text-sm font-bold" />
+          <GoogleIcon iconName="check" className="text-sm font-bold text-white" />
         </DropdownMenuPrimitive.ItemIndicator>
       </span>
       {children}
@@ -108,10 +95,8 @@ function DropdownMenuCheckboxItem({
   );
 }
 
-function DropdownMenuRadioGroup({
-  ...props
-}) {
-  return (<DropdownMenuPrimitive.RadioGroup data-slot="dropdown-menu-radio-group" {...props} />);
+function DropdownMenuRadioGroup({ ...props }) {
+  return <DropdownMenuPrimitive.RadioGroup data-slot="dropdown-menu-radio-group" {...props} />;
 }
 
 function DropdownMenuRadioItem({
@@ -123,16 +108,15 @@ function DropdownMenuRadioItem({
     <DropdownMenuPrimitive.RadioItem
       data-slot="dropdown-menu-radio-item"
       className={cn(
-        "relative flex cursor-pointer items-center gap-2 rounded-sm py-2.5 pr-2 pl-8 text-sm outline-hidden select-none",
-        "text-on-surface hover:bg-white/[0.08] focus:bg-white/[0.08] focus:text-on-surface",
-        "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        "relative flex cursor-pointer items-center gap-2 h-[36px] pr-2.5 pl-8 rounded-xl text-sm font-medium outline-none select-none text-white hover:bg-white/20 focus:bg-white/20 transition-colors",
         "data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
         className
       )}
-      {...props}>
-      <span className="pointer-events-none absolute left-2 flex size-3.5 items-center justify-center">
+      {...props}
+    >
+      <span className="pointer-events-none absolute left-2.5 flex size-4 items-center justify-center">
         <DropdownMenuPrimitive.ItemIndicator>
-          <GoogleIcon iconName="circle" fill={true} className="text-xs" />
+          <GoogleIcon iconName="circle" fill={true} className="text-xs text-white" />
         </DropdownMenuPrimitive.ItemIndicator>
       </span>
       {children}
@@ -149,11 +133,9 @@ function DropdownMenuLabel({
     <DropdownMenuPrimitive.Label
       data-slot="dropdown-menu-label"
       data-inset={inset}
-      className={cn(
-        "px-2 py-1.5 text-xs font-medium text-on-surface-subtle data-[inset]:pl-8",
-        className
-      )}
-      {...props} />
+      className={cn("px-2.5 py-1.5 text-xs font-semibold text-white/50 uppercase tracking-wider data-[inset]:pl-8", className)}
+      {...props}
+    />
   );
 }
 
@@ -164,8 +146,9 @@ function DropdownMenuSeparator({
   return (
     <DropdownMenuPrimitive.Separator
       data-slot="dropdown-menu-separator"
-      className={cn("-mx-1 my-1.5 h-px bg-outline-variant", className)}
-      {...props} />
+      className={cn("-mx-1 my-1.5 h-px bg-white/10", className)}
+      {...props}
+    />
   );
 }
 
@@ -176,14 +159,13 @@ function DropdownMenuShortcut({
   return (
     <span
       data-slot="dropdown-menu-shortcut"
-      className={cn("ml-auto text-xs tracking-widest text-on-surface-subtle", className)}
-      {...props} />
+      className={cn("ml-auto text-xs tracking-widest text-white/50 font-mono", className)}
+      {...props}
+    />
   );
 }
 
-function DropdownMenuSub({
-  ...props
-}) {
+function DropdownMenuSub({ ...props }) {
   return <DropdownMenuPrimitive.Sub data-slot="dropdown-menu-sub" {...props} />;
 }
 
@@ -198,16 +180,14 @@ function DropdownMenuSubTrigger({
       data-slot="dropdown-menu-sub-trigger"
       data-inset={inset}
       className={cn(
-        "flex cursor-pointer items-center gap-3 rounded-sm pl-3 pr-4 py-2 min-h-[2.125rem] text-sm leading-5 font-medium outline-hidden select-none font-sans antialiased",
-        "text-on-surface hover:bg-white/[0.08] hover:text-on-surface focus:bg-white/[0.08] focus:text-on-surface",
-        "data-[state=open]:bg-white/[0.08] data-[state=open]:text-on-surface transition-colors duration-100 ease-in-out",
-        "[&_svg:not([class*='text-'])]:text-on-surface-variant [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-5",
+        "flex cursor-pointer items-center gap-2.5 h-[36px] px-2.5 rounded-xl text-sm font-medium outline-none select-none font-sans text-white hover:bg-white/20 focus:bg-white/20 data-[state=open]:bg-white/20 transition-colors",
         "data-[inset]:pl-8",
         className
       )}
-      {...props}>
+      {...props}
+    >
       {children}
-      <GoogleIcon iconName="chevron_right" className="ml-auto text-base text-on-surface-subtle" />
+      <GoogleIcon iconName="chevron_right" className="ml-auto text-base text-white/50" />
     </DropdownMenuPrimitive.SubTrigger>
   );
 }
@@ -222,11 +202,12 @@ function DropdownMenuSubContent({
       data-slot="dropdown-menu-sub-content"
       style={style}
       className={cn(
-        "z-50 w-52 min-w-[12rem] rounded-md origin-(--radix-dropdown-menu-content-transform-origin) overflow-hidden p-1.5 flex flex-col gap-0.5 font-sans antialiased bg-surface-container-high border border-outline-variant text-on-surface shadow-none",
+        "z-50 w-52 min-w-[12rem] rounded-2xl origin-(--radix-dropdown-menu-content-transform-origin) overflow-hidden p-1.5 flex flex-col gap-0.5 font-sans antialiased surface-glass border border-white/10 text-white shadow-xl",
         "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
         className
       )}
-      {...props} />
+      {...props}
+    />
   );
 }
 
@@ -246,4 +227,4 @@ export {
   DropdownMenuSub,
   DropdownMenuSubTrigger,
   DropdownMenuSubContent,
-}
+};

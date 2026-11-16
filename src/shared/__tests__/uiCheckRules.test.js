@@ -8,10 +8,10 @@ describe("UI Check Detection Rules (P3 Improvements)", () => {
 
   describe("Rule U1: Color literals including modern CSS Color 4 (oklch, oklab)", () => {
     it("detects standard hex codes", () => {
-      const line = 'color: "#282a2c", background: "#fff"';
+      const line = 'color: "#334455", background: "#fff"';
       const matches = line.match(u1Re);
       expect(matches).toHaveLength(2);
-      expect(matches).toContain("#282a2c");
+      expect(matches).toContain("#334455");
       expect(matches).toContain("#fff");
     });
 

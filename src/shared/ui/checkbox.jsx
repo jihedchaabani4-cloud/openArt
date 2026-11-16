@@ -1,15 +1,3 @@
-/**
- * Checkbox Primitive — OpenArt / Labveil Unified Design System
- * 
- * ═══════════════════════════════════════════════════════════════════════════════
- * STRICT ARCHITECTURAL RULES:
- * 1. ZERO CALL-SITE RESTYLING: Never add ad-hoc background, border, or corner classes.
- * 2. USE CANONICAL VARIANTS: `variant="default" | "neon"`.
- * 3. USE CANONICAL SIZES: `size="default" | "lg"`.
- * 4. `className` IS EXCLUSIVELY FOR LAYOUT (e.g. `shrink-0`, `self-center`).
- * ═══════════════════════════════════════════════════════════════════════════════
- */
-
 "use client";
 
 import * as React from "react";
@@ -19,12 +7,11 @@ import { cn } from "@/shared/lib/utils";
 
 const Checkbox = React.forwardRef(({
   className,
-  variant = "default",
   size = "default",
+  variant = "default",
   ...props
 }, ref) => {
   const isLg = size === "lg";
-  const isNeon = variant === "neon";
 
   return (
     <CheckboxPrimitive.Root
@@ -33,17 +20,11 @@ const Checkbox = React.forwardRef(({
       data-variant={variant}
       data-size={size}
       className={cn(
-        // Base structure & geometry
-        "peer shrink-0 cursor-pointer rounded-sm border transition-colors outline-none",
-        "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-black",
+        "peer shrink-0 cursor-pointer rounded-sm border border-[#27272A] bg-white/5 transition-colors outline-none",
+        "focus-visible:ring-2 focus-visible:ring-white/70",
         "disabled:cursor-not-allowed disabled:opacity-50",
+        "data-[state=checked]:bg-white data-[state=checked]:border-white data-[state=checked]:text-black",
         isLg ? "size-5" : "size-4",
-        // Resting border and background
-        "border-outline-variant bg-surface-container hover:border-outline hover:bg-surface-container-high",
-        // Checked state
-        isNeon
-          ? "data-[state=checked]:bg-lime-400 data-[state=checked]:border-lime-400 data-[state=checked]:text-black"
-          : "data-[state=checked]:bg-primary data-[state=checked]:border-primary data-[state=checked]:text-on-primary",
         className
       )}
       {...props}

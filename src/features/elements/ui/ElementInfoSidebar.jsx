@@ -230,7 +230,7 @@ export function ElementInfoSidebar({
       </div>
 
       {/* 4. Directives de rendu (Guidelines) */}
-      <div className="personality-section gap-1 pt-1.5 border-t border-[var(--mat-sys-outline-variant,rgba(255,255,255,0.08))]">
+      <div className="personality-section gap-1 pt-1.5 border-t border-white/10">
         <div className="label-row pb-1">
           <div className="flex items-center gap-1.5">
             <span className="field-label text-xs font-semibold">Directives de rendu</span>

@@ -1,46 +1,24 @@
-/**
- * Card Primitive — OpenArt / Labveil Unified Design System
- * 
- * ═══════════════════════════════════════════════════════════════════════════════
- * STRICT ARCHITECTURAL RULES:
- * 1. ZERO CALL-SITE RESTYLING: Card borders, corners, and surface colors are standard.
- * 2. USE CANONICAL VARIANTS: `variant="default" | "interactive" | "glass"` or `tone / radius`.
- * 3. DUAL EXPORT & SYNONYM PATTERN: Full backward compatibility for named exports
- *    alongside ergonomic compound dot-notation (`Card.Header`, `Card.Canvas`, `Card.Body`).
- * 4. `className` IS EXCLUSIVELY FOR LAYOUT (e.g. `col-span-1`, `w-full`).
- * ═══════════════════════════════════════════════════════════════════════════════
- */
-
 import * as React from "react";
-import { Surface } from "./surface";
 import { cn } from "@/shared/lib/utils";
 
 const Card = React.forwardRef(function Card(
   {
     className,
     variant = "default",
-    interactive,
-    tone,
-    radius = "md",
+    interactive = false,
     ...props
   },
   ref
 ) {
-  const resolvedTone = tone || (variant === "glass" ? "overlay" : "card");
-  const isInteractive = interactive ?? (variant === "interactive");
-
   return (
-    <Surface
+    <div
       ref={ref}
-      tone={resolvedTone}
-      radius={radius}
       data-slot="card"
-      data-variant={variant}
-      tabIndex={isInteractive ? 0 : undefined}
-      role={isInteractive ? "button" : undefined}
+      tabIndex={interactive ? 0 : undefined}
+      role={interactive ? "button" : undefined}
       className={cn(
-        "text-content-base transition-all font-sans antialiased overflow-hidden flex flex-col relative",
-        isInteractive && "cursor-pointer hover:bg-white/10 hover:border-line-interactive focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-line-interactive transition-all active:scale-95",
+        "rounded-md sm:rounded-[28px] bg-white/5 backdrop-blur-2xl text-white hover:bg-white/10 transition-all font-sans antialiased overflow-hidden flex flex-col relative border border-white/10",
+        interactive && "cursor-pointer hover:border-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 active:scale-95",
         className
       )}
       {...props}
@@ -58,8 +36,8 @@ const CardHeader = React.forwardRef(function CardHeader(
       ref={ref}
       data-slot="card-header"
       className={cn(
-        "flex flex-col gap-1.5 p-4 sm:p-5",
-        bordered && "border-b border-line-subtle pb-3",
+        "flex flex-col gap-1.5 p-6",
+        bordered && "border-b border-white/10 pb-4",
         className
       )}
       {...props}
@@ -76,7 +54,7 @@ const CardTitle = React.forwardRef(function CardTitle(
     <h3
       ref={ref}
       data-slot="card-title"
-      className={cn("text-base font-semibold tracking-tight text-content-base leading-snug", className)}
+      className={cn("text-base font-semibold tracking-tight text-white leading-snug", className)}
       {...props}
     />
   );
@@ -91,28 +69,12 @@ const CardDescription = React.forwardRef(function CardDescription(
     <p
       ref={ref}
       data-slot="card-description"
-      className={cn("text-xs text-content-muted leading-relaxed", className)}
+      className={cn("text-xs text-white/50 leading-relaxed", className)}
       {...props}
     />
   );
 });
 CardDescription.displayName = "CardDescription";
-
-const CardCanvas = React.forwardRef(function CardCanvas(
-  { className, ...props },
-  ref
-) {
-  // Edge-to-edge bleed zone with zero padding for video, WebGL, or scrubbers
-  return (
-    <div
-      ref={ref}
-      data-slot="card-canvas"
-      className={cn("relative w-full overflow-hidden bg-surface-sunken", className)}
-      {...props}
-    />
-  );
-});
-CardCanvas.displayName = "CardCanvas";
 
 const CardContent = React.forwardRef(function CardContent(
   { className, ...props },
@@ -122,7 +84,7 @@ const CardContent = React.forwardRef(function CardContent(
     <div
       ref={ref}
       data-slot="card-content"
-      className={cn("p-4 sm:p-5 pt-0 sm:pt-0 flex-1", className)}
+      className={cn("p-6 pt-0 flex-1", className)}
       {...props}
     />
   );
@@ -138,8 +100,8 @@ const CardFooter = React.forwardRef(function CardFooter(
       ref={ref}
       data-slot="card-footer"
       className={cn(
-        "flex items-center p-4 sm:p-5 pt-0 sm:pt-0 gap-2 shrink-0",
-        bordered && "border-t border-line-subtle pt-3",
+        "flex items-center p-6 pt-0 gap-2 shrink-0",
+        bordered && "border-t border-white/10 pt-4",
         className
       )}
       {...props}
@@ -148,14 +110,42 @@ const CardFooter = React.forwardRef(function CardFooter(
 });
 CardFooter.displayName = "CardFooter";
 
-// Attach dot-notation compound aliases to Card
+const SectionCard = React.forwardRef(function SectionCard(
+  { className, ...props },
+  ref
+) {
+  return (
+    <div
+      ref={ref}
+      data-slot="section-card"
+      className={cn("rounded-[28px] bg-white/5 backdrop-blur-2xl px-8 py-6 text-white border border-white/10", className)}
+      {...props}
+    />
+  );
+});
+SectionCard.displayName = "SectionCard";
+
+const CardCanvas = React.forwardRef(function CardCanvas(
+  { className, ...props },
+  ref
+) {
+  return (
+    <div
+      ref={ref}
+      data-slot="card-canvas"
+      className={cn("relative w-full overflow-hidden", className)}
+      {...props}
+    />
+  );
+});
+CardCanvas.displayName = "CardCanvas";
+
 Card.Header = CardHeader;
 Card.Title = CardTitle;
 Card.Description = CardDescription;
 Card.Content = CardContent;
-Card.Body = CardContent; // Ergonomic alias for CardContent
-Card.Canvas = CardCanvas;
 Card.Footer = CardFooter;
+Card.Canvas = CardCanvas;
 
 export {
   Card,
@@ -163,6 +153,7 @@ export {
   CardTitle,
   CardDescription,
   CardContent,
-  CardCanvas,
   CardFooter,
+  CardCanvas,
+  SectionCard,
 };

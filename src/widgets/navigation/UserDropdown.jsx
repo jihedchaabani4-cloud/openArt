@@ -94,7 +94,7 @@ export function UserDropdown({ className }) {
           >
             <Avatar className="size-full rounded-full bg-transparent">
               <AvatarImage src={avatarUrl} alt={displayName} />
-              <AvatarFallback className="rounded-full bg-slate-700 text-xs font-semibold text-white/90">
+              <AvatarFallback className="rounded-full bg-white/10 text-xs font-semibold text-white/90">
                 {initials}
               </AvatarFallback>
             </Avatar>

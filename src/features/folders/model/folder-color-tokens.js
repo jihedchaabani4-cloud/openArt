@@ -1,16 +1,16 @@
 /**
  * Collection / Folder Color Tokens
- * Sourced from openart/labveil color specification.
+ * Aligned with SaaS Dark UI Design System (DESIGN.md)
  */
 export const FOLDER_COLOR_OPTIONS = [
   {
-    id: "lime",
-    label: "Lime",
-    hex: "#d1fe17",
-    bgClass: "bg-lime",
-    backTab: "#a3cc00",
-    frontTop: "#efff99",
-    frontBottom: "#d1fe17",
+    id: "amber",
+    label: "Amber",
+    hex: "#FFC241",
+    bgClass: "bg-[#FFC241]",
+    backTab: "#d97706",
+    frontTop: "#fef3c7",
+    frontBottom: "#FFC241",
     frontStroke: "#ffffff40",
   },
   {
@@ -24,13 +24,13 @@ export const FOLDER_COLOR_OPTIONS = [
     frontStroke: "#ffffff40",
   },
   {
-    id: "slate",
-    label: "Slate",
-    hex: "#e2e8f0",
-    bgClass: "bg-slate-200",
-    backTab: "#94a3b8",
-    frontTop: "#f8fafc",
-    frontBottom: "#cbd5e1",
+    id: "zinc",
+    label: "Zinc",
+    hex: "#e4e4e7",
+    bgClass: "bg-zinc-200",
+    backTab: "#a1a1aa",
+    frontTop: "#fafafa",
+    frontBottom: "#d4d4d8",
     frontStroke: "#ffffff40",
   },
   {

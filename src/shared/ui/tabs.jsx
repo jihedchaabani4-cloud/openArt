@@ -1,19 +1,10 @@
-/**
- * Tabs Primitive — OpenArt / Labveil Unified Design System
- * 
- * ═══════════════════════════════════════════════════════════════════════════════
- * STRICT ARCHITECTURAL RULES:
- * 1. ZERO CALL-SITE RESTYLING: Tab triggers and lists follow canonical variants.
- * 2. USE CANONICAL VARIANTS: `variant="pills" | "underline" | "studio"`.
- * 3. USE CANONICAL SIZES: `size="default" | "sm"`.
- * ═══════════════════════════════════════════════════════════════════════════════
- */
-
 "use client";
 
 import * as React from "react";
 import { Tabs as TabsPrimitive } from "radix-ui";
 import { cn } from "@/shared/lib/utils";
+
+const TabsContext = React.createContext({ variant: "pills" });
 
 function Tabs({
   className,
@@ -28,30 +19,23 @@ function Tabs({
   );
 }
 
-const TabsListContext = React.createContext({ variant: "pills", size: "default" });
-
 function TabsList({
   className,
   variant = "pills",
-  size = "default",
   ...props
 }) {
   return (
-    <TabsListContext.Provider value={{ variant, size }}>
+    <TabsContext.Provider value={{ variant }}>
       <TabsPrimitive.List
         data-slot="tabs-list"
         data-variant={variant}
-        data-size={size}
         className={cn(
-          "inline-flex items-center justify-center font-sans antialiased",
-          variant === "pills" && "rounded-full bg-surface-container p-1 gap-1 border border-outline-variant",
-          variant === "underline" && "gap-4 border-b border-outline-variant px-1",
-          variant === "studio" && "w-full rounded-md bg-surface-container p-1 gap-1 border border-outline-variant",
+          "inline-flex items-center gap-1 p-1 rounded-full bg-white/5 border border-white/10 font-sans antialiased",
           className
         )}
         {...props}
       />
-    </TabsListContext.Provider>
+    </TabsContext.Provider>
   );
 }
 
@@ -59,33 +43,17 @@ function TabsTrigger({
   className,
   ...props
 }) {
-  const { variant, size } = React.useContext(TabsListContext);
-  const isSm = size === "sm";
+  const { variant } = React.useContext(TabsContext);
+  const isStudio = variant === "studio";
 
   return (
     <TabsPrimitive.Trigger
       data-slot="tabs-trigger"
       className={cn(
-        "inline-flex cursor-pointer items-center justify-center whitespace-nowrap font-medium transition-all outline-none",
+        "h-8 rounded-full px-3 text-sm font-medium bg-white/10 text-white hover:bg-white/15 transition-all outline-none cursor-pointer",
+        "data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow",
         "disabled:pointer-events-none disabled:opacity-50",
-        // Pills variant
-        variant === "pills" && [
-          isSm ? "h-6 px-2.5 text-xs rounded-full" : "h-7 px-3.5 text-xs rounded-full",
-          "text-on-surface-subtle hover:text-on-surface hover:bg-white/[0.08]",
-          "data-[state=active]:bg-primary data-[state=active]:text-on-primary data-[state=active]:font-semibold",
-        ],
-        // Underline variant
-        variant === "underline" && [
-          isSm ? "h-7 text-xs pb-1" : "h-9 text-sm pb-2",
-          "text-on-surface-subtle hover:text-on-surface border-b-2 border-transparent",
-          "data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:font-semibold",
-        ],
-        // Studio variant
-        variant === "studio" && [
-          "flex-1 py-1.5 rounded-sm text-xs uppercase tracking-wider font-semibold",
-          "text-on-surface-subtle hover:text-on-surface hover:bg-white/[0.08]",
-          "data-[state=active]:bg-lime-400 data-[state=active]:text-black",
-        ],
+        isStudio && "tracking-wider uppercase",
         className
       )}
       {...props}
@@ -101,7 +69,7 @@ function TabsContent({
     <TabsPrimitive.Content
       data-slot="tabs-content"
       className={cn(
-        "outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+        "outline-none focus-visible:ring-2 focus-visible:ring-white/70",
         className
       )}
       {...props}

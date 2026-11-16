@@ -90,10 +90,10 @@ describe("FileTree Component (shadcn.io/ui/file-tree)", () => {
     expect(defaultGrad.id).toBe("white");
     expect(defaultGrad.frontTop).toBe("#ffffff");
 
-    // When collection data has a color (e.g. lime #d1fe17) -> uses that color
-    const limeGrad = getFolderColorGradient("#d1fe17");
-    expect(limeGrad.id).toBe("lime");
-    expect(limeGrad.frontBottom).toBe("#d1fe17");
+    // When collection data has a color (e.g. amber #FFC241) -> uses that color
+    const amberGrad = getFolderColorGradient("#FFC241");
+    expect(amberGrad.id).toBe("amber");
+    expect(amberGrad.frontBottom).toBe("#FFC241");
 
     // Render inside FileTreeFolder
     const { container } = render(
@@ -104,16 +104,16 @@ describe("FileTree Component (shadcn.io/ui/file-tree)", () => {
           icon={<FolderGlyphIcon data-testid="white-icon" />}
         />
         <FileTreeItem
-          value="f-lime"
-          element="Lime Folder"
-          icon={<FolderGlyphIcon color="#d1fe17" data-testid="lime-icon" />}
+          value="f-amber"
+          element="Amber Folder"
+          icon={<FolderGlyphIcon color="#FFC241" data-testid="amber-icon" />}
         />
       </FileTree>
     );
 
     expect(screen.getByText("Default White Folder")).toBeDefined();
-    expect(screen.getByText("Lime Folder")).toBeDefined();
+    expect(screen.getByText("Amber Folder")).toBeDefined();
     expect(container.querySelector('[data-testid="white-icon"]')).toBeDefined();
-    expect(container.querySelector('[data-testid="lime-icon"]')).toBeDefined();
+    expect(container.querySelector('[data-testid="amber-icon"]')).toBeDefined();
   });
 });

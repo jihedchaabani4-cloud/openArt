@@ -210,7 +210,7 @@ describe("CollectionMediaGridItem action button group & menu styling", () => {
     );
 
     expect(mediaGridItemFile).toContain('ButtonGroup variant="pill"');
-    expect(buttonGroupFile).not.toContain("border border-[var(--mat-sys-outline-variant");
+    expect(buttonGroupFile).not.toContain("outline-variant");
   });
 });
 

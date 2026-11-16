@@ -126,7 +126,7 @@ describe("CreateFolderDialog Component", () => {
       id: "f-123",
       name: "Original Name",
       description: "Original Description",
-      color: "#d1fe17", // Lime
+      color: "#FFC241", // Amber
     };
 
     renderWithClient(

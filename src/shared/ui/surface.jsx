@@ -1,65 +1,50 @@
-/**
- * Surface Primitive — OpenArt / Labveil Unified Design System
- * 
- * ═══════════════════════════════════════════════════════════════════════════════
- * STRICT ARCHITECTURAL RULES:
- * 1. ZERO REACT CONTEXT: 100% Server Component safe, zero hydration penalty.
- * 2. RADIX DELEGATION: Supports asChild via radix-ui Slot.Root.
- * 3. CANONICAL UTILITIES: Uses cn from @/shared/lib/utils for token awareness.
- * ═══════════════════════════════════════════════════════════════════════════════
- */
-
 import * as React from "react";
 import { Slot } from "radix-ui";
 import { cva } from "class-variance-authority";
 import { cn } from "@/shared/lib/utils";
 
 export const surfaceVariants = cva(
-  "transition-colors duration-150 border",
+  "transition-colors duration-150",
   {
     variants: {
       tone: {
-        base: "bg-surface text-on-surface border-outline-variant",
-        panel: "bg-surface-container-low text-on-surface border-outline-variant",
-        processing: "bg-surface-container-lowest text-on-surface border-outline-variant",
-        card: "bg-surface-container text-on-surface border-outline-variant",
-        elevated: "bg-surface-container-high text-on-surface border-outline-variant",
-        highest: "bg-surface-container-highest text-on-surface border-outline",
-        sunken: "bg-surface-container-lowest text-on-surface border-outline-variant",
-        overlay: "bg-surface-container-high/90 text-on-surface border-outline-variant backdrop-blur-md",
-        tertiary: "bg-surface-tertiary text-on-surface border-outline-variant",
-        brand: "bg-lime text-black border-transparent",
-        // Google Flow Material 3 surface ladder
-        surface: "bg-surface text-on-surface border-outline-variant",
-        "container-lowest": "bg-surface-container-lowest text-on-surface border-outline-variant",
-        "container-low": "bg-surface-container-low text-on-surface border-outline-variant",
-        container: "bg-surface-container text-on-surface border-outline-variant",
-        "container-high": "bg-surface-container-high text-on-surface border-outline",
-        "container-highest": "bg-surface-container-highest text-on-surface border-outline",
-        bright: "bg-surface-bright text-on-surface border-outline",
+        base: "bg-omni-bg text-white border border-white/10",
+        panel: "bg-omni-bg text-white border-r border-[#27272A]",
+        processing: "bg-[#09090B] text-white",
+        card: "bg-white/5 backdrop-blur-2xl text-white border border-white/10",
+        elevated: "bg-[#27272A] text-white border border-white/10",
+        highest: "bg-[#27272A] text-white border border-white/10",
+        sunken: "bg-[#09090B] text-white",
+        overlay: "surface-glass text-white border border-white/10",
+        tertiary: "bg-[#0E1015] text-white",
+        secondary: "bg-[#27272A] text-[#FAFAFA]",
       },
       radius: {
         none: "rounded-none",
-        xxxs: "rounded-xxxs",
-        xs: "rounded-xs",
-        sm: "rounded-sm",
-        md: "rounded-md",
-        lg: "rounded-lg",
-        xl: "rounded-xl",
-        "2xl": "rounded-2xl",
-        "3xl": "rounded-3xl",
+        sm: "rounded-md",
+        md: "rounded-[10px]",
+        lg: "rounded-2xl",
+        xl: "rounded-3xl",
+        "2xl": "rounded-[28px]",
         full: "rounded-full",
       },
     },
     defaultVariants: {
       tone: "base",
-      radius: "lg",
+      radius: "md",
     },
   }
 );
 
 export const Surface = React.forwardRef(function Surface(
-  { className, tone, radius, asChild = false, ...props },
+  {
+    asChild = false,
+    tone = "base",
+    radius = "md",
+    className,
+    children,
+    ...props
+  },
   ref
 ) {
   const Comp = asChild ? Slot.Root : "div";
@@ -67,9 +52,13 @@ export const Surface = React.forwardRef(function Surface(
     <Comp
       ref={ref}
       data-slot="surface"
+      data-tone={tone}
+      data-radius={radius}
       className={cn(surfaceVariants({ tone, radius }), className)}
       {...props}
-    />
+    >
+      {children}
+    </Comp>
   );
 });
 Surface.displayName = "Surface";
