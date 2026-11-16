@@ -14,7 +14,7 @@ export const RatioIcon = ({ ratio, isSelected }) => {
   const rw = Math.max(Math.round(normW * scale), 6), rh = Math.max(Math.round(normH * scale), 6);
   const x = (CW - rw) / 2, y = (CH - rh) / 2;
   return (
-    <div className={cn("flex items-center justify-center rounded-sm w-8 h-6 text-on-surface")}>
+    <div className={cn("flex items-center justify-center rounded-sm w-8 h-6 text-white")}>
       <svg width={CW} height={CH} viewBox={`0 0 ${CW} ${CH}`} fill="none">
         <rect x={x + 0.5} y={y + 0.5} width={rw - 1} height={rh - 1} rx="2" stroke="currentColor" strokeWidth={isSelected ? "2" : "1.4"} />
       </svg>

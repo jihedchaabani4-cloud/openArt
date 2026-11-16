@@ -50,8 +50,8 @@ export function DropdownShell({
           className={cn(
             "size-9 rounded-lg flex items-center justify-center transition-all p-0",
             isActive
-              ? "bg-transparent text-on-surface"
-              : "text-on-surface-variant hover:bg-white/[0.08] hover:text-on-surface"
+              ? "bg-transparent text-white"
+              : "text-white/70 hover:bg-white/[0.08] hover:text-white"
           )}
         >
           {trigger}

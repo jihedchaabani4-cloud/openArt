@@ -5,6 +5,7 @@ import { cn } from "@/shared/lib/utils";
 import { GoogleIcon } from "@/shared/ui/GoogleIcon";
 import { Button } from "@/shared/ui/button";
 import { Slider } from "@/shared/ui/slider";
+import { Switch } from "@/shared/ui/switch";
 import { Popover, PopoverTrigger, PopoverContent } from "@/shared/ui/popover";
 import { resolveModelIcon } from "../../../core/modelManagement.js";
 import { calculateModelCredits } from "../../../core/creditCalculationService.js";
@@ -52,7 +53,7 @@ export function formatParamLabel(str) {
 
 /**
  * Unified FlowSelect dropdown component
- * Powered by collision-aware Radix Popover primitive while preserving Google Flow styling.
+ * Powered by Radix Popover and SaaS Dark UI styling.
  */
 export function FlowSelect({
   value,
@@ -74,17 +75,17 @@ export function FlowSelect({
           <Button
             type="button"
             variant="outline"
-            className="w-full h-9 px-3 flex items-center justify-between transition-all"
+            className="w-full h-9 px-3 flex items-center justify-between transition-all bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20 rounded-xl"
             aria-label={ariaLabel || label || displayValue}
           >
             <span className="flex items-center gap-1.5 truncate text-white">
               {icon}
-              {label && <span className="text-cool-slate font-normal">{label}:</span>}
+              {label && <span className="text-white/50 font-normal">{label}:</span>}
               <span className="truncate text-white font-medium">{displayValue}</span>
             </span>
             <GoogleIcon
               iconName="arrow_drop_down"
-              className={cn("text-[20px] text-white transition-transform shrink-0", open && "rotate-180")}
+              className={cn("text-[20px] text-white/70 transition-transform shrink-0", open && "rotate-180")}
             />
           </Button>
         </PopoverTrigger>
@@ -111,7 +112,10 @@ export function FlowSelect({
                 key={String(item.value)}
                 type="button"
                 variant={isSelected ? "secondary" : "ghost"}
-                className="w-full justify-between"
+                className={cn(
+                  "w-full h-9 justify-between px-2.5 rounded-lg text-xs font-medium transition-colors",
+                  isSelected ? "bg-white/15 text-white" : "text-white/80 hover:bg-white/10 hover:text-white"
+                )}
                 onClick={() => {
                   onChange?.(item.value);
                   setOpen(false);
@@ -173,16 +177,10 @@ function FlowParamSelect({ paramKey, def, value, onChange }) {
 /**
  * FlowPromptBoxSettings
  *
- * Exact replication of Google Flow's <flow-prompt-box-settings class="settings-content-overlay">:
- * - Container: width 17.5rem (280px), rounded 18px, padding 0.5rem (8px)
- * - Glassmorphism: backdrop-filter blur(40px), background rgba(22, 23, 24, 0.9), shadow 0 16px 32px -8px rgba(0,0,0,0.4)
- * - Toggle groups: rounded 14px, background rgba(218, 220, 224, 0.05), gap 1 (4px), padding 1 (4px)
- * - Toggle buttons: rounded 10px, active bg rgba(218, 220, 224, 0.25), text/icon white, inactive rgba(218, 220, 224, 0.75)
- * - Mode toggles: Image (image icon) and Video (videocam icon)
- * - Format toggles: 16:9, 4:3, 1:1, 3:4, 9:16 with content-layout-column
- * - Model selector trigger button: Banana / Model name with arrow_drop_down
- * - Outputs toggles: x1, x2, x3, x4
- * - Credit cost label: "La génération utilisera 0 crédits"
+ * SaaS Dark UI compliant Prompt Bar Settings panel:
+ * - Uses Base UI Button, Slider, Switch, Popover primitives
+ * - Surface glass / dark translucent container with 1px border-white/10
+ * - Semantic HTML with accessible radio and dialog roles
  */
 export function FlowPromptBoxSettings({
   activeMode = "image",
@@ -296,178 +294,135 @@ export function FlowPromptBoxSettings({
   };
 
   return (
-    <flow-prompt-box-settings
-     
+    <div
+      data-slot="prompt-box-settings"
+      role="region"
+      aria-label="Paramètres de génération"
       className={cn(
-        "settings-content-overlay flow-prompt-box-settings block w-[var(--prompt-box-settings-width,17.5rem)] rounded-lg p-2",
-        "bg-(--background-state-90) backdrop-blur-80 border border-white/10 shadow-none",
+        "flow-prompt-box-settings w-72 rounded-2xl p-2.5",
+        "bg-[#242426]/95 backdrop-blur-2xl border border-white/10 shadow-2xl",
         "text-white select-none font-sans antialiased",
         className
       )}
       style={{
-        display: "block",
         boxSizing: "border-box",
-        width: "var(--prompt-box-settings-width, 17.5rem)",
-        borderRadius: "8px",
-        padding: "0.5rem",
+        width: "var(--prompt-box-settings-width, 18rem)",
+        borderRadius: "16px",
+        padding: "0.625rem",
         colorScheme: "dark",
         pointerEvents: "auto",
         WebkitFontSmoothing: "antialiased",
       }}
     >
-      <div className="settings-content flex flex-col gap-2">
-        {/* ── 1. MODE TOGGLES (flow-toggles aria-label="Mode" class="variant-emphasized") ── */}
+      <div className="settings-content flex flex-col gap-2.5">
+        {/* ── 1. MODE TOGGLES (Image vs Video) ── */}
         {hasModes && modeOptions.length > 0 && (
-          <flow-toggles
+          <div
+            role="radiogroup"
             aria-label="Mode"
-            className="variant-emphasized block w-full"
+            className="flex items-center gap-1 p-1 bg-white/5 border border-white/10 rounded-xl w-full"
           >
-            <mat-button-toggle-group
-              className="mat-button-toggle-group toggle-group flex items-center gap-1 p-1 bg-white/5 rounded-sm w-full"
-              role="radiogroup"
-            >
-              {modeOptions.map((opt) => {
-                const isChecked = activeMode === opt.value;
-                return (
-                  <mat-button-toggle
-                    key={opt.value}
-                    role="presentation"
-                    className={cn(
-                      "mat-button-toggle toggle flex-toggle flex-1 flex h-8 rounded-sm transition-all",
-                      isChecked && "mat-button-toggle-checked"
-                    )}
-                  >
-                    <Button
-                      type="button"
-                      variant={isChecked ? "secondary" : "ghost"}
-                      onClick={() => onModeChange?.(opt.value)}
-                      role="radio"
-                      aria-checked={isChecked}
-                      className={cn(
-                        "mat-button-toggle-button w-full h-8 text-white",
-                        isChecked ? "font-semibold" : "font-medium"
-                      )}
-                    >
-                      <span className="mat-button-toggle-label-content flex items-center justify-center gap-1.5 w-full">
-                        <span className="toggle-label flex items-center justify-center gap-1.5">
-                          <GoogleIcon
-                            iconName={opt.icon}
-                            className="text-[16px] leading-none text-white"
-                          />
-                          <span className={cn("toggle-text leading-none text-white", isChecked ? "font-semibold" : "font-medium")}>{opt.label}</span>
-                        </span>
-                      </span>
-                    </Button>
-                  </mat-button-toggle>
-                );
-              })}
-            </mat-button-toggle-group>
-          </flow-toggles>
+            {modeOptions.map((opt) => {
+              const isChecked = activeMode === opt.value;
+              return (
+                <Button
+                  key={opt.value}
+                  type="button"
+                  variant={isChecked ? "primary" : "ghost"}
+                  onClick={() => onModeChange?.(opt.value)}
+                  role="radio"
+                  aria-checked={isChecked}
+                  className={cn(
+                    "flex-1 h-8 rounded-lg text-xs transition-all gap-1.5",
+                    isChecked
+                      ? "bg-white text-black font-semibold shadow hover:bg-white/90"
+                      : "text-white/70 hover:text-white hover:bg-white/10 font-medium"
+                  )}
+                >
+                  <GoogleIcon
+                    iconName={opt.icon}
+                    className="text-[16px] leading-none"
+                  />
+                  <span>{opt.label}</span>
+                </Button>
+              );
+            })}
+          </div>
         )}
 
         {/* ── SubMode: Type de vidéo (when Video mode is active) ── */}
         {hasModes && activeMode === "video" && subModeOptions.length > 1 && (
-          <flow-toggles
+          <div
+            role="radiogroup"
             aria-label="Type de vidéo"
-            className="variant-emphasized block w-full"
+            className="flex items-center gap-1 p-1 bg-white/5 border border-white/10 rounded-xl w-full"
           >
-            <mat-button-toggle-group
-              className="mat-button-toggle-group toggle-group mat-button-toggle-group-appearance-standard flex items-center gap-1 p-1 bg-white/5 rounded-sm w-full"
-              role="radiogroup"
-            >
-              {subModeOptions.map((opt) => {
-                const isChecked = activeSubMode === opt.value;
-                return (
-                  <mat-button-toggle
-                    key={opt.value}
-                    role="presentation"
-                    className={cn(
-                      "mat-button-toggle toggle flex-toggle mat-button-toggle-appearance-standard mat-button-toggle-animations-enabled flex-1 flex h-8 rounded-sm transition-all",
-                      isChecked && "mat-button-toggle-checked"
-                    )}
-                  >
-                    <Button
-                      type="button"
-                      variant={isChecked ? "secondary" : "ghost"}
-                      onClick={() => onSubModeChange?.(opt.value)}
-                      role="radio"
-                      aria-checked={isChecked}
-                      className={cn(
-                        "mat-button-toggle-button w-full h-8 text-white",
-                        isChecked ? "font-semibold" : "font-medium"
-                      )}
-                    >
-                      <span className="mat-button-toggle-label-content flex items-center justify-center gap-1.5 w-full">
-                        <span className="toggle-label flex items-center justify-center gap-1.5">
-                          <GoogleIcon
-                            iconName={opt.icon}
-                            className="text-[16px] leading-none text-white"
-                          />
-                          <span className={cn("toggle-text leading-none text-white", isChecked ? "font-semibold" : "font-medium")}>{opt.label}</span>
-                        </span>
-                      </span>
-                    </Button>
-                  </mat-button-toggle>
-                );
-              })}
-            </mat-button-toggle-group>
-          </flow-toggles>
+            {subModeOptions.map((opt) => {
+              const isChecked = activeSubMode === opt.value;
+              return (
+                <Button
+                  key={opt.value}
+                  type="button"
+                  variant={isChecked ? "primary" : "ghost"}
+                  onClick={() => onSubModeChange?.(opt.value)}
+                  role="radio"
+                  aria-checked={isChecked}
+                  className={cn(
+                    "flex-1 h-8 rounded-lg text-xs transition-all gap-1.5",
+                    isChecked
+                      ? "bg-white text-black font-semibold shadow hover:bg-white/90"
+                      : "text-white/70 hover:text-white hover:bg-white/10 font-medium"
+                  )}
+                >
+                  <GoogleIcon
+                    iconName={opt.icon}
+                    className="text-[16px] leading-none"
+                  />
+                  <span>{opt.label}</span>
+                </Button>
+              );
+            })}
+          </div>
         )}
 
-        {/* ── 2. FORMAT / ASPECT RATIO TOGGLES (flow-toggles aria-label="Format") ── */}
+        {/* ── 2. FORMAT / ASPECT RATIO TOGGLES ── */}
         {ratioOptions.length > 0 && (
-          <flow-toggles
+          <div
+            role="radiogroup"
             aria-label="Format"
-            className="block w-full"
+            className="grid grid-cols-5 gap-1 p-1 bg-white/5 border border-white/10 rounded-xl w-full"
           >
-            <mat-button-toggle-group
-              className="mat-button-toggle-group toggle-group content-layout-column flex flex-wrap items-center gap-1 p-1 bg-white/5 rounded-sm w-full"
-              role="radiogroup"
-            >
-              {ratioOptions.map((ratio) => {
-                const isChecked = currentRatio === ratio;
-                const iconName = getRatioIcon(ratio);
+            {ratioOptions.map((ratio) => {
+              const isChecked = currentRatio === ratio;
+              const iconName = getRatioIcon(ratio);
 
-                return (
-                  <mat-button-toggle
-                    key={ratio}
-                    role="presentation"
-                    className={cn(
-                      "mat-button-toggle toggle flex-toggle flex-1 min-w-[44px] h-[54px] rounded-sm transition-all",
-                      isChecked && "mat-button-toggle-checked"
-                    )}
-                  >
-                    <Button
-                      type="button"
-                      variant={isChecked ? "secondary" : "ghost"}
-                      onClick={() => handleRatioClick(ratio)}
-                      role="radio"
-                      aria-checked={isChecked}
-                      className={cn(
-                        "mat-button-toggle-button w-full h-full text-white",
-                        isChecked ? "font-semibold" : "font-medium"
-                      )}
-                    >
-                      <span className="mat-button-toggle-label-content flex flex-col items-center justify-center">
-                        <span className="toggle-label flex flex-col items-center justify-center gap-1">
-                          <GoogleIcon
-                            iconName={iconName}
-                            className="text-[18px] leading-none text-white"
-                          />
-                          <span className={cn("toggle-text text-[11px] leading-tight text-white", isChecked ? "font-semibold" : "font-medium")}>
-                            {ratio}
-                          </span>
-                        </span>
-                      </span>
-                    </Button>
-                  </mat-button-toggle>
-                );
-              })}
-            </mat-button-toggle-group>
-          </flow-toggles>
+              return (
+                <Button
+                  key={ratio}
+                  type="button"
+                  variant={isChecked ? "primary" : "ghost"}
+                  onClick={() => handleRatioClick(ratio)}
+                  role="radio"
+                  aria-checked={isChecked}
+                  className={cn(
+                    "flex flex-col items-center justify-center min-w-[44px] h-[52px] rounded-lg p-1 transition-all",
+                    isChecked
+                      ? "bg-white text-black font-semibold shadow hover:bg-white/90"
+                      : "text-white/70 hover:text-white hover:bg-white/10 font-medium"
+                  )}
+                >
+                  <GoogleIcon
+                    iconName={iconName}
+                    className="text-[18px] leading-none mb-0.5"
+                  />
+                  <span className="text-[10px] leading-tight font-mono">{ratio}</span>
+                </Button>
+              );
+            })}
+          </div>
         )}
 
-        {/* ── 3. DYNAMIC PARAMETERS (Quality, Video Resolution, Duration, etc.) ── */}
+        {/* ── 3. DYNAMIC PARAMETERS (Quality, Video Resolution, Duration, Sliders, Switches) ── */}
         {otherParams.length > 0 && (
           <div className="flex flex-col gap-2">
             {otherParams.map(([key, def]) => {
@@ -498,106 +453,84 @@ export function FlowPromptBoxSettings({
                 const gridColsClass = def.values.length > 8 ? "grid-cols-5" : "grid-cols-4";
 
                 return (
-                  <flow-toggles
+                  <div
                     key={key}
+                    role="radiogroup"
                     aria-label={def.label || key}
-                    className="block w-full"
+                    className={cn(
+                      "p-1 bg-white/5 border border-white/10 rounded-xl w-full max-w-full",
+                      isGrid ? cn("grid", gridColsClass, "gap-1") : "flex items-center gap-1"
+                    )}
                   >
-                    <mat-button-toggle-group
-                      className={cn(
-                        "mat-button-toggle-group toggle-group p-1 bg-white/5 rounded-sm w-full max-w-full",
-                        isGrid ? cn("grid", gridColsClass, "gap-1") : "flex items-center gap-1"
-                      )}
-                      role="radiogroup"
-                    >
-                      {def.values.map((item) => {
-                        const itemVal = typeof item === "object" ? item.value : item;
-                        let itemLabel = typeof item === "object" ? item.label || item.value : item;
-                        if ((key === "duration" || def.label?.toLowerCase()?.includes("durée")) && typeof itemLabel === "string") {
-                          if (itemLabel.endsWith("s") && !itemLabel.includes(" ")) {
-                            itemLabel = itemLabel.replace("s", " s");
-                          }
+                    {def.values.map((item) => {
+                      const itemVal = typeof item === "object" ? item.value : item;
+                      let itemLabel = typeof item === "object" ? item.label || item.value : item;
+                      if ((key === "duration" || def.label?.toLowerCase()?.includes("durée")) && typeof itemLabel === "string") {
+                        if (itemLabel.endsWith("s") && !itemLabel.includes(" ")) {
+                          itemLabel = itemLabel.replace("s", " s");
                         }
-                        const isChecked = String(val) === String(itemVal) || (!val && itemVal === def.default);
-                        const hasInfo = itemVal === "360p" || item?.info;
-                        const infoText = item?.info || (itemVal === "360p" ? "La résolution 360p est générée plus rapidement, mais elle est plus faible" : "");
+                      }
+                      const isChecked = String(val) === String(itemVal) || (!val && itemVal === def.default);
+                      const hasInfo = itemVal === "360p" || item?.info;
+                      const infoText = item?.info || (itemVal === "360p" ? "La résolution 360p est générée plus rapidement, mais elle est plus faible" : "");
 
-                        return (
-                          <mat-button-toggle
-                            key={String(itemVal)}
-                            role="presentation"
-                            aria-description={infoText || undefined}
-                            className={cn(
-                              "mat-button-toggle toggle flex h-8 rounded-sm transition-all overflow-hidden",
-                              !isGrid && "flex-1",
-                              isChecked && "mat-button-toggle-checked"
+                      return (
+                        <Button
+                          key={String(itemVal)}
+                          type="button"
+                          variant={isChecked ? "primary" : "ghost"}
+                          onClick={() => onParamChange?.(key, itemVal)}
+                          role="radio"
+                          aria-checked={isChecked}
+                          aria-description={infoText || undefined}
+                          className={cn(
+                            "h-8 rounded-lg text-xs transition-all px-1.5",
+                            !isGrid && "flex-1",
+                            isChecked
+                              ? "bg-white text-black font-semibold shadow hover:bg-white/90"
+                              : "text-white/70 hover:text-white hover:bg-white/10 font-medium"
+                          )}
+                        >
+                          <span className="flex items-center justify-center gap-1 truncate w-full text-center">
+                            <span className="truncate">{itemLabel}</span>
+                            {hasInfo && (
+                              <GoogleIcon
+                                iconName="info"
+                                role="img"
+                                aria-hidden={false}
+                                aria-label={infoText}
+                                className="text-[13px] opacity-70"
+                              />
                             )}
-                          >
-                            <Button
-                              type="button"
-                              variant={isChecked ? "secondary" : "ghost"}
-                              onClick={() => onParamChange?.(key, itemVal)}
-                              role="radio"
-                              aria-checked={isChecked}
-                              className={cn(
-                                "mat-button-toggle-button w-full h-8 text-white px-1",
-                                isChecked ? "font-semibold" : "font-medium"
-                              )}
-                            >
-                              <span className="mat-button-toggle-label-content flex items-center justify-center gap-1 truncate w-full text-center">
-                                <span className="toggle-label flex items-center justify-center gap-1 truncate">
-                                  <span className="toggle-text truncate text-white">{itemLabel}</span>
-                                  {hasInfo && (
-                                    <GoogleIcon
-                                      iconName="info"
-                                      role="img"
-                                      aria-hidden={false}
-                                      aria-label={infoText}
-                                      className="mat-icon notranslate mat-mdc-tooltip-trigger flow-icon-m info-icon google-symbols mat-icon-no-color text-[14px] text-white hover:text-white"
-                                    />
-                                  )}
-                                </span>
-                              </span>
-                            </Button>
-                          </mat-button-toggle>
-                        );
-                      })}
-                    </mat-button-toggle-group>
-                  </flow-toggles>
-                );
-              }
-
-              // Render Boolean Toggles (On / Off)
-              if (def.type === "boolean") {
-                const isChecked = Boolean(val);
-                return (
-                  <div key={key} className="flex items-center justify-between px-1">
-                    <span className="text-[12px] text-white font-medium">
-                      {def.label || key}
-                    </span>
-                    <div className="flex items-center gap-1 p-1 bg-white/5 rounded-sm">
-                      <Button
-                        type="button"
-                        variant={!isChecked ? "secondary" : "ghost"}
-                        className="px-2.5 py-0.5 text-xs font-medium"
-                        onClick={() => onParamChange?.(key, false)}
-                      >
-                        Off
-                      </Button>
-                      <Button
-                        type="button"
-                        variant={isChecked ? "secondary" : "ghost"}
-                        className="px-2.5 py-0.5 text-xs font-semibold"
-                        onClick={() => onParamChange?.(key, true)}
-                      >
-                        On
-                      </Button>
-                    </div>
+                          </span>
+                        </Button>
+                      );
+                    })}
                   </div>
                 );
               }
 
-              // Numeric Slider Control
+              // Render Boolean Toggles with canonical Switch primitive
+              if (def.type === "boolean") {
+                return (
+                  <div
+                    key={key}
+                    className="flex items-center justify-between px-2.5 py-2 rounded-xl bg-white/5 border border-white/10"
+                  >
+                    <span className="text-xs text-white/90 font-medium">
+                      {def.label || formatParamLabel(key)}
+                    </span>
+                    <Switch
+                      size="sm"
+                      checked={Boolean(val)}
+                      onCheckedChange={(checked) => onParamChange?.(key, checked)}
+                      aria-label={def.label || formatParamLabel(key)}
+                    />
+                  </div>
+                );
+              }
+
+              // Numeric Slider Control with canonical Slider primitive
               if (def.type === "number") {
                 const min = def.min ?? 0;
                 const max = def.max ?? 100;
@@ -605,9 +538,9 @@ export function FlowPromptBoxSettings({
                 const numVal = val !== undefined && val !== null ? Number(val) : (def.default ?? min);
 
                 return (
-                  <div key={key} className="flex flex-col gap-1 p-1 bg-white/5 rounded-sm px-2.5 py-2">
-                    <div className="flex items-center justify-between text-[11px]">
-                      <span className="text-white font-medium">{def.label || key}</span>
+                  <div key={key} className="flex flex-col gap-1.5 p-2 bg-white/5 border border-white/10 rounded-xl px-2.5">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-white/80 font-medium">{def.label || formatParamLabel(key)}</span>
                       <span className="font-mono text-white font-semibold tabular-nums">{numVal}</span>
                     </div>
                     <Slider
@@ -616,7 +549,7 @@ export function FlowPromptBoxSettings({
                       step={step}
                       value={[Number.isNaN(numVal) ? min : numVal]}
                       onValueChange={([newVal]) => onParamChange?.(key, newVal)}
-                      className="w-full py-1.5"
+                      className="w-full py-1"
                     />
                   </div>
                 );
@@ -627,7 +560,7 @@ export function FlowPromptBoxSettings({
           </div>
         )}
 
-        {/* ── 4. MODEL SELECT TRIGGER (only when models exist) ── */}
+        {/* ── 4. MODEL SELECT TRIGGER ── */}
         {models && models.length > 0 && currentModel && (
           <FlowSelect
             value={currentModel.id}
@@ -667,86 +600,68 @@ export function FlowPromptBoxSettings({
               )
             }
             displayValue={currentModel?.name || "Model"}
-            width={240}
+            width={260}
             maxHeightLimit={320}
             ariaLabel="Sélectionner une famille de modèles"
           />
         )}
 
-        {/* ── 6. OUTPUTS / VARIATIONS TOGGLES (only when models exist) ── */}
+        {/* ── 5. OUTPUTS / VARIATIONS TOGGLES ── */}
         {models && models.length > 0 && currentModel && (
-          <flow-toggles
+          <div
+            role="radiogroup"
             aria-label="Nombre de sorties"
-            className="block w-full"
+            className="flex items-center gap-1 p-1 bg-white/5 border border-white/10 rounded-xl w-full"
           >
-            <mat-button-toggle-group
-              className="mat-button-toggle-group toggle-group flex items-center gap-1 p-1 bg-white/5 rounded-sm w-full"
-              role="radiogroup"
-            >
-              {[1, 2, 3, 4].map((countVal) => {
-                const isChecked = currentCount === countVal;
+            {[1, 2, 3, 4].map((countVal) => {
+              const isChecked = currentCount === countVal;
 
-                return (
-                  <mat-button-toggle
-                    key={countVal}
-                    role="presentation"
-                    className={cn(
-                      "mat-button-toggle toggle flex-toggle flex-1 flex h-8 rounded-sm transition-all",
-                      isChecked && "mat-button-toggle-checked"
-                    )}
-                  >
-                    <Button
-                      type="button"
-                      variant={isChecked ? "secondary" : "ghost"}
-                      onClick={() => handleCountClick(countVal)}
-                      role="radio"
-                      aria-checked={isChecked}
-                      className={cn(
-                        "mat-button-toggle-button w-full h-8 text-white",
-                        isChecked ? "font-semibold" : "font-medium"
-                      )}
-                    >
-                      <span className="mat-button-toggle-label-content flex items-center justify-center w-full">
-                        <span className="toggle-label flex items-center justify-center">
-                          <span className="toggle-text font-semibold text-white">x{countVal}</span>
-                        </span>
-                      </span>
-                    </Button>
-                  </mat-button-toggle>
-                );
-              })}
-            </mat-button-toggle-group>
-          </flow-toggles>
+              return (
+                <Button
+                  key={countVal}
+                  type="button"
+                  variant={isChecked ? "primary" : "ghost"}
+                  onClick={() => handleCountClick(countVal)}
+                  role="radio"
+                  aria-checked={isChecked}
+                  className={cn(
+                    "flex-1 h-8 rounded-lg text-xs transition-all",
+                    isChecked
+                      ? "bg-white text-black font-semibold shadow hover:bg-white/90"
+                      : "text-white/70 hover:text-white hover:bg-white/10 font-medium"
+                  )}
+                >
+                  x{countVal}
+                </Button>
+              );
+            })}
+          </div>
         )}
 
-        {/* ── 7. CREDIT COST LABEL (only when models exist) ── */}
+        {/* ── 6. CREDIT COST LABEL ── */}
         {models && models.length > 0 && currentModel && (
-          <flow-credit-cost-label
-            className="settings-credit-cost block text-center"
-          >
-            <span className="credit-cost-label block text-[11px] text-cool-slate">
-              <span>
-                La génération utilisera{" "}
-                <a
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="credit-cost-link text-white underline underline-offset-2 hover:text-white/80 transition-colors font-medium"
-                  href="https://support.google.com/googleone?p=g1_ai_credit_menu"
-                >
-                  {displayCredits}&nbsp;{displayCredits === 1 ? "crédit" : "crédits"}
-                </a>
-              </span>
-            </span>
-          </flow-credit-cost-label>
+          <div className="pt-0.5 text-center">
+            <p className="text-[11px] text-white/50">
+              La génération utilisera{" "}
+              <a
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-accent-yellow underline underline-offset-2 hover:text-accent-yellow/80 transition-colors font-medium"
+                href="https://support.google.com/googleone?p=g1_ai_credit_menu"
+              >
+                {displayCredits}&nbsp;{displayCredits === 1 ? "crédit" : "crédits"}
+              </a>
+            </p>
+          </div>
         )}
 
         {/* ── Empty notice if no models available for this mode ── */}
         {(!models || models.length === 0) && (
-          <div className="py-3 px-2 text-center text-[12px] text-white">
+          <div className="py-3 px-2 text-center text-xs text-white/50">
             Aucun modèle disponible
           </div>
         )}
       </div>
-    </flow-prompt-box-settings>
+    </div>
   );
 }
