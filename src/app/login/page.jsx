@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { GoogleIcon } from "@/shared/ui/GoogleIcon";
+import { GoogleIcon } from "@/components/primitives/GoogleIcon";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { LoadingScreen } from "@/shared/ui/LoadingScreen";
-import { Input } from "@/shared/ui/input";
+import { LoadingScreen } from "@/components/primitives/LoadingScreen";
+import { Input } from "@/components/base/input";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 const DOMAIN_SERVER = process.env.NEXT_PUBLIC_DOMAIN_SERVER;
@@ -85,7 +85,7 @@ export default function LoginPage() {
             </div>
 
             {/* Card Container */}
-            <div className="bg-[var(--bg-surface)] border border-white/10 p-8 rounded-2xl shadow-none relative overflow-hidden">
+            <div className="bg-surface-panel border border-white/10 p-8 rounded-2xl shadow-none relative overflow-hidden">
               
               {/* Shine effect on card */}
               <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />

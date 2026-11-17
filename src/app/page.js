@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthSession } from "@/shared/api/auth";
 import { LandingPage } from "@/views";
-import { GoogleIcon } from "@/shared/ui/GoogleIcon";
+import { GoogleIcon } from "@/components/primitives/GoogleIcon";
 
 export default function HomePage() {
   const router = useRouter();

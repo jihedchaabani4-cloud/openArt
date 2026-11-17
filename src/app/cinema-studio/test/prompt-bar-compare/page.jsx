@@ -9,6 +9,7 @@ import {
   GeneratedPromptBar,
   useRealBackendModels,
 } from "@/features/prompt-bar/index.platform";
+import { Button } from "@/components/base/button";
 
 // ── Payload log ───────────────────────────────────────────────────────────────
 function PayloadLog({ entries, label, color }) {
@@ -69,19 +70,15 @@ function V3Panel({ instanceLabel, color }) {
 export default function PromptBarTestPage() {
   const [activeTab, setActiveTab] = useState("single");
 
-  if (process.env.NODE_ENV === "production") {
-    notFound();
-  }
-
   const tabs = [
     { id: "single",    label: "Single Instance" },
     { id: "isolation", label: "Instance Isolation (×2)" },
   ];
 
   return (
-    <div className="min-h-screen bg-[#0e0f10] text-white">
+    <div className="min-h-screen bg-canvas-bg text-white">
       {/* Top bar */}
-      <div className="sticky top-0 z-40 bg-[#0e0f10]/90 backdrop-blur-xl border-b border-white/5 px-8 py-4 flex items-center justify-between">
+      <div className="sticky top-0 z-40 bg-canvas-bg/90 backdrop-blur-xl border-b border-white/5 px-8 py-4 flex items-center justify-between">
         <div>
           <h1 className="text-[16px] font-semibold text-white">Prompt Bar v3 — Test Page</h1>
           <p className="text-[12px] text-white/40 mt-0.5">
@@ -90,19 +87,14 @@ export default function PromptBarTestPage() {
         </div>
         <div className="flex items-center gap-1 bg-white/5 rounded-lg p-1">
           {tabs.map((tab) => (
-            <button
+            <Button
               key={tab.id}
               type="button"
+              variant={activeTab === tab.id ? "primary" : "ghost"}
               onClick={() => setActiveTab(tab.id)}
-              className={[
-                "px-4 py-1.5 rounded-lg text-[12px] font-medium transition-all",
-                activeTab === tab.id
-                  ? "bg-white text-black shadow"
-                  : "text-white/50 hover:text-white",
-              ].join(" ")}
             >
               {tab.label}
-            </button>
+            </Button>
           ))}
         </div>
       </div>

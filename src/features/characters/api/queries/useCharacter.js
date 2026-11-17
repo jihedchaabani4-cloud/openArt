@@ -15,7 +15,7 @@ import {
   validateFilesAgainstPolicy,
   CHARACTER_SHEET_UPLOAD_POLICY,
   CHARACTER_DETAIL_UPLOAD_POLICY,
-} from "@/features/media";
+} from "@/features/media/uploadPolicy";
 
 // ─── Shared constants (moved outside class hook to keep it usable) ───────────
 const MAX_DETAIL_IMAGES = 5;

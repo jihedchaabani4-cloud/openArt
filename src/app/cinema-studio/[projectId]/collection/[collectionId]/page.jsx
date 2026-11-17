@@ -17,13 +17,13 @@ import {
   useRealBackendModels,
 } from "@/features/prompt-bar/index.platform";
 import { SharedGalleryGrid } from "@/features/media";
-import { MediaGridItem } from "@/widgets/StudioLayout/GenerationsStudio/MediaGridItem";
-import { GoogleIcon } from "@/shared/ui/GoogleIcon";
-import { Button } from "@/shared/ui/button";
+import { MediaGridItem } from "@/components/cinema-studio/media/MediaGridItem";
+import { GoogleIcon } from "@/components/primitives/GoogleIcon";
+import { Button } from "@/components/base/button";
 
 import { usePromptStore } from "@/features/prompt-bar/model/usePromptStore";
 import { buildCollectionCoverById } from "@/shared/lib/displayUtils";
-import { LoadingScreen } from "@/shared/ui/LoadingScreen";
+import { LoadingScreen } from "@/components/primitives/LoadingScreen";
 import { logger } from "@/shared/lib/logger";
 
 const PAGE_SIZE = 30;
@@ -292,7 +292,7 @@ export default function CollectionDetailPage({ params }) {
   }
 
   return (
-    <div className="flex h-full w-full overflow-hidden text-white bg-background relative">
+    <div className="flex h-full w-full overflow-hidden text-white bg-main relative">
       <main className="flex-1 flex flex-col relative min-w-0 overflow-hidden z-10">
         {/* Preserve dragged workflow in DOM to prevent browser canceling HTML5 drag */}
         {isDragging && draggedItem?.workflow && (

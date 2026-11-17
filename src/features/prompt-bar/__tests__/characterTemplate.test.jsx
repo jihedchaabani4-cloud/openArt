@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
 import { characterTemplate } from "../templates/character.template.js";
-import { CharacterPromptBar } from "../templates/CharacterPromptBar.jsx";
+import { CharacterPromptBar } from "@/components/cinema-studio/prompt-bar/CharacterPromptBar.jsx";
 import { createPromptBarStore } from "../store/createPromptBarStore.js";
 
 describe("Character Template & CharacterPromptBar", () => {

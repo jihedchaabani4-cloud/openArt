@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { GoogleIcon } from "@/shared/ui/GoogleIcon";
+import { GoogleIcon } from "@/components/primitives/GoogleIcon";
 import { usePackages, useCheckout } from "@/features/payments/api/paymentsApi";
 import { PackageSelectionDialog } from "@/features/payments/ui/PackageSelectionDialog";
 import {
@@ -9,27 +9,10 @@ import {
     AccordionContent,
     AccordionItem,
     AccordionTrigger,
-} from "@/shared/ui/accordion";
-import { Button } from "@/shared/ui/button";
+} from "@/components/base/accordion";
+import { Button } from "@/components/base/button";
 import { useAuthSession } from "@/shared/api/auth";
-import { LoginDialog } from "@/components/LoginDialog";
-
-const SURFACE_BACKGROUND_ELEVATED = "#222222";
-const SURFACE_BORDER = "#2f2f2f";
-const SURFACE_BORDER_SUBTLE = "#2a2a2a";
-const TEXT_PRIMARY = "#f3f3f3";
-const TEXT_SECONDARY = "#d2d2d2";
-const TEXT_MUTED = "white/50";
-const TEXT_FAINT = "white/40";
-const BUTTON_SURFACE = "#323232";
-const BUTTON_SURFACE_HOVER = "#3a3a3a";
-const BUTTON_PRIMARY = "#1a73e8";
-const BUTTON_PRIMARY_HOVER = "#2b7de9";
-const PLAN_COLORS = {
-    title: TEXT_PRIMARY,
-    button: BUTTON_SURFACE,
-    hover: BUTTON_SURFACE_HOVER,
-};
+import { LoginDialog } from "@/components/layout/LoginDialog";
 
 function formatPrice(value, currency = "USD") {
     if (value == null) {
@@ -57,10 +40,6 @@ function getPlanKind(pkg) {
     }
 
     return null;
-}
-
-function getPlanColor(_label) {
-    return PLAN_COLORS;
 }
 
 function getPlanSuffix(pkg) {
@@ -120,7 +99,7 @@ function CompareCategorySection({ title, items, packages, initialVisibleCount = 
     return (
         <div className=" ">
             <div className="px-5 py-5">
-                <h3 className="text-[28px] font-bold tracking-[-0.03em]" style={{ color: TEXT_PRIMARY }}>{title}</h3>
+                <h3 className="text-[28px] font-bold tracking-[-0.03em] text-white">{title}</h3>
             </div>
 
 
@@ -128,12 +107,12 @@ function CompareCategorySection({ title, items, packages, initialVisibleCount = 
             {visibleItems.map((item) => (
                 <div
                     key={item.key}
-                    className="grid items-center px-5 py-4"
-                    style={{ gridTemplateColumns, borderBottom: `1px solid ${SURFACE_BORDER_SUBTLE}` }}
+                    className="grid items-center border-b border-border px-5 py-4"
+                    style={{ gridTemplateColumns }}
                 >
                     <div className="pr-5">
-                        <p className="text-sm font-semibold" style={{ color: TEXT_PRIMARY }}>{item.displayName}</p>
-                        <p className="mt-1 text-xs" style={{ color: TEXT_MUTED }}>{formatModelBasis(item)}</p>
+                        <p className="text-sm font-semibold text-white">{item.displayName}</p>
+                        <p className="mt-1 text-xs text-muted-foreground">{formatModelBasis(item)}</p>
                     </div>
 
                     {packages.map((pkg) => {
@@ -141,8 +120,7 @@ function CompareCategorySection({ title, items, packages, initialVisibleCount = 
                         return (
                             <div
                                 key={`${item.key}-${pkg.id}`}
-                                className="text-sm font-medium"
-                                style={{ color: TEXT_PRIMARY }}
+                                className="text-sm font-medium text-white"
                             >
                                 {formatGenerationCount(packageCount?.count ?? 0, item.unitLabel)}
                             </div>
@@ -157,8 +135,7 @@ function CompareCategorySection({ title, items, packages, initialVisibleCount = 
                         type="button"
                         variant="ghost"
                         onClick={() => setIsExpanded((current) => !current)}
-                        className="h-auto p-0 text-sm font-medium hover:bg-transparent hover:text-white"
-                        style={{ color: TEXT_MUTED }}
+                        className="h-auto p-0 text-sm font-medium text-muted-foreground hover:bg-transparent hover:text-white"
                     >
                         <GoogleIcon
                             iconName="keyboard_arrow_down"
@@ -200,7 +177,7 @@ function ComparePlansSection({ packages, modelsComparison, onBuy, isPending, pen
     return (
         <div className="space-y-5">
             <div className="text-center">
-                <h2 className="text-[40px] font-bold uppercase tracking-[-0.04em] md:text-[52px]" style={{ color: TEXT_PRIMARY }}>
+                <h2 className="text-[40px] font-bold uppercase tracking-[-0.04em] text-white md:text-[52px]">
                     Compare Credit Packs
                 </h2>
             </div>
@@ -222,8 +199,8 @@ function ComparePlansSection({ packages, modelsComparison, onBuy, isPending, pen
                         >
                             <div className="min-w-[1020px]">
                                 <div
-                                    className="grid px-5 pb-6 pt-5"
-                                    style={{ gridTemplateColumns, background: "transparent" }}
+                                    className="grid bg-transparent px-5 pb-6 pt-5"
+                                    style={{ gridTemplateColumns }}
                                 >
                                     <div className="pr-5" />
 
@@ -233,21 +210,20 @@ function ComparePlansSection({ packages, modelsComparison, onBuy, isPending, pen
 
                                         return (
                                             <div key={`sticky-${pkg.id}`} className="pr-3">
-                                                <p className="text-base font-bold" style={{ color: TEXT_PRIMARY }}>{pkg.label}</p>
+                                                <p className="text-base font-bold text-white">{pkg.label}</p>
                                                 {price && (
-                                                    <p className="mt-2 text-sm font-semibold" style={{ color: TEXT_PRIMARY }}>
+                                                    <p className="mt-2 text-sm font-semibold text-white">
                                                         {price}
                                                         {getPlanKind(pkg) === "subscription" ? "/month" : ""}
                                                     </p>
                                                 )}
-                                                <p className="mt-1 text-xs" style={{ color: TEXT_MUTED }}>{pkg.credits} credits</p>
+                                                <p className="mt-1 text-xs text-muted-foreground">{pkg.credits} credits</p>
                                                 <Button
                                                     type="button"
-                                                    variant="ghost"
+                                                    variant="tonal"
                                                     onClick={() => onBuy(pkg.id)}
                                                     disabled={isPending && pendingPackageId === pkg.id}
-                                                    className="mt-3 h-10 w-full rounded-lg px-4 text-sm font-semibold hover:text-white"
-                                                    style={{ background: BUTTON_SURFACE, color: TEXT_PRIMARY }}
+                                                    className="mt-3 h-10 w-full rounded-lg px-4 text-sm font-semibold text-white hover:text-white"
                                                 >
                                                     {isPending && pendingPackageId === pkg.id ? (
                                                         <GoogleIcon iconName="progress_activity" className="text-base animate-spin" />
@@ -297,7 +273,6 @@ function TemplatePricingCard({ pkg, modelsComparison, onBuy, isLoading }) {
         ? pkg.features.map((feature) => feature.replace(/^~\s*/, ""))
         : [];
     const price = formatPrice(pkg.price, pkg.currency);
-    const colors = getPlanColor(pkg.label);
 
     const generatedBreakdown = [];
     if (modelsComparison) {
@@ -421,7 +396,7 @@ function TemplatePricingCard({ pkg, modelsComparison, onBuy, isLoading }) {
         <article className="mx-auto flex w-full max-w-[290px] flex-col border-t border-white/12 pt-4 text-white sm:max-w-[310px]">
             <div className="space-y-3">
                 <div className="space-y-2.5">
-                    <p className="text-center text-[22px] font-medium tracking-[-0.04em] sm:text-[25px] opacity-80" style={{ color: colors.title }}>
+                    <p className="text-center text-[22px] font-medium tracking-[-0.04em] text-white sm:text-[25px] opacity-80">
                         {pkg.label}
                     </p>
                     {price && (
@@ -435,13 +410,10 @@ function TemplatePricingCard({ pkg, modelsComparison, onBuy, isLoading }) {
                 <Button
                     id={`buy-${pkg.id}`}
                     type="button"
+                    variant="primary"
                     onClick={() => onBuy(pkg.id)}
                     disabled={isLoading}
                     className="h-9 w-full rounded-full px-4 text-[13px] font-medium transition-colors duration-200 sm:h-10 sm:text-sm"
-                    style={{
-                        backgroundColor: "#d9d9de",
-                        color: "#202020",
-                    }}
                 >
                     {isLoading ? <GoogleIcon iconName="progress_activity" className="text-base animate-spin" /> : "Get Started"}
                 </Button>
@@ -449,7 +421,7 @@ function TemplatePricingCard({ pkg, modelsComparison, onBuy, isLoading }) {
 
             <div className="mt-7 flex flex-1 flex-col gap-4">
 
-                <ul className="space-y-4 text-[13px] leading-5.5 sm:text-[13px]" style={{ color: TEXT_PRIMARY }}>
+                <ul className="space-y-4 text-[13px] leading-5.5 text-white sm:text-[13px]">
                     {primaryFeatures.map((feature) => (
                         <li key={feature} className="flex items-start gap-3">
                             <GoogleIcon iconName="check" className="text-base mt-1 shrink-0 font-bold" />
@@ -466,7 +438,7 @@ function TemplatePricingCard({ pkg, modelsComparison, onBuy, isLoading }) {
                     </div>
                 )}
 
-                <ul className="space-y-4 text-[13px] leading-5.5 sm:text-[13px]" style={{ color: TEXT_PRIMARY }}>
+                <ul className="space-y-4 text-[13px] leading-5.5 text-white sm:text-[13px]">
                     {secondaryFeatures.map((feature) => (
                         <li key={feature} className="flex items-start gap-3">
                             <GoogleIcon iconName="check" className="text-base mt-1 shrink-0 font-bold" />
@@ -493,10 +465,7 @@ function TemplatePricingCard({ pkg, modelsComparison, onBuy, isLoading }) {
 
 function SkeletonCard() {
     return (
-        <div
-            style={{ background: SURFACE_BACKGROUND_ELEVATED, borderColor: SURFACE_BORDER }}
-            className="aspect-[1/1.08] w-full rounded-lg border"
-        />
+        <div className="aspect-[1/1.08] w-full rounded-lg border border-border bg-surface-secondary" />
     );
 }
 
@@ -564,7 +533,7 @@ export function PricingSection({ hideFaq = false }) {
     return (
         <section className="mx-auto flex w-full max-w-[1200px] flex-col gap-8 space-y-4 px-5 py-14">
             <div className="text-center">
-                <h2 className="mt-4 text-[40px] font-bold tracking-[-0.05em] md:text-[52px]" style={{ color: TEXT_PRIMARY }}>
+                <h2 className="mt-4 text-[40px] font-bold tracking-[-0.05em] text-white md:text-[52px]">
                     Choose the plan that suits you best
                 </h2>
             </div>
@@ -584,16 +553,13 @@ export function PricingSection({ hideFaq = false }) {
                 </div>
 
                 {isError && (
-                    <div
-                        style={{ background: SURFACE_BACKGROUND_ELEVATED, borderColor: SURFACE_BORDER, color: TEXT_MUTED }}
-                        className="rounded-lg border px-6 py-12 text-center text-sm md:col-span-3"
-                    >
+                    <div className="rounded-lg border border-border bg-surface-secondary px-6 py-12 text-center text-sm text-muted-foreground md:col-span-3">
                         Could not load packages. Please try again later.
                     </div>
                 )}
             </div>
 
-            <p className="text-center text-xs" style={{ color: TEXT_FAINT }}>
+            <p className="text-center text-xs text-(--text-secondary)">
                 Secure payments powered by Lemon Squeezy. Credits are added instantly after payment.
             </p>
 
@@ -625,10 +591,7 @@ export function PricingSection({ hideFaq = false }) {
                 <div className="w-full pt-10">
                     <div className="grid gap-10 lg:grid-cols-[340px_minmax(0,1fr)] lg:gap-14">
                         <div className="lg:pt-3">
-                            <h2
-                                className="max-w-[280px] text-[52px] font-bold leading-[0.94] tracking-[-0.06em] sm:text-[64px] md:text-[76px]"
-                                style={{ color: TEXT_PRIMARY }}
-                            >
+                            <h2 className="max-w-[280px] text-[52px] font-bold leading-[0.94] tracking-[-0.06em] text-white sm:text-[64px] md:text-[76px]">
                                 Your
                                 <br />
                                 questions,
@@ -642,27 +605,19 @@ export function PricingSection({ hideFaq = false }) {
                             <AccordionItem
                                 key={item.question}
                                 value={`faq-${index}`}
-                                style={{ borderColor: SURFACE_BORDER_SUBTLE }}
-                                className="border-b first:border-t"
+                                className="border-b border-border first:border-t"
                             >
                                 <AccordionTrigger
-                                    className="py-6 text-left text-[20px] font-semibold tracking-[-0.03em] hover:no-underline"
-                                    style={{ color: TEXT_PRIMARY }}
+                                    className="py-6 text-left text-[20px] font-semibold tracking-[-0.03em] text-white hover:no-underline"
                                     icon={
-                                        <span
-                                            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full"
-                                            style={{ background: "rgba(255,255,255,0.08)", color: TEXT_PRIMARY }}
-                                        >
+                                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/8 text-white">
                                             <GoogleIcon iconName="add" className="text-base" />
                                         </span>
                                     }
                                 >
                                     {item.question}
                                 </AccordionTrigger>
-                                <AccordionContent
-                                    className="max-w-3xl pb-6 pr-12 text-sm leading-7"
-                                    style={{ color: TEXT_SECONDARY }}
-                                >
+                                <AccordionContent className="max-w-3xl pb-6 pr-12 text-sm leading-7 text-white/80">
                                     {item.answer}
                                 </AccordionContent>
                             </AccordionItem>
@@ -671,9 +626,10 @@ export function PricingSection({ hideFaq = false }) {
                     </div>
 
                     <div className="mt-10 flex items-center justify-center gap-4 text-center">
-                        <p className="text-sm font-semibold" style={{ color: TEXT_SECONDARY }}>Ready to get started?</p>
+                        <p className="text-sm font-semibold text-white/80">Ready to get started?</p>
                         <Button
                             type="button"
+                            variant="primary"
                             onClick={() => {
                                 const element = packsSectionRef.current;
                                 if (!element) {
@@ -690,14 +646,7 @@ export function PricingSection({ hideFaq = false }) {
                                 });
                             }}
                             disabled={!nonTrialPackages.length}
-                            className="h-10 rounded-lg px-5 text-sm font-semibold text-white transition-colors"
-                            style={{ background: BUTTON_PRIMARY }}
-                            onMouseOver={(event) => {
-                                event.currentTarget.style.backgroundColor = BUTTON_PRIMARY_HOVER;
-                            }}
-                            onMouseOut={(event) => {
-                                event.currentTarget.style.backgroundColor = BUTTON_PRIMARY;
-                            }}
+                            className="h-10 rounded-lg px-5 text-sm font-semibold transition-colors"
                         >
                             Choose your pack
                         </Button>

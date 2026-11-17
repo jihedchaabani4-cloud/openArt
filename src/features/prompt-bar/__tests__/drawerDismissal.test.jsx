@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { render, screen, fireEvent, act } from "@testing-library/react";
-import { PromptBarPlatform } from "../platform/PromptBarPlatform.jsx";
+import { PromptBarPlatform } from "@/components/cinema-studio/prompt-bar/PromptBarPlatform.jsx";
 import { generatedMediaTemplate } from "../templates/generatedMedia.template.js";
 import { createPromptBarStore } from "../store/createPromptBarStore.js";
 

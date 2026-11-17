@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen, fireEvent, cleanup } from "@testing-library/react";
-import { PromptBarControlsRow } from "../platform/parts/PromptBarControlsRow";
+import { PromptBarControlsRow } from "@/components/cinema-studio/prompt-bar/parts/PromptBarControlsRow";
 
 afterEach(() => {
   cleanup();
@@ -66,7 +66,7 @@ describe("PromptBarControlsRow", () => {
     );
 
     expect(screen.getByText("Flux Schnell")).toBeTruthy();
-    expect(screen.getByText("x2")).toBeTruthy();
+    expect(screen.queryByText("x2")).toBeNull();
 
     const triggerBtn = screen.getByLabelText("Déclencheur des paramètres");
     fireEvent.click(triggerBtn);

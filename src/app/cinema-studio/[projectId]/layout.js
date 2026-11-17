@@ -5,13 +5,13 @@ import { useEffect, useState, useCallback } from "react"
 import { AnimatePresence, motion } from "framer-motion"
 import { useQueryClient } from "@tanstack/react-query"
 
-import { LeftNavigationRail } from "@/widgets/StudioLayout/LeftNavigationRail"
-import { StudioNavbar } from "@/widgets/StudioNavbar"
+import { LeftNavigationRail } from "@/components/layout/LeftNavigationRail"
+import { StudioNavbar } from "@/components/layout/StudioNavbar"
 import { useWorkflowsStore } from "@/features/workflows"
 import { useProjectData } from "@/features/workflows/api/workflowsApi"
 import { useProjectFolders } from "@/features/folders"
-import { LoadingScreen } from "@/shared/ui/LoadingScreen"
-import { ProjectError } from "@/features/projects/ui/ProjectError"
+import { LoadingScreen } from "@/components/primitives/LoadingScreen"
+import { ProjectError } from "@/components/cinema-studio/projects/ProjectError"
 import { queryKeys } from "@/shared/api/queryKeys"
 import { useDragAutoScroll } from "@/features/studio"
 import { usePromptBarRouteWatcher } from "@/features/prompt-bar/index.platform"
@@ -117,7 +117,7 @@ export default function StudioLayout({ children }) {
     }
 
     return (
-        <div className="flex flex-col h-screen overflow-hidden relative bg-background">
+        <div className="flex flex-col h-screen overflow-hidden relative bg-main">
             <AnimatePresence mode="wait">
                 {showIntro ? (
                     <motion.div
@@ -139,9 +139,9 @@ export default function StudioLayout({ children }) {
                         className="flex-1 flex flex-col overflow-hidden"
                     >
                         {!isEditPage ? (
-                            <div className="flex-1 min-h-0 flex overflow-hidden relative w-full h-full p-2 gap-2 bg-background">
+                            <div className="flex-1 min-h-0 flex overflow-hidden relative w-full h-full p-2 gap-2 bg-main">
                                 {!isTrashPage && <LeftNavigationRail />}
-                                <div className="flex-1 min-w-0 flex flex-col relative overflow-hidden h-full rounded-3xl border border-border bg-background">
+                                <div className="flex-1 min-w-0 flex flex-col relative overflow-hidden h-full rounded-3xl border border-border bg-main">
                                     <StudioNavbar />
                                     <div className="flex-1 min-h-0 relative overflow-hidden flex flex-col">
                                         {children}

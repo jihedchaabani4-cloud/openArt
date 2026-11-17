@@ -2,9 +2,9 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { GoogleIcon } from "@/shared/ui/GoogleIcon";
-import { Dialog, DialogContent, DialogTitle } from "@/shared/ui/dialog";
-import { Button } from "@/shared/ui/button";
+import { GoogleIcon } from "@/components/primitives/GoogleIcon";
+import { Dialog, DialogContent, DialogTitle } from "@/components/primitives/dialog";
+import { Button } from "@/components/base/button";
 import { cn } from "@/shared/lib/utils";
 import { usePackages, useCheckout } from "@/features/payments/api/paymentsApi";
 
@@ -284,7 +284,7 @@ export function PackageSelectionDialog({
                                         className={cn(
                                             "w-full h-auto p-3 sm:p-4 rounded-lg border text-left transition-all duration-200 block justify-start",
                                             isSelected
-                                                ? "border-white/90 bg-[var(--bg-surface-2)]"
+                                                ? "border-white/90 bg-surface-card"
                                                 : "border-white/10 bg-transparent hover:bg-white/5"
                                         )}
                                     >

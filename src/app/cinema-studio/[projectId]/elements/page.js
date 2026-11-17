@@ -3,21 +3,21 @@
 import * as React from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useRouter, useSearchParams } from "next/navigation"
-import { GoogleIcon } from "@/shared/ui/GoogleIcon";
+import { GoogleIcon } from "@/components/primitives/GoogleIcon";
 
 import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows"
 import { useElementSheetWorkflows } from "@/features/elements"
 
-import { Button } from "@/shared/ui/button";
+import { Button } from "@/components/base/button";
 import { usePromptStore } from "@/features/studio";
-import { LoadingScreen } from "@/shared/ui/LoadingScreen";
+import { LoadingScreen } from "@/components/primitives/LoadingScreen";
 
 import { SharedGalleryGrid } from "@/features/media";
-import { MediaGridItem } from "@/widgets/StudioLayout/GenerationsStudio/MediaGridItem";
+import { MediaGridItem } from "@/components/cinema-studio/media/MediaGridItem";
 import { HowToDrawer, ElementsEmptyState } from "@/features/elements";
 import { useWorkflowDelete } from "@/features/workflows";
-import { ConfirmDeleteDialog } from "@/shared/ui/ConfirmDeleteDialog";
-import { NewElementDialog } from "@/widgets/NewElementDialog";
+import { ConfirmDeleteDialog } from "@/components/primitives/ConfirmDeleteDialog";
+import { NewElementDialog } from "@/components/cinema-studio/elements/NewElementDialog";
 
 const PAGE_SIZE = 30;
 
@@ -119,7 +119,7 @@ export default function ElementsPage({ params }) {
     }
 
     return (
-        <div className="flex h-full w-full overflow-hidden text-white bg-background relative">
+        <div className="flex h-full w-full overflow-hidden text-white bg-main relative">
             <main className="flex-1 flex flex-col relative min-w-0 overflow-hidden z-10">
                 {/* ── Global Drag Overlay ── */}
                 <AnimatePresence>
@@ -169,7 +169,7 @@ export default function ElementsPage({ params }) {
                         <Button
                             type="button"
                             variant="secondary"
-                            className="h-auto px-6 py-4 rounded-2xl bg-neutral-800 hover:bg-neutral-700 text-neutral-200 hover:text-white active:scale-95 border-none backdrop-blur-md text-sm font-medium"
+                            className="h-auto px-6 py-4 rounded-2xl bg-surface-secondary hover:bg-surface-secondary text-white/90 hover:text-white active:scale-95 border-none backdrop-blur-md text-sm font-medium"
                             onClick={() => setIsNewElementOpen(true)}
                         >
                             <GoogleIcon iconName="add" className="text-xl" />

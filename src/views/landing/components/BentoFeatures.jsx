@@ -41,7 +41,7 @@ export function BentoFeatures() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="w-full h-full rounded-lg overflow-hidden relative border border-white/10 bg-[#0d0d0d] group shadow-none flex items-center justify-center"
+          className="w-full h-full rounded-lg overflow-hidden relative border border-white/10 bg-omni-bg group shadow-none flex items-center justify-center"
         >
           <img src="https://s.krea.ai/light-streak.webp" className="absolute z-0 h-full w-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700 pointer-events-none" loading="lazy" alt="" />
           <div className="absolute inset-0 bg-black/25 z-10 pointer-events-none" />
@@ -57,9 +57,9 @@ export function BentoFeatures() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.05 }}
-          className="w-full h-full rounded-lg overflow-hidden relative border border-white/5 bg-[#ffffff] p-5 flex flex-col items-center justify-center text-black shadow-none"
+          className="w-full h-full rounded-lg overflow-hidden relative border border-white/5 bg-white p-5 flex flex-col items-center justify-center text-black shadow-none"
         >
-          <span className="text-4xl md:text-5xl font-extrabold tracking-tight bg-gradient-to-br from-neutral-950 to-neutral-600 bg-clip-text text-transparent">22K</span>
+          <span className="text-4xl md:text-5xl font-extrabold tracking-tight bg-gradient-to-br from-black to-black/60 bg-clip-text text-transparent">22K</span>
           <span className="text-[11px] font-bold text-black/50 mt-1 text-center">Pixels upscaling</span>
         </motion.div>
       )}
@@ -70,9 +70,9 @@ export function BentoFeatures() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.1 }}
-          className="w-full h-full rounded-lg overflow-hidden relative border border-white/5 bg-[#ffffff] p-5 flex flex-col items-center justify-center text-black shadow-none"
+          className="w-full h-full rounded-lg overflow-hidden relative border border-white/5 bg-white p-5 flex flex-col items-center justify-center text-black shadow-none"
         >
-          <span className="text-4xl md:text-5xl font-extrabold tracking-tight bg-gradient-to-br from-neutral-950 to-neutral-600 bg-clip-text text-transparent">Train</span>
+          <span className="text-4xl md:text-5xl font-extrabold tracking-tight bg-gradient-to-br from-black to-black/60 bg-clip-text text-transparent">Train</span>
           <span className="text-[10px] font-bold text-black/45 mt-1 text-center leading-snug px-1">Fine-tune models with your own data</span>
         </motion.div>
       )}
@@ -86,7 +86,7 @@ export function BentoFeatures() {
           className="w-full h-full flex flex-col justify-between gap-2 pointer-events-auto"
         >
           {/* Top: 4K Native generation */}
-          <div className="relative h-[48%] rounded-lg overflow-hidden border border-white/10 bg-[#0d0d0d] group shadow-none flex flex-col items-center justify-center text-white">
+          <div className="relative h-[48%] rounded-lg overflow-hidden border border-white/10 bg-omni-bg group shadow-none flex flex-col items-center justify-center text-white">
             <img src="https://s.krea.ai/eye-macro.webp" className="absolute z-0 h-full w-full object-cover opacity-75 group-hover:scale-105 transition-transform duration-700 pointer-events-none" loading="lazy" alt="" />
             <div className="absolute inset-0 bg-black/15 z-10 pointer-events-none" />
             <span className="relative z-20 text-3xl font-extrabold tracking-tight leading-none">4K</span>
@@ -94,7 +94,7 @@ export function BentoFeatures() {
           </div>
 
           {/* Bottom: Minimalist UI */}
-          <div className="relative h-[48%] rounded-lg overflow-hidden border border-white/10 bg-[#0a0a0a] group flex items-center justify-center p-3 shadow-none">
+          <div className="relative h-[48%] rounded-lg overflow-hidden border border-white/10 bg-canvas-deep group flex items-center justify-center p-3 shadow-none">
             <img src="https://s.krea.ai/minimalistBase.webp" className="absolute z-0 h-full w-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700 pointer-events-none" loading="lazy" alt="" />
             <div className="absolute inset-0 bg-black/20 z-10 pointer-events-none" />
             <div className="relative z-20 text-center text-lg font-bold text-white tracking-tight">
@@ -122,7 +122,7 @@ export function BentoFeatures() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.05 }}
-          className="w-full h-full rounded-lg overflow-hidden relative border border-white/10 bg-[#0d0d0d] group shadow-none flex flex-col items-center justify-center text-white"
+          className="w-full h-full rounded-lg overflow-hidden relative border border-white/10 bg-omni-bg group shadow-none flex flex-col items-center justify-center text-white"
         >
           <img src="https://s.krea.ai/krea1-example.webp" className="absolute z-0 h-full w-full object-cover opacity-85 group-hover:scale-105 transition-transform duration-700 pointer-events-none" loading="lazy" alt="" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent z-10 pointer-events-none" />
@@ -140,14 +140,14 @@ export function BentoFeatures() {
           className="w-full h-full flex flex-col justify-between gap-2 pointer-events-auto"
         >
           {/* Top: Do not train */}
-          <div className="relative h-[48%] rounded-lg overflow-hidden border border-white/5 bg-[#ffffff] p-3 flex flex-col items-center justify-center text-black shadow-none">
-            <span className="text-lg font-extrabold tracking-tight bg-gradient-to-br from-neutral-950 to-neutral-600 bg-clip-text text-transparent">Do not train</span>
+          <div className="relative h-[48%] rounded-lg overflow-hidden border border-white/5 bg-white p-3 flex flex-col items-center justify-center text-black shadow-none">
+            <span className="text-lg font-extrabold tracking-tight bg-gradient-to-br from-black to-black/60 bg-clip-text text-transparent">Do not train</span>
             <span className="text-[9px] font-bold text-black/50 mt-0.5 text-center leading-tight">Safely generate proprietary data</span>
           </div>
 
           {/* Bottom: 64+ Models */}
-          <div className="relative h-[48%] rounded-lg overflow-hidden border border-white/5 bg-[#ffffff] p-3 flex flex-col items-center justify-center text-black shadow-none">
-            <span className="text-3xl font-extrabold tracking-tight bg-gradient-to-br from-neutral-950 to-neutral-600 bg-clip-text text-transparent">64+</span>
+          <div className="relative h-[48%] rounded-lg overflow-hidden border border-white/5 bg-white p-3 flex flex-col items-center justify-center text-black shadow-none">
+            <span className="text-3xl font-extrabold tracking-tight bg-gradient-to-br from-black to-black/60 bg-clip-text text-transparent">64+</span>
             <span className="text-[10px] font-bold text-black/50 mt-0.5">Models</span>
           </div>
         </motion.div>
@@ -159,7 +159,7 @@ export function BentoFeatures() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="w-full h-full rounded-lg overflow-hidden relative border border-white/10 bg-[#0d0d0d] group shadow-none flex flex-col justify-between"
+          className="w-full h-full rounded-lg overflow-hidden relative border border-white/10 bg-omni-bg group shadow-none flex flex-col justify-between"
         >
           <img src="https://s.krea.ai/asset-manager.webp" className="absolute z-0 h-full w-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700 pointer-events-none" loading="lazy" alt="" />
           <div className="absolute inset-0 bg-gradient-to-b from-black/85 via-black/20 to-transparent z-10 pointer-events-none" />
@@ -175,7 +175,7 @@ export function BentoFeatures() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.05 }}
-          className="w-full h-full rounded-lg overflow-hidden relative border border-white/5 bg-[#ffffff] shadow-none flex flex-col items-center justify-between text-black p-4"
+          className="w-full h-full rounded-lg overflow-hidden relative border border-white/5 bg-white shadow-none flex flex-col items-center justify-between text-black p-4"
         >
           <span className="text-[11px] md:text-xs font-bold tracking-tight">Bleeding Edge</span>
           <svg viewBox="0 0 200 200" className="block select-none w-[68px] h-[68px]" width="68" height="68">
@@ -187,22 +187,22 @@ export function BentoFeatures() {
                 <feGaussianBlur stdDeviation="1"></feGaussianBlur>
               </filter>
             </defs>
-            <circle cx="101" cy="102" r="97" fill="#000" filter="url(#clock-shadow)" opacity="0.1"></circle>
-            <circle cx="100" cy="100" r="95" className="fill-neutral-50 stroke-neutral-200" strokeWidth="1"></circle>
+            <circle cx="101" cy="102" r="97" fill="black" filter="url(#clock-shadow)" opacity="0.1"></circle>
+            <circle cx="100" cy="100" r="95" className="fill-white stroke-black/10" strokeWidth="1"></circle>
             <text textAnchor="middle" dominantBaseline="middle" className="fill-black font-bold" fontSize="13" x="100" y="24">12</text>
             <text textAnchor="middle" dominantBaseline="middle" className="fill-black/35 font-semibold" fontSize="12" x="180" y="101">3</text>
             <text textAnchor="middle" dominantBaseline="middle" className="fill-black/35 font-semibold" fontSize="12" x="100" y="178">6</text>
             <text textAnchor="middle" dominantBaseline="middle" className="fill-black/35 font-semibold" fontSize="12" x="22" y="101">9</text>
             <g transform="rotate(87, 100, 100)">
-              <line x1="100" y1="100" x2="100" y2="50" className="stroke-neutral-800" strokeWidth="6" strokeLinecap="round"></line>
+              <line x1="100" y1="100" x2="100" y2="50" className="stroke-black/80" strokeWidth="6" strokeLinecap="round"></line>
             </g>
             <g transform="rotate(326, 100, 100)">
-              <line x1="100" y1="100" x2="100" y2="35" className="stroke-neutral-800" strokeWidth="4" strokeLinecap="round"></line>
+              <line x1="100" y1="100" x2="100" y2="35" className="stroke-black/80" strokeWidth="4" strokeLinecap="round"></line>
             </g>
             <g className="animate-[spin_60s_linear_infinite]" style={{ transformOrigin: "100px 100px" }}>
-              <line x1="100" y1="100" x2="100" y2="28" stroke="#FFC32F" strokeWidth="1.5" strokeLinecap="round"></line>
+              <line x1="100" y1="100" x2="100" y2="28" className="stroke-accent-yellow" strokeWidth="1.5" strokeLinecap="round"></line>
             </g>
-            <circle cx="100" cy="100" r="5" fill="#FFC32F"></circle>
+            <circle cx="100" cy="100" r="5" className="fill-accent-yellow"></circle>
           </svg>
           <span className="text-[8px] text-black/55 font-bold tracking-tight text-center leading-none mb-0.5">
             Access latest models on release day
@@ -216,7 +216,7 @@ export function BentoFeatures() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.1 }}
-          className="w-full h-full rounded-lg overflow-hidden relative border border-white/10 bg-[#0d0d0d] group shadow-none flex flex-col justify-between"
+          className="w-full h-full rounded-lg overflow-hidden relative border border-white/10 bg-omni-bg group shadow-none flex flex-col justify-between"
         >
           <img src="https://s.krea.ai/isometricPromptStyles.webp" className="absolute z-0 h-full w-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700 pointer-events-none" loading="lazy" alt="" />
           <div className="absolute inset-0 bg-black/10 z-10 pointer-events-none" />
@@ -232,7 +232,7 @@ export function BentoFeatures() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="w-full h-full rounded-lg overflow-hidden relative border border-white/10 bg-[#0d0d0d] group shadow-none flex flex-col justify-between"
+          className="w-full h-full rounded-lg overflow-hidden relative border border-white/10 bg-omni-bg group shadow-none flex flex-col justify-between"
         >
           <img src="https://s.krea.ai/isometricEditExample.webp" className="absolute z-0 h-full w-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700 pointer-events-none" loading="lazy" alt="" />
           <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/10 to-transparent z-10 pointer-events-none" />
@@ -248,16 +248,16 @@ export function BentoFeatures() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.05 }}
-          className="w-full h-full rounded-lg overflow-hidden relative border border-white/5 bg-[#ffffff] shadow-none flex flex-col justify-between text-black p-4"
+          className="w-full h-full rounded-lg overflow-hidden relative border border-white/5 bg-white shadow-none flex flex-col justify-between text-black p-4"
         >
           <span className="text-[11px] md:text-xs font-bold tracking-tight">Lipsync</span>
           <div className="flex justify-center items-center gap-1.5 h-12 my-0.5">
-            <div className="w-1 bg-neutral-900 rounded-full h-6 animate-[bounce_0.8s_infinite]" />
-            <div className="w-1 bg-neutral-700 rounded-full h-10 animate-[bounce_0.6s_infinite_0.1s]" />
-            <div className="w-1 bg-neutral-900 rounded-full h-8 animate-[bounce_0.7s_infinite_0.2s]" />
-            <div className="w-1 bg-neutral-800 rounded-full h-5 animate-[bounce_0.9s_infinite_0.15s]" />
-            <div className="w-1 bg-neutral-950 rounded-full h-9 animate-[bounce_0.5s_infinite_0.05s]" />
-            <div className="w-1 bg-neutral-600 rounded-full h-6 animate-[bounce_0.8s_infinite_0.25s]" />
+            <div className="w-1 bg-black rounded-full h-6 animate-[bounce_0.8s_infinite]" />
+            <div className="w-1 bg-black/70 rounded-full h-10 animate-[bounce_0.6s_infinite_0.1s]" />
+            <div className="w-1 bg-black rounded-full h-8 animate-[bounce_0.7s_infinite_0.2s]" />
+            <div className="w-1 bg-black/80 rounded-full h-5 animate-[bounce_0.9s_infinite_0.15s]" />
+            <div className="w-1 bg-black rounded-full h-9 animate-[bounce_0.5s_infinite_0.05s]" />
+            <div className="w-1 bg-black/60 rounded-full h-6 animate-[bounce_0.8s_infinite_0.25s]" />
           </div>
           <span className="text-[8px] text-black/55 font-bold tracking-tight text-center leading-none">
             Synchronized audio
@@ -269,10 +269,9 @@ export function BentoFeatures() {
 
   return (
     <section
-      className="relative py-40 px-6 md:px-12 lg:px-24 z-30 w-full min-h-[150vh] flex flex-col items-center justify-center"
+      className="relative py-40 px-6 md:px-12 lg:px-24 z-30 w-full min-h-[150vh] flex flex-col items-center justify-center bg-gradient-to-b from-body-root to-black"
       style={{
         transform: "translateY(15px)",
-        background: "linear-gradient(to bottom, #181819 0%, #000000 100%)",
       }}
     >
       {/* Absolute Masked Background Image */}
@@ -293,20 +292,12 @@ export function BentoFeatures() {
 
       {/* Smooth transition overlay at the top of Section 2 */}
       <div
-        className="absolute top-0 left-0 right-0 pointer-events-none z-10"
-        style={{
-          height: "280px",
-          background: "linear-gradient(to bottom, #050505 0%, rgba(5, 5, 5, 0) 100%)",
-        }}
+        className="absolute top-0 left-0 right-0 pointer-events-none z-10 h-[280px] bg-gradient-to-b from-black to-transparent"
       />
 
       {/* Subtle radial glow — very faint, just enough depth */}
       <div
-        className="absolute inset-0 pointer-events-none z-0"
-        style={{
-          background:
-            "radial-gradient(ellipse 70% 50% at 20% 70%, rgba(120, 95, 65, 0.15) 0%, rgba(65, 48, 32, 0.05) 60%, transparent 100%)",
-        }}
+        className="absolute inset-0 pointer-events-none z-0 opacity-20 bg-gradient-to-tr from-white/5 via-transparent to-transparent"
       />
 
       <div className="max-w-6xl w-full flex flex-col items-center justify-center mx-auto pt-8 relative z-10">

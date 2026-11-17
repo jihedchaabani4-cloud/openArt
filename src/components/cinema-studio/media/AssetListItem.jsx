@@ -1,0 +1,65 @@
+"use client";
+
+import { Button } from "@/components/base/button";
+import { cn } from "@/shared/lib/utils";
+
+/**
+ * AssetListItem
+ * Pure Google Flow asset list item:
+ * - Uses canonical Button variants (secondary for active, flow-ghost for idle)
+ * - Exact Google Flow typography and rounded thumbnail
+ */
+export function AssetListItem({
+  item: _item,
+  itemUrl,
+  title = "Sans titre",
+  typeLabel = "Image",
+  isVideo = false,
+  isActive = false,
+  isDisabled = false,
+  onClick,
+  onDoubleClick,
+  className,
+}) {
+  return (
+    <Button
+      variant={isActive ? "secondary" : "flow-ghost"}
+      type="button"
+      role="option"
+      aria-selected={isActive}
+      aria-disabled={isDisabled}
+      onClick={onClick}
+      onDoubleClick={(e) => {
+        if (!isDisabled) {
+          onDoubleClick?.(e);
+        }
+      }}
+      className={cn(
+        "group w-full h-12 justify-start pl-1 pr-4 py-0 text-left select-none",
+        isDisabled && "opacity-40",
+        className
+      )}
+    >
+      {/* Thumbnail */}
+      <div className="w-10 h-10 rounded-xxxs overflow-hidden bg-black/40 shrink-0 relative flex items-center justify-center">
+        {isVideo ? (
+          <video src={itemUrl} className="w-full h-full object-cover" muted />
+        ) : (
+          <img src={itemUrl} alt="" className="w-full h-full object-cover" loading="lazy" />
+        )}
+      </div>
+
+      {/* Asset Text: Title and Uniform Type Subtitle */}
+      <div className="flex-1 min-w-0 flex flex-col justify-center text-left">
+        <span className="text-sm font-medium text-on-surface truncate leading-tight font-sans antialiased">
+          {title}
+        </span>
+        <span className="text-xs font-normal text-on-surface-subtle truncate font-sans antialiased mt-0.5">
+          {typeLabel}
+        </span>
+      </div>
+    </Button>
+  );
+}
+
+export default AssetListItem;

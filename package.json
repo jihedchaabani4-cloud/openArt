@@ -9,7 +9,8 @@
     "lint": "eslint",
     "test": "vitest run",
     "ui:check": "node scripts/ui-check.cjs",
-    "ui:inventory": "node scripts/ui-inventory.cjs"
+    "ui:inventory": "node scripts/ui-inventory.cjs",
+    "verify:ui": "node scripts/verify-zero-legacy-ui.mjs"
   },
   "dependencies": {
     "@lexical/react": "^0.41.0",
@@ -48,6 +49,7 @@
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.0.1",
     "jsdom": "^29.1.1",
+    "playwright": "^1.65.1",
     "shadcn": "^3.8.5",
     "tailwind-merge": "^3.5.0",
     "tailwindcss": "^4",

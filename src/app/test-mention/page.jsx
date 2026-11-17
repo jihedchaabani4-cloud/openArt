@@ -18,11 +18,12 @@ import {
   KEY_DOWN_COMMAND,
   COMMAND_PRIORITY_HIGH,
 } from "lexical";
-import { MentionNode, $createMentionNode } from "@/features/prompt-bar/ui/common/editor/MentionNode";
-import { MentionPlugin } from "@/features/prompt-bar/ui/common/editor/MentionPlugin";
-import { AtMentionMenu } from "@/features/prompt-bar/ui/common/editor/AtMentionMenu";
-import { GoogleIcon } from "@/shared/ui/GoogleIcon";
-import { Button } from "@/shared/ui/button";
+import { MentionNode, $createMentionNode } from "@/components/cinema-studio/prompt-bar/editor/MentionNode";
+import { MentionPlugin } from "@/components/cinema-studio/prompt-bar/editor/MentionPlugin";
+import { AtMentionMenu } from "@/components/cinema-studio/prompt-bar/editor/AtMentionMenu";
+import { GoogleIcon } from "@/components/primitives/GoogleIcon";
+import { Button } from "@/components/base/button";
+import { IconButton } from "@/components/base/icon-button";
 
 const INITIAL_REFERENCES = [
   {
@@ -322,7 +323,7 @@ export default function TestMentionPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0d0e0f] text-white p-6 md:p-12 font-sans selection:bg-white/20">
+    <div className="min-h-screen bg-canvas-bg text-white p-6 md:p-12 font-sans selection:bg-white/20">
       {/* Top Banner / Navigation */}
       <div className="max-w-6xl mx-auto mb-8">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-white/10">
@@ -344,45 +345,33 @@ export default function TestMentionPage() {
           </div>
 
           {/* View Mode Switcher */}
-          <div className="flex items-center gap-1 p-1 rounded-2xl bg-[#161718] border border-white/10 shrink-0 self-start md:self-auto">
-            <button
+          <div className="flex items-center gap-1 p-1 rounded-2xl bg-omni-bg border border-white/10 shrink-0 self-start md:self-auto">
+            <Button
               type="button"
+              variant={activeTab === "both" ? "primary" : "ghost"}
               onClick={() => setActiveTab("both")}
-              className={`px-3 py-1.5 rounded-lg text-[12px] font-medium transition-all ${
-                activeTab === "both"
-                  ? "bg-white text-black shadow-none font-semibold"
-                  : "text-white/60 hover:text-white hover:bg-white/5"
-              }`}
             >
               Side-by-Side (Both)
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
+              variant={activeTab === "v1" ? "primary" : "ghost"}
               onClick={() => setActiveTab("v1")}
-              className={`px-3 py-1.5 rounded-lg text-[12px] font-medium transition-all ${
-                activeTab === "v1"
-                  ? "bg-white text-black shadow-none font-semibold"
-                  : "text-white/60 hover:text-white hover:bg-white/5"
-              }`}
             >
               Version 1 (Floating)
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
+              variant={activeTab === "v2" ? "primary" : "ghost"}
               onClick={() => setActiveTab("v2")}
-              className={`px-3 py-1.5 rounded-lg text-[12px] font-medium transition-all ${
-                activeTab === "v2"
-                  ? "bg-white text-black shadow-none font-semibold"
-                  : "text-white/60 hover:text-white hover:bg-white/5"
-              }`}
             >
               Version 2 (Top Panel)
-            </button>
+            </Button>
           </div>
         </div>
 
         {/* Global Reference Store Bar */}
-        <div className="mt-4 p-4 rounded-2xl bg-[#161718]/60 border border-white/5 backdrop-blur-md flex flex-wrap items-center justify-between gap-3">
+        <div className="mt-4 p-4 rounded-2xl bg-omni-bg/60 border border-white/5 backdrop-blur-md flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <span className="text-[12px] font-semibold text-white/70 uppercase tracking-wider flex items-center gap-1.5">
               <GoogleIcon iconName="perm_media" className="text-[16px] text-white/50" />
@@ -428,7 +417,7 @@ export default function TestMentionPage() {
       <div className={`max-w-6xl mx-auto grid gap-8 ${activeTab === "both" ? "grid-cols-1 lg:grid-cols-2" : "grid-cols-1"}`}>
         {/* ── VERSION 1 CARD ── */}
         {(activeTab === "both" || activeTab === "v1") && (
-          <div className="flex flex-col gap-4 rounded-2xl bg-[#131415]/90 border border-white/10 p-6 shadow-none relative">
+          <div className="flex flex-col gap-4 rounded-2xl bg-omni-bg/90 border border-white/10 p-6 shadow-none relative">
             {/* Header Badge */}
             <div className="flex items-center justify-between pb-3 border-b border-white/5">
               <div className="flex items-center gap-2.5">
@@ -463,7 +452,7 @@ export default function TestMentionPage() {
 
             {/* Interactive Prompt Bar Shell */}
             <div className="relative mt-2">
-              <div className="rounded-2xl bg-[#161718]/80 backdrop-blur-xl border border-white/10 p-4 shadow-none focus-within:border-white/30 transition-all">
+              <div className="rounded-2xl bg-omni-bg/80 backdrop-blur-xl border border-white/10 p-4 shadow-none focus-within:border-white/30 transition-all">
                 <LexicalComposer initialConfig={initialConfigV1}>
                   <div className="relative min-h-[70px] w-full">
                     <RichTextPlugin
@@ -525,7 +514,7 @@ export default function TestMentionPage() {
 
         {/* ── VERSION 2 CARD ── */}
         {(activeTab === "both" || activeTab === "v2") && (
-          <div className="flex flex-col gap-4 rounded-2xl bg-[#131415]/90 border border-white/10 p-6 shadow-none relative">
+          <div className="flex flex-col gap-4 rounded-2xl bg-omni-bg/90 border border-white/10 p-6 shadow-none relative">
             {/* Header Badge */}
             <div className="flex items-center justify-between pb-3 border-b border-white/5">
               <div className="flex items-center gap-2.5">
@@ -618,44 +607,45 @@ export default function TestMentionPage() {
 
                 {/* Bottom Bar: Circular '+' on left, Auto Medium dropdown, Mic, and Circular '+' submit on right */}
                 <div className="pt-2 flex items-center justify-between">
-                  <button
+                  <IconButton
                     type="button"
+                    variant="tonal"
                     onClick={() => setV2PanelOpen(true)}
-                    className="size-8 rounded-full bg-white/10 hover:bg-white/15 active:scale-95 text-white/70 hover:text-white flex items-center justify-center transition-all shrink-0"
                     title="Add media, reference or connector"
                   >
                     <GoogleIcon iconName="add" className="text-[18px]" />
-                  </button>
+                  </IconButton>
 
                   <div className="flex items-center gap-2">
                     {/* Auto Medium Selector */}
-                    <button
+                    <Button
                       type="button"
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 text-white/80 hover:text-white text-[12.5px] font-medium transition-colors"
+                      variant="pill"
+                      className="gap-1.5"
                     >
                       <span className="font-semibold text-white">Auto</span>
                       <span className="text-white/60">Medium</span>
                       <GoogleIcon iconName="keyboard_arrow_down" className="text-[15px] text-white/40" />
-                    </button>
+                    </Button>
 
                     {/* Microphone Voice Button */}
-                    <button
+                    <IconButton
                       type="button"
-                      className="size-8 rounded-full hover:bg-white/10 text-white/60 hover:text-white flex items-center justify-center transition-colors"
+                      variant="ghost"
                       title="Voice Input"
                     >
                       <GoogleIcon iconName="mic" className="text-[18px]" />
-                    </button>
+                    </IconButton>
 
                     {/* Circular White Action Button with Black '+' */}
-                    <button
+                    <IconButton
                       type="button"
+                      variant="primary"
                       onClick={() => alert(`Submitted prompt: ${v2RawOutput}`)}
-                      className="size-8 rounded-full bg-white hover:bg-white/90 active:scale-95 text-black flex items-center justify-center transition-all shadow-none shrink-0 cursor-pointer"
                       title="Generate"
                     >
-                      <GoogleIcon iconName="add" className="text-[20px] font-bold text-black" />
-                    </button>
+                      <GoogleIcon iconName="add" className="text-[20px] font-bold" />
+                    </IconButton>
                   </div>
                 </div>
               </div>
@@ -676,7 +666,7 @@ export default function TestMentionPage() {
       </div>
 
       {/* Feature Comparison Table */}
-      <div className="max-w-6xl mx-auto mt-12 p-6 rounded-2xl bg-[#141516]/80 border border-white/10 backdrop-blur-xl">
+      <div className="max-w-6xl mx-auto mt-12 p-6 rounded-2xl bg-omni-bg/80 border border-white/10 backdrop-blur-xl">
         <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
           <GoogleIcon iconName="table_chart" className="text-[20px] text-white/70" />
           Comparison Breakdown

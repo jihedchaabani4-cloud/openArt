@@ -11,7 +11,7 @@ import {
   getAcceptedMimeTypes,
 } from "../uploadPolicy";
 import { CharacterDetailsGallery } from "@/features/characters";
-import { CharacterEditNavbar } from "@/widgets/CharacterEditNavbar/CharacterEditNavbar";
+import { CharacterEditNavbar } from "@/components/layout/CharacterEditNavbar";
 import { api } from "@/shared/api/client";
 
 const mockBatchUploadAsync = vi.fn();

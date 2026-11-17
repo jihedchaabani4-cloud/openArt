@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen, fireEvent, cleanup, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { MoveToDialog } from "@/shared/ui/MoveToDialog";
+import { MoveToDialog } from "@/components/cinema-studio/collections/MoveToDialog";
 
 const mockMoveItem = vi.fn();
 vi.mock("@/features/folders/model/useFolderMove", async (importOriginal) => {

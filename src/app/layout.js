@@ -1,10 +1,16 @@
 import "./globals.css";
-import { Inter, Space_Grotesk } from "next/font/google";
+import { Geist_Mono, Inter, Noto_Sans_Arabic } from "next/font/google";
+import localFont from "next/font/local";
 
 import { ReactQueryProvider } from "@/shared/lib/ReactQueryProvider";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Toaster } from "sonner";
 import Script from "next/script";
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
 
 const inter = Inter({
   variable: "--font-inter",
@@ -12,27 +18,53 @@ const inter = Inter({
   display: "swap",
 });
 
-const spaceGrotesk = Space_Grotesk({
-  variable: "--font-space-grotesk",
-  subsets: ["latin"],
+const arabic = Noto_Sans_Arabic({
+  variable: "--font-arabic",
+  subsets: ["arabic"],
   display: "swap",
 });
 
+const googleSans = localFont({
+  src: [
+    {
+      path: "../../public/fonts/GoogleSans-VariableFont_GRAD,opsz,wght.ttf",
+      style: "normal",
+      weight: "100 900",
+    },
+    {
+      path: "../../public/fonts/GoogleSans-Italic-VariableFont_GRAD,opsz,wght.ttf",
+      style: "italic",
+      weight: "100 900",
+    },
+  ],
+  display: "swap",
+  variable: "--font-google-sans",
+});
+
 export const metadata = {
-  title: "Cinema Studio",
-  description: "Non-linear node-based creative AI studio",
+  title: "AI Influencer Studio",
+  description: "Non-linear node-based character branching studio",
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
       <head>
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+        />
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Google+Symbols:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+        />
         <Script
           id="suppress-extension-errors"
           strategy="beforeInteractive"
           dangerouslySetInnerHTML={{
             __html: `
               if (typeof window !== 'undefined') {
+                // Suppress browser extension unhandled rejections
                 window.addEventListener('unhandledrejection', function(e) {
                   var reason = e && (e.reason || e.detail);
                   var str = (reason && (reason.stack || reason.message || '' + reason)) || '';
@@ -42,6 +74,7 @@ export default function RootLayout({ children }) {
                   }
                 }, true);
 
+                // Filter out hydration mismatch warnings caused by browser extensions injecting bis_skin_checked
                 var filterBisLog = function(origFn) {
                   return function() {
                     for (var i = 0; i < arguments.length; i++) {
@@ -74,25 +107,12 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body
-        className={`${inter.variable} ${spaceGrotesk.variable} antialiased`}
+        className={`${inter.variable} ${arabic.variable} ${googleSans.variable} ${geistMono.variable} antialiased bg-body-root text-foreground font-sans`}
         suppressHydrationWarning
       >
         <ReactQueryProvider>
           {children}
-          <Toaster
-            theme="dark"
-            position="top-right"
-            closeButton
-            toastOptions={{
-              style: {
-                background: "var(--bg-surface)",
-                borderColor: "var(--border-brand-btn)",
-                color: "var(--text-primary)",
-                borderRadius: "var(--r-sm)",
-                boxShadow: "var(--sh-toast)",
-              },
-            }}
-          />
+          <Toaster theme="dark" position="bottom-right" richColors closeButton />
           <SpeedInsights />
         </ReactQueryProvider>
       </body>

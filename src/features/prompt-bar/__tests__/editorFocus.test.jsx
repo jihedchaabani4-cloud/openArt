@@ -15,7 +15,7 @@ import { PromptBarStoreContext } from "../store/PromptBarStoreContext.js";
 
 // Mock PromptEditor with focus tracking
 const mockFocusFn = vi.fn();
-vi.mock("../ui/common/editor/PromptEditor.jsx", () => ({
+vi.mock("@/components/cinema-studio/prompt-bar/editor/PromptEditor.jsx", () => ({
   PromptEditor: ({ value, onChange, focusRequest }) => {
     const inputRef = React.useRef(null);
     const isFirstRender = React.useRef(true);
@@ -42,7 +42,7 @@ vi.mock("../ui/common/editor/PromptEditor.jsx", () => ({
   },
 }));
 
-import { PromptBarPlatform } from "../platform/PromptBarPlatform.jsx";
+import { PromptBarPlatform } from "@/components/cinema-studio/prompt-bar/PromptBarPlatform.jsx";
 import { generatedMediaTemplate } from "../templates/generatedMedia.template.js";
 import { generatedMediaType } from "../templates/generatedMedia.template.js";
 

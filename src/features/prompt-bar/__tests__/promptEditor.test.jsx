@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import React from "react";
 import { render, screen } from "@testing-library/react";
-import { PromptEditor, handlePromptEditorError, MODULE_VERSION } from "../ui/common/editor/PromptEditor.jsx";
+import { PromptEditor, handlePromptEditorError, MODULE_VERSION } from "@/components/cinema-studio/prompt-bar/editor/PromptEditor.jsx";
 import { logger } from "@/shared/lib/logger";
 
 describe("PromptEditor Clean Code & Logger", () => {

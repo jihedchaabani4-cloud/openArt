@@ -2,10 +2,10 @@
 
 import * as React from "react";
 import { useParams } from "next/navigation";
-import { LoadingScreen } from "@/shared/ui/LoadingScreen";
-import { ConfirmDeleteDialog } from "@/shared/ui/ConfirmDeleteDialog";
+import { LoadingScreen } from "@/components/primitives/LoadingScreen";
+import { ConfirmDeleteDialog } from "@/components/primitives/ConfirmDeleteDialog";
 import { ImportMediaPopover } from "@/features/media";
-import { ElementEditNavbar } from "@/widgets/ElementEditNavbar/ElementEditNavbar";
+import { ElementEditNavbar } from "@/components/layout/ElementEditNavbar";
 import {
   useElementEdit,
   ElementInfoSidebar,

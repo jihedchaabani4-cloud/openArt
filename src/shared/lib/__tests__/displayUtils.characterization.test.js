@@ -133,7 +133,7 @@ describe("Characterization: Current Primary Media Resolution Behavior", () => {
         "features/workflows/core/useMediaViewerCore.js",
         "features/workflows/model/elementSheetConfig.js",
         "features/workflows/model/useMediaActions.js",
-        "widgets/EditNavbar/EditNavbar.jsx",
+        "components/layout/EditNavbar.jsx",
       ];
 
       for (const relPath of migratedFiles) {

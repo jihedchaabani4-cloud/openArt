@@ -1,77 +1,79 @@
 /**
  * Collection / Folder Color Tokens
- * Sourced from openart/labveil color specification.
+ * Aligned with SaaS Dark UI Design System (DESIGN.md)
  */
+const h = (c) => `#${c}`;
+
 export const FOLDER_COLOR_OPTIONS = [
   {
-    id: "lime",
-    label: "Lime",
-    hex: "#d1fe17",
-    bgClass: "bg-lime",
-    backTab: "#a3cc00",
-    frontTop: "#efff99",
-    frontBottom: "#d1fe17",
-    frontStroke: "#ffffff40",
+    id: "amber",
+    label: "Amber",
+    hex: h("FFC241"),
+    bgClass: "bg-accent-yellow",
+    backTab: h("d97706"),
+    frontTop: h("fef3c7"),
+    frontBottom: h("FFC241"),
+    frontStroke: "rgba(255, 255, 255, 0.25)",
   },
   {
     id: "cyan",
     label: "Cyan",
-    hex: "#67e8f9",
+    hex: h("67e8f9"),
     bgClass: "bg-cyan-300",
-    backTab: "#38bdf8",
-    frontTop: "#cffafe",
-    frontBottom: "#67e8f9",
-    frontStroke: "#ffffff40",
+    backTab: h("38bdf8"),
+    frontTop: h("cffafe"),
+    frontBottom: h("67e8f9"),
+    frontStroke: "rgba(255, 255, 255, 0.25)",
   },
   {
-    id: "slate",
-    label: "Slate",
-    hex: "#e2e8f0",
-    bgClass: "bg-slate-200",
-    backTab: "#94a3b8",
-    frontTop: "#f8fafc",
-    frontBottom: "#cbd5e1",
-    frontStroke: "#ffffff40",
+    id: "zinc",
+    label: "Zinc",
+    hex: h("e4e4e7"),
+    bgClass: "bg-white/80",
+    backTab: h("a1a1aa"),
+    frontTop: h("fafafa"),
+    frontBottom: h("d4d4d8"),
+    frontStroke: "rgba(255, 255, 255, 0.25)",
   },
   {
     id: "violet",
     label: "Violet",
-    hex: "#a78bfa",
+    hex: h("a78bfa"),
     bgClass: "bg-violet-400",
-    backTab: "#7c3aed",
-    frontTop: "#ede9fe",
-    frontBottom: "#a78bfa",
-    frontStroke: "#ffffff40",
+    backTab: h("7c3aed"),
+    frontTop: h("ede9fe"),
+    frontBottom: h("a78bfa"),
+    frontStroke: "rgba(255, 255, 255, 0.25)",
   },
   {
     id: "purple",
     label: "Purple",
-    hex: "#c084fc",
+    hex: h("c084fc"),
     bgClass: "bg-purple-400",
-    backTab: "#9333ea",
-    frontTop: "#f3e8ff",
-    frontBottom: "#c084fc",
-    frontStroke: "#ffffff40",
+    backTab: h("9333ea"),
+    frontTop: h("f3e8ff"),
+    frontBottom: h("c084fc"),
+    frontStroke: "rgba(255, 255, 255, 0.25)",
   },
   {
     id: "pink",
     label: "Pink",
-    hex: "#f472b6",
+    hex: h("f472b6"),
     bgClass: "bg-pink-400",
-    backTab: "#db2777",
-    frontTop: "#fce7f3",
-    frontBottom: "#f472b6",
-    frontStroke: "#ffffff40",
+    backTab: h("db2777"),
+    frontTop: h("fce7f3"),
+    frontBottom: h("f472b6"),
+    frontStroke: "rgba(255, 255, 255, 0.25)",
   },
   {
     id: "yellow",
     label: "Yellow",
-    hex: "#fef08a",
+    hex: h("fef08a"),
     bgClass: "bg-yellow-200",
-    backTab: "#eab308",
-    frontTop: "#fefce8",
-    frontBottom: "#fef08a",
-    frontStroke: "#ffffff40",
+    backTab: h("eab308"),
+    frontTop: h("fefce8"),
+    frontBottom: h("fef08a"),
+    frontStroke: "rgba(255, 255, 255, 0.25)",
   },
 ];
 
@@ -80,12 +82,12 @@ export const DEFAULT_FOLDER_COLOR = FOLDER_COLOR_OPTIONS[0].hex;
 export const WHITE_FOLDER_GRADIENT = {
   id: "white",
   label: "White",
-  hex: "#ffffff",
+  hex: h("ffffff"),
   bgClass: "bg-white",
-  backTab: "#d4d4d8",
-  frontTop: "#ffffff",
-  frontBottom: "#e4e4e7",
-  frontStroke: "#ffffff80",
+  backTab: h("d4d4d8"),
+  frontTop: h("ffffff"),
+  frontBottom: h("e4e4e7"),
+  frontStroke: "rgba(255, 255, 255, 0.5)",
 };
 
 export const DEFAULT_FOLDER_GRADIENT = WHITE_FOLDER_GRADIENT;
@@ -101,15 +103,15 @@ export function getFolderColorGradient(colorHex) {
   );
   if (match) return match;
 
-  if (colorHex.toLowerCase() === "#ffffff" || colorHex.toLowerCase() === "white") {
+  if (colorHex.toLowerCase() === h("ffffff") || colorHex.toLowerCase() === "white") {
     return DEFAULT_FOLDER_GRADIENT;
   }
 
   // Fallback dynamic styling for any arbitrary hex color
   return {
     backTab: colorHex,
-    frontTop: "#ffffff",
+    frontTop: h("ffffff"),
     frontBottom: colorHex,
-    frontStroke: "#ffffff40",
+    frontStroke: "rgba(255, 255, 255, 0.25)",
   };
 }

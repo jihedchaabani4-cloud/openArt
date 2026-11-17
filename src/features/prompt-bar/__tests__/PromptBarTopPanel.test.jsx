@@ -1,12 +1,12 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { PromptBarTopPanel } from "../platform/parts/PromptBarTopPanel";
+import { PromptBarTopPanel } from "@/components/cinema-studio/prompt-bar/parts/PromptBarTopPanel";
+import { Button } from "@/components/base/button";
 
-// Mock child components to keep unit test isolated and fast
-vi.mock("../ui/common/editor/AtMentionMenu.jsx", () => ({
+vi.mock("@/components/cinema-studio/prompt-bar/editor/AtMentionMenu.jsx", () => ({
   AtMentionMenu: ({ open, query, onClose }) => (
     <div data-testid="at-mention-menu" data-open={String(open)} data-query={query}>
-      <button onClick={onClose}>Close Mention</button>
+      <Button onClick={onClose}>Close Mention</Button>
     </div>
   ),
 }));
@@ -17,7 +17,7 @@ vi.mock("@/features/media", async (importOriginal) => {
     ...actual,
     ImportMediaPopover: ({ open, onOpenChange, mode }) => (
       <div data-testid="import-media-popover" data-open={String(open)} data-mode={mode}>
-        <button onClick={() => onOpenChange(false)}>Close Popover</button>
+        <Button onClick={() => onOpenChange(false)}>Close Popover</Button>
       </div>
     ),
   };

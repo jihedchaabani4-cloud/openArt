@@ -15,7 +15,7 @@ vi.mock("next/navigation", () => ({
 }));
 
 // Mock PromptEditor
-vi.mock("../ui/common/editor/PromptEditor.jsx", () => ({
+vi.mock("@/components/cinema-studio/prompt-bar/editor/PromptEditor.jsx", () => ({
   PromptEditor: ({ value, onChange, placeholder }) => (
     <textarea
       data-testid="mock-prompt-editor"
@@ -27,7 +27,7 @@ vi.mock("../ui/common/editor/PromptEditor.jsx", () => ({
 }));
 
 import { createPromptBarStore } from "../store/createPromptBarStore.js";
-import { PromptBarPlatform } from "../platform/PromptBarPlatform.jsx";
+import { PromptBarPlatform } from "@/components/cinema-studio/prompt-bar/PromptBarPlatform.jsx";
 import {
   generatedMediaType,
   COMPOSITION_REQUIREMENTS,

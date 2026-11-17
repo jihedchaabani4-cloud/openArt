@@ -3,19 +3,19 @@
 import * as React from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useRouter } from "next/navigation"
-import { GoogleIcon } from "@/shared/ui/GoogleIcon";
+import { GoogleIcon } from "@/components/primitives/GoogleIcon";
 
 import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows"
 import { useCharacterWorkflows } from "@/features/characters"
 import { usePromptStore } from "@/features/studio";
-import { LoadingScreen } from "@/shared/ui/LoadingScreen"
+import { LoadingScreen } from "@/components/primitives/LoadingScreen"
 
 import { SharedGalleryGrid } from "@/features/media"
-import { MediaGridItem } from "@/widgets/StudioLayout/GenerationsStudio/MediaGridItem"
+import { MediaGridItem } from "@/components/cinema-studio/media/MediaGridItem"
 import { HowToDrawer } from "@/features/elements";
 import { useWorkflowDelete } from "@/features/workflows"
-import { ConfirmDeleteDialog } from "@/shared/ui/ConfirmDeleteDialog"
-import { Button } from "@/shared/ui/button"
+import { ConfirmDeleteDialog } from "@/components/primitives/ConfirmDeleteDialog"
+import { Button } from "@/components/base/button"
 
 const PAGE_SIZE = 30;
 
@@ -115,7 +115,7 @@ export default function CharactersPage({ params }) {
     }
 
     return (
-        <div className="flex h-full w-full overflow-hidden text-white bg-background relative">
+        <div className="flex h-full w-full overflow-hidden text-white bg-main relative">
             <main className="flex-1 flex flex-col relative min-w-0 overflow-hidden z-10">
                 <AnimatePresence>
                     {isDragging && (
@@ -167,7 +167,7 @@ export default function CharactersPage({ params }) {
                     <Button
                         type="button"
                         onClick={() => router.push(`/cinema-studio/${projectId}/characters/new`)}
-                        className="flex items-center gap-2 px-6 py-4 h-auto rounded-full bg-[var(--bg-surface)] hover:bg-[var(--bg-surface-elevated)] text-[var(--text-primary)] transition-all active:scale-95 border border-[var(--border-default)] shadow-none cursor-pointer"
+                        className="flex items-center gap-2 px-6 py-4 h-auto rounded-full bg-surface-card hover:bg-surface-elevated text-white transition-all active:scale-95 border border-white/10 shadow-none cursor-pointer"
                     >
                         <GoogleIcon iconName="add" className="text-xl" />
                         <span className="font-medium text-[15px]">New character</span>

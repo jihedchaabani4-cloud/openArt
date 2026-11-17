@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen, fireEvent, cleanup, within } from "@testing-library/react";
-import { FlowSelect } from "../ui/common/selectors/FlowPromptBoxSettings";
+import { FlowSelect } from "@/components/cinema-studio/prompt-bar/selectors/FlowPromptBoxSettings";
 
 afterEach(() => {
   cleanup();
@@ -72,8 +72,10 @@ describe("FlowSelect component", () => {
 
     const listbox = screen.getByRole("listbox");
     expect(listbox.getAttribute("data-slot")).toBe("popover-content");
-    expect(listbox.className).toContain("bg-[var(--bg-surface)]");
-    expect(listbox.className).toContain("rounded-[var(--r-lg)]");
+    expect(listbox.className).toContain("bg-surface-container-high");
+    expect(listbox.className).toContain("backdrop-blur-80");
+    expect(listbox.className).toContain("rounded-md");
+    expect(listbox.className).toContain("border-outline-variant");
     expect(listbox.className).toContain("p-1");
     expect(listbox.style.width).toBe("240px");
   });
@@ -120,10 +122,10 @@ describe("FlowSelect component", () => {
     const optionButtons = within(listbox).getAllByRole("button");
     const selectedOption = optionButtons.find((btn) => btn.textContent.includes("High Quality"));
     expect(selectedOption).toBeDefined();
-    expect(selectedOption.querySelector('svg')).not.toBeNull();
+    expect(selectedOption.textContent).toContain("check");
 
     const unselectedOption = optionButtons.find((btn) => btn.textContent.includes("Fast Mode"));
     expect(unselectedOption).toBeDefined();
-    expect(unselectedOption.querySelector('svg')).toBeNull();
+    expect(unselectedOption.textContent).not.toContain("check");
   });
 });

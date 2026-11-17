@@ -1,0 +1,83 @@
+"use client";
+
+import { motion, AnimatePresence } from "framer-motion";
+import { GoogleIcon } from "@/components/primitives/GoogleIcon";
+import { BaseSelector } from "./BaseSelector";
+
+/**
+ * FeatureModeSelector
+ *
+ * Feature-level mode and sub-mode segmented controller.
+ * - Top row: Image vs Video
+ * - Sub row (only when mode is video): Frames vs Reference
+ */
+export function FeatureModeSelector({
+  mode = "image",
+  onModeChange,
+  subMode = "frames",
+  onSubModeChange,
+  availableSubModes,
+  className = "",
+}) {
+  const modeOptions = [
+    {
+      value: "image",
+      label: "Image",
+      icon: <GoogleIcon iconName="image" className="text-[14px] mr-1.5" />,
+    },
+    {
+      value: "video",
+      label: "Video",
+      icon: <GoogleIcon iconName="movie" className="text-[14px] mr-1.5" />,
+    },
+  ];
+
+  const allSubModeOptions = [
+    {
+      value: "frames",
+      label: "Frames",
+      icon: <GoogleIcon iconName="panorama_wide_angle" className="text-[14px] mr-1.5" />,
+    },
+    {
+      value: "reference",
+      label: "Reference",
+      icon: <GoogleIcon iconName="extension" className="text-[14px] mr-1.5" />,
+    },
+  ];
+
+  const subModeOptions = Array.isArray(availableSubModes) && availableSubModes.length > 0
+    ? allSubModeOptions.filter((opt) => availableSubModes.includes(opt.value))
+    : allSubModeOptions;
+
+  return (
+    <div className={`flex flex-col gap-2 ${className}`}>
+      {/* Top Level: Image / Video */}
+      <BaseSelector
+        value={mode}
+        onChange={onModeChange}
+        options={modeOptions}
+        variant="white"
+      />
+
+      {/* Sub Level: Frames / Reference (Only visible in Video mode when multiple sub-modes are available) */}
+      <AnimatePresence initial={false}>
+        {mode === "video" && subModeOptions.length > 1 && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+            className="overflow-hidden"
+          >
+            <BaseSelector
+              value={subMode}
+              onChange={onSubModeChange}
+              options={subModeOptions}
+              variant="white"
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}

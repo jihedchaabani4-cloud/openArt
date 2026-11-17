@@ -6,12 +6,12 @@
  */
 
 // ── Renderer & Wrappers ──────────────────────────────────
-export { PromptBarPlatform } from "./platform/PromptBarPlatform.jsx";
-export { GeneratedPromptBar } from "./templates/GeneratedPromptBar.jsx";
+export { PromptBarPlatform } from "@/components/cinema-studio/prompt-bar/PromptBarPlatform.jsx";
+export { GeneratedPromptBar } from "@/components/cinema-studio/prompt-bar/GeneratedPromptBar.jsx";
 export { generatedMediaTemplate } from "./templates/generatedMedia.template.js";
-export { CharacterPromptBar } from "./templates/CharacterPromptBar.jsx";
+export { CharacterPromptBar } from "@/components/cinema-studio/prompt-bar/CharacterPromptBar.jsx";
 export { characterTemplate } from "./templates/character.template.js";
-export { CharacterFeatureEditor, ElementFeatureEditor } from "./ui/character/CharacterFeatureEditor.jsx";
+export { CharacterFeatureEditor, ElementFeatureEditor } from "@/components/cinema-studio/prompt-bar/CharacterFeatureEditor.jsx";
 export { useCharacterStore, useElementStore } from "./model/useCharacterStore.js";
 export { promptBarService } from "./api/promptBarService.js";
 
@@ -39,14 +39,14 @@ export * as tagsResolver                from "./core/tagsResolver.js";
 export * as entityService               from "./core/entityService.js";
 
 // ── Production Selectors (Reused) ─────────────────────────
-export { PromptBarShell } from "./ui/common/PromptBarShell.jsx";
-export { MediaInput } from "./ui/common/MediaInput.jsx";
-export { ReferenceButton, ViewReference, SwapIcon } from "./ui/common/ReferenceButton.jsx";
-export { RatioSelector } from "./ui/common/selectors/RatioSelector.jsx";
-export { QualitySelector } from "./ui/common/selectors/QualitySelector.jsx";
-export { VideoResolutionSelector } from "./ui/common/selectors/VideoResolutionSelector.jsx";
-export { VariationSelector } from "./ui/common/selectors/VariationSelector.jsx";
-export { DurationSelector } from "./ui/common/selectors/DurationSelector.jsx";
-export { BaseSelector } from "./ui/common/selectors/BaseSelector.jsx";
-export { FeatureModeSelector } from "./ui/common/selectors/FeatureModeSelector.jsx";
-export { FlowPromptBoxSettings } from "./ui/common/selectors/FlowPromptBoxSettings.jsx";
+export { PromptBarShell } from "@/components/cinema-studio/prompt-bar/PromptBarShell.jsx";
+export { MediaInput } from "@/components/cinema-studio/prompt-bar/MediaInput.jsx";
+export { ReferenceButton, ViewReference, SwapIcon } from "@/components/cinema-studio/prompt-bar/ReferenceButton.jsx";
+export { RatioSelector } from "@/components/cinema-studio/prompt-bar/selectors/RatioSelector.jsx";
+export { QualitySelector } from "@/components/cinema-studio/prompt-bar/selectors/QualitySelector.jsx";
+export { VideoResolutionSelector } from "@/components/cinema-studio/prompt-bar/selectors/VideoResolutionSelector.jsx";
+export { VariationSelector } from "@/components/cinema-studio/prompt-bar/selectors/VariationSelector.jsx";
+export { DurationSelector } from "@/components/cinema-studio/prompt-bar/selectors/DurationSelector.jsx";
+export { BaseSelector } from "@/components/cinema-studio/prompt-bar/selectors/BaseSelector.jsx";
+export { FeatureModeSelector } from "@/components/cinema-studio/prompt-bar/selectors/FeatureModeSelector.jsx";
+export { FlowPromptBoxSettings } from "@/components/cinema-studio/prompt-bar/selectors/FlowPromptBoxSettings.jsx";

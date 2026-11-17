@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Button } from "@/shared/ui/button";
+import { Button } from "@/components/base/button";
 
 const levelSlides = [
   {
@@ -55,7 +55,7 @@ export function ModelSlider() {
         </div>
 
         {/* Carousel / Slider Card */}
-        <div className="relative h-[20rem] w-full overflow-hidden rounded-lg bg-zinc-950 group shadow-none">
+        <div className="relative h-[20rem] w-full overflow-hidden rounded-lg bg-canvas-bg group shadow-none">
           {/* Images */}
           {levelSlides.map((slide, idx) => (
             <div

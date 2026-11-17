@@ -1,12 +1,10 @@
 // [FSD Layer: features/characters/hooks] — Barrel for characters domain hooks.
-// Exports follow the 1 hook / file split rule; exact names from baseline.md §0.2 T5.
-// 2 queries  + 7 mutations = baseline 9 named hooks.
-export { useCharacter, default } from "./useCharacter";
-export { useCharacterWorkflows } from "./useCharacterWorkflows";
-export { useCreateCharacterMutation } from "./useCreateCharacterMutation";
-export { useUpdateCharacter } from "./useUpdateCharacter";
-export { useGenerateCharacterSheetMutation } from "./useGenerateCharacterSheetMutation";
-export { useGenerateCharacterDescriptionMutation } from "./useGenerateCharacterDescriptionMutation";
-export { useAddMediaToCharacter } from "./useAddMediaToCharacter";
-export { useRemoveMediaFromCharacter } from "./useRemoveMediaFromCharacter";
-export { useSetCharacterSheetMedia } from "./useSetCharacterSheetMedia";
+export { useCharacter, default } from "../api/queries/useCharacter";
+export { useCharacterWorkflows } from "../api/queries/useCharacterWorkflows";
+export { useCreateCharacterMutation } from "../api/mutations/useCreateCharacterMutation";
+export { useUpdateCharacter } from "../api/mutations/useUpdateCharacter";
+export { useGenerateCharacterSheetMutation } from "../api/mutations/useGenerateCharacterSheetMutation";
+export { useGenerateCharacterDescriptionMutation } from "../api/mutations/useGenerateCharacterDescriptionMutation";
+export { useAddMediaToCharacter } from "../api/mutations/useAddMediaToCharacter";
+export { useRemoveMediaFromCharacter } from "../api/mutations/useRemoveMediaFromCharacter";
+export { useSetCharacterSheetMedia } from "../api/mutations/useSetCharacterSheetMedia";

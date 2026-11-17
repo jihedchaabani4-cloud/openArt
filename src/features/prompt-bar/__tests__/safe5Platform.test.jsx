@@ -23,7 +23,7 @@ vi.mock("next/navigation", () => ({
   usePathname: () => "/cinema-studio/proj_test/assets",
 }));
 
-vi.mock("../ui/common/editor/PromptEditor.jsx", () => ({
+vi.mock("@/components/cinema-studio/prompt-bar/editor/PromptEditor.jsx", () => ({
   PromptEditor: ({ value, onChange, placeholder }) => (
     <textarea
       data-testid="mock-prompt-editor"
@@ -34,7 +34,7 @@ vi.mock("../ui/common/editor/PromptEditor.jsx", () => ({
   ),
 }));
 
-import { PromptBarPlatform } from "../platform/PromptBarPlatform.jsx";
+import { PromptBarPlatform } from "@/components/cinema-studio/prompt-bar/PromptBarPlatform.jsx";
 import {
   COMPOSITION_REQUIREMENTS,
   filterEligibleModels,

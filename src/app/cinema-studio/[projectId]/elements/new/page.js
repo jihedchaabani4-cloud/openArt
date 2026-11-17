@@ -2,7 +2,7 @@
 
 import { use, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { LoadingScreen } from "@/shared/ui/LoadingScreen";
+import { LoadingScreen } from "@/components/primitives/LoadingScreen";
 
 /**
  * Legacy /elements/new page

@@ -3,14 +3,14 @@
 import * as React from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useProjectData, useSetPrimaryMedia } from "@/features/workflows/api/workflowsApi";
-import { EditMediaView } from "@/widgets/EditMediaView";
-import { WorkflowMediaGallery } from "@/features/workflows/ui/WorkflowMediaGallery";
-import { EditNavbar } from "@/widgets/EditNavbar/EditNavbar";
+import { EditMediaView } from "@/components/cinema-studio/media/EditMediaView";
+import { WorkflowMediaGallery } from "@/components/cinema-studio/media/WorkflowMediaGallery";
+import { EditNavbar } from "@/components/layout/EditNavbar";
 import { useElementStore } from "@/features/prompt-bar/model/useElementStore";
 import { buildElementSheetDraft, syncElementDraft } from "@/features/workflows/model/elementSheetConfig";
 import { getItemMetadata } from "@/shared/lib/generationUtils";
 import { resolveMainMedia } from "@/features/workflows/core/resolveMediaRef";
-import { LoadingScreen } from "@/shared/ui/LoadingScreen";
+import { LoadingScreen } from "@/components/primitives/LoadingScreen";
 
 export default function ElementWorkflowEditPage() {
     const { projectId, workflowId } = useParams();
@@ -92,7 +92,7 @@ export default function ElementWorkflowEditPage() {
     if (!workflow) return null; // Let redirect handle it
 
     return (
-        <div className="flex flex-col h-full w-full bg-black text-white overflow-hidden">
+        <div className="flex flex-col h-full w-full bg-background text-white overflow-hidden">
             <EditNavbar
                 workflow={workflow}
                 showHistory={showHistory}

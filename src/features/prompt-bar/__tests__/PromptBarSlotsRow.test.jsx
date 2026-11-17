@@ -1,28 +1,29 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
-import { PromptBarSlotsRow } from "../platform/parts/PromptBarSlotsRow";
+import { PromptBarSlotsRow } from "@/components/cinema-studio/prompt-bar/parts/PromptBarSlotsRow";
+import { Button } from "@/components/base/button";
 
-vi.mock("../ui/common/MediaInput.jsx", () => ({
+vi.mock("@/components/cinema-studio/prompt-bar/MediaInput.jsx", () => ({
   MediaInput: ({ label, role, onClick, onRemove }) => (
     <div data-testid={`media-input-${role}`}>
       <span>{label}</span>
-      <button onClick={onClick}>Upload</button>
-      <button onClick={onRemove}>Remove</button>
+      <Button onClick={onClick}>Upload</Button>
+      <Button onClick={onRemove}>Remove</Button>
     </div>
   ),
 }));
 
-vi.mock("../ui/common/ReferenceButton.jsx", () => ({
+vi.mock("@/components/cinema-studio/prompt-bar/ReferenceButton.jsx", () => ({
   ViewReference: ({ media, label, onRemove }) => (
     <div data-testid={`view-reference-${media.id || media.workflow_id}`}>
       <span>{label}</span>
-      <button onClick={onRemove}>Remove Ref</button>
+      <Button onClick={onRemove}>Remove Ref</Button>
     </div>
   ),
   ReferenceButton: ({ word, onClick }) => (
-    <button data-testid="reference-add-btn" onClick={onClick}>
+    <Button data-testid="reference-add-btn" onClick={onClick}>
       {word}
-    </button>
+    </Button>
   ),
   SwapIcon: () => <span data-testid="swap-icon">Swap</span>,
 }));
