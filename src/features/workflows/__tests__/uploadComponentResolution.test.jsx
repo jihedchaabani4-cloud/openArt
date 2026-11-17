@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import realPayload from "./fixtures/realProjectDataPayload.json";
-import { resolveCachedWorkflowMediaItem } from "@/features/media/ui/SharedGalleryGrid";
+import { resolveCachedWorkflowMediaItem } from "@/components/cinema-studio/media/SharedGalleryGrid";
 import { getItemMetadata } from "@/shared/lib/displayUtils";
 
 describe("Component Resolution for All 4 Upload Workflows", () => {

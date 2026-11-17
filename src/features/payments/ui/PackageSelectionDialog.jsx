@@ -2,9 +2,9 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { GoogleIcon } from "@/shared/ui/GoogleIcon";
-import { Dialog, DialogContent, DialogTitle } from "@/shared/ui/dialog";
-import { Button } from "@/shared/ui/button";
+import { GoogleIcon } from "@/components/primitives/GoogleIcon";
+import { Dialog, DialogContent, DialogTitle } from "@/components/primitives/dialog";
+import { Button } from "@/components/base/button";
 import { cn } from "@/shared/lib/utils";
 import { usePackages, useCheckout } from "@/features/payments/api/paymentsApi";
 

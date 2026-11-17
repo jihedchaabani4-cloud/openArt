@@ -17,10 +17,10 @@ export {
   resolveLibraryEntryMedia,
 } from "./model/assetsLibrary";
 export { useAssetsSelection } from "./model/useAssetsSelection";
-export { AssetsGroupSection } from "./ui/AssetsGroupSection";
-export { AssetsNavbar } from "./ui/AssetsNavbar";
-export { AssetsSelectionBar } from "./ui/AssetsSelectionBar";
-export { AssetsSidebar } from "./ui/AssetsSidebar";
-export { LibraryMediaGridItem } from "./ui/LibraryMediaGridItem";
-export { SidebarDropdownButton, SidebarFilterButton } from "./ui/SidebarFilterButton";
-export { default as AssetDetailNavbar } from "./ui/AssetDetailNavbar";
+export { AssetsGroupSection } from "@/components/cinema-studio/assets/AssetsGroupSection";
+export { AssetsNavbar } from "@/components/layout/AssetsNavbar";
+export { AssetsSelectionBar } from "@/components/cinema-studio/assets/AssetsSelectionBar";
+export { AssetsSidebar } from "@/components/cinema-studio/assets/AssetsSidebar";
+export { LibraryMediaGridItem } from "@/components/cinema-studio/assets/LibraryMediaGridItem";
+export { SidebarDropdownButton, SidebarFilterButton } from "@/components/cinema-studio/assets/SidebarFilterButton";
+export { default as AssetDetailNavbar } from "@/components/layout/AssetDetailNavbar";

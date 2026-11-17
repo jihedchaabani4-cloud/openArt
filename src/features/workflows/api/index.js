@@ -12,7 +12,7 @@
 export { useProjectData } from "./queries/useProjectData";
 export { useAssets } from "./queries/useAssets";
 export { useInfiniteUserLibrary } from "./queries/useInfiniteUserLibrary";
-export { useLibraryWorkflowDetail } from "@/features/media";
+export { useLibraryWorkflowDetail } from "@/features/media/api/queries/useLibraryWorkflowDetail";
 
 // ── Mutations
 export { useGenerateMutation } from "./mutations/useGenerateMutation";
@@ -38,7 +38,7 @@ export {
   useAddMediaToCharacter,
   useRemoveMediaFromCharacter,
   useSetCharacterSheetMedia,
-} from '@/features/characters';
+} from '@/features/characters/api';
 
 export {
   useElement,
@@ -48,4 +48,4 @@ export {
   useAddImageToElement,
   useDeleteMediaItem,
   useAnalyzeElementVision,
-} from '@/features/elements';
+} from '@/features/elements/api';

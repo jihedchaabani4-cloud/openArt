@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { notFound } from "next/navigation";
-import { GoogleIcon } from "@/shared/ui/GoogleIcon";
-import { ProcessingCard } from "@/shared/ui/ProcessingCard";
-import { MediaGridItem } from "@/widgets/StudioLayout/GenerationsStudio/MediaGridItem";
+import { GoogleIcon } from "@/components/primitives/GoogleIcon";
+import { ProcessingCard } from "@/components/cinema-studio/media/ProcessingCard";
+import { MediaGridItem } from "@/components/cinema-studio/media/MediaGridItem";
+import { Button } from "@/components/base/button";
 
 export default function ProcessingCardTestPage() {
   const [progress, setProgress] = useState(29);
@@ -30,7 +31,7 @@ export default function ProcessingCardTestPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0d0e11] text-white p-6 md:p-10">
+    <div className="min-h-screen bg-canvas-bg text-white p-6 md:p-10">
       <div className="max-w-6xl mx-auto flex flex-col gap-8">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-6">
@@ -43,45 +44,39 @@ export default function ProcessingCardTestPage() {
             </div>
             <h1 className="text-2xl font-bold tracking-tight">Processing Card Demo</h1>
             <p className="text-sm text-white/50 mt-1">
-              Exact reverse-engineered specs: #17181a dark neutral base, 10s non-linear orbital drift, 13s secondary blob, blur-3xl glow, minimal play icon & tabular % counter.
+              Exact reverse-engineered specs: neutral dark base, 10s non-linear orbital drift, 13s secondary blob, blur-3xl glow, minimal play icon & tabular % counter.
             </p>
           </div>
 
           {/* Controls Bar */}
           <div className="flex flex-wrap items-center gap-3 bg-white/[0.04] p-3 rounded-lg border border-white/10">
-            <button
+            <Button
               type="button"
+              variant={isAutoSimulating ? "secondary" : "outline"}
               onClick={() => setIsAutoSimulating(!isAutoSimulating)}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
-                isAutoSimulating
-                  ? "bg-white/20 text-white border border-white/30"
-                  : "bg-white/5 text-white/60 hover:bg-white/10 border border-white/10"
-              }`}
+              className="gap-2"
             >
               {isAutoSimulating ? <GoogleIcon iconName="pause" className="text-sm" /> : <GoogleIcon iconName="play_arrow" className="text-sm" />}
               {isAutoSimulating ? "Simulating (+1/+2% / 2s)" : "Paused"}
-            </button>
+            </Button>
 
-            <button
+            <Button
               type="button"
+              variant="outline"
               onClick={() => setProgress(29)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-white/5 hover:bg-white/10 text-white/60 hover:text-white border border-white/10 transition-colors cursor-pointer"
+              className="gap-1.5"
             >
               <GoogleIcon iconName="refresh" className="text-sm" />
               Reset (29%)
-            </button>
+            </Button>
 
-            <button
+            <Button
               type="button"
+              variant={showPlayIcon ? "tonal" : "outline"}
               onClick={() => setShowPlayIcon(!showPlayIcon)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer border ${
-                showPlayIcon
-                  ? "bg-amber-500/20 text-amber-300 border-amber-500/40"
-                  : "bg-white/5 text-white/50 border-white/10 hover:text-white"
-              }`}
             >
               {showPlayIcon ? "Video Icon: ON" : "Video Icon: OFF (Image mode)"}
-            </button>
+            </Button>
 
             <div className="flex items-center gap-2 pl-2 border-l border-white/10">
               <span className="text-xs text-white/50 font-mono tabular-nums">{progress}%</span>
@@ -231,7 +226,7 @@ export default function ProcessingCardTestPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-white/60">
             <div className="flex flex-col gap-1 p-3 rounded-lg bg-black/40 border border-white/5">
               <span className="text-white font-medium">Card Container</span>
-              <span>Background: <code className="text-white/80">#17181a</code> (pure neutral dark)</span>
+              <span>Background: <code className="text-white/80">bg-canvas-bg</code> (pure neutral dark)</span>
               <span>Radius: <code className="text-white/80">rounded-2xl</code> (~16px)</span>
               <span>No skeleton shimmer, no spinner</span>
             </div>

@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import { notFound } from "next/navigation";
-import { GoogleIcon } from "@/shared/ui/GoogleIcon";
-import { ShineText } from "@/shared/ui/ShineText";
+import { GoogleIcon } from "@/components/primitives/GoogleIcon";
+import { ShineText } from "@/components/primitives/ShineText";
+import { Button } from "@/components/base/button";
 
 export default function ShineTextTestPage() {
   const [active, setActive] = useState(true);
@@ -14,7 +15,7 @@ export default function ShineTextTestPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0d0e11] text-white p-6 md:p-10">
+    <div className="min-h-screen bg-canvas-bg text-white p-6 md:p-10">
       <div className="max-w-6xl mx-auto flex flex-col gap-8">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-6">
@@ -33,30 +34,28 @@ export default function ShineTextTestPage() {
 
           {/* Controls Bar */}
           <div className="flex flex-wrap items-center gap-3 bg-white/[0.04] p-3 rounded-lg border border-white/10">
-            <button
+            <Button
               type="button"
+              variant={active ? "secondary" : "outline"}
               onClick={() => setActive(!active)}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
-                active
-                  ? "bg-white/20 text-white border border-white/30"
-                  : "bg-white/5 text-white/60 hover:bg-white/10 border border-white/10"
-              }`}
+              className="gap-2"
             >
               {active ? <GoogleIcon iconName="pause" className="text-sm" /> : <GoogleIcon iconName="play_arrow" className="text-sm" />}
               {active ? "Sweeping (loop)" : "Idle (processing done)"}
-            </button>
+            </Button>
 
-            <button
+            <Button
               type="button"
+              variant="outline"
               onClick={() => {
                 setActive(true);
                 setDuration(2.6);
               }}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-white/5 hover:bg-white/10 text-white/60 hover:text-white border border-white/10 transition-colors cursor-pointer"
+              className="gap-1.5"
             >
               <GoogleIcon iconName="refresh" className="text-sm" />
               Reset
-            </button>
+            </Button>
 
             <div className="flex items-center gap-2 pl-2 border-l border-white/10">
               <span className="text-xs text-white/50 font-mono tabular-nums">{duration.toFixed(1)}s</span>
@@ -82,7 +81,7 @@ export default function ShineTextTestPage() {
             <span className="text-xs text-white/40">Default cycle: 2.6s sweep + soft hold</span>
           </div>
 
-          <div className="p-10 rounded-2xl bg-[#141518] border border-white/5 shadow-none flex items-center justify-center">
+          <div className="p-10 rounded-2xl bg-omni-bg border border-white/5 shadow-none flex items-center justify-center">
             <ShineText
               active={active}
               duration={duration}
@@ -137,28 +136,28 @@ export default function ShineTextTestPage() {
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <div className="p-6 rounded-lg bg-[#141518] border border-white/5 flex flex-col gap-3">
+            <div className="p-6 rounded-lg bg-omni-bg border border-white/5 flex flex-col gap-3">
               <span className="text-xs text-white/50 font-mono">Image generation</span>
               <ShineText active={active} duration={duration} className="text-xl font-semibold">
                 Generating your character…
               </ShineText>
             </div>
 
-            <div className="p-6 rounded-lg bg-[#141518] border border-white/5 flex flex-col gap-3">
+            <div className="p-6 rounded-lg bg-omni-bg border border-white/5 flex flex-col gap-3">
               <span className="text-xs text-white/50 font-mono">Video generation</span>
               <ShineText active={active} duration={duration} className="text-xl font-semibold">
                 Rendering your scene…
               </ShineText>
             </div>
 
-            <div className="p-6 rounded-lg bg-[#141518] border border-white/5 flex flex-col gap-3">
+            <div className="p-6 rounded-lg bg-omni-bg border border-white/5 flex flex-col gap-3">
               <span className="text-xs text-white/50 font-mono">Long copy (sweep across wrap)</span>
               <ShineText active={active} duration={duration} className="text-xl font-semibold">
                 Upscaling 4× — almost there, polishing details…
               </ShineText>
             </div>
 
-            <div className="p-6 rounded-lg bg-[#141518] border border-white/5 flex flex-col gap-3">
+            <div className="p-6 rounded-lg bg-omni-bg border border-white/5 flex flex-col gap-3">
               <span className="text-xs text-white/50 font-mono">active=false (idle comparison)</span>
               <ShineText active={false} className="text-xl font-semibold">
                 Upscaling 4× — almost there, polishing details…

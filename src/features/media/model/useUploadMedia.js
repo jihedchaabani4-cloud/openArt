@@ -7,31 +7,12 @@ import { intrinsicSizeToRatioLabel } from "@/shared/lib/displayUtils";
 import {
   validateFilesAgainstPolicy,
   DEFAULT_UPLOAD_POLICY,
-  MAX_BATCH_UPLOAD_FILES,
   BATCH_UPLOAD_CONCURRENCY,
+  validateBatchCount,
 } from "../uploadPolicy";
 import { api } from "@/shared/api/client";
 
-/**
- * Pure validation helper for batch upload counts.
- * Enforces the maximum selection limit defined in uploadPolicy.
- *
- * @param {File | File[] | FileList} filesOrFile
- */
-export function validateBatchCount(filesOrFile) {
-  if (!filesOrFile) return;
-  const files = Array.isArray(filesOrFile)
-    ? filesOrFile
-    : (typeof filesOrFile[Symbol.iterator] === "function" || typeof filesOrFile.length === "number")
-    ? Array.from(filesOrFile)
-    : [filesOrFile];
-
-  if (files.length > MAX_BATCH_UPLOAD_FILES) {
-    throw new Error(
-      `Too many files selected (${files.length}). Maximum allowed is ${MAX_BATCH_UPLOAD_FILES} files per upload.`
-    );
-  }
-}
+export { validateBatchCount };
 
 /**
  * Standalone direct media upload helper.

@@ -12,8 +12,8 @@ import { selectPersistable } from "../store/persistence.js";
 import { createRegistry } from "../store/registry.js";
 import { promptBarService } from "../api/promptBarService.js";
 import { drainPendingActions } from "../store/pendingActions.js";
-import { PromptEditor } from "../ui/common/editor/PromptEditor.jsx";
-import { SHINE_TEXT_SWEEP_MS } from "@/shared/ui/ShineText";
+import { PromptEditor } from "@/components/cinema-studio/prompt-bar/editor/PromptEditor.jsx";
+import { SHINE_TEXT_SWEEP_MS } from "@/components/primitives/ShineText";
 
 function createMockStorage() {
   const store = new Map();
@@ -162,7 +162,7 @@ describe("Prompt fill animation: programmatic fills shine once, typing never", (
   // ── Platform wiring (source contract) ────────────────────────────────────
 
   it("PromptBarPlatform reads promptFillNonce and passes fillNonce to PromptEditor (default for all templates)", () => {
-    const platformPath = path.resolve(__dirname, "../platform/PromptBarPlatform.jsx");
+    const platformPath = path.resolve(__dirname, "../../../components/cinema-studio/prompt-bar/PromptBarPlatform.jsx");
     const src = fs.readFileSync(platformPath, "utf8");
 
     expect(src).toContain("promptFillNonce");

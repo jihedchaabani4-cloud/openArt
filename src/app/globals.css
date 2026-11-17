@@ -1,6 +1,8 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+@custom-variant dark (&:is(.dark *));
+
 /* ── Google Symbols font (if used by GoogleIcon) ── */
 @font-face {
   font-family: 'Google Symbols';
@@ -56,63 +58,183 @@
 .h-button-l { height: 42px; }
 
 @theme inline {
-  --color-background: hsl(var(--background));
-  --color-foreground: hsl(var(--foreground));
+  --color-background: var(--body-bg);
+  --color-foreground: rgb(var(--foreground));
+  --color-saas-bg: var(--saas-bg);
   --color-omni-bg: var(--omni-bg);
   --color-body-bg: var(--body-bg);
-  --color-primary: hsl(var(--primary));
-  --color-primary-foreground: hsl(var(--primary-foreground));
-  --color-secondary: hsl(var(--secondary));
-  --color-secondary-foreground: hsl(var(--secondary-foreground));
-  --color-muted: hsl(var(--muted));
-  --color-muted-foreground: hsl(var(--muted-foreground));
-  --color-accent: hsl(var(--accent));
-  --color-accent-foreground: hsl(var(--accent-foreground));
-  --color-border: hsl(var(--border));
-  --color-input: hsl(var(--input));
+  --color-canvas-bg: var(--canvas-bg);
+  --color-primary: rgb(var(--primary));
+  --color-primary-foreground: rgb(var(--primary-foreground));
+  --color-secondary: rgb(var(--secondary));
+  --color-secondary-foreground: rgb(var(--secondary-foreground));
+  --color-muted: rgb(var(--muted));
+  --color-muted-foreground: rgb(var(--muted-foreground));
+  --color-accent: rgb(var(--accent));
+  --color-accent-foreground: rgb(var(--accent-foreground));
+  --color-border: rgb(var(--border));
+  --color-input: rgb(var(--input));
   --color-ring: hsl(var(--ring));
   --color-accent-yellow: var(--accent-yellow);
   --color-error: var(--error);
   --color-button-tonal: var(--button-tonal);
   --color-button-tonal-hover: var(--button-tonal-hover);
   --color-surface-card: var(--surface-card);
+  --color-prompt-bar-bg: var(--prompt-bar-bg);
+  --color-popover: rgb(var(--popover));
+  --color-popover-foreground: rgb(var(--popover-foreground));
+  --color-card: var(--card);
+  --color-card-foreground: rgb(var(--card-foreground));
+  --color-destructive: rgb(var(--destructive));
+  --color-destructive-foreground: rgb(var(--destructive-foreground));
+  --color-accent-blue: rgb(var(--accent-blue));
+  --color-accent-orange: rgb(var(--accent-orange));
+  --color-accent-green: hsl(var(--accent-green));
+  --color-bg-background: rgb(var(--bg-background));
+  --color-border-primary: rgb(var(--border-primary));
+  --color-border-subtle: rgb(var(--border-subtle));
+  --color-card-hover: rgb(var(--card-hover));
+  --color-fill-disabled: rgb(var(--fill-disabled));
+  --color-fill-hover: rgb(var(--fill-hover));
+  --color-fill-primary: rgb(var(--fill-primary));
+  --color-fill-secondary: rgb(var(--fill-secondary));
+  --color-fill-tertiary: rgb(var(--fill-tertiary));
+  --color-tertiary: rgb(var(--tertiary));
 
   --font-sans: "Geist Sans", "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "Geist Mono", ui-monospace, Consolas, monospace;
 }
 
+@keyframes scanShimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.animate-shimmer {
+  animation: scanShimmer 1.5s infinite cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+}
+
+/* ==========================================================================
+   SAAS DARK UI — COMPLETE EXTRACTED TOKENS & COMPONENT CONTRACT (`globals.css`)
+   Extracted from exact computed DOM styles + DESIGN.md.
+   RULE: Components must ONLY use these CSS tokens (`var(--...)`) and `.ds-*`
+   classes. No hardcoded hex/rgb values or legacy classes outside this file.
+   ========================================================================== */
+
 @layer base {
   :root,
   html.dark {
     color-scheme: dark;
-    --background: 240 10% 3.9%;          /* #09090B */
-    --foreground: 0 0% 98%;             /* #FAFAFA */
-    --omni-bg: #1A1A1A;                 /* rgb(26, 26, 26) */
-    --body-bg: #0E1015;                 /* rgb(14, 16, 21) */
-    --primary: 0 0% 98%;                /* #FAFAFA / #FFFFFF */
-    --primary-foreground: 240 5.9% 10%; /* #18181B / #000000 */
-    --secondary: 240 3.7% 15.9%;        /* #27272A */
-    --secondary-foreground: 0 0% 98%;   /* #FAFAFA */
-    --muted: 240 3.7% 15.9%;            /* #27272A */
-    --muted-foreground: 240 5% 64.9%;   /* #A1A1AA */
-    --accent: 240 3.7% 15.9%;           /* #27272A */
-    --accent-foreground: 0 0% 98%;      /* #FAFAFA */
-    --border: 240 3.7% 15.9%;           /* #27272A */
-    --input: 240 3.7% 15.9%;            /* #27272A */
-    --ring: 240 4.9% 83.9%;             /* #D4D4D8 */
-    --accent-yellow: #FFC241;           /* rgb(255, 193, 65) */
-    --error: #E5484D;                   /* rgb(229, 72, 77) */
-    --button-tonal: rgba(255, 255, 255, 0.10);
-    --button-tonal-hover: rgba(255, 255, 255, 0.15);
-    --surface-card: rgba(255, 255, 255, 0.05);
+
+    /* --- Core Tokens --- */
+    --accent: 255 255 255;
+    --accent-blue: 0 178 248;
+    --accent-foreground: 0 0 0;
+    --accent-green: 78, 92.3%, 59%;
+    --accent-orange: 255 87 10;
+    --background: 26 26 26;
+    --bg-background: 26 26 26;
+    --border: 49 49 49;
+    --border-primary: 141 141 141;
+    --border-subtle: 49 49 49;
+    --card: 68 68 68;
+    --card-foreground: 255 255 255;
+    --card-hover: 67 67 67;
+    --destructive: 229 72 77;
+    --destructive-foreground: 255 255 255;
+    --fill-disabled: 38 38 38;
+    --fill-hover: 67 67 67;
+    --fill-primary: 255 255 255;
+    --fill-secondary: 49 49 49;
+    --fill-tertiary: 44 44 44;
+    --foreground: 255 255 255;
+    --input: 141 141 141;
+    --muted: 49 49 49;
+    --muted-foreground: 141 141 141;
+    --opus-bg-black: 13 13 13;
+    --opus-bg-menu: 0 0% 26.7%;
+    --opus-bg-overlay-subtle: 47 47 47;
+    --popover: 68 68 68;
+    --popover-foreground: 255 255 255;
+    --primary: 255 255 255;
+    --primary-foreground: 0 0 0;
+    --ring: 240 4.9% 83.9%;
+    --secondary: 141 141 141;
+    --secondary-foreground: 255 255 255;
+    --tertiary: 118 118 118;
+
+    /* --- Exact Surface & Background Tokens --- */
+    --saas-bg: #1A1A1A;                              /* Core SaaS pages & Cinema Studio background */
+    --body-bg: #1A1A1A;                              /* Root body & HTML background */
+    --canvas-bg: #1A1A1A;                            /* Canvas background */
+    --canvas-bg-80: rgba(26, 26, 26, 0.80);          /* Card bottom status overlay */
+    --omni-bg: #1A1A1A;                              /* App & Sidebar background */
+    --prompt-bar-bg: rgba(68, 68, 68, 0.50);          /* Prompt bar card background (#444444 / 50%) */
+    --surface-secondary: #27272A;                    /* rgb(39, 39, 42) */
+    --surface-nav-active: rgba(39, 39, 42, 0.50);    /* Active sidebar item */
+    --surface-card: rgba(255, 255, 255, 0.05);       /* Composer & section cards */
+    --surface-input-well: rgba(0, 0, 0, 0.15);       /* Prompt input inner well */
+    --surface-tonal: rgba(255, 255, 255, 0.10);      /* --button-tonal */
+    --surface-tonal-hover: rgba(255, 255, 255, 0.15);
+    --surface-tonal-hover-strong: rgba(255, 255, 255, 0.18);
+    --surface-glass-bg: rgba(68, 68, 68, 0.50);      /* Floating glass menu */
+    --surface-badge-glass: rgba(48, 48, 48, 0.80);   /* bg-grey-400/80 badge */
+    --surface-listbox: rgba(36, 36, 38, 0.96);       /* Select listbox */
+    --surface-launcher: #2D2D2D;                     /* rgb(45, 45, 45) Intercom button */
+
+    /* --- Exact Text & Icon Tokens --- */
+    --text-primary: #FFFFFF;                         /* rgb(255, 255, 255) */
+    --text-primary-soft: #FAFAFA;                    /* rgb(250, 250, 250) */
+    --text-card-title: #FFFBF6;                      /* rgb(255, 251, 246) */
+    --text-inverse: #18181B;                         /* rgb(24, 24, 27) */
+    --text-body: #9B9EA3;                            /* rgb(155, 158, 163) — Default body/input */
+    --text-body-muted: rgba(255, 255, 255, 0.70);    /* 70% white */
+    --text-muted-fg: #A1A1AA;                        /* rgb(161, 161, 170) */
+    --text-secondary: rgba(255, 255, 255, 0.50);     /* 50% white */
+    --text-disabled: rgba(255, 255, 255, 0.25);      /* 25% white */
+
+    /* --- Borders, Dividers & Focus --- */
+    --border-structural: #27272A;                    /* rgb(39, 39, 42) */
     --border-subtle: rgba(255, 255, 255, 0.10);
+    --border-divider: rgba(255, 255, 255, 0.20);
     --border-dashed: rgba(255, 255, 255, 0.18);
-    --text-secondary: rgba(255, 255, 255, 0.50);
-    --text-disabled: rgba(255, 255, 255, 0.25);
+    --focus-ring-workspace: rgba(255, 255, 255, 0.70);
+
+    /* --- Status & Semantic Accents --- */
+    --accent-yellow: #FFC241;
+    --accent-yellow-banner: rgba(255, 193, 65, 0.10);
+    --text-unsaved: #EC632D;                         /* rgb(236, 99, 45) */
+    --error: #E5484D;                                /* rgb(229, 72, 77) — Error dot */
+    --error-badge: #E31B0C;                          /* rgb(227, 27, 12) — Counter pill */
+
+    /* --- Typography & OpenType Features --- */
+    --font-geist-sans: "Geist Sans", ui-sans-serif, system-ui, sans-serif;
+    --font-geist-mono: "Geist Mono", ui-monospace, Consolas, monospace;
+
+    /* --- Border Radii Scale --- */
+    --radius-badge: 6px;
+    --radius-row: 8px;
+    --radius-control: 10px;
+    --radius-cta-lg: 12px;
+    --radius-slot: 16px;
+    --radius-tab-top: 20px;
+    --radius-preview: 24px;
+    --radius-card: 28px;
+    --radius-pill: 9999px;
+
+    /* --- Blur & Transitions --- */
+    --blur-glass: blur(40px);
+    --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+    --ease-decelerate: cubic-bezier(0, 0, 0.2, 1);
+  }
+
+  * {
+    border-color: var(--border-structural);
   }
 
   html {
-    background-color: var(--body-bg);
+    background-color: var(--omni-bg);
     color-scheme: dark;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -121,10 +243,17 @@
 
   body {
     background-color: var(--omni-bg);
-    color: #FFFFFF;
-    font-family: "Geist Sans", "Inter", ui-sans-serif, system-ui, sans-serif;
+    color: var(--text-body);
+    font-family: var(--font-geist-sans);
+    font-feature-settings: "ss01", "ss03", "ss04", "ss06", "ss08";
     font-variant-alternates: styleset(ss01, ss03, ss04, ss06, ss08);
+    line-height: 24px;
     -webkit-font-smoothing: antialiased;
+    overscroll-behavior: none;
+  }
+
+  code, pre, kbd, samp {
+    font-family: var(--font-geist-mono);
   }
 
   input[type="search"]::-webkit-search-decoration,
@@ -135,28 +264,726 @@
   }
 }
 
-.surface-glass {
-  background-color: rgba(68, 68, 68, 0.50);
-  backdrop-filter: blur(40px);
-  -webkit-backdrop-filter: blur(40px);
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+/* ==========================================================================
+   SURFACE, TEXT & FOCUS UTILITIES
+   ========================================================================== */
+
+@layer utilities {
+  .bg-saas-bg { background-color: var(--saas-bg); }
+  .bg-omni-bg { background-color: var(--omni-bg); }
+  .bg-body-root { background-color: var(--body-bg); }
+  .bg-canvas-deep { background-color: var(--canvas-bg); }
+  .text-unsaved { color: var(--text-unsaved); }
+  .bg-error { background-color: var(--error); }
+
+  .surface-glass {
+    background-color: var(--surface-glass-bg);
+    -webkit-backdrop-filter: var(--blur-glass);
+    backdrop-filter: var(--blur-glass);
+    border: 1px solid var(--border-subtle);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  }
+
+  .surface-listbox {
+    background-color: var(--surface-listbox);
+    -webkit-backdrop-filter: var(--blur-glass);
+    backdrop-filter: var(--blur-glass);
+    border: 1px solid var(--border-subtle);
+  }
+
+  /* Dual Focus Strategy */
+  .focus-workspace:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--focus-ring-workspace);
+  }
+  .focus-chrome:focus-visible {
+    outline: none;
+    box-shadow: none;
+  }
+
+  /* Carousel Scroll Fade */
+  .ds-scroll-fade-right {
+    background-image: linear-gradient(to left, var(--omni-bg), transparent);
+  }
 }
 
-.header-backdrop {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  backdrop-filter: blur(2px);
-  -webkit-backdrop-filter: blur(2px);
-  mask-image: linear-gradient(180deg, #000 0%, #000 40%, rgba(0, 0, 0, 0.85) 55%, rgba(0, 0, 0, 0.65) 68%, rgba(0, 0, 0, 0.42) 78%, rgba(0, 0, 0, 0.22) 86%, rgba(0, 0, 0, 0.1) 92%, rgba(0, 0, 0, 0.03) 96%, rgba(0, 0, 0, 0.005) 98.5%, transparent 100%);
-  -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 40%, rgba(0, 0, 0, 0.85) 55%, rgba(0, 0, 0, 0.65) 68%, rgba(0, 0, 0, 0.42) 78%, rgba(0, 0, 0, 0.22) 86%, rgba(0, 0, 0, 0.1) 92%, rgba(0, 0, 0, 0.03) 96%, rgba(0, 0, 0, 0.005) 98.5%, transparent 100%);
-  z-index: -1;
-  background: var(--header-blur-background, transparent);
-  transition: opacity 0.3s ease-in-out;
-  opacity: 0;
+/* ==========================================================================
+   CANONICAL COMPONENT CONTRACT CLASSES (`.ds-*`)
+   ========================================================================== */
+
+@layer components {
+  /* --- Layout & Sidebar --- */
+  .ds-app-shell {
+    background-color: var(--omni-bg);
+    color: var(--text-body);
+  }
+
+  .ds-sidebar {
+    background-color: var(--omni-bg);
+    border-right: 1px solid var(--border-structural);
+    padding: 12px;
+  }
+
+  .ds-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    height: 38px;
+    padding: 8px;
+    border-radius: var(--radius-control);
+    border: 1px solid transparent;
+    color: var(--text-primary-soft);
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 20px;
+    transition: background-color 150ms var(--ease-standard), border-color 150ms var(--ease-standard);
+  }
+  .ds-nav-item:hover,
+  .ds-nav-item[data-active="true"] {
+    background-color: var(--surface-nav-active);
+    border-color: var(--border-structural);
+  }
+
+  /* --- 01. Button Solid (Primary White, Large CTA, Secondary Dark) --- */
+  .ds-btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 38px;
+    padding: 0 16px;
+    border-radius: var(--radius-control);
+    background-color: var(--text-primary-soft);
+    color: var(--text-inverse);
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 20px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+    transition: background-color 150ms var(--ease-standard), opacity 150ms var(--ease-standard);
+  }
+  .ds-btn-primary:hover:not(:disabled) {
+    background-color: rgba(250, 250, 250, 0.90);
+  }
+  .ds-btn-primary:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--focus-ring-workspace);
+  }
+  .ds-btn-primary:disabled {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  .ds-btn-cta-lg {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 48px;
+    padding: 8px 16px;
+    border-radius: var(--radius-cta-lg);
+    background-color: var(--text-primary-soft);
+    color: var(--text-inverse);
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 20px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+    transition: background-color 150ms var(--ease-standard);
+  }
+  .ds-btn-cta-lg:hover:not(:disabled) {
+    background-color: rgba(250, 250, 250, 0.90);
+  }
+
+  .ds-btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 32px;
+    padding: 0 12px;
+    border-radius: var(--radius-control);
+    background-color: var(--surface-secondary);
+    color: var(--text-primary-soft);
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 16px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    transition: background-color 150ms var(--ease-standard);
+  }
+  .ds-btn-secondary:hover:not(:disabled) {
+    background-color: rgba(39, 39, 42, 0.80);
+  }
+
+  /* --- 02. Button Tonal & Filter Chips --- */
+  .ds-btn-tonal {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 36px;
+    padding: 8px 16px;
+    border-radius: var(--radius-badge);
+    background-color: var(--surface-tonal);
+    color: var(--text-primary-soft);
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 20px;
+    transition: background-color 150ms var(--ease-standard);
+  }
+  .ds-btn-tonal:hover:not(:disabled) {
+    background-color: var(--surface-tonal-hover);
+  }
+
+  .ds-btn-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 32px;
+    padding: 0 12px;
+    border-radius: var(--radius-pill);
+    background-color: var(--surface-tonal);
+    color: var(--text-primary-soft);
+    font-size: 14px;
+    font-weight: 500;
+    transition: background-color 150ms var(--ease-standard);
+  }
+  .ds-btn-pill:hover:not(:disabled) {
+    background-color: var(--surface-tonal-hover-strong);
+  }
+
+  .ds-filter-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 38px;
+    padding: 8px 12px 8px 10px;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--border-subtle);
+    background-color: transparent;
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 17px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    transition: background-color 150ms var(--ease-standard), color 150ms var(--ease-standard);
+  }
+  .ds-filter-chip:hover {
+    background-color: var(--surface-tonal);
+    color: var(--text-primary);
+  }
+
+  /* --- 03. Button Ghost & Text Link --- */
+  .ds-btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 38px;
+    gap: 6px;
+    padding: 0 10px;
+    border-radius: var(--radius-control);
+    background-color: transparent;
+    color: var(--text-primary);
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 20px;
+    transition: background-color 150ms var(--ease-standard);
+  }
+  .ds-btn-ghost:hover:not(:disabled) {
+    background-color: var(--surface-tonal);
+  }
+
+  .ds-btn-link {
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 500;
+    transition: color 150ms var(--ease-standard);
+  }
+  .ds-btn-link:hover {
+    color: var(--text-primary);
+  }
+
+  /* --- 04. Button Outline --- */
+  .ds-btn-outline {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 34px;
+    padding: 8px;
+    border-radius: var(--radius-control);
+    border: 1px solid var(--border-structural);
+    background-color: transparent;
+    color: var(--text-primary-soft);
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 20px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    transition: background-color 150ms var(--ease-standard);
+  }
+  .ds-btn-outline:hover:not(:disabled) {
+    background-color: var(--surface-nav-active);
+  }
+
+  /* --- 05. Icon Button (Chrome = ring-0) --- */
+  .ds-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-badge);
+    background-color: transparent;
+    color: var(--text-primary-soft);
+    transition: background-color 150ms var(--ease-standard);
+  }
+  .ds-icon-btn:hover:not(:disabled) {
+    background-color: var(--surface-tonal-hover);
+  }
+  .ds-icon-btn:focus-visible {
+    outline: none;
+    box-shadow: none;
+  }
+
+  .ds-icon-btn-tonal {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-badge);
+    background-color: var(--surface-tonal);
+    color: var(--text-primary-soft);
+    transition: background-color 150ms var(--ease-standard);
+  }
+  .ds-icon-btn-tonal:hover:not(:disabled) {
+    background-color: var(--surface-tonal-hover);
+  }
+  .ds-icon-btn-tonal:focus-visible {
+    outline: none;
+    box-shadow: none;
+  }
+
+  .ds-icon-btn-outline {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    padding: 8px;
+    border-radius: var(--radius-control);
+    border: 1px solid var(--border-structural);
+    background-color: transparent;
+    color: var(--text-primary-soft);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    transition: background-color 150ms var(--ease-standard);
+  }
+  .ds-icon-btn-outline:hover:not(:disabled) {
+    background-color: var(--surface-secondary);
+  }
+
+  .ds-icon-btn-carousel {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-control);
+    border: 1px solid var(--border-subtle);
+    background-color: transparent;
+    color: var(--text-body);
+    transition: background-color 150ms var(--ease-standard);
+  }
+  .ds-icon-btn-carousel:hover:not(:disabled) {
+    background-color: var(--surface-tonal-hover-strong);
+  }
+  .ds-icon-btn-carousel:disabled {
+    cursor: not-allowed;
+  }
+
+  /* --- 06. Pill Select & Dropdown --- */
+  .ds-select-trigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 38px;
+    width: 200px;
+    padding: 0 16px 0 20px;
+    border-radius: var(--radius-pill);
+    background-color: var(--surface-tonal);
+    color: var(--text-primary);
+    font-size: 16px;
+    font-weight: 500;
+    transition: background-color 150ms var(--ease-standard);
+  }
+  .ds-select-trigger:hover {
+    background-color: var(--surface-tonal-hover);
+  }
+
+  .ds-menu-item {
+    display: flex;
+    align-items: center;
+    height: 36px;
+    padding: 0 10px;
+    border-radius: var(--radius-cta-lg);
+    color: var(--text-primary);
+    font-size: 14px;
+    font-weight: 500;
+    transition: background-color 150ms var(--ease-standard);
+  }
+  .ds-menu-item:hover {
+    background-color: rgba(255, 255, 255, 0.20);
+  }
+
+  /* --- 07. Pill Tabs & Composer Folder Tabs --- */
+  .ds-tab-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 32px;
+    padding: 0 12px;
+    border-radius: var(--radius-pill);
+    background-color: var(--surface-tonal);
+    color: var(--text-primary);
+    font-size: 14px;
+    font-weight: 500;
+    transition: background-color 150ms var(--ease-standard), color 150ms var(--ease-standard);
+  }
+  .ds-tab-pill[data-state="active"] {
+    background-color: var(--text-primary);
+    color: var(--text-inverse);
+  }
+
+  .ds-composer-tab {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 48px;
+    padding: 0 20px;
+    border-top-left-radius: var(--radius-tab-top);
+    border-top-right-radius: var(--radius-tab-top);
+    background-color: transparent;
+    color: var(--text-secondary);
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 26px;
+    transition: color 150ms var(--ease-standard), background-color 150ms var(--ease-standard);
+  }
+  .ds-composer-tab:hover {
+    color: var(--text-body-muted);
+  }
+  .ds-composer-tab[data-state="on"],
+  .ds-composer-tab[data-state="active"] {
+    background-color: var(--surface-card);
+    color: var(--text-primary-soft);
+  }
+
+  /* --- 08. Composer Card, Section Card & Media Cards --- */
+  .bg-popover {
+    background-color: hsl(var(--popover));
+  }
+
+  .bg-card {
+    background-color: var(--card);
+  }
+
+  .bg-card\/50 {
+    background-color: color-mix(in srgb, var(--card) 50%, transparent);
+  }
+
+  .ds-composer-card {
+    border-radius: var(--radius-card);
+    background-color: rgba(68, 68, 68, 0.50);
+    background-color: color-mix(in srgb, var(--card) 50%, transparent);
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+    padding: 3px;
+  }
+
+  .ds-composer-well {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    border-radius: var(--radius-slot);
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 4px 0;
+  }
+
+  .ds-section-card {
+    border-radius: var(--radius-card);
+    background-color: var(--surface-card);
+    -webkit-backdrop-filter: var(--blur-glass);
+    backdrop-filter: var(--blur-glass);
+    padding: 24px 32px;
+  }
+
+  .ds-accordion-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: 24px;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 18px;
+    letter-spacing: 0.1px;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+  }
+
+  .ds-media-card {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--radius-preview);
+    border: 1px solid var(--border-subtle);
+    transition: border-color 200ms var(--ease-standard);
+  }
+  .ds-media-card:hover {
+    border-color: var(--text-primary);
+  }
+
+  .ds-thumb-card {
+    position: relative;
+    overflow: clip;
+    border-radius: var(--radius-slot);
+    border: 1px solid var(--border-structural);
+  }
+
+  /* --- 09. Dashed Upload Slot --- */
+  .ds-upload-slot {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-slot);
+    border: 1px dashed var(--border-dashed);
+    background-color: var(--surface-card);
+    color: var(--text-secondary);
+    transition: background-color 150ms var(--ease-standard);
+  }
+  .ds-upload-slot:hover:not(:disabled) {
+    background-color: var(--surface-tonal);
+  }
+  .ds-upload-slot:disabled {
+    cursor: not-allowed;
+    color: var(--text-disabled);
+  }
+
+  /* --- 10. Interactive List Row --- */
+  .ds-list-row {
+    display: flex;
+    align-items: center;
+    height: 48px;
+    padding: 0 12px;
+    border-radius: var(--radius-row);
+    background-color: transparent;
+    color: var(--text-primary);
+    font-size: 14px;
+    font-weight: 500;
+    transition: background-color 150ms var(--ease-standard);
+  }
+  .ds-list-row:hover {
+    background-color: var(--surface-card);
+  }
+
+  /* --- 11. Switch & Input --- */
+  .ds-switch {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    width: 44px;
+    height: 24px;
+    border-radius: var(--radius-pill);
+    background-color: var(--surface-tonal-hover);
+    transition: background-color 150ms var(--ease-standard);
+  }
+  .ds-switch[data-checked],
+  .ds-switch[data-state="checked"] {
+    background-color: var(--text-primary);
+  }
+
+  .ds-switch-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: var(--radius-pill);
+    background-color: var(--text-primary);
+    transition: transform 150ms var(--ease-standard), background-color 150ms var(--ease-standard);
+  }
+  .ds-switch[data-checked] .ds-switch-thumb,
+  .ds-switch[data-state="checked"] .ds-switch-thumb {
+    background-color: var(--canvas-bg);
+  }
+
+  .ds-input {
+    height: 38px;
+    padding: 0 14px;
+    border-radius: var(--radius-control);
+    background-color: var(--surface-card);
+    border: none;
+    color: var(--text-primary);
+    font-size: 14px;
+    transition: background-color 150ms var(--ease-standard);
+  }
+  .ds-input:focus {
+    outline: none;
+  }
+
+  .ds-input-ghost {
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+    color: var(--text-primary);
+  }
+  .ds-input-ghost:hover,
+  .ds-input-ghost:focus,
+  .ds-input-ghost:focus-within {
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+  }
+
+  .ds-input-accent,
+  .ds-input-search {
+    display: flex;
+    align-items: center;
+    height: 36px;
+    padding: 0 10px;
+    border-radius: var(--radius-row);
+    background-color: rgb(var(--accent) / 0.50);
+    border: none;
+    color: var(--text-primary);
+    font-size: 14px;
+    transition: background-color 150ms var(--ease-standard);
+  }
+  .ds-input-accent:hover,
+  .ds-input-search:hover {
+    background-color: rgb(var(--accent) / 0.70);
+  }
+  .ds-input-accent:focus,
+  .ds-input-accent:focus-within,
+  .ds-input-search:focus,
+  .ds-input-search:focus-within {
+    background-color: rgb(var(--accent) / 0.70);
+    outline: none;
+  }
+
+  .ds-checkbox {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-control);
+    border: 1px solid var(--border-structural);
+    background-color: var(--surface-card);
+    transition: background-color 150ms var(--ease-standard), border-color 150ms var(--ease-standard);
+  }
+  .ds-checkbox[data-state="checked"] {
+    background-color: var(--text-primary);
+    border-color: var(--text-primary);
+    color: var(--text-inverse);
+  }
+  .ds-checkbox-circle {
+    border-radius: var(--radius-pill);
+  }
+
+  /* --- 12. Badges, Status Bar & Floating Launcher --- */
+  .ds-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 6px;
+    border-radius: var(--radius-badge);
+    background-color: var(--surface-tonal);
+    color: var(--text-primary-soft);
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 16px;
+  }
+
+  .ds-badge-glass {
+    display: inline-flex;
+    align-items: center;
+    height: 24px;
+    padding: 0 8px;
+    border-radius: var(--radius-pill);
+    background-color: var(--surface-badge-glass);
+    -webkit-backdrop-filter: var(--blur-glass);
+    backdrop-filter: var(--blur-glass);
+    color: var(--text-primary);
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 15px;
+  }
+
+  .ds-badge-count {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    height: 14px;
+    border-radius: var(--radius-pill);
+    background-color: var(--error-badge);
+    color: var(--text-primary-soft);
+    font-size: 10px;
+    font-weight: 500;
+  }
+
+  .ds-banner-accent {
+    display: flex;
+    align-items: center;
+    padding-left: 16px;
+    border-radius: var(--radius-control);
+    background-color: var(--omni-bg);
+    background-image: linear-gradient(to right, var(--accent-yellow-banner), var(--accent-yellow-banner));
+  }
+
+  .ds-floating-launcher {
+    border-radius: var(--radius-pill);
+    background-color: var(--surface-launcher);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-primary);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  }
 }
 
-.header-backdrop-visible {
-  opacity: 0;
+/* ==========================================================================
+   SHINETEXT SWEEP ANIMATION
+   ========================================================================== */
+@keyframes shineTextSweep {
+  0%, 10% {
+    background-position: 100% 0;
+  }
+  60%, 100% {
+    background-position: 0% 0;
+  }
 }
 
+.shine-text {
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+.shine-text--sweep {
+  background-image: linear-gradient(90deg,
+    rgba(255, 255, 255, 0.38) 0%,
+    rgba(255, 255, 255, 0.38) 38%,
+    rgba(255, 255, 255, 0.96) 50%,
+    rgba(255, 255, 255, 0.38) 62%,
+    rgba(255, 255, 255, 0.38) 100%);
+  background-size: 250% 100%;
+  background-repeat: no-repeat;
+  color: transparent;
+  text-shadow: 0 0 16px rgba(255, 255, 255, 0.12);
+  animation-name: shineTextSweep;
+  animation-duration: 2.6s;
+  animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1);
+  animation-iteration-count: infinite;
+  will-change: background-position;
+}
+
+.shine-text--sweep--once {
+  animation-iteration-count: 1;
+}
+
+.shine-text--idle {
+  color: rgba(255, 255, 255, 0.38);
+}

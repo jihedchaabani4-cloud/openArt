@@ -1,8 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Button } from "@/shared/ui/button";
-import { GoogleIcon } from "@/shared/ui/GoogleIcon";
+import { Button } from "@/components/base/button";
+import { GoogleIcon } from "@/components/primitives/GoogleIcon";
 
 const appName = process.env.NEXT_PUBLIC_APP_NAME || "Level Labs";
 

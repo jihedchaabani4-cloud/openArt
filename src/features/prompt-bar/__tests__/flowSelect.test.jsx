@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen, fireEvent, cleanup, within } from "@testing-library/react";
-import { FlowSelect } from "../ui/common/selectors/FlowPromptBoxSettings";
+import { FlowSelect } from "@/components/cinema-studio/prompt-bar/selectors/FlowPromptBoxSettings";
 
 afterEach(() => {
   cleanup();

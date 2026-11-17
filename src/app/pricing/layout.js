@@ -1,6 +1,6 @@
 "use client";
 
-import { ProjectsNavbar } from "@/widgets/ProjectsNavbar/ProjectsNavbar";
+import { ProjectsNavbar } from "@/components/layout/ProjectsNavbar";
 
 export default function PricingLayout({ children }) {
   return (

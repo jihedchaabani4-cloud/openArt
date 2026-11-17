@@ -1,4 +1,4 @@
 export * from "./api";
-export * from "./ui";
+export * from "@/components/cinema-studio/characters";
 export { characterService } from "./api/characterService";
 export { default } from "./api/queries/useCharacter";

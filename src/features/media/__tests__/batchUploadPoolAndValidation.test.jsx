@@ -5,7 +5,7 @@ import { api } from "@/shared/api/client";
 import { toast } from "sonner";
 import { useUploadMedia } from "../model/useUploadMedia";
 import { MAX_BATCH_UPLOAD_FILES, BATCH_UPLOAD_CONCURRENCY } from "../uploadPolicy";
-import { NavbarImportButton } from "@/widgets/StudioNavbar/ui/NavbarImportButton";
+import { NavbarImportButton } from "@/components/layout/StudioNavbar/NavbarImportButton";
 import { useWorkflowsStore } from "@/features/workflows";
 
 vi.mock("@/shared/api/client", () => ({

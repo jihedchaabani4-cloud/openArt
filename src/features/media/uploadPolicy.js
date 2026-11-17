@@ -183,4 +183,25 @@ export function validateFilesAgainstPolicy(filesOrFile, policy = DEFAULT_UPLOAD_
   };
 }
 
+/**
+ * Pure validation helper for batch upload counts.
+ * Enforces the maximum selection limit defined in uploadPolicy.
+ *
+ * @param {File | File[] | FileList} filesOrFile
+ */
+export function validateBatchCount(filesOrFile) {
+  if (!filesOrFile) return;
+  const files = Array.isArray(filesOrFile)
+    ? filesOrFile
+    : (typeof filesOrFile[Symbol.iterator] === "function" || typeof filesOrFile.length === "number")
+    ? Array.from(filesOrFile)
+    : [filesOrFile];
+
+  if (files.length > MAX_BATCH_UPLOAD_FILES) {
+    throw new Error(
+      `Too many files selected (${files.length}). Maximum allowed is ${MAX_BATCH_UPLOAD_FILES} files per upload.`
+    );
+  }
+}
+
 export default UPLOAD_POLICIES;

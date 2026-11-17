@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { GoogleIcon } from "@/shared/ui/GoogleIcon";
+import { GoogleIcon } from "@/components/primitives/GoogleIcon";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { LoadingScreen } from "@/shared/ui/LoadingScreen";
-import { Input } from "@/shared/ui/input";
+import { LoadingScreen } from "@/components/primitives/LoadingScreen";
+import { Input } from "@/components/base/input";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 const DOMAIN_SERVER = process.env.NEXT_PUBLIC_DOMAIN_SERVER;

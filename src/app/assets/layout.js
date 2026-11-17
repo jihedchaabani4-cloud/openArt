@@ -5,8 +5,8 @@ import { usePathname } from "next/navigation";
 import { useMotionValueEvent, useScroll } from "framer-motion";
 
 import { AssetsFiltersProvider } from "@/features/assets/model/assetsFilters";
-import { AssetsNavbar } from "@/features/assets/ui/AssetsNavbar";
-import { AssetsSidebar } from "@/features/assets/ui/AssetsSidebar";
+import { AssetsNavbar } from "@/components/layout/AssetsNavbar";
+import { AssetsSidebar } from "@/components/cinema-studio/assets/AssetsSidebar";
 
 export default function AssetsLayout({ children }) {
   const { scrollY } = useScroll();

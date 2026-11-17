@@ -107,7 +107,7 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body
-        className={`${inter.variable} ${arabic.variable} ${googleSans.variable} ${geistMono.variable} antialiased bg-background text-foreground font-sans`}
+        className={`${inter.variable} ${arabic.variable} ${googleSans.variable} ${geistMono.variable} antialiased bg-body-root text-foreground font-sans`}
         suppressHydrationWarning
       >
         <ReactQueryProvider>

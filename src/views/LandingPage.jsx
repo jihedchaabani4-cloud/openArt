@@ -5,7 +5,7 @@ import { ModelsShowcase } from "./landing/components/ModelsShowcase";
 import { BentoFeatures } from "./landing/components/BentoFeatures";
 import { ModelSlider } from "./landing/components/ModelSlider";
 import { PricingSection } from "@/features/payments/ui/PricingSection";
-import { LoginDialog } from "@/components/LoginDialog";
+import { LoginDialog } from "@/components/layout/LoginDialog";
 
 export function LandingPage({ user, authLoading, onCTA }) {
   const [loginOpen, setLoginOpen] = useState(false);

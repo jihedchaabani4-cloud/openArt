@@ -3,12 +3,12 @@
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { NavbarCore, NavbarTitle } from "@/widgets/NavbarCore";
+import { NavbarCore, NavbarTitle } from "@/components/layout/NavbarCore";
 import { useCharacterWorkflows, useGenerateCharacterDescriptionMutation, useCreateCharacterMutation } from "@/features/characters";
 import { useWorkflowsStore } from "@/features/workflows";
 import { useCharacterStore } from "@/features/studio";
 import { CharacterPromptBar, promptBarService } from "@/features/prompt-bar";
-import { ShineText } from "@/shared/ui/ShineText";
+import { ShineText } from "@/components/primitives/ShineText";
 
 const CHARACTER_ARCHETYPES = [
   {
@@ -88,20 +88,13 @@ function ArchetypeCard({ archetype, onClick, index, isGenerating, isDisabled }) 
         src={archetype.image}
         alt={archetype.title}
         crossOrigin="anonymous"
-        style={{
-          width: 88,
-          height: 88,
-          borderRadius: "0.875rem",
-          objectFit: "cover",
-          flexShrink: 0,
-          opacity: 1,
-        }}
+        className="size-[88px] shrink-0 rounded-[0.875rem] object-cover"
       />
-      <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem", minWidth: 0, flex: 1 }}>
-        <span style={{ fontSize: "0.9375rem", fontWeight: 700, color: "#fff", lineHeight: "1.25rem" }}>
+      <div className="flex min-w-0 flex-1 flex-col gap-1">
+        <span className="text-[0.9375rem] font-bold leading-5 text-white">
           {archetype.title}
         </span>
-        <span style={{ fontSize: "0.75rem", color: "rgba(255, 255, 255, 0.6)", lineHeight: "1.1rem" }}>
+        <span className="text-xs leading-[1.1rem] text-white/60">
           {archetype.description}
         </span>
         {isGenerating && (

@@ -1,5 +1,5 @@
-import AssetDetailNavbar from "@/features/assets/ui/AssetDetailNavbar";
-import { UserDropdown } from "@/widgets/navigation/UserDropdown";
+import AssetDetailNavbar from "@/components/layout/AssetDetailNavbar";
+import { UserDropdown } from "@/components/layout/UserDropdown";
 
 export default async function AssetDetailLayout({ children, params }) {
   const { workflowId } = await params;

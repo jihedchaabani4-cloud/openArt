@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen, fireEvent, cleanup, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { CreateFolderDialog } from "@/shared/ui/CreateFolderDialog";
+import { CreateFolderDialog } from "@/components/cinema-studio/collections/CreateFolderDialog";
 
 const mockMutateAsync = vi.fn();
 vi.mock("@/features/folders/api/mutations/useCreateFolder", () => ({

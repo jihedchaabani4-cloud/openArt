@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, fireEvent, waitFor, cleanup } from "@testing-library/react";
-import { MediaInput } from "../ui/common/MediaInput.jsx";
+import { MediaInput } from "@/components/cinema-studio/prompt-bar/MediaInput.jsx";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 vi.mock("next/navigation", () => ({

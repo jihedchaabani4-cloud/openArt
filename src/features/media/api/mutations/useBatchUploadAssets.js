@@ -4,8 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/shared/api/client';
 import { queryKeys } from '@/shared/api/queryKeys';
 import { intrinsicSizeToRatioLabel, setCachedImageDimensions } from '@/shared/lib/displayUtils';
-import { validateBatchCount } from '../../model/useUploadMedia';
-import { BATCH_UPLOAD_CONCURRENCY } from '../../uploadPolicy';
+import { validateBatchCount, BATCH_UPLOAD_CONCURRENCY } from '../../uploadPolicy';
 
 // ── Helper: extract width/height/ratio from file before upload ──────────────
 function getMediaMetadata(file) {

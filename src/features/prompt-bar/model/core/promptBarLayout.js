@@ -1,5 +1,5 @@
 const BASE_CARD_CLASS =
-  "relative w-full flex flex-col bg-white/5 backdrop-blur-2xl rounded-[20px] min-h-[60px] border border-white/10 shadow-none";
+  "relative w-full flex flex-col ds-composer-card bg-card/50 rounded-3xl min-h-[60px] p-[3px] border-0 shadow-none";
 
 export const PROMPT_BAR_VARIANTS = {
   generation: {

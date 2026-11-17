@@ -1,7 +1,7 @@
 "use client"
 
 import { usePathname } from "next/navigation"
-import { ProjectsNavbar } from "@/widgets/ProjectsNavbar/ProjectsNavbar";
+import { ProjectsNavbar } from "@/components/layout/ProjectsNavbar";
 
 /**
  * Layout for all /projects/* routes.

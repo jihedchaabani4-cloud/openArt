@@ -1,7 +1,7 @@
 import { useMemo, useCallback } from "react";
 import { usePromptBarStore } from "../../store/usePromptBarStore.js";
 import { calculateModelCredits } from "../../core/creditCalculationService.js";
-import { getRatioIcon } from "../../ui/common/selectors/FlowPromptBoxSettings.jsx";
+import { getRatioIcon } from "@/components/cinema-studio/prompt-bar/selectors/FlowPromptBoxSettings.jsx";
 
 /**
  * usePromptBarGenerate

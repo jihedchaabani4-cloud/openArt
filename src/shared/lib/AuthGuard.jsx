@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useAuthSession } from "@/shared/api/auth";
 
 // Pages that are always publicly accessible (no auth required)
-const PUBLIC_PATHS = ["/", "/login", "/pricing", "/assets"];
+const PUBLIC_PATHS = ["/", "/login", "/pricing", "/assets", "/dev", "/cinema-studio/test"];
 
 export function AuthGuard() {
   const pathname = usePathname();

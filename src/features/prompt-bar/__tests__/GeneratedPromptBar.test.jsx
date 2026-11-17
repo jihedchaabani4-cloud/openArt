@@ -1,12 +1,14 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { act } from "react";
 import { render, screen, fireEvent, cleanup } from "@testing-library/react";
-import { GeneratedPromptBar } from "../templates/GeneratedPromptBar.jsx";
+import { GeneratedPromptBar } from "@/components/cinema-studio/prompt-bar/GeneratedPromptBar.jsx";
 import { clearPersistentPromptBarStores, getActivePromptBarStore } from "../store/PromptBarStoreContext.js";
 import { registry } from "../store/registry.js";
 
+import { Button } from "@/components/base/button";
+
 // Mock PromptEditor to keep tests fast and isolated
-vi.mock("../ui/common/editor/PromptEditor.jsx", () => ({
+vi.mock("@/components/cinema-studio/prompt-bar/editor/PromptEditor.jsx", () => ({
   PromptEditor: ({ value, onChange, onSubmit }) => (
     <div data-testid="mock-prompt-editor">
       <input
@@ -14,9 +16,9 @@ vi.mock("../ui/common/editor/PromptEditor.jsx", () => ({
         value={value || ""}
         onChange={(e) => onChange(e.target.value)}
       />
-      <button data-testid="mock-submit-btn" onClick={onSubmit}>
+      <Button data-testid="mock-submit-btn" onClick={onSubmit}>
         Submit
-      </button>
+      </Button>
     </div>
   ),
 }));

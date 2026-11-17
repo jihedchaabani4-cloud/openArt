@@ -15,11 +15,11 @@ import {
   useRealBackendModels,
 } from "@/features/prompt-bar/index.platform"
 import { SharedGalleryGrid } from "@/features/media"
-import { MediaGridItem } from "@/widgets/StudioLayout/GenerationsStudio/MediaGridItem"
+import { MediaGridItem } from "@/components/cinema-studio/media/MediaGridItem"
 
 import { usePromptStore } from "@/features/prompt-bar/model/usePromptStore";
 import { buildCollectionCoverById } from "@/shared/lib/displayUtils";
-import { LoadingScreen } from "@/shared/ui/LoadingScreen";
+import { LoadingScreen } from "@/components/primitives/LoadingScreen";
 import { logger } from "@/shared/lib/logger";
 
 const PAGE_SIZE = 30;

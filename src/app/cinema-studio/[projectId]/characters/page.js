@@ -3,19 +3,19 @@
 import * as React from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useRouter } from "next/navigation"
-import { GoogleIcon } from "@/shared/ui/GoogleIcon";
+import { GoogleIcon } from "@/components/primitives/GoogleIcon";
 
 import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows"
 import { useCharacterWorkflows } from "@/features/characters"
 import { usePromptStore } from "@/features/studio";
-import { LoadingScreen } from "@/shared/ui/LoadingScreen"
+import { LoadingScreen } from "@/components/primitives/LoadingScreen"
 
 import { SharedGalleryGrid } from "@/features/media"
-import { MediaGridItem } from "@/widgets/StudioLayout/GenerationsStudio/MediaGridItem"
+import { MediaGridItem } from "@/components/cinema-studio/media/MediaGridItem"
 import { HowToDrawer } from "@/features/elements";
 import { useWorkflowDelete } from "@/features/workflows"
-import { ConfirmDeleteDialog } from "@/shared/ui/ConfirmDeleteDialog"
-import { Button } from "@/shared/ui/button"
+import { ConfirmDeleteDialog } from "@/components/primitives/ConfirmDeleteDialog"
+import { Button } from "@/components/base/button"
 
 const PAGE_SIZE = 30;
 

@@ -107,16 +107,44 @@ Paste this into your global CSS file (`globals.css`) to initialize the exact the
     --secondary-foreground: 0 0% 98%;   /* #FAFAFA */
     --muted: 240 3.7% 15.9%;            /* #27272A */
     --muted-foreground: 240 5% 64.9%;   /* #A1A1AA */
-    --accent: 240 3.7% 15.9%;           /* #27272A */
-    --accent-foreground: 0 0% 98%;      /* #FAFAFA */
-    --border: 240 3.7% 15.9%;           /* #27272A */
-    --input: 240 3.7% 15.9%;            /* #27272A */
-    --ring: 240 4.9% 83.9%;             /* #D4D4D8 */
+    --accent: 255 255 255;              /* rgb(255, 255, 255) */
+    --accent-blue: 0 178 248;           /* rgb(0, 178, 248) */
+    --accent-foreground: 0 0 0;         /* rgb(0, 0, 0) */
+    --accent-green: 78, 92.3%, 59%;     /* hsl(78, 92.3%, 59%) */
+    --accent-orange: 255 87 10;         /* rgb(255, 87, 10) */
+    --bg-background: 26 26 26;          /* rgb(26, 26, 26) */
+    --border-primary: 141 141 141;      /* rgb(141, 141, 141) */
+    --border-subtle: 49 49 49;          /* rgb(49, 49, 49) */
+    --card: 68 68 68;                   /* rgb(68, 68, 68) */
+    --card-foreground: 255 255 255;     /* rgb(255, 255, 255) */
+    --card-hover: 67 67 67;             /* rgb(67, 67, 67) */
+    --destructive: 229 72 77;           /* rgb(229, 72, 77) */
+    --destructive-foreground: 255 255 255; /* rgb(255, 255, 255) */
+    --fill-disabled: 38 38 38;          /* rgb(38, 38, 38) */
+    --fill-hover: 67 67 67;             /* rgb(67, 67, 67) */
+    --fill-primary: 255 255 255;        /* rgb(255, 255, 255) */
+    --fill-secondary: 49 49 49;         /* rgb(49, 49, 49) */
+    --fill-tertiary: 44 44 44;          /* rgb(44, 44, 44) */
+    --foreground: 255 255 255;          /* rgb(255, 255, 255) */
+    --input: 141 141 141;               /* rgb(141, 141, 141) */
+    --muted: 49 49 49;                  /* rgb(49, 49, 49) */
+    --muted-foreground: 141 141 141;    /* rgb(141, 141, 141) */
+    --opus-bg-black: 13 13 13;          /* rgb(13, 13, 13) */
+    --opus-bg-menu: 0 0% 26.7%;         /* hsl(0, 0%, 26.7%) */
+    --opus-bg-overlay-subtle: 47 47 47; /* rgb(47, 47, 47) */
+    --popover: 68 68 68;                /* rgb(68, 68, 68) */
+    --popover-foreground: 255 255 255;  /* rgb(255, 255, 255) */
+    --primary: 255 255 255;             /* rgb(255, 255, 255) */
+    --primary-foreground: 0 0 0;        /* rgb(0, 0, 0) */
+    --secondary: 141 141 141;           /* rgb(141, 141, 141) */
+    --secondary-foreground: 255 255 255; /* rgb(255, 255, 255) */
+    --tertiary: 118 118 118;            /* rgb(118, 118, 118) */
     --accent-yellow: #FFC241;           /* rgb(255, 193, 65) */
     --error: #E5484D;                   /* rgb(229, 72, 77) */
     --button-tonal: rgba(255, 255, 255, 0.10);
     --button-tonal-hover: rgba(255, 255, 255, 0.15);
     --surface-card: rgba(255, 255, 255, 0.05);
+    --prompt-bar-bg: rgba(68, 68, 68, 0.50); /* Prompt bar card background (#444444 / 50%) */
     --border-subtle: rgba(255, 255, 255, 0.10);
     --border-dashed: rgba(255, 255, 255, 0.18);
     --text-secondary: rgba(255, 255, 255, 0.50);
@@ -153,8 +181,8 @@ Paste this into your global CSS file (`globals.css`) to initialize the exact the
 | **05** | **Icon Button** | `Ghost Toolbar`, `Tonal Square`, `Outline Square` | `size-9.5 (38x38px) rounded-[10px] p-2.5 bg-transparent text-white hover:bg-white/10 disabled:opacity-50` |
 | **06** | **Pill Select & Dropdown** | `Pill Trigger`, `Glass Menu Item`, `Checkmark Option` | Trigger: `h-9.5 w-[200px] rounded-full bg-white/10 pl-5 pr-4 text-base font-medium hover:bg-white/15 focus-visible:ring-2 focus-visible:ring-white/70` • Menu Item: `h-[36px] px-2.5 rounded-xl hover:bg-white/20` |
 | **07** | **Pill Tabs (Tablist)** | `Pill Tab Item`, `Segmented Switcher` | `h-8 rounded-full px-3 text-sm font-medium bg-white/10 text-white hover:bg-white/15 data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow` |
-| **08** | **Section Card & Accordion** | `Frosted Card`, `Uppercase Accordion Trigger` | Card: `rounded-[28px] bg-white/5 backdrop-blur-2xl px-8 py-6` • Trigger: `h-6 w-full flex justify-between text-sm font-medium uppercase leading-[18px] tracking-[0.1px] text-white/50` |
+| **08** | **Section Card & Composer Card** | `Frosted Card`, `Prompt Bar Card`, `Uppercase Accordion Trigger` | Card: `rounded-[28px] bg-white/5 backdrop-blur-2xl px-8 py-6` • Composer Card (`.ds-composer-card / .bg-card\/50`): `rounded-3xl bg-card/50 (#444444 @ 50%) p-[3px] border-0 shadow-none` • Trigger: `h-6 w-full flex justify-between text-sm font-medium uppercase leading-[18px] tracking-[0.1px] text-white/50` |
 | **09** | **Dashed Upload / Media Slot** | `Square 64x64`, `Aspect 96x72` | `size-16` or `h-[72px] w-24` `rounded-2xl border border-dashed border-white/[0.18] bg-white/5 hover:bg-white/10` (Disabled: `cursor-not-allowed text-white/25`) |
 | **10** | **Interactive List / Setting Row** | `Compact Ratio Row`, `Thumbnail Preview Row` | Compact: `h-12 px-3 rounded-lg bg-transparent text-sm font-medium text-white hover:bg-white/5` • Preview: `group flex items-center justify-between gap-3` with `h-[72px] w-24 rounded-2xl border border-white/10 bg-white/5 group-hover:bg-white/10` |
-| **11** | **Switch, Input & Checkbox** | `Pill Switch`, `Text/Search Input`, `Checkbox` | Switch: `w-11 h-6 rounded-full bg-white/15 data-[checked]:bg-white` + thumb `size-[18px] bg-white data-[checked]:bg-[#09090B]` • Input: `h-9.5 px-3.5 rounded-[10px] bg-white/5 border border-[#27272A] focus:border-white/50` |
+| **11** | **Switch, Input & Checkbox** | `Pill Switch`, `Ghost / Accent / Default Input`, `Checkbox` | Switch: `w-11 h-6 rounded-full bg-white/15 data-[checked]:bg-white` + thumb `size-[18px] bg-white data-[checked]:bg-[#09090B]` • Input (2 canonical variants): Ghost (`.ds-input-ghost`, transparent in all states for prompt bar / composer well) & Accent (`.ds-input-accent`, `h-9 px-2.5 rounded-lg bg-accent/50 hover:bg-accent/70 focus-within:bg-accent/70 border-none` for navbar search) |
 | **12** | **Badge & Status Banner** | `Status Badge`, `Accent Banner` | Badge: `rounded-md px-1.5 py-0.5 text-xs font-semibold bg-white/10 text-[#FAFAFA]` • Banner: `rounded-[10px] bg-[#1A1A1A] bg-gradient-to-r from-[#FFC141]/10 to-[#FFC141]/10 pl-4` |

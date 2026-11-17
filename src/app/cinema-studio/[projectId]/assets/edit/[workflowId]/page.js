@@ -3,13 +3,13 @@
 import * as React from "react"
 import { useParams, useRouter, useSearchParams } from "next/navigation"
 import { useFilteredWorkflows } from "@/features/workflows/model/useFilteredWorkflows"
-import { EditMediaView } from "@/widgets/EditMediaView"
-import { WorkflowMediaGallery } from "@/features/workflows/ui/WorkflowMediaGallery"
-import { EditNavbar } from "@/widgets/EditNavbar/EditNavbar"
+import { EditMediaView } from "@/components/cinema-studio/media/EditMediaView"
+import { WorkflowMediaGallery } from "@/components/cinema-studio/media/WorkflowMediaGallery"
+import { EditNavbar } from "@/components/layout/EditNavbar"
 import { getItemMetadata } from "@/shared/lib/generationUtils"
 import { resolveMainMedia } from "@/features/workflows/core/resolveMediaRef"
 import { useSetPrimaryMedia } from "@/features/workflows/api/workflowsApi"
-import { LoadingScreen } from "@/shared/ui/LoadingScreen"
+import { LoadingScreen } from "@/components/primitives/LoadingScreen"
 
 /**
  * Asset Edit Page
@@ -65,7 +65,7 @@ export default function AssetEditPage() {
     if (!workflow) return null; // Let the redirect handle it
 
     return (
-        <div className="flex flex-col h-full w-full text-white overflow-hidden bg-black">
+        <div className="flex flex-col h-full w-full text-white overflow-hidden bg-background">
             <EditNavbar 
                 workflow={workflow} 
                 activeItem={activeItem}

@@ -2,12 +2,14 @@ import React from "react";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, cleanup, waitFor, fireEvent, renderHook } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { TrashView } from "../ui/TrashView";
+import { TrashView } from "@/components/cinema-studio/media/TrashView";
 import { queryKeys } from "@/shared/api/queryKeys";
 import { api } from "@/shared/api/client";
 import { useFilteredWorkflows } from "@/features/workflows/model/useFilteredWorkflows";
 import { useElementSheetWorkflows } from "@/features/elements/hooks/useElementSheetWorkflows";
 import { useCharacterWorkflows } from "@/features/characters/api/queries/useCharacterWorkflows";
+
+import { Button } from "@/components/base/button";
 
 const mockPush = vi.fn();
 vi.mock("next/navigation", () => ({
@@ -32,20 +34,20 @@ vi.mock("react-photo-album", () => ({
   ),
 }));
 
-vi.mock("@/widgets/StudioLayout/GenerationsStudio/MediaGridItem/StudioItemMenu", () => ({
+vi.mock("@/components/cinema-studio/media/StudioItemMenu", () => ({
   StudioItemDropdownMenu: ({ items, trigger }) => (
     <div data-testid="studio-item-menu">
       {trigger}
       <div data-testid="menu-items">
         {items?.map((item, idx) => (
-          <button
+          <Button
             key={item.key || idx}
             role="menuitem"
             onClick={item.onClick}
             disabled={item.disabled}
           >
             {item.label}
-          </button>
+          </Button>
         ))}
       </div>
     </div>
