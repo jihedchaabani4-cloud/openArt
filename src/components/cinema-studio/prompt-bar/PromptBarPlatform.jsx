@@ -12,6 +12,7 @@ import { PromptBarTopPanel } from "@/components/cinema-studio/prompt-bar/parts/P
 import { PromptBarSlotsRow } from "@/components/cinema-studio/prompt-bar/parts/PromptBarSlotsRow.jsx";
 import { PromptBarControlsRow } from "@/components/cinema-studio/prompt-bar/parts/PromptBarControlsRow.jsx";
 import { Button } from "@/components/base/button";
+import { IconButton } from "@/components/base/icon-button";
 import { GoogleIcon } from "@/components/primitives/GoogleIcon";
 
 // Platform Architecture
@@ -461,8 +462,7 @@ function PromptBarPlatformInner({
                 exit={{ opacity: 0, scale: 0.85 }}
                 transition={{ duration: 0.15 }}
               >
-                <Button
-                  type="button"
+                <IconButton
                   variant="ghost"
                   aria-label="Effacer tout"
                   title="Effacer tout (texte et références)"
@@ -473,7 +473,7 @@ function PromptBarPlatformInner({
                     iconName="close"
                     className="text-base leading-none"
                   />
-                </Button>
+                </IconButton>
               </motion.div>
             )}
             {canShowExpandButton && (
@@ -484,8 +484,7 @@ function PromptBarPlatformInner({
                 exit={{ opacity: 0, scale: 0.85 }}
                 transition={{ duration: 0.15 }}
               >
-                <Button
-                  type="button"
+                <IconButton
                   variant="ghost"
                   aria-label={isPromptExpanded ? "Réduire le champ de saisie" : "Agrandir le champ de saisie"}
                   title={isPromptExpanded ? "Collapse prompt input" : "Expand prompt input"}
@@ -499,7 +498,7 @@ function PromptBarPlatformInner({
                     iconName={isPromptExpanded ? "close_fullscreen" : "open_in_full"}
                     className="text-base leading-none"
                   />
-                </Button>
+                </IconButton>
               </motion.div>
             )}
           </AnimatePresence>
