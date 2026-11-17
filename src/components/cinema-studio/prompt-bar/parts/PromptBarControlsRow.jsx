@@ -1,6 +1,7 @@
 import { cn } from "@/shared/lib/utils";
 import { GoogleIcon } from "@/components/primitives/GoogleIcon";
 import { Button } from "@/components/base/button";
+import { IconButton } from "@/components/base/icon-button";
 
 /**
  * PromptBarControlsRow
@@ -70,8 +71,7 @@ export function PromptBarControlsRow({
       )}
 
       {onToggleExpand && (
-        <Button
-          type="button"
+        <IconButton
           variant="ghost"
           aria-label={isExpanded ? "Réduire le champ de saisie" : "Agrandir le champ de saisie"}
           title={isExpanded ? "Collapse prompt input" : "Expand prompt input"}
@@ -85,7 +85,7 @@ export function PromptBarControlsRow({
             iconName={isExpanded ? "close_fullscreen" : "open_in_full"}
             className="text-base leading-none"
           />
-        </Button>
+        </IconButton>
       )}
 
       <Button
