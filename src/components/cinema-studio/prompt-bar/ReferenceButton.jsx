@@ -34,6 +34,8 @@ export function ReferenceButton({
 
   return (
     <div
+      data-pill-focus="true"
+      tabIndex={!disabled ? 0 : undefined}
       onClick={!disabled ? onClick : undefined}
       onDragOver={onDragOver}
       onDragEnter={onDragEnter}
@@ -41,12 +43,12 @@ export function ReferenceButton({
       onDrop={onDrop}
       className={cn(
         "group relative shrink-0",
-        "w-[50px] h-[50px] rounded-sm",
+        "w-[50px] h-[50px] rounded-2xl",
         "flex items-center justify-center",
-        "bg-white/[0.04]",
-        "border border-white/10",
+        "bg-[color:var(--white-5)]",
         "transition-all duration-200 ease-out",
-        "hover:bg-white/[0.07] hover:border-white/20",
+        "hover:bg-[color:var(--ui-button-hover)]",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--border-heavy)]",
         "active:scale-95",
         pulse && "animate-pulse-border",
         disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer",
@@ -147,7 +149,7 @@ export function ViewReference({
     >
       {/* 50x50 Chip Container */}
       <div
-        className="chip-container group w-full h-full relative rounded-sm overflow-hidden bg-white/[0.04] cursor-pointer flex items-center justify-center select-none"
+        className="chip-container group w-full h-full relative rounded-2xl overflow-hidden bg-white/[0.04] cursor-pointer flex items-center justify-center select-none"
         aria-label={tooltipText}
         onClick={(e) => {
           e.stopPropagation();

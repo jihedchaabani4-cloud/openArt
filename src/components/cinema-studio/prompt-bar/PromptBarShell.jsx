@@ -34,8 +34,15 @@ export function PromptBarShell({
         {isDragging ? (
           dragOverlay
         ) : (
-          <div className={cn(variantConfig.cardClassName, cardClassName)}>
-            <div className={cn(variantConfig.innerClassName, innerClassName)}>{children}</div>
+          <div
+            className={cn(
+              variantConfig.cardClassName,
+              variantConfig.innerClassName,
+              cardClassName,
+              innerClassName
+            )}
+          >
+            {children}
           </div>
         )}
       </div>

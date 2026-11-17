@@ -66,7 +66,7 @@ describe("PromptBarControlsRow", () => {
     );
 
     expect(screen.getByText("Flux Schnell")).toBeTruthy();
-    expect(screen.getByText("x2")).toBeTruthy();
+    expect(screen.queryByText("x2")).toBeNull();
 
     const triggerBtn = screen.getByLabelText("Déclencheur des paramètres");
     fireEvent.click(triggerBtn);

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect } from "react";
+import { cn } from "@/shared/lib/utils";
 import { logger } from "@/shared/lib/logger";
 import { LexicalComposer } from "@lexical/react/LexicalComposer";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
@@ -267,6 +268,7 @@ export function PromptEditor({
   focusRequest = 0,
   fillNonce = 0,
   plugins = null,
+  isExpanded = false,
 }) {
   // Move nodes inside to participate in HMR correctly
   const EDITOR_NODES = React.useMemo(() => [MentionNode, FeatureNode], []);
@@ -303,10 +305,15 @@ export function PromptEditor({
 
   return (
     <LexicalComposer initialConfig={initialConfig} key={editorKey}>
-      <div className="relative min-h-[38px] w-full items-start">
+      <div className="relative w-full h-full min-h-[38px] items-start">
         <RichTextPlugin
           contentEditable={
-            <ContentEditable className={"ds-input-ghost bg-transparent hover:bg-transparent focus:bg-transparent outline-none text-white text-[14.5px] leading-relaxed min-h-[36px] py-1.5 max-h-[200px] overflow-y-auto scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent" + (sweeping ? " shine-text--sweep shine-text--sweep--once" : "")} />
+            <ContentEditable
+              className={cn(
+                "ds-input-ghost bg-transparent hover:bg-transparent focus:bg-transparent outline-none text-white text-[14.5px] leading-relaxed py-1.5 overflow-y-auto scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent w-full h-full min-h-[36px]",
+                sweeping && "shine-text--sweep shine-text--sweep--once"
+              )}
+            />
           }
           placeholder={
             !value && (

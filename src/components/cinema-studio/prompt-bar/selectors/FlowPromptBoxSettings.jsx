@@ -561,7 +561,7 @@ export function FlowPromptBoxSettings({
                 <img
                   src={currentModelIcon}
                   alt=""
-                  className="size-3.5 rounded-sm object-contain brightness-0 invert shrink-0"
+                  className="size-5 rounded-sm object-contain brightness-0 invert shrink-0"
                   onError={(e) => {
                     e.currentTarget.style.display = "none";
                   }}

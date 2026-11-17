@@ -117,7 +117,7 @@ export default function StudioLayout({ children }) {
     }
 
     return (
-        <div className="flex flex-col h-screen overflow-hidden relative bg-background">
+        <div className="flex flex-col h-screen overflow-hidden relative bg-main">
             <AnimatePresence mode="wait">
                 {showIntro ? (
                     <motion.div
@@ -139,9 +139,9 @@ export default function StudioLayout({ children }) {
                         className="flex-1 flex flex-col overflow-hidden"
                     >
                         {!isEditPage ? (
-                            <div className="flex-1 min-h-0 flex overflow-hidden relative w-full h-full p-2 gap-2 bg-background">
+                            <div className="flex-1 min-h-0 flex overflow-hidden relative w-full h-full p-2 gap-2 bg-main">
                                 {!isTrashPage && <LeftNavigationRail />}
-                                <div className="flex-1 min-w-0 flex flex-col relative overflow-hidden h-full rounded-3xl border border-border bg-background">
+                                <div className="flex-1 min-w-0 flex flex-col relative overflow-hidden h-full rounded-3xl border border-border bg-main">
                                     <StudioNavbar />
                                     <div className="flex-1 min-h-0 relative overflow-hidden flex flex-col">
                                         {children}

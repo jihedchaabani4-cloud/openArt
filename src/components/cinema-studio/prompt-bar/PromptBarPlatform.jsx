@@ -11,6 +11,8 @@ import { FlowPromptBoxSettings } from "@/components/cinema-studio/prompt-bar/sel
 import { PromptBarTopPanel } from "@/components/cinema-studio/prompt-bar/parts/PromptBarTopPanel.jsx";
 import { PromptBarSlotsRow } from "@/components/cinema-studio/prompt-bar/parts/PromptBarSlotsRow.jsx";
 import { PromptBarControlsRow } from "@/components/cinema-studio/prompt-bar/parts/PromptBarControlsRow.jsx";
+import { Button } from "@/components/base/button";
+import { GoogleIcon } from "@/components/primitives/GoogleIcon";
 
 // Platform Architecture
 import { PromptBarStoreProvider, PromptBarStoreContext } from "@/features/prompt-bar/store/PromptBarStoreContext.js";
@@ -122,6 +124,7 @@ function PromptBarPlatformInner({
   editorPlugins,
 }) {
   const [drawerOpen, setDrawerOpen] = useState(false); // Collapsed by default (FR-COMP-04)
+  const [isPromptExpanded, setIsPromptExpanded] = useState(false);
   const containerRef = useRef(null);
   const tuneButtonRef = useRef(null);
   const settingsOverlayRef = useRef(null);
@@ -151,6 +154,8 @@ function PromptBarPlatformInner({
   const setParameter     = usePromptBarStore((s) => s.setParameter);
   const focusRequest     = usePromptBarStore((s) => s.focusRequest);
   const promptFillNonce  = usePromptBarStore((s) => s.promptFillNonce);
+  const clearEntities    = usePromptBarStore((s) => s.clearEntities);
+  const removeMedia      = usePromptBarStore((s) => s.removeMedia);
 
   // Model state and synchronization (H1)
   const {
@@ -277,6 +282,44 @@ function PromptBarPlatformInner({
     activeMode,
   });
 
+  const hasReferences = (activeReferences && activeReferences.length > 0) ||
+    (allSelectedMedia && allSelectedMedia.length > 0) ||
+    (activeSlots && activeSlots.length > 0 && activeSlots.some((slot) => {
+      const backendKey = featureConfig?.resolveParameterMapping
+        ? featureConfig.resolveParameterMapping(currentModel, slot.role) || slot.role
+        : slot.role;
+      const val = paramValues?.[backendKey];
+      if (Array.isArray(val)) return val.length > 0;
+      return Boolean(val);
+    }));
+
+  const hasAnyContent = Boolean(prompt?.trim()) || Boolean(hasReferences);
+
+  // Expand button only appears when input exceeds character threshold (gets filled: 60+ chars or newlines), or is already expanded
+  const EXPAND_THRESHOLD_CHARS = 60;
+  const canShowExpandButton = Boolean(
+    prompt && (prompt.trim().length >= EXPAND_THRESHOLD_CHARS || prompt.includes("\n"))
+  ) || isPromptExpanded;
+
+  const handleClearAll = useCallback(() => {
+    setPrompt("");
+    if (activeSlots && activeSlots.length > 0) {
+      activeSlots.forEach((slot) => {
+        const backendKey = featureConfig?.resolveParameterMapping
+          ? featureConfig.resolveParameterMapping(currentModel, slot.role) || slot.role
+          : slot.role;
+        setParameter(backendKey, undefined);
+        if (typeof removeMedia === "function") {
+          removeMedia({ role: slot.role });
+        }
+      });
+    }
+    if (typeof clearEntities === "function") {
+      clearEntities();
+    }
+    setIsPromptExpanded(false);
+  }, [setPrompt, activeSlots, featureConfig, currentModel, setParameter, removeMedia, clearEntities]);
+
   // Close parameter drawer on click outside or Escape key
   useEffect(() => {
     if (!drawerOpen) return;
@@ -380,7 +423,7 @@ function PromptBarPlatformInner({
       variant="generation"
       hideBackground={true}
       className={cn("w-full", className)}
-      innerClassName="w-full flex flex-col gap-1 p-2.5"
+      innerClassName="w-full flex flex-col gap-1 p-2"
       popover={
         <>
           {settingsOverlay}
@@ -389,70 +432,131 @@ function PromptBarPlatformInner({
       }
     >
 
-      {/* ── Reference & Media Slots Row (H5) ─── */}
-      <PromptBarSlotsRow
-        activeSlots={activeSlots}
-        featureConfig={featureConfig}
-        currentModel={currentModel}
-        paramValues={paramValues}
-        dialogAnchorRef={dialogAnchorRef}
-        getReferenceItems={getReferenceItems}
-        getSlotMaxRefs={getSlotMaxRefs}
-        calculateUsedImages={calculateUsedImages}
-        handleRemoveReferenceItem={handleRemoveReferenceItem}
-        handleOpenDialog={handleOpenDialog}
-        setParameter={setParameter}
-        handleRemoveSlot={handleRemoveSlot}
-        showSwap={showSwap}
-        swapEnabled={swapEnabled}
-        handleSwapFrames={handleSwapFrames}
-      />
-
-      {/* ── Prompt Input (Lexical Rich Editor with @ Mentions) ─── */}
-      {layout.showPromptInput && (
-        <div className="w-full ds-composer-well ds-input-ghost bg-transparent border-none shadow-none px-1 py-1">
-          <PromptEditor
-            value={prompt}
-            onChange={setPrompt}
-            onSubmit={handleGenerate}
-            referenceImages={activeReferences}
-            onTriggerMentionDialog={handleTriggerMentionDialog}
-            onMentionQueryChange={setMentionQuery}
-            mentionOpen={quickMentionOpen || dialogOpen}
-            placeholder="Describe what you want to create..."
-            focusRequest={focusRequest}
-            fillNonce={promptFillNonce}
-            plugins={editorPlugins}
-          />
+      {/* ── Top Row: Reference & Media Slots (left) + Corner Expand/Collapse Button (right) ─── */}
+      <div className="flex items-start justify-between gap-2 w-full">
+        <PromptBarSlotsRow
+          activeSlots={activeSlots}
+          featureConfig={featureConfig}
+          currentModel={currentModel}
+          paramValues={paramValues}
+          dialogAnchorRef={dialogAnchorRef}
+          getReferenceItems={getReferenceItems}
+          getSlotMaxRefs={getSlotMaxRefs}
+          calculateUsedImages={calculateUsedImages}
+          handleRemoveReferenceItem={handleRemoveReferenceItem}
+          handleOpenDialog={handleOpenDialog}
+          setParameter={setParameter}
+          handleRemoveSlot={handleRemoveSlot}
+          showSwap={showSwap}
+          swapEnabled={swapEnabled}
+          handleSwapFrames={handleSwapFrames}
+        />
+        <div className="ml-auto shrink-0 self-start flex items-center gap-1">
+          <AnimatePresence>
+            {hasAnyContent && (
+              <motion.div
+                key="clear-all-btn"
+                initial={{ opacity: 0, scale: 0.85 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.85 }}
+                transition={{ duration: 0.15 }}
+              >
+                <Button
+                  type="button"
+                  variant="ghost"
+                  aria-label="Effacer tout"
+                  title="Effacer tout (texte et références)"
+                  onClick={handleClearAll}
+                  className="size-8 p-0 border-0 flex items-center justify-center shrink-0 cursor-pointer text-white/70 hover:text-white transition-colors"
+                >
+                  <GoogleIcon
+                    iconName="close"
+                    className="text-base leading-none"
+                  />
+                </Button>
+              </motion.div>
+            )}
+            {canShowExpandButton && (
+              <motion.div
+                key="expand-btn"
+                initial={{ opacity: 0, scale: 0.85 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.85 }}
+                transition={{ duration: 0.15 }}
+              >
+                <Button
+                  type="button"
+                  variant="ghost"
+                  aria-label={isPromptExpanded ? "Réduire le champ de saisie" : "Agrandir le champ de saisie"}
+                  title={isPromptExpanded ? "Collapse prompt input" : "Expand prompt input"}
+                  onClick={() => setIsPromptExpanded((v) => !v)}
+                  className={cn(
+                    "size-8 p-0 border-0 flex items-center justify-center shrink-0 cursor-pointer text-white/70 hover:text-white transition-colors",
+                    isPromptExpanded && "is-active bg-white/10 text-white"
+                  )}
+                >
+                  <GoogleIcon
+                    iconName={isPromptExpanded ? "close_fullscreen" : "open_in_full"}
+                    className="text-base leading-none"
+                  />
+                </Button>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
-      )}
+      </div>
 
-      {/* ── Controls Row (H5) ─────────────────────────────────── */}
-      {/* Note: PromptBarControlsRow renders the circular generate button (size-8) with <ArrowRight /> */}
-      <PromptBarControlsRow
-        renderRightActions={renderRightActions}
-        isGenerating={isGenerating}
-        showSettingsButton={((layout.showParameterDrawer && (hasModes || drawerParams.length > 0)) || layout.showModelSelector)}
-        tuneButtonRef={tuneButtonRef}
-        drawerOpen={drawerOpen}
-        onToggleDrawer={() => {
-          setDrawerOpen((v) => {
-            const next = !v;
-            if (next) {
-              setQuickMentionOpen(false);
-              setDialogOpen(false);
-            }
-            return next;
-          });
-        }}
-        currentModel={currentModel}
-        currentModelIcon={currentModelIcon}
-        currentRatioIcon={currentRatioIcon}
-        currentCount={currentCount}
-        estimatedCredits={estimatedCredits}
-        isGenerateDisabled={isGenerateDisabled}
-        handleGenerate={handleGenerate}
-      />
+      {/* ── Prompt Input & Controls Row (on the same line) ─── */}
+      <div className="flex items-end gap-2 w-full">
+        {layout.showPromptInput && (
+          <motion.div
+            animate={{ height: isPromptExpanded ? 200 : 38 }}
+            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+            className="flex-1 min-w-0 ds-composer-well ds-input-ghost bg-transparent border-none shadow-none px-1 py-0.5 overflow-hidden"
+          >
+            <PromptEditor
+              value={prompt}
+              onChange={setPrompt}
+              onSubmit={handleGenerate}
+              referenceImages={activeReferences}
+              onTriggerMentionDialog={handleTriggerMentionDialog}
+              onMentionQueryChange={setMentionQuery}
+              mentionOpen={quickMentionOpen || dialogOpen}
+              placeholder="Describe what you want to create..."
+              focusRequest={focusRequest}
+              fillNonce={promptFillNonce}
+              plugins={editorPlugins}
+              isExpanded={isPromptExpanded}
+            />
+          </motion.div>
+        )}
+
+        {/* ── Controls (Settings Dropdown Trigger + Send Button) ─── */}
+        <PromptBarControlsRow
+          renderRightActions={renderRightActions}
+          isGenerating={isGenerating}
+          showSettingsButton={((layout.showParameterDrawer && (hasModes || drawerParams.length > 0)) || layout.showModelSelector)}
+          tuneButtonRef={tuneButtonRef}
+          drawerOpen={drawerOpen}
+          onToggleDrawer={() => {
+            setDrawerOpen((v) => {
+              const next = !v;
+              if (next) {
+                setQuickMentionOpen(false);
+                setDialogOpen(false);
+              }
+              return next;
+            });
+          }}
+          currentModel={currentModel}
+          currentModelIcon={currentModelIcon}
+          currentRatioIcon={currentRatioIcon}
+          currentCount={currentCount}
+          estimatedCredits={estimatedCredits}
+          isGenerateDisabled={isGenerateDisabled}
+          handleGenerate={handleGenerate}
+        />
+      </div>
     </PromptBarShell>
   );
 

@@ -5,7 +5,7 @@ import { cn } from "@/shared/lib/utils";
 
 // Visuals live in globals.css (.ds-btn-*). This file only maps variant → class.
 const buttonVariants = cva(
-  "cursor-pointer gap-2 whitespace-nowrap shrink-0 select-none outline-none disabled:pointer-events-none disabled:opacity-50",
+  "cursor-pointer gap-2 whitespace-nowrap shrink-0 select-none outline-none disabled:pointer-events-none disabled:opacity-50 rounded-2xl",
   {
     variants: {
       variant: {

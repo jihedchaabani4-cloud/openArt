@@ -1,18 +1,18 @@
 const BASE_CARD_CLASS =
-  "relative w-full flex flex-col ds-composer-card bg-card/50 rounded-3xl min-h-[60px] p-[3px] border-0 shadow-none";
+  "relative w-full flex flex-col ds-composer-card bg-[color:var(--ui-menu-background)]/70 p-2 [--blur:40px] rounded-3xl min-h-[60px] border-0 shadow-none";
 
 export const PROMPT_BAR_VARIANTS = {
   generation: {
     cardClassName: BASE_CARD_CLASS,
-    innerClassName: "w-full flex flex-col gap-1 p-2.5",
+    innerClassName: "w-full flex flex-col gap-1 p-2",
   },
   edit: {
     cardClassName: BASE_CARD_CLASS,
-    innerClassName: "w-full flex flex-col gap-1 p-2.5",
+    innerClassName: "w-full flex flex-col gap-1 p-2",
   },
   elements: {
     cardClassName: `${BASE_CARD_CLASS} overflow-hidden`,
-    innerClassName: "w-full flex flex-col gap-1 p-2.5",
+    innerClassName: "w-full flex flex-col gap-1 p-2",
   },
 };
 
