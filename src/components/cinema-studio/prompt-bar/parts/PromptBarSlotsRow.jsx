@@ -35,7 +35,7 @@ export function PromptBarSlotsRow({
 
   return (
     <div className="overflow-visible">
-      <div ref={dialogAnchorRef} className="flex items-center gap-2 flex-wrap">
+      <div ref={dialogAnchorRef} className="flex items-center gap-1.5 flex-wrap">
         {activeSlots.map((slot) => {
           const backendKey = featureConfig?.resolveParameterMapping?.(currentModel, slot.role) ?? slot.role;
           const media = paramValues?.[backendKey];
@@ -57,7 +57,7 @@ export function PromptBarSlotsRow({
                 {refList.map((refItem) => {
                   const itemId = refItem.workflow_id || refItem.id;
                   return (
-                    <div key={itemId} className="flex items-center gap-2">
+                    <div key={itemId} className="flex items-center">
                       <ViewReference
                         media={refItem}
                         label={refItem.displayName || "Ref"}
@@ -69,7 +69,7 @@ export function PromptBarSlotsRow({
 
                 {/* Add button (shown beside thumbnails; hidden only when reaching max real images) */}
                 {canAddMore && (
-                  <div key={`${slot.role}-add-btn`} className="flex items-center gap-2">
+                  <div key={`${slot.role}-add-btn`} className="flex items-center">
                     <ReferenceButton
                       variant="add"
                       word={refList.length === 0 ? "Ref" : "Add"}
@@ -84,7 +84,7 @@ export function PromptBarSlotsRow({
 
           // Fixed Keyframe Slot (Start Frame / End Frame in video mode)
           return (
-            <div key={slot.role} className="flex items-center gap-2">
+            <div key={slot.role} className="flex items-center gap-1.5">
               <MediaInput
                 label={slotLabel}
                 role={slot.role}

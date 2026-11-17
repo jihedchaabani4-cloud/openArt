@@ -83,12 +83,12 @@ const Input = React.forwardRef(({
     }
   };
 
-  const isBlurInput = variant === "blurinput";
-  const isGhost = variant === "ghost" || variant === "composer" || variant === "navbar" || variant === "inline" || variant === "transparent";
+  const isBare = variant === "composer" || variant === "navbar" || variant === "inline" || variant === "transparent";
+  const isGhost = variant === "ghost" || variant === "blurinput";
   const isAccent = variant === "accent" || variant === "search" || variant === "filled";
   const isSearch = variant === "search";
   const resolvedGoogleIcon = googleIcon || (isSearch && !Icon ? "search" : undefined);
-  const hasWrapper = isSearch || isAccent || isBlurInput || isGhost || !!Icon || !!resolvedGoogleIcon || !!onClear || showEditButton || !!rightElement || !!label || hasPrefix;
+  const hasWrapper = isSearch || isAccent || isGhost || isBare || !!Icon || !!resolvedGoogleIcon || !!onClear || showEditButton || !!rightElement || !!label || hasPrefix;
 
   if (hasWrapper) {
     return (
@@ -105,11 +105,13 @@ const Input = React.forwardRef(({
         )}
         <div 
           className={cn(
-            isGhost
-              ? "ds-input-ghost bg-transparent border-none outline-none shadow-none p-0 h-auto flex items-center justify-between w-full hover:bg-transparent focus-within:bg-transparent"
-              : isAccent
-                ? "ds-input ds-input-accent ds-input-search relative flex items-center justify-between w-full h-9 px-2.5 rounded-lg bg-accent/50 hover:bg-accent/70 focus-within:bg-accent/70 border-none outline-none transition-colors"
-                : "ds-input relative flex items-center justify-between w-full border-none outline-none",
+            isBare
+              ? "ds-input-bare bg-transparent border-none outline-none shadow-none p-0 h-auto flex items-center justify-between w-full hover:bg-transparent focus-within:bg-transparent"
+              : isGhost
+                ? "ds-input-ghost relative flex items-center justify-between w-full h-9 px-3 rounded-2xl bg-white/5 hover:bg-white/20 focus-within:bg-white/20 border-none outline-none transition-colors"
+                : isAccent
+                  ? "ds-input ds-input-accent ds-input-search relative flex items-center justify-between w-full h-9 px-2.5 rounded-lg bg-accent/50 hover:bg-accent/70 focus-within:bg-accent/70 border-none outline-none transition-colors"
+                  : "ds-input relative flex items-center justify-between w-full border-none outline-none",
             className
           )}
         >
@@ -178,8 +180,6 @@ const Input = React.forwardRef(({
     );
   }
 
-  const isBare = isGhost;
-
   return (
     <input
       type={type}
@@ -189,10 +189,12 @@ const Input = React.forwardRef(({
       onChange={onChange}
       className={cn(
         isBare
-          ? "ds-input-ghost bg-transparent border-none outline-none text-sm font-medium text-white placeholder:text-white/50 focus:ring-0 hover:bg-transparent focus:bg-transparent p-0 shadow-none cursor-text disabled:opacity-50 font-sans antialiased"
-          : isAccent
-            ? "ds-input ds-input-accent ds-input-search flex w-full h-9 px-2.5 rounded-lg bg-accent/50 hover:bg-accent/70 focus:bg-accent/70 border-none outline-none placeholder:text-white/50 text-white text-sm font-medium transition-colors cursor-text"
-            : "ds-input flex w-full border-none outline-none placeholder:text-[var(--text-secondary)] disabled:cursor-not-allowed disabled:opacity-50 cursor-text",
+          ? "ds-input-bare bg-transparent border-none outline-none text-sm font-medium text-white placeholder:text-white/50 focus:ring-0 hover:bg-transparent focus:bg-transparent p-0 shadow-none cursor-text disabled:opacity-50 font-sans antialiased"
+          : isGhost
+            ? "ds-input-ghost flex w-full h-9 px-3 rounded-2xl bg-white/5 hover:bg-white/20 focus:bg-white/20 border-none outline-none placeholder:text-white/50 text-white text-sm font-medium transition-colors cursor-text"
+            : isAccent
+              ? "ds-input ds-input-accent ds-input-search flex w-full h-9 px-2.5 rounded-lg bg-accent/50 hover:bg-accent/70 focus:bg-accent/70 border-none outline-none placeholder:text-white/50 text-white text-sm font-medium transition-colors cursor-text"
+              : "ds-input flex w-full border-none outline-none placeholder:text-[var(--text-secondary)] disabled:cursor-not-allowed disabled:opacity-50 cursor-text",
         className
       )}
       {...props}

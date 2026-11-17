@@ -53,7 +53,7 @@ export function PromptBarTopPanel({
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.97, y: 8 }}
           transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-          className="overflow-hidden rounded-2xl bg-(--background-state-90) backdrop-blur-80 border border-white/10 shadow-none pointer-events-auto w-fit max-w-[95vw]"
+          className="overflow-hidden rounded-2xl bg-[color:var(--ui-menu-background)] backdrop-blur-2xl border border-white/10 shadow-none pointer-events-auto w-fit max-w-[95vw]"
         >
           <ImportMediaPopover
             variant="panel"
@@ -66,8 +66,9 @@ export function PromptBarTopPanel({
             mode={activeDialogMode}
             selectedItems={dialogSelectedItems}
             excludedItems={allSelectedMedia}
-            onSelect={onSelectMedia}
+            onSelect={(assets) => onSelectMedia(assets, { keepOpen: true })}
             initialSearch={mentionQuery}
+            closeOnSelect={false}
           />
         </motion.div>
       )}

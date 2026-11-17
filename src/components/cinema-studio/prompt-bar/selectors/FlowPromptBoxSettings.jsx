@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { cn } from "@/shared/lib/utils";
 import { GoogleIcon } from "@/components/primitives/GoogleIcon";
 import { Button } from "@/components/base/button";
+import { Switch } from "@/components/base/switch";
 import { Slider } from "@/components/primitives/slider";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/primitives/popover";
 import { resolveModelIcon } from "@/features/prompt-bar/core/modelManagement.js";
@@ -64,6 +65,7 @@ export function FlowSelect({
   width = 220,
   maxHeightLimit = 320,
   ariaLabel,
+  sideOffset = 12,
 }) {
   const [open, setOpen] = useState(false);
 
@@ -73,19 +75,33 @@ export function FlowSelect({
         <PopoverTrigger asChild>
           <Button
             type="button"
-            variant="outline"
-            className="w-full justify-between"
+            variant="dropdown-card"
+            className="w-full justify-between bg-white/10 hover:bg-white/15"
             aria-label={ariaLabel || label || displayValue}
+            data-state={open ? "open" : "closed"}
           >
-            <span className="flex items-center gap-1.5 truncate text-white">
+            <div className="text-ellipsis overflow-hidden flex items-center gap-2">
               {icon}
-              {label && <span className="text-white/60 font-normal">{label}:</span>}
-              <span className="truncate text-white font-medium">{displayValue}</span>
-            </span>
-            <GoogleIcon
-              iconName="arrow_drop_down"
-              className={cn("text-[20px] text-white transition-transform shrink-0", open && "rotate-180")}
-            />
+              <span className="flex min-w-0 flex-col items-start gap-0.5 font-medium">
+                {label && (
+                  <span className="text-xs leading-[15px] text-white/50">{label}</span>
+                )}
+                <span className="max-w-full truncate text-sm leading-[17px] text-white font-medium">
+                  {displayValue}
+                </span>
+              </span>
+            </div>
+            <svg
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              aria-hidden="true"
+              className={cn(
+                "size-4 shrink-0 text-white/50 transition-transform duration-150 ease-out",
+                open && "rotate-90"
+              )}
+            >
+              <path d="M9.29301 6.29295C9.68354 5.90243 10.3166 5.90243 10.7071 6.29295L15.7071 11.293C16.0974 11.6835 16.0975 12.3165 15.7071 12.707L10.7071 17.707L10.6309 17.7754C10.2382 18.0957 9.65913 18.0731 9.29301 17.707C8.9269 17.3409 8.90432 16.7619 9.22465 16.3691L9.29301 16.293L13.4092 12.1767C13.5068 12.0791 13.5067 11.9209 13.4092 11.8232L9.29301 7.70702C8.90249 7.31649 8.90249 6.68348 9.29301 6.29295Z" />
+            </svg>
           </Button>
         </PopoverTrigger>
 
@@ -94,39 +110,59 @@ export function FlowSelect({
           data-portal="true"
           side="left"
           align="end"
-          sideOffset={8}
+          sideOffset={sideOffset}
           collisionPadding={16}
           avoidCollisions
-          className="z-[99999] p-1 overflow-y-auto font-sans antialiased"
+          className="z-[99999] max-h-[240px] overflow-y-auto overflow-x-hidden p-0 font-sans antialiased bg-[color:var(--ui-menu-background)] text-white border border-white/10 rounded-xl shadow-2xl"
           style={{
             width: `${width}px`,
-            maxHeight: `${maxHeightLimit}px`,
           }}
         >
-          {items.map((item) => {
-            const isSelected = String(value) === String(item.value);
+          <div className="overflow-hidden p-[6px] flex flex-col gap-1 w-full" role="group">
+            {items.map((item) => {
+              const isSelected = String(value) === String(item.value);
 
-            return (
-              <Button
-                key={String(item.value)}
-                type="button"
-                variant={isSelected ? "secondary" : "ghost"}
-                className="w-full justify-between"
-                onClick={() => {
-                  onChange?.(item.value);
-                  setOpen(false);
-                }}
-              >
-                <span className="flex items-center gap-2 truncate">
-                  {item.icon}
+              return (
+                <div
+                  key={String(item.value)}
+                  role="option"
+                  aria-selected={isSelected}
+                  data-selected={isSelected}
+                  onClick={() => {
+                    onChange?.(item.value);
+                    setOpen(false);
+                  }}
+                  className={cn(
+                    "relative flex gap-2 select-none items-center py-1.5 outline-none min-h-8 rounded-lg px-2 text-sm font-medium cursor-pointer transition-colors duration-150 ease-out",
+                    isSelected
+                      ? "bg-white/15 text-white ring-1 ring-inset ring-white/30 hover:bg-white/20"
+                      : "bg-transparent text-white/80 hover:bg-white/10 hover:text-white"
+                  )}
+                >
+                  <svg
+                    width="15"
+                    height="15"
+                    viewBox="0 0 15 15"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    className={cn(
+                      "mr-2 h-4 w-4 shrink-0 transition-opacity duration-150",
+                      isSelected ? "opacity-100 text-white" : "opacity-0"
+                    )}
+                  >
+                    <path
+                      d="M11.4669 3.72684C11.7558 3.91574 11.8369 4.30308 11.648 4.59198L7.39799 11.092C7.29783 11.2452 7.13556 11.3467 6.95402 11.3699C6.77247 11.3931 6.58989 11.3355 6.45446 11.2124L3.70446 8.71241C3.44905 8.48022 3.43023 8.08494 3.66242 7.82953C3.89461 7.57412 4.28989 7.55529 4.5453 7.78749L6.75292 9.79441L10.6018 3.90792C10.7907 3.61902 11.178 3.53795 11.4669 3.72684Z"
+                      fill="currentColor"
+                      fillRule="evenodd"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  {item.icon && <span className="shrink-0">{item.icon}</span>}
                   <span className="truncate">{item.label}</span>
-                </span>
-                {isSelected && (
-                  <GoogleIcon iconName="check" className="text-base text-white shrink-0 ml-1" />
-                )}
-              </Button>
-            );
-          })}
+                </div>
+              );
+            })}
+          </div>
         </PopoverContent>
       </Popover>
     </div>
@@ -292,8 +328,8 @@ export function FlowPromptBoxSettings({
     <div
       data-slot="prompt-box-settings"
       className={cn(
-        "settings-content-overlay flow-prompt-box-settings block box-border w-[var(--prompt-box-settings-width,17.5rem)] rounded-lg p-2",
-        "surface-listbox shadow-none",
+        "settings-content-overlay flow-prompt-box-settings block box-border w-[var(--prompt-box-settings-width,18rem)] rounded-2xl p-2.5",
+        "bg-[color:var(--ui-menu-background)] border border-white/10 shadow-2xl",
         "text-white select-none font-sans antialiased",
         className
       )}
@@ -304,7 +340,7 @@ export function FlowPromptBoxSettings({
           <div
             role="radiogroup"
             aria-label="Mode"
-            className="flex items-center gap-1 p-1 bg-white/5 rounded-sm w-full"
+            className="flex items-center gap-1 p-1 bg-white/5 border border-white/10 rounded-xl w-full"
           >
             {modeOptions.map((opt) => {
               const isChecked = activeMode === opt.value;
@@ -316,7 +352,7 @@ export function FlowPromptBoxSettings({
                   onClick={() => onModeChange?.(opt.value)}
                   role="radio"
                   aria-checked={isChecked}
-                  className="flex-1"
+                  className="flex-1 rounded-lg text-xs h-8"
                 >
                   <GoogleIcon
                     iconName={opt.icon}
@@ -334,7 +370,7 @@ export function FlowPromptBoxSettings({
           <div
             role="radiogroup"
             aria-label="Type de vidéo"
-            className="flex items-center gap-1 p-1 bg-white/5 rounded-sm w-full"
+            className="flex items-center gap-1 p-1 bg-white/5 border border-white/10 rounded-xl w-full"
           >
             {subModeOptions.map((opt) => {
               const isChecked = activeSubMode === opt.value;
@@ -346,7 +382,7 @@ export function FlowPromptBoxSettings({
                   onClick={() => onSubModeChange?.(opt.value)}
                   role="radio"
                   aria-checked={isChecked}
-                  className="flex-1"
+                  className="flex-1 rounded-lg text-xs h-8"
                 >
                   <GoogleIcon
                     iconName={opt.icon}
@@ -364,7 +400,7 @@ export function FlowPromptBoxSettings({
           <div
             role="radiogroup"
             aria-label="Format"
-            className="flex flex-wrap items-center gap-1 p-1 bg-white/5 rounded-sm w-full"
+            className="flex flex-wrap items-center gap-1 p-1 bg-white/5 border border-white/10 rounded-xl w-full"
           >
             {ratioOptions.map((ratio) => {
               const isChecked = currentRatio === ratio;
@@ -378,7 +414,7 @@ export function FlowPromptBoxSettings({
                   onClick={() => handleRatioClick(ratio)}
                   role="radio"
                   aria-checked={isChecked}
-                  className="flex-1 min-w-[44px] h-[54px] flex-col gap-1 p-1"
+                  className="flex-1 min-w-[44px] h-[52px] flex-col gap-1 p-1 rounded-lg"
                 >
                   <GoogleIcon
                     iconName={iconName}
@@ -427,7 +463,7 @@ export function FlowPromptBoxSettings({
                     role="radiogroup"
                     aria-label={def.label || key}
                     className={cn(
-                      "p-1 bg-white/5 rounded-sm w-full max-w-full",
+                      "p-1 bg-white/5 border border-white/10 rounded-xl w-full max-w-full",
                       isGrid ? cn("grid", gridColsClass, "gap-1") : "flex items-center gap-1"
                     )}
                   >
@@ -452,7 +488,7 @@ export function FlowPromptBoxSettings({
                           role="radio"
                           aria-checked={isChecked}
                           aria-description={infoText || undefined}
-                          className={!isGrid ? "flex-1" : undefined}
+                          className={cn(!isGrid ? "flex-1" : undefined, "rounded-lg text-xs h-8")}
                         >
                           <span className="flex items-center justify-center gap-1 truncate w-full text-center">
                             <span className="truncate text-white">{itemLabel}</span>
@@ -473,30 +509,19 @@ export function FlowPromptBoxSettings({
                 );
               }
 
-              // Render Boolean Toggles (On / Off) using canonical Button variants
+              // Render Boolean Toggles (On / Off) using canonical Base Switch
               if (def.type === "boolean") {
                 const isChecked = Boolean(val);
                 return (
-                  <div key={key} className="flex items-center justify-between px-1">
-                    <span className="text-[12px] text-white font-medium">
+                  <div key={key} className="flex items-center justify-between px-3 py-2 bg-white/5 border border-white/10 rounded-xl">
+                    <span className="text-xs text-white font-medium">
                       {def.label || key}
                     </span>
-                    <div className="flex items-center gap-1 p-1 bg-white/5 rounded-sm">
-                      <Button
-                        type="button"
-                        variant={!isChecked ? "secondary" : "ghost"}
-                        onClick={() => onParamChange?.(key, false)}
-                      >
-                        Off
-                      </Button>
-                      <Button
-                        type="button"
-                        variant={isChecked ? "secondary" : "ghost"}
-                        onClick={() => onParamChange?.(key, true)}
-                      >
-                        On
-                      </Button>
-                    </div>
+                    <Switch
+                      checked={isChecked}
+                      onCheckedChange={(checked) => onParamChange?.(key, checked)}
+                      aria-label={def.label || key}
+                    />
                   </div>
                 );
               }
@@ -509,10 +534,10 @@ export function FlowPromptBoxSettings({
                 const numVal = val !== undefined && val !== null ? Number(val) : (def.default ?? min);
 
                 return (
-                  <div key={key} className="flex flex-col gap-1 p-1 bg-white/5 rounded-sm px-2.5 py-2">
-                    <div className="flex items-center justify-between text-[11px]">
+                  <div key={key} className="flex flex-col gap-1.5 p-2.5 bg-white/5 border border-white/10 rounded-xl">
+                    <div className="flex items-center justify-between text-xs">
                       <span className="text-white font-medium">{def.label || key}</span>
-                      <span className="font-mono text-white font-semibold tabular-nums">{numVal}</span>
+                      <span className="font-mono text-white/90 font-semibold tabular-nums">{numVal}</span>
                     </div>
                     <Slider
                       min={min}
@@ -561,7 +586,7 @@ export function FlowPromptBoxSettings({
                 <img
                   src={currentModelIcon}
                   alt=""
-                  className="size-5 rounded-sm object-contain brightness-0 invert shrink-0"
+                  className="size-5 rounded-lg object-contain brightness-0 invert shrink-0"
                   onError={(e) => {
                     e.currentTarget.style.display = "none";
                   }}
@@ -571,6 +596,7 @@ export function FlowPromptBoxSettings({
               )
             }
             displayValue={currentModel?.name || "Model"}
+            label="Model"
             width={240}
             maxHeightLimit={320}
             ariaLabel="Sélectionner une famille de modèles"
@@ -582,7 +608,7 @@ export function FlowPromptBoxSettings({
           <div
             role="radiogroup"
             aria-label="Nombre de sorties"
-            className="flex items-center gap-1 p-1 bg-white/5 rounded-sm w-full"
+            className="flex items-center gap-1 p-1 bg-white/5 border border-white/10 rounded-xl w-full"
           >
             {[1, 2, 3, 4].map((countVal) => {
               const isChecked = currentCount === countVal;
@@ -595,7 +621,7 @@ export function FlowPromptBoxSettings({
                   onClick={() => handleCountClick(countVal)}
                   role="radio"
                   aria-checked={isChecked}
-                  className="flex-1"
+                  className="flex-1 rounded-lg text-xs h-8"
                 >
                   <span className="font-semibold text-white">x{countVal}</span>
                 </Button>
@@ -606,8 +632,8 @@ export function FlowPromptBoxSettings({
 
         {/* ── 6. CREDIT COST LABEL ── */}
         {models && models.length > 0 && currentModel && (
-          <div className="settings-credit-cost block text-center">
-            <span className="credit-cost-label block text-[11px] text-white/60">
+          <div className="settings-credit-cost block text-center pt-1 pb-0.5">
+            <span className="credit-cost-label block text-xs text-white/50">
               <span>
                 La génération utilisera{" "}
                 <a
@@ -625,7 +651,7 @@ export function FlowPromptBoxSettings({
 
         {/* ── Empty notice if no models available for this mode ── */}
         {(!models || models.length === 0) && (
-          <div className="py-3 px-2 text-center text-[12px] text-white">
+          <div className="py-3 px-2 text-center text-xs text-white/60">
             Aucun modèle disponible
           </div>
         )}

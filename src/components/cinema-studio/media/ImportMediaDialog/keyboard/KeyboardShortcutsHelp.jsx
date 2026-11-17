@@ -2,23 +2,23 @@
 
 import { useState } from "react";
 import {
-  HoverCard,
-  HoverCardTrigger,
-  HoverCardContent,
-} from "@/components/primitives/hover-card";
-import { Button } from "@/components/base/button";
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/primitives/popover";
+import { IconButton } from "@/components/base/icon-button";
 import { cn } from "@/shared/lib/utils";
 
 function ShortcutRow({ label, keys }) {
   const list = Array.isArray(keys) ? keys : [keys];
   return (
-    <div className="flex items-center justify-between px-2 py-1 rounded-sm hover:bg-white/[0.04] transition-colors">
-      <span className="text-xs text-white/70 font-normal leading-none">{label}</span>
+    <div className="flex items-center justify-between px-2 py-1 rounded-lg hover:bg-white/5 transition-colors">
+      <span className="text-xs text-white/70 font-normal leading-none font-sans antialiased">{label}</span>
       <div className="flex items-center gap-1 shrink-0">
         {list.map((k, i) => (
           <kbd
             key={i}
-            className="px-1.5 py-0.5 min-w-4 text-xs font-mono font-medium text-white/85 bg-white/10 rounded-sm border border-white/5 flex items-center justify-center leading-none select-none"
+            className="px-1.5 py-0.5 min-w-4 text-xs font-mono font-medium text-white/90 bg-white/10 rounded border border-white/10 flex items-center justify-center leading-none select-none"
           >
             {k}
           </kbd>
@@ -30,49 +30,44 @@ function ShortcutRow({ label, keys }) {
 
 /**
  * KeyboardShortcutsHelp
- * Compact, simple '?' trigger with a sleek menu-style hover dropdown.
+ * Click-triggered shortcut help popover:
+ * - Opens only on click
+ * - Closes on mouse leave or click outside
+ * - Positioned on right side (align="end")
+ * - Styled with dialog's ui-menu-background at 90% opacity and 2xl glassmorphism
  */
 export function KeyboardShortcutsHelp({ className }) {
   const [open, setOpen] = useState(false);
 
   return (
-    <HoverCard
-      open={open}
-      onOpenChange={setOpen}
-      openDelay={80}
-      closeDelay={180}
-    >
-      <HoverCardTrigger asChild>
-        <Button
-          type="button"
-          variant={open ? "secondary" : "ghost"}
-          onClick={(e) => {
-            e.stopPropagation();
-            setOpen((prev) => !prev);
-          }}
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <IconButton
+          variant={open ? "tonal" : "ghost"}
           className={cn("size-8 p-0 font-mono text-sm shrink-0", className)}
           aria-label="Keyboard Shortcuts"
           title="Keyboard Shortcuts"
         >
-          ?
-        </Button>
-      </HoverCardTrigger>
-      <HoverCardContent
+          <span className="font-mono text-sm font-semibold leading-none">?</span>
+        </IconButton>
+      </PopoverTrigger>
+      <PopoverContent
         align="end"
         side="bottom"
         sideOffset={6}
-        className="z-50 w-60 p-2 bg-surface-secondary/90 backdrop-blur-md border border-white/10 rounded-lg shadow-none text-white select-none"
+        onMouseLeave={() => setOpen(false)}
+        className="z-50 w-64 p-2.5 !bg-[color:var(--ui-menu-background)]/90 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-none text-white select-none"
       >
-        {/* Minimal Header */}
-        <div className="flex items-center justify-between px-2 pt-0.5 pb-1.5 mb-1 border-b border-white/[0.06]">
-          <span className="text-xs font-medium text-white/90">Shortcuts</span>
-          <span className="text-xs text-white/40 uppercase tracking-wider font-mono">Help</span>
+        {/* Header */}
+        <div className="flex items-center justify-between px-2 pt-0.5 pb-2 mb-1 border-b border-white/10">
+          <span className="text-xs font-medium text-white/90 font-sans antialiased">Shortcuts</span>
+          <span className="text-[10px] text-white/40 uppercase tracking-wider font-mono font-semibold">Help</span>
         </div>
 
         {/* Content */}
         <div className="flex flex-col gap-0.5">
           {/* Assets Section */}
-          <div className="text-xs font-medium text-white/40 px-2 pt-1 pb-0.5 uppercase tracking-wider">
+          <div className="text-[10px] font-semibold text-white/40 px-2 pt-1 pb-0.5 uppercase tracking-wider font-sans antialiased">
             Assets
           </div>
           <ShortcutRow label="Navigate" keys={["↑", "↓", "←", "→"]} />
@@ -80,25 +75,25 @@ export function KeyboardShortcutsHelp({ className }) {
           <ShortcutRow label="Add to prompt" keys="↵" />
           <ShortcutRow label="To sidebar" keys="←" />
 
-          <div className="my-1 border-t border-white/[0.06]" />
+          <div className="my-1 border-t border-white/10" />
 
           {/* Categories Section */}
-          <div className="text-xs font-medium text-white/40 px-2 pt-0.5 pb-0.5 uppercase tracking-wider">
+          <div className="text-[10px] font-semibold text-white/40 px-2 pt-0.5 pb-0.5 uppercase tracking-wider font-sans antialiased">
             Categories
           </div>
           <ShortcutRow label="Switch" keys={["↑", "↓"]} />
           <ShortcutRow label="Enter" keys={["→", "Tab"]} />
 
-          <div className="my-1 border-t border-white/[0.06]" />
+          <div className="my-1 border-t border-white/10" />
 
           {/* General Section */}
-          <div className="text-xs font-medium text-white/40 px-2 pt-0.5 pb-0.5 uppercase tracking-wider">
+          <div className="text-[10px] font-semibold text-white/40 px-2 pt-0.5 pb-0.5 uppercase tracking-wider font-sans antialiased">
             General
           </div>
           <ShortcutRow label="Search" keys="/" />
           <ShortcutRow label="Close" keys="Esc" />
         </div>
-      </HoverCardContent>
-    </HoverCard>
+      </PopoverContent>
+    </Popover>
   );
 }

@@ -90,6 +90,7 @@ export function NavbarImportButton() {
         </DropdownMenuTrigger>
 
         <DropdownMenuContent
+          variant="normal"
           align="end"
           className="w-52 p-1.5 flex flex-col gap-0.5 font-sans"
         >

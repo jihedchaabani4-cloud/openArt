@@ -222,7 +222,7 @@ export function EditNavbar({
                                     <GoogleIcon iconName="more_vert" className="text-[16px]" />
                                 </IconButton>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="start" className="w-52 p-1.5">
+                            <DropdownMenuContent variant="normal" align="start" className="w-52 p-1.5">
                                 <DropdownMenuItem onClick={() => nameRef.current?.startEditing()}>
                                     <GoogleIcon iconName="edit" className="text-[20px]" />
                                     Renommer

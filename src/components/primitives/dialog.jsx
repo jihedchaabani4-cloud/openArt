@@ -61,9 +61,9 @@ function DialogContent({
             z-50 fixed top-1/2 left-1/2
             -translate-x-1/2 -translate-y-1/2
             w-full max-w-[calc(100%-2rem)] sm:max-w-lg p-6
-            rounded-md border border-white/10 outline-none
-            bg-(--background-state-90) backdrop-blur-80 text-white
-            shadow-none
+            rounded-3xl border border-white/10 outline-none
+            bg-[color:var(--ui-menu-background)]/70 backdrop-blur-2xl text-white
+            shadow-xl
             data-[state=open]:animate-in
             data-[state=closed]:animate-out
             data-[state=open]:fade-in-0
@@ -74,7 +74,7 @@ function DialogContent({
 
           // FULL SCREEN
           variant === "full" &&
-            "fixed inset-0 z-50 w-screen h-screen outline-none bg-(--background-state-90) text-white",
+            "fixed inset-0 z-50 w-screen h-screen outline-none bg-[color:var(--ui-menu-background)]/70 text-white",
 
           // FLOATING (above prompt bar)
           variant === "floating" &&
@@ -84,7 +84,7 @@ function DialogContent({
             -translate-x-1/2 translate-y-0 
             w-75 max-w-[95%]
             h-auto max-h-[60vh]
-            rounded-md bg-(--background-state-90) backdrop-blur-80 text-white shadow-none border border-white/10 overflow-hidden
+            rounded-3xl bg-[color:var(--ui-menu-background)]/70 backdrop-blur-2xl text-white shadow-xl border border-white/10 overflow-hidden
             flex flex-col
             data-[state=open]:animate-in
             data-[state=closed]:animate-out
@@ -97,22 +97,22 @@ function DialogContent({
           // DEFAULT (centered)
           variant === "default" &&
             `
-            z-50 bg-(--background-state-90) backdrop-blur-80 text-white
+            z-50 bg-[color:var(--ui-menu-background)]/70 backdrop-blur-2xl text-white
             fixed top-1/2 left-1/2
             -translate-x-1/2 -translate-y-1/2
             w-full max-w-[calc(100%-2rem)]
             sm:max-w-6xl
-            rounded-md border border-white/10 p-6 shadow-none
+            rounded-3xl border border-white/10 p-6 shadow-xl
             data-[state=open]:animate-in
             data-[state=closed]:animate-out
           `,
           variant === "small" &&
             `
-            z-50 bg-(--background-state-90) backdrop-blur-80 text-white
+            z-50 bg-[color:var(--ui-menu-background)]/70 backdrop-blur-2xl text-white
             fixed top-1/2 left-1/2
             -translate-x-1/2 -translate-y-1/2
             w-full max-w-64 max-h-50
-            rounded-md border border-white/10 p-2 shadow-none
+            rounded-3xl border border-white/10 p-6 shadow-xl
             data-[state=open]:animate-in
             data-[state=closed]:animate-out
           `,
@@ -121,9 +121,9 @@ function DialogContent({
             z-50 fixed top-1/2 left-1/2
             -translate-x-1/2 -translate-y-1/2
             w-96 max-w-full p-6
-            rounded-md border border-white/10 outline-none
-            bg-(--background-state-90) backdrop-blur-80 text-white
-            shadow-none
+            rounded-3xl border border-white/10 outline-none
+            bg-[color:var(--ui-menu-background)]/70 backdrop-blur-2xl text-white
+            shadow-xl
             data-[state=open]:animate-in
             data-[state=closed]:animate-out
             data-[state=open]:fade-in-0
@@ -135,10 +135,10 @@ function DialogContent({
             `
             z-50 fixed top-1/2 left-1/2
             -translate-x-1/2 -translate-y-1/2
-            w-112 max-w-[calc(100vw-2rem)] max-h-[85vh] p-0 overflow-hidden
-            rounded-xl border border-white/10 outline-none
-            bg-(--background-state-90) backdrop-blur-80 text-white
-            shadow-none flex flex-col
+            w-112 max-w-[calc(100vw-2rem)] max-h-[85vh] p-6 overflow-hidden
+            rounded-3xl border border-white/10 outline-none
+            bg-[color:var(--ui-menu-background)]/70 backdrop-blur-2xl text-white
+            shadow-xl flex flex-col
             data-[state=open]:animate-in
             data-[state=closed]:animate-out
             data-[state=open]:fade-in-0

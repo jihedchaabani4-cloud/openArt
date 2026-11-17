@@ -461,10 +461,32 @@ export default function DesignSystemShowcasePage() {
                   </DialogContent>
                 </Dialog>
 
-                {/* Dropdown Menu */}
+                {/* Dropdown Menu (Normal Variant --ui-menu-background/30) */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="secondary">Actions Menu</Button>
+                    <Button variant="secondary">Normal Menu</Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent variant="normal">
+                    <DropdownMenuItem>
+                      <GoogleIcon iconName="edit" />
+                      <span>Rename</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem>
+                      <GoogleIcon iconName="content_copy" />
+                      <span>Duplicate</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem variant="destructive">
+                      <GoogleIcon iconName="delete" />
+                      <span>Move to Trash</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                {/* Dropdown Menu (Glass Variant) */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost">Glass Menu</Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent variant="glass">
                     <DropdownMenuItem>

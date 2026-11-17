@@ -198,7 +198,7 @@ export function usePromptBarReferences({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [quickMentionOpen]);
 
-  const handleSelectMedia = useCallback((assets) => {
+  const handleSelectMedia = useCallback((assets, options = {}) => {
     const items = Array.isArray(assets) ? assets : [assets];
     if (items.length === 0) {
       setDialogOpen(false);
@@ -242,8 +242,10 @@ export function usePromptBarReferences({
       setMentionQuery("");
     }
 
-    setDialogOpen(false);
-    setActiveDialogSlot(null);
+    if (options?.keepOpen !== true && options?.closeDialog !== false) {
+      setDialogOpen(false);
+      setActiveDialogSlot(null);
+    }
   }, [activeDialogSlot, mentionCallback, attachMedia, addElement, addCharacter, activeSlots, paramValues, featureConfig, currentModel, setParameter]);
 
   const handleRemoveReferenceItem = useCallback((itemToRemove) => {

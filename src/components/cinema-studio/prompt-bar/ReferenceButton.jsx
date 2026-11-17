@@ -43,7 +43,7 @@ export function ReferenceButton({
       onDrop={onDrop}
       className={cn(
         "group relative shrink-0",
-        "w-[50px] h-[50px] rounded-2xl",
+        "w-[50px] h-[50px] rounded-xl",
         "flex items-center justify-center",
         "bg-[color:var(--white-5)]",
         "transition-all duration-200 ease-out",
@@ -149,7 +149,7 @@ export function ViewReference({
     >
       {/* 50x50 Chip Container */}
       <div
-        className="chip-container group w-full h-full relative rounded-2xl overflow-hidden bg-white/[0.04] cursor-pointer flex items-center justify-center select-none"
+        className="chip-container group w-full h-full relative rounded-xl overflow-hidden bg-white/[0.04] cursor-pointer flex items-center justify-center select-none"
         aria-label={tooltipText}
         onClick={(e) => {
           e.stopPropagation();

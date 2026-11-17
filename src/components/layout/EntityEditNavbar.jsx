@@ -82,7 +82,7 @@ export function EntityEditNavbar({
                   <GoogleIcon iconName="add" className="text-xl text-white" />
                 </IconButton>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" sideOffset={6} className="w-52 p-1.5">
+              <DropdownMenuContent variant="normal" align="end" sideOffset={6} className="w-52 p-1.5">
                 {onUpload && (
                   <DropdownMenuItem
                     onSelect={() => onUpload()}

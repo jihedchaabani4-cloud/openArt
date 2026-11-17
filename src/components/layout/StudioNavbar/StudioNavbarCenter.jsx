@@ -21,7 +21,7 @@ export function StudioNavbarCenter({
             <div className="flex items-center gap-4 w-full min-w-0 h-full max-h-full relative">
                 <Input
                     ref={searchInputRef}
-                    variant="search"
+                    variant="ghost"
                     googleIcon="search"
                     placeholder="Search..."
                     containerClassName="h-full max-h-full justify-center flex"

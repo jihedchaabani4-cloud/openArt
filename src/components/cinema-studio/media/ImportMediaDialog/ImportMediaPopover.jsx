@@ -10,6 +10,7 @@ import { MediaViewCard } from "../MediaViewCard";
 import { resolveMediaUrl } from "@/shared/lib/displayUtils";
 import { GoogleIcon } from "@/components/primitives/GoogleIcon";
 import { Button } from "@/components/base/button";
+import { IconButton } from "@/components/base/icon-button";
 import { Input } from "@/components/base/input";
 import { RowsPhotoAlbum } from 'react-photo-album';
 import 'react-photo-album/rows.css';
@@ -43,6 +44,7 @@ export function ImportMediaPopover({
   onUploadFromPC,
   anchorRef,
   initialSearch = "",   // seed the search bar when the dialog first opens
+  closeOnSelect = false,
 }) {
   const isAssetSelect = variant === "asset-select" || mode === "asset-select";
 
@@ -521,8 +523,10 @@ export function ImportMediaPopover({
     if (selectedItems.length === 0) return;
     onSelect(selectedItems);
     setSelectedItems([]);
-    onOpenChange(false);
-  }, [selectedItems, onSelect, onOpenChange]);
+    if (closeOnSelect) {
+      onOpenChange(false);
+    }
+  }, [selectedItems, onSelect, onOpenChange, closeOnSelect]);
 
   // ── Desktop-Class Keyboard Navigation Engine ───────────────────────────
   const categoryRefs = React.useRef([]);
@@ -556,8 +560,10 @@ export function ImportMediaPopover({
       image_count:   candidateCount,
     };
     onSelect([asset]);
-    onOpenChange(false);
-  }, [availableSlots, remainingImages, onSelect, onOpenChange]);
+    if (closeOnSelect) {
+      onOpenChange(false);
+    }
+  }, [availableSlots, remainingImages, onSelect, onOpenChange, closeOnSelect]);
 
   // Space key multi-select toggle helper
   const handleToggleHighlight = React.useCallback((item) => {
@@ -674,14 +680,14 @@ export function ImportMediaPopover({
             // Panel (inline): keep its own natural width (48.75rem = 780px), height capped
             width: "min(48.75rem, 92vw)",
             height: "min(34rem, 75vh)",
-            padding: "0.75rem",
+            padding: "8px",
           } : {
             // Default (floating fixed): original fixed behaviour with prompt bar glassmorphism
             width: "min(48.75rem, 90vw)",
             height: "min(36.25rem, 90vh)",
-            padding: "0.75rem",
+            padding: "8px",
             borderRadius: "16px",
-            backgroundColor: "var(--background-state-90)",
+            backgroundColor: "var(--ui-menu-background)",
             backdropFilter: "blur(80px)",
             WebkitBackdropFilter: "blur(80px)",
             boxShadow: "none",
@@ -689,8 +695,8 @@ export function ImportMediaPopover({
           className={cn(
             isPanel
               ? ""
-              : "fixed bottom-24 left-1/2 -translate-x-1/2 z-50 border border-white/5",
-            "flex flex-col overflow-hidden text-white font-sans antialiased"
+              : "fixed bottom-24 left-1/2 -translate-x-1/2 z-50 border border-white/5 bg-[color:var(--ui-menu-background)]",
+            "flex flex-col overflow-hidden text-white font-sans antialiased p-2"
           )}
         >
           {/* Hidden file input */}
@@ -703,17 +709,17 @@ export function ImportMediaPopover({
             onChange={handleFileChange}
           />
 
-          <div className="flex flex-row flex-1 min-h-0 overflow-hidden">
+          <div className="flex flex-row flex-1 min-h-0 overflow-hidden gap-2">
             {/* ── Left Category Sidebar (Shown in standard mode only) ── */}
           {!isAssetSelect && (availableCategories.length > 0 || allowsImages || allowsVideos) && (
-            <div className="w-36 flex flex-col gap-1.5 shrink-0 select-none bg-transparent pl-1.5 pr-1">
+            <div className="w-36 flex flex-col gap-1.5 shrink-0 select-none bg-transparent p-0">
               {availableCategories.length > 0 && (
                 <>
                   <div className="px-2 pt-0.5 pb-1 text-xs font-semibold text-white/30 uppercase tracking-wider font-sans antialiased">
                     Categories
                   </div>
                   
-                  <nav role="tablist" className="flex flex-col gap-1 flex-1 p-0.5">
+                  <nav role="tablist" className="flex flex-col gap-1 flex-1 p-0">
                     {availableCategories.map((cat, catIdx) => {
                       const isActive = (selectedCategory || defaultCategory) === cat.id;
                       const isHighlighted = navZone === "sidebar" && highlightedCategoryIdx === catIdx;
@@ -723,7 +729,7 @@ export function ImportMediaPopover({
                           key={cat.id}
                           role="tab"
                           aria-selected={isActive}
-                          variant={isActive ? "nav-tab-active" : "nav-tab"}
+                          variant="ghost"
                           onClick={() => {
                             setSelectedCategory(cat.id);
                             setHighlightedCategoryIdx(catIdx);
@@ -731,6 +737,7 @@ export function ImportMediaPopover({
                           }}
                           className={cn(
                             "w-full justify-start h-8 text-xs cursor-pointer group px-2.5 flex items-center gap-2.5 transition-all",
+                            isActive ? "bg-white/10 text-white font-medium" : "text-white/60 hover:text-white",
                             isHighlighted && "ring-1 ring-inset ring-white/70 bg-white/10"
                           )}
                         >
@@ -769,14 +776,14 @@ export function ImportMediaPopover({
           )}
 
           {/* ── Right Content Area ── */}
-          <div className="flex-1 flex flex-col min-w-0 min-h-0 pl-1">
+          <div className="flex-1 flex flex-col min-w-0 min-h-0">
             {/* Search Header Bar */}
             <div className="pb-2.5 flex items-center gap-2 shrink-0">
               {/* Search Bar Input */}
               <div className="flex-1">
                 <Input
                   ref={searchInputRef}
-                  variant="blurinput"
+                  variant="ghost"
                   googleIcon="search"
                   type="search"
                   value={search}
@@ -789,41 +796,37 @@ export function ImportMediaPopover({
               </div>
 
               {/* Layout Mode Switcher (Grid vs List) */}
-              <div className="flex items-center p-0.5 rounded-sm bg-white/5 shrink-0">
-                <Button
-                  type="button"
-                  variant="ghost"
+              <div className="flex items-center p-0.5 rounded-2xl bg-white/5 shrink-0 gap-1">
+                <IconButton
+                  variant={layoutMode === "grid" ? "tonal" : "ghost"}
                   onClick={() => setLayoutMode("grid")}
-                  className={cn(
-                    "w-8 h-8 rounded-sm transition-all cursor-pointer border-none outline-none p-0",
-                    layoutMode === "grid"
-                      ? "bg-white/20 text-white shadow-none hover:bg-white/20"
-                      : "text-white/40 hover:text-white/80 hover:bg-white/5"
-                  )}
                   title="Grid view"
                   aria-label="Grid view"
                 >
                   <GoogleIcon iconName="grid_view" weight={300} className="text-base" />
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
+                </IconButton>
+                <IconButton
+                  variant={layoutMode === "list" ? "tonal" : "ghost"}
                   onClick={() => setLayoutMode("list")}
-                  className={cn(
-                    "w-8 h-8 rounded-sm transition-all cursor-pointer border-none outline-none p-0",
-                    layoutMode === "list"
-                      ? "bg-white/20 text-white shadow-none hover:bg-white/20"
-                      : "text-white/40 hover:text-white/80 hover:bg-white/5"
-                  )}
                   title="List view"
                   aria-label="List view"
                 >
                   <GoogleIcon iconName="view_list" weight={300} className="text-base" />
-                </Button>
+                </IconButton>
               </div>
 
               {/* Keyboard Shortcuts Help '?' Button & Hover Dropdown */}
               <KeyboardShortcutsHelp />
+
+              {/* Close Button */}
+              <IconButton
+                variant="ghost"
+                onClick={() => onOpenChange?.(false)}
+                title="Close"
+                aria-label="Close"
+              >
+                <GoogleIcon iconName="close" weight={300} className="text-base" />
+              </IconButton>
             </div>
 
             {layoutMode === "list" ? (
@@ -833,6 +836,12 @@ export function ImportMediaPopover({
                 availableSlots={availableSlots}
                 maxAllowed={maxAllowed}
                 focusedId={visibleItems[highlightedAssetIdx]?.id || visibleItems[highlightedAssetIdx]?.workflow_id}
+                onFocusChange={(item, idx) => {
+                  if (typeof idx === "number" && idx >= 0) {
+                    setHighlightedAssetIdx(idx);
+                  }
+                  setNavZone("gallery");
+                }}
                 onSelectDirect={handleSelectDirect}
                 loading={loading}
                 hasMore={hasMore}
@@ -934,13 +943,9 @@ export function ImportMediaPopover({
                 {/* Footer - Import Button */}
                 <div className="p-3 shrink-0 flex justify-end bg-transparent">
                   <Button 
+                    variant="primary"
                     onClick={handleImport}
                     disabled={selectedItems.length === 0}
-                    className={cn(
-                      selectedItems.length > 0 
-                        ? "bg-white text-black hover:bg-white/90 active:scale-95" 
-                        : "bg-white/5 text-white/20 cursor-not-allowed"
-                    )}
                   >
                     {selectedItems.length > 0 ? (
                       <span className="flex items-center gap-2">

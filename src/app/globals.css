@@ -111,7 +111,7 @@
   --color-prompt-bar-bg: var(--prompt-bar-bg);
   --color-popover: rgb(var(--popover));
   --color-popover-foreground: rgb(var(--popover-foreground));
-  --color-card: var(--card);
+  --color-card: rgb(var(--card));
   --color-card-foreground: rgb(var(--card-foreground));
   --color-destructive: rgb(var(--destructive));
   --color-destructive-foreground: rgb(var(--destructive-foreground));
@@ -1017,6 +1017,40 @@
     background-color: var(--surface-nav-active);
   }
 
+  /* --- Dropdown Card Button Variant --- */
+  .ds-btn-dropdown-card {
+    position: relative;
+    display: flex;
+    height: 50px;
+    width: 100%;
+    min-width: 0;
+    cursor: pointer;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    overflow: hidden;
+    white-space: nowrap;
+    border-radius: 10px;
+    border: 0;
+    background-color: var(--surface-tonal);
+    padding: 0 12px;
+    text-align: left;
+    font-size: 12px;
+    line-height: 16px;
+    font-weight: 500;
+    color: rgb(var(--card-foreground));
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    transition: background-color 150ms cubic-bezier(0, 0, 0.2, 1), color 150ms cubic-bezier(0, 0, 0.2, 1);
+  }
+  .ds-btn-dropdown-card:hover:not(:disabled),
+  .ds-btn-dropdown-card[data-state="open"] {
+    background-color: var(--surface-tonal-hover);
+  }
+  .ds-btn-dropdown-card:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.70);
+  }
+
   /* --- 05. Icon Button (Chrome = ring-0) --- */
   .ds-icon-btn {
     display: inline-flex;
@@ -1124,7 +1158,7 @@
     transition: background-color 150ms var(--ease-standard);
   }
   .ds-menu-item:hover {
-    background-color: rgba(255, 255, 255, 0.20);
+    background-color: var(--surface-tonal);
   }
 
   /* --- 07. Pill Tabs & Composer Folder Tabs --- */
@@ -1177,15 +1211,42 @@
   }
 
   .bg-card {
-    background-color: var(--card);
+    --tw-bg-opacity: 1;
+    background-color: rgb(var(--card) / var(--tw-bg-opacity, 1));
+  }
+
+  .bg-card-hover {
+    --tw-bg-opacity: 1;
+    background-color: rgb(var(--card-hover) / var(--tw-bg-opacity, 1));
+  }
+
+  .bg-fill-secondary {
+    background-color: rgb(var(--fill-secondary));
   }
 
   .bg-card\/50 {
-    background-color: color-mix(in srgb, var(--card) 50%, transparent);
+    --tw-bg-opacity: 0.5;
+    background-color: rgb(var(--card) / var(--tw-bg-opacity, 0.5));
   }
 
-  .bg-ui-menu-background\/70 {
+  .bg-ui-menu-background,
+  .bg-\[color\:var\(--ui-menu-background\)\] {
+    background-color: var(--ui-menu-background);
+  }
+
+  .bg-ui-menu-background\/30,
+  .bg-\[color\:var\(--ui-menu-background\)\]\/30 {
+    background-color: color-mix(in srgb, var(--ui-menu-background) 30%, transparent);
+  }
+
+  .bg-ui-menu-background\/70,
+  .bg-\[color\:var\(--ui-menu-background\)\]\/70 {
     background-color: color-mix(in srgb, var(--ui-menu-background) 70%, transparent);
+  }
+
+  .bg-ui-menu-background\/90,
+  .bg-\[color\:var\(--ui-menu-background\)\]\/90 {
+    background-color: color-mix(in srgb, var(--ui-menu-background) 90%, transparent);
   }
 
   .ds-composer-card {
@@ -1328,20 +1389,37 @@
     outline: none;
   }
 
-  .ds-input-ghost {
+  .ds-input-bare {
     background-color: transparent !important;
     border: none !important;
     box-shadow: none !important;
     outline: none !important;
     color: var(--text-primary);
   }
-  .ds-input-ghost:hover,
-  .ds-input-ghost:focus,
-  .ds-input-ghost:focus-within {
+  .ds-input-bare:hover,
+  .ds-input-bare:focus,
+  .ds-input-bare:focus-within {
     background-color: transparent !important;
     border: none !important;
     box-shadow: none !important;
     outline: none !important;
+  }
+
+  .ds-input-ghost {
+    border-radius: var(--radius-button);
+    background-color: color-mix(in srgb, #ffffff 5%, transparent);
+    border: none;
+    outline: none;
+    color: var(--text-primary);
+    transition: background-color 150ms var(--ease-standard);
+  }
+  .ds-input-ghost:hover {
+    background-color: color-mix(in srgb, #ffffff 20%, transparent);
+  }
+  .ds-input-ghost:focus,
+  .ds-input-ghost:focus-within {
+    background-color: color-mix(in srgb, #ffffff 20%, transparent);
+    outline: none;
   }
 
   .ds-input-accent,

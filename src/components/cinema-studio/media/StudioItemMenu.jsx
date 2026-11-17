@@ -81,7 +81,7 @@ export function StudioItemDropdownMenu({
           </IconButton>
         )}
       </DropdownMenuTrigger>
-      <DropdownMenuContent align={align} className={cn("p-1.5 min-w-[12rem] w-52 flow-menu-panel mat-mdc-menu-panel", className)}>
+      <DropdownMenuContent variant="normal" align={align} className={cn("p-1.5 min-w-[12rem] w-52 flow-menu-panel mat-mdc-menu-panel", className)}>
         {activeItems.map((m, i) => {
           if (m.key === "separator" || m.type === "separator") {
             return <DropdownMenuSeparator key={m.key || `sep-${i}`} className="my-1.5" />;
