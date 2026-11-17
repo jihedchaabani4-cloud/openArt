@@ -23,7 +23,7 @@ export function AssetListItem({
 }) {
   return (
     <Button
-      variant={isActive ? "secondary" : "flow-ghost"}
+      variant="ghost"
       type="button"
       role="option"
       aria-selected={isActive}
@@ -35,13 +35,16 @@ export function AssetListItem({
         }
       }}
       className={cn(
-        "group w-full h-12 justify-start pl-1 pr-4 py-0 text-left select-none",
-        isDisabled && "opacity-40",
+        "!h-12 w-full !justify-start gap-3 px-2 py-1.5 rounded-xl text-left select-none transition-colors",
+        isActive
+          ? "!bg-white/10 text-white font-medium"
+          : "text-white/80 hover:!bg-white/5 hover:text-white",
+        isDisabled && "opacity-50",
         className
       )}
     >
       {/* Thumbnail */}
-      <div className="w-10 h-10 rounded-xxxs overflow-hidden bg-black/40 shrink-0 relative flex items-center justify-center">
+      <div className="w-10 h-10 rounded-lg overflow-hidden bg-white/5 shrink-0 relative flex items-center justify-center border border-white/10">
         {isVideo ? (
           <video src={itemUrl} className="w-full h-full object-cover" muted />
         ) : (
@@ -51,10 +54,10 @@ export function AssetListItem({
 
       {/* Asset Text: Title and Uniform Type Subtitle */}
       <div className="flex-1 min-w-0 flex flex-col justify-center text-left">
-        <span className="text-sm font-medium text-on-surface truncate leading-tight font-sans antialiased">
+        <span className="text-sm font-medium text-white truncate leading-tight font-sans antialiased">
           {title}
         </span>
-        <span className="text-xs font-normal text-on-surface-subtle truncate font-sans antialiased mt-0.5">
+        <span className="text-xs font-normal text-white/50 truncate font-sans antialiased mt-0.5">
           {typeLabel}
         </span>
       </div>

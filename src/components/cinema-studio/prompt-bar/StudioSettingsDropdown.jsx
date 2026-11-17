@@ -58,7 +58,7 @@ export function StudioSettingsDropdown(props) {
         </Button>
       </DropdownMenuTrigger>
       
-      <DropdownMenuContent align="end" className="w-72 p-1.5 flex flex-col gap-1 font-sans antialiased">
+      <DropdownMenuContent variant="normal" align="end" className="w-72 p-1.5 flex flex-col gap-1 font-sans antialiased">
         {/* ── 1. Grid Size Selector ── */}
         <div className="flex flex-col gap-1 px-0.5 mb-1">
           <span className="text-xs font-medium text-white/75">
@@ -135,7 +135,7 @@ export function StudioSettingsDropdown(props) {
                 e.preventDefault()
                 setShowUploadedMedia(!showUploadedMedia)
               }}
-              className="flex items-center justify-between cursor-pointer px-2.5 h-[36px] rounded-xl hover:bg-white/20 transition-colors"
+              className="flex items-center justify-between cursor-pointer px-2.5 h-[36px] rounded-xl hover:bg-white/10 transition-colors"
             >
               <div className="flex items-center gap-2.5">
                 <GoogleIcon iconName="upload" className="text-lg text-white/70 shrink-0" />
@@ -153,7 +153,7 @@ export function StudioSettingsDropdown(props) {
                 e.preventDefault()
                 setShowTileDetails(!showTileDetails)
               }}
-              className="flex items-center justify-between cursor-pointer px-2.5 h-[36px] rounded-xl hover:bg-white/20 transition-colors"
+              className="flex items-center justify-between cursor-pointer px-2.5 h-[36px] rounded-xl hover:bg-white/10 transition-colors"
             >
               <div className="flex items-center gap-2.5">
                 <GoogleIcon iconName="visibility" className="text-lg text-white/70 shrink-0" />
@@ -171,7 +171,7 @@ export function StudioSettingsDropdown(props) {
                 e.preventDefault()
                 setSoundOnHover(!soundOnHover)
               }}
-              className="flex items-center justify-between cursor-pointer px-2.5 h-[36px] rounded-xl hover:bg-white/20 transition-colors"
+              className="flex items-center justify-between cursor-pointer px-2.5 h-[36px] rounded-xl hover:bg-white/10 transition-colors"
             >
               <div className="flex items-center gap-2.5">
                 <GoogleIcon iconName="volume_up" className="text-lg text-white/70 shrink-0" />
@@ -189,7 +189,7 @@ export function StudioSettingsDropdown(props) {
                 e.preventDefault()
                 setClearPromptOnSubmit(!clearPromptOnSubmit)
               }}
-              className="flex items-center justify-between cursor-pointer px-2.5 h-[36px] rounded-xl hover:bg-white/20 transition-colors"
+              className="flex items-center justify-between cursor-pointer px-2.5 h-[36px] rounded-xl hover:bg-white/10 transition-colors"
             >
               <div className="flex items-center gap-2.5">
                 <GoogleIcon iconName="backspace" className="text-lg text-white/70 shrink-0" />

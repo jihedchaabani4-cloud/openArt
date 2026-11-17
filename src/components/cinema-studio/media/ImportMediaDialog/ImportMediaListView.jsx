@@ -16,6 +16,7 @@ import { AssetListItem } from "../AssetListItem";
 export function ImportMediaListView({
   items = [],
   focusedId: propFocusedId,
+  onFocusChange,
   onSelectDirect,
   loading = false,
   hasMore = false,
@@ -24,16 +25,30 @@ export function ImportMediaListView({
   availableSlots,
   maxAllowed: _maxAllowed,
 }) {
-  const [internalFocusedId, setInternalFocusedId] = useState(null);
-  const focusedId = propFocusedId !== undefined ? propFocusedId : internalFocusedId;
-  const setFocusedId = setInternalFocusedId;
+  const [internalFocusedId, setInternalFocusedId] = useState(propFocusedId ?? null);
+
+  // Sync internal state whenever propFocusedId updates externally
+  useEffect(() => {
+    if (propFocusedId !== undefined && propFocusedId !== null) {
+      setInternalFocusedId(propFocusedId);
+    }
+  }, [propFocusedId]);
+
+  const focusedId = internalFocusedId ?? propFocusedId;
   const loadMoreRef = useRef(null);
+
+  // Flexible match function
+  const matchesFocused = (item) => {
+    if (!item || !focusedId) return false;
+    const candidates = [item.id, item.workflow_id, item.workflowId, item.name, item.url].filter(Boolean);
+    return candidates.includes(focusedId);
+  };
 
   // Derive focused item from items
   const focusedItem = useMemo(() => {
     if (!items || items.length === 0) return null;
     if (focusedId) {
-      const found = items.find((it) => (it.id || it.name || it.workflow_id) === focusedId);
+      const found = items.find(matchesFocused);
       if (found) return found;
     }
     return items[0] || null;
@@ -41,10 +56,11 @@ export function ImportMediaListView({
 
   // Update focusedId if focusedItem changes and focusedId is not set
   useEffect(() => {
-    if (focusedItem && !focusedId) {
-      setFocusedId(focusedItem.id || focusedItem.name || focusedItem.workflow_id);
+    if (focusedItem && !internalFocusedId) {
+      const initialId = focusedItem.id || focusedItem.workflow_id || focusedItem.name;
+      setInternalFocusedId(initialId);
     }
-  }, [focusedItem, focusedId, setFocusedId]);
+  }, [focusedItem, internalFocusedId]);
 
   // Infinite scroll intersection observer for list
   useEffect(() => {
@@ -97,8 +113,16 @@ export function ImportMediaListView({
           {items.map((item, idx) => {
             const itemUrl = getItemUrl(item);
             const { isVid, typeLabel, title } = getItemMetadata(item);
-            const itemId = item.id || item.name || item.workflow_id || String(idx);
-            const isFocused = (focusedItem?.id || focusedItem?.name || focusedItem?.workflow_id) === itemId;
+            const itemId = item.id || item.workflow_id || item.name || String(idx);
+            const isFocused = Boolean(
+              focusedItem &&
+              (
+                item === focusedItem ||
+                (item.id && (item.id === focusedItem.id || item.id === focusedItem.workflow_id)) ||
+                (item.workflow_id && (item.workflow_id === focusedItem.workflow_id || item.workflow_id === focusedItem.id)) ||
+                (item.url && item.url === focusedItem.url)
+              )
+            );
             const candidateCount = item.image_count || 1;
             const isOverQuota = typeof remainingImages === "number"
               ? candidateCount > availableSlots
@@ -114,7 +138,10 @@ export function ImportMediaListView({
                 isVideo={isVid}
                 isActive={isFocused}
                 isDisabled={isOverQuota}
-                onClick={() => setFocusedId(itemId)}
+                onClick={() => {
+                  setInternalFocusedId(itemId);
+                  onFocusChange?.(item, idx, itemId);
+                }}
                 onDoubleClick={() => {
                   if (!isOverQuota) {
                     onSelectDirect?.(item);
@@ -134,7 +161,7 @@ export function ImportMediaListView({
       </div>
 
       {/* ── Right Pane: Detail & Preview Hero Pane ── */}
-      <div className="flex-1 min-h-0 flex flex-col bg-surface-secondary/80 rounded-xxxs overflow-hidden relative">
+      <div className="flex-1 min-h-0 flex flex-col bg-white/5 border border-white/10 rounded-2xl overflow-hidden relative">
         {focusedItem ? (
           <>
             {/* Center Hero Preview Area */}
@@ -146,13 +173,13 @@ export function ImportMediaListView({
                   autoPlay
                   loop
                   muted
-                  className="max-h-full max-w-full rounded-xxxs object-contain shadow-none"
+                  className="max-h-full max-w-full rounded-xl object-contain shadow-none"
                 />
               ) : (
                 <img
                   src={focusedUrl}
                   alt=""
-                  className="max-h-full max-w-full rounded-xxxs object-contain shadow-none"
+                  className="max-h-full max-w-full rounded-xl object-contain shadow-none"
                 />
               )}
             </div>
@@ -177,18 +204,13 @@ export function ImportMediaListView({
                       </span>
                     )}
                     <Button
+                      variant="primary"
                       onClick={() => {
                         if (!isFocusedOverQuota) {
                           onSelectDirect?.(focusedItem);
                         }
                       }}
                       disabled={isFocusedOverQuota}
-                      className={cn(
-                        "h-9 px-4 rounded-sm text-xs font-semibold transition-all flex items-center gap-1.5 shadow-none select-none",
-                        isFocusedOverQuota
-                          ? "bg-white/10 text-white/40 cursor-not-allowed border border-white/5"
-                          : "bg-white text-black hover:bg-white/90 active:scale-95 cursor-pointer border-none"
-                      )}
                     >
                       <span className="w-4 h-4 flex items-center justify-center shrink-0">
                         <GoogleIcon iconName={isFocusedOverQuota ? "block" : "add"} weight={300} className="text-sm leading-none" />

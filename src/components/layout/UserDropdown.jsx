@@ -102,6 +102,7 @@ export function UserDropdown({ className }) {
         </DropdownMenuTrigger>
 
         <DropdownMenuContent
+          variant="normal"
           align="end"
           sideOffset={10}
           className="user-dropdown-panel w-90"

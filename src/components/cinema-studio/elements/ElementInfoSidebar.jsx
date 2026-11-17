@@ -151,7 +151,7 @@ export function ElementInfoSidebar({
               />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" sideOffset={6} className="w-52 p-1.5">
+          <DropdownMenuContent variant="normal" align="start" sideOffset={6} className="w-52 p-1.5">
             {ELEMENT_TYPES.map((type) => {
               const isSelected =
                 type.id.toLowerCase() ===

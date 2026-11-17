@@ -434,7 +434,7 @@ function PromptBarPlatformInner({
     >
 
       {/* ── Top Row: Reference & Media Slots (left) + Corner Expand/Collapse Button (right) ─── */}
-      <div className="flex items-start justify-between gap-2 w-full">
+      <div className="flex items-start justify-between gap-1.5 w-full">
         <PromptBarSlotsRow
           activeSlots={activeSlots}
           featureConfig={featureConfig}
