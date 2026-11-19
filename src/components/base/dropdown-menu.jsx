@@ -39,9 +39,9 @@ const DropdownMenuContent = React.forwardRef(function DropdownMenuContent(
         sideOffset={sideOffset}
         style={style}
         className={cn(
-          "z-50 max-h-(--radix-dropdown-menu-content-available-height) w-52 min-w-[12rem] rounded-2xl origin-(--radix-dropdown-menu-content-transform-origin) overflow-x-hidden overflow-y-auto p-1.5 flex flex-col gap-0.5",
+          "z-50 max-h-(--radix-dropdown-menu-content-available-height) w-52 min-w-[12rem] rounded-[var(--radius-3xl)] origin-(--radix-dropdown-menu-content-transform-origin) overflow-x-hidden overflow-y-auto bg-ui-menu-background p-2 [--blur:40px] flex flex-col gap-0.5",
           isNormal
-            ? "bg-[color:var(--ui-menu-background)]/30 backdrop-blur-2xl border border-white/10 shadow-none text-white font-sans antialiased"
+            ? "border border-border-weak shadow-none text-text-primary font-sans antialiased"
             : isListbox
               ? "surface-listbox shadow-xl"
               : "surface-glass shadow-xl",
@@ -76,13 +76,13 @@ const DropdownMenuItem = React.forwardRef(function DropdownMenuItem(
       data-inset={inset}
       data-variant={variant}
       className={cn(
-        "ds-menu-item relative gap-2.5 cursor-pointer outline-none select-none rounded-xl text-white font-medium text-sm transition-colors",
-        isGhost && "hover:bg-white/10 focus:bg-white/10 hover:bg-[color:var(--surface-tonal)] focus:bg-[color:var(--surface-tonal)]",
-        "[&_svg:not([class*='text-'])]:text-white/70 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        "ds-menu-item relative gap-2.5 cursor-pointer outline-none select-none rounded-xl text-text-primary font-medium text-sm transition-colors",
+        isGhost && "hover:bg-surface-tonal focus:bg-surface-tonal",
+        "[&_svg:not([class*='text-'])]:text-text-body-muted [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         "data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[inset]:pl-8",
-        "data-[variant=ghost]:hover:bg-white/10 data-[variant=ghost]:focus:bg-white/10 data-[variant=ghost]:hover:bg-[color:var(--surface-tonal)] data-[variant=ghost]:focus:bg-[color:var(--surface-tonal)]",
-        "data-[variant=destructive]:!text-error data-[variant=destructive]:hover:bg-white/10 data-[variant=destructive]:focus:bg-white/10 data-[variant=destructive]:hover:bg-[color:var(--surface-tonal)] data-[variant=destructive]:focus:bg-[color:var(--surface-tonal)] data-[variant=destructive]:[&_svg]:!text-error",
-        "data-[variant=danger]:!text-error data-[variant=danger]:hover:bg-white/10 data-[variant=danger]:focus:bg-white/10 data-[variant=danger]:hover:bg-[color:var(--surface-tonal)] data-[variant=danger]:focus:bg-[color:var(--surface-tonal)] data-[variant=danger]:[&_svg]:!text-error",
+        "data-[variant=ghost]:hover:bg-surface-tonal data-[variant=ghost]:focus:bg-surface-tonal",
+        "data-[variant=destructive]:!text-error data-[variant=destructive]:hover:bg-surface-tonal data-[variant=destructive]:focus:bg-surface-tonal data-[variant=destructive]:[&_svg]:!text-error",
+        "data-[variant=danger]:!text-error data-[variant=danger]:hover:bg-surface-tonal data-[variant=danger]:focus:bg-surface-tonal data-[variant=danger]:[&_svg]:!text-error",
         className
       )}
       {...props}
@@ -105,7 +105,7 @@ const DropdownMenuCheckboxItem = React.forwardRef(function DropdownMenuCheckboxI
       ref={ref}
       data-slot="dropdown-menu-checkbox-item"
       className={cn(
-        "relative flex cursor-pointer items-center gap-2 h-[36px] pr-2.5 pl-8 rounded-xl text-sm font-medium outline-none select-none text-white hover:bg-white/10 focus:bg-white/10 hover:bg-[color:var(--surface-tonal)] focus:bg-[color:var(--surface-tonal)] transition-colors",
+        "relative flex cursor-pointer items-center gap-2 h-[36px] pr-2.5 pl-8 rounded-xl text-sm font-medium outline-none select-none text-text-primary hover:bg-surface-tonal focus:bg-surface-tonal transition-colors",
         "data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
         className
       )}
@@ -114,7 +114,7 @@ const DropdownMenuCheckboxItem = React.forwardRef(function DropdownMenuCheckboxI
     >
       <span className="pointer-events-none absolute left-2.5 flex size-4 items-center justify-center">
         <DropdownMenuPrimitive.ItemIndicator>
-          <GoogleIcon iconName="check" className="text-sm font-bold text-white" />
+          <GoogleIcon iconName="check" className="text-sm font-bold text-text-primary" />
         </DropdownMenuPrimitive.ItemIndicator>
       </span>
       {children}
@@ -140,7 +140,7 @@ const DropdownMenuRadioItem = React.forwardRef(function DropdownMenuRadioItem(
       ref={ref}
       data-slot="dropdown-menu-radio-item"
       className={cn(
-        "relative flex cursor-pointer items-center gap-2 h-[36px] pr-2.5 pl-8 rounded-xl text-sm font-medium outline-none select-none text-white hover:bg-white/10 focus:bg-white/10 hover:bg-[color:var(--surface-tonal)] focus:bg-[color:var(--surface-tonal)] transition-colors",
+        "relative flex cursor-pointer items-center gap-2 h-[36px] pr-2.5 pl-8 rounded-xl text-sm font-medium outline-none select-none text-text-primary hover:bg-surface-tonal focus:bg-surface-tonal transition-colors",
         "data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
         className
       )}
@@ -148,7 +148,7 @@ const DropdownMenuRadioItem = React.forwardRef(function DropdownMenuRadioItem(
     >
       <span className="pointer-events-none absolute left-2.5 flex size-4 items-center justify-center">
         <DropdownMenuPrimitive.ItemIndicator>
-          <GoogleIcon iconName="circle" fill={true} className="text-xs text-white" />
+          <GoogleIcon iconName="circle" fill={true} className="text-xs text-text-primary" />
         </DropdownMenuPrimitive.ItemIndicator>
       </span>
       {children}
@@ -170,7 +170,7 @@ const DropdownMenuLabel = React.forwardRef(function DropdownMenuLabel(
       ref={ref}
       data-slot="dropdown-menu-label"
       data-inset={inset}
-      className={cn("px-2.5 py-1.5 text-xs font-semibold text-white/50 uppercase tracking-wider data-[inset]:pl-8", className)}
+      className={cn("px-2.5 py-1.5 text-xs font-semibold text-text-secondary uppercase tracking-wider data-[inset]:pl-8", className)}
       {...props}
     />
   );
@@ -188,7 +188,7 @@ const DropdownMenuSeparator = React.forwardRef(function DropdownMenuSeparator(
     <DropdownMenuPrimitive.Separator
       ref={ref}
       data-slot="dropdown-menu-separator"
-      className={cn("-mx-1 my-1.5 h-px bg-white/10", className)}
+      className={cn("-mx-1 my-1.5 h-px bg-border-weak", className)}
       {...props}
     />
   );
@@ -202,7 +202,7 @@ function DropdownMenuShortcut({
   return (
     <span
       data-slot="dropdown-menu-shortcut"
-      className={cn("ml-auto text-xs tracking-widest text-white/50 font-mono", className)}
+      className={cn("ml-auto text-xs tracking-widest text-text-secondary font-mono", className)}
       {...props}
     />
   );
@@ -227,14 +227,14 @@ const DropdownMenuSubTrigger = React.forwardRef(function DropdownMenuSubTrigger(
       data-slot="dropdown-menu-sub-trigger"
       data-inset={inset}
       className={cn(
-        "flex cursor-pointer items-center gap-2.5 h-[36px] px-2.5 rounded-xl text-sm font-medium outline-none select-none font-sans text-white hover:bg-white/10 focus:bg-white/10 hover:bg-[color:var(--surface-tonal)] focus:bg-[color:var(--surface-tonal)] data-[state=open]:bg-white/10 data-[state=open]:bg-[color:var(--surface-tonal)] transition-colors",
+        "flex cursor-pointer items-center gap-2.5 h-[36px] px-2.5 rounded-xl text-sm font-medium outline-none select-none font-sans text-text-primary hover:bg-surface-tonal focus:bg-surface-tonal data-[state=open]:bg-surface-tonal transition-colors",
         "data-[inset]:pl-8",
         className
       )}
       {...props}
     >
       {children}
-      <GoogleIcon iconName="chevron_right" className="ml-auto text-base text-white/50" />
+      <GoogleIcon iconName="chevron_right" className="ml-auto text-base text-text-secondary" />
     </DropdownMenuPrimitive.SubTrigger>
   );
 });
@@ -259,9 +259,9 @@ const DropdownMenuSubContent = React.forwardRef(function DropdownMenuSubContent(
       data-variant={variant}
       style={style}
       className={cn(
-        "z-50 w-52 min-w-[12rem] rounded-2xl origin-(--radix-dropdown-menu-content-transform-origin) overflow-hidden p-1.5 flex flex-col gap-0.5 font-sans antialiased text-white border border-white/10",
+        "z-50 w-52 min-w-[12rem] rounded-[var(--radius-3xl)] origin-(--radix-dropdown-menu-content-transform-origin) overflow-hidden bg-ui-menu-background p-2 [--blur:40px] flex flex-col gap-0.5 font-sans antialiased text-text-primary border border-border-weak",
         isNormal
-          ? "bg-[color:var(--ui-menu-background)]/30 backdrop-blur-2xl shadow-none"
+          ? "shadow-none"
           : isListbox
             ? "surface-listbox shadow-xl"
             : "surface-glass shadow-xl",

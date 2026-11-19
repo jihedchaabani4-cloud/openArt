@@ -53,9 +53,9 @@ function ContextMenuSubTrigger({
       data-inset={inset}
       className={cn(
         "flex cursor-pointer items-center gap-3 rounded-sm pl-3 pr-4 py-2 min-h-[2.125rem] text-sm leading-5 font-medium outline-hidden select-none font-sans antialiased",
-        "text-white/90 hover:bg-white/10 hover:text-white focus:bg-white/10 focus:text-white",
-        "data-[state=open]:bg-white/10 data-[state=open]:text-white transition-colors duration-100 ease-in-out",
-        "[&_svg:not([class*='text-'])]:text-white/70 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-5",
+        "text-text-primary-soft hover:bg-ui-button-tonal hover:text-text-primary focus:bg-ui-button-tonal focus:text-text-primary",
+        "data-[state=open]:bg-ui-button-tonal data-[state=open]:text-text-primary transition-colors duration-100 ease-in-out",
+        "[&_svg:not([class*='text-'])]:text-text-body-muted [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-5",
         "data-[inset]:pl-8",
         className
       )}
@@ -76,7 +76,7 @@ function ContextMenuSubContent({
       data-slot="context-menu-sub-content"
       style={style}
       className={cn(
-        "z-50 w-52 min-w-[12rem] rounded-md origin-(--radix-context-menu-content-transform-origin) overflow-hidden p-1.5 flex flex-col gap-0.5 font-sans antialiased bg-surface-container-high border border-outline-variant text-on-surface shadow-none",
+        "z-50 w-52 min-w-[12rem] rounded-[var(--radius-3xl)] origin-(--radix-context-menu-content-transform-origin) overflow-hidden bg-ui-menu-background p-2 [--blur:40px] flex flex-col gap-0.5 font-sans antialiased border border-border-weak text-text-primary shadow-none",
         "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
         className
       )}
@@ -96,7 +96,7 @@ function ContextMenuContent({
         style={style}
         className={cn(
           // Layout & shape
-          "z-50 w-52 min-w-[12rem] rounded-md overflow-hidden p-1.5 flex flex-col gap-0.5 font-sans antialiased bg-surface-container-high border border-outline-variant text-on-surface shadow-none",
+          "z-50 w-52 min-w-[12rem] rounded-[var(--radius-3xl)] overflow-hidden bg-ui-menu-background p-2 [--blur:40px] flex flex-col gap-0.5 font-sans antialiased border border-border-weak text-text-primary shadow-none",
           "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
           className
         )}
@@ -120,14 +120,14 @@ function ContextMenuItem({
         // Layout
         "relative flex cursor-pointer items-center gap-3 rounded-sm pl-3 pr-4 py-2 min-h-[2.125rem] text-sm leading-5 font-medium outline-hidden select-none font-sans antialiased",
         // Theme defaults: on-surface text, state layers for hover & focus
-        "text-on-surface hover:bg-white/[0.08] focus:bg-white/[0.08] focus:text-on-surface active:bg-white/[0.12] transition-colors duration-100 ease-in-out",
+        "text-on-surface hover:bg-ui-button-hover focus:bg-ui-button-hover focus:text-on-surface active:bg-ui-button-tonal transition-colors duration-100 ease-in-out",
         // Icon defaults
         "[&_svg:not([class*='text-'])]:text-on-surface-variant [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-5",
         // Disabled & inset
         "data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[inset]:pl-8",
         // Destructive / Danger variant (pure text & icon red, NO red background, ghost hover layer)
-        "data-[variant=destructive]:!text-error data-[variant=destructive]:hover:!text-error data-[variant=destructive]:focus:!text-error data-[variant=destructive]:hover:bg-white/[0.08] data-[variant=destructive]:focus:bg-white/[0.08] data-[variant=destructive]:[&_svg]:!text-error",
-        "data-[variant=danger]:!text-error data-[variant=danger]:hover:!text-error data-[variant=danger]:focus:!text-error data-[variant=danger]:hover:bg-white/[0.08] data-[variant=danger]:focus:bg-white/[0.08] data-[variant=danger]:[&_svg]:!text-error",
+        "data-[variant=destructive]:!text-error data-[variant=destructive]:hover:!text-error data-[variant=destructive]:focus:!text-error data-[variant=destructive]:hover:bg-ui-button-hover data-[variant=destructive]:focus:bg-ui-button-hover data-[variant=destructive]:[&_svg]:!text-error",
+        "data-[variant=danger]:!text-error data-[variant=danger]:hover:!text-error data-[variant=danger]:focus:!text-error data-[variant=danger]:hover:bg-ui-button-hover data-[variant=danger]:focus:bg-ui-button-hover data-[variant=danger]:[&_svg]:!text-error",
         className
       )}
       {...props} />
@@ -145,7 +145,7 @@ function ContextMenuCheckboxItem({
       data-slot="context-menu-checkbox-item"
       className={cn(
         "relative flex cursor-pointer items-center gap-2 rounded-sm py-2.5 pr-2 pl-8 text-sm outline-hidden select-none",
-        "text-on-surface hover:bg-white/[0.08] focus:bg-white/[0.08] focus:text-on-surface",
+        "text-on-surface hover:bg-ui-button-hover focus:bg-ui-button-hover focus:text-on-surface",
         "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         "data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
         className
@@ -172,7 +172,7 @@ function ContextMenuRadioItem({
       data-slot="context-menu-radio-item"
       className={cn(
         "relative flex cursor-pointer items-center gap-2 rounded-sm py-2.5 pr-2 pl-8 text-sm outline-hidden select-none",
-        "text-on-surface hover:bg-white/[0.08] focus:bg-white/[0.08] focus:text-on-surface",
+        "text-on-surface hover:bg-ui-button-hover focus:bg-ui-button-hover focus:text-on-surface",
         "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         "data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
         className

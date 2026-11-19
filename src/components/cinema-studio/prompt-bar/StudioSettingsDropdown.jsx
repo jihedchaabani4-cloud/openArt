@@ -58,14 +58,14 @@ export function StudioSettingsDropdown(props) {
         </Button>
       </DropdownMenuTrigger>
       
-      <DropdownMenuContent variant="normal" align="end" className="w-72 p-1.5 flex flex-col gap-1 font-sans antialiased">
+      <DropdownMenuContent variant="normal" align="end" className="w-72 p-2 flex flex-col gap-1 font-sans antialiased">
         {/* ── 1. Grid Size Selector ── */}
         <div className="flex flex-col gap-1 px-0.5 mb-1">
-          <span className="text-xs font-medium text-white/75">
+          <span className="text-xs font-medium text-text-body-muted">
             Taille de la grille
           </span>
           <div
-            className="flex items-center gap-1 p-1 bg-white/5 border border-white/10 rounded-xl w-full select-none"
+            className="flex items-center gap-1 p-0.5 bg-surface-card border border-border-weak rounded-xl w-full select-none"
             role="radiogroup"
             aria-label="Taille de la grille"
           >
@@ -94,11 +94,11 @@ export function StudioSettingsDropdown(props) {
 
         {/* ── 2. Space Between Media (S: 4px, M: 8px, L: 16px) ── */}
         <div className="flex flex-col gap-1 px-0.5 mb-1">
-          <span className="text-xs font-medium text-white/75">
+          <span className="text-xs font-medium text-text-body-muted">
             Space between media
           </span>
           <div
-            className="flex items-center gap-1 p-1 bg-white/5 border border-white/10 rounded-xl w-full select-none"
+            className="flex items-center gap-1 p-0.5 bg-surface-card border border-border-weak rounded-xl w-full select-none"
             role="radiogroup"
             aria-label="Space between media"
           >
@@ -125,7 +125,7 @@ export function StudioSettingsDropdown(props) {
           </div>
         </div>
 
-        <DropdownMenuSeparator className="my-1.5 bg-white/10" />
+        <DropdownMenuSeparator className="my-1.5 bg-border-weak" />
 
         {/* ── 3. Display Toggles with Base UI Switch ── */}
         <div className="flex flex-col gap-0.5">
@@ -135,11 +135,11 @@ export function StudioSettingsDropdown(props) {
                 e.preventDefault()
                 setShowUploadedMedia(!showUploadedMedia)
               }}
-              className="flex items-center justify-between cursor-pointer px-2.5 h-[36px] rounded-xl hover:bg-white/10 transition-colors"
+              className="flex items-center justify-between cursor-pointer px-2.5 h-[36px] rounded-xl hover:bg-surface-tonal transition-colors"
             >
               <div className="flex items-center gap-2.5">
-                <GoogleIcon iconName="upload" className="text-lg text-white/70 shrink-0" />
-                <span className="text-sm font-medium text-white">
+                <GoogleIcon iconName="upload" className="text-lg text-text-body-muted shrink-0" />
+                <span className="text-sm font-medium text-text-primary">
                   Médias importés
                 </span>
               </div>
@@ -153,11 +153,11 @@ export function StudioSettingsDropdown(props) {
                 e.preventDefault()
                 setShowTileDetails(!showTileDetails)
               }}
-              className="flex items-center justify-between cursor-pointer px-2.5 h-[36px] rounded-xl hover:bg-white/10 transition-colors"
+              className="flex items-center justify-between cursor-pointer px-2.5 h-[36px] rounded-xl hover:bg-surface-tonal transition-colors"
             >
               <div className="flex items-center gap-2.5">
-                <GoogleIcon iconName="visibility" className="text-lg text-white/70 shrink-0" />
-                <span className="text-sm font-medium text-white">
+                <GoogleIcon iconName="visibility" className="text-lg text-text-body-muted shrink-0" />
+                <span className="text-sm font-medium text-text-primary">
                   Détails des blocs
                 </span>
               </div>
@@ -171,11 +171,11 @@ export function StudioSettingsDropdown(props) {
                 e.preventDefault()
                 setSoundOnHover(!soundOnHover)
               }}
-              className="flex items-center justify-between cursor-pointer px-2.5 h-[36px] rounded-xl hover:bg-white/10 transition-colors"
+              className="flex items-center justify-between cursor-pointer px-2.5 h-[36px] rounded-xl hover:bg-surface-tonal transition-colors"
             >
               <div className="flex items-center gap-2.5">
-                <GoogleIcon iconName="volume_up" className="text-lg text-white/70 shrink-0" />
-                <span className="text-sm font-medium text-white">
+                <GoogleIcon iconName="volume_up" className="text-lg text-text-body-muted shrink-0" />
+                <span className="text-sm font-medium text-text-primary">
                   Son au survol
                 </span>
               </div>
@@ -189,11 +189,11 @@ export function StudioSettingsDropdown(props) {
                 e.preventDefault()
                 setClearPromptOnSubmit(!clearPromptOnSubmit)
               }}
-              className="flex items-center justify-between cursor-pointer px-2.5 h-[36px] rounded-xl hover:bg-white/10 transition-colors"
+              className="flex items-center justify-between cursor-pointer px-2.5 h-[36px] rounded-xl hover:bg-surface-tonal transition-colors"
             >
               <div className="flex items-center gap-2.5">
-                <GoogleIcon iconName="backspace" className="text-lg text-white/70 shrink-0" />
-                <span className="text-sm font-medium text-white">
+                <GoogleIcon iconName="backspace" className="text-lg text-text-body-muted shrink-0" />
+                <span className="text-sm font-medium text-text-primary">
                   Effacer le prompt
                 </span>
               </div>

@@ -32,8 +32,6 @@ export function ProjectCard({ project, onDelete, onRename }) {
     return (
         <Card
             asChild
-            radius="md"
-            tone="card"
             className="group relative flex flex-col overflow-hidden bg-transparent border-transparent transition-all duration-300 shadow-none"
         >
             <motion.div

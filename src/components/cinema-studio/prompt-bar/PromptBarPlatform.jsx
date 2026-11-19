@@ -326,17 +326,17 @@ function PromptBarPlatformInner({
     if (!drawerOpen) return;
 
     const handleClickOutside = (event) => {
-      if (containerRef?.current && containerRef.current.contains(event.target)) {
-        return;
-      }
+      // Keep open if clicking the tune button (its onClick handles toggle)
       if (tuneButtonRef?.current && tuneButtonRef.current.contains(event.target)) {
         return;
       }
+      // Keep open if clicking inside the settings overlay card
       if (settingsOverlayRef?.current && settingsOverlayRef.current.contains(event.target)) {
         return;
       }
+      // Keep open if selecting from dropdowns / popovers (e.g. Model, Resolution selectors)
       const isPortalClick = event.target.closest?.(
-        "[data-radix-popper-content-wrapper], [role='dialog'], [role='listbox'], .radix-portal, [data-portal]"
+        "[data-radix-popper-content-wrapper], [data-slot='popover-content'], [role='dialog'], [role='listbox'], .radix-portal, [data-portal]"
       );
       if (isPortalClick) {
         return;
@@ -351,10 +351,10 @@ function PromptBarPlatformInner({
       }
     };
 
-    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("pointerdown", handleClickOutside, true);
     window.addEventListener("keydown", handleKeyDown);
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("pointerdown", handleClickOutside, true);
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [drawerOpen]);
@@ -576,7 +576,7 @@ function PromptBarPlatformInner({
   return (
     <div
       ref={containerRef}
-      className="absolute bottom-8 left-1/2 -translate-x-1/2 z-50 w-full max-w-[650px] px-6 flex flex-col items-center gap-2 pointer-events-none"
+      className="absolute bottom-8 left-1/2 -translate-x-1/2 z-50 w-full max-w-150 px-6 flex flex-col items-center gap-2 pointer-events-none"
     >
       {topPanelZone}
       <div className="w-full pointer-events-auto">

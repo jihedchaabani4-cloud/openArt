@@ -56,7 +56,7 @@ export function KeyboardShortcutsHelp({ className }) {
         side="bottom"
         sideOffset={6}
         onMouseLeave={() => setOpen(false)}
-        className="z-50 w-64 p-2.5 !bg-[color:var(--ui-menu-background)]/90 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-none text-white select-none"
+        className="z-50 w-64 bg-ui-menu-background p-2 [--blur:40px] border border-border-weak rounded-[var(--radius-3xl)] shadow-none text-text-primary select-none"
       >
         {/* Header */}
         <div className="flex items-center justify-between px-2 pt-0.5 pb-2 mb-1 border-b border-white/10">

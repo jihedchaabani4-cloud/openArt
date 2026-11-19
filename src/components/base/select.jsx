@@ -51,17 +51,17 @@ const SelectTrigger = React.forwardRef(function SelectTrigger(
       className={cn(
         "cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 focus-workspace",
         isOutline
-          ? "ds-btn-outline inline-flex items-center justify-between w-auto h-9.5 px-3.5 text-sm"
+          ? "ds-btn-outline inline-flex items-center justify-between w-auto h-[50px] px-3.5 text-sm"
           : isPill
-            ? "ds-select-trigger"
-            : "ds-select-trigger w-auto h-9.5 px-3.5 rounded-sm text-sm",
+            ? "ds-select-trigger h-[50px]"
+            : "ds-select-trigger w-auto h-[50px] px-3.5 rounded-sm text-sm",
         className
       )}
       {...props}
     >
       {children}
       <SelectPrimitive.Icon asChild>
-        <GoogleIcon iconName="keyboard_arrow_down" className="text-base text-white/50 shrink-0 ml-2" />
+        <GoogleIcon iconName="keyboard_arrow_down" className="text-base text-icon-secondary shrink-0 ml-2" />
       </SelectPrimitive.Icon>
     </SelectPrimitive.Trigger>
   );
@@ -90,7 +90,7 @@ const SelectContent = React.forwardRef(function SelectContent(
         data-variant={variant}
         className={cn(
           "relative z-50 flex flex-col overflow-y-auto select-none font-sans antialiased",
-          "min-w-30 max-h-96 rounded-2xl p-1.5 shadow-xl",
+          "min-w-30 max-h-96 rounded-[var(--radius-3xl)] bg-ui-menu-background p-2 [--blur:40px] shadow-xl",
           isGlass ? "surface-glass" : "surface-listbox",
           "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95",
           "data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95",
@@ -126,7 +126,7 @@ const SelectLabel = React.forwardRef(function SelectLabel({ className, ...props 
     <SelectPrimitive.Label
       ref={ref}
       data-slot="select-label"
-      className={cn("px-2.5 py-1.5 text-xs font-semibold text-white/50 uppercase tracking-wider", className)}
+      className={cn("px-2.5 py-1.5 text-xs font-semibold text-text-secondary uppercase tracking-wider", className)}
       {...props}
     />
   );
@@ -142,14 +142,14 @@ const SelectItem = React.forwardRef(function SelectItem(
       ref={ref}
       data-slot="select-item"
       className={cn(
-        "ds-menu-item group gap-2.5 cursor-pointer outline-none select-none focus:bg-white/20 data-[highlighted]:bg-white/20",
+        "ds-menu-item group gap-2.5 cursor-pointer outline-none select-none focus:bg-ui-button-active data-[highlighted]:bg-ui-button-active",
         "data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
         className
       )}
       {...props}
     >
       {icon && (
-        <span className="shrink-0 flex items-center justify-center text-lg text-white/70">
+        <span className="shrink-0 flex items-center justify-center text-lg text-text-body-muted">
           {renderIconNode(icon)}
         </span>
       )}
@@ -165,13 +165,13 @@ const SelectItem = React.forwardRef(function SelectItem(
         </div>
 
         {subtitle && (
-          <span className="text-xs font-normal text-white/50 truncate">
+          <span className="text-xs font-normal text-text-secondary truncate">
             {subtitle}
           </span>
         )}
       </div>
 
-      <span className="shrink-0 flex size-4 items-center justify-center text-white">
+      <span className="shrink-0 flex size-4 items-center justify-center text-text-primary">
         <SelectPrimitive.ItemIndicator>
           <GoogleIcon iconName="check" className="text-sm font-bold" />
         </SelectPrimitive.ItemIndicator>
@@ -186,7 +186,7 @@ const SelectSeparator = React.forwardRef(function SelectSeparator({ className, .
     <SelectPrimitive.Separator
       ref={ref}
       data-slot="select-separator"
-      className={cn("pointer-events-none -mx-1 my-1.5 h-px bg-white/10", className)}
+      className={cn("pointer-events-none -mx-1 my-1.5 h-px bg-border-weak", className)}
       {...props}
     />
   );
@@ -198,7 +198,7 @@ const SelectScrollUpButton = React.forwardRef(function SelectScrollUpButton({ cl
     <SelectPrimitive.ScrollUpButton
       ref={ref}
       data-slot="select-scroll-up-button"
-      className={cn("flex cursor-default items-center justify-center py-1 text-white/50", className)}
+      className={cn("flex cursor-default items-center justify-center py-1 text-icon-secondary", className)}
       {...props}
     >
       <GoogleIcon iconName="keyboard_arrow_up" className="text-base" />
@@ -212,7 +212,7 @@ const SelectScrollDownButton = React.forwardRef(function SelectScrollDownButton(
     <SelectPrimitive.ScrollDownButton
       ref={ref}
       data-slot="select-scroll-down-button"
-      className={cn("flex cursor-default items-center justify-center py-1 text-white/50", className)}
+      className={cn("flex cursor-default items-center justify-center py-1 text-icon-secondary", className)}
       {...props}
     >
       <GoogleIcon iconName="keyboard_arrow_down" className="text-base" />

@@ -1,5 +1,5 @@
 const BASE_CARD_CLASS =
-  "relative w-full flex flex-col ds-composer-card bg-[color:var(--ui-menu-background)]/70 p-2 [--blur:40px] rounded-3xl min-h-[60px] border-0 shadow-none";
+  "relative w-full flex flex-col ds-composer-card bg-ui-menu-background p-2 [--blur:40px] border border-border-weak rounded-[var(--radius-3xl)] min-h-[60px]";
 
 export const PROMPT_BAR_VARIANTS = {
   generation: {
@@ -23,7 +23,7 @@ export function getPromptBarVariant(variant = "generation") {
 export function getPromptBarContainerClassName(hideBackground = false) {
   return hideBackground
     ? "relative w-full flex flex-col"
-    : "absolute bottom-8 left-1/2 -translate-x-1/2 w-full z-50 flex items-center justify-center max-w-[650px] px-6";
+    : "absolute bottom-8 left-1/2 -translate-x-1/2 w-full z-50 flex items-center justify-center max-w-150 px-6";
 }
 
 export function getPromptBarContentClassName() {

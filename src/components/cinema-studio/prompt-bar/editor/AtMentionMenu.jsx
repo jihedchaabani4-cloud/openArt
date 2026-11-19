@@ -274,13 +274,13 @@ export function AtMentionMenu({
       exit={{ opacity: 0, scale: 0.98, y: 6 }}
       transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
       className={cn(
-        "w-full rounded-lg bg-(--background-state-90) backdrop-blur-80 border border-white/10 shadow-none pointer-events-auto flex flex-col z-50 overflow-hidden select-none font-sans antialiased",
+        "w-full rounded-[var(--radius-3xl)] bg-ui-menu-background p-2 [--blur:40px] border border-border-weak shadow-none pointer-events-auto flex flex-col z-50 overflow-hidden select-none font-sans antialiased",
         className
       )}
     >
       <div
         ref={listRef}
-        className="flex flex-col py-2 px-2 max-h-[340px] overflow-y-auto scrollbar-thin scrollbar-thumb-white/15 scrollbar-track-transparent pr-1 font-sans antialiased"
+        className="flex flex-col max-h-[340px] overflow-y-auto custom-scrollbar pr-1 font-sans antialiased"
       >
         {/* ── SECTION: Add ── */}
         {addItems.length > 0 && (
@@ -303,15 +303,15 @@ export function AtMentionMenu({
                     className={cn(
                       "flex items-center gap-2.5 px-3 py-2 rounded-sm cursor-pointer transition-all text-left",
                       isSelected
-                        ? "bg-white/[0.08] text-white ring-1 ring-white/20"
-                        : "hover:bg-white/[0.05] text-white/90"
+                        ? "bg-ui-button-hover text-text-primary ring-1 ring-border-strong"
+                        : "hover:bg-surface-card text-text-primary-soft"
                     )}
                   >
-                    <div className="size-4 shrink-0 flex items-center justify-center text-white/70">
+                    <div className="size-4 shrink-0 flex items-center justify-center text-text-body-muted">
                       <Icon className="size-4" />
                     </div>
                     <div className="flex items-baseline gap-2 truncate">
-                      <span className="text-[14px] font-medium text-white">
+                      <span className="text-[14px] font-medium text-text-primary">
                         {item.title}
                       </span>
                       <span className="text-[13px] text-cool-slate font-normal truncate">
@@ -345,11 +345,11 @@ export function AtMentionMenu({
                     className={cn(
                       "flex items-center gap-2.5 px-3 py-2 rounded-sm cursor-pointer transition-all text-left group",
                       isSelected
-                        ? "bg-white/[0.08] text-white ring-1 ring-white/20"
-                        : "hover:bg-white/[0.05] text-white/90"
+                        ? "bg-ui-button-hover text-text-primary ring-1 ring-border-strong"
+                        : "hover:bg-surface-card text-text-primary-soft"
                     )}
                   >
-                    <div className="size-5 shrink-0 rounded-sm overflow-hidden bg-white/10 flex items-center justify-center">
+                    <div className="size-5 shrink-0 rounded-sm overflow-hidden bg-ui-button-tonal flex items-center justify-center">
                       {item.url ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
@@ -358,14 +358,14 @@ export function AtMentionMenu({
                           className="size-full object-cover"
                         />
                       ) : (
-                        <AssetLibraryIcon className="size-3 text-white/50" />
+                        <AssetLibraryIcon className="size-3 text-icon-secondary" />
                       )}
                     </div>
                     <div className="flex items-center justify-between gap-3 flex-1 min-w-0">
-                      <span className="text-[14px] font-medium text-white truncate">
+                      <span className="text-[14px] font-medium text-text-primary truncate">
                         {item.title}
                       </span>
-                      <span className="text-[11px] text-cool-slate font-medium px-2 py-0.5 rounded-full bg-white/[0.06] shrink-0 border-0 ml-auto">
+                      <span className="text-[11px] text-cool-slate font-medium px-2 py-0.5 rounded-full bg-surface-card shrink-0 border-0 ml-auto">
                         {item.category}
                       </span>
                     </div>

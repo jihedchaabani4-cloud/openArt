@@ -119,7 +119,7 @@ export default function ElementsPage({ params }) {
     }
 
     return (
-        <div className="flex h-full w-full overflow-hidden text-white bg-main relative">
+        <div className="flex h-full w-full overflow-hidden text-white bg-transparent relative">
             <main className="flex-1 flex flex-col relative min-w-0 overflow-hidden z-10">
                 {/* ── Global Drag Overlay ── */}
                 <AnimatePresence>

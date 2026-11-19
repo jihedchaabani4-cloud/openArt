@@ -287,7 +287,7 @@ export function LeftNavigationRail() {
             >
               <span
                 className={cn(
-                  "flex items-center justify-center size-5 shrink-0 text-white/60 group-hover:text-white transition-colors",
+                  "flex items-center justify-center size-5 shrink-0 text-icon-secondary group-hover:text-icon-primary transition-colors",
                   isExpanded && "mr-1.5"
                 )}
               >
@@ -318,7 +318,7 @@ export function LeftNavigationRail() {
           "w-full justify-start p-0 gap-0 overflow-hidden",
           item.isActive
             ? "bg-surface-elevated text-on-surface shadow-none hover:bg-surface-elevated hover:text-on-surface"
-            : "text-on-surface-variant hover:text-on-surface hover:bg-white/[0.06]"
+            : "text-on-surface-variant hover:text-on-surface hover:bg-ui-button-hover"
         )}
         title={!isExpanded ? item.label : undefined}
       >
@@ -332,7 +332,7 @@ export function LeftNavigationRail() {
               iconName={item.icon}
               className={cn(
                 "text-xl shrink-0",
-                item.isActive ? "text-white" : "text-white/80"
+                item.isActive ? "text-icon-primary" : "text-icon-secondary"
               )}
             />
           </span>
@@ -472,7 +472,7 @@ export function LeftNavigationRail() {
         width: isExpanded ? `${sidebarWidth}px` : "var(--studio-sidebar-width, 52px)",
       }}
       className={cn(
-        "h-full shrink-0 relative z-40 bg-transparent flex flex-col select-none pt-0 pb-3 px-0 rounded-2xl border border-border",
+        "h-full shrink-0 relative z-40 bg-transparent flex flex-col select-none pt-0 pb-3 px-0 rounded-2xl border border-border-subtle",
         isResizing ? "transition-none select-none" : "rail-smooth-transition"
       )}
     >
@@ -488,7 +488,7 @@ export function LeftNavigationRail() {
 
       {/* ── Collections Tree Section (when expanded) ── */}
       {isExpanded ? (
-        <div className="flex flex-col flex-1 min-h-0 mt-3 pt-3 border-t border-border/40 px-2 overflow-hidden">
+        <div className="flex flex-col flex-1 min-h-0 mt-3 pt-3 border-t border-border-subtle px-2 overflow-hidden">
           <div className="flex items-center justify-between px-2 pb-1.5 shrink-0">
             <span className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">
               Collections
@@ -537,9 +537,9 @@ export function LeftNavigationRail() {
         >
           <span className="w-[48px] h-full shrink-0 flex items-center justify-center">
             {isExpanded ? (
-              <GoogleIcon iconName="left_panel_close" className="text-xl text-white/80 shrink-0" />
+              <GoogleIcon iconName="left_panel_close" className="text-xl text-icon-secondary shrink-0" />
             ) : (
-              <GoogleIcon iconName="left_panel_open" className="text-xl text-white/80 shrink-0" />
+              <GoogleIcon iconName="left_panel_open" className="text-xl text-icon-secondary shrink-0" />
             )}
           </span>
           <span

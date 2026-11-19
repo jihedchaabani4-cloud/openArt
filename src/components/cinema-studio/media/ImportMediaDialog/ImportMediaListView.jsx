@@ -1,10 +1,8 @@
 "use client";
 
 import { useState, useMemo, useEffect, useRef } from "react";
-import { GoogleIcon } from "@/components/primitives/GoogleIcon";
 import { Button } from "@/components/base/button";
 import { resolveMediaUrl } from "@/shared/lib/displayUtils";
-import { cn } from "@/shared/lib/utils";
 import { AssetListItem } from "../AssetListItem";
 
 /**
@@ -83,23 +81,8 @@ export function ImportMediaListView({
 
   const getItemMetadata = (item) => {
     const isVid = Boolean(item?.is_video || item?.type === "video" || !!item?.video);
-    const wType = String(item?.workflow_type || item?.workflowType || "").toUpperCase();
-    const isChar = Boolean(item?.is_character || item?.type === "character" || wType === "CHARACTER" || wType === "CHARACTER_SHEET");
-    const isElem = Boolean(item?.is_element || item?.type === "element" || wType === "ELEMENT" || wType === "ELEMENT_SHEET");
-
-    let typeLabel = "Image";
-
-    if (isChar) {
-      typeLabel = "Personnage";
-    } else if (isElem) {
-      typeLabel = "Element";
-    } else if (isVid) {
-      typeLabel = "Video";
-    }
-
     const title = item?.display_name || item?.metadata?.displayName || item?.name || item?.prompt || "Sans titre";
-
-    return { isVid, isChar, isElem, typeLabel, title };
+    return { isVid, title };
   };
 
   const focusedUrl = focusedItem ? getItemUrl(focusedItem) : "";
@@ -107,12 +90,20 @@ export function ImportMediaListView({
 
   return (
     <div className="flex-1 flex flex-row min-h-0 overflow-hidden gap-2">
-      {/* ── Left Pane: Scrollable Asset List ── */}
-      <div className="w-56 shrink-0 flex flex-col min-h-0 bg-transparent overflow-hidden">
-        <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col gap-1 pr-1">
-          {items.map((item, idx) => {
+      {/* ── Middle Pane: Scrollable Asset List (flow-add-menu-asset-list) ── */}
+      <div
+        role="listbox"
+        aria-label="Asset list"
+        className="w-[240px] shrink-0 overflow-y-auto custom-scrollbar flex flex-col gap-0.5 pr-1"
+      >
+        {items.length === 0 && !loading ? (
+          <div className="flex-1 flex items-center justify-center text-white/30 text-xs">
+            No assets found
+          </div>
+        ) : (
+          items.map((item, idx) => {
             const itemUrl = getItemUrl(item);
-            const { isVid, typeLabel, title } = getItemMetadata(item);
+            const { isVid, title } = getItemMetadata(item);
             const itemId = item.id || item.workflow_id || item.name || String(idx);
             const isFocused = Boolean(
               focusedItem &&
@@ -134,7 +125,6 @@ export function ImportMediaListView({
                 item={item}
                 itemUrl={itemUrl}
                 title={title}
-                typeLabel={typeLabel}
                 isVideo={isVid}
                 isActive={isFocused}
                 isDisabled={isOverQuota}
@@ -149,23 +139,23 @@ export function ImportMediaListView({
                 }}
               />
             );
-          })}
+          })
+        )}
 
-          {/* Loader for pagination */}
-          {(hasMore || loading) && (
-            <div ref={loadMoreRef} className="h-8 flex items-center justify-center shrink-0">
-              {loading && <div className="w-4 h-4 rounded-full border-2 border-white/10 border-t-white/40 animate-spin" />}
-            </div>
-          )}
-        </div>
+        {/* Loader for pagination */}
+        {(hasMore || loading) && (
+          <div ref={loadMoreRef} className="h-8 flex items-center justify-center shrink-0">
+            {loading && <div className="w-4 h-4 rounded-full border-2 border-white/10 border-t-white/40 animate-spin" />}
+          </div>
+        )}
       </div>
 
-      {/* ── Right Pane: Detail & Preview Hero Pane ── */}
-      <div className="flex-1 min-h-0 flex flex-col bg-white/5 border border-white/10 rounded-2xl overflow-hidden relative">
+      {/* ── Right Pane: Large Detail & Preview Hero Pane (flow-add-menu-detail-pane) ── */}
+      <div className="flex-1 min-w-0 min-h-0 flex flex-col gap-2 rounded-xl bg-black/25 p-2 overflow-hidden">
         {focusedItem ? (
           <>
-            {/* Center Hero Preview Area */}
-            <div className="flex-1 w-full min-h-0 flex items-center justify-center p-3 relative overflow-hidden">
+            {/* Detail Preview Box */}
+            <div className="flex-1 w-full min-h-0 flex items-center justify-center overflow-hidden">
               {focusedMeta?.isVid ? (
                 <video
                   src={focusedUrl}
@@ -173,19 +163,19 @@ export function ImportMediaListView({
                   autoPlay
                   loop
                   muted
-                  className="max-h-full max-w-full rounded-xl object-contain shadow-none"
+                  className="max-h-full max-w-full rounded-lg object-contain"
                 />
               ) : (
                 <img
                   src={focusedUrl}
-                  alt=""
-                  className="max-h-full max-w-full rounded-xl object-contain shadow-none"
+                  alt={focusedMeta?.title || ""}
+                  className="max-h-full max-w-full rounded-lg object-contain"
                 />
               )}
             </div>
 
-            {/* Bottom Actions Bar - Single Direct Add Button with Quota Feedback */}
-            <div className="p-3 shrink-0 flex items-center justify-end gap-3 bg-transparent">
+            {/* Bottom Actions */}
+            <div className="shrink-0 flex items-center">
               {(() => {
                 const focusedCandidateCount = focusedItem.image_count || 1;
                 const isFocusedOverQuota = typeof remainingImages === "number"
@@ -193,37 +183,24 @@ export function ImportMediaListView({
                   : (typeof availableSlots === "number" ? availableSlots <= 0 : false);
 
                 return (
-                  <>
-                    {isFocusedOverQuota && (
-                      <span className="text-xs text-muted-foreground font-normal select-none">
-                        {typeof remainingImages === "number"
-                          ? (focusedCandidateCount > 1
-                              ? `Nécessite ${focusedCandidateCount} images (${availableSlots} restante${availableSlots > 1 ? "s" : ""})`
-                              : `Limite atteinte (${availableSlots} restante)`)
-                          : "Limite atteinte"}
-                      </span>
-                    )}
-                    <Button
-                      variant="primary"
-                      onClick={() => {
-                        if (!isFocusedOverQuota) {
-                          onSelectDirect?.(focusedItem);
-                        }
-                      }}
-                      disabled={isFocusedOverQuota}
-                    >
-                      <span className="w-4 h-4 flex items-center justify-center shrink-0">
-                        <GoogleIcon iconName={isFocusedOverQuota ? "block" : "add"} weight={300} className="text-sm leading-none" />
-                      </span>
-                      <span className="leading-none flex items-center">Ajouter au prompt</span>
-                    </Button>
-                  </>
+                  <Button
+                    variant="primary"
+                    onClick={() => {
+                      if (!isFocusedOverQuota) {
+                        onSelectDirect?.(focusedItem);
+                      }
+                    }}
+                    disabled={isFocusedOverQuota}
+                    className="w-full !h-8.5 rounded-lg text-xs font-medium justify-center"
+                  >
+                    Add to prompt
+                  </Button>
                 );
               })()}
             </div>
           </>
         ) : (
-          <div className="flex-1 flex items-center justify-center text-white/20 text-xs uppercase tracking-widest font-sans antialiased">
+          <div className="flex-1 flex items-center justify-center text-white/25 text-xs">
             No item selected
           </div>
         )}

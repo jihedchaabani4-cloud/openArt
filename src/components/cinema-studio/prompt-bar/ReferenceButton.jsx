@@ -45,10 +45,10 @@ export function ReferenceButton({
         "group relative shrink-0",
         "w-[50px] h-[50px] rounded-xl",
         "flex items-center justify-center",
-        "bg-[color:var(--white-5)]",
+        "bg-white-5",
         "transition-all duration-200 ease-out",
-        "hover:bg-[color:var(--ui-button-hover)]",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--border-heavy)]",
+        "hover:bg-ui-button-hover",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-heavy",
         "active:scale-95",
         pulse && "animate-pulse-border",
         disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer",
@@ -65,7 +65,7 @@ export function ReferenceButton({
             "transition-all duration-200 ease-out",
             HoverContent
               ? "absolute group-hover:-translate-y-2 group-hover:opacity-0"
-              : "group-hover:text-white"
+              : "group-hover:text-text-primary"
           )}
         >
           {displayWord}
@@ -149,7 +149,7 @@ export function ViewReference({
     >
       {/* 50x50 Chip Container */}
       <div
-        className="chip-container group w-full h-full relative rounded-xl overflow-hidden bg-white/[0.04] cursor-pointer flex items-center justify-center select-none"
+        className="chip-container group w-full h-full relative rounded-xl overflow-hidden bg-white-5 cursor-pointer flex items-center justify-center select-none"
         aria-label={tooltipText}
         onClick={(e) => {
           e.stopPropagation();
@@ -177,13 +177,13 @@ export function ViewReference({
 
         {/* Hover overlay — cancel button */}
         <div
-          className="hover-icon-overlay absolute inset-0 flex items-center justify-center bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-20"
+          className="hover-icon-overlay absolute inset-0 flex items-center justify-center bg-fill-overlay-dark opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-20"
           title={`Supprimer ${tooltipText}`}
         >
           <GoogleIcon
             iconName="cancel"
             fill
-            className="mat-icon notranslate hover-icon flow-icon-s google-symbols mat-icon-no-color text-white text-[20px]"
+            className="mat-icon notranslate hover-icon flow-icon-s google-symbols mat-icon-no-color text-text-primary text-[20px]"
             aria-hidden="true"
           />
         </div>
@@ -214,7 +214,7 @@ export function ViewReference({
             transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
             className="absolute bottom-[calc(100%+12px)] left-1/2 -translate-x-1/2 z-[100] pointer-events-none flex flex-col items-center"
           >
-            <div className="rounded-xxxs overflow-hidden shadow-none bg-omni-bg border border-white/10 flex items-center justify-center">
+            <div className="rounded-xxxs overflow-hidden shadow-none bg-omni-bg border border-border-weak flex items-center justify-center">
               {isVideo ? (
                 <video
                   src={src}
