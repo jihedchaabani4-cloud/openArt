@@ -290,11 +290,65 @@ function PromptBarPlatformInner({
 
   const hasAnyContent = Boolean(prompt?.trim()) || Boolean(hasReferences);
 
-  // Expand button only appears when input exceeds character threshold (gets filled: 60+ chars or newlines), or is already expanded
-  const EXPAND_THRESHOLD_CHARS = 60;
-  const canShowExpandButton = Boolean(
-    prompt && (prompt.trim().length >= EXPAND_THRESHOLD_CHARS || prompt.includes("\n"))
-  ) || isPromptExpanded;
+  const [isReferenceUnstacked, setIsReferenceUnstacked] = useState(false);
+  const hasFilledReferenceSlot = Boolean(
+    activeSlots &&
+      activeSlots.some((slot) => {
+        if (slot.role !== "reference") return false;
+        const backendKey = featureConfig?.resolveParameterMapping
+          ? featureConfig.resolveParameterMapping(currentModel, slot.role) || slot.role
+          : slot.role;
+        const items = getReferenceItems ? getReferenceItems(backendKey) : [];
+        return items.length > 0;
+      })
+  );
+  const showUnstackedReferenceTray = isReferenceUnstacked && hasFilledReferenceSlot;
+
+  useEffect(() => {
+    if (!hasFilledReferenceSlot && isReferenceUnstacked) {
+      setIsReferenceUnstacked(false);
+    }
+  }, [hasFilledReferenceSlot, isReferenceUnstacked]);
+
+  // Expand button only appears when input reaches a full line / wraps (or exceeds character threshold), or is already expanded
+  const EXPAND_THRESHOLD_CHARS = 45;
+  const [isInputLineFull, setIsInputLineFull] = useState(false);
+  const editorContainerRef = useRef(null);
+
+  useEffect(() => {
+    if (!prompt || !prompt.trim()) {
+      setIsInputLineFull(false);
+      return;
+    }
+    const container = editorContainerRef.current;
+    const editable = container?.querySelector('[contenteditable="true"]');
+    const p = editable?.querySelector("p") || editable;
+    if (p && p.clientWidth > 0 && typeof document.createRange === "function") {
+      try {
+        const range = document.createRange();
+        range.selectNodeContents(p);
+        const rects = range.getClientRects();
+        const boxRect = range.getBoundingClientRect();
+        const reachedFullLine =
+          rects.length > 1 ||
+          boxRect.height > 30 ||
+          boxRect.width >= p.clientWidth - 20 ||
+          prompt.includes("\n");
+        setIsInputLineFull(reachedFullLine);
+        return;
+      } catch {
+        // fallback below
+      }
+    }
+    setIsInputLineFull(
+      prompt.trim().length >= EXPAND_THRESHOLD_CHARS || prompt.includes("\n")
+    );
+  }, [prompt, activeSlots?.length]);
+
+  const canShowExpandButton =
+    isInputLineFull ||
+    Boolean(prompt && (prompt.trim().length >= EXPAND_THRESHOLD_CHARS || prompt.includes("\n"))) ||
+    isPromptExpanded;
 
   const handleClearAll = useCallback(() => {
     setPrompt("");
@@ -427,11 +481,15 @@ function PromptBarPlatformInner({
           data-source="reference"
           className={cn(
             "relative grid min-w-0 flex-1 overflow-hidden rounded-[var(--radius-2xl)] bg-[color:var(--white-5)] transition-[height] duration-200 ease-out",
-            isPromptExpanded ? "h-56" : "h-30"
+            showUnstackedReferenceTray
+              ? "min-h-17 h-auto"
+              : isPromptExpanded
+                ? "h-44"
+                : "h-17"
           )}
         >
           <legend className="sr-only">(Optional) Add a reference</legend>
-          <div className="col-start-1 row-start-1 flex min-w-0 items-center gap-1 p-1.5 h-full">
+          <div className="col-start-1 row-start-1 relative flex min-w-0 items-center gap-1.5 p-1.5 h-full">
             <PromptBarSlotsRow
               activeSlots={activeSlots}
               featureConfig={featureConfig}
@@ -448,87 +506,106 @@ function PromptBarPlatformInner({
               showSwap={showSwap}
               swapEnabled={swapEnabled}
               handleSwapFrames={handleSwapFrames}
+              isReferenceUnstacked={showUnstackedReferenceTray}
+              onToggleReferenceUnstacked={setIsReferenceUnstacked}
             />
 
-            {activeSlots && activeSlots.length > 0 && layout.showPromptInput && (
-              <div
-                aria-hidden="true"
-                className="h-25 w-px shrink-0 bg-gradient-to-b from-transparent via-[color:var(--border-subtle)] to-transparent"
-              />
-            )}
+            <motion.div
+              aria-hidden={showUnstackedReferenceTray || undefined}
+              animate={{
+                opacity: showUnstackedReferenceTray ? 0 : 1,
+                x: showUnstackedReferenceTray ? 16 : 0,
+                filter: showUnstackedReferenceTray ? "blur(3px)" : "blur(0px)",
+              }}
+              transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+              className={cn(
+                "flex min-w-0 items-center gap-1.5",
+                showUnstackedReferenceTray
+                  ? "pointer-events-none absolute inset-y-1.5 right-1.5 left-20"
+                  : "flex-1 h-full"
+              )}
+            >
+              {activeSlots && activeSlots.length > 0 && layout.showPromptInput && (
+                <div
+                  aria-hidden="true"
+                  className="self-stretch my-1 w-px shrink-0 bg-gradient-to-b from-transparent via-[color:var(--border-subtle)] to-transparent"
+                />
+              )}
 
-            {layout.showPromptInput && (
-              <div className="min-w-0 flex-1 h-full flex flex-col justify-between p-1.5 overflow-hidden">
-                <div className="flex-1 min-h-0 overflow-hidden">
-                  <PromptEditor
-                    value={prompt}
-                    onChange={setPrompt}
-                    onSubmit={handleGenerate}
-                    referenceImages={activeReferences}
-                    onTriggerMentionDialog={handleTriggerMentionDialog}
-                    onMentionQueryChange={setMentionQuery}
-                    mentionOpen={dialogOpen}
-                    placeholder="Describe what you want to create..."
-                    focusRequest={focusRequest}
-                    fillNonce={promptFillNonce}
-                    plugins={editorPlugins}
-                    isExpanded={isPromptExpanded}
-                  />
+              {layout.showPromptInput && (
+                <div className="min-w-0 flex-1 h-full flex flex-col justify-center px-1.5 py-0.5 overflow-hidden">
+                  <div ref={editorContainerRef} className="flex-1 min-h-0 overflow-y-auto custom-scrollbar">
+                    <PromptEditor
+                      value={prompt}
+                      onChange={setPrompt}
+                      onSubmit={handleGenerate}
+                      referenceImages={activeReferences}
+                      onTriggerMentionDialog={handleTriggerMentionDialog}
+                      onMentionQueryChange={setMentionQuery}
+                      mentionOpen={dialogOpen}
+                      placeholder="Describe what you want to create..."
+                      focusRequest={focusRequest}
+                      fillNonce={promptFillNonce}
+                      plugins={editorPlugins}
+                      isExpanded={isPromptExpanded}
+                    />
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            <div className="ml-auto shrink-0 self-start flex items-center gap-1">
-              <AnimatePresence>
-                {hasAnyContent && (
-                  <motion.div
-                    key="clear-all-btn"
-                    initial={{ opacity: 0, scale: 0.85 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.85 }}
-                    transition={{ duration: 0.15 }}
-                  >
-                    <IconButton
-                      variant="ghost"
-                      aria-label="Effacer tout"
-                      title="Effacer tout (texte et références)"
-                      onClick={handleClearAll}
-                      className="size-8 p-0 border-0 flex items-center justify-center shrink-0 cursor-pointer text-white/70 hover:text-white transition-colors"
+              <div className="ml-auto shrink-0 self-start flex items-center gap-0.5">
+                <AnimatePresence>
+                  {hasAnyContent && (
+                    <motion.div
+                      key="clear-all-btn"
+                      initial={{ opacity: 0, scale: 0.85 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.85 }}
+                      transition={{ duration: 0.15 }}
                     >
-                      <GoogleIcon
-                        iconName="close"
-                        className="text-base leading-none"
-                      />
-                    </IconButton>
-                  </motion.div>
-                )}
-                {canShowExpandButton && (
-                  <motion.div
-                    key="expand-btn"
-                    initial={{ opacity: 0, scale: 0.85 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.85 }}
-                    transition={{ duration: 0.15 }}
-                  >
-                    <IconButton
-                      variant="ghost"
-                      aria-label={isPromptExpanded ? "Réduire le champ de saisie" : "Agrandir le champ de saisie"}
-                      title={isPromptExpanded ? "Collapse prompt input" : "Expand prompt input"}
-                      onClick={() => setIsPromptExpanded((v) => !v)}
-                      className={cn(
-                        "size-8 p-0 border-0 flex items-center justify-center shrink-0 cursor-pointer text-white/70 hover:text-white transition-colors",
-                        isPromptExpanded && "is-active bg-white/10 text-white"
-                      )}
+                      <IconButton
+                        variant="ghost"
+                        aria-label="Effacer tout"
+                        title="Effacer tout (texte et références)"
+                        onClick={handleClearAll}
+                        className="size-7 p-0 border-0 flex items-center justify-center shrink-0 cursor-pointer text-white/70 hover:text-white transition-colors"
+                      >
+                        <GoogleIcon
+                          iconName="close"
+                          className="text-base leading-none"
+                        />
+                      </IconButton>
+                    </motion.div>
+                  )}
+
+                  {layout.showPromptInput && canShowExpandButton && (
+                    <motion.div
+                      key="expand-btn"
+                      initial={{ opacity: 0, scale: 0.85 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.85 }}
+                      transition={{ duration: 0.15 }}
                     >
-                      <GoogleIcon
-                        iconName={isPromptExpanded ? "close_fullscreen" : "open_in_full"}
-                        className="text-base leading-none"
-                      />
-                    </IconButton>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
+                      <IconButton
+                        variant="ghost"
+                        aria-label={isPromptExpanded ? "Réduire le champ de saisie" : "Agrandir le champ de saisie"}
+                        title={isPromptExpanded ? "Collapse prompt input" : "Expand prompt input"}
+                        onClick={() => setIsPromptExpanded((v) => !v)}
+                        className={cn(
+                          "size-7 p-0 border-0 flex items-center justify-center shrink-0 cursor-pointer text-white/70 hover:text-white transition-colors",
+                          isPromptExpanded && "is-active bg-white/10 text-white"
+                        )}
+                      >
+                        <GoogleIcon
+                          iconName={isPromptExpanded ? "close_fullscreen" : "open_in_full"}
+                          className="text-base leading-none"
+                        />
+                      </IconButton>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </motion.div>
           </div>
         </fieldset>
       </div>

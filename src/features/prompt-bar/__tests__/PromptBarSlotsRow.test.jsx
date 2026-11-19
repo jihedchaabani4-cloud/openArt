@@ -36,7 +36,7 @@ describe("PromptBarSlotsRow", () => {
     expect(container.firstChild).toBeNull();
   });
 
-  it("renders reference slot with stacked thumbnails and remove button", () => {
+  it("renders reference slot with stacked thumbnails, expands into tray on click, and collapses back", () => {
     const handleRemoveRef = vi.fn();
     const handleOpenDialog = vi.fn();
 
@@ -62,9 +62,19 @@ describe("PromptBarSlotsRow", () => {
     fireEvent.click(screen.getByTestId("reference-remove-all-btn"));
     expect(handleRemoveRef).toHaveBeenCalledWith(refItems[0], "reference");
 
+    // Clicking the stacked fan expands the reference tray
     const stackBtn = screen.getByTestId("reference-stack-btn");
     fireEvent.click(stackBtn);
+
+    const addBtn = screen.getByTestId("reference-add-btn");
+    fireEvent.click(addBtn);
     expect(handleOpenDialog).toHaveBeenCalledWith(activeSlots[0]);
+
+    // Clicking the collapse button stacks the uploaded images back
+    const collapseBtn = screen.getByTestId("reference-collapse-stack-btn");
+    expect(collapseBtn.getAttribute("aria-label")).toBe("Stack the uploaded images");
+    fireEvent.click(collapseBtn);
+    expect(screen.getByTestId("reference-stack-btn")).toBeTruthy();
   });
 
   it("renders keyframe slots and swap button when showSwap is true", () => {
