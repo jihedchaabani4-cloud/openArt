@@ -157,11 +157,11 @@ export function PromptBarSlotsRow({
                     animate={{ opacity: 1, x: 0, scale: 1 }}
                     transition={{ duration: 0.24, ease: [0.25, 1, 0.5, 1] }}
                     onClick={() => setReferenceUnstacked(false)}
-                    className="group relative flex cursor-pointer flex-col items-center justify-center rounded-[var(--radius-card)] text-[color:var(--text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--border-heavy)] self-stretch min-h-14 w-9.5 shrink-0"
+                    className="group relative flex cursor-pointer flex-col items-center justify-center rounded-[10px] text-[color:var(--text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--border-heavy)] self-stretch min-h-14 w-9.5 shrink-0"
                   >
                     <span
                       aria-hidden="true"
-                      className="pointer-events-none absolute inset-0 rounded-[var(--radius-card)] bg-[color:var(--white-5)] transition-colors group-hover:bg-[color:var(--ui-button-hover)]"
+                      className="pointer-events-none absolute inset-0 rounded-[10px] bg-[color:var(--white-5)] transition-colors group-hover:bg-[color:var(--ui-button-hover)]"
                     />
                     <span className="relative grid place-items-center">
                       <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24" aria-hidden="true">
