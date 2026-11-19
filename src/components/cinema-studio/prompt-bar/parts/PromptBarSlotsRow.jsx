@@ -111,7 +111,7 @@ export function PromptBarSlotsRow({
       <div
         ref={dialogAnchorRef}
         className={cn(
-          "flex h-full items-center gap-1.5 overflow-visible",
+          "flex h-full items-center gap-2 px-1 overflow-visible",
           isReferenceUnstacked ? "min-w-0 flex-1" : "shrink-0"
         )}
       >
@@ -364,9 +364,9 @@ export function PromptBarSlotsRow({
             );
           }
 
-          // Fixed Keyframe Slot (Start Frame / End Frame in video mode — stays the same)
+          // Fixed Keyframe Slot (Start Frame / End Frame in video mode — all 3 siblings in the same flex row with unified gap)
           return (
-            <div key={slot.role} className="flex items-center gap-1.5 px-2">
+            <React.Fragment key={slot.role}>
               <MediaInput
                 label={slotLabel}
                 role={slot.role}
@@ -382,13 +382,13 @@ export function PromptBarSlotsRow({
                   type="button"
                   onClick={handleSwapFrames}
                   disabled={!swapEnabled}
-                  className="size-8 p-0"
+                  className="size-8 p-0 shrink-0"
                   title={swapEnabled ? "Swap start and end frames" : "Fill both frames to swap"}
                 >
                   <SwapIcon />
                 </IconButton>
               )}
-            </div>
+            </React.Fragment>
           );
         })}
       </div>
