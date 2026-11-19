@@ -104,6 +104,7 @@ const REMOVE_ICON_PATH =
 
 export function ViewReference({
   media,
+  onClick,
   onRemove,
   label,
   className,
@@ -140,8 +141,10 @@ export function ViewReference({
     <div
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      onClick={onClick}
       className={cn(
         "group relative shrink-0 size-[50px] rounded-2xl [corner-shape:squircle] border-2 border-[color:var(--border-heavy)] [--rim:2px]",
+        onClick && "cursor-pointer",
         className
       )}
     >

@@ -65,6 +65,46 @@ describe("T5: attachMedia & removeMedia Commands", () => {
       expect(listener).toHaveBeenCalledTimes(2);
     });
 
+    it("on frames model: allows selecting media from multi-output image workflows (image_count > 1) and when store has entities/references", () => {
+      const store = createTestStore({
+        elements: [{ id: "el_1", workflow_id: "el_1", type: "element", image_count: 1 }],
+      });
+
+      // Selecting an image asset produced by a 2-image or 4-image batch workflow in ImportMediaPopover
+      const resStart = store.getState().attachMedia({
+        role: "start",
+        value: {
+          id: "wf_batch_1",
+          workflow_id: "wf_batch_1",
+          url: "https://example.com/batch1.png",
+          type: "image",
+          image_count: 2,
+        },
+      });
+
+      expect(resStart.ok).toBe(true);
+      expect(store.getState().parameterValues.input_image).toEqual(
+        expect.objectContaining({ workflow_id: "wf_batch_1" })
+      );
+
+      // Selecting end frame (even if same image or another batch image)
+      const resEnd = store.getState().attachMedia({
+        role: "end",
+        value: {
+          id: "wf_batch_2",
+          workflow_id: "wf_batch_2",
+          url: "https://example.com/batch2.png",
+          type: "image",
+          image_count: 4,
+        },
+      });
+
+      expect(resEnd.ok).toBe(true);
+      expect(store.getState().parameterValues.last_frame).toEqual(
+        expect.objectContaining({ workflow_id: "wf_batch_2" })
+      );
+    });
+
     it("on images-list model: reference appends to images array", () => {
       const store = createTestStore({
         selectedModelId: normalizedImagesListModel.id,

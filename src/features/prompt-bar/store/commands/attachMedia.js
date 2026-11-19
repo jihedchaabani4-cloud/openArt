@@ -52,12 +52,17 @@ export function attachMedia(state, { role, value } = {}, deps = {}) {
   const isList = paramDef?.type === "image[]" || paramDef?.type === "video[]" || role === "reference";
 
   // 3. Existing values and validation
+  // Single-value slots (e.g. "start", "end") replace their value directly and do not share multi-reference list quota
   const currentRaw = state.parameterValues?.[targetKey];
-  const existing = Array.isArray(currentRaw) ? currentRaw : (currentRaw ? [currentRaw] : []);
-  const used = countUsedRefs(state.parameterValues, activeSlots, [
-    ...(state.elements || []),
-    ...(state.characters || []),
-  ]);
+  const existing = isList
+    ? (Array.isArray(currentRaw) ? currentRaw : (currentRaw ? [currentRaw] : []))
+    : [];
+  const used = isList
+    ? countUsedRefs(state.parameterValues, activeSlots, [
+        ...(state.elements || []),
+        ...(state.characters || []),
+      ])
+    : 0;
 
   const check = canAttach({
     model: currentModel,
