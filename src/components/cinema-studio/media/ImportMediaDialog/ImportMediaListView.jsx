@@ -1,18 +1,23 @@
 "use client";
 
 import { useState, useMemo, useEffect, useRef } from "react";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Button } from "@/components/base/button";
 import { resolveMediaUrl } from "@/shared/lib/displayUtils";
 import { AssetListItem } from "../AssetListItem";
+
+const LIST_ITEM_EASE = [0.22, 1, 0.36, 1];
+const LIST_COLLAPSE_EASE = [0.25, 1, 0.5, 1];
 
 /**
  * ImportMediaListView
  * Google Flow inspired master-detail view for media assets:
  * - Left pane: list of assets. Clicking an item sets it as active to preview.
- * - Right pane: large hero preview pane with a single "Ajouter au prompt" button to import directly.
+ * - Right pane: large hero preview pane with a single "Add to prompt" button to import directly.
  */
 export function ImportMediaListView({
   items = [],
+  listKey = "default",
   focusedId: propFocusedId,
   onFocusChange,
   onSelectDirect,
@@ -23,6 +28,7 @@ export function ImportMediaListView({
   availableSlots,
   maxAllowed: _maxAllowed,
 }) {
+  const prefersReducedMotion = useReducedMotion();
   const [internalFocusedId, setInternalFocusedId] = useState(propFocusedId ?? null);
 
   // Sync internal state whenever propFocusedId updates externally
@@ -32,25 +38,29 @@ export function ImportMediaListView({
     }
   }, [propFocusedId]);
 
-  const focusedId = internalFocusedId ?? propFocusedId;
   const loadMoreRef = useRef(null);
 
   // Flexible match function
-  const matchesFocused = (item) => {
-    if (!item || !focusedId) return false;
+  const matchesId = (item, targetId) => {
+    if (!item || !targetId) return false;
     const candidates = [item.id, item.workflow_id, item.workflowId, item.name, item.url].filter(Boolean);
-    return candidates.includes(focusedId);
+    return candidates.includes(targetId);
   };
 
-  // Derive focused item from items
+  // Derive focused item from items (prefer propFocusedId immediately so removing an item never flashes items[0])
   const focusedItem = useMemo(() => {
     if (!items || items.length === 0) return null;
-    if (focusedId) {
-      const found = items.find(matchesFocused);
+    const primaryId = propFocusedId ?? internalFocusedId;
+    if (primaryId) {
+      const found = items.find((item) => matchesId(item, primaryId));
+      if (found) return found;
+    }
+    if (internalFocusedId && internalFocusedId !== primaryId) {
+      const found = items.find((item) => matchesId(item, internalFocusedId));
       if (found) return found;
     }
     return items[0] || null;
-  }, [items, focusedId]);
+  }, [items, propFocusedId, internalFocusedId]);
 
   // Update focusedId if focusedItem changes and focusedId is not set
   useEffect(() => {
@@ -87,6 +97,62 @@ export function ImportMediaListView({
 
   const focusedUrl = focusedItem ? getItemUrl(focusedItem) : "";
   const focusedMeta = focusedItem ? getItemMetadata(focusedItem) : null;
+  const focusedItemKey = focusedItem
+    ? focusedItem.id || focusedItem.workflow_id || focusedItem.workflowId || focusedUrl || focusedItem.name || "focused"
+    : null;
+
+  const rowInitial = prefersReducedMotion
+    ? { opacity: 0, paddingBottom: 2 }
+    : { opacity: 0, height: 0, x: -12, scale: 0.96, filter: "blur(2px)", paddingBottom: 0 };
+
+  const rowAnimate = prefersReducedMotion
+    ? { opacity: 1, paddingBottom: 2, transition: { duration: 0.12 } }
+    : {
+        opacity: 1,
+        height: "auto",
+        x: 0,
+        scale: 1,
+        filter: "blur(0px)",
+        paddingBottom: 2,
+        transition: { duration: 0.22, ease: LIST_ITEM_EASE },
+      };
+
+  const rowExit = prefersReducedMotion
+    ? { opacity: 0, pointerEvents: "none", transition: { duration: 0.12 } }
+    : {
+        opacity: 0,
+        x: -28,
+        scale: 0.94,
+        filter: "blur(2px)",
+        height: 0,
+        paddingBottom: 0,
+        pointerEvents: "none",
+        transition: {
+          opacity: { duration: 0.2, ease: LIST_ITEM_EASE },
+          x: { duration: 0.24, ease: LIST_ITEM_EASE },
+          scale: { duration: 0.2, ease: LIST_ITEM_EASE },
+          filter: { duration: 0.2, ease: LIST_ITEM_EASE },
+          height: { duration: 0.24, delay: 0.08, ease: LIST_COLLAPSE_EASE },
+          paddingBottom: { duration: 0.24, delay: 0.08, ease: LIST_COLLAPSE_EASE },
+        },
+      };
+
+  const previewInitial = prefersReducedMotion
+    ? { opacity: 0 }
+    : { opacity: 0, scale: 0.96, y: 6, filter: "blur(2px)" };
+
+  const previewAnimate = prefersReducedMotion
+    ? { opacity: 1 }
+    : { opacity: 1, scale: 1, y: 0, filter: "blur(0px)" };
+
+  const previewExit = prefersReducedMotion
+    ? { opacity: 0 }
+    : { opacity: 0, scale: 0.92, y: 14, filter: "blur(3px)" };
+
+  const previewTransition = {
+    duration: prefersReducedMotion ? 0.1 : 0.2,
+    ease: LIST_ITEM_EASE,
+  };
 
   return (
     <div className="flex-1 flex flex-row min-h-0 overflow-hidden gap-2">
@@ -94,53 +160,71 @@ export function ImportMediaListView({
       <div
         role="listbox"
         aria-label="Asset list"
-        className="w-[240px] shrink-0 overflow-y-auto custom-scrollbar flex flex-col gap-0.5 pr-1"
+        className="w-[240px] shrink-0 overflow-y-auto overflow-x-hidden custom-scrollbar flex flex-col pr-1"
       >
-        {items.length === 0 && !loading ? (
-          <div className="flex-1 flex items-center justify-center text-white/30 text-xs">
-            No assets found
-          </div>
-        ) : (
-          items.map((item, idx) => {
-            const itemUrl = getItemUrl(item);
-            const { isVid, title } = getItemMetadata(item);
-            const itemId = item.id || item.workflow_id || item.name || String(idx);
-            const isFocused = Boolean(
-              focusedItem &&
-              (
-                item === focusedItem ||
-                (item.id && (item.id === focusedItem.id || item.id === focusedItem.workflow_id)) ||
-                (item.workflow_id && (item.workflow_id === focusedItem.workflow_id || item.workflow_id === focusedItem.id)) ||
-                (item.url && item.url === focusedItem.url)
-              )
-            );
-            const candidateCount = item.image_count || 1;
-            const isOverQuota = typeof remainingImages === "number"
-              ? candidateCount > availableSlots
-              : (typeof availableSlots === "number" ? availableSlots <= 0 : false);
+        <div key={listKey} className="flex flex-col flex-1">
+          <AnimatePresence initial={false}>
+            {items.map((item, idx) => {
+              const itemUrl = getItemUrl(item);
+              const { isVid, title } = getItemMetadata(item);
+              const itemId = item.id || item.workflow_id || item.workflowId || item.url || item.name || String(idx);
+              const isFocused = Boolean(
+                focusedItem &&
+                (
+                  item === focusedItem ||
+                  (item.id && (item.id === focusedItem.id || item.id === focusedItem.workflow_id)) ||
+                  (item.workflow_id && (item.workflow_id === focusedItem.workflow_id || item.workflow_id === focusedItem.id)) ||
+                  (item.url && item.url === focusedItem.url)
+                )
+              );
+              const candidateCount = item.image_count || 1;
+              const isOverQuota = typeof remainingImages === "number"
+                ? candidateCount > availableSlots
+                : (typeof availableSlots === "number" ? availableSlots <= 0 : false);
 
-            return (
-              <AssetListItem
-                key={itemId}
-                item={item}
-                itemUrl={itemUrl}
-                title={title}
-                isVideo={isVid}
-                isActive={isFocused}
-                isDisabled={isOverQuota}
-                onClick={() => {
-                  setInternalFocusedId(itemId);
-                  onFocusChange?.(item, idx, itemId);
-                }}
-                onDoubleClick={() => {
-                  if (!isOverQuota) {
-                    onSelectDirect?.(item);
-                  }
-                }}
-              />
-            );
-          })
-        )}
+              return (
+                <motion.div
+                  key={itemId}
+                  role="presentation"
+                  initial={rowInitial}
+                  animate={rowAnimate}
+                  exit={rowExit}
+                  className="shrink-0 overflow-hidden"
+                >
+                  <AssetListItem
+                    item={item}
+                    itemUrl={itemUrl}
+                    title={title}
+                    isVideo={isVid}
+                    isActive={isFocused}
+                    isDisabled={isOverQuota}
+                    onClick={() => {
+                      setInternalFocusedId(itemId);
+                      onFocusChange?.(item, idx, itemId);
+                    }}
+                    onDoubleClick={() => {
+                      if (!isOverQuota) {
+                        onSelectDirect?.(item);
+                      }
+                    }}
+                  />
+                </motion.div>
+              );
+            })}
+          </AnimatePresence>
+
+          {items.length === 0 && !loading && (
+            <motion.div
+              key="empty-assets"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.18, delay: prefersReducedMotion ? 0 : 0.12 }}
+              className="flex-1 flex items-center justify-center text-white/30 text-xs"
+            >
+              No assets found
+            </motion.div>
+          )}
+        </div>
 
         {/* Loader for pagination */}
         {(hasMore || loading) && (
@@ -152,56 +236,74 @@ export function ImportMediaListView({
 
       {/* ── Right Pane: Large Detail & Preview Hero Pane (flow-add-menu-detail-pane) ── */}
       <div className="flex-1 min-w-0 min-h-0 flex flex-col gap-2 rounded-xl bg-black/25 p-2 overflow-hidden">
-        {focusedItem ? (
-          <>
-            {/* Detail Preview Box */}
-            <div className="flex-1 w-full min-h-0 flex items-center justify-center overflow-hidden">
-              {focusedMeta?.isVid ? (
-                <video
-                  src={focusedUrl}
-                  controls
-                  autoPlay
-                  loop
-                  muted
-                  className="max-h-full max-w-full rounded-lg object-contain"
-                />
-              ) : (
-                <img
-                  src={focusedUrl}
-                  alt={focusedMeta?.title || ""}
-                  className="max-h-full max-w-full rounded-lg object-contain"
-                />
-              )}
-            </div>
+        {/* Detail Preview Box */}
+        <div className="flex-1 w-full min-h-0 relative flex items-center justify-center overflow-hidden">
+          <AnimatePresence mode="popLayout" initial={false}>
+            {focusedItem ? (
+              <motion.div
+                key={focusedItemKey}
+                initial={previewInitial}
+                animate={previewAnimate}
+                exit={previewExit}
+                transition={previewTransition}
+                className="size-full flex items-center justify-center"
+              >
+                {focusedMeta?.isVid ? (
+                  <video
+                    src={focusedUrl}
+                    controls
+                    autoPlay
+                    loop
+                    muted
+                    className="max-h-full max-w-full rounded-lg object-contain"
+                  />
+                ) : (
+                  <img
+                    src={focusedUrl}
+                    alt={focusedMeta?.title || ""}
+                    className="max-h-full max-w-full rounded-lg object-contain"
+                  />
+                )}
+              </motion.div>
+            ) : (
+              <motion.div
+                key="no-item-selected"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.18 }}
+                className="size-full flex items-center justify-center text-white/25 text-xs"
+              >
+                No item selected
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
 
-            {/* Bottom Actions */}
-            <div className="shrink-0 flex items-center">
-              {(() => {
-                const focusedCandidateCount = focusedItem.image_count || 1;
-                const isFocusedOverQuota = typeof remainingImages === "number"
-                  ? focusedCandidateCount > availableSlots
-                  : (typeof availableSlots === "number" ? availableSlots <= 0 : false);
+        {/* Bottom Actions */}
+        {focusedItem && (
+          <div className="shrink-0 flex items-center">
+            {(() => {
+              const focusedCandidateCount = focusedItem.image_count || 1;
+              const isFocusedOverQuota = typeof remainingImages === "number"
+                ? focusedCandidateCount > availableSlots
+                : (typeof availableSlots === "number" ? availableSlots <= 0 : false);
 
-                return (
-                  <Button
-                    variant="primary"
-                    onClick={() => {
-                      if (!isFocusedOverQuota) {
-                        onSelectDirect?.(focusedItem);
-                      }
-                    }}
-                    disabled={isFocusedOverQuota}
-                    className="w-full !h-8.5 rounded-lg text-xs font-medium justify-center"
-                  >
-                    Add to prompt
-                  </Button>
-                );
-              })()}
-            </div>
-          </>
-        ) : (
-          <div className="flex-1 flex items-center justify-center text-white/25 text-xs">
-            No item selected
+              return (
+                <Button
+                  variant="primary"
+                  onClick={() => {
+                    if (!isFocusedOverQuota) {
+                      onSelectDirect?.(focusedItem);
+                    }
+                  }}
+                  disabled={isFocusedOverQuota}
+                  className="w-full !h-8.5 rounded-lg text-xs font-medium justify-center"
+                >
+                  Add to prompt
+                </Button>
+              );
+            })()}
           </div>
         )}
       </div>

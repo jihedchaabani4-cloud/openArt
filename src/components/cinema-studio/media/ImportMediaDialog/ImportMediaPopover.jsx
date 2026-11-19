@@ -680,6 +680,7 @@ export function ImportMediaPopover({
 
         <ImportMediaListView
           items={visibleItems}
+          listKey={`${selectedCategory || defaultCategory}:${search.trim()}`}
           remainingImages={remainingImages}
           availableSlots={availableSlots}
           maxAllowed={maxAllowed}
