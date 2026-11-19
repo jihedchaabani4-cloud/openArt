@@ -168,6 +168,24 @@ export function removeEntityWithPromptClean(list = [], entityId, prompt = "") {
 export function getEntityImageCount(item) {
   if (!item) return 0;
   if (typeof item === "string") return 1;
+
+  const wType = String(item.workflow_type || item.workflowType || "").toUpperCase();
+  const isMultiImageEntity =
+    item.type === "character" ||
+    item.type === "element" ||
+    Boolean(item.is_character) ||
+    Boolean(item.is_element) ||
+    Boolean(item.characterId) ||
+    Boolean(item.elementId) ||
+    item.entity_type === "character" ||
+    item.entity_type === "element" ||
+    wType.includes("CHARACTER") ||
+    wType.includes("ELEMENT");
+
+  if (!isMultiImageEntity) {
+    return 1;
+  }
+
   if (typeof item.image_count === "number" && item.image_count > 0) return item.image_count;
   if (typeof item.images_count === "number" && item.images_count > 0) return item.images_count;
   if (typeof item.imageCount === "number" && item.imageCount > 0) return item.imageCount;

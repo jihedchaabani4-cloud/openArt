@@ -44,7 +44,11 @@ export function PromptBarTopPanel({
             mode={activeDialogMode}
             selectedItems={dialogSelectedItems}
             excludedItems={allSelectedMedia}
-            onSelect={(assets) => onSelectMedia(assets, { keepOpen: true })}
+            onSelect={(assets) =>
+              onSelectMedia(assets, {
+                keepOpen: !activeDialogSlot || activeDialogSlot.role === "reference",
+              })
+            }
             initialSearch={mentionQuery}
             closeOnSelect={false}
           />

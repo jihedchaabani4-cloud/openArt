@@ -99,8 +99,12 @@ export function SwapIcon({ className }) {
 }
 
 
+const REMOVE_ICON_PATH =
+  "M7.29268 7.30529C7.47998 7.11782 7.73398 7.0125 7.99882 7.0125C8.26367 7.0125 8.51767 7.11782 8.70497 7.30529L11.994 10.5983L15.283 7.30529C15.3752 7.20978 15.4854 7.1336 15.6072 7.08119C15.7291 7.02878 15.8602 7.00119 15.9928 7.00004C16.1254 6.99888 16.2569 7.02419 16.3797 7.07447C16.5024 7.12475 16.6139 7.199 16.7077 7.29289C16.8015 7.38679 16.8756 7.49844 16.9259 7.62133C16.9761 7.74423 17.0014 7.87591 17.0002 8.00869C16.9991 8.14147 16.9715 8.27269 16.9192 8.39469C16.8668 8.5167 16.7907 8.62704 16.6953 8.71929L13.4063 12.0123L16.6953 15.3053C16.8773 15.4939 16.9779 15.7465 16.9757 16.0087C16.9734 16.2709 16.8683 16.5217 16.6832 16.7071C16.498 16.8925 16.2475 16.9977 15.9856 17C15.7237 17.0022 15.4714 16.9014 15.283 16.7193L11.994 13.4263L8.70497 16.7193C8.5166 16.9014 8.2643 17.0022 8.00242 17C7.74054 16.9977 7.49003 16.8925 7.30484 16.7071C7.11966 16.5217 7.01462 16.2709 7.01234 16.0087C7.01007 15.7465 7.11074 15.4939 7.29268 15.3053L10.5817 12.0123L7.29268 8.71929C7.10543 8.53176 7.00024 8.27745 7.00024 8.01229C7.00024 7.74712 7.10543 7.49282 7.29268 7.30529Z";
+
 export function ViewReference({
   media,
+  onClick,
   onRemove,
   label,
   className,
@@ -133,76 +137,55 @@ export function ViewReference({
     label ||
     (isCharacter ? "Ingrédient personnage" : isElement ? "Ingrédient élément" : "Ingrédient");
 
-  const badgeIcon = isCharacter
-    ? "accessibility_new"
-    : isElement
-    ? "widgets"
-    : isVideo
-    ? "videocam"
-    : null;
-
   return (
     <div
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className={cn("group relative shrink-0 w-[50px] h-[50px]", className)}
+      onClick={onClick}
+      className={cn(
+        "group relative shrink-0 size-[50px] rounded-2xl [corner-shape:squircle] border-2 border-[color:var(--border-heavy)] [--rim:2px]",
+        onClick && "cursor-pointer",
+        className
+      )}
     >
-      {/* 50x50 Chip Container */}
-      <div
-        className="chip-container group w-full h-full relative rounded-xl overflow-hidden bg-white-5 cursor-pointer flex items-center justify-center select-none"
-        aria-label={tooltipText}
+      {isVideo ? (
+        <video
+          src={src}
+          aria-label={tooltipText}
+          className="block size-full object-cover overflow-hidden rounded-[calc(16px-var(--rim,0px))] [corner-shape:squircle] select-none pointer-events-none"
+          autoPlay
+          loop
+          muted
+          playsInline
+        />
+      ) : (
+        <img
+          src={src}
+          alt={tooltipText}
+          decoding="async"
+          className="block size-full object-cover overflow-hidden rounded-[calc(16px-var(--rim,0px))] [corner-shape:squircle] select-none pointer-events-none"
+        />
+      )}
+
+      <button
+        type="button"
+        aria-label={`Remove ${tooltipText}`}
+        title={`Supprimer ${tooltipText}`}
         onClick={(e) => {
           e.stopPropagation();
           onRemove?.();
         }}
+        className="absolute grid size-5 cursor-pointer place-items-center rounded-full bg-[color:var(--ui-menu-background)] text-[color:var(--icon-primary)] [--blur:20px] hover:bg-[color:var(--ui-menu-background-strong)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--border-heavy)] transition-colors duration-200 z-10"
+        style={{
+          backdropFilter: "blur(var(--blur, 40px))",
+          right: "-8px",
+          top: "-7px",
+        }}
       >
-        <div className="chip-image-wrapper absolute inset-0 w-full h-full flex items-center justify-center overflow-hidden">
-          {isVideo ? (
-            <video
-              src={src}
-              className="chip-image w-full h-full object-cover select-none pointer-events-none"
-              autoPlay
-              loop
-              muted
-              playsInline
-            />
-          ) : (
-            <img
-              src={src}
-              alt={tooltipText}
-              className="chip-image w-full h-full object-cover select-none pointer-events-none"
-            />
-          )}
-        </div>
-
-        {/* Hover overlay — cancel button */}
-        <div
-          className="hover-icon-overlay absolute inset-0 flex items-center justify-center bg-fill-overlay-dark opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-20"
-          title={`Supprimer ${tooltipText}`}
-        >
-          <GoogleIcon
-            iconName="cancel"
-            fill
-            className="mat-icon notranslate hover-icon flow-icon-s google-symbols mat-icon-no-color text-text-primary text-[20px]"
-            aria-hidden="true"
-          />
-        </div>
-
-        {/* Type badge pinned to bottom-right corner */}
-        {badgeIcon && (
-          <div
-            className="type-badge"
-            aria-hidden="true"
-          >
-            <GoogleIcon
-              iconName={badgeIcon}
-              fill
-              weight={600}
-              className="mat-icon notranslate type-badge-icon google-symbols mat-icon-no-color"
-            />
-          </div>
-        )}
-      </div>
+        <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18" aria-hidden="true">
+          <path fillRule="evenodd" clipRule="evenodd" d={REMOVE_ICON_PATH} />
+        </svg>
+      </button>
 
       {/* Floating Media Preview Popover directly above */}
       <AnimatePresence>

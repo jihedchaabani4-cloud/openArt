@@ -231,6 +231,7 @@ export function MediaInput({
         <ViewReference
           media={typeof value === "string" ? { url: value, type: "image" } : value}
           label={label}
+          onClick={handleClick}
           onRemove={onRemove}
         />
       ) : (

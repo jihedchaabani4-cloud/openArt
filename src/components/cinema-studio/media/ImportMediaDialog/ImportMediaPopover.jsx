@@ -257,16 +257,17 @@ export function ImportMediaPopover({
           else if (isVid)            itemType = "video";
           else                       itemType = "image";
 
-          const constituentCount =
-            typeof w.image_count === "number" && w.image_count > 0
-              ? w.image_count
-              : typeof w.images_count === "number" && w.images_count > 0
-              ? w.images_count
-              : nestedItems.length > 0
-              ? nestedItems.length
-              : wfMedia.length > 0
-              ? wfMedia.length
-              : 1;
+          const constituentCount = semanticCategory
+            ? (typeof w.image_count === "number" && w.image_count > 0
+                ? w.image_count
+                : typeof w.images_count === "number" && w.images_count > 0
+                ? w.images_count
+                : nestedItems.length > 0
+                ? nestedItems.length
+                : wfMedia.length > 0
+                ? wfMedia.length
+                : 1)
+            : 1;
 
           finalItems.push({
             ...(mainMedia || {}),
