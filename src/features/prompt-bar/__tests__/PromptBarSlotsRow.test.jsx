@@ -36,12 +36,12 @@ describe("PromptBarSlotsRow", () => {
     expect(container.firstChild).toBeNull();
   });
 
-  it("renders reference slot with thumbnails and add button", () => {
+  it("renders reference slot with stacked thumbnails and remove button", () => {
     const handleRemoveRef = vi.fn();
     const handleOpenDialog = vi.fn();
 
     const activeSlots = [{ role: "reference", label: "References" }];
-    const refItems = [{ id: "ref-1", displayName: "My Ref" }];
+    const refItems = [{ id: "ref-1", displayName: "My Ref", url: "https://example.com/ref1.png" }];
 
     render(
       <PromptBarSlotsRow
@@ -56,14 +56,14 @@ describe("PromptBarSlotsRow", () => {
     );
 
     expect(screen.getByTestId("view-reference-ref-1")).toBeTruthy();
-    expect(screen.getByText("My Ref")).toBeTruthy();
+    expect(screen.getByText("Uploaded")).toBeTruthy();
+    expect(screen.getByText("Used as reference")).toBeTruthy();
 
-    fireEvent.click(screen.getByText("Remove Ref"));
+    fireEvent.click(screen.getByTestId("reference-remove-all-btn"));
     expect(handleRemoveRef).toHaveBeenCalledWith(refItems[0], "reference");
 
-    const addBtn = screen.getByTestId("reference-add-btn");
-    expect(addBtn.textContent).toBe("Add");
-    fireEvent.click(addBtn);
+    const stackBtn = screen.getByTestId("reference-stack-btn");
+    fireEvent.click(stackBtn);
     expect(handleOpenDialog).toHaveBeenCalledWith(activeSlots[0]);
   });
 

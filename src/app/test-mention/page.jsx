@@ -20,7 +20,6 @@ import {
 } from "lexical";
 import { MentionNode, $createMentionNode } from "@/components/cinema-studio/prompt-bar/editor/MentionNode";
 import { MentionPlugin } from "@/components/cinema-studio/prompt-bar/editor/MentionPlugin";
-import { AtMentionMenu } from "@/components/cinema-studio/prompt-bar/editor/AtMentionMenu";
 import { GoogleIcon } from "@/components/primitives/GoogleIcon";
 import { Button } from "@/components/base/button";
 import { IconButton } from "@/components/base/icon-button";
@@ -549,23 +548,6 @@ export default function TestMentionPage() {
 
             {/* Interactive Prompt Bar Shell with Top Panel Zone */}
             <div className="relative mt-2 flex flex-col items-center gap-2 w-full" ref={v2AnchorRef}>
-              {/* TOP PANEL ZONE */}
-              <AtMentionMenu
-                open={v2PanelOpen}
-                onClose={() => {
-                  setV2PanelOpen(false);
-                  setV2MentionQuery("");
-                }}
-                references={references}
-                anchorRef={v2AnchorRef}
-                query={v2MentionQuery}
-                onSelectReference={(ref) => {
-                  setV2InsertTarget(ref);
-                  setV2PanelOpen(false);
-                  setV2MentionQuery("");
-                }}
-                onOpenMediaLibrary={() => alert("Asset library clicked: Opening assets...")}
-              />
 
               {/* Prompt Bar Shell (Border-free and shadow-free matching prompt bar) */}
               <div className="w-full rounded-2xl bg-(--background-state-90) backdrop-blur-80 p-3.5 shadow-none transition-all border-0">

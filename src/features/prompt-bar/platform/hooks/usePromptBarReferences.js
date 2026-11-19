@@ -29,15 +29,13 @@ export function usePromptBarReferences({
   const attachMedia   = usePromptBarStore((s) => s.attachMedia);
   const removeMedia   = usePromptBarStore((s) => s.removeMedia);
 
-  // Dialog & quick mention states
+  // Dialog & mention states
   const [dialogOpen, setDialogOpen] = useState(false);
   const [activeDialogSlot, setActiveDialogSlot] = useState(null);
   const [activeDialogMode, setActiveDialogMode] = useState("image");
   const [mentionCallback, setMentionCallback] = useState(null);
-  const [quickMentionOpen, setQuickMentionOpen] = useState(false);
   const [mentionQuery, setMentionQuery] = useState("");
   const dialogAnchorRef = useRef(null);
-  const quickMentionAnchorRef = useRef(null);
 
   // Active references list for tags & mentions
   const activeReferences = useMemo(() => {
@@ -149,54 +147,33 @@ export function usePromptBarReferences({
     return Array.from(map.values());
   }, [paramValues, elements, characters]);
 
-  // Typing '@' -> opens AtMentionMenu
+  // Typing '@' -> opens ImportMediaPopover directly
   const handleTriggerMentionDialog = useCallback((cb) => {
     setMentionCallback(() => cb);
-    if (!dialogOpen) {
-      setQuickMentionOpen(true);
-    }
-  }, [dialogOpen]);
-
-  const handleSelectExistingReference = useCallback((ref) => {
-    if (mentionCallback) {
-      mentionCallback([ref]);
-    }
-    setQuickMentionOpen(false);
-    setMentionCallback(null);
-  }, [mentionCallback]);
-
-  const handleOpenMediaLibraryFromMention = useCallback(() => {
-    setQuickMentionOpen(false);
     setActiveDialogSlot(null);
     setActiveDialogMode("all");
     setDialogOpen(true);
   }, []);
 
-  const handleCloseQuickMention = useCallback(() => {
-    setQuickMentionOpen(false);
-    setMentionCallback(null);
-    setMentionQuery("");
-  }, []);
+  const handleMentionQueryChange = useCallback((q) => {
+    if (q === null) {
+      if (mentionCallback) {
+        setDialogOpen(false);
+        setMentionCallback(null);
+        setMentionQuery("");
+      }
+      return;
+    }
+    setMentionQuery(q);
+  }, [mentionCallback]);
 
   const handleOpenChangeDialog = useCallback((val) => {
     setDialogOpen(val);
     if (!val) {
+      setMentionCallback(null);
       setMentionQuery("");
     }
   }, []);
-
-  // Close quick mention dropdown on outside click
-  useEffect(() => {
-    if (!quickMentionOpen) return;
-    const handleClickOutside = (event) => {
-      if (quickMentionAnchorRef.current && !quickMentionAnchorRef.current.contains(event.target)) {
-        setQuickMentionOpen(false);
-        setMentionCallback(null);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [quickMentionOpen]);
 
   const handleSelectMedia = useCallback((assets, options = {}) => {
     const items = Array.isArray(assets) ? assets : [assets];
@@ -240,6 +217,9 @@ export function usePromptBarReferences({
       mentionCallback(normalizedItems);
       setMentionCallback(null);
       setMentionQuery("");
+      setDialogOpen(false);
+      setActiveDialogSlot(null);
+      return;
     }
 
     if (options?.keepOpen !== true && options?.closeDialog !== false) {
@@ -315,18 +295,12 @@ export function usePromptBarReferences({
     activeDialogMode,
     setActiveDialogMode,
     dialogAnchorRef,
-    quickMentionAnchorRef,
-    quickMentionOpen,
-    setQuickMentionOpen,
     mentionQuery,
-    setMentionQuery,
-    handleCloseQuickMention,
+    setMentionQuery: handleMentionQueryChange,
     handleOpenChangeDialog,
     handleOpenDialog,
     getSlotMaxRefs,
     handleTriggerMentionDialog,
-    handleSelectExistingReference,
-    handleOpenMediaLibraryFromMention,
     handleSelectMedia,
     handleRemoveReferenceItem,
     handleRemoveSlot,

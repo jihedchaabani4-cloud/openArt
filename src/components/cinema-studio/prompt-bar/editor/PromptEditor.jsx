@@ -104,10 +104,8 @@ function AtShortcutPlugin({ onTriggerMentionDialog, onMentionQueryChange, mentio
             query = before.slice(atIndex + 1);
             found = true;
           }
-        }
-
-        // Fallback: check full editor text if selection was lost (e.g. blurred when clicking popover)
-        if (!found) {
+        } else {
+          // Fallback: check full editor text only if selection was lost (e.g. blurred when clicking popover)
           const fullText = $getRoot().getTextContent();
           const atIndex = fullText.lastIndexOf("@");
           if (atIndex !== -1) {
@@ -117,7 +115,7 @@ function AtShortcutPlugin({ onTriggerMentionDialog, onMentionQueryChange, mentio
           }
         }
 
-        onMentionQueryChange?.(found ? query : "");
+        onMentionQueryChange?.(found ? query : null);
       });
     });
   }, [editor, mentionOpen, onMentionQueryChange]);

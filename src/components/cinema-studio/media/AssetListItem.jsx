@@ -36,8 +36,8 @@ export function AssetListItem({
       className={cn(
         "ds-pop-press !h-10 w-full !justify-start gap-2.5 p-1 pr-2.5 rounded-lg text-left select-none",
         isActive
-          ? "animate-button-pop !bg-white/10 text-white font-medium"
-          : "text-white/80 hover:!bg-white/5 hover:text-white font-normal",
+          ? "animate-button-pop !bg-white/[0.16] hover:!bg-white/20 text-white font-medium"
+          : "text-white/80 hover:!bg-white/10 hover:text-white font-normal",
         isDisabled && "opacity-50",
         className
       )}

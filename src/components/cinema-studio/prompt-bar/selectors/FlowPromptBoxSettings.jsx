@@ -361,7 +361,7 @@ export function FlowPromptBoxSettings({
                   role="radio"
                   aria-pressed={isChecked}
                   aria-checked={isChecked}
-                  className="flex-1 rounded-[10px] text-xs h-8"
+                  className="flex-1 rounded-[10px] text-xs h-[34px]"
                 >
                   <GoogleIcon
                     iconName={opt.icon}
@@ -392,7 +392,7 @@ export function FlowPromptBoxSettings({
                   role="radio"
                   aria-pressed={isChecked}
                   aria-checked={isChecked}
-                  className="flex-1 rounded-[10px] text-xs h-8"
+                  className="flex-1 rounded-[10px] text-xs h-[34px]"
                 >
                   <GoogleIcon
                     iconName={opt.icon}
@@ -428,13 +428,13 @@ export function FlowPromptBoxSettings({
                   role="radio"
                   aria-pressed={isChecked}
                   aria-checked={isChecked}
-                  className="w-full min-w-0 !h-[42px] flex-col !gap-0.5 !py-1 !px-1 rounded-[10px]"
+                  className="w-full min-w-0 !h-[34px] flex-col !gap-0.5 !py-0.5 !px-1 rounded-[10px]"
                 >
                   <GoogleIcon
                     iconName={iconName}
-                    className="!text-[18px] leading-none text-icon-primary"
+                    className="!text-[14px] leading-none text-icon-primary"
                   />
-                  <span className="text-[11px] leading-tight font-medium text-text-primary">
+                  <span className="text-[10px] leading-none font-medium text-text-primary">
                     {ratio}
                   </span>
                 </Button>
@@ -505,7 +505,7 @@ export function FlowPromptBoxSettings({
                           aria-pressed={isChecked}
                           aria-checked={isChecked}
                           aria-description={infoText || undefined}
-                          className={cn(!isGrid ? "flex-1" : undefined, "rounded-[10px] text-xs h-8")}
+                          className={cn(!isGrid ? "flex-1" : undefined, "rounded-[10px] text-xs h-[34px]")}
                         >
                           <span className="flex items-center justify-center gap-1 truncate w-full text-center">
                             <span className="truncate text-text-primary">{itemLabel}</span>

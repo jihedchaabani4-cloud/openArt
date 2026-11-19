@@ -611,8 +611,8 @@ export function ImportMediaPopover({
                     }}
                     className={cn(
                       "w-full !justify-start !h-8.5 text-[13px] cursor-pointer group px-2.5 rounded-lg flex items-center gap-2.5 transition-colors",
-                      isActive ? "!bg-white/10 text-white font-medium" : "text-white/65 hover:!bg-white/5 hover:text-white font-normal",
-                      isHighlighted && "ring-1 ring-inset ring-white/70 !bg-white/10"
+                      isActive ? "!bg-white/[0.16] hover:!bg-white/20 text-white font-medium" : "text-white/65 hover:!bg-white/10 hover:text-white font-normal",
+                      isHighlighted && "ring-1 ring-inset ring-white/70 !bg-white/[0.16]"
                     )}
                   >
                     <GoogleIcon
