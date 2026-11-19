@@ -97,12 +97,11 @@ function DialogContent({
           // DEFAULT (centered)
           variant === "default" &&
             `
-            z-50 bg-[color:var(--ui-menu-background)]/70 backdrop-blur-2xl text-white
+            z-50 bg-[color:var(--ui-menu-background)] p-2 [--blur:40px] backdrop-blur-2xl text-white
             fixed top-1/2 left-1/2
             -translate-x-1/2 -translate-y-1/2
-            w-full max-w-[calc(100%-2rem)]
-            sm:max-w-6xl
-            rounded-3xl border border-white/10 p-6 shadow-xl
+            w-[min(780px,calc(100%-2rem))] h-[min(580px,90vh)]
+            rounded-[var(--radius-3xl)] border border-white/10 shadow-xl
             data-[state=open]:animate-in
             data-[state=closed]:animate-out
           `,

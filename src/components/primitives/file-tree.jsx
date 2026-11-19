@@ -147,13 +147,13 @@ const Folder = forwardRef(function Folder(
       className={cn(
         "w-full justify-start rounded-lg text-xs font-medium px-2 py-1.5 transition-all duration-150 group",
         isSelected
-          ? "bg-white/10 text-white font-semibold"
-          : "text-white/70 hover:text-white hover:bg-white/5",
+          ? "bg-ui-button-tonal text-text-primary font-semibold"
+          : "text-text-body-muted hover:text-text-primary hover:bg-surface-card",
         className
       )}
       {...props}
     >
-      <span className="flex items-center justify-center size-5 shrink-0 mr-1.5 text-white/60 group-hover:text-white transition-colors">
+      <span className="flex items-center justify-center size-5 shrink-0 mr-1.5 text-icon-secondary group-hover:text-icon-primary transition-colors">
         {React.isValidElement(activeFolderIcon) ? (
           activeFolderIcon
         ) : (
@@ -254,13 +254,13 @@ const File = forwardRef(function File(
       className={cn(
         "w-full justify-start rounded-lg text-xs font-medium px-2 py-1.5 transition-all duration-150 group",
         isSelected
-          ? "bg-white/10 text-white font-semibold"
-          : "text-white/70 hover:text-white hover:bg-white/5",
+          ? "bg-ui-button-tonal text-text-primary font-semibold"
+          : "text-text-body-muted hover:text-text-primary hover:bg-surface-card",
         className
       )}
       {...props}
     >
-      <span className="flex items-center justify-center size-5 shrink-0 mr-1.5 text-white/60 group-hover:text-white transition-colors">
+      <span className="flex items-center justify-center size-5 shrink-0 mr-1.5 text-icon-secondary group-hover:text-icon-primary transition-colors">
         {React.isValidElement(activeFileIcon) ? (
           activeFileIcon
         ) : (

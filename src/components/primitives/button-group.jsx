@@ -3,12 +3,13 @@ import { cva } from "class-variance-authority"
 import { cn } from "@/shared/lib/utils"
 
 const buttonGroupVariants = cva(
-  "flex items-center max-w-fit gap-0.5 border-0 border-none",
+  "items-center border-0 border-none",
   {
     variants: {
       variant: {
-        default: "bg-(--foreground-state-05) rounded-sm p-1",
-        pill: "bg-white/60 backdrop-blur-md rounded-full p-1",
+        default: "flex max-w-fit gap-0.5 bg-(--foreground-state-05) rounded-sm p-1",
+        pill: "flex max-w-fit gap-0.5 bg-white/60 backdrop-blur-md rounded-full p-1",
+        radiogroup: "grid h-[38px] grid-cols-4 gap-0.5 rounded-xl bg-white/5 border border-white/10 p-0.5 w-full",
       },
     },
     defaultVariants: {

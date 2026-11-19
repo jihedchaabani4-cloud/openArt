@@ -255,18 +255,12 @@ function PromptBarPlatformInner({
     activeDialogSlot,
     activeDialogMode,
     dialogAnchorRef,
-    quickMentionOpen,
-    setQuickMentionOpen,
     mentionQuery,
     setMentionQuery,
-    quickMentionAnchorRef,
-    handleCloseQuickMention,
     handleOpenChangeDialog,
     handleOpenDialog,
     getSlotMaxRefs,
     handleTriggerMentionDialog,
-    handleSelectExistingReference,
-    handleOpenMediaLibraryFromMention,
     handleSelectMedia,
     handleRemoveReferenceItem,
     handleRemoveSlot,
@@ -296,11 +290,65 @@ function PromptBarPlatformInner({
 
   const hasAnyContent = Boolean(prompt?.trim()) || Boolean(hasReferences);
 
-  // Expand button only appears when input exceeds character threshold (gets filled: 60+ chars or newlines), or is already expanded
-  const EXPAND_THRESHOLD_CHARS = 60;
-  const canShowExpandButton = Boolean(
-    prompt && (prompt.trim().length >= EXPAND_THRESHOLD_CHARS || prompt.includes("\n"))
-  ) || isPromptExpanded;
+  const [isReferenceUnstacked, setIsReferenceUnstacked] = useState(false);
+  const hasFilledReferenceSlot = Boolean(
+    activeSlots &&
+      activeSlots.some((slot) => {
+        if (slot.role !== "reference") return false;
+        const backendKey = featureConfig?.resolveParameterMapping
+          ? featureConfig.resolveParameterMapping(currentModel, slot.role) || slot.role
+          : slot.role;
+        const items = getReferenceItems ? getReferenceItems(backendKey) : [];
+        return items.length > 0;
+      })
+  );
+  const showUnstackedReferenceTray = isReferenceUnstacked && hasFilledReferenceSlot;
+
+  useEffect(() => {
+    if (!hasFilledReferenceSlot && isReferenceUnstacked) {
+      setIsReferenceUnstacked(false);
+    }
+  }, [hasFilledReferenceSlot, isReferenceUnstacked]);
+
+  // Expand button only appears when input reaches a full line / wraps (or exceeds character threshold), or is already expanded
+  const EXPAND_THRESHOLD_CHARS = 45;
+  const [isInputLineFull, setIsInputLineFull] = useState(false);
+  const editorContainerRef = useRef(null);
+
+  useEffect(() => {
+    if (!prompt || !prompt.trim()) {
+      setIsInputLineFull(false);
+      return;
+    }
+    const container = editorContainerRef.current;
+    const editable = container?.querySelector('[contenteditable="true"]');
+    const p = editable?.querySelector("p") || editable;
+    if (p && p.clientWidth > 0 && typeof document.createRange === "function") {
+      try {
+        const range = document.createRange();
+        range.selectNodeContents(p);
+        const rects = range.getClientRects();
+        const boxRect = range.getBoundingClientRect();
+        const reachedFullLine =
+          rects.length > 1 ||
+          boxRect.height > 30 ||
+          boxRect.width >= p.clientWidth - 20 ||
+          prompt.includes("\n");
+        setIsInputLineFull(reachedFullLine);
+        return;
+      } catch {
+        // fallback below
+      }
+    }
+    setIsInputLineFull(
+      prompt.trim().length >= EXPAND_THRESHOLD_CHARS || prompt.includes("\n")
+    );
+  }, [prompt, activeSlots?.length]);
+
+  const canShowExpandButton =
+    isInputLineFull ||
+    Boolean(prompt && (prompt.trim().length >= EXPAND_THRESHOLD_CHARS || prompt.includes("\n"))) ||
+    isPromptExpanded;
 
   const handleClearAll = useCallback(() => {
     setPrompt("");
@@ -326,17 +374,17 @@ function PromptBarPlatformInner({
     if (!drawerOpen) return;
 
     const handleClickOutside = (event) => {
-      if (containerRef?.current && containerRef.current.contains(event.target)) {
-        return;
-      }
+      // Keep open if clicking the tune button (its onClick handles toggle)
       if (tuneButtonRef?.current && tuneButtonRef.current.contains(event.target)) {
         return;
       }
+      // Keep open if clicking inside the settings overlay card
       if (settingsOverlayRef?.current && settingsOverlayRef.current.contains(event.target)) {
         return;
       }
+      // Keep open if selecting from dropdowns / popovers (e.g. Model, Resolution selectors)
       const isPortalClick = event.target.closest?.(
-        "[data-radix-popper-content-wrapper], [role='dialog'], [role='listbox'], .radix-portal, [data-portal]"
+        "[data-radix-popper-content-wrapper], [data-slot='popover-content'], [role='dialog'], [role='listbox'], .radix-portal, [data-portal]"
       );
       if (isPortalClick) {
         return;
@@ -351,10 +399,10 @@ function PromptBarPlatformInner({
       }
     };
 
-    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("pointerdown", handleClickOutside, true);
     window.addEventListener("keydown", handleKeyDown);
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("pointerdown", handleClickOutside, true);
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [drawerOpen]);
@@ -362,12 +410,6 @@ function PromptBarPlatformInner({
   // ── Top Panel Zone (H5) ─────────────────────────────────────────────────────
   const topPanelZone = (
     <PromptBarTopPanel
-      quickMentionOpen={quickMentionOpen}
-      quickMentionAnchorRef={quickMentionAnchorRef}
-      onCloseQuickMention={handleCloseQuickMention}
-      activeReferences={activeReferences}
-      onSelectReference={handleSelectExistingReference}
-      onOpenMediaLibrary={handleOpenMediaLibraryFromMention}
       mentionQuery={mentionQuery}
       dialogOpen={dialogOpen}
       onOpenChangeDialog={handleOpenChangeDialog}
@@ -433,104 +475,143 @@ function PromptBarPlatformInner({
       }
     >
 
-      {/* ── Top Row: Reference & Media Slots (left) + Corner Expand/Collapse Button (right) ─── */}
-      <div className="flex items-start justify-between gap-1.5 w-full">
-        <PromptBarSlotsRow
-          activeSlots={activeSlots}
-          featureConfig={featureConfig}
-          currentModel={currentModel}
-          paramValues={paramValues}
-          dialogAnchorRef={dialogAnchorRef}
-          getReferenceItems={getReferenceItems}
-          getSlotMaxRefs={getSlotMaxRefs}
-          calculateUsedImages={calculateUsedImages}
-          handleRemoveReferenceItem={handleRemoveReferenceItem}
-          handleOpenDialog={handleOpenDialog}
-          setParameter={setParameter}
-          handleRemoveSlot={handleRemoveSlot}
-          showSwap={showSwap}
-          swapEnabled={swapEnabled}
-          handleSwapFrames={handleSwapFrames}
-        />
-        <div className="ml-auto shrink-0 self-start flex items-center gap-1">
-          <AnimatePresence>
-            {hasAnyContent && (
-              <motion.div
-                key="clear-all-btn"
-                initial={{ opacity: 0, scale: 0.85 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.85 }}
-                transition={{ duration: 0.15 }}
-              >
-                <IconButton
-                  variant="ghost"
-                  aria-label="Effacer tout"
-                  title="Effacer tout (texte et références)"
-                  onClick={handleClearAll}
-                  className="size-8 p-0 border-0 flex items-center justify-center shrink-0 cursor-pointer text-white/70 hover:text-white transition-colors"
-                >
-                  <GoogleIcon
-                    iconName="close"
-                    className="text-base leading-none"
-                  />
-                </IconButton>
-              </motion.div>
-            )}
-            {canShowExpandButton && (
-              <motion.div
-                key="expand-btn"
-                initial={{ opacity: 0, scale: 0.85 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.85 }}
-                transition={{ duration: 0.15 }}
-              >
-                <IconButton
-                  variant="ghost"
-                  aria-label={isPromptExpanded ? "Réduire le champ de saisie" : "Agrandir le champ de saisie"}
-                  title={isPromptExpanded ? "Collapse prompt input" : "Expand prompt input"}
-                  onClick={() => setIsPromptExpanded((v) => !v)}
-                  className={cn(
-                    "size-8 p-0 border-0 flex items-center justify-center shrink-0 cursor-pointer text-white/70 hover:text-white transition-colors",
-                    isPromptExpanded && "is-active bg-white/10 text-white"
+      {/* ── Main Row: Reference Slots + Vertical Gradient Divider + Prompt Input (on the same line) ─── */}
+      <div className="flex gap-2 w-full">
+        <fieldset
+          data-source="reference"
+          className={cn(
+            "relative grid min-w-0 flex-1 overflow-hidden rounded-[var(--radius-2xl)] bg-[color:var(--white-5)] transition-[height] duration-200 ease-out",
+            showUnstackedReferenceTray
+              ? "min-h-17 h-auto"
+              : isPromptExpanded
+                ? "h-44"
+                : "h-17"
+          )}
+        >
+          <legend className="sr-only">(Optional) Add a reference</legend>
+          <div className="col-start-1 row-start-1 relative flex min-w-0 items-center gap-1.5 p-1.5 h-full">
+            <PromptBarSlotsRow
+              activeSlots={activeSlots}
+              featureConfig={featureConfig}
+              currentModel={currentModel}
+              paramValues={paramValues}
+              dialogAnchorRef={dialogAnchorRef}
+              getReferenceItems={getReferenceItems}
+              getSlotMaxRefs={getSlotMaxRefs}
+              calculateUsedImages={calculateUsedImages}
+              handleRemoveReferenceItem={handleRemoveReferenceItem}
+              handleOpenDialog={handleOpenDialog}
+              setParameter={setParameter}
+              handleRemoveSlot={handleRemoveSlot}
+              showSwap={showSwap}
+              swapEnabled={swapEnabled}
+              handleSwapFrames={handleSwapFrames}
+              isReferenceUnstacked={showUnstackedReferenceTray}
+              onToggleReferenceUnstacked={setIsReferenceUnstacked}
+            />
+
+            <motion.div
+              aria-hidden={showUnstackedReferenceTray || undefined}
+              animate={{
+                opacity: showUnstackedReferenceTray ? 0 : 1,
+                x: showUnstackedReferenceTray ? 16 : 0,
+                filter: showUnstackedReferenceTray ? "blur(3px)" : "blur(0px)",
+              }}
+              transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+              className={cn(
+                "flex min-w-0 items-center gap-1.5",
+                showUnstackedReferenceTray
+                  ? "pointer-events-none absolute inset-y-1.5 right-1.5 left-20"
+                  : "flex-1 h-full"
+              )}
+            >
+              {activeSlots && activeSlots.length > 0 && layout.showPromptInput && (
+                <div
+                  aria-hidden="true"
+                  className="self-stretch my-1 w-px shrink-0 bg-gradient-to-b from-transparent via-[color:var(--border-subtle)] to-transparent"
+                />
+              )}
+
+              {layout.showPromptInput && (
+                <div className="min-w-0 flex-1 h-full flex flex-col justify-center px-1.5 py-0.5 overflow-hidden">
+                  <div ref={editorContainerRef} className="flex-1 min-h-0 overflow-y-auto custom-scrollbar">
+                    <PromptEditor
+                      value={prompt}
+                      onChange={setPrompt}
+                      onSubmit={handleGenerate}
+                      referenceImages={activeReferences}
+                      onTriggerMentionDialog={handleTriggerMentionDialog}
+                      onMentionQueryChange={setMentionQuery}
+                      mentionOpen={dialogOpen}
+                      placeholder="Describe what you want to create..."
+                      focusRequest={focusRequest}
+                      fillNonce={promptFillNonce}
+                      plugins={editorPlugins}
+                      isExpanded={isPromptExpanded}
+                    />
+                  </div>
+                </div>
+              )}
+
+              <div className="ml-auto shrink-0 self-start flex items-center gap-0.5">
+                <AnimatePresence>
+                  {hasAnyContent && (
+                    <motion.div
+                      key="clear-all-btn"
+                      initial={{ opacity: 0, scale: 0.85 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.85 }}
+                      transition={{ duration: 0.15 }}
+                    >
+                      <IconButton
+                        variant="ghost"
+                        aria-label="Effacer tout"
+                        title="Effacer tout (texte et références)"
+                        onClick={handleClearAll}
+                        className="size-7 p-0 border-0 flex items-center justify-center shrink-0 cursor-pointer text-white/70 hover:text-white transition-colors"
+                      >
+                        <GoogleIcon
+                          iconName="close"
+                          className="text-base leading-none"
+                        />
+                      </IconButton>
+                    </motion.div>
                   )}
-                >
-                  <GoogleIcon
-                    iconName={isPromptExpanded ? "close_fullscreen" : "open_in_full"}
-                    className="text-base leading-none"
-                  />
-                </IconButton>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+
+                  {layout.showPromptInput && canShowExpandButton && (
+                    <motion.div
+                      key="expand-btn"
+                      initial={{ opacity: 0, scale: 0.85 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.85 }}
+                      transition={{ duration: 0.15 }}
+                    >
+                      <IconButton
+                        variant="ghost"
+                        aria-label={isPromptExpanded ? "Réduire le champ de saisie" : "Agrandir le champ de saisie"}
+                        title={isPromptExpanded ? "Collapse prompt input" : "Expand prompt input"}
+                        onClick={() => setIsPromptExpanded((v) => !v)}
+                        className={cn(
+                          "size-7 p-0 border-0 flex items-center justify-center shrink-0 cursor-pointer text-white/70 hover:text-white transition-colors",
+                          isPromptExpanded && "is-active bg-white/10 text-white"
+                        )}
+                      >
+                        <GoogleIcon
+                          iconName={isPromptExpanded ? "close_fullscreen" : "open_in_full"}
+                          className="text-base leading-none"
+                        />
+                      </IconButton>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </motion.div>
+          </div>
+        </fieldset>
       </div>
 
-      {/* ── Prompt Input & Controls Row (on the same line) ─── */}
-      <div className="flex items-end gap-2 w-full">
-        {layout.showPromptInput && (
-          <motion.div
-            animate={{ height: isPromptExpanded ? 200 : 38 }}
-            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-            className="flex-1 min-w-0 ds-composer-well ds-input-ghost bg-transparent border-none shadow-none px-1 py-0.5 overflow-hidden"
-          >
-            <PromptEditor
-              value={prompt}
-              onChange={setPrompt}
-              onSubmit={handleGenerate}
-              referenceImages={activeReferences}
-              onTriggerMentionDialog={handleTriggerMentionDialog}
-              onMentionQueryChange={setMentionQuery}
-              mentionOpen={quickMentionOpen || dialogOpen}
-              placeholder="Describe what you want to create..."
-              focusRequest={focusRequest}
-              fillNonce={promptFillNonce}
-              plugins={editorPlugins}
-              isExpanded={isPromptExpanded}
-            />
-          </motion.div>
-        )}
-
-        {/* ── Controls (Settings Dropdown Trigger + Send Button) ─── */}
+      {/* ── Bottom Controls Row (Settings Dropdown Trigger + Send Button) ─── */}
+      <div className="flex items-center justify-end gap-2 w-full">
         <PromptBarControlsRow
           renderRightActions={renderRightActions}
           isGenerating={isGenerating}
@@ -541,7 +622,6 @@ function PromptBarPlatformInner({
             setDrawerOpen((v) => {
               const next = !v;
               if (next) {
-                setQuickMentionOpen(false);
                 setDialogOpen(false);
               }
               return next;
@@ -576,7 +656,7 @@ function PromptBarPlatformInner({
   return (
     <div
       ref={containerRef}
-      className="absolute bottom-8 left-1/2 -translate-x-1/2 z-50 w-full max-w-[650px] px-6 flex flex-col items-center gap-2 pointer-events-none"
+      className="absolute bottom-8 left-1/2 -translate-x-1/2 z-50 w-full max-w-150 px-6 flex flex-col items-center gap-2 pointer-events-none"
     >
       {topPanelZone}
       <div className="w-full pointer-events-auto">

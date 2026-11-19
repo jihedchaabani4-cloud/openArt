@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { cn } from "@/shared/lib/utils";
 import { GoogleIcon } from "@/components/primitives/GoogleIcon";
 import { Button } from "@/components/base/button";
+import { ButtonGroup } from "@/components/primitives/button-group";
 import { Switch } from "@/components/base/switch";
 import { Slider } from "@/components/primitives/slider";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/primitives/popover";
@@ -76,7 +77,7 @@ export function FlowSelect({
           <Button
             type="button"
             variant="dropdown-card"
-            className="w-full justify-between bg-white/10 hover:bg-white/15"
+            className="w-full h-[50px] justify-between bg-ui-button-tonal hover:bg-surface-tonal-hover rounded-[10px]"
             aria-label={ariaLabel || label || displayValue}
             data-state={open ? "open" : "closed"}
           >
@@ -84,9 +85,9 @@ export function FlowSelect({
               {icon}
               <span className="flex min-w-0 flex-col items-start gap-0.5 font-medium">
                 {label && (
-                  <span className="text-xs leading-[15px] text-white/50">{label}</span>
+                  <span className="text-xs leading-[15px] text-text-secondary">{label}</span>
                 )}
-                <span className="max-w-full truncate text-sm leading-[17px] text-white font-medium">
+                <span className="max-w-full truncate text-sm leading-[17px] text-text-primary font-medium">
                   {displayValue}
                 </span>
               </span>
@@ -96,7 +97,7 @@ export function FlowSelect({
               fill="currentColor"
               aria-hidden="true"
               className={cn(
-                "size-4 shrink-0 text-white/50 transition-transform duration-150 ease-out",
+                "size-4 shrink-0 text-icon-secondary transition-transform duration-150 ease-out",
                 open && "rotate-90"
               )}
             >
@@ -113,12 +114,12 @@ export function FlowSelect({
           sideOffset={sideOffset}
           collisionPadding={16}
           avoidCollisions
-          className="z-[99999] max-h-[240px] overflow-y-auto overflow-x-hidden p-0 font-sans antialiased bg-[color:var(--ui-menu-background)] text-white border border-white/10 rounded-xl shadow-2xl"
+          className="z-[99999] max-h-[240px] overflow-y-auto overflow-x-hidden font-sans antialiased bg-ui-menu-background p-2 [--blur:40px] text-text-primary border border-border-weak rounded-[var(--radius-3xl)] shadow-2xl"
           style={{
             width: `${width}px`,
           }}
         >
-          <div className="overflow-hidden p-[6px] flex flex-col gap-1 w-full" role="group">
+          <div className="overflow-hidden flex flex-col gap-1 w-full" role="group">
             {items.map((item) => {
               const isSelected = String(value) === String(item.value);
 
@@ -133,10 +134,10 @@ export function FlowSelect({
                     setOpen(false);
                   }}
                   className={cn(
-                    "relative flex gap-2 select-none items-center py-1.5 outline-none min-h-8 rounded-lg px-2 text-sm font-medium cursor-pointer transition-colors duration-150 ease-out",
+                    "relative flex gap-2 select-none items-center py-1.5 outline-none min-h-8 rounded-[10px] px-2 text-sm font-medium cursor-pointer transition-colors duration-150 ease-out",
                     isSelected
-                      ? "bg-white/15 text-white ring-1 ring-inset ring-white/30 hover:bg-white/20"
-                      : "bg-transparent text-white/80 hover:bg-white/10 hover:text-white"
+                      ? "bg-white-15 text-text-primary ring-1 ring-inset ring-border-heavy hover:bg-ui-button-active"
+                      : "bg-transparent text-text-body-muted hover:bg-ui-button-tonal hover:text-text-primary"
                   )}
                 >
                   <svg
@@ -147,7 +148,7 @@ export function FlowSelect({
                     xmlns="http://www.w3.org/2000/svg"
                     className={cn(
                       "mr-2 h-4 w-4 shrink-0 transition-opacity duration-150",
-                      isSelected ? "opacity-100 text-white" : "opacity-0"
+                      isSelected ? "opacity-100 text-text-primary" : "opacity-0"
                     )}
                   >
                     <path
@@ -196,7 +197,6 @@ function FlowParamSelect({ paramKey, def, value, onChange }) {
       value={value ?? def.default}
       onChange={(newVal) => onChange?.(paramKey, newVal)}
       items={items}
-      icon={<GoogleIcon iconName={getParamIcon()} className="text-[16px] text-white/60 shrink-0" />}
       label={paramTitle}
       displayValue={displayValue}
       width={220}
@@ -251,6 +251,14 @@ export function FlowPromptBoxSettings({
     if (!availableSubModes || availableSubModes.length === 0) return all;
     return all.filter((s) => availableSubModes.includes(s.value));
   }, [availableSubModes]);
+
+  const currentModeOption = useMemo(() => {
+    return modeOptions.find((m) => m.value === activeMode) || modeOptions[0];
+  }, [modeOptions, activeMode]);
+
+  const currentSubModeOption = useMemo(() => {
+    return subModeOptions.find((s) => s.value === activeSubMode) || subModeOptions[0];
+  }, [subModeOptions, activeSubMode]);
 
   // Ratio Parameter detection (from parameters array or currentModel)
   const ratioParamEntry = useMemo(() => {
@@ -328,19 +336,19 @@ export function FlowPromptBoxSettings({
     <div
       data-slot="prompt-box-settings"
       className={cn(
-        "settings-content-overlay flow-prompt-box-settings block box-border w-[var(--prompt-box-settings-width,18rem)] rounded-2xl p-2.5",
-        "bg-[color:var(--ui-menu-background)] border border-white/10 shadow-2xl",
-        "text-white select-none font-sans antialiased",
+        "settings-content-overlay flow-prompt-box-settings block box-border w-[var(--prompt-box-settings-width,18rem)] rounded-[var(--radius-3xl)]",
+        "bg-ui-menu-background p-2 [--blur:40px] border border-border-weak shadow-2xl",
+        "text-text-primary select-none font-sans antialiased",
         className
       )}
     >
-      <div className="settings-content flex flex-col gap-2">
+      <div className="settings-content flex flex-col gap-1">
         {/* ── 1. MODE TOGGLES ── */}
         {hasModes && modeOptions.length > 0 && (
           <div
             role="radiogroup"
             aria-label="Mode"
-            className="flex items-center gap-1 p-1 bg-white/5 border border-white/10 rounded-xl w-full"
+            className="flex items-center gap-1 p-0.5 bg-surface-card border border-border-weak rounded-xl w-full"
           >
             {modeOptions.map((opt) => {
               const isChecked = activeMode === opt.value;
@@ -348,15 +356,16 @@ export function FlowPromptBoxSettings({
                 <Button
                   key={opt.value}
                   type="button"
-                  variant={isChecked ? "secondary" : "ghost"}
+                  variant="segmented"
                   onClick={() => onModeChange?.(opt.value)}
                   role="radio"
+                  aria-pressed={isChecked}
                   aria-checked={isChecked}
-                  className="flex-1 rounded-lg text-xs h-8"
+                  className="flex-1 rounded-[10px] text-xs h-[34px]"
                 >
                   <GoogleIcon
                     iconName={opt.icon}
-                    className="text-[16px] leading-none text-white"
+                    className="!text-[16px] leading-none text-icon-primary"
                   />
                   <span>{opt.label}</span>
                 </Button>
@@ -370,7 +379,7 @@ export function FlowPromptBoxSettings({
           <div
             role="radiogroup"
             aria-label="Type de vidéo"
-            className="flex items-center gap-1 p-1 bg-white/5 border border-white/10 rounded-xl w-full"
+            className="flex items-center gap-1 p-0.5 bg-surface-card border border-border-weak rounded-xl w-full"
           >
             {subModeOptions.map((opt) => {
               const isChecked = activeSubMode === opt.value;
@@ -378,15 +387,16 @@ export function FlowPromptBoxSettings({
                 <Button
                   key={opt.value}
                   type="button"
-                  variant={isChecked ? "secondary" : "ghost"}
+                  variant="segmented"
                   onClick={() => onSubModeChange?.(opt.value)}
                   role="radio"
+                  aria-pressed={isChecked}
                   aria-checked={isChecked}
-                  className="flex-1 rounded-lg text-xs h-8"
+                  className="flex-1 rounded-[10px] text-xs h-[34px]"
                 >
                   <GoogleIcon
                     iconName={opt.icon}
-                    className="text-[16px] leading-none text-white"
+                    className="!text-[16px] leading-none text-icon-primary"
                   />
                   <span>{opt.label}</span>
                 </Button>
@@ -400,7 +410,10 @@ export function FlowPromptBoxSettings({
           <div
             role="radiogroup"
             aria-label="Format"
-            className="flex flex-wrap items-center gap-1 p-1 bg-white/5 border border-white/10 rounded-xl w-full"
+            style={{
+              gridTemplateColumns: `repeat(${Math.min(ratioOptions.length, 5)}, minmax(0, 1fr))`,
+            }}
+            className="grid gap-1 p-0.5 bg-surface-card border border-border-weak rounded-xl w-full"
           >
             {ratioOptions.map((ratio) => {
               const isChecked = currentRatio === ratio;
@@ -410,17 +423,20 @@ export function FlowPromptBoxSettings({
                 <Button
                   key={ratio}
                   type="button"
-                  variant={isChecked ? "secondary" : "ghost"}
+                  variant="segmented"
                   onClick={() => handleRatioClick(ratio)}
                   role="radio"
+                  aria-pressed={isChecked}
                   aria-checked={isChecked}
-                  className="flex-1 min-w-[44px] h-[52px] flex-col gap-1 p-1 rounded-lg"
+                  className="w-full min-w-0 !h-[34px] flex-col !gap-0.5 !py-0.5 !px-1 rounded-[10px]"
                 >
                   <GoogleIcon
                     iconName={iconName}
-                    className="text-[18px] leading-none text-white"
+                    className="!text-[14px] leading-none text-icon-primary"
                   />
-                  <span className="text-[11px] leading-tight text-white">{ratio}</span>
+                  <span className="text-[10px] leading-none font-medium text-text-primary">
+                    {ratio}
+                  </span>
                 </Button>
               );
             })}
@@ -429,7 +445,7 @@ export function FlowPromptBoxSettings({
 
         {/* ── 3. DYNAMIC PARAMETERS (Quality, Video Resolution, Duration, etc.) ── */}
         {otherParams.length > 0 && (
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-1">
             {otherParams.map(([key, def]) => {
               const val = paramValues[key];
 
@@ -463,7 +479,7 @@ export function FlowPromptBoxSettings({
                     role="radiogroup"
                     aria-label={def.label || key}
                     className={cn(
-                      "p-1 bg-white/5 border border-white/10 rounded-xl w-full max-w-full",
+                      "p-0.5 bg-surface-card border border-border-weak rounded-xl w-full max-w-full",
                       isGrid ? cn("grid", gridColsClass, "gap-1") : "flex items-center gap-1"
                     )}
                   >
@@ -483,22 +499,23 @@ export function FlowPromptBoxSettings({
                         <Button
                           key={String(itemVal)}
                           type="button"
-                          variant={isChecked ? "secondary" : "ghost"}
+                          variant="segmented"
                           onClick={() => onParamChange?.(key, itemVal)}
                           role="radio"
+                          aria-pressed={isChecked}
                           aria-checked={isChecked}
                           aria-description={infoText || undefined}
-                          className={cn(!isGrid ? "flex-1" : undefined, "rounded-lg text-xs h-8")}
+                          className={cn(!isGrid ? "flex-1" : undefined, "rounded-[10px] text-xs h-[34px]")}
                         >
                           <span className="flex items-center justify-center gap-1 truncate w-full text-center">
-                            <span className="truncate text-white">{itemLabel}</span>
+                            <span className="truncate text-text-primary">{itemLabel}</span>
                             {hasInfo && (
                               <GoogleIcon
                                 iconName="info"
                                 role="img"
                                 aria-hidden={false}
                                 aria-label={infoText}
-                                className="text-[14px] text-white hover:text-white"
+                                className="text-[14px] text-icon-primary hover:text-text-primary"
                               />
                             )}
                           </span>
@@ -513,8 +530,8 @@ export function FlowPromptBoxSettings({
               if (def.type === "boolean") {
                 const isChecked = Boolean(val);
                 return (
-                  <div key={key} className="flex items-center justify-between px-3 py-2 bg-white/5 border border-white/10 rounded-xl">
-                    <span className="text-xs text-white font-medium">
+                  <div key={key} className="flex items-center justify-between px-3 py-2 bg-surface-card border border-border-weak rounded-xl">
+                    <span className="text-xs text-text-primary font-medium">
                       {def.label || key}
                     </span>
                     <Switch
@@ -534,10 +551,10 @@ export function FlowPromptBoxSettings({
                 const numVal = val !== undefined && val !== null ? Number(val) : (def.default ?? min);
 
                 return (
-                  <div key={key} className="flex flex-col gap-1.5 p-2.5 bg-white/5 border border-white/10 rounded-xl">
+                  <div key={key} className="flex flex-col gap-1.5 p-2.5 bg-surface-card border border-border-weak rounded-xl">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="text-white font-medium">{def.label || key}</span>
-                      <span className="font-mono text-white/90 font-semibold tabular-nums">{numVal}</span>
+                      <span className="text-text-primary font-medium">{def.label || key}</span>
+                      <span className="font-mono text-text-primary-soft font-semibold tabular-nums">{numVal}</span>
                     </div>
                     <Slider
                       min={min}
@@ -577,24 +594,10 @@ export function FlowPromptBoxSettings({
                     }}
                   />
                 ) : (
-                  <GoogleIcon iconName={icon || "volume_up"} className="text-[16px] text-white shrink-0" />
+                  <GoogleIcon iconName={icon || "volume_up"} className="text-[16px] text-icon-primary shrink-0" />
                 ),
               };
             })}
-            icon={
-              currentModelIcon ? (
-                <img
-                  src={currentModelIcon}
-                  alt=""
-                  className="size-5 rounded-lg object-contain brightness-0 invert shrink-0"
-                  onError={(e) => {
-                    e.currentTarget.style.display = "none";
-                  }}
-                />
-              ) : (
-                <span className="text-[14px]">🍌</span>
-              )
-            }
             displayValue={currentModel?.name || "Model"}
             label="Model"
             width={240}
@@ -608,7 +611,7 @@ export function FlowPromptBoxSettings({
           <div
             role="radiogroup"
             aria-label="Nombre de sorties"
-            className="flex items-center gap-1 p-1 bg-white/5 border border-white/10 rounded-xl w-full"
+            className="grid grid-cols-4 gap-1 p-0.5 bg-surface-card border border-border-weak rounded-xl w-full"
           >
             {[1, 2, 3, 4].map((countVal) => {
               const isChecked = currentCount === countVal;
@@ -617,13 +620,14 @@ export function FlowPromptBoxSettings({
                 <Button
                   key={countVal}
                   type="button"
-                  variant={isChecked ? "secondary" : "ghost"}
+                  variant="segmented"
                   onClick={() => handleCountClick(countVal)}
                   role="radio"
+                  aria-pressed={isChecked}
                   aria-checked={isChecked}
-                  className="flex-1 rounded-lg text-xs h-8"
+                  className="w-full h-[34px] rounded-[10px]"
                 >
-                  <span className="font-semibold text-white">x{countVal}</span>
+                  {countVal}
                 </Button>
               );
             })}
@@ -633,13 +637,13 @@ export function FlowPromptBoxSettings({
         {/* ── 6. CREDIT COST LABEL ── */}
         {models && models.length > 0 && currentModel && (
           <div className="settings-credit-cost block text-center pt-1 pb-0.5">
-            <span className="credit-cost-label block text-xs text-white/50">
+            <span className="credit-cost-label block text-xs text-text-secondary">
               <span>
                 La génération utilisera{" "}
                 <a
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="credit-cost-link text-white underline underline-offset-2 hover:text-white/80 transition-colors font-medium"
+                  className="credit-cost-link text-text-primary underline underline-offset-2 hover:text-text-body-muted transition-colors font-medium"
                   href="https://support.google.com/googleone?p=g1_ai_credit_menu"
                 >
                   {displayCredits}&nbsp;{displayCredits === 1 ? "crédit" : "crédits"}
@@ -651,7 +655,7 @@ export function FlowPromptBoxSettings({
 
         {/* ── Empty notice if no models available for this mode ── */}
         {(!models || models.length === 0) && (
-          <div className="py-3 px-2 text-center text-xs text-white/60">
+          <div className="py-3 px-2 text-center text-xs text-text-secondary">
             Aucun modèle disponible
           </div>
         )}

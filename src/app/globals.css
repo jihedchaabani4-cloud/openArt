@@ -40,16 +40,19 @@
 }
 
 .custom-scrollbar {
-  -ms-overflow-style: none !important;
-  scrollbar-width: none !important;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.16) transparent;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-y: contain;
 }
 .custom-scrollbar::-webkit-scrollbar {
-  display: none !important;
-  width: 0 !important;
-  height: 0 !important;
-  background: transparent !important;
+  width: 6px;
+  height: 6px;
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.16);
+  border-radius: 9999px;
 }
 
 /* ── Button Height Utilities ── */
@@ -88,7 +91,12 @@
   --color-background: var(--body-bg);
   --color-foreground: rgb(var(--foreground));
   --color-bg-main: var(--bg-main);
+  --color-bg-editor: var(--bg-editor);
+  --color-bg-web: var(--bg-web);
+  --color-bg-agent: var(--bg-agent);
+  --color-web-panel: var(--web-panel);
   --color-ui-menu-background: var(--ui-menu-background);
+  --color-ui-menu-background-strong: var(--ui-menu-background-strong);
   --color-omni-bg: var(--omni-bg);
   --color-body-bg: var(--body-bg);
   --color-canvas-bg: var(--canvas-bg);
@@ -105,9 +113,20 @@
   --color-ring: hsl(var(--ring));
   --color-accent-yellow: var(--accent-yellow);
   --color-error: var(--error);
-  --color-button-tonal: var(--button-tonal);
-  --color-button-tonal-hover: var(--button-tonal-hover);
+  --color-button-tonal: var(--ui-button-tonal);
+  --color-button-tonal-hover: var(--ui-button-hover);
+  --color-ui-button-tonal: var(--ui-button-tonal);
+  --color-ui-button-tonal-disabled: var(--ui-button-tonal-disabled);
+  --color-ui-button-hover: var(--ui-button-hover);
+  --color-ui-button-active: var(--ui-button-active);
+  --color-ui-button-active-hover: var(--ui-button-active-hover);
+  --color-on-active: var(--on-active);
+  --color-ui-button-error: var(--ui-button-error);
+  --color-ui-button-error-hover: var(--ui-button-error-hover);
   --color-surface-card: var(--surface-card);
+  --color-surface-secondary: var(--surface-secondary);
+  --color-surface-tonal: var(--surface-tonal);
+  --color-surface-tonal-hover: var(--surface-tonal-hover);
   --color-prompt-bar-bg: var(--prompt-bar-bg);
   --color-popover: rgb(var(--popover));
   --color-popover-foreground: rgb(var(--popover-foreground));
@@ -120,7 +139,33 @@
   --color-accent-green: hsl(var(--accent-green));
   --color-bg-background: rgb(var(--bg-background));
   --color-border-primary: rgb(var(--border-primary));
-  --color-border-subtle: rgb(var(--border-subtle));
+  --color-border-subtle: var(--border-subtle);
+  --color-border-weak: var(--border-weak);
+  --color-border-strong: var(--border-strong);
+  --color-border-heavy: var(--border-heavy);
+  --color-border-pure: var(--border-pure);
+  --color-border-structural: var(--border-structural);
+  --color-text-primary: var(--text-primary);
+  --color-text-primary-soft: var(--text-primary-soft);
+  --color-text-primary-dark: var(--text-primary-dark);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-disabled: var(--text-disabled);
+  --color-text-body: var(--text-body);
+  --color-text-body-muted: var(--text-body-muted);
+  --color-text-inverse: var(--text-inverse);
+  --color-icon-primary: var(--icon-primary);
+  --color-icon-secondary: var(--icon-secondary);
+  --color-icon-disabled: var(--icon-disabled);
+  --color-white-5: var(--white-5);
+  --color-white-15: var(--white-15);
+  --color-grey-30: var(--grey-30);
+  --color-grey-50: var(--grey-50);
+  --color-grey-60: var(--grey-60);
+  --color-grey-90: var(--grey-90);
+  --color-fill-overlay: var(--fill-overlay);
+  --color-fill-overlay-dark: var(--fill-overlay-dark);
+  --color-fill-panel: var(--fill-panel);
+  --color-fill-light-tertiary: var(--fill-light-tertiary);
   --color-card-hover: rgb(var(--card-hover));
   --color-fill-disabled: rgb(var(--fill-disabled));
   --color-fill-hover: rgb(var(--fill-hover));
@@ -129,8 +174,16 @@
   --color-fill-tertiary: rgb(var(--fill-tertiary));
   --color-tertiary: rgb(var(--tertiary));
 
-  --font-sans: "Geist Sans", "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "Geist Mono", ui-monospace, Consolas, monospace;
+  --font-sans: var(--font-geist-sans), "Geist Sans", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), "Geist Mono", ui-monospace, Consolas, monospace;
+  --radius-button: var(--radius-button);
+  --radius-card: var(--radius-card);
+  --radius-control: var(--radius-control);
+  --radius-slot: var(--radius-slot);
+  --radius-preview: var(--radius-preview);
+  --radius-pill: var(--radius-pill);
+  --radius-3xl: var(--radius-3xl);
+  --rounded-buttons: 10px;
 }
 
 @keyframes scanShimmer {
@@ -162,11 +215,11 @@
     --accent-foreground: 0 0 0;
     --accent-green: 78, 92.3%, 59%;
     --accent-orange: 255 87 10;
-    --background: 26 26 26;
-    --bg-background: 26 26 26;
-    --border: 49 49 49;
+    --background: 18 18 18;
+    --bg-background: 18 18 18;
+    --border: 255 255 255 / 0.06;
     --border-primary: 141 141 141;
-    --border-subtle: 49 49 49;
+    --border-subtle: rgba(255, 255, 255, 0.06);
     --card: 68 68 68;
     --card-foreground: 255 255 255;
     --card-hover: 67 67 67;
@@ -194,11 +247,11 @@
     --tertiary: 118 118 118;
 
     /* --- Exact Surface & Background Tokens --- */
-    --body-bg: #1A1A1A;                              /* Root body & HTML background */
-    --canvas-bg: #1A1A1A;                            /* Canvas background */
-    --canvas-bg-80: rgba(26, 26, 26, 0.80);          /* Card bottom status overlay */
-    --omni-bg: #1A1A1A;                              /* App & Sidebar background */
-    --prompt-bar-bg: rgba(68, 68, 68, 0.50);          /* Prompt bar card background (#444444 / 50%) */
+    --body-bg: #121212;                              /* Root body & HTML background */
+    --canvas-bg: #121212;                            /* Canvas background */
+    --canvas-bg-80: rgba(18, 18, 18, 0.80);          /* Card bottom status overlay */
+    --omni-bg: #121212;                              /* App & Sidebar background */
+    --prompt-bar-bg: rgba(68, 68, 68, 0.50);         /* Prompt bar card background */
     --surface-secondary: #27272A;                    /* rgb(39, 39, 42) */
     --surface-nav-active: rgba(39, 39, 42, 0.50);    /* Active sidebar item */
     --surface-card: rgba(255, 255, 255, 0.05);       /* Composer & section cards */
@@ -208,7 +261,7 @@
     --surface-tonal-hover-strong: rgba(255, 255, 255, 0.18);
     --surface-glass-bg: rgba(68, 68, 68, 0.50);      /* Floating glass menu */
     --surface-badge-glass: rgba(48, 48, 48, 0.80);   /* bg-grey-400/80 badge */
-    --surface-listbox: rgba(36, 36, 38, 0.96);       /* Select listbox */
+    --surface-listbox: rgba(68, 68, 68, 0.50);       /* Select listbox */
     --surface-launcher: #2D2D2D;                     /* rgb(45, 45, 45) Intercom button */
 
     /* --- Exact Text & Icon Tokens --- */
@@ -224,7 +277,7 @@
 
     /* --- Borders, Dividers & Focus --- */
     --border-structural: #27272A;                    /* rgb(39, 39, 42) */
-    --border-subtle: rgba(255, 255, 255, 0.10);
+    --border-subtle: rgba(255, 255, 255, 0.06);
     --border-divider: rgba(255, 255, 255, 0.20);
     --border-dashed: rgba(255, 255, 255, 0.18);
     --focus-ring-workspace: rgba(255, 255, 255, 0.70);
@@ -237,8 +290,8 @@
     --error-badge: #E31B0C;                          /* rgb(227, 27, 12) — Counter pill */
 
     /* --- Typography & OpenType Features --- */
-    --font-geist-sans: "Geist Sans", ui-sans-serif, system-ui, sans-serif;
-    --font-geist-mono: "Geist Mono", ui-monospace, Consolas, monospace;
+    --font-sans: var(--font-geist-sans), "Geist Sans", "Inter", ui-sans-serif, system-ui, sans-serif;
+    --font-mono: var(--font-geist-mono), "Geist Mono", ui-monospace, Consolas, monospace;
 
     /* --- Border Radii Scale --- */
     --radius-badge: 6px;
@@ -248,8 +301,10 @@
     --radius-slot: 16px;
     --radius-tab-top: 20px;
     --radius-preview: 24px;
-    --radius-card: 28px;
+    --radius-3xl: 24px;
+    --radius-card: 24px;
     --radius-pill: 9999px;
+    --rounded-buttons: 10px;
 
     /* --- Blur & Transitions --- */
     --blur-glass: blur(40px);
@@ -578,11 +633,11 @@
 
     /* --- Extended Semantic Color & Surface Bindings --- */
     --border-color: #dddad7;
-    --surface-grain-opacity: .035;
-    --color-bg-main: #131213;
+    --surface-grain-opacity: 0;
+    --color-bg-main: #121212;
     --color-bg-agent: #1e1e1e;
     --color-bg-editor: #121212;
-    --color-bg-web: #1a1a1a;
+    --color-bg-web: #121212;
     --color-text-primary: #ffffff;
     --color-text-primary-dark: #18181b;
     --color-text-secondary: rgba(255, 255, 255, 0.50);
@@ -590,7 +645,7 @@
     --color-icon-primary: #ffffff;
     --color-icon-secondary: rgba(255, 255, 255, 0.50);
     --color-icon-disabled: rgba(255, 255, 255, 0.25);
-    --color-border-subtle: rgba(255, 255, 255, 0.10);
+    --color-border-subtle: rgba(255, 255, 255, 0.06);
     --color-border-weak: rgba(255, 255, 255, 0.08);
     --color-border-strong: rgba(255, 255, 255, 0.20);
     --color-border-heavy: rgba(255, 255, 255, 0.30);
@@ -603,19 +658,20 @@
     --color-fill-overlay-dark: rgba(0, 0, 0, 0.80);
     --color-fill-panel: rgba(255, 255, 255, 0.05);
     --color-fill-light-tertiary: rgba(255, 255, 255, 0.03);
-    --color-white-5: rgba(255, 255, 255, 0.05);
+    --color-white-5: rgba(255, 255, 255, 0.04);
     --color-white-15: rgba(255, 255, 255, 0.15);
     --color-ui-button-tonal: rgba(255, 255, 255, 0.10);
     --color-ui-button-tonal-disabled: rgba(255, 255, 255, 0.05);
-    --color-ui-button-hover: rgba(255, 255, 255, 0.15);
+    --color-ui-button-hover: rgba(255, 255, 255, 0.08);
     --color-ui-button-active: rgba(255, 255, 255, 0.20);
     --color-ui-button-active-hover: rgba(255, 255, 255, 0.25);
     --color-on-active: #ffffff;
     --color-ui-button-error: #cf4020;
     --color-ui-button-error-hover: #e5484d;
-    --color-ui-menu-background: #444444;
+    --color-ui-menu-background: rgba(68, 68, 68, 0.50);
     --color-ui-menu-background-strong: #1e1e1e;
-    --color-web-panel: #1a1a1a;
+    --blur: 40px;
+    --color-web-panel: #121212;
     --color-agent-foreground: #ffffff;
     --color-accent-red: #cf4020;
     --color-accent-red-light: #ff570a;
@@ -683,6 +739,7 @@
     --radius-md: 6px;
     --radius-button: 16px;
     --radius-xl: 10px;
+    --radius-3xl: 24px;
 
     /* --- Z-Index Layering Tokens --- */
     --z-local: 50;
@@ -731,24 +788,27 @@
   html {
     background-color: var(--omni-bg);
     color-scheme: dark;
+    font-family: var(--font-sans);
+    font-feature-settings: "calt", "ss01", "ss03", "ss04", "ss06", "ss08";
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    text-rendering: optimizeLegibility;
+    text-rendering: optimizelegibility;
   }
 
   body {
     background-color: var(--omni-bg);
     color: var(--text-body);
-    font-family: var(--font-geist-sans);
-    font-feature-settings: "ss01", "ss03", "ss04", "ss06", "ss08";
+    font-family: var(--font-sans);
+    font-feature-settings: "calt", "ss01", "ss03", "ss04", "ss06", "ss08";
     font-variant-alternates: styleset(ss01, ss03, ss04, ss06, ss08);
     line-height: 24px;
     -webkit-font-smoothing: antialiased;
+    text-rendering: optimizelegibility;
     overscroll-behavior: none;
   }
 
   code, pre, kbd, samp {
-    font-family: var(--font-geist-mono);
+    font-family: var(--font-mono);
   }
 
   input[type="search"]::-webkit-search-decoration,
@@ -766,25 +826,47 @@
 @layer utilities {
   .bg-main { background-color: var(--bg-main); }
   .bg-bg-main { background-color: var(--bg-main); }
+  .bg-bg-editor { background-color: var(--bg-editor); }
+  .bg-bg-web { background-color: var(--bg-web); }
   .bg-omni-bg { background-color: var(--omni-bg); }
   .bg-body-root { background-color: var(--body-bg); }
   .bg-canvas-deep { background-color: var(--canvas-bg); }
   .text-unsaved { color: var(--text-unsaved); }
   .bg-error { background-color: var(--error); }
 
-  .surface-glass {
-    background-color: var(--surface-glass-bg);
-    -webkit-backdrop-filter: var(--blur-glass);
-    backdrop-filter: var(--blur-glass);
+  /* Reference SaaS Typography Scale */
+  .text-h4 { font-size: 36px; font-weight: 600; line-height: 39.6px; }
+  .text-h5 { font-size: 24px; font-weight: 600; line-height: 28.8px; }
+  .text-h6 { font-size: 18px; font-weight: 600; line-height: 21.8px; }
+  .text-section-sm { font-size: 14px; font-weight: 500; line-height: 18px; }
+  .text-label-lg { font-size: 18px; font-weight: 500; line-height: 22px; }
+  .text-label-md { font-size: 16px; font-weight: 500; line-height: 20px; }
+  .text-label-sm { font-size: 14px; font-weight: 500; line-height: 17px; }
+  .text-label-xs { font-size: 12px; font-weight: 500; line-height: 15px; }
+  .text-button-sm { font-size: 14px; font-weight: 500; line-height: 17px; }
+  .text-button-xs { font-size: 12px; font-weight: 500; line-height: 15px; }
+  .text-body-md { font-size: 16px; font-weight: 400; line-height: 24px; }
+  .text-body-sm { font-size: 14px; font-weight: 400; line-height: 22px; }
+  .text-body-xs { font-size: 12px; font-weight: 400; line-height: 19px; }
+
+  .surface-glass,
+  .surface-menu {
+    --blur: 40px;
+    background-color: var(--ui-menu-background);
+    -webkit-backdrop-filter: blur(var(--blur, 40px));
+    backdrop-filter: blur(var(--blur, 40px));
     border: 1px solid var(--border-subtle);
+    padding: 8px;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
   }
 
   .surface-listbox {
-    background-color: var(--surface-listbox);
-    -webkit-backdrop-filter: var(--blur-glass);
-    backdrop-filter: var(--blur-glass);
+    --blur: 40px;
+    background-color: var(--ui-menu-background);
+    -webkit-backdrop-filter: blur(var(--blur, 40px));
+    backdrop-filter: blur(var(--blur, 40px));
     border: 1px solid var(--border-subtle);
+    padding: 8px;
   }
 
   /* Dual Focus Strategy */
@@ -1017,6 +1099,74 @@
     background-color: var(--surface-nav-active);
   }
 
+  /* --- Pop Animation for Segmented / Radiogroup Buttons --- */
+  @keyframes buttonPop {
+    0% {
+      transform: scale(0.96);
+    }
+    50% {
+      transform: scale(1.04);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+
+  .animate-button-pop {
+    animation: buttonPop 220ms cubic-bezier(0.2, 0.9, 0.3, 1.2) forwards;
+  }
+
+  .ds-pop-press {
+    transition: transform 150ms cubic-bezier(0, 0, 0.2, 1), background-color 150ms cubic-bezier(0, 0, 0.2, 1), color 150ms cubic-bezier(0, 0, 0.2, 1);
+  }
+  .ds-pop-press:active:not(:disabled) {
+    transform: scale(0.96);
+  }
+  .ds-pop-press[aria-selected="true"],
+  .ds-pop-press[aria-pressed="true"],
+  .ds-pop-press[aria-checked="true"],
+  .ds-pop-press[data-state="active"] {
+    animation: buttonPop 220ms cubic-bezier(0.2, 0.9, 0.3, 1.2);
+  }
+
+  .ds-btn-segmented {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 34px;
+    min-width: 0;
+    border-radius: var(--rounded-buttons, 10px);
+    border: 0;
+    padding: 0;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background-color 150ms cubic-bezier(0, 0, 0.2, 1), color 150ms cubic-bezier(0, 0, 0.2, 1), transform 150ms cubic-bezier(0, 0, 0.2, 1);
+  }
+  .ds-btn-segmented:active {
+    transform: scale(0.96);
+  }
+  .ds-btn-segmented[aria-pressed="true"],
+  .ds-btn-segmented[aria-checked="true"],
+  .ds-btn-segmented[data-state="active"],
+  .ds-btn-segmented[data-state="on"] {
+    background-color: var(--surface-secondary);
+    color: var(--text-primary);
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.12);
+    animation: buttonPop 220ms cubic-bezier(0.2, 0.9, 0.3, 1.2);
+  }
+  .ds-btn-segmented[aria-pressed="false"],
+  .ds-btn-segmented[aria-checked="false"] {
+    background-color: transparent;
+    color: var(--text-secondary);
+  }
+  .ds-btn-segmented:hover:not([aria-pressed="true"]):not([aria-checked="true"]) {
+    background-color: var(--surface-tonal);
+    color: var(--text-primary);
+  }
+
   /* --- Dropdown Card Button Variant --- */
   .ds-btn-dropdown-card {
     position: relative;
@@ -1030,7 +1180,7 @@
     gap: 8px;
     overflow: hidden;
     white-space: nowrap;
-    border-radius: 10px;
+    border-radius: var(--rounded-buttons, 10px);
     border: 0;
     background-color: var(--surface-tonal);
     padding: 0 12px;
@@ -1132,7 +1282,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: space-between;
-    height: 38px;
+    height: 50px;
     width: 200px;
     padding: 0 16px 0 20px;
     border-radius: var(--radius-pill);
@@ -1232,31 +1382,45 @@
   .bg-ui-menu-background,
   .bg-\[color\:var\(--ui-menu-background\)\] {
     background-color: var(--ui-menu-background);
+    -webkit-backdrop-filter: blur(var(--blur, 40px));
+    backdrop-filter: blur(var(--blur, 40px));
   }
 
   .bg-ui-menu-background\/30,
   .bg-\[color\:var\(--ui-menu-background\)\]\/30 {
     background-color: color-mix(in srgb, var(--ui-menu-background) 30%, transparent);
+    -webkit-backdrop-filter: blur(var(--blur, 40px));
+    backdrop-filter: blur(var(--blur, 40px));
   }
 
   .bg-ui-menu-background\/70,
   .bg-\[color\:var\(--ui-menu-background\)\]\/70 {
     background-color: color-mix(in srgb, var(--ui-menu-background) 70%, transparent);
+    -webkit-backdrop-filter: blur(var(--blur, 40px));
+    backdrop-filter: blur(var(--blur, 40px));
   }
 
   .bg-ui-menu-background\/90,
   .bg-\[color\:var\(--ui-menu-background\)\]\/90 {
     background-color: color-mix(in srgb, var(--ui-menu-background) 90%, transparent);
+    -webkit-backdrop-filter: blur(var(--blur, 40px));
+    backdrop-filter: blur(var(--blur, 40px));
+  }
+
+  .rounded-3xl,
+  .rounded-\[var\(--radius-3xl\)\] {
+    border-radius: var(--radius-3xl);
   }
 
   .ds-composer-card {
-    border-radius: var(--radius-card);
-    background-color: color-mix(in srgb, var(--ui-menu-background) 70%, transparent);
+    --blur: 40px;
+    border-radius: var(--radius-3xl);
+    background-color: var(--ui-menu-background);
     -webkit-backdrop-filter: blur(var(--blur, 40px));
     backdrop-filter: blur(var(--blur, 40px));
-    border: none !important;
-    box-shadow: none !important;
-    outline: none !important;
+    border: 1px solid var(--border-weak);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+    outline: none;
     padding: 8px;
   }
 
@@ -1407,18 +1571,18 @@
 
   .ds-input-ghost {
     border-radius: var(--radius-button);
-    background-color: color-mix(in srgb, #ffffff 5%, transparent);
+    background-color: rgba(255, 255, 255, 0.04);
     border: none;
     outline: none;
     color: var(--text-primary);
     transition: background-color 150ms var(--ease-standard);
   }
   .ds-input-ghost:hover {
-    background-color: color-mix(in srgb, #ffffff 20%, transparent);
+    background-color: rgba(255, 255, 255, 0.08);
   }
   .ds-input-ghost:focus,
   .ds-input-ghost:focus-within {
-    background-color: color-mix(in srgb, #ffffff 20%, transparent);
+    background-color: rgba(255, 255, 255, 0.08);
     outline: none;
   }
 
@@ -1521,6 +1685,12 @@
     border: 1px solid var(--border-subtle);
     color: var(--text-primary);
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  }
+
+  .settings-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
   }
 }
 

@@ -32,10 +32,10 @@ const EmptyState = () => (
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-            className="flex flex-col items-center gap-4"
+            className="flex flex-col items-center gap-3 px-8 py-6 rounded-2xl border border-dashed border-white/[0.08]"
         >
             <div className="flex flex-col items-center gap-1">
-                <p className="text-[18px] text-white/35 font-normal tracking-wide text-center">
+                <p className="text-[18px] text-white/60 font-normal tracking-wide text-center">
                     Start creating or drop media
                 </p>
             </div>
@@ -234,7 +234,7 @@ export default function AssetsPage({ params }) {
     }
 
     return (
-        <div className="flex h-full w-full overflow-hidden text-white bg-main relative">
+        <div className="flex h-full w-full overflow-hidden text-white bg-transparent relative">
             <main className="flex-1 flex flex-col relative min-w-0 overflow-hidden z-10">
                 {/* Preserve dragged workflow in DOM to prevent browser canceling HTML5 drag */}
                 {isDragging && draggedItem?.workflow && (

@@ -13,7 +13,6 @@ export function AssetListItem({
   item: _item,
   itemUrl,
   title = "Sans titre",
-  typeLabel = "Image",
   isVideo = false,
   isActive = false,
   isDisabled = false,
@@ -35,16 +34,16 @@ export function AssetListItem({
         }
       }}
       className={cn(
-        "!h-12 w-full !justify-start gap-3 px-2 py-1.5 rounded-xl text-left select-none transition-colors",
+        "ds-pop-press !h-10 w-full !justify-start gap-2.5 p-1 pr-2.5 rounded-lg text-left select-none",
         isActive
-          ? "!bg-white/10 text-white font-medium"
-          : "text-white/80 hover:!bg-white/5 hover:text-white",
+          ? "animate-button-pop !bg-white/[0.16] hover:!bg-white/20 text-white font-medium"
+          : "text-white/80 hover:!bg-white/10 hover:text-white font-normal",
         isDisabled && "opacity-50",
         className
       )}
     >
       {/* Thumbnail */}
-      <div className="w-10 h-10 rounded-lg overflow-hidden bg-white/5 shrink-0 relative flex items-center justify-center border border-white/10">
+      <div className="size-8 rounded-md overflow-hidden bg-white/5 shrink-0 relative flex items-center justify-center">
         {isVideo ? (
           <video src={itemUrl} className="w-full h-full object-cover" muted />
         ) : (
@@ -52,15 +51,10 @@ export function AssetListItem({
         )}
       </div>
 
-      {/* Asset Text: Title and Uniform Type Subtitle */}
-      <div className="flex-1 min-w-0 flex flex-col justify-center text-left">
-        <span className="text-sm font-medium text-white truncate leading-tight font-sans antialiased">
-          {title}
-        </span>
-        <span className="text-xs font-normal text-white/50 truncate font-sans antialiased mt-0.5">
-          {typeLabel}
-        </span>
-      </div>
+      {/* Asset Title */}
+      <span className="flex-1 min-w-0 text-[13px] truncate leading-tight font-sans antialiased">
+        {title}
+      </span>
     </Button>
   );
 }

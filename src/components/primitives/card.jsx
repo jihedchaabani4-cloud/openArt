@@ -1,4 +1,5 @@
 import * as React from "react";
+import { Slot } from "radix-ui";
 import { cn } from "@/shared/lib/utils";
 
 const Card = React.forwardRef(function Card(
@@ -6,19 +7,22 @@ const Card = React.forwardRef(function Card(
     className,
     variant = "default",
     interactive = false,
+    asChild = false,
     ...props
   },
   ref
 ) {
+  const Comp = asChild ? Slot.Root : "div";
+
   return (
-    <div
+    <Comp
       ref={ref}
       data-slot="card"
       tabIndex={interactive ? 0 : undefined}
       role={interactive ? "button" : undefined}
       className={cn(
-        "rounded-md sm:rounded-[28px] bg-white/5 backdrop-blur-2xl text-white hover:bg-white/10 transition-all font-sans antialiased overflow-hidden flex flex-col relative border border-white/10",
-        interactive && "cursor-pointer hover:border-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 active:scale-95",
+        "rounded-md sm:rounded-[28px] bg-surface-card backdrop-blur-2xl text-text-primary hover:bg-ui-button-tonal transition-all font-sans antialiased overflow-hidden flex flex-col relative border border-border-weak",
+        interactive && "cursor-pointer hover:border-border-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-heavy active:scale-95",
         className
       )}
       {...props}
@@ -37,7 +41,7 @@ const CardHeader = React.forwardRef(function CardHeader(
       data-slot="card-header"
       className={cn(
         "flex flex-col gap-1.5 p-6",
-        bordered && "border-b border-white/10 pb-4",
+        bordered && "border-b border-border-weak pb-4",
         className
       )}
       {...props}
@@ -54,7 +58,7 @@ const CardTitle = React.forwardRef(function CardTitle(
     <h3
       ref={ref}
       data-slot="card-title"
-      className={cn("text-base font-semibold tracking-tight text-white leading-snug", className)}
+      className={cn("text-base font-semibold tracking-tight text-text-primary leading-snug", className)}
       {...props}
     />
   );
@@ -69,7 +73,7 @@ const CardDescription = React.forwardRef(function CardDescription(
     <p
       ref={ref}
       data-slot="card-description"
-      className={cn("text-xs text-white/50 leading-relaxed", className)}
+      className={cn("text-xs text-text-secondary leading-relaxed", className)}
       {...props}
     />
   );
@@ -101,7 +105,7 @@ const CardFooter = React.forwardRef(function CardFooter(
       data-slot="card-footer"
       className={cn(
         "flex items-center p-6 pt-0 gap-2 shrink-0",
-        bordered && "border-t border-white/10 pt-4",
+        bordered && "border-t border-border-weak pt-4",
         className
       )}
       {...props}

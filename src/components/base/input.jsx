@@ -99,7 +99,7 @@ const Input = React.forwardRef(({
         )}
       >
         {label && (
-          <label className="text-xs font-semibold text-white">
+          <label className="text-xs font-semibold text-text-primary">
             {label}
           </label>
         )}
@@ -108,7 +108,7 @@ const Input = React.forwardRef(({
             isBare
               ? "ds-input-bare bg-transparent border-none outline-none shadow-none p-0 h-auto flex items-center justify-between w-full hover:bg-transparent focus-within:bg-transparent"
               : isGhost
-                ? "ds-input-ghost relative flex items-center justify-between w-full h-9 px-3 rounded-2xl bg-white/5 hover:bg-white/20 focus-within:bg-white/20 border-none outline-none transition-colors"
+                ? "ds-input-ghost relative flex items-center justify-between w-full h-9 px-3 rounded-2xl bg-white-5 hover:bg-ui-button-hover focus-within:bg-ui-button-hover border-none outline-none transition-colors"
                 : isAccent
                   ? "ds-input ds-input-accent ds-input-search relative flex items-center justify-between w-full h-9 px-2.5 rounded-lg bg-accent/50 hover:bg-accent/70 focus-within:bg-accent/70 border-none outline-none transition-colors"
                   : "ds-input relative flex items-center justify-between w-full border-none outline-none",
@@ -116,22 +116,22 @@ const Input = React.forwardRef(({
           )}
         >
           {resolvedGoogleIcon && (
-            <span className="flex items-center justify-center shrink-0 select-none text-white/50 mr-2">
+            <span className="flex items-center justify-center shrink-0 select-none text-icon-secondary mr-2">
               <GoogleIcon iconName={resolvedGoogleIcon} name={resolvedGoogleIcon} weight={googleIconWeight} className="text-lg shrink-0" />
             </span>
           )}
 
           {Icon && !googleIcon && (
-            <span className="flex items-center justify-center shrink-0 text-white/50 mr-2">
+            <span className="flex items-center justify-center shrink-0 text-icon-secondary mr-2">
               {renderIconNode(Icon, {
-                className: "size-4 text-white/50 shrink-0",
+                className: "size-4 text-icon-secondary shrink-0",
                 strokeWidth: iconStrokeWidth ?? 1.75,
               })}
             </span>
           )}
 
           {hasPrefix && (
-            <span className="text-white/50 select-none shrink-0 pointer-events-none mr-1 font-sans text-sm">
+            <span className="text-text-secondary select-none shrink-0 pointer-events-none mr-1 font-sans text-sm">
               {prefixStr}
             </span>
           )}
@@ -142,7 +142,7 @@ const Input = React.forwardRef(({
             placeholder={placeholder}
             value={hasPrefix ? displayValue : value}
             onChange={handleChange}
-            className="bg-transparent border-none outline-none p-0 flex-1 placeholder:text-white/50 text-white text-sm font-medium min-w-0 font-sans antialiased shadow-none cursor-text"
+            className="bg-transparent border-none outline-none p-0 flex-1 placeholder:text-text-secondary text-text-primary text-sm font-medium min-w-0 font-sans antialiased shadow-none cursor-text"
             {...props}
           />
 
@@ -151,13 +151,13 @@ const Input = React.forwardRef(({
               type="button"
               variant="ghost"
               onClick={onClear}
-              className="p-1 size-7 rounded-md shrink-0 ml-1 cursor-pointer hover:bg-white/10"
+              className="p-1 size-7 rounded-md shrink-0 ml-1 cursor-pointer hover:bg-ui-button-tonal"
               aria-label="Clear input"
             >
               {ClearIcon ? (
                 renderIconNode(ClearIcon, { className: "size-4" })
               ) : (
-                <GoogleIcon iconName="close" className="text-lg text-white/50" />
+                <GoogleIcon iconName="close" className="text-lg text-icon-secondary" />
               )}
             </Button>
           )}
@@ -167,10 +167,10 @@ const Input = React.forwardRef(({
               type="button"
               variant="ghost"
               onClick={handleEditClick}
-              className="flex items-center justify-center size-7 p-1.5 rounded-md shrink-0 ml-2 cursor-pointer hover:bg-white/10"
+              className="flex items-center justify-center size-7 p-1.5 rounded-md shrink-0 ml-2 cursor-pointer hover:bg-ui-button-tonal"
               aria-label="Edit"
             >
-              <GoogleIcon iconName="edit" className="text-lg text-white/50" />
+              <GoogleIcon iconName="edit" className="text-lg text-icon-secondary" />
             </Button>
           )}
 
@@ -189,12 +189,12 @@ const Input = React.forwardRef(({
       onChange={onChange}
       className={cn(
         isBare
-          ? "ds-input-bare bg-transparent border-none outline-none text-sm font-medium text-white placeholder:text-white/50 focus:ring-0 hover:bg-transparent focus:bg-transparent p-0 shadow-none cursor-text disabled:opacity-50 font-sans antialiased"
+          ? "ds-input-bare bg-transparent border-none outline-none text-sm font-medium text-text-primary placeholder:text-text-secondary focus:ring-0 hover:bg-transparent focus:bg-transparent p-0 shadow-none cursor-text disabled:opacity-50 font-sans antialiased"
           : isGhost
-            ? "ds-input-ghost flex w-full h-9 px-3 rounded-2xl bg-white/5 hover:bg-white/20 focus:bg-white/20 border-none outline-none placeholder:text-white/50 text-white text-sm font-medium transition-colors cursor-text"
+            ? "ds-input-ghost flex w-full h-9 px-3 rounded-2xl bg-white-5 hover:bg-ui-button-hover focus:bg-ui-button-hover border-none outline-none placeholder:text-text-secondary text-text-primary text-sm font-medium transition-colors cursor-text"
             : isAccent
-              ? "ds-input ds-input-accent ds-input-search flex w-full h-9 px-2.5 rounded-lg bg-accent/50 hover:bg-accent/70 focus:bg-accent/70 border-none outline-none placeholder:text-white/50 text-white text-sm font-medium transition-colors cursor-text"
-              : "ds-input flex w-full border-none outline-none placeholder:text-[var(--text-secondary)] disabled:cursor-not-allowed disabled:opacity-50 cursor-text",
+              ? "ds-input ds-input-accent ds-input-search flex w-full h-9 px-2.5 rounded-lg bg-accent/50 hover:bg-accent/70 focus:bg-accent/70 border-none outline-none placeholder:text-text-secondary text-text-primary text-sm font-medium transition-colors cursor-text"
+              : "ds-input flex w-full border-none outline-none placeholder:text-text-secondary disabled:cursor-not-allowed disabled:opacity-50 cursor-text",
         className
       )}
       {...props}

@@ -188,16 +188,16 @@ export function MentionPlugin({ references = [], onOpenMediaLibrary }) {
     <div
       ref={menuRef}
       style={{ top: pos.top, left: pos.left }}
-      className="absolute z-[9999] w-64 rounded-lg border border-white/10 bg-omni-bg/95 backdrop-blur-80 p-1.5 shadow-none animate-in fade-in zoom-in-95 duration-150"
+      className="absolute z-[9999] w-64 rounded-lg border border-border-weak bg-omni-bg/95 backdrop-blur-80 p-1.5 shadow-none animate-in fade-in zoom-in-95 duration-150"
     >
-      <div className="px-2.5 py-1 text-[10px] font-semibold tracking-wider uppercase text-white/40 flex items-center justify-between">
+      <div className="px-2.5 py-1 text-[10px] font-semibold tracking-wider uppercase text-text-secondary flex items-center justify-between">
         <span>Mention Reference</span>
-        {query && <span className="text-white/60 lowercase font-mono">@{query}</span>}
+        {query && <span className="text-text-body-muted lowercase font-mono">@{query}</span>}
       </div>
 
-      <div className="flex flex-col gap-0.5 max-h-56 overflow-y-auto scrollbar-thin scrollbar-thumb-white/10">
+      <div className="flex flex-col gap-0.5 max-h-56 overflow-y-auto custom-scrollbar">
         {filtered.length === 0 ? (
-          <div className="px-3 py-3 text-center text-[12px] text-white/40">
+          <div className="px-3 py-3 text-center text-[12px] text-text-secondary">
             No matching references
           </div>
         ) : (
@@ -215,22 +215,22 @@ export function MentionPlugin({ references = [], onOpenMediaLibrary }) {
                   insertMention(item, i);
                 }}
                 className={`flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg cursor-pointer transition-colors ${
-                  isSelected ? "bg-white/15 text-white" : "hover:bg-white/10 text-white/80"
+                  isSelected ? "bg-white-15 text-text-primary" : "hover:bg-ui-button-tonal text-text-body-muted"
                 }`}
               >
-                <div className="shrink-0 size-7 rounded-lg overflow-hidden bg-white/10 border border-white/10 flex items-center justify-center">
+                <div className="shrink-0 size-7 rounded-lg overflow-hidden bg-ui-button-tonal border border-border-weak flex items-center justify-center">
                   {imgUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={imgUrl} alt="" className="size-full object-cover" />
                   ) : (
-                    <GoogleIcon iconName="image" className="text-[14px] text-white/50" />
+                    <GoogleIcon iconName="image" className="text-[14px] text-icon-secondary" />
                   )}
                 </div>
                 <div className="flex flex-col min-w-0 flex-1">
-                  <span className="text-[13px] font-medium text-white truncate leading-tight">
+                  <span className="text-[13px] font-medium text-text-primary truncate leading-tight">
                     {title}
                   </span>
-                  <span className="text-[10px] text-white/40 uppercase tracking-wide truncate">
+                  <span className="text-[10px] text-text-secondary uppercase tracking-wide truncate">
                     {sub}
                   </span>
                 </div>
@@ -241,7 +241,7 @@ export function MentionPlugin({ references = [], onOpenMediaLibrary }) {
 
         {onOpenMediaLibrary && (
           <>
-            <div className="h-px bg-white/10 my-1" />
+            <div className="h-px bg-border-weak my-1" />
             <div
               onMouseDown={(e) => {
                 e.preventDefault();
@@ -249,17 +249,17 @@ export function MentionPlugin({ references = [], onOpenMediaLibrary }) {
                 onOpenMediaLibrary();
               }}
               className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg cursor-pointer transition-colors text-[12px] ${
-                activeIdx === filtered.length ? "bg-white/15 text-white" : "hover:bg-white/10 text-white/70 hover:text-white"
+                activeIdx === filtered.length ? "bg-white-15 text-text-primary" : "hover:bg-ui-button-tonal text-text-body-muted hover:text-text-primary"
               }`}
             >
-              <GoogleIcon iconName="add_photo_alternate" className="text-[16px] text-white/60" />
+              <GoogleIcon iconName="add_photo_alternate" className="text-[16px] text-icon-secondary" />
               <span>Choose from Library / Upload...</span>
             </div>
           </>
         )}
       </div>
 
-      <div className="px-2 py-1 mt-1 border-t border-white/5 flex items-center justify-between text-[10px] text-white/30">
+      <div className="px-2 py-1 mt-1 border-t border-border-subtle flex items-center justify-between text-[10px] text-text-disabled">
         <span>Use ↑↓ to navigate</span>
         <span>↵ Enter to select</span>
       </div>

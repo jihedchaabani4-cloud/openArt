@@ -36,12 +36,12 @@ describe("PromptBarSlotsRow", () => {
     expect(container.firstChild).toBeNull();
   });
 
-  it("renders reference slot with thumbnails and add button", () => {
+  it("renders reference slot with stacked thumbnails, expands into tray on click, and collapses back", () => {
     const handleRemoveRef = vi.fn();
     const handleOpenDialog = vi.fn();
 
     const activeSlots = [{ role: "reference", label: "References" }];
-    const refItems = [{ id: "ref-1", displayName: "My Ref" }];
+    const refItems = [{ id: "ref-1", displayName: "My Ref", url: "https://example.com/ref1.png" }];
 
     render(
       <PromptBarSlotsRow
@@ -56,15 +56,25 @@ describe("PromptBarSlotsRow", () => {
     );
 
     expect(screen.getByTestId("view-reference-ref-1")).toBeTruthy();
-    expect(screen.getByText("My Ref")).toBeTruthy();
+    expect(screen.getByText("Uploaded")).toBeTruthy();
+    expect(screen.getByText("Used as reference")).toBeTruthy();
 
-    fireEvent.click(screen.getByText("Remove Ref"));
+    fireEvent.click(screen.getByTestId("reference-remove-all-btn"));
     expect(handleRemoveRef).toHaveBeenCalledWith(refItems[0], "reference");
 
+    // Clicking the stacked fan expands the reference tray
+    const stackBtn = screen.getByTestId("reference-stack-btn");
+    fireEvent.click(stackBtn);
+
     const addBtn = screen.getByTestId("reference-add-btn");
-    expect(addBtn.textContent).toBe("Add");
     fireEvent.click(addBtn);
     expect(handleOpenDialog).toHaveBeenCalledWith(activeSlots[0]);
+
+    // Clicking the collapse button stacks the uploaded images back
+    const collapseBtn = screen.getByTestId("reference-collapse-stack-btn");
+    expect(collapseBtn.getAttribute("aria-label")).toBe("Stack the uploaded images");
+    fireEvent.click(collapseBtn);
+    expect(screen.getByTestId("reference-stack-btn")).toBeTruthy();
   });
 
   it("renders keyframe slots and swap button when showSwap is true", () => {

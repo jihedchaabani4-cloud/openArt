@@ -14,7 +14,7 @@ export function HowToDrawer({ isOpen, onClose }) {
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-sm">
+      <div className="fixed inset-0 z-50 flex justify-end bg-fill-overlay backdrop-blur-sm">
         {/* Backdrop click to close */}
         <motion.div
           initial={{ opacity: 0 }}
@@ -30,7 +30,7 @@ export function HowToDrawer({ isOpen, onClose }) {
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 250 }}
-            className="relative w-full max-w-md h-full bg-omni-bg text-white border-y-0 border-r-0 border-l border-line-default p-6 flex flex-col justify-between shadow-none z-10 overflow-y-auto"
+            className="relative w-full max-w-md h-full bg-omni-bg text-text-primary border-y-0 border-r-0 border-l border-line-default p-6 flex flex-col justify-between shadow-none z-10 overflow-y-auto"
           >
             <div>
               {/* Header */}
@@ -53,12 +53,12 @@ export function HowToDrawer({ isOpen, onClose }) {
             <div className="flex flex-col gap-6 pt-6">
               {/* Step 1 */}
               <div className="flex gap-4 items-start">
-                <div className="w-8 h-8 rounded-full bg-white/10 border border-white/15 text-white flex items-center justify-center text-xs font-bold shrink-0">
+                <div className="w-8 h-8 rounded-full bg-ui-button-tonal border border-border-weak text-text-primary flex items-center justify-center text-xs font-bold shrink-0">
                   1
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold text-white">Upload Reference Photos</h3>
-                  <p className="text-xs text-white/60 mt-1 leading-relaxed">
+                  <h3 className="text-sm font-semibold text-text-primary">Upload Reference Photos</h3>
+                  <p className="text-xs text-text-secondary mt-1 leading-relaxed">
                     Provide 1 to 6 clear photos of your product, character, or object.
                   </p>
                 </div>
@@ -66,12 +66,12 @@ export function HowToDrawer({ isOpen, onClose }) {
 
               {/* Step 2 */}
               <div className="flex gap-4 items-start">
-                <div className="w-8 h-8 rounded-full bg-white/10 border border-white/15 text-white flex items-center justify-center text-xs font-bold shrink-0">
+                <div className="w-8 h-8 rounded-full bg-ui-button-tonal border border-border-weak text-text-primary flex items-center justify-center text-xs font-bold shrink-0">
                   2
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold text-white">AI Vision Analysis</h3>
-                  <p className="text-xs text-white/60 mt-1 leading-relaxed">
+                  <h3 className="text-sm font-semibold text-text-primary">AI Vision Analysis</h3>
+                  <p className="text-xs text-text-secondary mt-1 leading-relaxed">
                     Our AI Vision extracts identity traits, materials, aesthetics, and optimal generation directives.
                   </p>
                 </div>
@@ -79,13 +79,13 @@ export function HowToDrawer({ isOpen, onClose }) {
 
               {/* Step 3 */}
               <div className="flex gap-4 items-start">
-                <div className="w-8 h-8 rounded-full bg-white/10 border border-white/15 text-white flex items-center justify-center text-xs font-bold shrink-0">
+                <div className="w-8 h-8 rounded-full bg-ui-button-tonal border border-border-weak text-text-primary flex items-center justify-center text-xs font-bold shrink-0">
                   3
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold text-white">Reuse in Studio Prompts</h3>
-                  <p className="text-xs text-white/60 mt-1 leading-relaxed">
-                    Type <code className="px-1.5 py-0.5 rounded bg-white/10 text-white font-mono text-[11px]">@Element</code> in the prompt bar to integrate it consistently across any scene.
+                  <h3 className="text-sm font-semibold text-text-primary">Reuse in Studio Prompts</h3>
+                  <p className="text-xs text-text-secondary mt-1 leading-relaxed">
+                    Type <code className="px-1.5 py-0.5 rounded bg-ui-button-tonal text-text-primary font-mono text-[11px]">@Element</code> in the prompt bar to integrate it consistently across any scene.
                   </p>
                 </div>
               </div>

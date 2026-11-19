@@ -6,18 +6,14 @@ import { useParams } from "next/navigation";
 import { useLibraryFilter, extractIdentifyingKeys } from "@/features/studio";
 import { useProjectData } from "@/features/workflows/api/workflowsApi";
 import { useUploadMedia } from "@/features/media/model/useUploadMedia";
-import { MediaViewCard } from "../MediaViewCard";
 import { resolveMediaUrl } from "@/shared/lib/displayUtils";
 import { GoogleIcon } from "@/components/primitives/GoogleIcon";
 import { Button } from "@/components/base/button";
 import { IconButton } from "@/components/base/icon-button";
 import { Input } from "@/components/base/input";
-import { RowsPhotoAlbum } from 'react-photo-album';
-import 'react-photo-album/rows.css';
 import { cn } from "@/shared/lib/utils";
 import { ImportMediaListView } from "./ImportMediaListView";
 import { useImportMediaKeyboard } from "./keyboard/useImportMediaKeyboard";
-import { KeyboardShortcutsHelp } from "./keyboard/KeyboardShortcutsHelp";
 
 /**
  * ImportMediaPopover
@@ -436,8 +432,6 @@ export function ImportMediaPopover({
     }
   }, [availableCategories, selectedCategory, defaultCategory, setSelectedCategory]);
 
-  const [selectedItems, setSelectedItems] = React.useState([]);
-  const [layoutMode, setLayoutMode] = React.useState("grid"); // "grid" | "list"
   const fileInputRef = React.useRef(null);
   const popoverRef = React.useRef(null);
 
@@ -465,68 +459,12 @@ export function ImportMediaPopover({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [open, onOpenChange, anchorRef]);
 
-  const toggleSelection = React.useCallback((item) => {
-    const itemUrl = item.url ?? item.image?.url ?? item.video?.url ?? item.file_url;
-    const isVideo = item.type === "video" || item.is_video || !!item.video;
-    const canonicalWorkflowId = item.workflow_id || item.workflowId || item.workflow?.id || item.id || null;
-    const mediaId = item.media_id || item.mediaId || (item.workflow_id ? item.id : null);
-    const count = item.image_count || 1;
-    
-    const asset = {
-      ...item,
-      url:           itemUrl,
-      workflow_id:   canonicalWorkflowId,
-      workflowId:    canonicalWorkflowId,
-      media_id:      mediaId || item.media_id || item.id,
-      mediaId:       mediaId || item.mediaId || item.id,
-      asset_id:      canonicalWorkflowId || item.id,
-      id:            canonicalWorkflowId || item.id,
-      is_video:      isVideo,
-      type:          item.type || (item.is_character ? "character" : (item.is_element ? "element" : "media")),
-      workflow_type: item.workflow_type || (item.is_character ? "CHARACTER_SHEET" : (item.is_element ? "ELEMENT_SHEET" : "GENERATED")),
-      displayName:   item.display_name || item.name || "Ref",
-      name:          item.display_name || item.name || "Ref",
-      image_count:   count,
-    };
-
-    setSelectedItems((prev) => {
-      const assetKey = asset.workflow_id || asset.asset_id || asset.url;
-      const exists = prev.find(p => (p.workflow_id || p.asset_id) === assetKey || p.url === asset.url);
-      if (exists) {
-        return prev.filter(p => (p.workflow_id || p.asset_id) !== assetKey && p.url !== asset.url);
-      }
-      if (maxAllowed === 1) {
-        return [asset];
-      }
-      if (typeof remainingImages === "number") {
-        const currentSelectedImages = prev.reduce((acc, cur) => acc + (cur.image_count || 1), 0);
-        if (currentSelectedImages + count > remainingImages) return prev;
-      } else if (prev.length >= maxAllowed) {
-        return prev;
-      }
-      return [...prev, asset];
-    });
-  }, [maxAllowed, remainingImages]);
-
-  const selectedImageCount = React.useMemo(() => {
-    return selectedItems.reduce((acc, cur) => acc + (cur.image_count || 1), 0);
-  }, [selectedItems]);
-
   const availableSlots = React.useMemo(() => {
     if (typeof remainingImages === "number") {
-      return Math.max(0, remainingImages - selectedImageCount);
+      return Math.max(0, remainingImages);
     }
-    return Math.max(0, maxAllowed - selectedItems.length);
-  }, [remainingImages, maxAllowed, selectedImageCount, selectedItems.length]);
-
-  const handleImport = React.useCallback(() => {
-    if (selectedItems.length === 0) return;
-    onSelect(selectedItems);
-    setSelectedItems([]);
-    if (closeOnSelect) {
-      onOpenChange(false);
-    }
-  }, [selectedItems, onSelect, onOpenChange, closeOnSelect]);
+    return Math.max(0, maxAllowed);
+  }, [remainingImages, maxAllowed]);
 
   // ── Desktop-Class Keyboard Navigation Engine ───────────────────────────
   const categoryRefs = React.useRef([]);
@@ -565,21 +503,6 @@ export function ImportMediaPopover({
     }
   }, [availableSlots, remainingImages, onSelect, onOpenChange, closeOnSelect]);
 
-  // Space key multi-select toggle helper
-  const handleToggleHighlight = React.useCallback((item) => {
-    if (!item) return;
-    toggleSelection(item);
-  }, [toggleSelection]);
-
-  // Enter key commit or direct selection helper
-  const handleConfirmOrSelect = React.useCallback((highlightedItem) => {
-    if (selectedItems.length > 0) {
-      handleImport();
-    } else if (highlightedItem) {
-      handleSelectDirect(highlightedItem);
-    }
-  }, [selectedItems, handleImport, handleSelectDirect]);
-
   const {
     zone: navZone,
     setZone: setNavZone,
@@ -593,19 +516,15 @@ export function ImportMediaPopover({
     selectedCategory: selectedCategory || defaultCategory,
     setSelectedCategory,
     visibleItems,
-    layoutMode,
+    layoutMode: "list",
     categoryRefs,
     cardRefs,
     searchInputRef,
     onSelectAsset: handleSelectDirect,
-    onToggleAsset: handleToggleHighlight,
-    onConfirmSelection: handleConfirmOrSelect,
+    onToggleAsset: handleSelectDirect,
+    onConfirmSelection: handleSelectDirect,
     onClose: () => onOpenChange(false),
   });
-
-  React.useEffect(() => {
-    if (!open) setSelectedItems([]);
-  }, [open]);
 
   const handleFileChange = async (e) => {
     const files = Array.from(e.target.files ?? []).slice(0, maxAllowed);
@@ -642,31 +561,6 @@ export function ImportMediaPopover({
     return "image/*,video/mp4,video/webm";
   }, [allowsImages, allowsVideos]);
 
-  const photos = React.useMemo(() => {
-    const BASE = 1200;
-    return visibleItems.map((item, i) => {
-      const itemUrl = resolveMediaUrl(item) ?? item.url ?? item.image?.url ?? item.video?.url ?? item.file_url ?? null;
-      if (!itemUrl) return null;
-
-      const isVideo  = item.type === "video" || item.is_video || !!item.video;
-      const w = item.width  ?? item.image?.dimensions?.width  ?? item.video?.dimensions?.width  ?? null;
-      const h = item.height ?? item.image?.dimensions?.height ?? item.video?.dimensions?.height ?? null;
-      const wNum = w ? parseFloat(w) : (isVideo ? 16 : 3);
-      const hNum = h ? parseFloat(h) : (isVideo ?  9 : 4);
-      const maxDim = Math.max(wNum, hNum);
-
-      return {
-        src:     itemUrl,
-        width:   Math.round(BASE * (wNum / maxDim)),
-        height:  Math.round(BASE * (hNum / maxDim)),
-        key:     item.id ?? itemUrl ?? String(i),
-        item,
-        itemUrl,
-        isVideo,
-      };
-    }).filter(Boolean);
-  }, [visibleItems]);
-
   const isPanel = variant === "panel";
 
   const popoverElement = (
@@ -676,299 +570,132 @@ export function ImportMediaPopover({
       animate={isPanel ? undefined : { opacity: 1, y: 0, scale: 1 }}
       exit={isPanel ? undefined : { opacity: 0, y: 10, scale: 0.95 }}
       transition={isPanel ? undefined : { duration: 0.22, ease: [0.23, 1, 0.32, 1] }}
-          style={isPanel ? {
-            // Panel (inline): keep its own natural width (48.75rem = 780px), height capped
-            width: "min(48.75rem, 92vw)",
-            height: "min(34rem, 75vh)",
-            padding: "8px",
-          } : {
-            // Default (floating fixed): original fixed behaviour with prompt bar glassmorphism
-            width: "min(48.75rem, 90vw)",
-            height: "min(36.25rem, 90vh)",
-            padding: "8px",
-            borderRadius: "16px",
-            backgroundColor: "var(--ui-menu-background)",
-            backdropFilter: "blur(80px)",
-            WebkitBackdropFilter: "blur(80px)",
-            boxShadow: "none",
-          }}
-          className={cn(
-            isPanel
-              ? ""
-              : "fixed bottom-24 left-1/2 -translate-x-1/2 z-50 border border-white/5 bg-[color:var(--ui-menu-background)]",
-            "flex flex-col overflow-hidden text-white font-sans antialiased p-2"
+      style={{
+        width: "min(780px, 92vw)",
+        height: "min(580px, 90vh)",
+      }}
+      className={cn(
+        !isPanel && "fixed bottom-24 left-1/2 -translate-x-1/2 z-50",
+        "flex flex-row gap-2 overflow-hidden rounded-[var(--radius-3xl)] border border-border-weak bg-ui-menu-background p-2 [--blur:40px] text-text-primary font-sans antialiased"
+      )}
+    >
+      {/* Hidden file input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        className="hidden"
+        multiple
+        accept={uploadAccept}
+        onChange={handleFileChange}
+      />
+
+      {/* ── Left Category Sidebar (flow-add-menu-side-nav) ── */}
+      {!isAssetSelect && (availableCategories.length > 0 || allowsImages || allowsVideos) && (
+        <div className="w-[120px] flex flex-col gap-1 shrink-0 select-none">
+          {availableCategories.length > 0 && (
+            <nav role="tablist" aria-label="Category navigation" className="flex flex-col gap-0.5 flex-1">
+              {availableCategories.map((cat, catIdx) => {
+                const isActive = (selectedCategory || defaultCategory) === cat.id;
+                const isHighlighted = navZone === "sidebar" && highlightedCategoryIdx === catIdx;
+                return (
+                  <Button
+                    ref={(el) => { categoryRefs.current[catIdx] = el; }}
+                    key={cat.id}
+                    role="tab"
+                    aria-selected={isActive}
+                    variant="ghost"
+                    onClick={() => {
+                      setSelectedCategory(cat.id);
+                      setHighlightedCategoryIdx(catIdx);
+                      setNavZone("sidebar");
+                    }}
+                    className={cn(
+                      "w-full !justify-start !h-8.5 text-[13px] cursor-pointer group px-2.5 rounded-lg flex items-center gap-2.5 transition-colors",
+                      isActive ? "!bg-white/[0.16] hover:!bg-white/20 text-white font-medium" : "text-white/65 hover:!bg-white/10 hover:text-white font-normal",
+                      isHighlighted && "ring-1 ring-inset ring-white/70 !bg-white/[0.16]"
+                    )}
+                  >
+                    <GoogleIcon
+                      iconName={cat.googleIcon}
+                      name={cat.googleIcon}
+                      weight={300}
+                      className={cn("text-base shrink-0 transition-colors leading-none", isActive ? "text-white" : "text-white/65 group-hover:text-white")}
+                    />
+                    <span className="truncate leading-none">{cat.label}</span>
+                  </Button>
+                );
+              })}
+            </nav>
           )}
-        >
-          {/* Hidden file input */}
-          <input
-            ref={fileInputRef}
-            type="file"
-            className="hidden"
-            multiple
-            accept={uploadAccept}
-            onChange={handleFileChange}
+
+          {/* Upload Button at bottom of sidebar */}
+          {(allowsImages || allowsVideos) && (
+            <Button
+              variant="ghost"
+              disabled={isUploading}
+              onClick={() => fileInputRef.current?.click()}
+              className="mt-auto w-full !justify-start !h-8.5 text-[13px] font-normal gap-2.5 cursor-pointer px-2.5 rounded-lg flex items-center text-white/75 hover:!bg-white/5 hover:text-white"
+            >
+              <GoogleIcon
+                iconName={isUploading ? "progress_activity" : "upload"}
+                weight={300}
+                className={cn("text-base shrink-0 leading-none", isUploading && "animate-spin text-white/40")}
+              />
+              <span className="truncate leading-none">{isUploading ? "Uploading..." : "Upload media"}</span>
+            </Button>
+          )}
+        </div>
+      )}
+
+      {/* ── Right Content Area (.right-panel) ── */}
+      <div className="flex-1 flex flex-col min-w-0 min-h-0 gap-2">
+        {/* Search Header Bar (.search-header) */}
+        <header className="flex items-center gap-2 shrink-0">
+          <Input
+            ref={searchInputRef}
+            variant="ghost"
+            googleIcon="search"
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            onFocus={() => setNavZone("search")}
+            placeholder="Search assets"
+            aria-label="Search assets"
+            containerClassName="flex-1 min-w-0"
+            className="!h-8 px-2.5 rounded-lg bg-white/[0.07] text-[13px]"
           />
 
-          <div className="flex flex-row flex-1 min-h-0 overflow-hidden gap-2">
-            {/* ── Left Category Sidebar (Shown in standard mode only) ── */}
-          {!isAssetSelect && (availableCategories.length > 0 || allowsImages || allowsVideos) && (
-            <div className="w-36 flex flex-col gap-1.5 shrink-0 select-none bg-transparent p-0">
-              {availableCategories.length > 0 && (
-                <>
-                  <div className="px-2 pt-0.5 pb-1 text-xs font-semibold text-white/30 uppercase tracking-wider font-sans antialiased">
-                    Categories
-                  </div>
-                  
-                  <nav role="tablist" className="flex flex-col gap-1 flex-1 p-0">
-                    {availableCategories.map((cat, catIdx) => {
-                      const isActive = (selectedCategory || defaultCategory) === cat.id;
-                      const isHighlighted = navZone === "sidebar" && highlightedCategoryIdx === catIdx;
-                      return (
-                        <Button
-                          ref={(el) => { categoryRefs.current[catIdx] = el; }}
-                          key={cat.id}
-                          role="tab"
-                          aria-selected={isActive}
-                          variant="ghost"
-                          onClick={() => {
-                            setSelectedCategory(cat.id);
-                            setHighlightedCategoryIdx(catIdx);
-                            setNavZone("sidebar");
-                          }}
-                          className={cn(
-                            "w-full justify-start h-8 text-xs cursor-pointer group px-2.5 flex items-center gap-2.5 transition-all",
-                            isActive ? "bg-white/10 text-white font-medium" : "text-white/60 hover:text-white",
-                            isHighlighted && "ring-1 ring-inset ring-white/70 bg-white/10"
-                          )}
-                        >
-                          <span className="w-4 h-4 flex items-center justify-center shrink-0">
-                            <GoogleIcon iconName={cat.googleIcon} name={cat.googleIcon} weight={300} className={cn("text-base transition-colors leading-none", isActive ? "text-white" : "text-white/60 group-hover:text-white")} />
-                          </span>
-                          <span className="truncate leading-none select-none flex items-center">{cat.label}</span>
-                        </Button>
-                      );
-                    })}
-                  </nav>
-                </>
-              )}
+          {/* Close Button */}
+          <IconButton
+            variant="ghost"
+            onClick={() => onOpenChange?.(false)}
+            title="Close"
+            aria-label="Close"
+            className="!size-8 rounded-lg shrink-0"
+          >
+            <GoogleIcon iconName="close" weight={300} className="text-base" />
+          </IconButton>
+        </header>
 
-              {/* Upload Button at bottom of sidebar (shown if image or video uploads allowed) */}
-              {(allowsImages || allowsVideos) && (
-                <div className="mt-auto pt-1">
-                  <Button
-                    variant="ghost"
-                    disabled={isUploading}
-                    onClick={() => fileInputRef.current?.click()}
-                    className="w-full justify-start h-8 text-xs gap-2.5 cursor-pointer px-2.5 flex items-center"
-                  >
-                    <span className="w-4 h-4 flex items-center justify-center shrink-0">
-                      {isUploading ? (
-                        <GoogleIcon iconName="progress_activity" weight={300} className="text-sm animate-spin text-white/40 leading-none" />
-                      ) : (
-                        <GoogleIcon iconName="upload" className="text-sm shrink-0" />
-                      )}
-                    </span>
-                    <span className="truncate leading-none select-none flex items-center">{isUploading ? "Uploading..." : "Upload Media"}</span>
-                  </Button>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* ── Right Content Area ── */}
-          <div className="flex-1 flex flex-col min-w-0 min-h-0">
-            {/* Search Header Bar */}
-            <div className="pb-2.5 flex items-center gap-2 shrink-0">
-              {/* Search Bar Input */}
-              <div className="flex-1">
-                <Input
-                  ref={searchInputRef}
-                  variant="ghost"
-                  googleIcon="search"
-                  type="search"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  onFocus={() => setNavZone("search")}
-                  placeholder="Search assets (press / to focus)"
-                  aria-label="Search assets"
-                  className="w-full text-sm"
-                />
-              </div>
-
-              {/* Layout Mode Switcher (Grid vs List) */}
-              <div className="flex items-center p-0.5 rounded-2xl bg-white/5 shrink-0 gap-1">
-                <IconButton
-                  variant={layoutMode === "grid" ? "tonal" : "ghost"}
-                  onClick={() => setLayoutMode("grid")}
-                  title="Grid view"
-                  aria-label="Grid view"
-                >
-                  <GoogleIcon iconName="grid_view" weight={300} className="text-base" />
-                </IconButton>
-                <IconButton
-                  variant={layoutMode === "list" ? "tonal" : "ghost"}
-                  onClick={() => setLayoutMode("list")}
-                  title="List view"
-                  aria-label="List view"
-                >
-                  <GoogleIcon iconName="view_list" weight={300} className="text-base" />
-                </IconButton>
-              </div>
-
-              {/* Keyboard Shortcuts Help '?' Button & Hover Dropdown */}
-              <KeyboardShortcutsHelp />
-
-              {/* Close Button */}
-              <IconButton
-                variant="ghost"
-                onClick={() => onOpenChange?.(false)}
-                title="Close"
-                aria-label="Close"
-              >
-                <GoogleIcon iconName="close" weight={300} className="text-base" />
-              </IconButton>
-            </div>
-
-            {layoutMode === "list" ? (
-              <ImportMediaListView
-                items={visibleItems}
-                remainingImages={remainingImages}
-                availableSlots={availableSlots}
-                maxAllowed={maxAllowed}
-                focusedId={visibleItems[highlightedAssetIdx]?.id || visibleItems[highlightedAssetIdx]?.workflow_id}
-                onFocusChange={(item, idx) => {
-                  if (typeof idx === "number" && idx >= 0) {
-                    setHighlightedAssetIdx(idx);
-                  }
-                  setNavZone("gallery");
-                }}
-                onSelectDirect={handleSelectDirect}
-                loading={loading}
-                hasMore={hasMore}
-                onLoadMore={onLoadMore}
-              />
-            ) : (
-              <>
-                {/* Grid Area - Scrollable */}
-                <div className="flex-1 overflow-y-auto p-4 scrollbar-hide min-h-0">
-                  {loading && visibleItems.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center h-full gap-3 opacity-20">
-                      <div className="w-5 h-5 rounded-full border-2 border-white/10 border-t-white animate-spin" />
-                      <span className="text-xs font-medium uppercase tracking-widest">Loading...</span>
-                    </div>
-                  ) : visibleItems.length === 0 ? (
-                    <div className="flex items-center justify-center h-full text-white/20 text-xs uppercase tracking-widest">
-                      No assets found
-                    </div>
-                  ) : (
-                    <RowsPhotoAlbum
-                      photos={photos}
-                      targetRowHeight={160}
-                      spacing={6}
-                      rowConstraints={{ singleRowMaxHeight: 260 }}
-                      render={{
-                        photo: (_, { photo, width, height }) => {
-                          const { item, itemUrl, isVideo } = photo;
-                          const isSelected = selectedItems.some(
-                            (p) =>
-                              (p.workflow_id && (p.workflow_id === item.workflow_id || p.workflow_id === item.id)) ||
-                              p.asset_id === item.id ||
-                              p.url === itemUrl
-                          );
-                          const itemIdx = visibleItems.indexOf(item);
-                          const isHighlighted = navZone === "gallery" && highlightedAssetIdx === itemIdx;
-                          const candidateCount = item.image_count || 1;
-                          const isOverQuota = typeof remainingImages === "number"
-                            ? candidateCount > availableSlots
-                            : selectedItems.length >= maxAllowed;
-                          const isDisabled = isOverQuota && !isSelected;
-
-                          return (
-                            <MediaViewCard
-                              ref={(el) => {
-                                if (itemIdx !== -1) cardRefs.current[itemIdx] = el;
-                              }}
-                              key={photo.key}
-                              item={item}
-                              itemUrl={itemUrl}
-                              isVideo={isVideo}
-                              width={width}
-                              height={height}
-                              isSelected={isSelected}
-                              isHighlighted={isHighlighted}
-                              isDisabled={isDisabled}
-                              onSelect={() => {
-                                setHighlightedAssetIdx(itemIdx !== -1 ? itemIdx : 0);
-                                setNavZone("gallery");
-                                if (maxAllowed === 1) {
-                                  handleSelectDirect(item);
-                                } else {
-                                  toggleSelection(item);
-                                }
-                              }}
-                              onDoubleClick={() => {
-                                handleSelectDirect(item);
-                              }}
-                            />
-                          );
-                        },
-                      }}
-                    />
-                  )}
-
-                  {(hasMore || loading) && visibleItems.length > 0 && (
-                    <div 
-                      className="h-10 w-full flex items-center justify-center"
-                      ref={(el) => {
-                        if (!el) return;
-                        const observer = new IntersectionObserver(
-                          ([entry]) => {
-                            if (entry.isIntersecting && !loading && hasMore) {
-                              onLoadMore();
-                            }
-                          },
-                          { rootMargin: "100px" }
-                        );
-                        observer.observe(el);
-                        return () => observer.disconnect();
-                      }}
-                    >
-                      {loading && (
-                        <div className="w-4 h-4 rounded-full border-2 border-white/10 border-t-white/40 animate-spin" />
-                      )}
-                    </div>
-                  )}
-                </div>
-
-                {/* Footer - Import Button */}
-                <div className="p-3 shrink-0 flex justify-end bg-transparent">
-                  <Button 
-                    variant="primary"
-                    onClick={handleImport}
-                    disabled={selectedItems.length === 0}
-                  >
-                    {selectedItems.length > 0 ? (
-                      <span className="flex items-center gap-2">
-                        <span>Import ({selectedItems.length})</span>
-                        <kbd className="px-1.5 py-0.5 text-xs font-mono bg-black/10 rounded border border-black/10 font-semibold leading-none">
-                          ↵ Enter
-                        </kbd>
-                      </span>
-                    ) : (
-                      "Select Media"
-                    )}
-                  </Button>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-
-        <style jsx>{`
-          .scrollbar-hide::-webkit-scrollbar { display: none; }
-          .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-        `}</style>
-      </motion.div>
+        <ImportMediaListView
+          items={visibleItems}
+          remainingImages={remainingImages}
+          availableSlots={availableSlots}
+          maxAllowed={maxAllowed}
+          focusedId={visibleItems[highlightedAssetIdx]?.id || visibleItems[highlightedAssetIdx]?.workflow_id}
+          onFocusChange={(item, idx) => {
+            if (typeof idx === "number" && idx >= 0) {
+              setHighlightedAssetIdx(idx);
+            }
+            setNavZone("gallery");
+          }}
+          onSelectDirect={handleSelectDirect}
+          loading={loading}
+          hasMore={hasMore}
+          onLoadMore={onLoadMore}
+        />
+      </div>
+    </motion.div>
   );
 
   if (isPanel) {

@@ -3,14 +3,6 @@ import { render, screen } from "@testing-library/react";
 import { PromptBarTopPanel } from "@/components/cinema-studio/prompt-bar/parts/PromptBarTopPanel";
 import { Button } from "@/components/base/button";
 
-vi.mock("@/components/cinema-studio/prompt-bar/editor/AtMentionMenu.jsx", () => ({
-  AtMentionMenu: ({ open, query, onClose }) => (
-    <div data-testid="at-mention-menu" data-open={String(open)} data-query={query}>
-      <Button onClick={onClose}>Close Mention</Button>
-    </div>
-  ),
-}));
-
 vi.mock("@/features/media", async (importOriginal) => {
   const actual = await importOriginal();
   return {
@@ -24,41 +16,19 @@ vi.mock("@/features/media", async (importOriginal) => {
 });
 
 describe("PromptBarTopPanel", () => {
-  it("renders null/empty when both quick mention and dialog are closed", () => {
+  it("renders null/empty when dialog is closed", () => {
     render(
       <PromptBarTopPanel
-        quickMentionOpen={false}
         dialogOpen={false}
       />
     );
-    expect(screen.queryByTestId("at-mention-menu")).toBeNull();
     expect(screen.queryByTestId("import-media-popover")).toBeNull();
   });
 
-  it("renders AtMentionMenu when quickMentionOpen is true", () => {
-    const onClose = vi.fn();
-    render(
-      <PromptBarTopPanel
-        quickMentionOpen={true}
-        onCloseQuickMention={onClose}
-        mentionQuery="test-query"
-        activeReferences={[]}
-        dialogOpen={false}
-      />
-    );
-    const menu = screen.getByTestId("at-mention-menu");
-    expect(menu).toBeTruthy();
-    expect(menu.getAttribute("data-query")).toBe("test-query");
-
-    screen.getByText("Close Mention").click();
-    expect(onClose).toHaveBeenCalledTimes(1);
-  });
-
-  it("renders ImportMediaPopover when dialogOpen is true and quickMentionOpen is false", () => {
+  it("renders ImportMediaPopover when dialogOpen is true", () => {
     const onOpenChange = vi.fn();
     render(
       <PromptBarTopPanel
-        quickMentionOpen={false}
         dialogOpen={true}
         onOpenChangeDialog={onOpenChange}
         activeDialogMode="media"

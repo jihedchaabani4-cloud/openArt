@@ -66,9 +66,9 @@ export function CharacterFeatureEditor({ open, onOpenChange, anchorRef }) {
           className={cn(
             "absolute bottom-full left-1/2 -translate-x-1/2 mb-4 z-50 pointer-events-auto",
             "flex flex-col h-[470px] w-[880px] max-w-[95vw] overflow-hidden",
-            "gap-2 p-3 rounded-2xl backdrop-blur-80",
-            "border border-white/10 shadow-none",
-            "bg-(--background-state-90) text-white"
+            "gap-2 rounded-[var(--radius-3xl)] bg-ui-menu-background p-2 [--blur:40px]",
+            "border border-border-weak shadow-none",
+            "text-text-primary"
           )}
         >
           {/* Header - Tabs */}

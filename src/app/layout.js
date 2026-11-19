@@ -1,5 +1,5 @@
 import "./globals.css";
-import { Geist_Mono, Inter, Noto_Sans_Arabic } from "next/font/google";
+import { Geist, Geist_Mono, Inter, Noto_Sans_Arabic } from "next/font/google";
 import localFont from "next/font/local";
 
 import { ReactQueryProvider } from "@/shared/lib/ReactQueryProvider";
@@ -7,9 +7,16 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Toaster } from "sonner";
 import Script from "next/script";
 
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+  display: "swap",
+});
+
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  display: "swap",
 });
 
 const inter = Inter({
@@ -48,7 +55,11 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className="dark" suppressHydrationWarning>
+    <html
+      lang="en"
+      className={`${geistSans.variable} ${geistMono.variable} dark`}
+      suppressHydrationWarning
+    >
       <head>
         <link
           rel="stylesheet"
@@ -107,7 +118,7 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body
-        className={`${inter.variable} ${arabic.variable} ${googleSans.variable} ${geistMono.variable} antialiased bg-body-root text-foreground font-sans`}
+        className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} ${arabic.variable} ${googleSans.variable} antialiased bg-body-root text-foreground font-sans`}
         suppressHydrationWarning
       >
         <ReactQueryProvider>

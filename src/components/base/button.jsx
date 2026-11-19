@@ -21,8 +21,9 @@ const buttonVariants = cva(
         ghost: "ds-btn-ghost focus-workspace",
         outline: "ds-btn-outline focus-workspace",
         link: "ds-btn-link inline-flex items-center focus-workspace",
-        "dropdown-card": "ds-btn-dropdown-card bg-white/10 hover:bg-white/15",
-        dropdown_card: "ds-btn-dropdown-card bg-white/10 hover:bg-white/15",
+        "dropdown-card": "ds-btn-dropdown-card h-[50px] rounded-[10px] bg-ui-button-tonal hover:bg-surface-tonal-hover",
+        dropdown_card: "ds-btn-dropdown-card h-[50px] rounded-[10px] bg-ui-button-tonal hover:bg-surface-tonal-hover",
+        segmented: "ds-btn-segmented rounded-[10px] focus-workspace",
       },
       size: {
         default: "",
