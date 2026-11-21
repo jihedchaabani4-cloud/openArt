@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthSession } from "@/shared/api/auth";
 import { LandingPage } from "@/views";
-import { GoogleIcon } from "@/components/primitives/GoogleIcon";
+import { HugeIcon } from "@/components/primitives/HugeIcon";
 
 export default function HomePage() {
   const router = useRouter();
@@ -22,7 +22,7 @@ export default function HomePage() {
         className="min-h-screen bg-background flex flex-col items-center justify-center text-white/50"
         suppressHydrationWarning
       >
-        <GoogleIcon iconName="progress_activity" className="text-4xl animate-spin text-white mb-4" />
+        <HugeIcon name="loading-03" className="text-4xl animate-spin text-white mb-4" />
         <span>Chargement...</span>
       </div>
     );

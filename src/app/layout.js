@@ -61,14 +61,7 @@ export default function RootLayout({ children }) {
       suppressHydrationWarning
     >
       <head>
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
-        />
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Google+Symbols:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
-        />
+        <link rel="stylesheet" href="https://use.hugeicons.com/font/icons.css" />
         <Script
           id="suppress-extension-errors"
           strategy="beforeInteractive"

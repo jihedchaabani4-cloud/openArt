@@ -1,7 +1,9 @@
 export * from "./button";
 export * from "./icon-button";
+export * from "./menu";
 export * from "./select";
 export * from "./dropdown-menu";
+export * from "@/components/primitives/context-menu";
 export * from "./pill-tabs";
 export * from "./section-card";
 export * from "./accordion";
@@ -11,3 +13,4 @@ export * from "./switch";
 export * from "./input";
 export * from "./checkbox";
 export * from "./badge";
+export { Slider } from "@/components/primitives/slider";

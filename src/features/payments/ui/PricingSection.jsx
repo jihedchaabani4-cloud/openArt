@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { GoogleIcon } from "@/components/primitives/GoogleIcon";
+import { HugeIcon } from "@/components/primitives/HugeIcon";
 import { usePackages, useCheckout } from "@/features/payments/api/paymentsApi";
 import { PackageSelectionDialog } from "@/features/payments/ui/PackageSelectionDialog";
 import {
@@ -137,8 +137,8 @@ function CompareCategorySection({ title, items, packages, initialVisibleCount = 
                         onClick={() => setIsExpanded((current) => !current)}
                         className="h-auto p-0 text-sm font-medium text-muted-foreground hover:bg-transparent hover:text-white"
                     >
-                        <GoogleIcon
-                            iconName="keyboard_arrow_down"
+                        <HugeIcon
+                            name="arrow-down-01"
                             className={`text-base transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`}
                         />
                         {isExpanded ? "View less" : "View more"}
@@ -226,7 +226,7 @@ function ComparePlansSection({ packages, modelsComparison, onBuy, isPending, pen
                                                     className="mt-3 h-10 w-full rounded-lg px-4 text-sm font-semibold text-white hover:text-white"
                                                 >
                                                     {isPending && pendingPackageId === pkg.id ? (
-                                                        <GoogleIcon iconName="progress_activity" className="text-base animate-spin" />
+                                                        <HugeIcon name="loading-03" className="text-base animate-spin" />
                                                     ) : (
                                                         ctaLabel
                                                     )}
@@ -415,7 +415,7 @@ function TemplatePricingCard({ pkg, modelsComparison, onBuy, isLoading }) {
                     disabled={isLoading}
                     className="h-9 w-full rounded-full px-4 text-[13px] font-medium transition-colors duration-200 sm:h-10 sm:text-sm"
                 >
-                    {isLoading ? <GoogleIcon iconName="progress_activity" className="text-base animate-spin" /> : "Get Started"}
+                    {isLoading ? <HugeIcon name="loading-03" className="text-base animate-spin" /> : "Get Started"}
                 </Button>
             </div>
 
@@ -424,7 +424,7 @@ function TemplatePricingCard({ pkg, modelsComparison, onBuy, isLoading }) {
                 <ul className="space-y-4 text-[13px] leading-5.5 text-white sm:text-[13px]">
                     {primaryFeatures.map((feature) => (
                         <li key={feature} className="flex items-start gap-3">
-                            <GoogleIcon iconName="check" className="text-base mt-1 shrink-0 font-bold" />
+                            <HugeIcon name="tick-02" className="text-base mt-1 shrink-0 font-bold" />
                             <span>{feature}</span>
                         </li>
                     ))}
@@ -433,7 +433,7 @@ function TemplatePricingCard({ pkg, modelsComparison, onBuy, isLoading }) {
                 {(secondaryFeatures.length > 0 || generatedBreakdown.length > 0) && (
                     <div className="flex items-center gap-4 py-1">
                         <div className="h-px flex-1 bg-white/10" />
-                        <GoogleIcon iconName="add" className="text-lg shrink-0 text-white" />
+                        <HugeIcon name="add-01" className="text-lg shrink-0 text-white" />
                         <div className="h-px flex-1 bg-white/10" />
                     </div>
                 )}
@@ -441,7 +441,7 @@ function TemplatePricingCard({ pkg, modelsComparison, onBuy, isLoading }) {
                 <ul className="space-y-4 text-[13px] leading-5.5 text-white sm:text-[13px]">
                     {secondaryFeatures.map((feature) => (
                         <li key={feature} className="flex items-start gap-3">
-                            <GoogleIcon iconName="check" className="text-base mt-1 shrink-0 font-bold" />
+                            <HugeIcon name="tick-02" className="text-base mt-1 shrink-0 font-bold" />
                             <span>{feature}</span>
                         </li>
                     ))}
@@ -611,7 +611,7 @@ export function PricingSection({ hideFaq = false }) {
                                     className="py-6 text-left text-[20px] font-semibold tracking-[-0.03em] text-white hover:no-underline"
                                     icon={
                                         <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/8 text-white">
-                                            <GoogleIcon iconName="add" className="text-base" />
+                                            <HugeIcon name="add-01" className="text-base" />
                                         </span>
                                     }
                                 >

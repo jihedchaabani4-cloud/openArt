@@ -5,7 +5,7 @@ import { cn } from "@/shared/lib/utils";
 
 // Visuals live in globals.css (.ds-btn-*). This file only maps variant → class.
 const buttonVariants = cva(
-  "cursor-pointer gap-2 whitespace-nowrap shrink-0 select-none outline-none disabled:pointer-events-none disabled:opacity-50 rounded-2xl",
+  "cursor-pointer gap-1.5 whitespace-nowrap shrink-0 select-none outline-none disabled:pointer-events-none disabled:opacity-50 rounded-lg",
   {
     variants: {
       variant: {
@@ -21,18 +21,20 @@ const buttonVariants = cva(
         ghost: "ds-btn-ghost focus-workspace",
         outline: "ds-btn-outline focus-workspace",
         link: "ds-btn-link inline-flex items-center focus-workspace",
-        "dropdown-card": "ds-btn-dropdown-card h-[50px] rounded-[10px] bg-ui-button-tonal hover:bg-surface-tonal-hover",
-        dropdown_card: "ds-btn-dropdown-card h-[50px] rounded-[10px] bg-ui-button-tonal hover:bg-surface-tonal-hover",
+        "dropdown-card": "ds-btn-dropdown-card rounded-[10px] bg-ui-button-tonal hover:bg-surface-tonal-hover",
+        dropdown_card: "ds-btn-dropdown-card rounded-[10px] bg-ui-button-tonal hover:bg-surface-tonal-hover",
         segmented: "ds-btn-segmented rounded-[10px] focus-workspace",
+        nav: "ds-nav-item rounded-lg focus-workspace",
       },
       size: {
         default: "",
-        s: "h-8",
-        m: "h-9",
-        l: "h-[42px]",
-        sm: "h-8 px-3",
-        lg: "h-11 px-6",
-        icon: "size-9.5 p-2.5",
+        xs: "h-6 px-2 ds-text-caption-s [--ds-icon-size:var(--icon-size-xs)]",
+        s: "h-8 [--ds-icon-size:var(--icon-size-sm)]",
+        m: "h-9 [--ds-icon-size:var(--icon-size-md)]",
+        l: "h-[42px] [--ds-icon-size:var(--icon-size-lg)]",
+        sm: "h-8 px-2.5 ds-text-caption-m [--ds-icon-size:var(--icon-size-sm)]",
+        lg: "h-10 px-5 ds-text-caption-l font-semibold [--ds-icon-size:var(--icon-size-lg)]",
+        icon: "size-8 p-1 [--ds-icon-size:var(--icon-size-sm)]",
       },
     },
     defaultVariants: {
@@ -47,12 +49,14 @@ const Button = React.forwardRef(function Button(
   ref
 ) {
   const Comp = asChild ? Slot.Root : "button";
+  const resolvedSize = size?.toLowerCase?.() ?? size;
   return (
     <Comp
       ref={ref}
       data-slot="button"
       data-variant={variant || "ghost"}
-      className={cn(buttonVariants({ variant, size: size?.toLowerCase?.() ?? size }), className)}
+      data-size={resolvedSize}
+      className={cn(buttonVariants({ variant, size: resolvedSize }), className)}
       {...props}
     />
   );

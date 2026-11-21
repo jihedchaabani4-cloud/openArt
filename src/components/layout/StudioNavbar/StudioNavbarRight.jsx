@@ -3,19 +3,23 @@
 import * as React from "react"
 import { cn } from "@/shared/lib/utils"
 import { StudioSettingsDropdown } from "@/components/cinema-studio/prompt-bar/StudioSettingsDropdown"
+import { NavbarFilterDropdown } from "./NavbarFilterDropdown"
 import { NavbarImportButton } from "./NavbarImportButton"
 import { NavbarRestoreAllButton } from "./NavbarRestoreAllButton"
+import { NavbarEmptyTrashButton } from "./NavbarEmptyTrashButton"
 import { UserDropdown } from "@/components/layout/UserDropdown"
 
-export const StudioNavbarRight = React.memo(function StudioNavbarRight({ searchExpanded }) {
+export const StudioNavbarRight = React.memo(function StudioNavbarRight({ searchExpanded, availableModels }) {
     return (
         <div className={cn(
-            "flex min-w-0 items-center justify-end whitespace-nowrap transition-opacity duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] gap-1 flex-1 h-full max-h-full",
+            "flex min-w-0 items-center justify-end whitespace-nowrap transition-opacity duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] gap-1.5 flex-1 h-full max-h-full",
             searchExpanded ? "opacity-0 pointer-events-none" : "opacity-100"
         )}>
             <NavbarRestoreAllButton />
-            <NavbarImportButton />
+            <NavbarEmptyTrashButton />
+            <NavbarFilterDropdown availableModels={availableModels} />
             <StudioSettingsDropdown />
+            <NavbarImportButton />
             <UserDropdown />
         </div>
     )

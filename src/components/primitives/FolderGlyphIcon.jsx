@@ -10,7 +10,7 @@ import { getFolderColorGradient } from "@/features/folders/model/folder-color-to
 export function FolderGlyphIcon({
   color,
   className,
-  size = 18,
+  size = 16,
   isOpen = false,
   ...props
 }) {

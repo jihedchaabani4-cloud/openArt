@@ -2,7 +2,7 @@
 
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/components/base/button";
-import { GoogleIcon } from "@/components/primitives/GoogleIcon";
+import { HugeIcon } from "@/components/primitives/HugeIcon";
 
 /**
  * FlowErrorTile
@@ -15,6 +15,7 @@ export function FlowErrorTile({
   onReusePrompt,
   canReusePrompt = true,
   onDelete,
+  hideActions = false,
   className,
 }) {
   const displayError =
@@ -32,14 +33,7 @@ export function FlowErrorTile({
             <div className="error-tile-content flex flex-col justify-between h-full w-full min-h-0 overflow-hidden">
               {/* ── Top section: Warning icon + Title + Subtitle ── */}
               <div className="error-message flex flex-col items-start text-left w-full min-h-0 overflow-hidden">
-                <mat-icon
-                  role="img"
-                  className="mat-icon notranslate error-icon google-symbols mat-icon-no-color shrink-0"
-                  aria-hidden="true"
-                  data-mat-icon-type="font"
-                >
-                  warning
-                </mat-icon>
+                <HugeIcon name="alert-02" className="error-icon shrink-0" />
                 <div
                   className="error-title font-sans font-medium text-white tracking-normal text-sm leading-tight shrink-0"
                 >
@@ -60,44 +54,46 @@ export function FlowErrorTile({
               </div>
 
               {/* ── Bottom-right aligned Action Buttons ── */}
-              <div
-                className="buttons-container flex items-center justify-end gap-1.5 mt-auto w-full self-end pt-1 shrink-0"
-              >
-                {/* 1. Reuse Prompt Button */}
-                <Button
-                  type="button"
-                  variant="ghost"
-                  className="size-8 p-0 rounded-full"
-                  aria-label="Reuse prompt"
-                  title="Reuse prompt"
-                  disabled={!canReusePrompt}
-                  
-                  onClick={(e) => {
-                    if (canReusePrompt) {
-                      e.stopPropagation();
-                      onReusePrompt?.(e);
-                    }
-                  }}
+              {!hideActions && (
+                <div
+                  className="buttons-container flex items-center justify-end gap-1.5 mt-auto w-full self-end pt-1 shrink-0"
                 >
-                  <GoogleIcon iconName="undo" className="text-base" />
-                </Button>
+                  {/* 1. Reuse Prompt Button */}
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="size-8 p-0 rounded-full"
+                    aria-label="Reuse prompt"
+                    title="Reuse prompt"
+                    disabled={!canReusePrompt}
+                    
+                    onClick={(e) => {
+                      if (canReusePrompt) {
+                        e.stopPropagation();
+                        onReusePrompt?.(e);
+                      }
+                    }}
+                  >
+                    <HugeIcon name="undo" className="text-base" />
+                  </Button>
 
-                {/* 3. Delete Button */}
-                <Button
-                  type="button"
-                  variant="ghost"
-                  className="size-8 p-0 rounded-full"
-                  aria-label="Delete"
-                  title="Delete"
-                  
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onDelete?.(e);
-                  }}
-                >
-                  <GoogleIcon iconName="delete_forever" className="text-base" />
-                </Button>
-              </div>
+                  {/* 3. Delete Button */}
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="size-8 p-0 rounded-full"
+                    aria-label="Delete"
+                    title="Delete"
+                    
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDelete?.(e);
+                    }}
+                  >
+                    <HugeIcon name="delete-02" className="text-base" />
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         </flow-error-tile>

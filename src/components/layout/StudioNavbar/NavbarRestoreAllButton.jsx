@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { GoogleIcon } from "@/components/primitives/GoogleIcon";
+import { HugeIcon } from "@/components/primitives/HugeIcon";
 import { Button } from "@/components/base/button";
 import { toast } from "sonner";
 import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows";
@@ -38,9 +38,9 @@ export function NavbarRestoreAllButton() {
       variant="outline"
       onClick={handleRestoreAll}
       disabled={isPending || !hasTrashed}
-      className="flex items-center gap-1.5 cursor-pointer h-8 sm:h-9 max-h-full"
+      className="flex items-center gap-1.5 cursor-pointer h-7 max-h-full ds-text-caption-m"
     >
-      <GoogleIcon iconName="restore" className="text-base" />
+      <HugeIcon name="restore-bin" />
       <span>{isPending ? "Restauration..." : "Tout restaurer"}</span>
     </Button>
   );

@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/base/button";
-import { GoogleIcon } from "@/components/primitives/GoogleIcon";
+import { HugeIcon } from "@/components/primitives/HugeIcon";
 import { cn } from "@/shared/lib/utils";
 
 /**
@@ -21,7 +21,7 @@ export function NavbarBackButton({
   onClick,
   href,
   label = "Back",
-  iconName = "arrow_back",
+  iconName = "arrow-left-02",
   className,
   disabled = false,
   children,
@@ -39,8 +39,8 @@ export function NavbarBackButton({
         variant="ghost"
         disabled={disabled}
         className={cn(
-          "cursor-pointer shrink-0 text-white/70 hover:text-white transition-all",
-          children ? "h-8 sm:h-9 max-h-full px-3.5 gap-2 font-medium text-sm" : "size-8 sm:size-9 max-h-full aspect-square",
+          "cursor-pointer shrink-0 text-text-body-muted hover:text-text-primary transition-all",
+          children ? "h-7 max-h-full px-2.5 gap-1.5 ds-text-caption-m" : "size-7 max-h-full aspect-square p-0",
           className
         )}
         onDragOver={onDragOver}
@@ -49,7 +49,7 @@ export function NavbarBackButton({
         onDrop={onDrop}
       >
         <Link href={href} aria-label={label} title={label}>
-          <GoogleIcon iconName={iconName} className="text-[20px]" />
+          <HugeIcon name={iconName} />
           {children}
         </Link>
       </Button>
@@ -71,8 +71,8 @@ export function NavbarBackButton({
       variant="ghost"
       disabled={disabled}
       className={cn(
-        "cursor-pointer shrink-0 text-white/70 hover:text-white transition-all",
-        children ? "h-8 sm:h-9 max-h-full px-3.5 gap-2 font-medium text-sm" : "size-8 sm:size-9 max-h-full aspect-square",
+        "cursor-pointer shrink-0 text-text-body-muted hover:text-text-primary transition-all",
+        children ? "h-7 max-h-full px-2.5 gap-1.5 ds-text-caption-m" : "size-7 max-h-full aspect-square p-0",
         className
       )}
       onClick={handleClick}
@@ -83,7 +83,7 @@ export function NavbarBackButton({
       aria-label={label}
       title={label}
     >
-      <GoogleIcon iconName={iconName} className="text-[20px]" />
+      <HugeIcon name={iconName} />
       {children}
     </Button>
   );

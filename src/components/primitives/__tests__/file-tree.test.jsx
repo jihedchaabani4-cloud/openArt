@@ -116,4 +116,32 @@ describe("FileTree Component (shadcn.io/ui/file-tree)", () => {
     expect(container.querySelector('[data-testid="white-icon"]')).toBeDefined();
     expect(container.querySelector('[data-testid="amber-icon"]')).toBeDefined();
   });
+
+  it("uses .ds-nav-item contract with size-4 icon container, gap-0.5, and rounded-lg by default", () => {
+    const { container } = render(
+      <FileTree selectedId="f-active" initialExpandedItems={["f-parent"]}>
+        <FileTreeFolder value="f-parent" element="Parent Folder">
+          <FileTreeItem value="f-active" element="Active Folder" />
+        </FileTreeFolder>
+      </FileTree>
+    );
+
+    const tree = container.querySelector('[role="tree"]');
+    expect(tree?.className).toContain("gap-0.5");
+
+    const items = container.querySelectorAll('[role="treeitem"]');
+    expect(items).toHaveLength(2);
+    items.forEach((item) => {
+      expect(item.className).toContain("ds-nav-item");
+      expect(item.className).toContain("rounded-lg");
+      expect(item.className).not.toContain("h-8");
+      const iconWrapper = item.firstElementChild;
+      expect(iconWrapper?.className).toContain("size-4");
+      expect(iconWrapper?.className).not.toContain("mr-1.5");
+    });
+
+    expect(items[0].getAttribute("data-active")).toBeNull();
+    expect(items[1].getAttribute("data-active")).toBe("true");
+    expect(items[1].getAttribute("aria-selected")).toBe("true");
+  });
 });

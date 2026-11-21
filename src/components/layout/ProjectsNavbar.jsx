@@ -57,7 +57,7 @@ export function ProjectsNavbar() {
                         href="/cinema-studio"
                         className="flex items-center gap-3 group transition-opacity hover:opacity-100"
                     >
-                        <span className="text-[14px] font-bold tracking-[-0.03em] leading-tight text-text-primary uppercase italic">
+                        <span className="ds-text-caption-l font-bold tracking-[-0.03em] leading-tight text-text-primary uppercase italic">
                             {process.env.NEXT_PUBLIC_APP_NAME || "Labveil"}
                         </span>
                     </Link>
@@ -66,13 +66,13 @@ export function ProjectsNavbar() {
                 {/* ── Center: Nav Links ── */}
                 <div className="absolute left-1/2 -translate-x-1/2 hidden md:flex items-center gap-1">
 
-                    <Link href="/cinema-studio" className="text-[14px] font-semibold text-text-primary-soft hover:text-text-primary transition-colors px-3 py-2 rounded-sm hover:bg-surface-card">
+                    <Link href="/cinema-studio" className="ds-text-caption-l font-semibold text-text-primary-soft hover:text-text-primary transition-colors px-3 py-2 rounded-sm hover:bg-surface-card">
                         Cinema Studio
                     </Link>
-                    <Link href="/pricing" className="text-[14px] font-semibold text-text-primary-soft hover:text-text-primary transition-colors px-3 py-2 rounded-sm hover:bg-surface-card">
+                    <Link href="/pricing" className="ds-text-caption-l font-semibold text-text-primary-soft hover:text-text-primary transition-colors px-3 py-2 rounded-sm hover:bg-surface-card">
                         Pricing
                     </Link>
-                    <Link href="/assets" className="text-[14px] font-semibold text-text-primary-soft hover:text-text-primary transition-colors px-3 py-2 rounded-sm hover:bg-surface-card">
+                    <Link href="/assets" className="ds-text-caption-l font-semibold text-text-primary-soft hover:text-text-primary transition-colors px-3 py-2 rounded-sm hover:bg-surface-card">
                         Assets
                     </Link>
                 </div>
@@ -84,9 +84,9 @@ export function ProjectsNavbar() {
                     ) : (
                         <Button
                             onClick={() => setLoginOpen(true)}
-                            variant="studio-ghost"
-                            size="sm"
-                            className="text-text-primary gap-2 font-semibold text-[14px]"
+                            variant="ghost"
+                            size="s"
+                            className="text-text-primary gap-2 ds-text-caption-m font-semibold"
                         >
                             Login
                         </Button>

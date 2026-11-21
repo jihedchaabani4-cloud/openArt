@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { useParams, useRouter, useSearchParams } from "next/navigation"
-import { GoogleIcon } from "@/components/primitives/GoogleIcon"
+import { HugeIcon } from "@/components/primitives/HugeIcon"
 import { IconButton } from "@/components/base/icon-button"
 import { downloadFile } from "@/shared/lib/utils"
 import { resolveMainMedia } from "@/features/workflows/core/resolveMediaRef"
@@ -17,6 +17,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/base/dropdown-menu"
+import { MenuItemContent } from "@/components/base/menu"
 
 function toTitleCase(value) {
     return String(value || "")
@@ -219,20 +220,18 @@ export function EditNavbar({
                                     variant="ghost"
                                     aria-label="More options"
                                 >
-                                    <GoogleIcon iconName="more_vert" className="text-[16px]" />
+                                    <HugeIcon name="more-vertical" />
                                 </IconButton>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent variant="normal" align="start" className="w-52 p-1.5">
+                            <DropdownMenuContent align="start">
                                 <DropdownMenuItem onClick={() => nameRef.current?.startEditing()}>
-                                    <GoogleIcon iconName="edit" className="text-[20px]" />
-                                    Renommer
+                                    <MenuItemContent icon="pencil-edit-02">Renommer</MenuItemContent>
                                 </DropdownMenuItem>
-                                <DropdownMenuItem 
+                                <DropdownMenuItem
                                     variant="destructive"
                                     onClick={() => setIsDeleteDialogOpen(true)}
                                 >
-                                    <GoogleIcon iconName="delete" className="text-[20px]" />
-                                    Placer dans la corbeille
+                                    <MenuItemContent icon="delete-02">Placer dans la corbeille</MenuItemContent>
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
@@ -253,7 +252,7 @@ export function EditNavbar({
                     <NavbarAction
                         variant="ghost"
                         size="icon"
-                        icon="download"
+                        icon="download-04"
                         title="Download"
                         aria-label="Download"
                         loading={isDownloading}

@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import * as AccordionPrimitive from "@radix-ui/react-accordion";
-import { GoogleIcon } from "@/components/primitives/GoogleIcon";
+import { HugeIcon } from "@/components/primitives/HugeIcon";
 import { cn } from "@/shared/lib/utils";
 
 function Accordion({ ...props }) {
@@ -40,15 +40,15 @@ const AccordionTrigger = React.forwardRef(function AccordionTrigger(
         ref={ref}
         data-slot="accordion-trigger"
         className={cn(
-          "ds-accordion-trigger focus-workspace hover:text-[var(--text-primary)] transition-colors cursor-pointer [&[data-state=open]>svg]:rotate-180 [&[data-state=open]>.google-symbols]:rotate-180",
+          "ds-accordion-trigger focus-workspace hover:text-[var(--text-primary)] transition-colors cursor-pointer [&[data-state=open]>svg]:rotate-180 [&[data-state=open]>.huge-icon]:rotate-180",
           className
         )}
         {...props}
       >
         {children}
         {icon ?? (
-          <GoogleIcon
-            iconName="keyboard_arrow_down"
+          <HugeIcon
+            name="arrow-down-01"
             className={cn("text-base transition-transform duration-200", iconClassName)}
           />
         )}

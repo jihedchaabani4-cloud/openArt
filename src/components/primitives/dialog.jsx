@@ -1,6 +1,6 @@
 "use client"
 
-import { GoogleIcon } from "@/components/primitives/GoogleIcon";
+import { HugeIcon } from "@/components/primitives/HugeIcon";
 import * as DialogPrimitive from "@radix-ui/react-dialog"
 
 import { cn } from "@/shared/lib/utils"
@@ -155,7 +155,7 @@ function DialogContent({
           <DialogPrimitive.Close
             className="absolute top-4 right-4 text-on-surface-subtle hover:text-on-surface transition flex items-center justify-center cursor-pointer"
           >
-            <GoogleIcon iconName="close" className="text-xl" />
+            <HugeIcon name="cancel-01" size="lg" />
             <span className="sr-only">Close</span>
           </DialogPrimitive.Close>
         )}
@@ -203,7 +203,7 @@ function DialogTitle({ className, ...props }) {
   return (
     <DialogPrimitive.Title
       data-slot="dialog-title"
-      className={cn("text-lg font-semibold text-on-surface tracking-tight font-sans", className)}
+      className={cn("ds-text-h-xxs text-on-surface font-sans", className)}
       {...props}
     />
   )

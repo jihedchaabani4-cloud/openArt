@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { GoogleIcon } from "@/components/primitives/GoogleIcon";
+import { HugeIcon } from "@/components/primitives/HugeIcon";
 import { Dialog, DialogContent, DialogTitle } from "@/components/primitives/dialog";
 import { Button } from "@/components/base/button";
 import { cn } from "@/shared/lib/utils";
@@ -238,7 +238,7 @@ export function PackageSelectionDialog({
                     className="flex h-[min(740px,84vh)] w-[min(960px,94vw)] max-w-[960px] items-center justify-center overflow-hidden p-0"
                 >
                     <DialogTitle className="sr-only">Choose your package</DialogTitle>
-                    <GoogleIcon iconName="progress_activity" className="text-3xl animate-spin text-white/40" />
+                    <HugeIcon name="loading-03" className="text-3xl animate-spin text-white/40" />
                 </DialogContent>
             </Dialog>
         );
@@ -295,7 +295,7 @@ export function PackageSelectionDialog({
                                                     isSelected ? "border-white bg-white" : "border-white/20 bg-transparent"
                                                 )}
                                             >
-                                                {isSelected && <GoogleIcon iconName="check" className="text-xs font-bold text-black" />}
+                                                {isSelected && <HugeIcon name="tick-02" className="text-xs font-bold text-black" />}
                                             </span>
 
                                             <div className="min-w-0 flex-1">
@@ -322,7 +322,7 @@ export function PackageSelectionDialog({
 
                                                     <div className="shrink-0 text-right">
                                                         <p className="flex items-center justify-end gap-1 text-[13px] font-normal text-white">
-                                                            <GoogleIcon iconName="stars" className="text-[13px] text-white" />
+                                                            <HugeIcon name="star" className="text-[13px] text-white" />
                                                             {creditsLabel}
                                                         </p>
                                                         {tenCreditsPrice && (
@@ -335,7 +335,7 @@ export function PackageSelectionDialog({
 
                                                 {tag === "Most popular" && (
                                                     <div className="mt-3 flex w-full items-start gap-1 rounded-md bg-white/5 border border-white/10 px-2 py-1.5 text-[10px] font-medium leading-3.5 text-white/70">
-                                                        <GoogleIcon iconName="stars" className="text-[12px] text-white mt-[2px] shrink-0" />
+                                                        <HugeIcon name="star" className="text-[12px] text-white mt-[2px] shrink-0" />
                                                         <span>
                                                             Most popular - Get the strongest value for image and video generation before it changes.
                                                         </span>
@@ -384,14 +384,14 @@ export function PackageSelectionDialog({
                                 className="relative h-12 w-full overflow-hidden rounded-sm px-5 py-3 text-sm font-semibold transition-all sm:h-14 sm:py-4 sm:text-base before:absolute before:left-[-40%] before:top-0 before:h-full before:w-[8%] before:skew-x-[-20deg] before:bg-gradient-to-r before:from-transparent before:via-white/50 before:to-transparent before:content-['']"
                             >
                                 {isPending && pendingPackageId === selectedPackage?.id ? (
-                                    <GoogleIcon iconName="progress_activity" className="text-lg animate-spin" />
+                                    <HugeIcon name="loading-03" className="text-lg animate-spin" />
                                 ) : (
                                     "Continuer"
                                 )}
                             </Button>
                             <div className="flex w-full flex-col gap-1">
                                 <div className="flex w-full items-center justify-center gap-2">
-                                    <GoogleIcon iconName="verified_user" className="text-base" />
+                                    <HugeIcon name="security-check" className="text-base" />
                                     <p className="text-center text-[11px] font-normal text-white">
                                         Paiement sur et securise
                                     </p>
@@ -424,7 +424,7 @@ export function PackageSelectionDialog({
                                     >
                                         <span className="relative">View all plans and features</span>
                                         <span className="relative">
-                                            <GoogleIcon iconName="north_east" className="text-base text-white transition-colors group-hover:text-white/70" />
+                                            <HugeIcon name="arrow-up-right-01" className="text-base text-white transition-colors group-hover:text-white/70" />
                                         </span>
                                     </Link>
                                 </div>

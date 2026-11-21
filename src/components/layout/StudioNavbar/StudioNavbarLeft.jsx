@@ -3,17 +3,9 @@
 import { cn } from "@/shared/lib/utils"
 import * as React from "react"
 import { EditableDisplayName } from "@/components/primitives/EditableDisplayName"
-import { GoogleIcon } from "@/components/primitives/GoogleIcon"
 import { useDeleteProject } from "@/features/projects/api/projectsApi"
 import { useRouter, useParams, usePathname } from "next/navigation"
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from "@/components/base/dropdown-menu"
 import { Button } from "@/components/base/button"
-import { NavbarBackButton } from "@/components/layout/NavbarCore/NavbarBackButton"
 import { NavbarTitle } from "@/components/layout/NavbarCore/NavbarTitle"
 import { ConfirmDeleteDialog } from "@/components/primitives/ConfirmDeleteDialog"
 import { useProjectFolders, useUpdateFolder, useDeleteFolder, useFolderMove, useDownloadCollection } from "@/features/folders"
@@ -47,6 +39,22 @@ export function StudioNavbarLeft({
         return collections.find((c) => c.id === collectionId) || null
     }, [collections, collectionId])
 
+    const ancestorCollections = React.useMemo(() => {
+        if (!activeCollection) return []
+        const byId = new Map(collections.map((c) => [c.id, c]))
+        const chain = []
+        const visited = new Set([activeCollection.id])
+        let curParentId = activeCollection.parent_id || activeCollection.parentId
+        while (curParentId && !visited.has(curParentId)) {
+            visited.add(curParentId)
+            const parent = byId.get(curParentId)
+            if (!parent) break
+            chain.unshift(parent)
+            curParentId = parent.parent_id || parent.parentId
+        }
+        return chain
+    }, [activeCollection, collections])
+
     const parentId = activeCollection?.parent_id || activeCollection?.parentId
 
     // Back button behavior:
@@ -61,9 +69,6 @@ export function StudioNavbarLeft({
                 ? `/cinema-studio/${projectId}/collection/${parentId}`
                 : `/cinema-studio/${projectId}/assets`)
             : "/cinema-studio"
-
-    const backIcon = (isTrashPage || isCollectionPage) ? "arrow_back" : "home"
-    const backLabel = (isTrashPage || isCollectionPage) ? "Back" : "Accueil"
 
     // Display title: collection name when in collection, else project name
     const displayName = isCollectionPage
@@ -193,19 +198,11 @@ export function StudioNavbarLeft({
                 setIsBackDragOver(false)
             }
         }
-        const onPointerDrop = (e) => {
-            if (e.detail) {
-                executeMoveToParent(e.detail)
-                setIsBackDragOver(false)
-            }
-        }
         window.addEventListener("studio:pointer-hover-target", onPointerHover)
-        window.addEventListener("studio:drop-to-back", onPointerDrop)
         return () => {
             window.removeEventListener("studio:pointer-hover-target", onPointerHover)
-            window.removeEventListener("studio:drop-to-back", onPointerDrop)
         }
-    }, [executeMoveToParent])
+    }, [])
 
     const handleSaveName = (nextName) => {
         const trimmed = nextName?.trim()
@@ -252,51 +249,49 @@ export function StudioNavbarLeft({
                     onDragLeave={handleBackDragLeave}
                     onDrop={handleBackDrop}
                     onClick={() => router.push(backHref)}
-                    className="shrink-0 select-none h-8 max-h-full"
+                    className="shrink-0 select-none h-7 max-h-full"
                     title="Drop here to move out of collection"
                 >
                     <span className="pointer-events-none select-none">Move out of collection</span>
                 </Button>
             ) : (
                 <>
-                    {(isCollectionPage || isTrashPage) && (
-                        <NavbarBackButton
-                            href={backHref}
-                            label={backLabel}
-                            iconName={backIcon}
-                            className="transition-all shrink-0 border-0 border-transparent shadow-none h-8 sm:h-9 max-h-full"
-                            onDragOver={isCollectionPage ? handleBackDragOver : undefined}
-                            onDragEnter={isCollectionPage ? handleBackDragEnter : undefined}
-                            onDragLeave={isCollectionPage ? handleBackDragLeave : undefined}
-                            onDrop={isCollectionPage ? handleBackDrop : undefined}
-                        />
-                    )}
-
                     {isTrashPage ? (
                         <NavbarTitle>Trash</NavbarTitle>
                     ) : isCollectionPage ? (
-                        <div className="flex min-w-0 items-center gap-1.5 text-sm font-medium h-full max-h-full">
-                            <span
+                        <nav
+                            aria-label="Folder path"
+                            className="flex min-w-0 items-center gap-1.5 ds-text-caption-l font-semibold tracking-tight leading-none overflow-hidden"
+                        >
+                            <button
+                                type="button"
                                 onClick={() => router.push(`/cinema-studio/${projectId}/assets`)}
-                                className="text-on-surface-variant hover:text-on-surface cursor-pointer transition-colors"
+                                className="text-text-secondary hover:text-text-primary cursor-pointer transition-colors shrink-0"
                             >
                                 Assets
-                            </span>
-                            <span className="text-on-surface-subtle">/</span>
-                            {activeCollection?.color && (
-                                <span
-                                    className="size-2 rounded-full shrink-0"
-                                    style={activeCollection?.color ? { backgroundColor: activeCollection.color } : undefined}
-                                />
-                            )}
+                            </button>
+                            {ancestorCollections.map((ancestor) => (
+                                <React.Fragment key={ancestor.id}>
+                                    <span className="text-text-tertiary shrink-0">/</span>
+                                    <button
+                                        type="button"
+                                        onClick={() => router.push(`/cinema-studio/${projectId}/collection/${ancestor.id}`)}
+                                        className="text-text-secondary hover:text-text-primary cursor-pointer transition-colors truncate max-w-[140px]"
+                                        title={ancestor.name || ancestor.folder_name || "Collection"}
+                                    >
+                                        {ancestor.name || ancestor.folder_name || "Collection"}
+                                    </button>
+                                </React.Fragment>
+                            ))}
+                            <span className="text-text-tertiary shrink-0">/</span>
                             <EditableDisplayName
                                 ref={nameRef}
                                 displayName={displayName}
                                 placeholder="Untitled collection"
                                 onSave={handleSaveName}
-                                inputClassName="text-md font-medium max-w-[160px] sm:max-w-[220px] focus:text-on-surface transition-all text-on-surface h-8 max-h-full"
+                                inputClassName="ds-text-caption-l font-semibold tracking-tight max-w-[160px] sm:max-w-[220px] text-text-primary focus:text-text-primary transition-all h-7"
                             />
-                        </div>
+                        </nav>
                     ) : pathname.includes("/elements") ? (
                         <NavbarTitle>Elements</NavbarTitle>
                     ) : pathname.includes("/characters") ? (

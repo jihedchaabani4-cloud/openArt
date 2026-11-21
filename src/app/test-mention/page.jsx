@@ -20,7 +20,7 @@ import {
 } from "lexical";
 import { MentionNode, $createMentionNode } from "@/components/cinema-studio/prompt-bar/editor/MentionNode";
 import { MentionPlugin } from "@/components/cinema-studio/prompt-bar/editor/MentionPlugin";
-import { GoogleIcon } from "@/components/primitives/GoogleIcon";
+import { HugeIcon } from "@/components/primitives/HugeIcon";
 import { Button } from "@/components/base/button";
 import { IconButton } from "@/components/base/icon-button";
 
@@ -335,7 +335,7 @@ export default function TestMentionPage() {
               <span className="text-white/50 text-[12px]">Interactive Mention UI Comparison</span>
             </div>
             <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-white flex items-center gap-2.5">
-              <GoogleIcon iconName="alternate_email" className="text-[28px] text-blue-400" />
+              <HugeIcon name="at" className="text-[28px] text-blue-400" />
               Mention Component Test Arena
             </h1>
             <p className="text-white/60 text-[13.5px] mt-1">
@@ -373,7 +373,7 @@ export default function TestMentionPage() {
         <div className="mt-4 p-4 rounded-2xl bg-omni-bg/60 border border-white/5 backdrop-blur-md flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <span className="text-[12px] font-semibold text-white/70 uppercase tracking-wider flex items-center gap-1.5">
-              <GoogleIcon iconName="perm_media" className="text-[16px] text-white/50" />
+              <HugeIcon name="album-02" className="text-[16px] text-white/50" />
               Active References Pool ({references.length}):
             </span>
             <div className="flex items-center gap-1.5 flex-wrap">
@@ -397,7 +397,7 @@ export default function TestMentionPage() {
               className="h-6 px-2 text-xs"
               onClick={handleAddSample}
             >
-              <GoogleIcon iconName="add" className="text-[14px]" />
+              <HugeIcon name="add-01" className="text-[14px]" />
               Add Sample
             </Button>
             <Button
@@ -439,7 +439,7 @@ export default function TestMentionPage() {
 
             {/* Instruction Callout */}
             <div className="p-3 rounded-2xl bg-purple-500/10 border border-purple-500/20 text-[12px] text-purple-200/90 flex items-start gap-2.5">
-              <GoogleIcon iconName="info" className="text-[18px] shrink-0 text-purple-300 mt-0.5" />
+              <HugeIcon name="information-circle" className="text-[18px] shrink-0 text-purple-300 mt-0.5" />
               <div>
                 <p className="font-semibold text-white">How to test:</p>
                 <p className="mt-0.5">
@@ -483,7 +483,7 @@ export default function TestMentionPage() {
                 {/* Bottom Bar Details */}
                 <div className="pt-3 mt-2 border-t border-white/5 flex items-center justify-between">
                   <div className="flex items-center gap-1.5 text-[11px] text-white/40">
-                    <GoogleIcon iconName="keyboard" className="text-[14px]" />
+                    <HugeIcon name="keyboard" className="text-[14px]" />
                     <span>Trigger: Typing @</span>
                   </div>
                   <Button
@@ -536,7 +536,7 @@ export default function TestMentionPage() {
 
             {/* Instruction Callout */}
             <div className="p-3 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 text-[12px] text-cyan-200/90 flex items-start gap-2.5">
-              <GoogleIcon iconName="info" className="text-[18px] shrink-0 text-cyan-300 mt-0.5" />
+              <HugeIcon name="information-circle" className="text-[18px] shrink-0 text-cyan-300 mt-0.5" />
               <div>
                 <p className="font-semibold text-white">How to test:</p>
                 <p className="mt-0.5">
@@ -595,7 +595,7 @@ export default function TestMentionPage() {
                     onClick={() => setV2PanelOpen(true)}
                     title="Add media, reference or connector"
                   >
-                    <GoogleIcon iconName="add" className="text-[18px]" />
+                    <HugeIcon name="add-01" className="text-[18px]" />
                   </IconButton>
 
                   <div className="flex items-center gap-2">
@@ -607,7 +607,7 @@ export default function TestMentionPage() {
                     >
                       <span className="font-semibold text-white">Auto</span>
                       <span className="text-white/60">Medium</span>
-                      <GoogleIcon iconName="keyboard_arrow_down" className="text-[15px] text-white/40" />
+                      <HugeIcon name="arrow-down-01" className="text-[15px] text-white/40" />
                     </Button>
 
                     {/* Microphone Voice Button */}
@@ -616,7 +616,7 @@ export default function TestMentionPage() {
                       variant="ghost"
                       title="Voice Input"
                     >
-                      <GoogleIcon iconName="mic" className="text-[18px]" />
+                      <HugeIcon name="mic-01" className="text-[18px]" />
                     </IconButton>
 
                     {/* Circular White Action Button with Black '+' */}
@@ -626,7 +626,7 @@ export default function TestMentionPage() {
                       onClick={() => alert(`Submitted prompt: ${v2RawOutput}`)}
                       title="Generate"
                     >
-                      <GoogleIcon iconName="add" className="text-[20px] font-bold" />
+                      <HugeIcon name="add-01" className="text-[20px] font-bold" />
                     </IconButton>
                   </div>
                 </div>
@@ -650,7 +650,7 @@ export default function TestMentionPage() {
       {/* Feature Comparison Table */}
       <div className="max-w-6xl mx-auto mt-12 p-6 rounded-2xl bg-omni-bg/80 border border-white/10 backdrop-blur-xl">
         <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-          <GoogleIcon iconName="table_chart" className="text-[20px] text-white/70" />
+          <HugeIcon name="table" className="text-[20px] text-white/70" />
           Comparison Breakdown
         </h3>
 

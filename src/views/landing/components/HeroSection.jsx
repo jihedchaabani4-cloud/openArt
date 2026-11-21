@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Button } from "@/components/base/button";
-import { GoogleIcon } from "@/components/primitives/GoogleIcon";
+import { HugeIcon } from "@/components/primitives/HugeIcon";
 
 const appName = process.env.NEXT_PUBLIC_APP_NAME || "Level Labs";
 
@@ -107,7 +107,7 @@ export function HeroSection({ user, authLoading, onCTA }) {
               className="mt-8 flex items-center gap-2 h-10 px-6 text-sm"
             >
               {authLoading ? (
-                <><GoogleIcon iconName="progress_activity" className="text-xl animate-spin" /> Connexion...</>
+                <><HugeIcon name="loading-03" className="text-xl animate-spin" /> Connexion...</>
               ) : user ? (
                 "Cinema Studio"
               ) : (

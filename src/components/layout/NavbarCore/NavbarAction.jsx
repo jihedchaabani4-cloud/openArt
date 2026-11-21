@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { Button } from "@/components/base/button";
-import { GoogleIcon } from "@/components/primitives/GoogleIcon";
+import { HugeIcon } from "@/components/primitives/HugeIcon";
 import { cn } from "@/shared/lib/utils";
 
 /**
@@ -12,7 +12,7 @@ import { cn } from "@/shared/lib/utils";
  *
  * @param {Object} props
  * @param {React.ReactNode} [props.label] - Button text label
- * @param {string | React.ReactNode} [props.icon] - GoogleIcon name string or React node
+ * @param {string | React.ReactNode} [props.icon] - HugeIcon name string or React node
  * @param {"primary" | "danger" | "ghost" | "outline" | "secondary" | "neon"} [props.variant="ghost"]
  * @param {"default" | "sm" | "icon"} [props.size="default"]
  * @param {Function} [props.onClick]
@@ -37,16 +37,16 @@ export function NavbarAction({
 
   const renderedIcon = React.useMemo(() => {
     if (loading) {
-      return <GoogleIcon iconName="progress_activity" className={size === "icon" ? "text-xl animate-spin shrink-0" : "text-base animate-spin shrink-0"} />;
+      return <HugeIcon name="loading-03" className="animate-spin shrink-0" />;
     }
     if (!icon) {
       if (variant === "danger") {
-        return <GoogleIcon iconName="delete" className={size === "icon" ? "text-[20px] shrink-0" : "text-[16px] shrink-0"} />;
+        return <HugeIcon name="delete-02" className="shrink-0" />;
       }
       return null;
     }
     if (typeof icon === "string") {
-      return <GoogleIcon iconName={icon} className={size === "icon" ? "text-[20px] shrink-0" : "text-[16px] shrink-0"} />;
+      return <HugeIcon name={icon} className="shrink-0" />;
     }
     if (React.isValidElement(icon)) {
       return icon;
@@ -56,10 +56,10 @@ export function NavbarAction({
       (typeof icon === "object" && icon !== null && ("$$typeof" in icon || "render" in icon))
     ) {
       const IconComponent = icon;
-      return <IconComponent className="w-4 h-4 shrink-0" />;
+      return <IconComponent className="size-3.5 shrink-0" />;
     }
     return null;
-  }, [icon, loading, variant, size]);
+  }, [icon, loading, variant]);
 
   const isIcon = size === "icon";
   const coreVariant = variant === "white" || variant === "neon" ? "primary" : variant;
@@ -68,11 +68,12 @@ export function NavbarAction({
     <Button
       type="button"
       variant={coreVariant}
+      size={isIcon ? "icon" : size}
       data-variant={variant}
       disabled={disabled || loading}
       onClick={onClick}
       className={cn(
-        isIcon && "size-9 p-0",
+        isIcon && "size-7 p-0",
         className
       )}
       {...rest}

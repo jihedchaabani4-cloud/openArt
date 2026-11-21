@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useLibraryWorkflowDetail } from "@/features/media";
-import { GoogleIcon } from "@/components/primitives/GoogleIcon";
+import { HugeIcon } from "@/components/primitives/HugeIcon";
 
 export default function AssetDetailNavbar({ workflowId, userSlot = null }) {
   const { data } = useLibraryWorkflowDetail(workflowId);
@@ -17,7 +17,7 @@ export default function AssetDetailNavbar({ workflowId, userSlot = null }) {
             className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-sm text-white/72 transition hover:bg-white/5 hover:text-white"
             aria-label="Back to assets"
           >
-            <GoogleIcon iconName="arrow_back" className="text-2xl" />
+            <HugeIcon name="arrow-left-02" size="lg" />
           </Link>
 
           <div className="flex min-w-0 items-center gap-3">

@@ -38,7 +38,7 @@ describe("CharacterEditNavbar", () => {
     // Dropdown trigger is rendered as a simple icon-only '+' button without text or bg
     const trigger = screen.getByTestId("import-dropdown-trigger");
     expect(trigger).toBeDefined();
-    expect(trigger.textContent).toBe("add");
+    expect(trigger.querySelector('[data-icon-name="add-01"]')).toBeTruthy();
     expect(trigger.textContent).not.toContain("Importer");
     expect(trigger.className).toMatch(/bg-transparent|ds-icon-btn/);
 
@@ -50,7 +50,7 @@ describe("CharacterEditNavbar", () => {
 
     // Verify standardized width and compact item sizing
     const menuContent = uploadItem.closest('[data-slot="dropdown-menu-content"]');
-    expect(menuContent.className).toContain("w-52");
+    expect(menuContent.className).toContain("w-56");
 
     const uploadMenuItem = uploadItem.closest('[data-slot="dropdown-menu-item"]');
     expect(uploadMenuItem.className).toContain("ds-menu-item");

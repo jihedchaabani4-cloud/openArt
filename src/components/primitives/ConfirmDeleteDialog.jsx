@@ -10,7 +10,7 @@ import {
   DialogClose,
   DialogTrigger,
 } from "@/components/primitives/dialog";
-import { GoogleIcon } from "@/components/primitives/GoogleIcon";
+import { HugeIcon } from "@/components/primitives/HugeIcon";
 import { Button } from "@/components/base/button";
 
 /**
@@ -52,7 +52,7 @@ export function ConfirmDeleteDialog({
       >
         <div className="flex flex-col items-center text-center">
           <div className="mb-3">
-            <GoogleIcon iconName="warning" className="text-3xl text-danger" />
+            <HugeIcon name="alert-02" className="text-3xl text-danger" />
           </div>
           
           <DialogHeader className="space-y-1">

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { GoogleIcon } from "@/components/primitives/GoogleIcon";
+import { HugeIcon } from "@/components/primitives/HugeIcon";
 import { Dialog, DialogContent, DialogTitle } from "@/components/primitives/dialog";
 import { Button } from "@/components/base/button";
 import { IconButton } from "@/components/base/icon-button";
@@ -50,7 +50,7 @@ function AuthButton({ icon, children, onClick, _inverted = false, isLoading = fa
       className="w-full gap-2"
     >
       {isLoading ? (
-        <GoogleIcon iconName="progress_activity" className="text-xl animate-spin" />
+        <HugeIcon name="loading-03" className="animate-spin" />
       ) : React.isValidElement(icon) ? (
         icon
       ) : typeof icon === "function" || (typeof icon === "object" && icon !== null && ("$$typeof" in icon || "render" in icon)) ? (
@@ -197,10 +197,10 @@ function LeftPanel({ open }) {
         </div>
         <div className="relative z-10 flex h-full flex-col justify-end p-10">
           <div className="space-y-3">
-            <p className="max-w-[320px] text-[28px] font-semibold tracking-[-0.03em] text-white">
+            <p className="max-w-[320px] ds-text-h-sm text-white">
               Bring your ideas to life faster.
             </p>
-            <p className="max-w-[360px] text-[13px] leading-6 text-white/68">
+            <p className="max-w-[360px] ds-text-caption-l font-normal text-white/68">
               Sign in to generate images, edit visuals, and access stronger creative tools with your account.
             </p>
           </div>
@@ -239,7 +239,7 @@ export function LoginDialog({ open, onClose }) {
           className="absolute right-3 top-3 z-20"
           aria-label="Close login dialog"
         >
-          <GoogleIcon iconName="close" className="text-xl" />
+          <HugeIcon name="cancel-01" />
         </IconButton>
 
         <div className="flex h-full w-full items-stretch justify-center p-3">
@@ -248,10 +248,10 @@ export function LoginDialog({ open, onClose }) {
           <div className="flex h-full w-full flex-col justify-center md:items-center lg:w-[400px] xl:w-[400px]">
             <div className="flex w-full flex-col gap-8 px-2 py-10 md:max-w-[360px] md:px-6 md:py-6">
               <div className="space-y-2 text-center">
-                <p className="text-[28px] font-semibold tracking-[-0.02em] text-white">
+                <p className="ds-text-h-sm text-white">
                   Sign in or create your account
                 </p>
-                <p className="text-[14px] leading-6 text-white/58">
+                <p className="ds-text-caption-l font-normal text-white/58">
                   Get smarter results, save your work, and unlock premium image and video tools.
                 </p>
               </div>
@@ -266,11 +266,11 @@ export function LoginDialog({ open, onClose }) {
               </div>
 
               <div className="space-y-3 text-center">
-                <div className="inline-flex items-center gap-2 text-[12px] text-white/55">
+                <div className="inline-flex items-center gap-2 ds-text-caption-m font-normal text-white/55">
                   <span className="size-3 rounded-sm border border-white/25" />
                   Your account data stays secure and private.
                 </div>
-                <p className="text-[11px] leading-5 text-white/38">
+                <p className="ds-text-caption-s font-normal text-white/38">
                   By continuing, you agree to our Terms of Service and Privacy Policy.
                 </p>
               </div>

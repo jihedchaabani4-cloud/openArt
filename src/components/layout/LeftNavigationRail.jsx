@@ -3,19 +3,32 @@
 import React, { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { motion } from "framer-motion";
-import { GoogleIcon } from "@/components/primitives/GoogleIcon";
+import { HugeIcon } from "@/components/primitives/HugeIcon";
 import { Button } from "@/components/base/button";
+import { IconButton } from "@/components/base/icon-button";
+import { Input } from "@/components/base/input";
 import { FileTree, FileTreeFolder, FileTreeItem } from "@/components/primitives/file-tree";
 import { FolderGlyphIcon } from "@/components/primitives/FolderGlyphIcon";
 import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from "@/components/base/dropdown-menu";
+import {
+  ContextMenu,
+  ContextMenuTrigger,
   ContextMenuContent,
   ContextMenuItem,
+  ContextMenuLabel,
   ContextMenuSeparator,
   ContextMenuSub,
   ContextMenuSubTrigger,
   ContextMenuSubContent,
 } from "@/components/primitives/context-menu";
+import { MenuItemContent } from "@/components/base/menu";
 import { CreateFolderDialog } from "@/components/cinema-studio/collections/CreateFolderDialog";
 import { ConfirmDeleteDialog } from "@/components/primitives/ConfirmDeleteDialog";
 import { MoveToDialog } from "@/components/cinema-studio/collections/MoveToDialog";
@@ -23,6 +36,11 @@ import { cn } from "@/shared/lib/utils";
 import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows";
 import { useCharacterWorkflows } from "@/features/characters";
 import { useElementSheetWorkflows } from "@/features/elements";
+import {
+  useProjects,
+  useUpdateProject,
+  useDeleteProject,
+} from "@/features/projects/api/projectsApi";
 import {
   useProjectFolders,
   useUpdateFolder,
@@ -51,7 +69,20 @@ export function LeftNavigationRail() {
   const { workflows: characters = [] } = useCharacterWorkflows(selectedProjectId);
   useElementSheetWorkflows(selectedProjectId);
 
+  const { data: projects = [] } = useProjects();
+  const { mutateAsync: updateProject } = useUpdateProject();
+  const { mutateAsync: deleteProject } = useDeleteProject();
   const { data: rawFolders = [] } = useProjectFolders(selectedProjectId);
+
+  const activeProject = useMemo(
+    () =>
+      (Array.isArray(projects) ? projects : []).find(
+        (p) => String(p.project_id ?? p.id) === String(selectedProjectId)
+      ) || null,
+    [projects, selectedProjectId]
+  );
+  const activeProjectName =
+    activeProject?.project_name || activeProject?.name || "Project";
 
   // Expands / collapses via toggle button or interactive drag resize
   const DEFAULT_EXPANDED_WIDTH = 224;
@@ -73,7 +104,7 @@ export function LeftNavigationRail() {
         setIsExpanded(false);
       } else {
         setIsExpanded(true);
-        const clamped = Math.max(170, Math.min(newWidth, 450));
+        const clamped = Math.max(170, Math.min(newWidth, DEFAULT_EXPANDED_WIDTH));
         setSidebarWidth(clamped);
       }
     };
@@ -162,10 +193,116 @@ export function LeftNavigationRail() {
   const { mutateAsync: updateFolder } = useUpdateFolder();
   const { mutateAsync: deleteFolder } = useDeleteFolder();
 
+  const [isCreateFolderOpen, setIsCreateFolderOpen] = useState(false);
   const [createSubfolderParentId, setCreateSubfolderParentId] = useState(null);
   const [deletingFolder, setDeletingFolder] = useState(null);
   const [editingFolder, setEditingFolder] = useState(null);
   const [movingFolder, setMovingFolder] = useState(null);
+  const [isRenamingProject, setIsRenamingProject] = useState(false);
+  const [projectNameDraft, setProjectNameDraft] = useState("");
+  const [isDeletingProject, setIsDeletingProject] = useState(false);
+  const [dragOverTarget, setDragOverTarget] = useState(null);
+  const projectNameInputRef = React.useRef(null);
+  const pendingRenameFocusRef = React.useRef(false);
+
+  useEffect(() => {
+    const handlePointerHover = (e) => {
+      const detail = e.detail;
+      if (detail?.target === "add-to-collection" && detail.collectionId) {
+        setDragOverTarget((prev) =>
+          prev?.type === "add-to-collection" && prev.collectionId === detail.collectionId
+            ? prev
+            : { type: "add-to-collection", collectionId: detail.collectionId }
+        );
+      } else if (detail?.target === "move-to-root") {
+        setDragOverTarget((prev) =>
+          prev?.type === "move-to-root" ? prev : { type: "move-to-root", collectionId: null }
+        );
+      } else {
+        setDragOverTarget((prev) => (prev === null ? prev : null));
+      }
+    };
+    window.addEventListener("studio:pointer-hover-target", handlePointerHover);
+    return () => {
+      window.removeEventListener("studio:pointer-hover-target", handlePointerHover);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (isRenamingProject && projectNameInputRef.current) {
+      projectNameInputRef.current.focus();
+      projectNameInputRef.current.select();
+    }
+  }, [isRenamingProject]);
+
+  const handleOpenProjectInNewTab = () => {
+    if (selectedProjectId && typeof window !== "undefined") {
+      window.open(
+        `/cinema-studio/${selectedProjectId}/assets`,
+        "_blank",
+        "noopener,noreferrer"
+      );
+    }
+  };
+
+  const handleStartRenameProject = () => {
+    pendingRenameFocusRef.current = true;
+    setProjectNameDraft(activeProjectName);
+    setIsRenamingProject(true);
+  };
+
+  const handleSaveProjectName = async () => {
+    const trimmed = projectNameDraft.trim();
+    setIsRenamingProject(false);
+    if (!trimmed || trimmed === activeProjectName.trim() || !selectedProjectId) return;
+    try {
+      await updateProject({
+        projectId: selectedProjectId,
+        projectData: { project_name: trimmed },
+      });
+    } catch {
+      // Optimistic rollback handled by useUpdateProject
+    }
+  };
+
+  const handleProjectMenuCloseAutoFocus = (e) => {
+    if (pendingRenameFocusRef.current) {
+      e.preventDefault();
+      pendingRenameFocusRef.current = false;
+      projectNameInputRef.current?.focus();
+      projectNameInputRef.current?.select();
+    }
+  };
+
+  const renderProjectMenuItems = ({ Label, Item, Separator }) => (
+    <>
+      <Label>Actions</Label>
+      <Item onSelect={handleOpenProjectInNewTab}>
+        <MenuItemContent icon="link-square-02">Open in new tab</MenuItemContent>
+      </Item>
+      <Item onSelect={handleStartRenameProject}>
+        <MenuItemContent icon="pencil-edit-02">Rename</MenuItemContent>
+      </Item>
+      <Item onSelect={() => setIsCreateFolderOpen(true)}>
+        <MenuItemContent icon="folder-add">Add folder</MenuItemContent>
+      </Item>
+      <Separator />
+      <Item variant="destructive" onSelect={() => setIsDeletingProject(true)}>
+        <MenuItemContent icon="delete-02">Delete</MenuItemContent>
+      </Item>
+    </>
+  );
+
+  const handleConfirmDeleteProject = async () => {
+    if (!selectedProjectId) return;
+    setIsDeletingProject(false);
+    router.push("/cinema-studio");
+    try {
+      await deleteProject(selectedProjectId);
+    } catch {
+      // Optimistic rollback handled by useDeleteProject
+    }
+  };
 
   const handleSetColor = async (folderId, colorHex) => {
     if (!folderId || !selectedProjectId) return;
@@ -214,7 +351,18 @@ export function LeftNavigationRail() {
   const isCharactersActive = pathname?.includes("/characters");
   const isElementsActive = pathname?.includes("/elements");
   const isTrashActive = pathname?.includes("/trash");
-  const currentActiveTab = optimisticTab || (isCharactersActive ? "characters" : isElementsActive ? "elements" : isTrashActive ? "trash" : "assets");
+  const isCollectionActive = Boolean(activeCollectionId);
+  const currentActiveTab =
+    optimisticTab ||
+    (isCharactersActive
+      ? "characters"
+      : isElementsActive
+        ? "elements"
+        : isTrashActive
+          ? "trash"
+          : isCollectionActive
+            ? null
+            : "assets");
 
   const handleToggleExpand = (e) => {
     e?.stopPropagation();
@@ -229,125 +377,77 @@ export function LeftNavigationRail() {
     ? `/cinema-studio/${selectedProjectId}/characters`
     : `/cinema-studio/${selectedProjectId}/characters/new`;
 
+  const homeNavItem = {
+    id: "home",
+    label: "Accueil",
+    icon: "home-03",
+    href: "/cinema-studio",
+    isActive: false,
+  };
+
   const mainNavItems = [
-    {
-      id: "home",
-      label: "Accueil",
-      icon: "chevron_left",
-      href: "/cinema-studio",
-      isActive: false,
-    },
-    {
-      id: "assets",
-      label: "Assets",
-      icon: "image",
-      href: `/cinema-studio/${selectedProjectId}/assets`,
-      isActive: currentActiveTab === "assets",
-    },
     {
       id: "elements",
       label: "Éléments",
-      icon: "alternate_email",
+      icon: "at",
       href: elementsHref,
       isActive: currentActiveTab === "elements",
     },
     {
       id: "characters",
       label: "Personnages",
-      icon: "accessibility_new",
+      icon: "user",
       href: charactersHref,
       isActive: currentActiveTab === "characters",
     },
   ];
 
+  const allAssetsItem = {
+    id: "assets",
+    label: "All assets",
+    icon: "image-02",
+    href: `/cinema-studio/${selectedProjectId}/assets`,
+    isActive: currentActiveTab === "assets",
+  };
+
   const trashItem = {
     id: "trash",
     label: "Corbeille",
-    icon: "delete",
+    icon: "delete-02",
     href: `/cinema-studio/${selectedProjectId}/trash`,
     isActive: currentActiveTab === "trash",
   };
 
-  const renderNavItem = (item) => {
-    if (item.id === "home") {
-      return (
-        <div key={item.id} className="flex h-12 shrink-0 items-center gap-2 px-2" bis_skin_checked="1">
-          <Button
-            asChild
-            size="m"
-            variant="ghost"
-            data-tour="sidebar-back"
-            className="w-full justify-start px-2 py-1.5 flex items-center h-button-m group"
-            title={!isExpanded ? item.label : undefined}
-          >
-            <Link
-              href={item.href}
-              prefetch={true}
-              onClick={() => setOptimisticTab(item.id)}
-            >
-              <span
-                className={cn(
-                  "flex items-center justify-center size-5 shrink-0 text-icon-secondary group-hover:text-icon-primary transition-colors",
-                  isExpanded && "mr-1.5"
-                )}
-              >
-                <GoogleIcon iconName={item.icon || "chevron_left"} className="text-base" />
-              </span>
-              <span
-                className={cn(
-                  "tracking-normal truncate flex-1 text-left font-medium whitespace-nowrap rail-label-transition",
-                  isExpanded ? "opacity-100" : "opacity-0 pointer-events-none"
-                )}
-              >
-                {item.label}
-              </span>
-            </Link>
-          </Button>
-          <div aria-hidden="true" className={cn("size-7 shrink-0", !isExpanded && "hidden")} bis_skin_checked="1" />
-        </div>
-      );
-    }
-
-    return (
-      <Button
-        key={item.id}
-        asChild
-        size="m"
-        variant="ghost"
-        className={cn(
-          "w-full justify-start p-0 gap-0 overflow-hidden",
-          item.isActive
-            ? "bg-surface-elevated text-on-surface shadow-none hover:bg-surface-elevated hover:text-on-surface"
-            : "text-on-surface-variant hover:text-on-surface hover:bg-ui-button-hover"
-        )}
-        title={!isExpanded ? item.label : undefined}
+  const renderNavItem = (item, extraClassName) => (
+    <Button
+      key={item.id}
+      asChild
+      variant="nav"
+      data-active={item.isActive ? "true" : undefined}
+      data-tour={item.id === "home" ? "sidebar-back" : undefined}
+      className={cn("group overflow-hidden", !isExpanded && "justify-center", extraClassName)}
+      title={!isExpanded ? item.label : undefined}
+    >
+      <Link
+        href={item.href}
+        prefetch={true}
+        aria-current={item.isActive ? "page" : undefined}
+        onClick={() => setOptimisticTab(item.id)}
       >
-        <Link
-          href={item.href}
-          prefetch={true}
-          onClick={() => setOptimisticTab(item.id)}
+        <span className="relative size-5 flex items-center justify-center shrink-0 text-icon-primary">
+          <HugeIcon name={item.icon} />
+        </span>
+        <span
+          className={cn(
+            "truncate flex-1 text-left",
+            !isExpanded && "sr-only"
+          )}
         >
-          <span className="w-[48px] h-full shrink-0 flex items-center justify-center">
-            <GoogleIcon
-              iconName={item.icon}
-              className={cn(
-                "text-xl shrink-0",
-                item.isActive ? "text-icon-primary" : "text-icon-secondary"
-              )}
-            />
-          </span>
-          <span
-            className={cn(
-              "tracking-normal truncate flex-1 pr-2 whitespace-nowrap rail-label-transition",
-              isExpanded ? "opacity-100" : "opacity-0 pointer-events-none"
-            )}
-          >
-            {item.label}
-          </span>
-        </Link>
-      </Button>
-    );
-  };
+          {item.label}
+        </span>
+      </Link>
+    </Button>
+  );
 
   const renderFolderNode = (node) => {
     const folderName = node.name || node.folder_name || "Collection";
@@ -356,7 +456,7 @@ export function LeftNavigationRail() {
     const isNodeLiked = Boolean(favoriteFolderIds[node.id] ?? node.favorited ?? node.is_liked);
 
     const folderIconElement = (
-      <FolderGlyphIcon color={folderColor} size={18} />
+      <FolderGlyphIcon color={folderColor} size={20} />
     );
 
     const labelElement = (
@@ -364,65 +464,64 @@ export function LeftNavigationRail() {
     );
 
     const folderContextMenu = (
-      <ContextMenuContent className="w-52">
+      <ContextMenuContent>
         <ContextMenuItem onClick={() => handleOpenCollectionInNewTab(node.id)}>
-          <GoogleIcon iconName="open_in_new" className="text-base" />
-          <span>Ouvrir dans un nouvel onglet</span>
+          <MenuItemContent icon="link-square-02">Ouvrir dans un nouvel onglet</MenuItemContent>
         </ContextMenuItem>
         <ContextMenuItem onClick={() => setCreateSubfolderParentId(node.id)}>
-          <GoogleIcon iconName="create_new_folder" className="text-base" />
-          <span>Nouveau sous-dossier</span>
+          <MenuItemContent icon="folder-add">Nouveau sous-dossier</MenuItemContent>
         </ContextMenuItem>
         <ContextMenuItem onClick={() => setEditingFolder(node)}>
-          <GoogleIcon iconName="edit" className="text-base" />
-          <span>Edit</span>
+          <MenuItemContent icon="pencil-edit-02">Edit</MenuItemContent>
         </ContextMenuItem>
         <ContextMenuItem onClick={() => setMovingFolder(node)}>
-          <GoogleIcon iconName="drive_file_move" className="text-base" />
-          <span>Déplacer vers...</span>
+          <MenuItemContent icon="folder-transfer">Déplacer vers...</MenuItemContent>
         </ContextMenuItem>
         <ContextMenuItem onClick={() => handleToggleLike(node.id)}>
-          <GoogleIcon
-            iconName="favorite"
-            fill={isNodeLiked}
-            className={cn("text-base", isNodeLiked && "text-red-400 fill-red-400")}
-          />
-          <span>{isNodeLiked ? "Unlike collection" : "Like collection"}</span>
+          <MenuItemContent
+            icon="favourite"
+            iconClassName={isNodeLiked ? "text-error" : undefined}
+          >
+            {isNodeLiked ? "Unlike collection" : "Like collection"}
+          </MenuItemContent>
         </ContextMenuItem>
         <ContextMenuItem onClick={() => handleDownload(node)} disabled={isDownloading}>
-          <GoogleIcon iconName="download" className="text-base" />
-          <span>{isDownloading ? "Downloading..." : "Download collection"}</span>
+          <MenuItemContent icon="download-04">
+            {isDownloading ? "Downloading..." : "Download collection"}
+          </MenuItemContent>
         </ContextMenuItem>
         <ContextMenuSeparator />
         <ContextMenuSub>
           <ContextMenuSubTrigger>
-            <GoogleIcon iconName="palette" className="text-base" />
-            <span>Couleur</span>
+            <MenuItemContent icon="paint-board">Couleur</MenuItemContent>
           </ContextMenuSubTrigger>
-          <ContextMenuSubContent className="w-44 p-1">
+          <ContextMenuSubContent>
             {FOLDER_COLOR_OPTIONS.map((c) => (
               <ContextMenuItem
                 key={c.id}
                 onClick={() => handleSetColor(node.id, c.hex)}
-                className="flex items-center gap-2"
               >
-                <span className={cn("size-3 rounded-full shrink-0", c.bgClass)} />
-                <span className="truncate">{c.label}</span>
-                {node.color?.toLowerCase() === c.hex.toLowerCase() && (
-                  <GoogleIcon iconName="check" className="text-xs ml-auto text-on-surface" />
-                )}
+                <MenuItemContent
+                  swatchClassName={c.bgClass}
+                  checked={node.color?.toLowerCase() === c.hex.toLowerCase()}
+                >
+                  {c.label}
+                </MenuItemContent>
               </ContextMenuItem>
             ))}
             <ContextMenuSeparator />
             <ContextMenuItem
               onClick={() => handleSetColor(node.id, null)}
-              className="flex items-center gap-2"
             >
-              <span className="size-3 rounded-full shrink-0 border border-border folder-swatch-white" />
-              <span>Blanc (Défaut)</span>
-              {(!node.color || node.color.toLowerCase() === DEFAULT_FOLDER_GRADIENT.hex.toLowerCase()) && (
-                <GoogleIcon iconName="check" className="text-xs ml-auto text-on-surface" />
-              )}
+              <MenuItemContent
+                swatchClassName="border border-border folder-swatch-white"
+                checked={
+                  !node.color ||
+                  node.color.toLowerCase() === DEFAULT_FOLDER_GRADIENT.hex.toLowerCase()
+                }
+              >
+                Blanc (Défaut)
+              </MenuItemContent>
             </ContextMenuItem>
           </ContextMenuSubContent>
         </ContextMenuSub>
@@ -431,11 +530,16 @@ export function LeftNavigationRail() {
           variant="destructive"
           onClick={() => setDeletingFolder(node)}
         >
-          <GoogleIcon iconName="delete" className="text-base" />
-          <span>Supprimer</span>
+          <MenuItemContent icon="delete-02">Supprimer</MenuItemContent>
         </ContextMenuItem>
       </ContextMenuContent>
     );
+
+    const isFolderDragOver =
+      dragOverTarget?.type === "add-to-collection" && dragOverTarget.collectionId === node.id;
+    const dragHighlightClass = isFolderDragOver
+      ? "bg-surface-tonal-hover ring-1 ring-text-primary/70"
+      : undefined;
 
     if (hasChildren) {
       return (
@@ -445,6 +549,9 @@ export function LeftNavigationRail() {
           element={labelElement}
           icon={folderIconElement}
           contextMenu={folderContextMenu}
+          data-collection-drop-id={node.id}
+          data-drag-over={isFolderDragOver ? "true" : undefined}
+          className={dragHighlightClass}
           isSelectable
         >
           {node.children.map(renderFolderNode)}
@@ -459,6 +566,9 @@ export function LeftNavigationRail() {
         element={labelElement}
         icon={folderIconElement}
         contextMenu={folderContextMenu}
+        data-collection-drop-id={node.id}
+        data-drag-over={isFolderDragOver ? "true" : undefined}
+        className={dragHighlightClass}
         isSelectable
       />
     );
@@ -469,89 +579,217 @@ export function LeftNavigationRail() {
       ref={asideRef}
       aria-label="Navigation Studio"
       style={{
-        width: isExpanded ? `${sidebarWidth}px` : "var(--studio-sidebar-width, 52px)",
+        width: isExpanded ? `${sidebarWidth}px` : "var(--studio-sidebar-width, 56px)",
+        maxWidth: `${DEFAULT_EXPANDED_WIDTH}px`,
       }}
       className={cn(
-        "h-full shrink-0 relative z-40 bg-transparent flex flex-col select-none pt-0 pb-3 px-0 rounded-2xl border border-border-subtle",
-        isResizing ? "transition-none select-none" : "rail-smooth-transition"
+        "h-full shrink-0 relative z-40 bg-transparent flex flex-col gap-y-4 select-none px-2 py-3 rounded-2xl border border-border-subtle",
+        isResizing ? "transition-none" : "transition-all duration-200 ease-out"
       )}
     >
-      {/* ── Fixed Top Spacer (independent of scroll) ── */}
-      <div className="w-full shrink-0 h-4" />
-
-      {/* ── Top Navigation Items: Générations, Éléments, Personnages ── */}
-      <div className="w-full shrink-0 px-0.5">
-        <nav className="flex flex-col gap-1.5 w-full">
-          {mainNavItems.map(renderNavItem)}
-        </nav>
-      </div>
-
-      {/* ── Collections Tree Section (when expanded) ── */}
-      {isExpanded ? (
-        <div className="flex flex-col flex-1 min-h-0 mt-3 pt-3 border-t border-border-subtle px-2 overflow-hidden">
-          <div className="flex items-center justify-between px-2 pb-1.5 shrink-0">
-            <span className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">
-              Collections
-            </span>
-            {rawFoldersList.length > 0 && (
-              <span className="text-xs text-on-surface-variant/70 font-normal">
-                {rawFoldersList.length}
-              </span>
+      {/* ── Primary Navigation & Collections Sections ── */}
+      <div className="flex w-full flex-1 flex-col gap-y-4 min-h-0">
+        <nav
+          aria-label="Navigation principale"
+          className="flex flex-col gap-0.5 items-start w-full shrink-0"
+        >
+          <div
+            className={cn(
+              "flex w-full items-center",
+              isExpanded ? "flex-row justify-between gap-1.5" : "flex-col-reverse gap-1"
             )}
+          >
+            {renderNavItem(homeNavItem, isExpanded ? "w-auto flex-1 shrink min-w-0" : undefined)}
+            <IconButton
+              type="button"
+              variant="tonal"
+              onClick={handleToggleExpand}
+              className="shrink-0 rounded-lg"
+              title={isExpanded ? "Réduire la barre" : "Développer la barre"}
+              aria-label={isExpanded ? "Réduire la barre" : "Développer la barre"}
+            >
+              <HugeIcon
+                name="sidebar-left-01"
+                className={cn(
+                  "transition-transform duration-200",
+                  !isExpanded && "rotate-180"
+                )}
+              />
+            </IconButton>
           </div>
 
-          <div className="flex-1 overflow-y-auto overflow-x-hidden min-h-0 pr-1 rail-smooth-transition">
-            {folderTree.length > 0 ? (
-              <FileTree
-                selectedId={activeCollectionId}
-                onSelectChange={handleSelectCollection}
-                size="m"
-                className="w-full"
+          {isExpanded && (
+            <ContextMenu>
+              <ContextMenuTrigger asChild>
+                <div
+                  data-testid="sidebar-project-row"
+                  className="flex items-center justify-between gap-1.5 w-full min-h-[34px] px-2 py-1 my-3 rounded-lg border border-transparent hover:bg-surface-nav-active/60 transition-colors"
+                >
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                    <span className="relative size-5 flex items-center justify-center shrink-0 text-icon-primary">
+                      <HugeIcon name="film-02" />
+                    </span>
+                    {isRenamingProject ? (
+                      <Input
+                        ref={projectNameInputRef}
+                        type="text"
+                        value={projectNameDraft}
+                        onChange={(e) => setProjectNameDraft(e.target.value.slice(0, 120))}
+                        onBlur={handleSaveProjectName}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            e.currentTarget.blur();
+                          } else if (e.key === "Escape") {
+                            e.preventDefault();
+                            setIsRenamingProject(false);
+                          }
+                        }}
+                        aria-label="Nom du projet"
+                        className="h-7 px-1.5 py-0 ds-text-caption-l flex-1 min-w-0 rounded-md"
+                      />
+                    ) : (
+                      <span
+                        onDoubleClick={handleStartRenameProject}
+                        title={activeProjectName}
+                        className="truncate font-sans ds-text-caption-l font-medium text-text-primary cursor-default"
+                      >
+                        {activeProjectName}
+                      </span>
+                    )}
+                  </div>
+
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <IconButton
+                        type="button"
+                        variant="ghost"
+                        size="xs"
+                        aria-label="Actions du projet"
+                        title="Actions du projet"
+                        className="shrink-0 rounded-md text-muted-foreground hover:text-text-primary"
+                      >
+                        <HugeIcon name="more-vertical" />
+                      </IconButton>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                      align="start"
+                      onCloseAutoFocus={handleProjectMenuCloseAutoFocus}
+                    >
+                      {renderProjectMenuItems({
+                        Label: DropdownMenuLabel,
+                        Item: DropdownMenuItem,
+                        Separator: DropdownMenuSeparator,
+                      })}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              </ContextMenuTrigger>
+              <ContextMenuContent onCloseAutoFocus={handleProjectMenuCloseAutoFocus}>
+                {renderProjectMenuItems({
+                  Label: ContextMenuLabel,
+                  Item: ContextMenuItem,
+                  Separator: ContextMenuSeparator,
+                })}
+              </ContextMenuContent>
+            </ContextMenu>
+          )}
+
+          {mainNavItems.map((item) => renderNavItem(item))}
+        </nav>
+
+        {/* ── All Assets & Folders Tree Section ── */}
+        <section
+          aria-label="Folders"
+          className="flex flex-col gap-1.5 items-start w-full flex-1 min-h-0 overflow-hidden"
+        >
+          {isExpanded && (
+            <div className="flex items-center justify-between w-full px-2 shrink-0">
+              <p className="font-sans text-sm font-normal text-muted-foreground">
+                Folders
+              </p>
+            </div>
+          )}
+
+          <div className="flex-1 w-full overflow-y-auto overflow-x-hidden min-h-0 custom-scrollbar flex flex-col gap-0.5">
+            <Button
+              asChild
+              variant="nav"
+              data-active={allAssetsItem.isActive ? "true" : undefined}
+              data-drop-project-root="true"
+              data-drag-over={dragOverTarget?.type === "move-to-root" ? "true" : undefined}
+              className={cn(
+                "group overflow-hidden shrink-0",
+                !isExpanded && "justify-center",
+                dragOverTarget?.type === "move-to-root" &&
+                  "bg-surface-tonal-hover ring-1 ring-text-primary/70"
+              )}
+              title={!isExpanded ? allAssetsItem.label : undefined}
+            >
+              <Link
+                href={allAssetsItem.href}
+                prefetch={true}
+                aria-current={allAssetsItem.isActive ? "page" : undefined}
+                onClick={() => setOptimisticTab("assets")}
               >
-                {folderTree.map(renderFolderNode)}
-              </FileTree>
-            ) : (
-              <div className="px-2 py-3 text-xs text-on-surface-variant/60 italic text-left">
-                Aucune collection
+                <span className="relative size-5 flex items-center justify-center shrink-0 text-icon-primary">
+                  <HugeIcon name={allAssetsItem.icon} />
+                </span>
+                <span
+                  className={cn(
+                    "truncate flex-1 text-left",
+                    !isExpanded && "sr-only"
+                  )}
+                >
+                  {allAssetsItem.label}
+                </span>
+              </Link>
+            </Button>
+
+            {isExpanded && (
+              <div className="flex flex-col gap-0.5 pl-4 w-full">
+                <Button
+                  type="button"
+                  variant="nav"
+                  onClick={() => setIsCreateFolderOpen(true)}
+                  className="group overflow-hidden text-muted-foreground hover:text-text-primary"
+                >
+                  <span className="relative size-5 flex items-center justify-center shrink-0">
+                    <HugeIcon name="folder-add" />
+                  </span>
+                  <span className="truncate flex-1 text-left">
+                    Add folder
+                  </span>
+                </Button>
+
+                {folderTree.length > 0 && (
+                  <FileTree
+                    selectedId={activeCollectionId}
+                    onSelectChange={handleSelectCollection}
+                    className="w-full"
+                  >
+                    {folderTree.map(renderFolderNode)}
+                  </FileTree>
+                )}
               </div>
             )}
           </div>
-        </div>
-      ) : (
-        /* ── Flexible Space (pushes bottom section to bottom) ── */
-        <div className="flex-1 min-h-[20px]" />
-      )}
-
-      {/* ── Dedicated Bottom Actions: Corbeille (Trash) & Toggle Button ── */}
-      <div className="mt-auto flex flex-col gap-1.5 pt-2 pb-2 mb-[30px] w-full shrink-0 px-0.5">
-        {renderNavItem(trashItem)}
-
-        <Button
-          type="button"
-          variant="ghost"
-          size="m"
-          onClick={handleToggleExpand}
-          className="w-full p-0 gap-0 justify-start overflow-hidden text-on-surface-variant hover:text-on-surface"
-          title={isExpanded ? "Réduire la barre" : "Développer la barre"}
-          aria-label={isExpanded ? "Réduire la barre" : "Développer la barre"}
-        >
-          <span className="w-[48px] h-full shrink-0 flex items-center justify-center">
-            {isExpanded ? (
-              <GoogleIcon iconName="left_panel_close" className="text-xl text-icon-secondary shrink-0" />
-            ) : (
-              <GoogleIcon iconName="left_panel_open" className="text-xl text-icon-secondary shrink-0" />
-            )}
-          </span>
-          <span
-            className={cn(
-              "tracking-normal truncate flex-1 text-left pr-2 whitespace-nowrap rail-label-transition",
-              isExpanded ? "opacity-100" : "opacity-0 pointer-events-none"
-            )}
-          >
-            Réduire
-          </span>
-        </Button>
+        </section>
       </div>
+
+      {/* ── Dedicated Bottom Action: Corbeille (Trash) ── */}
+      <div className="mt-auto flex flex-col gap-0.5 items-start w-full shrink-0">
+        {renderNavItem(trashItem)}
+      </div>
+
+      {isCreateFolderOpen && (
+        <CreateFolderDialog
+          open={isCreateFolderOpen}
+          onOpenChange={setIsCreateFolderOpen}
+          parentId={null}
+          projectId={selectedProjectId}
+        />
+      )}
 
       {createSubfolderParentId && (
         <CreateFolderDialog
@@ -586,6 +824,16 @@ export function LeftNavigationRail() {
           projectId={selectedProjectId}
           itemType="collection"
           item={movingFolder}
+        />
+      )}
+
+      {isDeletingProject && (
+        <ConfirmDeleteDialog
+          open={isDeletingProject}
+          onOpenChange={setIsDeletingProject}
+          onConfirm={handleConfirmDeleteProject}
+          title="Supprimer le projet"
+          description={`Êtes-vous sûr de vouloir supprimer "${activeProjectName}" ?`}
         />
       )}
 

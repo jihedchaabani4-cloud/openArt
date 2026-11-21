@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 
-import { GoogleIcon } from "@/components/primitives/GoogleIcon";
+import { HugeIcon } from "@/components/primitives/HugeIcon";
 import { UserDropdown } from "@/components/layout/UserDropdown";
 
 export function AssetsNavbar({ hidden = false }) {
@@ -24,7 +24,7 @@ export function AssetsNavbar({ hidden = false }) {
             className="inline-flex h-10 w-10 items-center justify-center rounded-sm text-white/72 transition hover:bg-white/5 hover:text-white"
             aria-label="Back to home"
           >
-            <GoogleIcon iconName="arrow_back" className="text-2xl" />
+            <HugeIcon name="arrow-left-02" size="lg" />
           </Link>
 
           <Link

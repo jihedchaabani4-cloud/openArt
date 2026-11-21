@@ -22,10 +22,9 @@ export function StudioNavbarCenter({
                 <Input
                     ref={searchInputRef}
                     variant="ghost"
-                    googleIcon="search"
+                    iconName="search-01"
                     placeholder="Search..."
-                    containerClassName="h-full max-h-full justify-center flex"
-                    className="max-h-full"
+                    containerClassName="flex items-center"
                     onClear={searchExpanded ? () => { setFilter('prompt', ''); handleCloseSearch?.(); } : undefined}
                     type="search"
                     value={filters.prompt || ""}

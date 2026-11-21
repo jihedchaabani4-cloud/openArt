@@ -9,7 +9,8 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/base/dropdown-menu";
-import { GoogleIcon } from "@/components/primitives/GoogleIcon";
+import { MenuItemContent } from "@/components/base/menu";
+import { HugeIcon } from "@/components/primitives/HugeIcon";
 import { IconButton } from "@/components/base/icon-button";
 
 /**
@@ -79,24 +80,18 @@ export function EntityEditNavbar({
                   title={addTitle}
                   aria-label={addTitle}
                 >
-                  <GoogleIcon iconName="add" className="text-xl text-white" />
+                  <HugeIcon name="add-01" className="text-white" />
                 </IconButton>
               </DropdownMenuTrigger>
-              <DropdownMenuContent variant="normal" align="end" sideOffset={6} className="w-52 p-1.5">
+              <DropdownMenuContent align="end">
                 {onUpload && (
-                  <DropdownMenuItem
-                    onSelect={() => onUpload()}
-                  >
-                    <GoogleIcon iconName="upload" className="text-xl text-white/80 shrink-0" />
-                    <span className="font-medium">Importer depuis l'ordinateur</span>
+                  <DropdownMenuItem onSelect={() => onUpload()}>
+                    <MenuItemContent icon="upload-04">Importer depuis l&apos;ordinateur</MenuItemContent>
                   </DropdownMenuItem>
                 )}
                 {onOpenAssets && (
-                  <DropdownMenuItem
-                    onSelect={() => onOpenAssets()}
-                  >
-                    <GoogleIcon iconName="perm_media" className="text-xl text-white/80 shrink-0" />
-                    <span className="font-medium">Depuis le projet</span>
+                  <DropdownMenuItem onSelect={() => onOpenAssets()}>
+                    <MenuItemContent icon="album-02">Depuis le projet</MenuItemContent>
                   </DropdownMenuItem>
                 )}
               </DropdownMenuContent>
@@ -112,10 +107,9 @@ export function EntityEditNavbar({
               title={isLiked ? "Retirer des favoris" : "Ajouter aux favoris"}
               aria-label={isLiked ? "Retirer des favoris" : "Ajouter aux favoris"}
             >
-              <GoogleIcon
-                iconName="favorite"
-                fill={isLiked}
-                className="text-xl text-white"
+              <HugeIcon
+                name="favourite"
+                className="text-white"
               />
             </IconButton>
           )}
@@ -125,12 +119,12 @@ export function EntityEditNavbar({
           {onDelete && (
             <NavbarAction
               variant="ghost"
-              icon="delete"
+              icon="delete-02"
               size="icon"
               title={deleteLabel}
               aria-label={deleteLabel}
               onClick={onDelete}
-              className="text-white hover:text-white hover:bg-white/10 h-8 w-8 transition-colors cursor-pointer rounded-sm"
+              className="text-white hover:text-white hover:bg-white/10 h-7 w-7 transition-colors cursor-pointer rounded-sm"
             />
           )}
 

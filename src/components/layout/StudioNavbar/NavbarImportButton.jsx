@@ -2,22 +2,16 @@
 
 import { useRef, useState } from "react";
 import { usePathname } from "next/navigation";
-import { GoogleIcon } from "@/components/primitives/GoogleIcon";
+import { HugeIcon } from "@/components/primitives/HugeIcon";
 import { useUploadMedia } from "@/features/media";
 import { CreateFolderDialog } from "@/components/cinema-studio/collections/CreateFolderDialog";
 import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows";
 import { Button } from "@/components/base/button";
 import { toast } from "sonner";
 import { logger } from "@/shared/lib/logger";
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from "@/components/base/dropdown-menu";
 
 export function NavbarImportButton() {
-  const { selectedProjectId: projectId, activeStudioTab, setActiveCollectionId } = useGenerationsStore();
+  const { selectedProjectId: projectId, activeStudioTab } = useGenerationsStore();
   const fileInputRef = useRef(null);
   const pathname = usePathname();
 
@@ -27,19 +21,16 @@ export function NavbarImportButton() {
   const currentCollectionId = collectionMatch ? collectionMatch[1] : null;
 
   const { uploadMedia, isUploading } = useUploadMedia();
-  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [isCreateFolderOpen, setIsCreateFolderOpen] = useState(false);
 
   if (activeStudioTab !== "assets" && activeStudioTab !== "generations" && activeStudioTab !== "collection") return null;
 
   const handleUploadClick = () => {
-    setDropdownOpen(false);
     if (!projectId) return;
     fileInputRef.current?.click();
   };
 
   const handleCreateCollectionClick = () => {
-    setDropdownOpen(false);
     if (!projectId) return;
     setIsCreateFolderOpen(true);
   };
@@ -73,45 +64,31 @@ export function NavbarImportButton() {
         accept="image/*,video/mp4,video/webm"
       />
 
-      <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
-        <DropdownMenuTrigger asChild>
-          <Button
-            disabled={isUploading || !projectId}
-            variant="ghost"
-            className="size-8 sm:size-9 max-h-full p-0 aspect-square"
-            title={projectId ? "Add or Upload" : "Project is still loading"}
-          >
-            {isUploading ? (
-              <GoogleIcon iconName="progress_activity" className="text-[13px] animate-spin text-white/40" />
-            ) : (
-              <GoogleIcon iconName="add" className="text-[13px]" />
-            )}
-          </Button>
-        </DropdownMenuTrigger>
+      <Button
+        type="button"
+        disabled={isUploading || !projectId}
+        variant="outline"
+        onClick={handleUploadClick}
+        title={projectId ? "Upload media" : "Project is still loading"}
+      >
+        {isUploading ? (
+          <HugeIcon name="loading-03" className="animate-spin text-text-secondary" />
+        ) : (
+          <HugeIcon name="upload-04" />
+        )}
+        <span>Upload</span>
+      </Button>
 
-        <DropdownMenuContent
-          variant="normal"
-          align="end"
-          className="w-52 p-1.5 flex flex-col gap-0.5 font-sans"
-        >
-          <DropdownMenuItem
-            onClick={handleUploadClick}
-            className="flex items-center gap-3 cursor-pointer pl-3 pr-4 py-2 hover:bg-white/10 text-white min-h-[2.125rem] text-[14px] leading-5 font-medium transition-colors duration-100 ease-in-out"
-          >
-            <GoogleIcon iconName="upload" className="text-[20px] text-white/80 shrink-0" />
-            <span className="font-medium">Upload media</span>
-          </DropdownMenuItem>
-
-          <DropdownMenuItem
-            onClick={handleCreateCollectionClick}
-            disabled={!projectId}
-            className="flex items-center gap-3 cursor-pointer pl-3 pr-4 py-2 hover:bg-white/10 text-white min-h-[2.125rem] text-[14px] leading-5 font-medium transition-colors duration-100 ease-in-out"
-          >
-            <GoogleIcon iconName="create_new_folder" className="text-[20px] text-white/80 shrink-0" />
-            <span className="font-medium">Create collection</span>
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <Button
+        type="button"
+        disabled={!projectId}
+        variant="outline"
+        onClick={handleCreateCollectionClick}
+        title={projectId ? "Create folder" : "Project is still loading"}
+      >
+        <HugeIcon name="folder-add" />
+        <span>Folder</span>
+      </Button>
 
       <CreateFolderDialog
         open={isCreateFolderOpen}

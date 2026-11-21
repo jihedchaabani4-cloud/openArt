@@ -7,7 +7,7 @@ Consolidated architecture for all UI components across the application.
 ```text
 src/components/
 ├── base/                    # The 12 canonical DESIGN.md Base Primitives (button, icon-button, select, dropdown-menu, pill-tabs, section-card, accordion, dashed-upload-slot, interactive-list-row, switch, input, checkbox, badge)
-├── primitives/              # Shared low-level Radix/UI helpers (dialog, textarea, tooltip, popover, slider, skeleton, avatar, card, context-menu, hover-card, radio-group, collapsible, LoadingScreen, ConfirmDeleteDialog, GoogleIcon, etc.)
+├── primitives/              # Shared low-level Radix/UI helpers (dialog, textarea, tooltip, popover, slider, skeleton, avatar, card, context-menu, hover-card, radio-group, collapsible, LoadingScreen, ConfirmDeleteDialog, HugeIcon, etc.)
 ├── layout/                  # App shell, navigation, auth & shared drawers (StudioLayout, StudioNavbar, NavbarCore, LoginDialog, HowToDrawer, etc.)
 └── cinema-studio/           # Cinema Studio domain components grouped by feature:
     ├── prompt-bar/          # Prompt bar & settings components (FlowPromptBoxSettings, StudioSettingsDropdown, BaseSelector, etc.)

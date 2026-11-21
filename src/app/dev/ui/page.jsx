@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { GoogleIcon } from "@/components/primitives/GoogleIcon";
+import { HugeIcon } from "@/components/primitives/HugeIcon";
 import {
   Button,
   IconButton,
@@ -16,6 +16,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
+  MenuItemContent,
   PillTabs,
   PillTabsList,
   PillTabsTrigger,
@@ -104,7 +105,7 @@ export default function DesignSystemShowcasePage() {
             onClick={() => setActiveSection("buttons")}
             className="w-full justify-start gap-2"
           >
-            <GoogleIcon iconName="smart_button" className="text-base" />
+            <HugeIcon name="cursor-rectangle-selection-01" className="text-base" />
             <span>Buttons &amp; Actions</span>
           </Button>
           <Button
@@ -112,7 +113,7 @@ export default function DesignSystemShowcasePage() {
             onClick={() => setActiveSection("forms")}
             className="w-full justify-start gap-2"
           >
-            <GoogleIcon iconName="edit_note" className="text-base" />
+            <HugeIcon name="note-edit" className="text-base" />
             <span>Form Inputs</span>
           </Button>
           <Button
@@ -120,7 +121,7 @@ export default function DesignSystemShowcasePage() {
             onClick={() => setActiveSection("overlays")}
             className="w-full justify-start gap-2"
           >
-            <GoogleIcon iconName="layers" className="text-base" />
+            <HugeIcon name="layers-01" className="text-base" />
             <span>Overlays &amp; Dialogs</span>
           </Button>
           <Button
@@ -128,7 +129,7 @@ export default function DesignSystemShowcasePage() {
             onClick={() => setActiveSection("navigation")}
             className="w-full justify-start gap-2"
           >
-            <GoogleIcon iconName="tab" className="text-base" />
+            <HugeIcon name="browser" className="text-base" />
             <span>Navigation &amp; Tabs</span>
           </Button>
           <Button
@@ -136,7 +137,7 @@ export default function DesignSystemShowcasePage() {
             onClick={() => setActiveSection("cards")}
             className="w-full justify-start gap-2"
           >
-            <GoogleIcon iconName="dashboard" className="text-base" />
+            <HugeIcon name="dashboard-square-01" className="text-base" />
             <span>Cards &amp; Containers</span>
           </Button>
           <Button
@@ -144,7 +145,7 @@ export default function DesignSystemShowcasePage() {
             onClick={() => setActiveSection("feedback")}
             className="w-full justify-start gap-2"
           >
-            <GoogleIcon iconName="insights" className="text-base" />
+            <HugeIcon name="analytics-up" className="text-base" />
             <span>Feedback &amp; Skeletons</span>
           </Button>
           <Button
@@ -152,7 +153,7 @@ export default function DesignSystemShowcasePage() {
             onClick={() => setActiveSection("tokens")}
             className="w-full justify-start gap-2"
           >
-            <GoogleIcon iconName="palette" className="text-base" />
+            <HugeIcon name="paint-board" className="text-base" />
             <span>Design Tokens</span>
           </Button>
         </aside>
@@ -255,10 +256,10 @@ export default function DesignSystemShowcasePage() {
                     <span className="text-xs text-white/50 font-mono">ghost</span>
                     <div className="flex items-center gap-2">
                       <IconButton aria-label="Settings Ghost">
-                        <GoogleIcon iconName="settings" />
+                        <HugeIcon name="settings-02" />
                       </IconButton>
                       <IconButton aria-label="Settings Disabled" disabled>
-                        <GoogleIcon iconName="settings" />
+                        <HugeIcon name="settings-02" />
                       </IconButton>
                     </div>
                   </div>
@@ -267,10 +268,10 @@ export default function DesignSystemShowcasePage() {
                     <span className="text-xs text-white/50 font-mono">tonal</span>
                     <div className="flex items-center gap-2">
                       <IconButton variant="tonal" aria-label="Add Media">
-                        <GoogleIcon iconName="add" />
+                        <HugeIcon name="add-01" />
                       </IconButton>
                       <IconButton variant="tonal" aria-label="Add Disabled" disabled>
-                        <GoogleIcon iconName="add" />
+                        <HugeIcon name="add-01" />
                       </IconButton>
                     </div>
                   </div>
@@ -279,10 +280,10 @@ export default function DesignSystemShowcasePage() {
                     <span className="text-xs text-white/50 font-mono">outline</span>
                     <div className="flex items-center gap-2">
                       <IconButton variant="outline" aria-label="Filter Outline">
-                        <GoogleIcon iconName="tune" />
+                        <HugeIcon name="sliders-horizontal" />
                       </IconButton>
                       <IconButton variant="outline" aria-label="Filter Disabled" disabled>
-                        <GoogleIcon iconName="tune" />
+                        <HugeIcon name="sliders-horizontal" />
                       </IconButton>
                     </div>
                   </div>
@@ -291,10 +292,10 @@ export default function DesignSystemShowcasePage() {
                     <span className="text-xs text-white/50 font-mono">carousel</span>
                     <div className="flex items-center gap-2">
                       <IconButton variant="carousel" aria-label="Prev">
-                        <GoogleIcon iconName="chevron_left" />
+                        <HugeIcon name="arrow-left-01" />
                       </IconButton>
                       <IconButton variant="carousel" aria-label="Next Disabled" disabled>
-                        <GoogleIcon iconName="chevron_right" />
+                        <HugeIcon name="arrow-right-01" />
                       </IconButton>
                     </div>
                   </div>
@@ -306,13 +307,13 @@ export default function DesignSystemShowcasePage() {
                 <h3 className="text-sm font-semibold text-white/90">Segmented ButtonGroup</h3>
                 <ButtonGroup>
                   <Button variant="ghost" className="size-8 p-0" aria-label="Thumb Up">
-                    <GoogleIcon iconName="thumb_up" />
+                    <HugeIcon name="thumbs-up" />
                   </Button>
                   <Button variant="ghost" className="size-8 p-0" aria-label="Share">
-                    <GoogleIcon iconName="share" />
+                    <HugeIcon name="share-08" />
                   </Button>
                   <Button variant="ghost" className="size-8 p-0" aria-label="More">
-                    <GoogleIcon iconName="more_vert" />
+                    <HugeIcon name="more-vertical" />
                   </Button>
                 </ButtonGroup>
               </div>
@@ -336,7 +337,7 @@ export default function DesignSystemShowcasePage() {
                   <Input label="Default Input" placeholder="Enter title..." />
                   <Input variant="search" placeholder="Search prompts (bg-accent/50)..." />
                   <div className="ds-composer-well rounded-xl p-2 flex items-center gap-2">
-                    <GoogleIcon iconName="auto_awesome" className="text-base text-white/50" />
+                    <HugeIcon name="sparkles" className="text-base text-white/50" />
                     <Input variant="ghost" placeholder="Type prompt inside composer well (ghost)..." />
                   </div>
                   <Input label="Disabled State" placeholder="Cannot edit..." disabled />
@@ -461,46 +462,21 @@ export default function DesignSystemShowcasePage() {
                   </DialogContent>
                 </Dialog>
 
-                {/* Dropdown Menu (Normal Variant --ui-menu-background/30) */}
+                {/* Dropdown Menu (Canonical Unified Glass) */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="secondary">Normal Menu</Button>
+                    <Button variant="secondary">Dropdown Menu</Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent variant="normal">
+                  <DropdownMenuContent>
                     <DropdownMenuItem>
-                      <GoogleIcon iconName="edit" />
-                      <span>Rename</span>
+                      <MenuItemContent icon="pencil-edit-02">Rename</MenuItemContent>
                     </DropdownMenuItem>
                     <DropdownMenuItem>
-                      <GoogleIcon iconName="content_copy" />
-                      <span>Duplicate</span>
+                      <MenuItemContent icon="copy-01">Duplicate</MenuItemContent>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem variant="destructive">
-                      <GoogleIcon iconName="delete" />
-                      <span>Move to Trash</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-
-                {/* Dropdown Menu (Glass Variant) */}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost">Glass Menu</Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent variant="glass">
-                    <DropdownMenuItem>
-                      <GoogleIcon iconName="edit" />
-                      <span>Rename</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <GoogleIcon iconName="content_copy" />
-                      <span>Duplicate</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem variant="destructive">
-                      <GoogleIcon iconName="delete" />
-                      <span>Move to Trash</span>
+                      <MenuItemContent icon="delete-02">Move to Trash</MenuItemContent>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -523,7 +499,7 @@ export default function DesignSystemShowcasePage() {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <IconButton variant="ghost" aria-label="Help">
-                      <GoogleIcon iconName="help" />
+                      <HugeIcon name="help-circle" />
                     </IconButton>
                   </TooltipTrigger>
                   <TooltipContent>Detailed instructions</TooltipContent>
@@ -622,15 +598,15 @@ export default function DesignSystemShowcasePage() {
                 <div className="flex flex-wrap items-center gap-4">
                   <DashedUploadSlot size="square">
                     <input type="file" className="hidden" aria-hidden="true" />
-                    <GoogleIcon iconName="add" className="text-lg" />
+                    <HugeIcon name="add-01" className="text-lg" />
                     <span className="text-2xs">Square</span>
                   </DashedUploadSlot>
                   <DashedUploadSlot size="aspect">
-                    <GoogleIcon iconName="cloud_upload" className="text-lg" />
+                    <HugeIcon name="cloud-upload" className="text-lg" />
                     <span className="text-2xs">96x72 Aspect</span>
                   </DashedUploadSlot>
                   <DashedUploadSlot size="aspect" disabled>
-                    <GoogleIcon iconName="lock" className="text-lg text-white/30" />
+                    <HugeIcon name="lock-password" className="text-lg text-white/30" />
                     <span className="text-2xs text-white/30">Disabled</span>
                   </DashedUploadSlot>
                 </div>
@@ -647,7 +623,7 @@ export default function DesignSystemShowcasePage() {
                   <InteractiveListRow variant="thumbnail">
                     <div className="flex items-center gap-3">
                       <div className="size-10 rounded-lg bg-white/10 flex items-center justify-center">
-                        <GoogleIcon iconName="image" className="text-base" />
+                        <HugeIcon name="image-02" className="text-base" />
                       </div>
                       <div className="flex flex-col">
                         <span className="text-xs font-medium">Cyberpunk Hero Avatar</span>
@@ -676,7 +652,7 @@ export default function DesignSystemShowcasePage() {
                 <h3 className="text-sm font-semibold text-white/90">StatusBanner (.ds-banner-accent)</h3>
                 <StatusBanner>
                   <div className="flex items-center gap-2">
-                    <GoogleIcon iconName="bolt" className="text-amber-400" />
+                    <HugeIcon name="flash" className="text-amber-400" />
                     <span className="text-xs font-medium">Generation queue is running at high speed</span>
                   </div>
                   <Button variant="outline" size="sm">View Tasks</Button>

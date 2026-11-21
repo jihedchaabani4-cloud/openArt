@@ -38,7 +38,7 @@ describe("ElementEditNavbar", () => {
     // Dropdown trigger is rendered as a simple icon-only '+' button without text or bg
     const trigger = screen.getByTestId("import-dropdown-trigger");
     expect(trigger).toBeDefined();
-    expect(trigger.textContent).toBe("add");
+    expect(trigger.querySelector('[data-icon-name="add-01"]')).toBeTruthy();
     expect(trigger.textContent).not.toContain("Importer");
     expect(trigger.className).toMatch(/bg-transparent|ds-icon-btn/);
     expect(trigger.className).not.toMatch(/(^|\s)bg-white\/10(\s|$)/);
@@ -51,7 +51,7 @@ describe("ElementEditNavbar", () => {
 
     // Verify standardized width and compact item sizing
     const menuContent = uploadItem.closest('[data-slot="dropdown-menu-content"]');
-    expect(menuContent.className).toContain("w-52");
+    expect(menuContent.className).toContain("w-56");
     expect(menuContent.className).not.toContain("min-w-[210px]");
 
     const uploadMenuItem = uploadItem.closest('[data-slot="dropdown-menu-item"]');
@@ -80,7 +80,7 @@ describe("ElementEditNavbar", () => {
     // Should have delete button with icon and title/aria-label
     const deleteBtn = screen.getByTitle("Delete");
     expect(deleteBtn).toBeDefined();
-    expect(deleteBtn.textContent).toContain("delete");
+    expect(deleteBtn.querySelector('[data-icon-name="delete-02"]')).toBeTruthy();
     expect(deleteBtn.className).toContain("text-white");
     expect(deleteBtn.className).not.toContain("foreground-color-danger");
 
@@ -100,7 +100,7 @@ describe("ElementEditNavbar", () => {
 
     const likeBtn = screen.getByTestId("like-element-button");
     expect(likeBtn).toBeDefined();
-    expect(likeBtn.textContent).toContain("favorite");
+    expect(likeBtn.querySelector('[data-icon-name="favourite"]')).toBeTruthy();
     // When unliked: outline / white
     expect(likeBtn.className).toMatch(/text-white|ds-icon-btn/);
 
@@ -117,7 +117,7 @@ describe("ElementEditNavbar", () => {
     const likedBtn = screen.getByTestId("like-element-button");
     expect(likedBtn.className).toMatch(/text-white|ds-icon-btn/);
     expect(likedBtn.className).not.toContain("text-red-500");
-    const likedIcon = likedBtn.querySelector("span[data-mat-icon-type='font']");
+    const likedIcon = likedBtn.querySelector('[data-icon-provider="hugeicons"]');
     expect(likedIcon.className).toContain("text-white");
     expect(likedIcon.className).not.toContain("text-red-500");
   });

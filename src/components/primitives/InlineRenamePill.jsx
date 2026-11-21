@@ -2,7 +2,7 @@
 import { logger } from "@/shared/lib/logger";
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { GoogleIcon } from "@/components/primitives/GoogleIcon";
+import { HugeIcon } from "@/components/primitives/HugeIcon";
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/components/base/button";
 
@@ -120,9 +120,9 @@ export function InlineRenamePill({
           className="size-7 p-0"
         >
           {isSaving ? (
-            <GoogleIcon iconName="progress_activity" className="text-base animate-spin text-white" />
+            <HugeIcon name="loading-03" className="text-base animate-spin text-white" />
           ) : (
-            <GoogleIcon iconName="check" className="text-base font-bold" />
+            <HugeIcon name="tick-02" className="text-base font-bold" />
           )}
         </Button>
 
@@ -135,7 +135,7 @@ export function InlineRenamePill({
           aria-label="Cancel"
           className="size-7 p-0"
         >
-          <GoogleIcon iconName="close" className="text-base font-bold" />
+          <HugeIcon name="cancel-01" className="text-base font-bold" />
         </Button>
       </div>
     </div>

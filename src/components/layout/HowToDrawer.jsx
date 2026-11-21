@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { GoogleIcon } from "@/components/primitives/GoogleIcon";
+import { HugeIcon } from "@/components/primitives/HugeIcon";
 import { Button } from "@/components/base/button";
 import { IconButton } from "@/components/base/icon-button";
 
@@ -36,7 +36,7 @@ export function HowToDrawer({ isOpen, onClose }) {
               {/* Header */}
               <div className="flex items-center justify-between pb-6 border-b border-line-subtle">
                 <div className="flex items-center gap-2">
-                  <GoogleIcon iconName="auto_awesome" className="text-xl text-content-base/80" />
+                  <HugeIcon name="sparkles" size="md" className="text-content-base/80" />
                   <h2 className="text-lg font-bold text-content-base">How AI Elements Work</h2>
                 </div>
               <IconButton
@@ -45,7 +45,7 @@ export function HowToDrawer({ isOpen, onClose }) {
                 onClick={onClose}
                 aria-label="Close"
               >
-                <GoogleIcon iconName="close" className="text-xl" />
+                <HugeIcon name="cancel-01" size="md" />
               </IconButton>
             </div>
 

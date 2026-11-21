@@ -3,30 +3,16 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* ── Google Symbols font (if used by GoogleIcon) ── */
-@font-face {
-  font-family: 'Google Symbols';
-  font-style: normal;
-  font-weight: 100 700;
-  src: url('/fonts/GoogleSymbols.woff2') format('woff2');
-  font-display: swap;
-}
-
-.google-symbols {
-  font-family: 'Google Symbols', sans-serif !important;
-  font-weight: normal;
-  font-style: normal;
+/* Unlayered so it wins over external Hugeicons CDN `.hgi-stroke` and compensates optical padding */
+.huge-icon {
+  font-size: calc(var(--ds-icon-size, var(--icon-size-md)) * 1.12);
+  width: 1em;
+  height: 1em;
   line-height: 1;
-  letter-spacing: normal;
-  text-transform: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  white-space: nowrap;
-  word-wrap: normal;
-  direction: ltr;
-  -webkit-font-feature-settings: 'liga';
-  font-feature-settings: 'liga';
+  flex-shrink: 0;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -97,6 +83,8 @@
   --color-web-panel: var(--web-panel);
   --color-ui-menu-background: var(--ui-menu-background);
   --color-ui-menu-background-strong: var(--ui-menu-background-strong);
+  --color-surface-menu-glass: var(--surface-menu-glass);
+  --color-border-menu-subtle: var(--border-menu-subtle);
   --color-omni-bg: var(--omni-bg);
   --color-body-bg: var(--body-bg);
   --color-canvas-bg: var(--canvas-bg);
@@ -125,6 +113,7 @@
   --color-ui-button-error-hover: var(--ui-button-error-hover);
   --color-surface-card: var(--surface-card);
   --color-surface-secondary: var(--surface-secondary);
+  --color-surface-nav-active: var(--surface-nav-active);
   --color-surface-tonal: var(--surface-tonal);
   --color-surface-tonal-hover: var(--surface-tonal-hover);
   --color-prompt-bar-bg: var(--prompt-bar-bg);
@@ -292,6 +281,64 @@
     /* --- Typography & OpenType Features --- */
     --font-sans: var(--font-geist-sans), "Geist Sans", "Inter", ui-sans-serif, system-ui, sans-serif;
     --font-mono: var(--font-geist-mono), "Geist Mono", ui-monospace, Consolas, monospace;
+
+    /* Font Weights */
+    --type-weight-regular: 400;
+    --type-weight-medium: 500;
+    --type-weight-semibold: 600;
+    --type-weight-bold: 700;
+    --type-weight-black: 900;
+
+    /* Letter Spacing */
+    --type-tracking-tight: -0.075rem;
+    --type-tracking-slight: -0.025rem;
+    --type-tracking-heading: -0.02em;
+    --type-tracking-body: -0.01em;
+    --type-tracking-none: 0;
+    --type-tracking-wide: 0.0125rem;
+
+    /* Fixed UI, Media & Body Sizes (+25% calibrated studio readability) */
+    --type-size-xxs: 0.7875rem;                      /* 12.6px — caption-s / micro badges, section headers, shortcuts */
+    --type-leading-xxs: 1.0625rem;                   /* 17px */
+    --type-size-xs: 0.92rem;                         /* 14.7px — caption-m / unified studio buttons, menus, selects, tabs, nav, inputs */
+    --type-leading-xs: 1.25rem;                      /* 20px */
+    --type-leading-xs-relaxed: 1.3125rem;            /* 21px */
+    --type-size-control: 0.92rem;                    /* 14.7px — inputs, search, prompt bar editor */
+    --type-leading-control: 1.3125rem;               /* 21px */
+    --type-size-sm: 0.985rem;                        /* 15.8px — caption-l / navbar titles, nav links, large CTAs */
+    --type-leading-sm: 1.4375rem;                    /* 23px */
+    --type-leading-sm-tight: 1.1875rem;              /* 19px */
+    --type-size-md: 1rem;                            /* 16px — body-s / dialogs, large controls */
+    --type-leading-md: 1.5rem;                       /* 24px */
+    --type-size-lg: 1.125rem;                        /* 18px — body-m / subtitles */
+    --type-leading-lg: 1.625rem;                     /* 26px */
+    --type-size-body-l: 1.25rem;                     /* 20px — body-l / lead editorial */
+    --type-leading-body-l: 1.75rem;                  /* 28px */
+
+    /* Icon Size Scale (+25% calibrated pixel scale) */
+    --icon-size-xs: 0.92rem;                         /* 14.7px — badges, checkboxes, radio dots, xs controls */
+    --icon-size-sm: 1.0625rem;                       /* 17px — unified studio controls: buttons, icon buttons, sidebar nav, menus, inputs, selects, tabs */
+    --icon-size-md: 1.1875rem;                       /* 19px — overlay icon buttons, m controls, standalone HugeIcon fallback */
+    --icon-size-lg: 1.3125rem;                       /* 21px — large CTAs (cta-lg/lg), lg icon buttons, dialog close */
+    --icon-size-xl: 1.5625rem;                       /* 25px — prominent standalone accent icons */
+
+    /* Responsive Heading & Display Sizes (Mobile base; scales at 768px & 1280px) */
+    --type-size-h-xxs: 1.125rem;                     /* 18px -> 20px -> 20px */
+    --type-leading-h-xxs: 1.5rem;
+    --type-size-h-xs: 1.25rem;                       /* 20px -> 22px -> 24px */
+    --type-leading-h-xs: 1.5rem;
+    --type-size-h-sm: 1.5rem;                        /* 24px -> 26px -> 28px */
+    --type-leading-h-sm: 1.875rem;
+    --type-size-h-md: 2rem;                          /* 32px -> 36px -> 40px */
+    --type-leading-h-md: 2.25rem;
+    --type-size-h-lg: 2.25rem;                       /* 36px -> 42px -> 48px */
+    --type-leading-h-lg: 2.625rem;
+    --type-size-h-xl: 3rem;                          /* 48px -> 56px -> 64px */
+    --type-leading-h-xl: 3.5rem;
+    --type-size-h1: 3.5rem;                          /* 56px -> 64px -> 72px */
+    --type-leading-h1: 4rem;
+    --type-size-display: 4rem;                       /* 64px -> 80px -> 98px */
+    --type-leading-display: 4.5rem;
 
     /* --- Border Radii Scale --- */
     --radius-badge: 6px;
@@ -670,6 +717,8 @@
     --color-ui-button-error-hover: #e5484d;
     --color-ui-menu-background: rgba(68, 68, 68, 0.50);
     --color-ui-menu-background-strong: #1e1e1e;
+    --surface-menu-glass: rgba(35, 38, 42, 0.75);
+    --border-menu-subtle: rgba(255, 255, 255, 0.05);
     --blur: 40px;
     --color-web-panel: #121212;
     --color-agent-foreground: #ffffff;
@@ -811,6 +860,50 @@
     font-family: var(--font-mono);
   }
 
+  @media (min-width: 768px) {
+    :root,
+    html.dark,
+    :root.opus {
+      --type-size-h-xxs: 1.25rem;
+      --type-leading-h-xxs: 1.75rem;
+      --type-size-h-xs: 1.375rem;
+      --type-leading-h-xs: 1.75rem;
+      --type-size-h-sm: 1.625rem;
+      --type-leading-h-sm: 2rem;
+      --type-size-h-md: 2.25rem;
+      --type-leading-h-md: 2.625rem;
+      --type-size-h-lg: 2.625rem;
+      --type-leading-h-lg: 3rem;
+      --type-size-h-xl: 3.5rem;
+      --type-leading-h-xl: 4rem;
+      --type-size-h1: 4rem;
+      --type-leading-h1: 4.5rem;
+      --type-size-display: 5rem;
+      --type-leading-display: 5.25rem;
+    }
+  }
+
+  @media (min-width: 1280px) {
+    :root,
+    html.dark,
+    :root.opus {
+      --type-size-h-xs: 1.5rem;
+      --type-leading-h-xs: 1.875rem;
+      --type-size-h-sm: 1.75rem;
+      --type-leading-h-sm: 2.25rem;
+      --type-size-h-md: 2.5rem;
+      --type-leading-h-md: 3rem;
+      --type-size-h-lg: 3rem;
+      --type-leading-h-lg: 3.5rem;
+      --type-size-h-xl: 4rem;
+      --type-leading-h-xl: 4.5rem;
+      --type-size-h1: 4.5rem;
+      --type-leading-h1: 5rem;
+      --type-size-display: 6.125rem;
+      --type-leading-display: 6.25rem;
+    }
+  }
+
   input[type="search"]::-webkit-search-decoration,
   input[type="search"]::-webkit-search-cancel-button,
   input[type="search"]::-webkit-search-results-button,
@@ -850,23 +943,14 @@
   .text-body-xs { font-size: 12px; font-weight: 400; line-height: 19px; }
 
   .surface-glass,
-  .surface-menu {
-    --blur: 40px;
-    background-color: var(--ui-menu-background);
-    -webkit-backdrop-filter: blur(var(--blur, 40px));
-    backdrop-filter: blur(var(--blur, 40px));
-    border: 1px solid var(--border-subtle);
-    padding: 8px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
-  }
-
+  .surface-menu,
   .surface-listbox {
     --blur: 40px;
-    background-color: var(--ui-menu-background);
+    background-color: var(--surface-menu-glass);
     -webkit-backdrop-filter: blur(var(--blur, 40px));
     backdrop-filter: blur(var(--blur, 40px));
-    border: 1px solid var(--border-subtle);
-    padding: 8px;
+    border: 0;
+    box-shadow: 0 0 0 1px var(--border-menu-subtle);
   }
 
   /* Dual Focus Strategy */
@@ -878,6 +962,13 @@
     outline: none;
     box-shadow: none;
   }
+
+  /* Icon Size Utilities */
+  .ds-icon-xs { --ds-icon-size: var(--icon-size-xs); font-size: var(--icon-size-xs); }
+  .ds-icon-sm { --ds-icon-size: var(--icon-size-sm); font-size: var(--icon-size-sm); }
+  .ds-icon-md { --ds-icon-size: var(--icon-size-md); font-size: var(--icon-size-md); }
+  .ds-icon-lg { --ds-icon-size: var(--icon-size-lg); font-size: var(--icon-size-lg); }
+  .ds-icon-xl { --ds-icon-size: var(--icon-size-xl); font-size: var(--icon-size-xl); }
 
   /* Carousel Scroll Fade */
   .ds-scroll-fade-right {
@@ -903,24 +994,37 @@
   }
 
   .ds-nav-item {
+    position: relative;
     display: flex;
     align-items: center;
+    justify-content: flex-start;
     gap: 8px;
     width: 100%;
-    height: 38px;
-    padding: 8px;
-    border-radius: var(--radius-control);
+    height: 34px;
+    padding: 6px 8px;
+    border-radius: var(--radius-row);
     border: 1px solid transparent;
-    color: var(--text-primary-soft);
-    font-size: 14px;
-    font-weight: 500;
-    line-height: 20px;
-    transition: background-color 150ms var(--ease-standard), border-color 150ms var(--ease-standard);
+    background-color: transparent;
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    font-size: var(--type-size-sm);
+    font-weight: var(--type-weight-medium);
+    line-height: var(--type-leading-sm);
+    white-space: nowrap;
+    cursor: pointer;
+    --ds-icon-size: var(--icon-size-md);
+    transition: background-color 150ms var(--ease-standard), border-color 150ms var(--ease-standard), color 150ms var(--ease-standard);
   }
   .ds-nav-item:hover,
-  .ds-nav-item[data-active="true"] {
+  .ds-nav-item[data-active="true"],
+  .ds-nav-item[aria-current="page"],
+  .ds-nav-item[aria-selected="true"] {
     background-color: var(--surface-nav-active);
     border-color: var(--border-structural);
+  }
+  .ds-nav-item:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--focus-ring-workspace);
   }
 
   /* --- 01. Button Solid (Primary White, Large CTA, Secondary Dark) --- */
@@ -928,14 +1032,16 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    height: 38px;
-    padding: 0 16px;
-    border-radius: var(--radius-button);
+    gap: 6px;
+    height: 32px;
+    padding: 0 10px;
+    border-radius: var(--radius-row);
     background-color: var(--text-primary-soft);
     color: var(--text-inverse);
-    font-size: 16px;
-    font-weight: 500;
-    line-height: 20px;
+    font-size: var(--type-size-xs);
+    font-weight: var(--type-weight-semibold);
+    line-height: var(--type-leading-xs);
+    --ds-icon-size: var(--icon-size-sm);
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
     transition: background-color 150ms var(--ease-standard), opacity 150ms var(--ease-standard);
   }
@@ -955,14 +1061,15 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    height: 48px;
-    padding: 8px 16px;
+    height: 40px;
+    padding: 0 16px;
     border-radius: var(--radius-button);
     background-color: var(--text-primary-soft);
     color: var(--text-inverse);
-    font-size: 16px;
-    font-weight: 500;
-    line-height: 20px;
+    font-size: var(--type-size-sm);
+    font-weight: var(--type-weight-semibold);
+    line-height: var(--type-leading-sm);
+    --ds-icon-size: var(--icon-size-lg);
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
     transition: background-color 150ms var(--ease-standard);
   }
@@ -974,14 +1081,16 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    gap: 6px;
     height: 32px;
-    padding: 0 12px;
-    border-radius: var(--radius-button);
+    padding: 0 10px;
+    border-radius: var(--radius-row);
     background-color: var(--surface-secondary);
     color: var(--text-primary-soft);
-    font-size: 12px;
-    font-weight: 500;
-    line-height: 16px;
+    font-size: var(--type-size-xs);
+    font-weight: var(--type-weight-medium);
+    line-height: var(--type-leading-xs);
+    --ds-icon-size: var(--icon-size-sm);
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
     transition: background-color 150ms var(--ease-standard);
   }
@@ -994,14 +1103,16 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    height: 36px;
-    padding: 8px 16px;
-    border-radius: var(--radius-button);
+    gap: 6px;
+    height: 32px;
+    padding: 0 10px;
+    border-radius: var(--radius-row);
     background-color: var(--surface-tonal);
     color: var(--text-primary-soft);
-    font-size: 14px;
-    font-weight: 500;
-    line-height: 20px;
+    font-size: var(--type-size-xs);
+    font-weight: var(--type-weight-medium);
+    line-height: var(--type-leading-xs);
+    --ds-icon-size: var(--icon-size-sm);
     transition: background-color 150ms var(--ease-standard);
   }
   .ds-btn-tonal:hover:not(:disabled) {
@@ -1012,13 +1123,16 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    height: 32px;
-    padding: 0 12px;
-    border-radius: var(--radius-button);
+    gap: 6px;
+    height: 30px;
+    padding: 0 10px;
+    border-radius: var(--radius-row);
     background-color: var(--surface-tonal);
     color: var(--text-primary-soft);
-    font-size: 14px;
-    font-weight: 500;
+    font-size: var(--type-size-xs);
+    font-weight: var(--type-weight-medium);
+    line-height: var(--type-leading-xs);
+    --ds-icon-size: var(--icon-size-sm);
     transition: background-color 150ms var(--ease-standard);
   }
   .ds-btn-pill:hover:not(:disabled) {
@@ -1029,16 +1143,17 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    height: 38px;
-    padding: 8px 12px 8px 10px;
-    border-radius: var(--radius-button);
+    gap: 6px;
+    height: 32px;
+    padding: 0 10px;
+    border-radius: var(--radius-row);
     border: 1px solid var(--border-subtle);
     background-color: transparent;
     color: var(--text-secondary);
-    font-size: 14px;
-    font-weight: 500;
-    line-height: 17px;
+    font-size: var(--type-size-xs);
+    font-weight: var(--type-weight-medium);
+    line-height: var(--type-leading-xs);
+    --ds-icon-size: var(--icon-size-sm);
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
     transition: background-color 150ms var(--ease-standard), color 150ms var(--ease-standard);
   }
@@ -1052,26 +1167,30 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    height: 38px;
+    height: 32px;
     gap: 6px;
-    padding: 0 10px;
-    border-radius: var(--radius-button);
+    padding: 0 8px;
+    border-radius: var(--radius-row);
     background-color: transparent;
     color: var(--text-primary);
-    font-size: 14px;
-    font-weight: 500;
-    line-height: 20px;
+    font-size: var(--type-size-xs);
+    font-weight: var(--type-weight-medium);
+    line-height: var(--type-leading-xs);
+    --ds-icon-size: var(--icon-size-sm);
     transition: background-color 150ms var(--ease-standard);
   }
-  .ds-btn-ghost:hover:not(:disabled) {
+  .ds-btn-ghost:hover:not(:disabled),
+  .ds-btn-ghost[data-state="open"] {
     background-color: var(--surface-tonal);
   }
 
   .ds-btn-link {
     background: transparent;
     color: var(--text-secondary);
-    font-size: 14px;
-    font-weight: 500;
+    font-size: var(--type-size-xs);
+    font-weight: var(--type-weight-medium);
+    line-height: var(--type-leading-xs);
+    --ds-icon-size: var(--icon-size-sm);
     transition: color 150ms var(--ease-standard);
   }
   .ds-btn-link:hover {
@@ -1083,20 +1202,25 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    height: 34px;
-    padding: 8px;
-    border-radius: var(--radius-button);
+    gap: 6px;
+    height: 32px;
+    padding: 0 10px;
+    border-radius: var(--radius-row);
     border: 1px solid var(--border-structural);
     background-color: transparent;
     color: var(--text-primary-soft);
-    font-size: 14px;
-    font-weight: 500;
-    line-height: 20px;
+    font-size: var(--type-size-xs);
+    font-weight: var(--type-weight-medium);
+    line-height: var(--type-leading-xs);
+    --ds-icon-size: var(--icon-size-sm);
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-    transition: background-color 150ms var(--ease-standard);
+    transition: background-color 150ms var(--ease-standard), border-color 150ms var(--ease-standard), color 150ms var(--ease-standard);
   }
-  .ds-btn-outline:hover:not(:disabled) {
-    background-color: var(--surface-nav-active);
+  .ds-btn-outline:hover:not(:disabled),
+  .ds-btn-outline[data-state="open"] {
+    background-color: var(--surface-tonal);
+    border-color: transparent;
+    color: var(--text-primary);
   }
 
   /* --- Pop Animation for Segmented / Radiogroup Buttons --- */
@@ -1133,14 +1257,16 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 6px;
     height: 34px;
     min-width: 0;
     border-radius: var(--rounded-buttons, 10px);
     border: 0;
     padding: 0;
-    font-size: 14px;
-    font-weight: 500;
+    font-size: var(--type-size-xs);
+    font-weight: var(--type-weight-medium);
+    line-height: var(--type-leading-xs);
+    --ds-icon-size: var(--icon-size-sm);
     cursor: pointer;
     white-space: nowrap;
     transition: background-color 150ms cubic-bezier(0, 0, 0.2, 1), color 150ms cubic-bezier(0, 0, 0.2, 1), transform 150ms cubic-bezier(0, 0, 0.2, 1);
@@ -1152,9 +1278,9 @@
   .ds-btn-segmented[aria-checked="true"],
   .ds-btn-segmented[data-state="active"],
   .ds-btn-segmented[data-state="on"] {
-    background-color: var(--surface-secondary);
+    background-color: var(--surface-tonal-hover-strong);
     color: var(--text-primary);
-    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.12);
+    box-shadow: inset 0 0 0 1px var(--border-subtle), 0 1px 2px 0 rgba(0, 0, 0, 0.18);
     animation: buttonPop 220ms cubic-bezier(0.2, 0.9, 0.3, 1.2);
   }
   .ds-btn-segmented[aria-pressed="false"],
@@ -1171,7 +1297,7 @@
   .ds-btn-dropdown-card {
     position: relative;
     display: flex;
-    height: 50px;
+    height: 44px;
     width: 100%;
     min-width: 0;
     cursor: pointer;
@@ -1183,11 +1309,12 @@
     border-radius: var(--rounded-buttons, 10px);
     border: 0;
     background-color: var(--surface-tonal);
-    padding: 0 12px;
+    padding: 0 10px;
     text-align: left;
-    font-size: 12px;
-    line-height: 16px;
-    font-weight: 500;
+    font-size: var(--type-size-xs);
+    line-height: var(--type-leading-xs);
+    font-weight: var(--type-weight-medium);
+    --ds-icon-size: var(--icon-size-md);
     color: rgb(var(--card-foreground));
     box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
     transition: background-color 150ms cubic-bezier(0, 0, 0.2, 1), color 150ms cubic-bezier(0, 0, 0.2, 1);
@@ -1206,14 +1333,16 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 36px;
-    height: 36px;
-    border-radius: var(--radius-button);
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-row);
     background-color: transparent;
     color: var(--text-primary-soft);
+    --ds-icon-size: var(--icon-size-sm);
     transition: background-color 150ms var(--ease-standard);
   }
-  .ds-icon-btn:hover:not(:disabled) {
+  .ds-icon-btn:hover:not(:disabled),
+  .ds-icon-btn[data-state="open"] {
     background-color: var(--surface-tonal-hover);
   }
   .ds-icon-btn:focus-visible {
@@ -1225,14 +1354,16 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 36px;
-    height: 36px;
-    border-radius: var(--radius-button);
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-row);
     background-color: var(--surface-tonal);
     color: var(--text-primary-soft);
+    --ds-icon-size: var(--icon-size-sm);
     transition: background-color 150ms var(--ease-standard);
   }
-  .ds-icon-btn-tonal:hover:not(:disabled) {
+  .ds-icon-btn-tonal:hover:not(:disabled),
+  .ds-icon-btn-tonal[data-state="open"] {
     background-color: var(--surface-tonal-hover);
   }
   .ds-icon-btn-tonal:focus-visible {
@@ -1244,18 +1375,22 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 38px;
-    height: 38px;
-    padding: 8px;
-    border-radius: var(--radius-button);
+    width: 32px;
+    height: 32px;
+    padding: 4px;
+    border-radius: var(--radius-row);
     border: 1px solid var(--border-structural);
     background-color: transparent;
     color: var(--text-primary-soft);
+    --ds-icon-size: var(--icon-size-sm);
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-    transition: background-color 150ms var(--ease-standard);
+    transition: background-color 150ms var(--ease-standard), border-color 150ms var(--ease-standard), color 150ms var(--ease-standard);
   }
-  .ds-icon-btn-outline:hover:not(:disabled) {
-    background-color: var(--surface-secondary);
+  .ds-icon-btn-outline:hover:not(:disabled),
+  .ds-icon-btn-outline[data-state="open"] {
+    background-color: var(--surface-tonal);
+    border-color: transparent;
+    color: var(--text-primary);
   }
 
   .ds-icon-btn-carousel {
@@ -1264,10 +1399,11 @@
     justify-content: center;
     width: 32px;
     height: 32px;
-    border-radius: var(--radius-button);
+    border-radius: var(--radius-row);
     border: 1px solid var(--border-subtle);
     background-color: transparent;
     color: var(--text-body);
+    --ds-icon-size: var(--icon-size-sm);
     transition: background-color 150ms var(--ease-standard);
   }
   .ds-icon-btn-carousel:hover:not(:disabled) {
@@ -1277,38 +1413,81 @@
     cursor: not-allowed;
   }
 
+  .ds-icon-btn-overlay {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-control);
+    background-color: transparent;
+    -webkit-backdrop-filter: blur(16px) brightness(0.82) saturate(150%);
+    backdrop-filter: blur(16px) brightness(0.82) saturate(150%);
+    border: none;
+    box-shadow: inset 0 0 0 1px var(--border-weak);
+    color: var(--text-primary);
+    --ds-icon-size: var(--icon-size-md);
+    transition:
+      backdrop-filter 150ms var(--ease-standard),
+      -webkit-backdrop-filter 150ms var(--ease-standard),
+      box-shadow 150ms var(--ease-standard);
+  }
+  .ds-icon-btn-overlay:hover:not(:disabled) {
+    -webkit-backdrop-filter: blur(80px) brightness(0.55) saturate(190%);
+    backdrop-filter: blur(80px) brightness(0.55) saturate(190%);
+    box-shadow: inset 0 0 0 1px var(--border-heavy);
+  }
+  .ds-icon-btn-overlay:focus-visible {
+    outline: none;
+    box-shadow: none;
+  }
+
   /* --- 06. Pill Select & Dropdown --- */
   .ds-select-trigger {
     display: inline-flex;
     align-items: center;
     justify-content: space-between;
-    height: 50px;
+    height: 28px;
     width: 200px;
-    padding: 0 16px 0 20px;
+    padding: 0 10px 0 12px;
     border-radius: var(--radius-pill);
     background-color: var(--surface-tonal);
     color: var(--text-primary);
-    font-size: 16px;
-    font-weight: 500;
+    font-size: var(--type-size-xs);
+    font-weight: var(--type-weight-medium);
+    line-height: var(--type-leading-xs);
+    --ds-icon-size: var(--icon-size-sm);
     transition: background-color 150ms var(--ease-standard);
   }
-  .ds-select-trigger:hover {
+  .ds-select-trigger:hover,
+  .ds-select-trigger[data-state="open"] {
     background-color: var(--surface-tonal-hover);
   }
 
   .ds-menu-item {
     display: flex;
     align-items: center;
-    height: 36px;
-    padding: 0 10px;
-    border-radius: var(--radius-cta-lg);
+    gap: 8px;
+    min-height: 30px;
+    padding: 5px 8px;
+    border-radius: var(--radius-row);
     color: var(--text-primary);
-    font-size: 14px;
-    font-weight: 500;
-    transition: background-color 150ms var(--ease-standard);
+    font-size: var(--type-size-xs);
+    font-weight: var(--type-weight-regular);
+    line-height: var(--type-leading-xs);
+    letter-spacing: var(--type-tracking-none);
+    --ds-icon-size: var(--icon-size-sm);
+    transition: background-color 150ms var(--ease-standard), color 150ms var(--ease-standard);
   }
-  .ds-menu-item:hover {
+  .ds-menu-item:hover,
+  .ds-menu-item:focus-visible,
+  .ds-menu-item[data-highlighted],
+  .ds-menu-item[data-state="open"] {
     background-color: var(--surface-tonal);
+  }
+  .ds-menu-item[data-selected="true"],
+  .ds-menu-item[aria-selected="true"] {
+    background-color: var(--surface-tonal-hover);
   }
 
   /* --- 07. Pill Tabs & Composer Folder Tabs --- */
@@ -1316,13 +1495,16 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    height: 32px;
+    gap: 6px;
+    height: 28px;
     padding: 0 12px;
     border-radius: var(--radius-pill);
     background-color: var(--surface-tonal);
     color: var(--text-primary);
-    font-size: 14px;
-    font-weight: 500;
+    font-size: var(--type-size-xs);
+    font-weight: var(--type-weight-medium);
+    line-height: var(--type-leading-xs);
+    --ds-icon-size: var(--icon-size-sm);
     transition: background-color 150ms var(--ease-standard), color 150ms var(--ease-standard);
   }
   .ds-tab-pill[data-state="active"] {
@@ -1335,15 +1517,17 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    gap: 6px;
     height: 48px;
     padding: 0 20px;
     border-top-left-radius: var(--radius-tab-top);
     border-top-right-radius: var(--radius-tab-top);
     background-color: transparent;
     color: var(--text-secondary);
-    font-size: 16px;
-    font-weight: 500;
-    line-height: 26px;
+    font-size: var(--type-size-md);
+    font-weight: var(--type-weight-medium);
+    line-height: var(--type-leading-lg);
+    --ds-icon-size: var(--icon-size-md);
     transition: color 150ms var(--ease-standard), background-color 150ms var(--ease-standard);
   }
   .ds-composer-tab:hover {
@@ -1414,12 +1598,12 @@
 
   .ds-composer-card {
     --blur: 40px;
-    border-radius: var(--radius-3xl);
-    background-color: var(--ui-menu-background);
+    border-radius: var(--radius-slot);
+    background-color: var(--surface-menu-glass);
     -webkit-backdrop-filter: blur(var(--blur, 40px));
     backdrop-filter: blur(var(--blur, 40px));
-    border: 1px solid var(--border-weak);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+    border: 0;
+    box-shadow: 0 0 0 1px var(--border-menu-subtle), 0 8px 32px rgba(0, 0, 0, 0.45);
     outline: none;
     padding: 8px;
   }
@@ -1449,9 +1633,9 @@
     justify-content: space-between;
     width: 100%;
     height: 24px;
-    font-size: 14px;
-    font-weight: 500;
-    line-height: 18px;
+    font-size: var(--type-size-xs);
+    font-weight: var(--type-weight-medium);
+    line-height: var(--type-leading-xs);
     letter-spacing: 0.1px;
     text-transform: uppercase;
     color: var(--text-secondary);
@@ -1473,6 +1657,53 @@
     overflow: clip;
     border-radius: var(--radius-slot);
     border: 1px solid var(--border-structural);
+  }
+
+  .ds-folder-bottom-blur {
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 20%;
+    min-height: 44px;
+    pointer-events: none;
+    background-image: linear-gradient(
+      to top,
+      var(--black-a10) 0%,
+      var(--black-a6) 55%,
+      transparent 100%
+    );
+    -webkit-backdrop-filter: blur(18px);
+    backdrop-filter: blur(18px);
+    -webkit-mask-image: linear-gradient(
+      to top,
+      black 0%,
+      black 38%,
+      rgba(0, 0, 0, 0.55) 70%,
+      transparent 100%
+    );
+    mask-image: linear-gradient(
+      to top,
+      black 0%,
+      black 38%,
+      rgba(0, 0, 0, 0.55) 70%,
+      transparent 100%
+    );
+  }
+
+  .ds-folder-bottom-bar {
+    container-type: inline-size;
+    padding: clamp(6px, 3.2cqi, 16px) clamp(10px, 4.5cqi, 20px);
+  }
+
+  .ds-folder-title {
+    font-size: clamp(1rem, 12cqi, 3.25rem);
+    line-height: 1.08;
+    text-shadow: 0 1px 2px var(--black-a8);
+  }
+
+  .ds-folder-count {
+    font-size: clamp(0.8125rem, 5.2cqi, 1.25rem);
+    line-height: 1;
+    --ds-icon-size: clamp(0.9375rem, 5.5cqi, 1.375rem);
   }
 
   /* --- 09. Dashed Upload Slot --- */
@@ -1498,13 +1729,14 @@
   .ds-list-row {
     display: flex;
     align-items: center;
-    height: 48px;
+    height: 40px;
     padding: 0 12px;
     border-radius: var(--radius-row);
     background-color: transparent;
     color: var(--text-primary);
-    font-size: 14px;
-    font-weight: 500;
+    font-size: var(--type-size-xs);
+    font-weight: var(--type-weight-medium);
+    line-height: var(--type-leading-xs);
     transition: background-color 150ms var(--ease-standard);
   }
   .ds-list-row:hover {
@@ -1539,14 +1771,76 @@
     background-color: var(--canvas-bg);
   }
 
-  .ds-input {
-    height: 38px;
-    padding: 0 14px;
+  /* --- Stepped Bar Slider (Card Size / Discrete Controls) --- */
+  .ds-slider-stepped {
+    position: relative;
+    display: flex;
+    width: 100%;
+    height: 36px;
+    align-items: center;
+    touch-action: none;
+    user-select: none;
+    cursor: pointer;
     border-radius: var(--radius-control);
+    overflow: hidden;
+    background-color: var(--surface-card);
+  }
+  .ds-slider-stepped:hover {
+    background-color: var(--surface-tonal);
+  }
+  .ds-slider-stepped-track {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: transparent;
+  }
+  .ds-slider-stepped-range {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    height: 100%;
+    background-color: var(--surface-tonal-hover);
+    border-right: 2px solid var(--border-heavy);
+    transition: width 150ms var(--ease-standard), right 150ms var(--ease-standard), background-color 150ms var(--ease-standard);
+  }
+  .ds-slider-stepped-range[data-full="true"] {
+    border-right-color: transparent;
+  }
+  .ds-slider-stepped-tick {
+    position: absolute;
+    top: 50%;
+    width: 1px;
+    height: 10px;
+    transform: translate(-50%, -50%);
+    border-radius: var(--radius-pill);
+    background-color: var(--border-heavy);
+    pointer-events: none;
+    z-index: 1;
+  }
+  .ds-slider-stepped-thumb {
+    display: block;
+    width: 12px;
+    height: 100%;
+    background-color: transparent;
+    cursor: ew-resize;
+    outline: none;
+  }
+  .ds-slider-stepped:has(.ds-slider-stepped-thumb:focus-visible) {
+    box-shadow: 0 0 0 2px var(--focus-ring-workspace);
+  }
+
+  .ds-input {
+    height: 28px;
+    padding: 0 10px;
+    border-radius: var(--radius-row);
     background-color: var(--surface-card);
     border: none;
     color: var(--text-primary);
-    font-size: 14px;
+    font-size: var(--type-size-xs);
+    font-weight: var(--type-weight-regular);
+    line-height: var(--type-leading-xs);
+    --ds-icon-size: var(--icon-size-sm);
     transition: background-color 150ms var(--ease-standard);
   }
   .ds-input:focus {
@@ -1570,11 +1864,16 @@
   }
 
   .ds-input-ghost {
-    border-radius: var(--radius-button);
+    height: 28px;
+    border-radius: var(--radius-row);
     background-color: rgba(255, 255, 255, 0.04);
     border: none;
     outline: none;
     color: var(--text-primary);
+    font-size: var(--type-size-xs);
+    font-weight: var(--type-weight-regular);
+    line-height: var(--type-leading-xs);
+    --ds-icon-size: var(--icon-size-sm);
     transition: background-color 150ms var(--ease-standard);
   }
   .ds-input-ghost:hover {
@@ -1590,24 +1889,29 @@
   .ds-input-search {
     display: flex;
     align-items: center;
-    height: 36px;
+    height: 28px;
     padding: 0 10px;
     border-radius: var(--radius-row);
-    background-color: rgb(var(--accent) / 0.50);
+    background-color: var(--surface-card);
+    box-shadow: inset 0 0 0 1px var(--border-menu-subtle);
     border: none;
     color: var(--text-primary);
-    font-size: 14px;
-    transition: background-color 150ms var(--ease-standard);
+    font-size: var(--type-size-xs);
+    font-weight: var(--type-weight-regular);
+    line-height: var(--type-leading-xs);
+    --ds-icon-size: var(--icon-size-sm);
+    transition: background-color 150ms var(--ease-standard), box-shadow 150ms var(--ease-standard);
   }
   .ds-input-accent:hover,
   .ds-input-search:hover {
-    background-color: rgb(var(--accent) / 0.70);
+    background-color: var(--surface-tonal);
   }
   .ds-input-accent:focus,
   .ds-input-accent:focus-within,
   .ds-input-search:focus,
   .ds-input-search:focus-within {
-    background-color: rgb(var(--accent) / 0.70);
+    background-color: var(--surface-tonal);
+    box-shadow: inset 0 0 0 1px var(--border-subtle);
     outline: none;
   }
 
@@ -1615,7 +1919,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    border-radius: var(--radius-control);
+    border-radius: var(--radius-badge);
     border: 1px solid var(--border-structural);
     background-color: var(--surface-card);
     transition: background-color 150ms var(--ease-standard), border-color 150ms var(--ease-standard);
@@ -1625,6 +1929,11 @@
     border-color: var(--text-primary);
     color: var(--text-inverse);
   }
+  .ds-checkbox[data-state="indeterminate"] {
+    background-color: var(--surface-tonal-hover);
+    border-color: var(--text-primary);
+    color: var(--text-primary);
+  }
   .ds-checkbox-circle {
     border-radius: var(--radius-pill);
   }
@@ -1633,28 +1942,32 @@
   .ds-badge {
     display: inline-flex;
     align-items: center;
+    gap: 4px;
     padding: 2px 6px;
     border-radius: var(--radius-badge);
     background-color: var(--surface-tonal);
     color: var(--text-primary-soft);
-    font-size: 12px;
-    font-weight: 600;
-    line-height: 16px;
+    font-size: var(--type-size-xxs);
+    font-weight: var(--type-weight-semibold);
+    line-height: var(--type-leading-xxs);
+    --ds-icon-size: var(--icon-size-xs);
   }
 
   .ds-badge-glass {
     display: inline-flex;
     align-items: center;
-    height: 24px;
-    padding: 0 8px;
+    gap: 4px;
+    height: 20px;
+    padding: 0 6px;
     border-radius: var(--radius-pill);
     background-color: var(--surface-badge-glass);
     -webkit-backdrop-filter: var(--blur-glass);
     backdrop-filter: var(--blur-glass);
     color: var(--text-primary);
-    font-size: 12px;
-    font-weight: 500;
-    line-height: 15px;
+    font-size: var(--type-size-xxs);
+    font-weight: var(--type-weight-semibold);
+    line-height: var(--type-leading-xxs);
+    --ds-icon-size: var(--icon-size-xs);
   }
 
   .ds-badge-count {
@@ -1666,8 +1979,45 @@
     border-radius: var(--radius-pill);
     background-color: var(--error-badge);
     color: var(--text-primary-soft);
-    font-size: 10px;
-    font-weight: 500;
+    font-size: var(--type-size-xxs);
+    font-weight: var(--type-weight-medium);
+    line-height: var(--type-leading-xxs);
+    --ds-icon-size: var(--icon-size-xs);
+  }
+
+  /* Shared zero-specificity SVG icon sizing bound to parent component --ds-icon-size */
+  :where(
+    .ds-btn-primary,
+    .ds-btn-cta-lg,
+    .ds-btn-secondary,
+    .ds-btn-tonal,
+    .ds-btn-pill,
+    .ds-filter-chip,
+    .ds-btn-ghost,
+    .ds-btn-link,
+    .ds-btn-outline,
+    .ds-btn-segmented,
+    .ds-btn-dropdown-card,
+    .ds-icon-btn,
+    .ds-icon-btn-tonal,
+    .ds-icon-btn-outline,
+    .ds-icon-btn-carousel,
+    .ds-icon-btn-overlay,
+    .ds-input,
+    .ds-input-ghost,
+    .ds-input-accent,
+    .ds-input-search,
+    .ds-select-trigger,
+    .ds-menu-item,
+    .ds-tab-pill,
+    .ds-composer-tab,
+    .ds-nav-item,
+    .ds-badge,
+    .ds-badge-glass
+  ) svg:not([class*="size-"]):not([class*="w-"]) {
+    width: var(--ds-icon-size);
+    height: var(--ds-icon-size);
+    flex-shrink: 0;
   }
 
   .ds-banner-accent {
@@ -1691,6 +2041,98 @@
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
+  }
+
+  /* --- Typography Scale (.ds-text-*) — declared last in @layer components so size modifiers override .ds-btn-* defaults while @layer utilities still win --- */
+  .ds-text-caption-s {
+    font-size: var(--type-size-xxs);
+    line-height: var(--type-leading-xxs);
+    font-weight: var(--type-weight-medium);
+    letter-spacing: var(--type-tracking-none);
+  }
+  .ds-text-caption-m {
+    font-size: var(--type-size-xs);
+    line-height: var(--type-leading-xs);
+    font-weight: var(--type-weight-medium);
+    letter-spacing: var(--type-tracking-none);
+  }
+  .ds-text-control {
+    font-size: var(--type-size-control);
+    line-height: var(--type-leading-control);
+    font-weight: var(--type-weight-regular);
+    letter-spacing: var(--type-tracking-none);
+  }
+  .ds-text-caption-l {
+    font-size: var(--type-size-sm);
+    line-height: var(--type-leading-sm);
+    font-weight: var(--type-weight-medium);
+    letter-spacing: var(--type-tracking-none);
+  }
+  .ds-text-body-s {
+    font-size: var(--type-size-md);
+    line-height: var(--type-leading-md);
+    font-weight: var(--type-weight-regular);
+    letter-spacing: var(--type-tracking-body);
+  }
+  .ds-text-body-m {
+    font-size: var(--type-size-lg);
+    line-height: var(--type-leading-lg);
+    font-weight: var(--type-weight-regular);
+    letter-spacing: var(--type-tracking-body);
+  }
+  .ds-text-body-l {
+    font-size: var(--type-size-body-l);
+    line-height: var(--type-leading-body-l);
+    font-weight: var(--type-weight-regular);
+    letter-spacing: var(--type-tracking-body);
+  }
+  .ds-text-h-xxs {
+    font-size: var(--type-size-h-xxs);
+    line-height: var(--type-leading-h-xxs);
+    font-weight: var(--type-weight-semibold);
+    letter-spacing: var(--type-tracking-body);
+  }
+  .ds-text-h-xs {
+    font-size: var(--type-size-h-xs);
+    line-height: var(--type-leading-h-xs);
+    font-weight: var(--type-weight-semibold);
+    letter-spacing: var(--type-tracking-body);
+  }
+  .ds-text-h-sm {
+    font-size: var(--type-size-h-sm);
+    line-height: var(--type-leading-h-sm);
+    font-weight: var(--type-weight-semibold);
+    letter-spacing: var(--type-tracking-heading);
+  }
+  .ds-text-h-md {
+    font-size: var(--type-size-h-md);
+    line-height: var(--type-leading-h-md);
+    font-weight: var(--type-weight-semibold);
+    letter-spacing: var(--type-tracking-heading);
+  }
+  .ds-text-h-lg {
+    font-size: var(--type-size-h-lg);
+    line-height: var(--type-leading-h-lg);
+    font-weight: var(--type-weight-bold);
+    letter-spacing: var(--type-tracking-heading);
+  }
+  .ds-text-h-xl {
+    font-size: var(--type-size-h-xl);
+    line-height: var(--type-leading-h-xl);
+    font-weight: var(--type-weight-bold);
+    letter-spacing: var(--type-tracking-heading);
+  }
+  .ds-text-h1 {
+    font-size: var(--type-size-h1);
+    line-height: var(--type-leading-h1);
+    font-weight: var(--type-weight-bold);
+    letter-spacing: var(--type-tracking-heading);
+  }
+  .ds-text-display {
+    font-size: var(--type-size-display);
+    line-height: var(--type-leading-display);
+    font-weight: var(--type-weight-bold);
+    letter-spacing: var(--type-tracking-heading);
   }
 }
 

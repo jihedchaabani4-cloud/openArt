@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useCallback, forwardRef } from "react";
-import { GoogleIcon } from "@/components/primitives/GoogleIcon";
+import { HugeIcon } from "@/components/primitives/HugeIcon";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/primitives/collapsible";
 import { Button } from "@/components/base/button";
 import { ContextMenu, ContextMenuTrigger } from "@/components/primitives/context-menu";
@@ -25,7 +25,7 @@ const Tree = forwardRef(function Tree(
   {
     className,
     children,
-    size = "m",
+    size,
     initialSelectedId,
     selectedId: controlledSelectedId,
     onSelectChange,
@@ -75,7 +75,7 @@ const Tree = forwardRef(function Tree(
       <div
         ref={ref}
         role="tree"
-        className={cn("flex flex-col gap-0.5 select-none w-full text-sm", className)}
+        className={cn("flex flex-col gap-0.5 select-none w-full", className)}
         {...props}
       >
         {children}
@@ -121,10 +121,10 @@ const Folder = forwardRef(function Folder(
   const isExpanded = expandedItems.includes(value);
   const isSelected = selectedId === value;
 
-  const resolvedOpenIcon = openIcon || icon || treeOpenIcon || "folder_open";
-  const resolvedCloseIcon = closeIcon || icon || treeCloseIcon || "folder";
-  const resolvedVariant = variant || (isSelected ? "secondary" : "ghost");
-  const resolvedSize = size || treeSize || "m";
+  const resolvedOpenIcon = openIcon || icon || treeOpenIcon || "folder-open";
+  const resolvedCloseIcon = closeIcon || icon || treeCloseIcon || "folder-01";
+  const resolvedVariant = variant || "nav";
+  const resolvedSize = size || treeSize || undefined;
   const activeFolderIcon = isExpanded ? resolvedOpenIcon : resolvedCloseIcon;
 
   const onRowClick = (e) => {
@@ -141,27 +141,22 @@ const Folder = forwardRef(function Folder(
       variant={resolvedVariant}
       size={resolvedSize}
       role="treeitem"
+      data-active={isSelected ? "true" : undefined}
       aria-selected={isSelected}
       aria-expanded={isExpanded}
       onClick={onRowClick}
-      className={cn(
-        "w-full justify-start rounded-lg text-xs font-medium px-2 py-1.5 transition-all duration-150 group",
-        isSelected
-          ? "bg-ui-button-tonal text-text-primary font-semibold"
-          : "text-text-body-muted hover:text-text-primary hover:bg-surface-card",
-        className
-      )}
+      className={cn("group", className)}
       {...props}
     >
-      <span className="flex items-center justify-center size-5 shrink-0 mr-1.5 text-icon-secondary group-hover:text-icon-primary transition-colors">
+      <span className="relative size-4 flex items-center justify-center shrink-0 text-icon-primary">
         {React.isValidElement(activeFolderIcon) ? (
           activeFolderIcon
         ) : (
-          <GoogleIcon iconName={activeFolderIcon} className="text-base" />
+          <HugeIcon name={activeFolderIcon} />
         )}
       </span>
 
-      <span className="truncate flex-1 text-left font-medium">
+      <span className="truncate flex-1 text-left">
         {element}
       </span>
 
@@ -220,7 +215,7 @@ const File = forwardRef(function File(
     isSelectable = true,
     variant,
     size,
-    fileIcon = "description",
+    fileIcon = "file-02",
     icon,
     actions,
     contextMenu,
@@ -231,8 +226,8 @@ const File = forwardRef(function File(
 ) {
   const { selectedId, handleSelect, size: treeSize } = useTree();
   const isSelected = selectedId === value;
-  const resolvedVariant = variant || (isSelected ? "secondary" : "ghost");
-  const resolvedSize = size || treeSize || "m";
+  const resolvedVariant = variant || "nav";
+  const resolvedSize = size || treeSize || undefined;
   const activeFileIcon = icon || fileIcon;
 
   const handleClick = (e) => {
@@ -249,26 +244,21 @@ const File = forwardRef(function File(
       variant={resolvedVariant}
       size={resolvedSize}
       role="treeitem"
+      data-active={isSelected ? "true" : undefined}
       aria-selected={isSelected}
       onClick={handleClick}
-      className={cn(
-        "w-full justify-start rounded-lg text-xs font-medium px-2 py-1.5 transition-all duration-150 group",
-        isSelected
-          ? "bg-ui-button-tonal text-text-primary font-semibold"
-          : "text-text-body-muted hover:text-text-primary hover:bg-surface-card",
-        className
-      )}
+      className={cn("group", className)}
       {...props}
     >
-      <span className="flex items-center justify-center size-5 shrink-0 mr-1.5 text-icon-secondary group-hover:text-icon-primary transition-colors">
+      <span className="relative size-4 flex items-center justify-center shrink-0 text-icon-primary">
         {React.isValidElement(activeFileIcon) ? (
           activeFileIcon
         ) : (
-          <GoogleIcon iconName={activeFileIcon} className="text-base" />
+          <HugeIcon name={activeFileIcon} />
         )}
       </span>
 
-      <span className="truncate flex-1 text-left font-medium">
+      <span className="truncate flex-1 text-left">
         {element}
       </span>
 
@@ -307,7 +297,7 @@ const CollapseButton = forwardRef(function CollapseButton(
   ref
 ) {
   const { setExpandedItems, expandedItems, size: treeSize } = useTree();
-  const resolvedSize = size || treeSize || "m";
+  const resolvedSize = size || treeSize || "s";
 
   const handleToggleAll = (e) => {
     e.stopPropagation();

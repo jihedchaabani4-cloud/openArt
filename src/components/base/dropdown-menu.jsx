@@ -2,7 +2,18 @@
 
 import * as React from "react";
 import { DropdownMenu as DropdownMenuPrimitive } from "radix-ui";
-import { GoogleIcon } from "@/components/primitives/GoogleIcon";
+import {
+  MENU_INDICATOR_SLOT_CLASS,
+  MENU_LABEL_CLASS,
+  MENU_PANEL_DEFAULT_WIDTH,
+  MENU_SEPARATOR_CLASS,
+  MENU_SHORTCUT_CLASS,
+  MenuCheckIcon,
+  MenuRadioDotIcon,
+  MenuSubChevronIcon,
+  menuItemClassName,
+  menuPanelClassName,
+} from "@/components/base/menu";
 import { cn } from "@/shared/lib/utils";
 
 function DropdownMenu({ ...props }) {
@@ -22,14 +33,12 @@ const DropdownMenuContent = React.forwardRef(function DropdownMenuContent(
   {
     className,
     variant = "glass",
-    sideOffset = 4,
+    sideOffset = 6,
     style,
     ...props
   },
   ref
 ) {
-  const isListbox = variant === "listbox";
-  const isNormal = variant === "normal";
   return (
     <DropdownMenuPrimitive.Portal>
       <DropdownMenuPrimitive.Content
@@ -38,16 +47,14 @@ const DropdownMenuContent = React.forwardRef(function DropdownMenuContent(
         data-variant={variant}
         sideOffset={sideOffset}
         style={style}
-        className={cn(
-          "z-50 max-h-(--radix-dropdown-menu-content-available-height) w-52 min-w-[12rem] rounded-[var(--radius-3xl)] origin-(--radix-dropdown-menu-content-transform-origin) overflow-x-hidden overflow-y-auto bg-ui-menu-background p-2 [--blur:40px] flex flex-col gap-0.5",
-          isNormal
-            ? "border border-border-weak shadow-none text-text-primary font-sans antialiased"
-            : isListbox
-              ? "surface-listbox shadow-xl"
-              : "surface-glass shadow-xl",
-          "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
-          className
-        )}
+        className={menuPanelClassName({
+          variant,
+          className: cn(
+            "max-h-(--radix-dropdown-menu-content-available-height) origin-(--radix-dropdown-menu-content-transform-origin)",
+            MENU_PANEL_DEFAULT_WIDTH,
+            className
+          ),
+        })}
         {...props}
       />
     </DropdownMenuPrimitive.Portal>
@@ -63,28 +70,20 @@ const DropdownMenuItem = React.forwardRef(function DropdownMenuItem(
   {
     className,
     inset,
-    variant = "ghost",
+    selected,
+    variant = "default",
     ...props
   },
   ref
 ) {
-  const isGhost = variant === "ghost" || variant === "default";
   return (
     <DropdownMenuPrimitive.Item
       ref={ref}
       data-slot="dropdown-menu-item"
       data-inset={inset}
+      data-selected={selected ? "true" : undefined}
       data-variant={variant}
-      className={cn(
-        "ds-menu-item relative gap-2.5 cursor-pointer outline-none select-none rounded-xl text-text-primary font-medium text-sm transition-colors",
-        isGhost && "hover:bg-surface-tonal focus:bg-surface-tonal",
-        "[&_svg:not([class*='text-'])]:text-text-body-muted [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
-        "data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[inset]:pl-8",
-        "data-[variant=ghost]:hover:bg-surface-tonal data-[variant=ghost]:focus:bg-surface-tonal",
-        "data-[variant=destructive]:!text-error data-[variant=destructive]:hover:bg-surface-tonal data-[variant=destructive]:focus:bg-surface-tonal data-[variant=destructive]:[&_svg]:!text-error",
-        "data-[variant=danger]:!text-error data-[variant=danger]:hover:bg-surface-tonal data-[variant=danger]:focus:bg-surface-tonal data-[variant=danger]:[&_svg]:!text-error",
-        className
-      )}
+      className={menuItemClassName({ inset, selected, className })}
       {...props}
     />
   );
@@ -104,17 +103,13 @@ const DropdownMenuCheckboxItem = React.forwardRef(function DropdownMenuCheckboxI
     <DropdownMenuPrimitive.CheckboxItem
       ref={ref}
       data-slot="dropdown-menu-checkbox-item"
-      className={cn(
-        "relative flex cursor-pointer items-center gap-2 h-[36px] pr-2.5 pl-8 rounded-xl text-sm font-medium outline-none select-none text-text-primary hover:bg-surface-tonal focus:bg-surface-tonal transition-colors",
-        "data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
-        className
-      )}
+      className={menuItemClassName({ hasIndicator: true, className })}
       checked={checked}
       {...props}
     >
-      <span className="pointer-events-none absolute left-2.5 flex size-4 items-center justify-center">
+      <span className={MENU_INDICATOR_SLOT_CLASS}>
         <DropdownMenuPrimitive.ItemIndicator>
-          <GoogleIcon iconName="check" className="text-sm font-bold text-text-primary" />
+          <MenuCheckIcon />
         </DropdownMenuPrimitive.ItemIndicator>
       </span>
       {children}
@@ -139,16 +134,12 @@ const DropdownMenuRadioItem = React.forwardRef(function DropdownMenuRadioItem(
     <DropdownMenuPrimitive.RadioItem
       ref={ref}
       data-slot="dropdown-menu-radio-item"
-      className={cn(
-        "relative flex cursor-pointer items-center gap-2 h-[36px] pr-2.5 pl-8 rounded-xl text-sm font-medium outline-none select-none text-text-primary hover:bg-surface-tonal focus:bg-surface-tonal transition-colors",
-        "data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
-        className
-      )}
+      className={menuItemClassName({ hasIndicator: true, className })}
       {...props}
     >
-      <span className="pointer-events-none absolute left-2.5 flex size-4 items-center justify-center">
+      <span className={MENU_INDICATOR_SLOT_CLASS}>
         <DropdownMenuPrimitive.ItemIndicator>
-          <GoogleIcon iconName="circle" fill={true} className="text-xs text-text-primary" />
+          <MenuRadioDotIcon />
         </DropdownMenuPrimitive.ItemIndicator>
       </span>
       {children}
@@ -170,7 +161,7 @@ const DropdownMenuLabel = React.forwardRef(function DropdownMenuLabel(
       ref={ref}
       data-slot="dropdown-menu-label"
       data-inset={inset}
-      className={cn("px-2.5 py-1.5 text-xs font-semibold text-text-secondary uppercase tracking-wider data-[inset]:pl-8", className)}
+      className={cn(MENU_LABEL_CLASS, className)}
       {...props}
     />
   );
@@ -188,7 +179,7 @@ const DropdownMenuSeparator = React.forwardRef(function DropdownMenuSeparator(
     <DropdownMenuPrimitive.Separator
       ref={ref}
       data-slot="dropdown-menu-separator"
-      className={cn("-mx-1 my-1.5 h-px bg-border-weak", className)}
+      className={cn(MENU_SEPARATOR_CLASS, className)}
       {...props}
     />
   );
@@ -202,7 +193,7 @@ function DropdownMenuShortcut({
   return (
     <span
       data-slot="dropdown-menu-shortcut"
-      className={cn("ml-auto text-xs tracking-widest text-text-secondary font-mono", className)}
+      className={cn(MENU_SHORTCUT_CLASS, className)}
       {...props}
     />
   );
@@ -216,6 +207,7 @@ const DropdownMenuSubTrigger = React.forwardRef(function DropdownMenuSubTrigger(
   {
     className,
     inset,
+    variant = "default",
     children,
     ...props
   },
@@ -226,15 +218,12 @@ const DropdownMenuSubTrigger = React.forwardRef(function DropdownMenuSubTrigger(
       ref={ref}
       data-slot="dropdown-menu-sub-trigger"
       data-inset={inset}
-      className={cn(
-        "flex cursor-pointer items-center gap-2.5 h-[36px] px-2.5 rounded-xl text-sm font-medium outline-none select-none font-sans text-text-primary hover:bg-surface-tonal focus:bg-surface-tonal data-[state=open]:bg-surface-tonal transition-colors",
-        "data-[inset]:pl-8",
-        className
-      )}
+      data-variant={variant}
+      className={menuItemClassName({ inset, className })}
       {...props}
     >
       {children}
-      <GoogleIcon iconName="chevron_right" className="ml-auto text-base text-text-secondary" />
+      <MenuSubChevronIcon />
     </DropdownMenuPrimitive.SubTrigger>
   );
 });
@@ -243,33 +232,32 @@ DropdownMenuSubTrigger.displayName = "DropdownMenuSubTrigger";
 const DropdownMenuSubContent = React.forwardRef(function DropdownMenuSubContent(
   {
     className,
-    variant = "normal",
+    variant = "glass",
+    sideOffset = 6,
     style,
     ...props
   },
   ref
 ) {
-  const isListbox = variant === "listbox";
-  const isGlass = variant === "glass";
-  const isNormal = variant === "normal" || (!isListbox && !isGlass);
   return (
-    <DropdownMenuPrimitive.SubContent
-      ref={ref}
-      data-slot="dropdown-menu-sub-content"
-      data-variant={variant}
-      style={style}
-      className={cn(
-        "z-50 w-52 min-w-[12rem] rounded-[var(--radius-3xl)] origin-(--radix-dropdown-menu-content-transform-origin) overflow-hidden bg-ui-menu-background p-2 [--blur:40px] flex flex-col gap-0.5 font-sans antialiased text-text-primary border border-border-weak",
-        isNormal
-          ? "shadow-none"
-          : isListbox
-            ? "surface-listbox shadow-xl"
-            : "surface-glass shadow-xl",
-        "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
-        className
-      )}
-      {...props}
-    />
+    <DropdownMenuPrimitive.Portal>
+      <DropdownMenuPrimitive.SubContent
+        ref={ref}
+        data-slot="dropdown-menu-sub-content"
+        data-variant={variant}
+        sideOffset={sideOffset}
+        style={style}
+        className={menuPanelClassName({
+          variant,
+          className: cn(
+            "max-h-(--radix-dropdown-menu-content-available-height) origin-(--radix-dropdown-menu-content-transform-origin)",
+            MENU_PANEL_DEFAULT_WIDTH,
+            className
+          ),
+        })}
+        {...props}
+      />
+    </DropdownMenuPrimitive.Portal>
   );
 });
 DropdownMenuSubContent.displayName = "DropdownMenuSubContent";
