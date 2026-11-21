@@ -12,22 +12,70 @@ export function getStudioGridSpacingPx(spacingKey = "sm") {
   return STUDIO_GRID_SPACING_CONFIG[spacingKey]?.px ?? 4;
 }
 
+export const STUDIO_GRID_SIZE_STOPS = ["xs", "sm", "md", "lg", "xl"];
+
 export const STUDIO_GRID_CONFIG = {
+  xs: {
+    targetRowHeight: 145,
+    minRowHeight: 100,
+    maxRowHeight: 185,
+    maxRowHeightMultiplier: 1.25,
+  },
   sm: {
-    targetRowHeight: 250,
-    maxRowHeightMultiplier: 1.0,
+    targetRowHeight: 190,
+    minRowHeight: 130,
+    maxRowHeight: 240,
+    maxRowHeightMultiplier: 1.25,
   },
   md: {
-    targetRowHeight: 420,
-    maxRowHeightMultiplier: 1.0,
+    targetRowHeight: 280,
+    minRowHeight: 190,
+    maxRowHeight: 350,
+    maxRowHeightMultiplier: 1.25,
   },
   lg: {
-    targetRowHeight: 540,
-    maxRowHeightMultiplier: 1.0,
+    targetRowHeight: 400,
+    minRowHeight: 260,
+    maxRowHeight: 490,
+    maxRowHeightMultiplier: 1.25,
+  },
+  xl: {
+    targetRowHeight: 520,
+    minRowHeight: 340,
+    maxRowHeight: 620,
+    maxRowHeightMultiplier: 1.25,
   },
 };
 
+export function getResponsiveTargetRowHeight(baseTargetHeight, containerWidth) {
+  const base = Number(baseTargetHeight);
+  if (!Number.isFinite(base) || base <= 0) return baseTargetHeight;
+  const width = Number(containerWidth);
+  if (!Number.isFinite(width) || width <= 0) return Math.round(base);
+
+  let factor = 1.0;
+  if (width < 640) factor = 0.72;
+  else if (width < 768) factor = 0.78;
+  else if (width < 1024) factor = 0.88;
+  else if (width > 1800) factor = 1.12;
+
+  return Math.round(base * factor);
+}
+
 const imageDimensionCache = new Map();
+const imageDimensionListeners = new Set();
+
+/**
+ * Subscribe to verified natural image/video dimension updates (>3% ratio change or first measurement).
+ * Returns an unsubscribe function.
+ */
+export function subscribeImageDimensions(listener) {
+  if (typeof listener !== "function") return () => {};
+  imageDimensionListeners.add(listener);
+  return () => {
+    imageDimensionListeners.delete(listener);
+  };
+}
 
 /**
  * Retrieve verified natural dimensions for an image URL if already loaded.
@@ -38,6 +86,7 @@ export function getCachedImageDimensions(url) {
 }
 
 const MAX_DIMENSION_CACHE = 500;
+const DIMENSION_RATIO_NOTIFY_THRESHOLD = 0.03;
 
 /**
  * Store verified natural pixel width/height for an image URL to preserve authentic ratio.
@@ -47,7 +96,15 @@ export function setCachedImageDimensions(url, width, height) {
   const w = Math.round(width);
   const h = Math.round(height);
   if (w <= 0 || h <= 0) return;
-  if (imageDimensionCache.size >= MAX_DIMENSION_CACHE) {
+
+  const prev = imageDimensionCache.get(url);
+  const prevRatio = prev ? prev.width / prev.height : null;
+  const nextRatio = w / h;
+  const shouldNotify =
+    prevRatio === null ||
+    Math.abs(nextRatio - prevRatio) / prevRatio > DIMENSION_RATIO_NOTIFY_THRESHOLD;
+
+  if (!prev && imageDimensionCache.size >= MAX_DIMENSION_CACHE) {
     const firstKey = imageDimensionCache.keys().next().value;
     imageDimensionCache.delete(firstKey);
   }
@@ -56,6 +113,16 @@ export function setCachedImageDimensions(url, width, height) {
     height: h,
     aspect: `${w}/${h}`,
   });
+
+  if (shouldNotify && imageDimensionListeners.size > 0) {
+    imageDimensionListeners.forEach((listener) => {
+      try {
+        listener(url, w, h);
+      } catch {
+        // Isolate subscriber errors
+      }
+    });
+  }
 }
 
 export function getStudioGridDensity(gridSize = "md", gridSpacing = "sm") {
@@ -69,9 +136,11 @@ export function getStudioGridDensity(gridSize = "md", gridSpacing = "sm") {
  */
 export function getGridClass(_group, _count, gridSize = "lg") {
   const layouts = {
+    xs: { container: "flex flex-wrap gap-xxs",   maxHeight: "h-[240px]" },
     sm: { container: "flex flex-wrap gap-xxs",   maxHeight: "h-[320px]" },
     md: { container: "flex flex-wrap gap-xxs",   maxHeight: "h-[500px]" },
     lg: { container: "flex flex-wrap gap-xxs",   maxHeight: "h-[650px]" },
+    xl: { container: "flex flex-wrap gap-xxs",   maxHeight: "h-[780px]" },
   };
   const props = layouts[gridSize] ?? layouts.lg;
   return { gridClass: props.container, maxHeightClass: props.maxHeight };
@@ -421,12 +490,43 @@ export function isMediaVideo(item) {
   );
 }
 
+const NON_ASSET_WORKFLOW_TYPES = new Set([
+  "ELEMENT_SHEET",
+  "ELEMENT",
+  "CHARACTER",
+  "CHARACTER_SHEET",
+]);
+
+function isActiveAssetWorkflow(workflow) {
+  if (!workflow || workflow.deleted_at || workflow.metadata?.deleted_at) {
+    return false;
+  }
+  const wType = String(workflow.workflow_type || workflow.workflowType || "").toUpperCase();
+  return !NON_ASSET_WORKFLOW_TYPES.has(wType);
+}
+
 export function getWorkflowFolderId(workflow) {
+  if (!workflow) return null;
+  const directFolder =
+    workflow.folder_id ||
+    workflow.folderId ||
+    workflow.metadata?.folder_id ||
+    workflow.metadata?.folderId;
+  if (directFolder) return directFolder;
+
+  // Do not fall back to stale collection_id fields when folder_id was explicitly cleared to null.
+  const hasExplicitNullFolder =
+    workflow.folder_id === null ||
+    workflow.folderId === null ||
+    workflow.metadata?.folder_id === null ||
+    workflow.metadata?.folderId === null;
+  if (hasExplicitNullFolder) return null;
+
   return (
-    workflow?.folder_id ||
-    workflow?.folderId ||
-    workflow?.metadata?.folder_id ||
-    workflow?.metadata?.folderId ||
+    workflow.collection_id ||
+    workflow.collectionId ||
+    workflow.metadata?.collection_id ||
+    workflow.metadata?.collectionId ||
     null
   );
 }
@@ -449,26 +549,60 @@ function getWorkflowMediaTime(workflow) {
 }
 
 /**
- * Cover for a collection = last completed media whose folder_id is that collection.
- * Media inside nested collections is never used for a parent cover.
+ * Direct-only active asset workflow count per collection (ZERO recursion into nested child folders).
+ */
+export function buildCollectionDirectCountById(workflows) {
+  const counts = new Map();
+  (workflows || []).forEach((workflow) => {
+    if (!isActiveAssetWorkflow(workflow)) return;
+    const folderId = getWorkflowFolderId(workflow);
+    if (!folderId) return;
+    counts.set(folderId, (counts.get(folderId) || 0) + 1);
+  });
+  return counts;
+}
+
+/**
+ * Cover + direct-only item count for a collection.
+ * - `url` / `isVideo`: last completed media whose direct folder_id is that collection.
+ * - `count`: direct-only count of active asset workflows in that collection (ZERO recursion).
+ * Media inside nested collections is never used for a parent cover or count.
  */
 export function buildCollectionCoverById(workflows) {
   const byId = new Map();
   (workflows || []).forEach((workflow) => {
+    if (!isActiveAssetWorkflow(workflow)) return;
     const folderId = getWorkflowFolderId(workflow);
     if (!folderId) return;
 
+    const current = byId.get(folderId);
+    const nextCount = (current?.count || 0) + 1;
+
     const media = resolvePrimaryRawMedia(workflow);
     const meta = getItemMetadata(media, workflow);
-    if (!meta?.url || meta.status !== "completed") return;
+    const hasCompletedCover = Boolean(meta?.url && meta.status === "completed");
 
-    const time = getWorkflowMediaTime(workflow);
-    const current = byId.get(folderId);
-    if (!current || time >= current.time) {
+    if (hasCompletedCover) {
+      const time = getWorkflowMediaTime(workflow);
+      if (!current || !current.url || time >= current.time) {
+        byId.set(folderId, {
+          url: meta.url,
+          isVideo: Boolean(meta.isVideo),
+          time,
+          count: nextCount,
+        });
+        return;
+      }
+    }
+
+    if (current) {
+      current.count = nextCount;
+    } else {
       byId.set(folderId, {
-        url: meta.url,
-        isVideo: Boolean(meta.isVideo),
-        time,
+        url: null,
+        isVideo: false,
+        time: -1,
+        count: nextCount,
       });
     }
   });

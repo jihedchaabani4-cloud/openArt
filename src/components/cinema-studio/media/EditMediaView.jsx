@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState, useCallback, useEffect } from "react";
-import { GoogleIcon } from "@/components/primitives/GoogleIcon";
+import { HugeIcon } from "@/components/primitives/HugeIcon";
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/components/base/button";
 import { MediaView } from "@/features/media";
@@ -78,7 +78,7 @@ function VideoControlsBar({
           onClick={togglePlay}
           aria-label={isPlaying ? "Pause" : "Play"}
         >
-          {isPlaying ? <GoogleIcon iconName="pause" fill={true} className="text-sm text-white" /> : <GoogleIcon iconName="play_arrow" fill={true} className="text-sm text-white ml-0.5" />}
+          {isPlaying ? <HugeIcon name="pause" className="text-sm text-white" /> : <HugeIcon name="play" className="text-sm text-white ml-0.5" />}
         </Button>
 
         {/* Scrubber Track */}
@@ -108,7 +108,7 @@ function VideoControlsBar({
           onClick={toggleMute}
           aria-label={isMuted ? "Unmute" : "Mute"}
         >
-          {isMuted ? <GoogleIcon iconName="volume_off" className="text-sm text-white" /> : <GoogleIcon iconName="volume_up" className="text-sm text-white" />}
+          {isMuted ? <HugeIcon name="volume-mute-02" className="text-sm text-white" /> : <HugeIcon name="volume-high" className="text-sm text-white" />}
         </Button>
 
         {/* Fullscreen */}
@@ -119,7 +119,7 @@ function VideoControlsBar({
           onClick={toggleFullscreen}
           aria-label="Fullscreen"
         >
-          <GoogleIcon iconName="fullscreen" className="text-sm text-white" />
+          <HugeIcon name="full-screen" className="text-sm text-white" />
         </Button>
       </div>
     </div>

@@ -1,6 +1,21 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
+const createDefaultFilters = () => ({
+  models: [],
+  types: [],
+  aspectRatios: [],
+  sort: "newest",
+  prompt: "",
+  liked: false,
+  dateRange: "all", // "all" | "today" | "7d" | "30d"
+  hideFailed: false,
+  activity: "all", // "all" | "generated" | "uploaded" | "liked"
+  gender: [],
+  renderingStyles: [],
+  elementTypes: [],
+});
+
 /**
  * [FSD Layer: features/workflows]
  * UI State ONLY for Workflows & Studio View.
@@ -51,7 +66,7 @@ export const useWorkflowUiStore = create(
       selectedMediaId: null,
       setSelectedMediaId: (id) => set({ selectedMediaId: id }),
 
-      gridSize: "lg", // "sm" | "md" | "lg"
+      gridSize: "md", // "sm" | "md" | "lg"
       setGridSize: (size) => set({ gridSize: size }),
 
       gridSpacing: "sm", // "sm" (4px, xxs) | "md" (8px, sm) | "lg" (16px, base)
@@ -68,26 +83,27 @@ export const useWorkflowUiStore = create(
       setClearPromptOnSubmit: (val) => set({ clearPromptOnSubmit: val }),
       showUploadedMedia: true,
       setShowUploadedMedia: (val) => set({ showUploadedMedia: val }),
+      splitByDate: false,
+      setSplitByDate: (val) => set({ splitByDate: val }),
+      showFolders: true,
+      setShowFolders: (val) => set({ showFolders: val }),
 
       // Filters
-      _generationFilters: {
-        models: [], types: [], aspectRatios: [],
-        sort: 'newest', prompt: '', liked: false,
-        gender: [], renderingStyles: [], elementTypes: [],
-      },
-      _elementFilters: {
-        models: [], types: [], aspectRatios: [],
-        sort: 'newest', prompt: '', liked: false,
-        gender: [], renderingStyles: [], elementTypes: [],
-      },
-      filters: {
-        models: [], types: [], aspectRatios: [],
-        sort: 'newest', prompt: '', liked: false,
-        gender: [], renderingStyles: [], elementTypes: [],
-      },
+      _generationFilters: createDefaultFilters(),
+      _elementFilters: createDefaultFilters(),
+      filters: createDefaultFilters(),
 
       setFilter: (key, value) => set((s) => {
         const nextFilters = { ...s.filters, [key]: value };
+        if (key === "activity") {
+          nextFilters.liked = value === "liked";
+        } else if (key === "liked") {
+          if (value) {
+            nextFilters.activity = "liked";
+          } else if (nextFilters.activity === "liked") {
+            nextFilters.activity = "all";
+          }
+        }
         const target = s.activeStudioTab === 'elements' ? '_elementFilters' : '_generationFilters';
         return {
           filters: nextFilters,
@@ -100,17 +116,13 @@ export const useWorkflowUiStore = create(
       }),
 
       clearFilters: () => set((s) => {
-        const empty = {
-          models: [], types: [], aspectRatios: [],
-          sort: 'newest', prompt: '', liked: false,
-          gender: [], renderingStyles: [], elementTypes: [],
-        };
+        const empty = createDefaultFilters();
         const target = s.activeStudioTab === 'elements' ? '_elementFilters' : '_generationFilters';
         return {
           filters: empty,
           [target]: empty,
-          _generationFilters: empty,
-          _elementFilters: empty,
+          _generationFilters: createDefaultFilters(),
+          _elementFilters: createDefaultFilters(),
         };
       }),
 
@@ -141,6 +153,8 @@ export const useWorkflowUiStore = create(
         showDetails: state.showDetails,
         clearPromptOnSubmit: state.clearPromptOnSubmit,
         showUploadedMedia: state.showUploadedMedia,
+        splitByDate: state.splitByDate,
+        showFolders: state.showFolders,
         favoriteFolderIds: state.favoriteFolderIds,
       }),
     }

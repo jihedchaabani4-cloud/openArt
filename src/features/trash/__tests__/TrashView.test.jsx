@@ -1,4 +1,3 @@
-import React from "react";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, cleanup, waitFor, fireEvent, renderHook } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -17,21 +16,6 @@ vi.mock("next/navigation", () => ({
   usePathname: () => "/cinema-studio/proj-1/trash",
   useParams: () => ({ projectId: "proj-1" }),
   useSearchParams: () => new URLSearchParams(),
-}));
-
-vi.mock("react-photo-album", () => ({
-  RowsPhotoAlbum: ({ photos, render }) => (
-    <div data-testid="photo-album">
-      {photos?.map((photo, i) =>
-        render?.photo
-          ? React.cloneElement(
-              render.photo({}, { photo, width: photo.width || 300, height: photo.height || 300 }),
-              { key: photo.key || i }
-            )
-          : null
-      )}
-    </div>
-  ),
 }));
 
 vi.mock("@/components/cinema-studio/media/StudioItemMenu", () => ({

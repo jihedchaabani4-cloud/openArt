@@ -13,12 +13,14 @@ import { queryKeys } from "@/shared/api/queryKeys"
 import {
   GeneratedPromptBar,
   useRealBackendModels,
-} from "@/features/prompt-bar/index.platform"
+} from "@/features/prompt-bar"
 import { SharedGalleryGrid } from "@/features/media"
 import { MediaGridItem } from "@/components/cinema-studio/media/MediaGridItem"
+import { useStudioSelectionStore } from "@/features/workflows/model/useStudioSelectionStore"
+import { StudioSelectionBar } from "@/components/cinema-studio/media/StudioSelectionBar"
 
 import { usePromptStore } from "@/features/prompt-bar/model/usePromptStore";
-import { buildCollectionCoverById } from "@/shared/lib/displayUtils";
+import { buildCollectionCoverById, buildCollectionDirectCountById } from "@/shared/lib/displayUtils";
 import { LoadingScreen } from "@/components/primitives/LoadingScreen";
 import { logger } from "@/shared/lib/logger";
 
@@ -62,6 +64,15 @@ export default function AssetsPage({ params }) {
             setActiveStudioTab("assets");
         }
     }, [projectId, setSelectedProjectId, setActiveStudioTab])
+
+    const hasSelection   = useStudioSelectionStore(s => s.selectedKeys.length > 0);
+    const setScope       = useStudioSelectionStore(s => s.setScope);
+    const clearSelection = useStudioSelectionStore(s => s.clearSelection);
+
+    React.useEffect(() => {
+        setScope(`assets:${projectId}`);
+        return () => clearSelection();
+    }, [projectId, setScope, clearSelection]);
 
     const isDragging = usePromptStore(s => s.isDraggingGalleryItem);
     const draggedItem = usePromptStore(s => s.draggedItem);
@@ -119,6 +130,10 @@ export default function AssetsPage({ params }) {
     const collectionCoverById = React.useMemo(
         () => buildCollectionCoverById(workflows),
         [workflows]
+    );
+    const collectionCountById = React.useMemo(
+        () => buildCollectionDirectCountById(fetchResult?.projectContents?.workflows ?? workflows),
+        [fetchResult?.projectContents?.workflows, workflows]
     );
 
     const setActiveCollectionId = useGenerationsStore(s => s.setActiveCollectionId);
@@ -262,12 +277,14 @@ export default function AssetsPage({ params }) {
                                 <SharedGalleryGrid
                                     entries={visibleItems}
                                     collectionCoverById={collectionCoverById}
+                                    collectionCountById={collectionCountById}
                                     gridSize={gridSize}
                                     gridSpacing={gridSpacing}
                                     projectId={projectId}
                                     CardComponent={MediaGridItem}
                                     onWorkflowClick={handleWorkflowClick}
                                     onCollectionClick={handleCollectionClick}
+                                    selectionEnabled={true}
                                 />
                                 {hasMore && (
                                     <div className="flex justify-center pt-2 text-sm text-white/45">
@@ -290,11 +307,19 @@ export default function AssetsPage({ params }) {
                 </div>
 
                 {/* Dedicated Generations PromptBar (Platform Architecture) */}
-                <GeneratedPromptBar
+                <div className={hasSelection ? "hidden" : undefined}>
+                    <GeneratedPromptBar
+                        projectId={projectId}
+                        models={realModels}
+                        onGenerate={handleGenerate}
+                        isGenerating={isGeneratingMutation}
+                    />
+                </div>
+
+                <StudioSelectionBar
                     projectId={projectId}
-                    models={realModels}
-                    onGenerate={handleGenerate}
-                    isGenerating={isGeneratingMutation}
+                    scope="assets"
+                    entries={visibleItems}
                 />
             </main>
         </div>

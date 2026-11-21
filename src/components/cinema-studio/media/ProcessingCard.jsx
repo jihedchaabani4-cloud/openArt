@@ -1,6 +1,6 @@
 "use client";
 
-import { GoogleIcon } from "@/components/primitives/GoogleIcon";
+import { HugeIcon } from "@/components/primitives/HugeIcon";
 import { cn } from "@/shared/lib/utils";
 
 /**
@@ -51,7 +51,7 @@ export function ProcessingCard({
 
       {/* ── Optional Top-Left Play Icon (Only when isVideo or showPlayIcon) ── */}
       {shouldShowPlayIcon && (
-        <GoogleIcon iconName="play_arrow" fill={true} className="absolute left-3 top-3 text-sm text-white/50 pointer-events-none" />
+        <HugeIcon name="play" className="absolute left-3 top-3 text-sm text-white/50 pointer-events-none" />
       )}
 
       {/* ── Top-Right Progress Badge ── */}

@@ -61,10 +61,24 @@ export function getGenerationConfig(item, group) {
 
     const refs = meta.references || settings.references || settings.input_assets || item.generationConfig?.references || [];
 
+    const resolvedModel =
+      meta.modelId ||
+      meta.modelName ||
+      meta.model ||
+      settings.model_name ||
+      settings.model ||
+      item.generationConfig?.model ||
+      item.generationConfig?.model_name ||
+      item.params?.model ||
+      item.params?.model_name ||
+      item.model_name ||
+      item.model;
+
     return {
       ...settings,
       prompt,
-      model_name: meta.modelId || meta.modelName || settings.model_name,
+      model: resolvedModel,
+      model_name: resolvedModel,
       ratio: settings.aspect_ratio || settings.ratio || "1:1",
       references: normalizeReferences(refs),
     };

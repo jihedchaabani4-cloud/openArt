@@ -26,6 +26,7 @@ export { useSetPrimaryMedia } from "./mutations/useSetPrimaryMedia";
 export { useMoveWorkflow } from "./mutations/useMoveWorkflow";
 export { useDetachMedia } from "./mutations/useDetachMedia";
 export { useDeleteMedia } from "./mutations/useDeleteMedia";
+export { useWorkspaceBulkDelete } from "./mutations/useWorkspaceBulkDelete";
 
 // ─── Character & Element Domain Re-exports (Single Source of Truth) ───────────
 export {

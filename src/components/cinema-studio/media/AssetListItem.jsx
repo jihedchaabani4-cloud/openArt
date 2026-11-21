@@ -52,7 +52,7 @@ export function AssetListItem({
       </div>
 
       {/* Asset Title */}
-      <span className="flex-1 min-w-0 text-[13px] truncate leading-tight font-sans antialiased">
+      <span className="flex-1 min-w-0 ds-text-caption-l truncate font-sans antialiased">
         {title}
       </span>
     </Button>

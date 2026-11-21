@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/base/button";
-import { GoogleIcon } from "@/components/primitives/GoogleIcon";
+import { HugeIcon } from "@/components/primitives/HugeIcon";
 
 export function ProjectsFloatingAction({ onCreate, isLoading }) {
     return (
@@ -13,9 +13,9 @@ export function ProjectsFloatingAction({ onCreate, isLoading }) {
                 disabled={isLoading}
             >
                 {isLoading ? (
-                    <GoogleIcon iconName="progress_activity" className="text-xl animate-spin" />
+                    <HugeIcon name="loading-03" className="animate-spin" />
                 ) : (
-                    <GoogleIcon iconName="add" className="text-xl" />
+                    <HugeIcon name="add-01" />
                 )}
                 <span>New project</span>
             </Button>

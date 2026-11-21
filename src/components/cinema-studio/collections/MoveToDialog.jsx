@@ -8,7 +8,7 @@ import {
   DialogTitle,
 } from "@/components/primitives/dialog";
 import { Button } from "@/components/base/button";
-import { GoogleIcon } from "@/components/primitives/GoogleIcon";
+import { HugeIcon } from "@/components/primitives/HugeIcon";
 import { FolderGlyphIcon } from "@/components/primitives/FolderGlyphIcon";
 import { cn } from "@/shared/lib/utils";
 import { useProjectFolders } from "@/features/folders/api/queries/useProjectFolders";
@@ -249,9 +249,8 @@ export function MoveToDialog({
                 aria-label={isExpanded ? `Collapse ${nodeName}` : `Expand ${nodeName}`}
                 className="size-6 p-0 shrink-0 text-on-surface-subtle hover:text-on-surface rounded"
               >
-                <GoogleIcon
-                  iconName={isExpanded ? "expand_more" : "chevron_right"}
-                  className="text-base"
+                <HugeIcon
+                  name={isExpanded ? "arrow-down-01" : "arrow-right-01"}
                 />
               </Button>
             ) : (
@@ -293,7 +292,7 @@ export function MoveToDialog({
                 title={`Create subfolder in ${nodeName}`}
                 className="opacity-0 group-hover:opacity-100 size-6 p-0 text-on-surface-subtle hover:text-on-surface rounded shrink-0 ml-auto"
               >
-                <GoogleIcon iconName="add" className="text-sm" />
+                <HugeIcon name="add-01" className="text-sm" />
               </Button>
             )}
           </div>
@@ -337,7 +336,7 @@ export function MoveToDialog({
               onClick={() => setCreatingInFolderId(null)}
               className="size-7 p-0 text-on-surface-subtle"
             >
-              <GoogleIcon iconName="close" className="text-sm" />
+              <HugeIcon name="cancel-01" className="text-sm" />
             </Button>
           </div>
         )}
@@ -375,14 +374,14 @@ export function MoveToDialog({
             className="size-7 rounded-full p-0 text-on-surface-subtle hover:text-on-surface"
             aria-label="Close"
           >
-            <GoogleIcon iconName="close" className="text-lg" />
+            <HugeIcon name="cancel-01" />
           </Button>
         </div>
 
         {/* Search Row */}
         <div className="px-5 pt-2 pb-2 flex items-center shrink-0">
           <div className="flex h-9 w-full items-center gap-2 rounded-xl border border-border/60 bg-surface-container-high px-2.5 min-w-0">
-            <GoogleIcon iconName="search" className="text-on-surface-subtle text-base shrink-0" />
+            <HugeIcon name="search-01" className="text-on-surface-subtle shrink-0" />
             <input
               type="text"
               value={searchQuery}
@@ -398,7 +397,7 @@ export function MoveToDialog({
                 onClick={() => setSearchQuery("")}
                 className="size-5 p-0 text-on-surface-subtle hover:text-on-surface"
               >
-                <GoogleIcon iconName="close" className="text-xs" />
+                <HugeIcon name="cancel-01" className="text-xs" />
               </Button>
             )}
           </div>

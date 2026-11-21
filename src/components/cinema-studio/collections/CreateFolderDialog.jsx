@@ -8,7 +8,7 @@ import {
 } from "@/components/primitives/dialog";
 import { Button } from "@/components/base/button";
 import { Textarea } from "@/components/primitives/textarea";
-import { GoogleIcon } from "@/components/primitives/GoogleIcon";
+import { HugeIcon } from "@/components/primitives/HugeIcon";
 import { cn } from "@/shared/lib/utils";
 import { useCreateFolder } from "@/features/folders/api/mutations/useCreateFolder";
 import { useUpdateFolder } from "@/features/folders/api/mutations/useUpdateFolder";
@@ -158,7 +158,7 @@ export function CreateFolderDialog({
             className="size-8 rounded-full p-0 text-on-surface-subtle hover:text-on-surface"
             aria-label="Close"
           >
-            <GoogleIcon iconName="close" className="text-lg" />
+            <HugeIcon name="cancel-01" />
           </Button>
         </div>
 
@@ -192,9 +192,8 @@ export function CreateFolderDialog({
                   aria-expanded={isDescriptionExpanded}
                   className="size-7 rounded-full p-0 text-on-surface-subtle hover:text-on-surface"
                 >
-                  <GoogleIcon
-                    iconName={isDescriptionExpanded ? "remove" : "add"}
-                    className="text-base"
+                  <HugeIcon
+                    name={isDescriptionExpanded ? "minus-sign" : "add-01"}
                   />
                 </Button>
               </div>

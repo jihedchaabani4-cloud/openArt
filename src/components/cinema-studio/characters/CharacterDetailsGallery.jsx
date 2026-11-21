@@ -2,7 +2,7 @@
 
 import { useRef, useMemo } from "react";
 import { Button } from "@/components/base/button";
-import { GoogleIcon } from "@/components/primitives/GoogleIcon";
+import { HugeIcon } from "@/components/primitives/HugeIcon";
 import { cn } from "@/shared/lib/utils";
 import { ReferenceMediaGalleryGrid } from "@/features/media";
 import { FlowCharacterImagePreview } from "./FlowCharacterImagePreview";
@@ -90,7 +90,7 @@ export function CharacterDetailsGallery({
             onClick={() => fileInputRef.current?.click()}
             title={atLimit ? "Maximum 5 images autorisées" : "Importer depuis l'ordinateur"}
           >
-            <GoogleIcon iconName="upload" className="text-[17px]" />
+            <HugeIcon name="upload-04" />
             <span>Importer</span>
           </Button>
 
@@ -103,7 +103,7 @@ export function CharacterDetailsGallery({
               onClick={onOpenAssets}
               title={atLimit ? "Maximum 5 images autorisées" : "Ajouter à partir du projet"}
             >
-              <GoogleIcon iconName="add" className="text-[17px]" />
+              <HugeIcon name="add-01" />
               <span>Depuis le projet</span>
             </Button>
           )}

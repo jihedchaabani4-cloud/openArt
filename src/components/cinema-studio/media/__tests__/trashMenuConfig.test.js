@@ -12,13 +12,13 @@ describe("trashMenuConfig", () => {
     expect(items[0]).toMatchObject({
       key: "restore",
       label: "Restaurer",
-      icon: "restore_from_trash",
+      icon: "restore-bin",
       disabled: false,
     });
     expect(items[1]).toMatchObject({
       key: "delete_permanently",
       label: "Supprimer définitivement",
-      icon: "delete_forever",
+      icon: "delete-02",
       variant: "destructive",
     });
 

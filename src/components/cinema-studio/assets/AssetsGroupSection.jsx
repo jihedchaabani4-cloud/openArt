@@ -1,7 +1,7 @@
 "use client";
 
 import { RowsPhotoAlbum } from "react-photo-album";
-import { GoogleIcon } from "@/components/primitives/GoogleIcon";
+import { HugeIcon } from "@/components/primitives/HugeIcon";
 
 import { LibraryMediaGridItem } from "./LibraryMediaGridItem";
 import { Button } from "@/components/base/button";
@@ -27,9 +27,9 @@ export function AssetsGroupSection({
           aria-label={`Select ${group.label}`}
         >
           {isAllSelected ? (
-            <GoogleIcon iconName="check" className="text-sm font-bold" />
+            <HugeIcon name="tick-02" className="text-sm font-bold" />
           ) : isPartiallySelected ? (
-            <GoogleIcon iconName="remove" className="text-sm font-bold" />
+            <HugeIcon name="minus-sign" className="text-sm font-bold" />
           ) : null}
         </Button>
         <h2 className="text-2xl font-semibold tracking-tight text-on-surface">

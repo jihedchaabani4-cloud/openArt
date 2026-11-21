@@ -14,7 +14,8 @@ import { LoadingScreen } from "@/components/primitives/LoadingScreen"
 import { ProjectError } from "@/components/cinema-studio/projects/ProjectError"
 import { queryKeys } from "@/shared/api/queryKeys"
 import { useDragAutoScroll } from "@/features/studio"
-import { usePromptBarRouteWatcher } from "@/features/prompt-bar/index.platform"
+import { useStudioDropExecutor } from "@/features/studio/model/useStudioDropExecutor"
+import { usePromptBarRouteWatcher } from "@/features/prompt-bar"
 
 /**
  * [FSD Layer: widgets/StudioLayout]
@@ -26,10 +27,11 @@ import { usePromptBarRouteWatcher } from "@/features/prompt-bar/index.platform"
  * 3. Pure Cache Management on entry/exit.
  */
 export default function StudioLayout({ children }) {
-    useDragAutoScroll();
-    usePromptBarRouteWatcher();
     const pathname = usePathname()
     const { projectId } = useParams()
+    useDragAutoScroll();
+    useStudioDropExecutor(projectId);
+    usePromptBarRouteWatcher();
     const queryClient = useQueryClient()
     const selectedProjectId = useWorkflowsStore(s => s.selectedProjectId);
     const setSelectedProjectId = useWorkflowsStore(s => s.setSelectedProjectId);

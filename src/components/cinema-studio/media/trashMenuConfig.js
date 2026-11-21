@@ -9,14 +9,14 @@ export function getTrashMenuItems({ onRestore, onDeletePermanently, isRestoring 
   return [
     {
       key: "restore",
-      icon: "restore_from_trash",
+      icon: "restore-bin",
       label: "Restaurer",
       disabled: Boolean(isRestoring),
       onClick: onRestore,
     },
     {
       key: "delete_permanently",
-      icon: "delete_forever",
+      icon: "delete-02",
       label: "Supprimer définitivement",
       variant: "destructive",
       onClick: onDeletePermanently,

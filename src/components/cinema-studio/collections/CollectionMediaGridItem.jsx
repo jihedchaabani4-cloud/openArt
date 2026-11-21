@@ -1,32 +1,55 @@
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect, useCallback, useContext } from "react";
 import { useRouter } from "next/navigation";
 import { createPortal } from "react-dom";
+import { QueryClientContext } from "@tanstack/react-query";
 import { motion, useMotionValue } from "framer-motion";
-import { GoogleIcon } from "@/components/primitives/GoogleIcon";
+import { HugeIcon } from "@/components/primitives/HugeIcon";
 import { cn } from "@/shared/lib/utils";
-import { ButtonGroup } from "@/components/primitives/button-group";
+import { queryKeys } from "@/shared/api/queryKeys";
 import { ConfirmDeleteDialog } from "@/components/primitives/ConfirmDeleteDialog";
 import { CreateFolderDialog } from "@/components/cinema-studio/collections/CreateFolderDialog";
 import { MoveToDialog } from "@/components/cinema-studio/collections/MoveToDialog";
-import { Button } from "@/components/base/button";
 import { IconButton } from "@/components/base/icon-button";
 import { StudioItemDropdownMenu } from "@/components/cinema-studio/media/StudioItemMenu";
 import { getStudioMenuItems } from "@/components/cinema-studio/media/studioMenuConfig";
 import { MediaView } from "@/features/media";
 import { useUpdateFolder, useDeleteFolder, useFolderMove, useDownloadCollection } from "@/features/folders";
+import { isFolderDescendant } from "@/features/folders/model/useFolderMove";
 import { usePromptStore, useStudioItemDrag } from "@/features/studio";
 import { useWorkflowsStore } from "@/features/workflows/model/useWorkflowsStore";
+import {
+  useStudioSelectionStore,
+  parseSelectionKey,
+} from "@/features/workflows/model/useStudioSelectionStore";
+import { stripWorkflowPrefix } from "@/features/workflows/lib/cacheHelpers";
+
+const DRAG_TARGET_LABELS = {
+  "add-to-collection": "Move to folder",
+  "move-to-root": "Move to root",
+  "move-out": "Move out",
+};
+
+function getDragTargetType(dragTarget) {
+  if (!dragTarget) return null;
+  if (typeof dragTarget === "string") return dragTarget;
+  return dragTarget.target || null;
+}
 
 export const CollectionMediaGridItem = React.memo(function CollectionMediaGridItem({
   collection,
   workflow,
   coverUrl = null,
   coverIsVideo = false,
+  itemCount = null,
   className,
   onClick,
   width: albumWidth = null,
   height: albumHeight = null,
   projectId: propProjectId = null,
+  isSelected = false,
+  isSelectionMode = false,
+  selectionEnabled = false,
+  onToggleSelect = null,
 }) {
   const col = collection || workflow;
   const router = useRouter();
@@ -46,6 +69,7 @@ export const CollectionMediaGridItem = React.memo(function CollectionMediaGridIt
   const [editingFolder, setEditingFolder] = useState(null);
   const [movingFolder, setMovingFolder] = useState(null);
 
+  const queryClient = useContext(QueryClientContext);
   const { mutateAsync: updateFolder } = useUpdateFolder();
   const { mutateAsync: deleteFolder, isPending: isDeleting } = useDeleteFolder();
   const { executeMoveFromPayload } = useFolderMove(projectId);
@@ -67,50 +91,101 @@ export const CollectionMediaGridItem = React.memo(function CollectionMediaGridIt
   const collectionName = col?.name || "Untitled collection";
   const collectionColor = col?.color || null;
   const collectionDescription = col?.description || null;
-  const collectionAssetCount = typeof col?.assetCount === "number" ? col.assetCount : null;
-  const collectionTileOverlay = (
-    <div className="collection-tile-scrim" />
-  );
+  const directItemCount =
+    typeof itemCount === "number"
+      ? itemCount
+      : typeof col?.assetCount === "number"
+        ? col.assetCount
+        : 0;
 
   useEffect(() => {
     const handlePointerHover = (e) => {
       if (e.detail?.target === "add-to-collection" && e.detail?.collectionId === col?.id) {
         setIsDragOver(true);
-      } else if (!e.detail?.target || e.detail?.collectionId !== col?.id) {
+      } else {
         setIsDragOver(false);
       }
     };
-    const handlePointerDrop = (e) => {
-      if (e.detail?.targetFolderId === col?.id && projectId) {
-        executeMoveFromPayload({
-          payload: e.detail,
-          targetFolderId: col.id,
-          projectId,
-        });
-      }
-    };
     window.addEventListener("studio:pointer-hover-target", handlePointerHover);
-    window.addEventListener("studio:drop-to-collection", handlePointerDrop);
     return () => {
       window.removeEventListener("studio:pointer-hover-target", handlePointerHover);
-      window.removeEventListener("studio:drop-to-collection", handlePointerDrop);
     };
-  }, [col?.id, projectId, executeMoveFromPayload]);
+  }, [col?.id]);
+
+  const canDrag = !isSelectionMode || isSelected;
+
+  const getDragItems = useCallback(() => {
+    if (isSelected) {
+      const selectedKeys = useStudioSelectionStore.getState().selectedKeys;
+      if (selectedKeys.length > 1) {
+        const parsed = selectedKeys
+          .map(parseSelectionKey)
+          .filter((entry) => entry.itemType && entry.id)
+          .map((entry) =>
+            entry.itemType === "workflow"
+              ? { itemType: "workflow", id: stripWorkflowPrefix(entry.id) }
+              : entry
+          );
+        if (parsed.length > 0) return parsed;
+      }
+    }
+    return folderId ? [{ itemType: "collection", id: folderId }] : [];
+  }, [isSelected, folderId]);
+
+  const getInvalidDropFolderIds = useCallback(() => {
+    const invalid = new Set();
+    const dragItems = getDragItems();
+    const folderIds = new Set();
+    if (folderId) folderIds.add(folderId);
+    for (const entry of dragItems) {
+      if (entry.itemType === "collection" && entry.id) {
+        folderIds.add(entry.id);
+      }
+    }
+    if (folderIds.size === 0) return invalid;
+
+    const rawFolders = projectId && queryClient
+      ? queryClient.getQueryData(queryKeys.folders.byProject(projectId))
+      : null;
+    const folders = Array.isArray(rawFolders)
+      ? rawFolders
+      : Array.isArray(rawFolders?.items)
+        ? rawFolders.items
+        : [];
+
+    for (const selectedFolderId of folderIds) {
+      invalid.add(selectedFolderId);
+      for (const folder of folders) {
+        const candidateId = folder?.id || folder?.folderId || folder?._id;
+        if (candidateId && isFolderDescendant(folders, selectedFolderId, candidateId)) {
+          invalid.add(candidateId);
+        }
+      }
+    }
+    return invalid;
+  }, [folderId, getDragItems, projectId, queryClient]);
 
   const {
     handlePointerDown,
     isDragging: isDraggingThis,
+    dragTarget,
+    dragCount = 1,
     justDraggedRef,
   } = useStudioItemDrag({
     itemType: "collection",
     item: col,
     itemId: col?.id,
-    isDraggable: true,
+    isDraggable: canDrag,
     isRenaming: false,
+    getDragItems,
+    getInvalidDropFolderIds,
     mouseX,
     mouseY,
     lastPos,
   });
+
+  const dragTargetType = getDragTargetType(dragTarget);
+  const dragTargetLabel = dragTargetType ? DRAG_TARGET_LABELS[dragTargetType] || null : null;
 
   const handleDragOver = (e) => {
     e.preventDefault();
@@ -247,12 +322,12 @@ export const CollectionMediaGridItem = React.memo(function CollectionMediaGridIt
   const cardStyle = albumWidth && albumHeight
     ? {
         width: albumWidth,
-        height: albumWidth,
-        aspectRatio: "1 / 1",
+        height: albumHeight,
+        aspectRatio: `${albumWidth} / ${albumHeight}`,
         transform: "translateZ(0)",
         contain: "paint layout",
         contentVisibility: "auto",
-        containIntrinsicSize: `${Math.round(albumWidth)}px ${Math.round(albumWidth)}px`,
+        containIntrinsicSize: `${Math.round(albumWidth)}px ${Math.round(albumHeight)}px`,
       }
     : {
         width: "100%",
@@ -265,6 +340,10 @@ export const CollectionMediaGridItem = React.memo(function CollectionMediaGridIt
   const handleNavigate = useCallback(
     (e) => {
       if (justDraggedRef.current) return;
+      if (isSelectionMode && onToggleSelect) {
+        onToggleSelect(e);
+        return;
+      }
       const targetCol = col || collection || workflow;
       const targetId = targetCol?.id || targetCol?.name;
       if (onClick) {
@@ -273,7 +352,56 @@ export const CollectionMediaGridItem = React.memo(function CollectionMediaGridIt
         router.push(`/cinema-studio/${projectId}/collection/${targetId}`);
       }
     },
-    [justDraggedRef, col, collection, workflow, onClick, projectId, router]
+    [isSelectionMode, onToggleSelect, justDraggedRef, col, collection, workflow, onClick, projectId, router]
+  );
+
+  const collectionTitleTooltip = collectionDescription
+    ? `${collectionName} — ${collectionDescription}`
+    : collectionName;
+  const collectionColorStyle = collectionColor
+    ? { backgroundColor: collectionColor }
+    : undefined;
+
+  const renderFolderFooter = (interactive) => (
+    <div
+      data-slot="folder-bottom-bar"
+      className="ds-folder-bottom-bar flex w-full items-end justify-between gap-2.5"
+    >
+      <div className="flex min-w-0 items-center gap-2">
+        {collectionColor && (
+          <span
+            className="size-2 rounded-full shrink-0"
+            style={collectionColorStyle}
+          />
+        )}
+        <span
+          data-slot="folder-title"
+          className="ds-folder-title font-medium tracking-tight text-text-primary truncate"
+          title={collectionTitleTooltip}
+          onDoubleClick={
+            interactive
+              ? (e) => {
+                  e.stopPropagation();
+                  setEditingFolder(col);
+                }
+              : undefined
+          }
+        >
+          {collectionName}
+        </span>
+      </div>
+      <span
+        data-slot="folder-item-count"
+        aria-label={`${directItemCount} ${directItemCount === 1 ? "item" : "items"}`}
+        className="ds-folder-count flex shrink-0 items-center gap-1 pb-0.5 font-medium text-text-primary/90 tabular-nums"
+      >
+        <HugeIcon
+          name="image-02"
+          className="text-text-primary/85 shrink-0"
+        />
+        <span>{directItemCount}</span>
+      </span>
+    </div>
   );
 
   return (
@@ -285,86 +413,100 @@ export const CollectionMediaGridItem = React.memo(function CollectionMediaGridIt
         contextMenuItems={menuItems}
         onClick={handleNavigate}
         isLiked={isLiked}
+        showLikedBadge={false}
         onLikeToggle={handleToggleLike}
         draggable={false}
+        isSelected={isSelected}
+        isSelectionMode={isSelectionMode}
+        selectionEnabled={selectionEnabled}
+        onToggleSelect={onToggleSelect}
+        outlineClassName="rounded-xl"
         data-collection-drop-id={col?.id}
-        onPointerDown={handlePointerDown}
-        onDragOver={handleDragOver}
-        onDragEnter={handleDragEnter}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
+        data-draggable-card={canDrag ? "true" : undefined}
+        onPointerDown={canDrag ? handlePointerDown : undefined}
+        onDragOver={isSelectionMode ? undefined : handleDragOver}
+        onDragEnter={isSelectionMode ? undefined : handleDragEnter}
+        onDragLeave={isSelectionMode ? undefined : handleDragLeave}
+        onDrop={isSelectionMode ? undefined : handleDrop}
         className={cn(
-          "cursor-pointer",
-          !coverUrl && "collection-tile-empty",
-          isDragOver && "ring-2 ring-white",
+          "shrink-0 rounded-xl",
+          canDrag ? "cursor-grab active:cursor-grabbing" : "cursor-pointer",
+          !coverUrl && "border border-border-subtle",
+          isDragOver && "ring-2 ring-text-primary",
           className
         )}
         style={cardStyle}
         topRight={
-          <div
-            className={cn(
-              "transition-opacity duration-200 pointer-events-auto",
-              isDropdownOpen ? "opacity-100" : "opacity-0 group-hover:opacity-100"
-            )}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <ButtonGroup variant="pill">
-              <IconButton
-                onClick={handleToggleLike}
-                aria-label={isLiked ? "Unlike collection" : "Like collection"}
-                title={isLiked ? "Unlike collection" : "Like collection"}
-              >
-                <GoogleIcon
-                  iconName="favorite"
-                  fill={isLiked}
-                  className="text-xs text-black/80"
-                />
-              </IconButton>
-              <StudioItemDropdownMenu
-                open={isDropdownOpen}
-                onOpenChange={setIsDropdownOpen}
-                items={menuItems}
-              />
-            </ButtonGroup>
-          </div>
-        }
-        bottom={
-          <div className="collection-title-container">
-            <span
-              className="title-text flex items-center gap-1.5"
-              title={collectionDescription ? `${collectionName} — ${collectionDescription}` : collectionName}
-              onClick={handleNavigate}
-              onDoubleClick={(e) => {
-                e.stopPropagation();
-                setEditingFolder(col);
-              }}
+          isSelectionMode ? null : (
+            <div
+              className="flex flex-col items-center gap-1.5 pointer-events-auto"
+              onClick={(e) => e.stopPropagation()}
             >
-              {collectionColor && (
-                <span
-                  className="size-2 rounded-full shrink-0"
-                  style={collectionColor ? { backgroundColor: collectionColor } : undefined}
+              <div
+                className={cn(
+                  "transition-opacity duration-200",
+                  isLiked || isDropdownOpen ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                )}
+              >
+                <IconButton
+                  variant="overlay"
+                  onClick={handleToggleLike}
+                  aria-label={isLiked ? "Unlike collection" : "Like collection"}
+                  title={isLiked ? "Unlike collection" : "Like collection"}
+                >
+                  <HugeIcon
+                    name="favourite"
+                    className="text-text-primary"
+                  />
+                </IconButton>
+              </div>
+              <div
+                className={cn(
+                  "transition-opacity duration-200",
+                  isDropdownOpen ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                )}
+              >
+                <StudioItemDropdownMenu
+                  open={isDropdownOpen}
+                  onOpenChange={setIsDropdownOpen}
+                  items={menuItems}
                 />
-              )}
-              <span className="truncate">{collectionName}</span>
-              {collectionAssetCount !== null && (
-                <span className="text-xs text-on-surface-subtle ml-auto font-normal">
-                  {collectionAssetCount}
-                </span>
-              )}
-            </span>
-          </div>
+              </div>
+            </div>
+          )
         }
+        bottom={isSelectionMode ? null : renderFolderFooter(true)}
       >
-        {coverUrl && (
+        {coverUrl ? (
           <div className="absolute inset-0">
             {coverIsVideo ? (
               <video src={coverUrl} className="h-full w-full object-cover" muted loop playsInline />
             ) : (
-              <img src={coverUrl} className="h-full w-full object-cover" alt="" />
+              <img src={coverUrl} draggable={false} className="h-full w-full object-cover" alt="" />
             )}
           </div>
+        ) : (
+          <div
+            data-slot="folder-empty-fallback"
+            className="absolute inset-0 flex items-center justify-center pb-8"
+          >
+            <HugeIcon
+              name="folder-01"
+              size="xl"
+              className="text-text-disabled"
+            />
+          </div>
         )}
-        {collectionTileOverlay}
+        <div
+          data-slot="folder-bottom-blur"
+          aria-hidden="true"
+          className="ds-folder-bottom-blur"
+        />
+        {isSelectionMode && (
+          <div className="absolute bottom-0 inset-x-0 pointer-events-none">
+            {renderFolderFooter(false)}
+          </div>
+        )}
       </MediaView>
 
       <ConfirmDeleteDialog
@@ -415,21 +557,50 @@ export const CollectionMediaGridItem = React.memo(function CollectionMediaGridIt
       {/* ── Collection drag ghost portal ── */}
       {isDraggingThis && typeof window !== "undefined" && createPortal(
         <motion.div
-          className="fixed top-0 left-0 z-50 pointer-events-none overflow-hidden rounded-xxxs border border-white/70 bg-surface-secondary shadow-none"
+          className="fixed top-0 left-0 z-50 pointer-events-none"
           style={ghostMotionStyle}
           initial={{ scale: 0.92, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.15 }}
         >
-          <div className="absolute inset-0 bg-gradient-to-b from-white/5 via-transparent to-black/50" />
-          <div className="absolute inset-x-2.5 bottom-2.5 flex items-end justify-between gap-2">
-            <h3 className="min-w-0 truncate text-xs font-medium leading-tight tracking-tight text-white/92">
-              {collectionName}
-            </h3>
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-sm border border-white/10 bg-surface-secondary/95 text-white/90 shadow-none">
-              <GoogleIcon iconName="folder" className="text-base" />
+          {dragCount > 1 && (
+            <div
+              aria-hidden="true"
+              data-slot="drag-stack-back"
+              className="absolute inset-0 translate-x-1.5 translate-y-1.5 rotate-3 rounded-xl bg-surface-card border border-border-subtle"
+            />
+          )}
+          <div className="relative h-full w-full overflow-hidden rounded-xl border border-border-heavy bg-surface-secondary">
+            <div className="absolute inset-0 bg-gradient-to-b from-white/5 via-transparent to-black/50" />
+            <div className="absolute inset-x-2.5 bottom-2.5 flex items-end justify-between gap-2">
+              <h3 className="min-w-0 truncate ds-text-caption-m font-medium tracking-tight text-text-primary">
+                {collectionName}
+              </h3>
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border-subtle bg-surface-secondary text-text-primary">
+                <HugeIcon name="folder-01" size="md" />
+              </div>
             </div>
           </div>
+          {dragCount > 1 && (
+            <span
+              data-slot="drag-count-badge"
+              className="absolute -top-2 -right-2 z-10 min-w-5 text-center bg-text-primary text-text-inverse rounded-full px-2 py-0.5 ds-text-caption-s font-semibold tabular-nums"
+            >
+              {dragCount}
+            </span>
+          )}
+          {dragTargetLabel && (
+            <motion.div
+              key={dragTargetType}
+              data-slot="drag-target-label"
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.12 }}
+              className="absolute left-1/2 top-full mt-2 -translate-x-1/2 surface-glass border border-border-subtle text-text-primary rounded-full px-2.5 py-1 ds-text-caption-m font-medium whitespace-nowrap"
+            >
+              {dragTargetLabel}
+            </motion.div>
+          )}
         </motion.div>,
         document.body
       )}

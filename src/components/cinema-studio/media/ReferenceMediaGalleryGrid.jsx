@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import { cn } from "@/shared/lib/utils";
-import { GoogleIcon } from "@/components/primitives/GoogleIcon";
+import { HugeIcon } from "@/components/primitives/HugeIcon";
 import { ButtonGroup } from "@/components/primitives/button-group";
 import { Button } from "@/components/base/button";
 import { IconButton } from "@/components/base/icon-button";
@@ -49,8 +49,7 @@ export function ReferenceMediaCard({
             {
               key: "set-cover",
               label: isCover ? "Image de couverture" : "Définir comme couverture",
-              icon: "bookmark",
-              fill: isCover,
+              icon: "bookmark-02",
               disabled: isCover,
               onClick: !isCover ? () => onSetCover(mediaId) : undefined,
             },
@@ -61,7 +60,7 @@ export function ReferenceMediaCard({
             {
               key: "delete-image",
               label: "Supprimer l'image",
-              icon: "delete",
+              icon: "delete-02",
               variant: "destructive",
               onClick: () => onDeleteImage(rawItem),
             },
@@ -85,7 +84,7 @@ export function ReferenceMediaCard({
         transform: "translateZ(0)",
       }}
       className={cn(
-        "group relative overflow-hidden bg-canvas-bg border-none shadow-none flex items-center justify-center",
+        "shrink-0 group relative overflow-hidden bg-canvas-bg border-none shadow-none flex items-center justify-center",
         className
       )}
       showLikedBadge={false}
@@ -108,9 +107,8 @@ export function ReferenceMediaCard({
                   title={isCover ? "Image de couverture" : "Définir comme couverture"}
                   aria-label="Couverture"
                 >
-                  <GoogleIcon
-                    iconName="bookmark"
-                    fill={isCover}
+                  <HugeIcon
+                    name="bookmark-02"
                     className="text-xs"
                   />
                 </IconButton>
@@ -124,7 +122,7 @@ export function ReferenceMediaCard({
                   title="Supprimer l'image"
                   aria-label="Supprimer"
                 >
-                  <GoogleIcon iconName="delete" className="text-xs hover:text-error" />
+                  <HugeIcon name="delete-02" className="text-xs hover:text-error" />
                 </IconButton>
               )}
             </ButtonGroup>
@@ -134,7 +132,7 @@ export function ReferenceMediaCard({
       overlay={
         isLoadingThis ? (
           <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] z-30 flex items-center justify-center">
-            <GoogleIcon iconName="progress_activity" className="text-2xl text-white animate-spin" />
+            <HugeIcon name="loading-03" className="text-2xl text-white animate-spin" />
           </div>
         ) : null
       }
@@ -200,6 +198,8 @@ export function ReferenceMediaGalleryGrid({
       <SharedGalleryGrid
         items={validItems}
         workflow={workflow}
+        splitByDate={false}
+        enableWheelResize={false}
         CardComponent={ReferenceMediaCard}
         cardProps={cardProps}
         targetRowHeight={targetRowHeight}

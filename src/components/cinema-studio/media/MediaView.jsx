@@ -1,7 +1,7 @@
 "use client";
 /* eslint-disable @next/next/no-img-element */
 
-import { useRef, useState, useCallback, forwardRef, memo } from "react";
+import { useRef, useState, useEffect, useCallback, forwardRef, memo } from "react";
 import { cn } from "@/shared/lib/utils";
 import { ProcessingCard } from "@/components/cinema-studio/media/ProcessingCard";
 import { FlowErrorTile } from "@/components/primitives/FlowErrorTile";
@@ -10,39 +10,145 @@ import {
   ContextMenuTrigger,
   ContextMenuContent,
   ContextMenuItem,
+  ContextMenuLabel,
   ContextMenuSeparator,
   ContextMenuSub,
   ContextMenuSubTrigger,
   ContextMenuSubContent,
 } from "@/components/primitives/context-menu";
+import { MenuItemsList } from "@/components/base/menu";
+import { StudioContextMenuContent } from "@/components/cinema-studio/media/StudioItemMenu";
 import { useMediaViewerCore } from "@/features/workflows/core/useMediaViewerCore";
-import { GoogleIcon } from "@/components/primitives/GoogleIcon";
+import { getBulkContextMenuSnapshot } from "@/features/workflows/model/studioBulkMenuBridge";
+import { HugeIcon } from "@/components/primitives/HugeIcon";
 import { Button } from "@/components/base/button";
+import { Checkbox } from "@/components/base/checkbox";
 
-function filterActiveMenuItems(items = []) {
-  if (!items || !items.length) return [];
-  const filtered = items.filter(
-    (m) => m && (m.type === "separator" || m.key === "separator" || m.key?.startsWith("sep-") || !m.disabled)
+const BULK_CONTEXT_MENU_COMPONENTS = {
+  Item: ContextMenuItem,
+  Separator: ContextMenuSeparator,
+  Sub: ContextMenuSub,
+  SubTrigger: ContextMenuSubTrigger,
+  SubContent: ContextMenuSubContent,
+};
+
+function buildBulkContextMenuItems(snapshot) {
+  const { count, scope, isBusy, hasAllKeys } = snapshot;
+
+  if (scope === "trash") {
+    return [
+      {
+        key: "bulk-restore",
+        label: "Restore",
+        icon: "restore-bin",
+        disabled: isBusy,
+        onClick: snapshot.bulkRestore,
+      },
+      {
+        key: "bulk-select-all",
+        label: "Select all",
+        icon: "select-01",
+        disabled: isBusy || !hasAllKeys,
+        onClick: snapshot.selectAll,
+      },
+      {
+        key: "bulk-clear",
+        label: "Clear selection",
+        icon: "cancel-01",
+        disabled: isBusy,
+        onClick: snapshot.clearSelection,
+      },
+      { key: "sep-trash-danger", type: "separator" },
+      {
+        key: "bulk-delete-permanent",
+        label: "Delete permanently",
+        icon: "delete-02",
+        variant: "destructive",
+        disabled: isBusy,
+        onClick: snapshot.openDeleteConfirm,
+      },
+    ];
+  }
+
+  const primaryItems = [];
+  if (snapshot.canDownload) {
+    primaryItems.push({
+      key: "bulk-download",
+      label: count > 1 ? `Download (${count})` : "Download",
+      icon: "download-04",
+      disabled: isBusy,
+      onClick: snapshot.bulkDownload,
+    });
+  }
+  if (snapshot.canMove) {
+    primaryItems.push({
+      key: "bulk-move",
+      label: "Move to...",
+      icon: "folder-transfer",
+      disabled: isBusy,
+      onClick: snapshot.openMoveDialog,
+    });
+  }
+  if (snapshot.canLike) {
+    primaryItems.push({
+      key: "bulk-like",
+      label: snapshot.isAllLiked ? "Unlike selected" : "Like selected",
+      icon: "favourite",
+      disabled: isBusy,
+      onClick: snapshot.bulkToggleLike,
+    });
+  }
+  if (snapshot.canAddToPrompt) {
+    primaryItems.push({
+      key: "bulk-add-to-prompt",
+      label: "Add to Prompt",
+      icon: "image-add-02",
+      disabled: isBusy,
+      onClick: snapshot.bulkAddToPrompt,
+    });
+  }
+
+  return [
+    ...primaryItems,
+    ...(primaryItems.length > 0 ? [{ key: "sep-selection", type: "separator" }] : []),
+    {
+      key: "bulk-select-all",
+      label: "Select all",
+      icon: "select-01",
+      disabled: isBusy || !hasAllKeys,
+      onClick: snapshot.selectAll,
+    },
+    {
+      key: "bulk-clear",
+      label: "Clear selection",
+      icon: "cancel-01",
+      disabled: isBusy,
+      onClick: snapshot.clearSelection,
+    },
+    { key: "sep-danger", type: "separator" },
+    {
+      key: "bulk-trash",
+      label: "Move to Trash",
+      icon: "delete-02",
+      variant: "destructive",
+      disabled: isBusy,
+      onClick: snapshot.openDeleteConfirm,
+    },
+  ];
+}
+
+function BulkSelectionContextMenuContent({ snapshot }) {
+  if (!snapshot || !snapshot.count) return null;
+  const items = buildBulkContextMenuItems(snapshot);
+  return (
+    <ContextMenuContent data-bulk-context-menu="true">
+      <ContextMenuLabel>{snapshot.count} selected</ContextMenuLabel>
+      <MenuItemsList
+        items={items}
+        components={BULK_CONTEXT_MENU_COMPONENTS}
+      />
+    </ContextMenuContent>
   );
-  const result = [];
-  for (let i = 0; i < filtered.length; i++) {
-    const curr = filtered[i];
-    const isSep = curr.type === "separator" || curr.key === "separator" || curr.key?.startsWith("sep-");
-    if (isSep) {
-      if (result.length === 0) continue;
-      const prev = result[result.length - 1];
-      const prevIsSep = prev.type === "separator" || prev.key === "separator" || prev.key?.startsWith("sep-");
-      if (prevIsSep) continue;
-    }
-    result.push(curr);
-  }
-  if (result.length > 0) {
-    const last = result[result.length - 1];
-    if (last.type === "separator" || last.key === "separator" || last.key?.startsWith("sep-")) {
-      result.pop();
-    }
-  }
-  return result;
 }
 
 /**
@@ -68,6 +174,7 @@ export const CoreMediaItemPresenter = memo(
       fit = "contain",
       surface = "default",
       className,
+      outlineClassName,
       style: propStyle = {},
       mediaClassName,
       draggable = false,
@@ -112,10 +219,15 @@ export const CoreMediaItemPresenter = memo(
       onDelete = null,
       onMouseEnter: propOnMouseEnter,
       onMouseLeave: propOnMouseLeave,
+      onContextMenu: propOnContextMenu,
       isLiked: propIsLiked = null,
       onLikeToggle = null,
       showLikedBadge = true,
       showVideoBadge = true,
+      isSelected = false,
+      isSelectionMode = false,
+      selectionEnabled = false,
+      onToggleSelect = null,
       ...props
     },
     ref
@@ -162,18 +274,18 @@ export const CoreMediaItemPresenter = memo(
     const isMenuOpen = controlledMenuOpen !== undefined ? controlledMenuOpen : internalMenuOpen;
     const _setMenuOpen = controlledOnMenuOpenChange || setInternalMenuOpen;
 
-    const isMenuActive = Boolean(showMenu || activeMenu || menuSlot || menuTrigger);
+    const isMenuActive = !isSelectionMode && Boolean(showMenu || activeMenu || menuSlot || menuTrigger);
 
     // Local hover state for overlay visibility
     const [isHovered, setIsHovered] = useState(false);
 
     const handleMouseEnter = useCallback((e) => {
       setIsHovered(true);
-      if (playOnHover && videoRef.current) {
+      if (playOnHover && !isSelectionMode && videoRef.current) {
         videoRef.current.play().catch(() => {});
       }
       propOnMouseEnter?.(e);
-    }, [playOnHover, videoRef, propOnMouseEnter]);
+    }, [playOnHover, isSelectionMode, videoRef, propOnMouseEnter]);
 
     const handleMouseLeave = useCallback((e) => {
       setIsHovered(false);
@@ -183,6 +295,24 @@ export const CoreMediaItemPresenter = memo(
       }
       propOnMouseLeave?.(e);
     }, [playOnHover, videoRef, propOnMouseLeave]);
+
+    useEffect(() => {
+      if (isSelectionMode && videoRef.current) {
+        if (!videoRef.current.paused) {
+          videoRef.current.pause();
+        }
+        if (videoRef.current.currentTime) {
+          videoRef.current.currentTime = 0;
+        }
+      }
+    }, [isSelectionMode, videoRef]);
+
+    const handleContextMenu = useCallback((e) => {
+      propOnContextMenu?.(e);
+      if (isSelectionMode && !isSelected) {
+        e.preventDefault();
+      }
+    }, [propOnContextMenu, isSelectionMode, isSelected]);
 
     const handleVideoLoaded = useCallback((e) => {
       core.handleVideoLoadedMetadata?.(e);
@@ -202,6 +332,22 @@ export const CoreMediaItemPresenter = memo(
 
     const isContain = fit === "contain";
     const hasContextMenu = Boolean((contextMenuItems && contextMenuItems.length > 0) || contextMenuContent);
+    const showBulkContextMenu = Boolean(isSelectionMode && isSelected);
+    const showSingleContextMenu = Boolean(!isSelectionMode && hasContextMenu);
+    const shouldWrapContextMenu = Boolean(hasContextMenu || selectionEnabled || showBulkContextMenu);
+    const isContextMenuDisabled = !showBulkContextMenu && !showSingleContextMenu;
+
+    const [bulkMenuSnapshot, setBulkMenuSnapshot] = useState(null);
+    const handleContextMenuOpenChange = useCallback(
+      (open) => {
+        if (showBulkContextMenu) {
+          setBulkMenuSnapshot(open ? getBulkContextMenuSnapshot() : null);
+        } else if (!open) {
+          setBulkMenuSnapshot(null);
+        }
+      },
+      [showBulkContextMenu]
+    );
 
     const renderDropdownMenu = () => {
       if (menuSlot) return menuSlot;
@@ -222,19 +368,24 @@ export const CoreMediaItemPresenter = memo(
     const cardElement = (
       <div
         ref={ref}
+        data-selected={isSelected ? "true" : undefined}
         className={cn(
-          "group relative select-none items-center justify-center overflow-hidden rounded-xxxs shadow-none",
-          surface === "card"
-            ? "bg-surface-card border border-white/10 hover:border-white/20 transition-none"
-            : "bg-black/40",
+          "group relative select-none items-center justify-center overflow-hidden rounded-xxxs shadow-none transition-opacity duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
+          surface === "card" ? "bg-surface-card border-0" : "bg-black/40",
           isContain ? "inline-flex w-fit h-fit max-w-full max-h-full shrink-0" : "flex w-full h-full",
-          draggable ? "cursor-grab active:cursor-grabbing" : onClick ? "cursor-pointer" : "",
+          draggable && !isSelectionMode
+            ? "cursor-grab active:cursor-grabbing"
+            : isSelectionMode || onClick
+              ? "cursor-pointer"
+              : "",
+          isSelectionMode && !isSelected ? "opacity-50 hover:opacity-75" : "opacity-100",
           className
         )}
-        draggable={draggable}
-        onDragStart={draggable ? onDragStart : undefined}
-        onDragEnd={draggable ? onDragEnd : undefined}
+        draggable={draggable && !isSelectionMode}
+        onDragStart={draggable && !isSelectionMode ? onDragStart : undefined}
+        onDragEnd={draggable && !isSelectionMode ? onDragEnd : undefined}
         onClick={handleCardClick}
+        onContextMenu={handleContextMenu}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         style={containerStyle}
@@ -252,7 +403,7 @@ export const CoreMediaItemPresenter = memo(
               muted={core.isMuted ?? true}
               onTimeUpdate={handleVideoTime}
               onLoadedMetadata={handleVideoLoaded}
-              onClick={onVideoClick || core.togglePlay}
+              onClick={isSelectionMode ? undefined : (onVideoClick || core.togglePlay)}
               className={cn(
                 isContain
                   ? "max-w-full max-h-full w-auto h-auto block object-contain select-none"
@@ -311,15 +462,16 @@ export const CoreMediaItemPresenter = memo(
           {isFailed && (
             <FlowErrorTile
               error={error}
-              onReusePrompt={onRetry}
-              canReusePrompt={canReusePrompt}
-              onDelete={onDelete}
+              onReusePrompt={isSelectionMode ? undefined : onRetry}
+              canReusePrompt={!isSelectionMode && canReusePrompt}
+              onDelete={isSelectionMode ? undefined : onDelete}
+              hideActions={isSelectionMode}
             />
           )}
         </div>
 
         {/* ── 2. Slot: Center ── */}
-        {center && (
+        {!isSelectionMode && center && (
           <div className="absolute inset-0 z-20 pointer-events-none flex items-center justify-center">
             <div className="pointer-events-auto">
               {center}
@@ -331,16 +483,46 @@ export const CoreMediaItemPresenter = memo(
         <div
           className={cn(
             "absolute inset-0 z-20 pointer-events-none flex flex-col justify-between transition-opacity duration-200",
-            showHoverOverlay && !(isLiked && effectiveShowLikedBadge) && !effectiveShowVideoBadge
+            showHoverOverlay &&
+              !(isLiked && effectiveShowLikedBadge) &&
+              !effectiveShowVideoBadge &&
+              !(isSelectionMode || isSelected)
               ? (isHovered || isMenuOpen ? "opacity-100" : "opacity-0")
               : "opacity-100"
           )}
         >
           {/* Top edge slots */}
-          <div className="w-full flex items-start justify-between p-3 gap-2">
+          <div className="w-full flex items-start justify-between p-2.5 gap-2">
             {/* Top Left Slot */}
-            <div className="pointer-events-auto flex items-center gap-2">
-              {isLiked && effectiveShowLikedBadge && (
+            <div className="pointer-events-auto flex items-center gap-1.5">
+              {selectionEnabled && (
+                <div
+                  data-slot="card-select-checkbox"
+                  className={cn(
+                    "relative z-30 flex items-center justify-center p-0.5 transition-opacity duration-150",
+                    isSelectionMode || isSelected
+                      ? "opacity-100"
+                      : "opacity-0 group-hover:opacity-100 focus-within:opacity-100"
+                  )}
+                  onPointerDown={(e) => e.stopPropagation()}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onToggleSelect?.(e);
+                  }}
+                >
+                  <Checkbox
+                    variant="default"
+                    size="lg"
+                    checked={Boolean(isSelected)}
+                    aria-label={isSelected ? "Deselect item" : "Select item"}
+                    className={cn(
+                      "border-border-heavy bg-fill-overlay",
+                      isSelected && "border-text-primary bg-text-primary text-text-inverse"
+                    )}
+                  />
+                </div>
+              )}
+              {!isSelectionMode && isLiked && effectiveShowLikedBadge && (
                 <Button
                   type="button"
                   variant="ghost"
@@ -355,10 +537,10 @@ export const CoreMediaItemPresenter = memo(
                   title="Liked"
                   aria-label="Liked"
                 >
-                  <GoogleIcon
-                    iconName="favorite"
-                    fill={true}
-                    className="text-base text-white fill-white drop-shadow"
+                  <HugeIcon
+                    name="favourite"
+                    size="sm"
+                    className="text-white drop-shadow"
                   />
                 </Button>
               )}
@@ -368,41 +550,46 @@ export const CoreMediaItemPresenter = memo(
                   title="Video"
                   aria-label="Video"
                 >
-                  <GoogleIcon
-                    iconName="videocam"
-                    className="text-base text-white drop-shadow"
+                  <HugeIcon
+                    name="video-01"
+                    size="sm"
+                    className="text-white drop-shadow"
                   />
                 </div>
               )}
-              {topLeft}
+              {!isSelectionMode && topLeft}
               {isMenuActive && menuPosition === "topLeft" && renderDropdownMenu()}
             </div>
 
             {/* Top Right Slot */}
-            <div className="pointer-events-auto flex items-center gap-1.5 ml-auto">
-              {topRight}
-              {isMenuActive && menuPosition === "topRight" && renderDropdownMenu()}
-            </div>
+            {!isSelectionMode && (
+              <div className="pointer-events-auto flex items-center gap-1.5 ml-auto">
+                {topRight}
+                {isMenuActive && menuPosition === "topRight" && renderDropdownMenu()}
+              </div>
+            )}
           </div>
 
           {/* Bottom edge slots */}
-          <div className="w-full flex items-end justify-between p-3 gap-2">
-            {/* Bottom Left Slot */}
-            <div className="pointer-events-auto flex items-center gap-2 min-w-0">
-              {bottomLeft}
-              {isMenuActive && menuPosition === "bottomLeft" && renderDropdownMenu()}
-            </div>
+          {!isSelectionMode && (
+            <div className="w-full flex items-end justify-between p-3 gap-2">
+              {/* Bottom Left Slot */}
+              <div className="pointer-events-auto flex items-center gap-2 min-w-0">
+                {bottomLeft}
+                {isMenuActive && menuPosition === "bottomLeft" && renderDropdownMenu()}
+              </div>
 
-            {/* Bottom Right Slot */}
-            <div className="pointer-events-auto flex items-center gap-2 ml-auto shrink-0">
-              {bottomRight}
-              {isMenuActive && menuPosition === "bottomRight" && renderDropdownMenu()}
+              {/* Bottom Right Slot */}
+              <div className="pointer-events-auto flex items-center gap-2 ml-auto shrink-0">
+                {bottomRight}
+                {isMenuActive && menuPosition === "bottomRight" && renderDropdownMenu()}
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* ── 4. Slot: Bottom Bar (e.g. Video Controls, Timeline) ── */}
-        {bottom && (
+        {!isSelectionMode && bottom && (
           <div className="absolute bottom-0 inset-x-0 z-30 pointer-events-auto">
             {bottom}
           </div>
@@ -414,100 +601,43 @@ export const CoreMediaItemPresenter = memo(
             {overlay || children}
           </div>
         )}
+
+        {/* ── 6. Subtle Dark Hover Scrim (Cards) ── */}
+        {!isContain && !isProcessing && !isFailed && !isSelectionMode && (
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 z-10 bg-black/25 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+          />
+        )}
+
+        {/* ── 7. Selected Frame Outline (single hairline 1px border inside contain: paint) ── */}
+        {(selectionEnabled || isSelected) && (
+          <div
+            data-slot="card-selected-outline"
+            aria-hidden="true"
+            className={cn(
+              "pointer-events-none absolute inset-0 z-30 rounded-xxxs border border-text-primary/65 transition-opacity duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
+              outlineClassName,
+              isSelected ? "opacity-100" : "opacity-0"
+            )}
+          />
+        )}
       </div>
     );
 
-    if (hasContextMenu) {
-      const activeCtxItems = filterActiveMenuItems(contextMenuItems || []);
+    if (shouldWrapContextMenu) {
       return (
-        <ContextMenu>
-          <ContextMenuTrigger asChild>
+        <ContextMenu onOpenChange={handleContextMenuOpenChange}>
+          <ContextMenuTrigger asChild disabled={isContextMenuDisabled}>
             {cardElement}
           </ContextMenuTrigger>
-          {contextMenuContent || (
-            <ContextMenuContent className="min-w-48">
-              {activeCtxItems.map((m, i) => {
-                if (m.key === "separator" || m.type === "separator") {
-                  return <ContextMenuSeparator key={m.key || `ctx-sep-${i}`} className="my-1.5" />;
-                }
-                if (m.subItems && m.subItems.length > 0) {
-                  return (
-                    <ContextMenuSub key={m.key || m.id || i}>
-                      <ContextMenuSubTrigger className="cursor-pointer">
-                        {m.icon && (
-                          typeof m.icon === "string" ? (
-                            <GoogleIcon
-                              iconName={m.icon}
-                              className={cn("text-base shrink-0", m.iconClassName)}
-                              fill={m.fill}
-                            />
-                          ) : (
-                            m.icon
-                          )
-                        )}
-                        <span className="truncate">{m.label}</span>
-                      </ContextMenuSubTrigger>
-                      <ContextMenuSubContent className="w-44 p-1">
-                        {m.subItems.map((sub, j) => {
-                          if (sub.type === "separator" || sub.key === "separator" || sub.key?.startsWith("sep-")) {
-                            return <ContextMenuSeparator key={sub.key || `sub-sep-${j}`} className="my-1.5" />;
-                          }
-                          return (
-                            <ContextMenuItem
-                              key={sub.key || j}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                if (sub.disabled) return;
-                                sub.onClick?.(e);
-                              }}
-                              className="flex items-center gap-2 cursor-pointer"
-                            >
-                              {sub.bgClass && (
-                                <span className={cn("size-3 rounded-full shrink-0", sub.bgClass)} />
-                              )}
-                              <span className="truncate">{sub.label}</span>
-                              {sub.checked && (
-                                <GoogleIcon iconName="check" className="text-xs ml-auto text-on-surface" />
-                              )}
-                            </ContextMenuItem>
-                          );
-                        })}
-                      </ContextMenuSubContent>
-                    </ContextMenuSub>
-                  );
-                }
-                return (
-                  <ContextMenuItem
-                    key={m.key || m.id || i}
-                    variant={m.variant}
-                    disabled={m.disabled}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (m.disabled) return;
-                      m.onClick?.(e);
-                    }}
-                    className={cn(
-                      "cursor-pointer",
-                      m.variant === "destructive" && "text-destructive"
-                    )}
-                  >
-                    {m.icon && (
-                      typeof m.icon === "string" ? (
-                        <GoogleIcon
-                          iconName={m.icon}
-                          className={cn("text-base shrink-0", m.iconClassName)}
-                          fill={m.fill}
-                        />
-                      ) : (
-                        m.icon
-                      )
-                    )}
-                    <span className="truncate">{m.label}</span>
-                  </ContextMenuItem>
-                );
-              })}
-            </ContextMenuContent>
-          )}
+          {showBulkContextMenu
+            ? bulkMenuSnapshot && <BulkSelectionContextMenuContent snapshot={bulkMenuSnapshot} />
+            : showSingleContextMenu && (
+                contextMenuContent || (
+                  <StudioContextMenuContent items={contextMenuItems || []} />
+                )
+              )}
         </ContextMenu>
       );
     }

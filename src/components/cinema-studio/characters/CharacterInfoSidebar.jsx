@@ -1,6 +1,6 @@
 "use client";
 
-import { GoogleIcon } from "@/components/primitives/GoogleIcon";
+import { HugeIcon } from "@/components/primitives/HugeIcon";
 import { Input } from "@/components/base/input";
 import { Textarea } from "@/components/primitives/textarea";
 import { Button } from "@/components/base/button";
@@ -87,9 +87,9 @@ export function CharacterInfoSidebar({
                   aria-label="Copy prompt"
                 >
                   {promptCopied ? (
-                    <GoogleIcon iconName="check" className="text-sm text-emerald-400" />
+                    <HugeIcon name="tick-02" className="text-sm text-emerald-400" />
                   ) : (
-                    <GoogleIcon iconName="content_copy" className="text-sm" />
+                    <HugeIcon name="copy-01" className="text-sm" />
                   )}
                 </Button>
               </div>

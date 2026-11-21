@@ -1,6 +1,6 @@
 "use client";
 
-import { GoogleIcon } from "@/components/primitives/GoogleIcon";
+import { HugeIcon } from "@/components/primitives/HugeIcon";
 import { Button } from "@/components/base/button";
 
 /**
@@ -8,10 +8,10 @@ import { Button } from "@/components/base/button";
  *
  * Harmonized, vertically-centered, borderless empty state for Cinema Studio Elements.
  * Built with balanced, proportional typographic and iconographic hierarchy:
- * - Hero icon: 24px GoogleIcon in 48px (size-12) circle (1:2 optical ratio)
+ * - Hero icon: 24px HugeIcon in 48px (size-12) circle (1:2 optical ratio)
  * - Hero Title: 18px semi-bold text-white tracking-tight
  * - Hero Subtitle: 14px (text-sm) regular text-white/50 leading-relaxed
- * - Card icon: 17px GoogleIcon in 30px (size-[30px]) badge (balanced padding)
+ * - Card icon: 17px HugeIcon in 30px (size-[30px]) badge (balanced padding)
  * - Card title: 13.5px medium text-white/90 (full label visibility without cramped truncation)
  * - Card visual: 135px WebP illustration centered
  * - CTA Button: 17px icon + 14px font in rounded pill
@@ -29,10 +29,8 @@ export function ElementsEmptyState({ onCreateElement, className = "" }) {
       <div className="flex flex-col items-center gap-3 text-center max-w-sm">
         {/* Proportional 48px circle with 24px icon (1:2 balanced ratio) */}
         <span className="size-12 flex items-center justify-center rounded-full bg-white/[0.06] border border-white/10 shrink-0">
-          <GoogleIcon
-            iconName="alternate_email"
-            opticalSize={24}
-            weight={400}
+          <HugeIcon
+            name="at"
             className="text-[24px] text-white leading-none"
           />
         </span>
@@ -65,10 +63,8 @@ export function ElementsEmptyState({ onCreateElement, className = "" }) {
         >
           <div className="flex shrink-0 items-center gap-2.5 min-w-0">
             <span className="size-[30px] flex shrink-0 items-center justify-center rounded-full bg-white/[0.08] border-none">
-              <GoogleIcon
-                iconName="alternate_email"
-                opticalSize={20}
-                weight={400}
+              <HugeIcon
+                name="at"
                 className="text-[17px] text-white leading-none"
               />
             </span>
@@ -97,10 +93,8 @@ export function ElementsEmptyState({ onCreateElement, className = "" }) {
         <div className="p-3.5 flex flex-col gap-2.5 overflow-hidden bg-white/[0.04] h-[220px] rounded-2xl border border-white/10 shadow-none">
           <div className="flex shrink-0 items-center gap-2.5 min-w-0">
             <span className="size-[30px] flex shrink-0 items-center justify-center rounded-full bg-white/[0.08] border-none">
-              <GoogleIcon
-                iconName="auto_awesome"
-                opticalSize={20}
-                weight={400}
+              <HugeIcon
+                name="sparkles"
                 className="text-[17px] text-white leading-none"
               />
             </span>
@@ -128,10 +122,8 @@ export function ElementsEmptyState({ onCreateElement, className = "" }) {
         <div className="p-3.5 flex flex-col gap-2.5 overflow-hidden bg-white/[0.04] h-[220px] rounded-2xl border border-white/10 shadow-none">
           <div className="flex shrink-0 items-center gap-2.5 min-w-0">
             <span className="size-[30px] flex shrink-0 items-center justify-center rounded-full bg-white/[0.08] border-none">
-              <GoogleIcon
-                iconName="inventory_2"
-                opticalSize={20}
-                weight={400}
+              <HugeIcon
+                name="package"
                 className="text-[17px] text-white leading-none"
               />
             </span>
@@ -162,10 +154,8 @@ export function ElementsEmptyState({ onCreateElement, className = "" }) {
         variant="pill"
         onClick={onCreateElement}
       >
-        <GoogleIcon
-          iconName="add"
-          opticalSize={20}
-          weight={400}
+        <HugeIcon
+          name="add-01"
           className="text-[17px] leading-none"
         />
         <span>Create element</span>

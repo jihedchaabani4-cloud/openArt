@@ -2,7 +2,7 @@
 /* eslint-disable @next/next/no-img-element */
 
 import React from "react";
-import { GoogleIcon } from "@/components/primitives/GoogleIcon";
+import { HugeIcon } from "@/components/primitives/HugeIcon";
 import { cn } from "@/shared/lib/utils";
 
 /**
@@ -86,7 +86,7 @@ export const MediaRenderer = React.memo(
         style={containerStyle}
         {...props}
       >
-        <GoogleIcon name="hourglass_empty" className="text-3xl text-white/50 animate-spin mb-2" />
+        <HugeIcon name="hourglass" className="text-3xl text-white/50 animate-spin mb-2" />
         <span className="text-xs font-medium tracking-wide">Processing...</span>
       </div>
     );
@@ -106,7 +106,7 @@ export const MediaRenderer = React.memo(
         style={containerStyle}
         {...props}
       >
-        <GoogleIcon name="broken_image" className="text-3xl text-red-400 mb-2" />
+        <HugeIcon name="image-not-found-01" className="text-3xl text-red-400 mb-2" />
         <span className="text-xs font-medium line-clamp-2">
           {error || fallbackText || "Generation failed"}
         </span>
@@ -128,7 +128,7 @@ export const MediaRenderer = React.memo(
         style={containerStyle}
         {...props}
       >
-        <GoogleIcon name="image_not_supported" className="text-3xl text-white/50 mb-2" />
+        <HugeIcon name="image-not-found-02" className="text-3xl text-white/50 mb-2" />
         <span className="text-xs font-medium">
           {fallbackText || "No media available"}
         </span>

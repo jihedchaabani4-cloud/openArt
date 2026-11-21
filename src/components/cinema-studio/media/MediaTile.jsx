@@ -18,11 +18,16 @@ export const MediaTile = React.memo(
       onSelect,
       onClick,
       aspectRatio = "1/1",
+      width,
+      height,
+      style,
       className,
       ...rendererProps
     },
     ref
   ) {
+    const tileStyle = width && height ? { width, height, ...style } : style;
+
     const handleClick = (e) => {
       if (onSelect) {
         onSelect(item, e);
@@ -46,10 +51,11 @@ export const MediaTile = React.memo(
             handleClick(e);
           }
         }}
+        style={tileStyle}
         className={cn(
-          "group relative overflow-hidden transition-none cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary shadow-none",
+          "shrink-0 group relative overflow-hidden transition-none cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary shadow-none",
           isSelected
-            ? "ring-2 ring-primary border-transparent shadow-none"
+            ? "border border-text-primary/65 shadow-none"
             : "hover:border-line-interactive",
           className
         )}

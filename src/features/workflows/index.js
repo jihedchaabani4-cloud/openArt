@@ -4,5 +4,17 @@ export { useMediaViewerCore, formatMediaDuration } from "./core/useMediaViewerCo
 export { resolveMainMedia, resolveMediaRef, normalizeWorkflowType } from "./core/resolveMediaRef";
 export { toMediaItem } from "./core/toMediaItem";
 export { useStudioWorkflows } from "./model/useStudioWorkflows";
-export { selectStudioWorkflows } from "./model/selectStudioWorkflows";
+export { selectStudioWorkflows, extractAvailableModels } from "./model/selectStudioWorkflows";
+export {
+  useStudioSelectionStore,
+  makeSelectionKey,
+  parseSelectionKey,
+  getEntrySelectionKey,
+} from "./model/useStudioSelectionStore";
+export {
+  useMarqueeSelection,
+  rectsIntersect,
+  computeMarqueeSelection,
+} from "./model/useMarqueeSelection";
+export { useStudioBulkActions } from "./model/useStudioBulkActions";
 export * from "./api/workflowsApi";

@@ -32,8 +32,11 @@ export function useRemoveWorkflow() {
 
     applyOptimistic: (oldData, { workflowId, workflowIds }) => {
       if (!oldData?.projectContents) return oldData;
-      const idsToRemove = workflowIds || (workflowId ? [workflowId] : []);
-      const cleanIds = idsToRemove.map((id) => String(id || '').replace(/^workflows\//, ''));
+      const idsToRemove = (Array.isArray(workflowIds) ? workflowIds : workflowId ? [workflowId] : []).filter(Boolean);
+      if (idsToRemove.length === 0) return oldData;
+
+      const cleanIds = idsToRemove.map((id) => String(id).replace(/^workflows\//, ''));
+      const cleanIdSet = new Set(cleanIds);
 
       const currentWorkflows = oldData.projectContents?.workflows || [];
       const currentTrashed = oldData.projectContents?.trashedWorkflows || [];
@@ -41,64 +44,60 @@ export function useRemoveWorkflow() {
       const currentElements = oldData.projectContents?.elements || [];
       const currentMedia = oldData.projectContents?.media || [];
 
-      // Check if target is already in trash (permanent delete) or active (move to trash)
-      const targetId = idsToRemove[0];
-      const isAlreadyTrashed = currentTrashed.some((wf) => matchWorkflowId(wf, targetId));
+      const nowIso = new Date().toISOString();
+      const newlyTrashedEntries = [];
+      const seenTrashedCleanIds = new Set();
 
-      if (isAlreadyTrashed) {
-        return {
-          ...oldData,
-          projectContents: {
-            ...oldData.projectContents,
-            workflows: currentWorkflows.filter((wf) => !idsToRemove.some((id) => matchWorkflowId(wf, id))),
-            trashedWorkflows: currentTrashed.filter((wf) => !idsToRemove.some((id) => matchWorkflowId(wf, id))),
-            characters: currentCharacters.filter((c) => !idsToRemove.some((id) => matchWorkflowId(c, id))),
-            elements: currentElements.filter((el) => !idsToRemove.some((id) => matchWorkflowId(el, id))),
-            media: currentMedia.filter((m) => {
-              const mWf = String(m.workflowId || m.workflow_id || '').replace(/^workflows\//, '');
-              return !cleanIds.includes(mWf);
-            }),
-          },
-        };
+      for (let i = 0; i < idsToRemove.length; i++) {
+        const id = idsToRemove[i];
+        const cleanId = cleanIds[i];
+        if (!cleanId || seenTrashedCleanIds.has(cleanId)) continue;
+
+        // Already in trash -> permanent delete (omit from trashedWorkflows)
+        if (currentTrashed.some((wf) => matchWorkflowId(wf, id))) continue;
+
+        seenTrashedCleanIds.add(cleanId);
+        const targetWf =
+          currentWorkflows.find((wf) => matchWorkflowId(wf, id)) ||
+          currentCharacters.find((c) => matchWorkflowId(c, id)) ||
+          currentElements.find((el) => matchWorkflowId(el, id));
+
+        newlyTrashedEntries.push(
+          targetWf
+            ? {
+                ...targetWf,
+                deleted_at: nowIso,
+                deletedAt: nowIso,
+                metadata: {
+                  ...(targetWf.metadata || {}),
+                  deleted_at: nowIso,
+                },
+              }
+            : {
+                id: cleanId,
+                name: cleanId,
+                deleted_at: nowIso,
+                deletedAt: nowIso,
+              }
+        );
       }
 
-      // Move to trash: find active workflow and move it to trashedWorkflows
-      const targetWf = currentWorkflows.find((wf) => matchWorkflowId(wf, targetId))
-        || currentCharacters.find((c) => matchWorkflowId(c, targetId))
-        || currentElements.find((el) => matchWorkflowId(el, targetId));
-
-      const nowIso = new Date().toISOString();
-      const trashedEntry = targetWf
-        ? {
-            ...targetWf,
-            deleted_at: nowIso,
-            deletedAt: nowIso,
-            metadata: {
-              ...(targetWf.metadata || {}),
-              deleted_at: nowIso,
-            },
-          }
-        : {
-            id: cleanIds[0],
-            name: cleanIds[0],
-            deleted_at: nowIso,
-            deletedAt: nowIso,
-          };
+      const matchesAnyTarget = (entity) => idsToRemove.some((id) => matchWorkflowId(entity, id));
 
       return {
         ...oldData,
         projectContents: {
           ...oldData.projectContents,
-          workflows: currentWorkflows.filter((wf) => !idsToRemove.some((id) => matchWorkflowId(wf, id))),
+          workflows: currentWorkflows.filter((wf) => !matchesAnyTarget(wf)),
           trashedWorkflows: [
-            trashedEntry,
-            ...currentTrashed.filter((wf) => !idsToRemove.some((id) => matchWorkflowId(wf, id))),
+            ...newlyTrashedEntries,
+            ...currentTrashed.filter((wf) => !matchesAnyTarget(wf)),
           ],
-          characters: currentCharacters.filter((c) => !idsToRemove.some((id) => matchWorkflowId(c, id))),
-          elements: currentElements.filter((el) => !idsToRemove.some((id) => matchWorkflowId(el, id))),
+          characters: currentCharacters.filter((c) => !matchesAnyTarget(c)),
+          elements: currentElements.filter((el) => !matchesAnyTarget(el)),
           media: currentMedia.filter((m) => {
             const mWf = String(m.workflowId || m.workflow_id || '').replace(/^workflows\//, '');
-            return !cleanIds.includes(mWf);
+            return !cleanIdSet.has(mWf);
           }),
         },
       };

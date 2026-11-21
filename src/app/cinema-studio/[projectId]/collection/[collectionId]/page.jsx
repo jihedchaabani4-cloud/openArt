@@ -8,21 +8,22 @@ import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows";
 import { useFilteredWorkflows as useFilteredGenerations } from "@/features/workflows/model/useFilteredWorkflows";
 import { useQueryClient } from "@tanstack/react-query";
 import { useGenerateMutation } from "@/features/workflows/api/workflowsApi";
-import { useProjectFolders, useFolderMove } from "@/features/folders";
+import { useProjectFolders } from "@/features/folders";
 import { useUploadMedia } from "@/features/media";
 import { queryKeys } from "@/shared/api/queryKeys";
-import { cn } from "@/shared/lib/utils";
 import {
   GeneratedPromptBar,
   useRealBackendModels,
-} from "@/features/prompt-bar/index.platform";
+} from "@/features/prompt-bar";
 import { SharedGalleryGrid } from "@/features/media";
 import { MediaGridItem } from "@/components/cinema-studio/media/MediaGridItem";
-import { GoogleIcon } from "@/components/primitives/GoogleIcon";
+import { useStudioSelectionStore } from "@/features/workflows/model/useStudioSelectionStore";
+import { StudioSelectionBar } from "@/components/cinema-studio/media/StudioSelectionBar";
+import { HugeIcon } from "@/components/primitives/HugeIcon";
 import { Button } from "@/components/base/button";
 
 import { usePromptStore } from "@/features/prompt-bar/model/usePromptStore";
-import { buildCollectionCoverById } from "@/shared/lib/displayUtils";
+import { buildCollectionCoverById, buildCollectionDirectCountById } from "@/shared/lib/displayUtils";
 import { LoadingScreen } from "@/components/primitives/LoadingScreen";
 import { logger } from "@/shared/lib/logger";
 
@@ -57,6 +58,15 @@ export default function CollectionDetailPage({ params }) {
     };
   }, [projectId, collectionId, setSelectedProjectId, setActiveStudioTab, setActiveCollectionId]);
 
+  const hasSelection = useStudioSelectionStore((s) => s.selectedKeys.length > 0);
+  const setScope = useStudioSelectionStore((s) => s.setScope);
+  const clearSelection = useStudioSelectionStore((s) => s.clearSelection);
+
+  React.useEffect(() => {
+    setScope(`collection:${projectId}:${collectionId}`);
+    return () => clearSelection();
+  }, [projectId, collectionId, setScope, clearSelection]);
+
   // Fetch folders to get collection metadata + sub-collections
   const { data: rawFolders = [], isLoading: isFoldersLoading } = useProjectFolders(projectId);
   const collections = React.useMemo(() => {
@@ -64,10 +74,6 @@ export default function CollectionDetailPage({ params }) {
     if (Array.isArray(rawFolders?.items)) return rawFolders.items;
     return [];
   }, [rawFolders]);
-
-  const collection = React.useMemo(() => {
-    return collections.find((c) => c.id === collectionId) || null;
-  }, [collections, collectionId]);
 
   // Sub-collections whose parent is this collection
   const subCollections = React.useMemo(() => {
@@ -98,67 +104,14 @@ export default function CollectionDetailPage({ params }) {
     () => buildCollectionCoverById(allWorkflows),
     [allWorkflows]
   );
+  const collectionCountById = React.useMemo(
+    () => buildCollectionDirectCountById(fetchResult?.projectContents?.workflows ?? allWorkflows),
+    [fetchResult?.projectContents?.workflows, allWorkflows]
+  );
 
-  const parentId = collection?.parent_id || collection?.parentId || null;
-  const parentCollection = React.useMemo(() => {
-    if (!parentId) return null;
-    return collections.find((c) => c.id === parentId) || null;
-  }, [collections, parentId]);
-
-  // Drag state & move mutations
+  // Drag state
   const isDragging = usePromptStore((s) => s.isDraggingGalleryItem);
   const draggedItem = usePromptStore((s) => s.draggedItem);
-  const { executeMoveFromPayload } = useFolderMove(projectId);
-  const [isRootDragOver, setIsRootDragOver] = React.useState(false);
-
-  const handleRootDragOver = React.useCallback((e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    e.dataTransfer.dropEffect = "move";
-    setIsRootDragOver(true);
-  }, []);
-
-  const handleRootDragLeave = React.useCallback((e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (!e.currentTarget.contains(e.relatedTarget)) {
-      setIsRootDragOver(false);
-    }
-  }, []);
-
-  const handleRootDrop = React.useCallback((e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsRootDragOver(false);
-
-    executeMoveFromPayload({
-      payload: e.dataTransfer,
-      fallbackDraggedItem: usePromptStore.getState().draggedItem,
-      currentFolderId: collectionId,
-      projectId,
-      isMoveOut: true,
-    });
-  }, [executeMoveFromPayload, projectId, collectionId]);
-
-  React.useEffect(() => {
-    const onPointerHover = (e) => {
-      if (e.detail?.target === "move-out" && e.detail.area === "root") {
-        setIsRootDragOver(true);
-      } else {
-        setIsRootDragOver(false);
-      }
-    };
-    window.addEventListener("studio:pointer-hover-target", onPointerHover);
-    return () => {
-      window.removeEventListener("studio:pointer-hover-target", onPointerHover);
-    };
-  }, []);
-
-  React.useEffect(() => {
-    if (!isDragging) {
-      setIsRootDragOver(false);
-    }
-  }, [isDragging]);
 
   // Combined: sub-collections first, then assets
   const combinedItems = React.useMemo(() => {
@@ -317,30 +270,6 @@ export default function CollectionDetailPage({ params }) {
           data-scroll-container="true"
           className="flex-1 overflow-y-auto overflow-x-hidden p-0 custom-scrollbar"
         >
-          {/* Root drop zone (move out of collection) */}
-          <AnimatePresence>
-            {isDragging && (
-              <motion.div
-                data-drop-root="true"
-                initial={{ opacity: 0, y: -8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                onDragOver={handleRootDragOver}
-                onDragLeave={handleRootDragLeave}
-                onDrop={handleRootDrop}
-                className={cn(
-                  "w-full mb-4 py-4 px-6 rounded-2xl border-2 border-dashed border-white/20 bg-white/[0.04] flex items-center justify-center gap-3 text-white/60 transition-all cursor-pointer",
-                  isRootDragOver && "border-white bg-white/15 text-white ring-2 ring-white ring-offset-2 ring-offset-background outline outline-2 outline-white scale-101 "
-                )}
-              >
-                <GoogleIcon iconName="drive_file_move" className="text-xl" />
-                <span className="text-sm font-semibold tracking-wide">
-                  Drop here to move out of collection {parentCollection?.name ? `(to ${parentCollection.name})` : "(to Root)"}
-                </span>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
           {/* ── Content Feed or Empty State ── */}
           <AnimatePresence mode="wait">
             {combinedItems.length > 0 ? (
@@ -355,12 +284,14 @@ export default function CollectionDetailPage({ params }) {
                 <SharedGalleryGrid
                   entries={visibleItems}
                   collectionCoverById={collectionCoverById}
+                  collectionCountById={collectionCountById}
                   gridSize={gridSize}
                   gridSpacing={gridSpacing}
                   projectId={projectId}
                   CardComponent={MediaGridItem}
                   onWorkflowClick={handleWorkflowClick}
                   onCollectionClick={handleCollectionClick}
+                  selectionEnabled={true}
                 />
                 {hasMore && (
                   <div className="flex justify-center pt-2 text-sm text-white/45">
@@ -377,7 +308,7 @@ export default function CollectionDetailPage({ params }) {
                 className="w-full min-h-[420px] flex flex-col items-center justify-center gap-4 text-center px-4"
               >
                 <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center">
-                  <GoogleIcon iconName="folder_open" className="text-3xl text-white/40" />
+                  <HugeIcon name="folder-open" className="text-3xl text-white/40" />
                 </div>
                 <div className="flex flex-col items-center gap-1.5 max-w-sm">
                   <h3 className="text-lg font-medium text-white/90">This collection is empty</h3>
@@ -391,7 +322,7 @@ export default function CollectionDetailPage({ params }) {
                   disabled={isUploading}
                   className="mt-2 h-9 px-4 rounded-sm gap-2 text-sm font-medium"
                 >
-                  <GoogleIcon iconName="upload" className="text-base" />
+                  <HugeIcon name="upload-04" className="text-base" />
                   <span>Upload media</span>
                 </Button>
               </motion.div>
@@ -400,11 +331,20 @@ export default function CollectionDetailPage({ params }) {
         </div>
 
         {/* Dedicated Generations PromptBar (Platform Architecture) */}
-        <GeneratedPromptBar
+        <div className={hasSelection ? "hidden" : undefined}>
+          <GeneratedPromptBar
+            projectId={projectId}
+            models={realModels}
+            onGenerate={handleGenerate}
+            isGenerating={isGeneratingMutation}
+          />
+        </div>
+
+        <StudioSelectionBar
           projectId={projectId}
-          models={realModels}
-          onGenerate={handleGenerate}
-          isGenerating={isGeneratingMutation}
+          scope="collection"
+          currentFolderId={collectionId}
+          entries={visibleItems}
         />
       </main>
     </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { GoogleIcon } from "@/components/primitives/GoogleIcon";
+import { HugeIcon } from "@/components/primitives/HugeIcon";
 import { Button } from "@/components/base/button";
 import { cn } from "@/shared/lib/utils";
 
@@ -43,7 +43,7 @@ export function FlowCharacterImagePreview({
             disabled={isUploading}
             onClick={onUpload}
           >
-            <GoogleIcon iconName="upload" className="text-[19px]" />
+            <HugeIcon name="upload-04" />
             <span>Importer</span>
           </Button>
 
@@ -54,7 +54,7 @@ export function FlowCharacterImagePreview({
             disabled={isUploading}
             onClick={onSelectProject}
           >
-            <GoogleIcon iconName="add" className="text-[19px]" />
+            <HugeIcon name="add-01" />
             <span>Ajouter à partir du projet</span>
           </Button>
         </div>

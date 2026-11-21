@@ -1,6 +1,5 @@
 import React, { useState, useCallback, useMemo } from "react";
 import { cn } from "@/shared/lib/utils";
-import { ButtonGroup } from "@/components/primitives/button-group";
 import { ConfirmDeleteDialog } from "@/components/primitives/ConfirmDeleteDialog";
 import { useWorkflowActions } from "@/features/workflows/model/useMediaActions";
 import { StudioItemDropdownMenu } from "./StudioItemMenu";
@@ -23,6 +22,10 @@ export const TrashMediaGridCard = React.memo(function TrashMediaGridCard({
   onRestoreSuccess = null,
   onRestoreError = null,
   projectId: propProjectId = null,
+  isSelected = false,
+  isSelectionMode = false,
+  selectionEnabled = false,
+  onToggleSelect = null,
   ..._props
 }) {
   const effectiveMediaId = mediaId || (typeof propItem === "string" ? propItem : null);
@@ -114,41 +117,51 @@ export const TrashMediaGridCard = React.memo(function TrashMediaGridCard({
         error={errorMsg}
         fit="cover"
         surface="card"
-        playOnHover={true}
+        playOnHover={!isSelectionMode}
         autoPlay={false}
         draggable={false}
-        onClick={(e) => onClick(workflow, e)}
+        isSelected={isSelected}
+        isSelectionMode={isSelectionMode}
+        selectionEnabled={selectionEnabled}
+        onToggleSelect={onToggleSelect}
+        onClick={(e) => {
+          if (isSelectionMode && onToggleSelect) {
+            onToggleSelect(e);
+            return;
+          }
+          onClick(workflow, e);
+        }}
         showHoverOverlay={false}
         contextMenuItems={menuItems}
-        onDelete={(e) => {
+        onDelete={isSelectionMode ? undefined : (e) => {
           e?.stopPropagation();
           setIsDeleteConfirmOpen(true);
         }}
-        className={cn("cursor-pointer", className)}
+        className={cn("shrink-0 cursor-pointer", className)}
         style={cardStyle}
-        topLeft={topLeft}
+        topLeft={isSelectionMode ? null : topLeft}
         topRight={
-          customTopRight !== null ? customTopRight : (
-            <div className={cn(
-              "transition-opacity duration-200 pointer-events-auto",
-              isDropdownOpen ? "opacity-100" : "opacity-0 group-hover:opacity-100"
-            )}>
-              <ButtonGroup variant="pill">
+          isSelectionMode
+            ? null
+            : customTopRight !== null ? customTopRight : (
+              <div className={cn(
+                "flex items-center gap-1.5 transition-opacity duration-200 pointer-events-auto",
+                isDropdownOpen ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+              )}>
                 <StudioItemDropdownMenu
                   open={isDropdownOpen}
                   onOpenChange={setIsDropdownOpen}
                   items={menuItems}
                 />
-              </ButtonGroup>
-            </div>
-          )
+              </div>
+            )
         }
         bottomLeft={
-          displayName && (
+          !isSelectionMode && displayName && (
             <div className="transition-opacity duration-200 pointer-events-auto max-w-[calc(100%-40px)] opacity-0 group-hover:opacity-100">
               <span
                 title={displayName}
-                className="text-white/90 truncate text-xs font-semibold select-none block"
+                className="ds-text-caption-m font-medium text-white/90 truncate select-none block"
               >
                 {displayName}
               </span>

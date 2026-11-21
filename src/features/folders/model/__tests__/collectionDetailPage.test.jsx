@@ -33,14 +33,14 @@ const stableParams = Promise.resolve({ projectId: "proj-1", collectionId: "col-1
 stableParams.status = "fulfilled";
 stableParams.value = { projectId: "proj-1", collectionId: "col-1" };
 
-vi.mock("@/features/prompt-bar/index.platform", () => ({
-  GeneratedPromptBar: () => <div data-testid="mock-prompt-bar">Prompt Bar</div>,
-  useRealBackendModels: () => ({ data: { models: [] }, isLoading: false }),
-}));
-
-vi.mock("@/features/prompt-bar/core/useRealBackendModels", () => ({
-  useRealBackendModels: () => ({ data: { models: [] }, isLoading: false }),
-}));
+vi.mock("@/features/prompt-bar", async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    GeneratedPromptBar: () => <div data-testid="mock-prompt-bar">Prompt Bar</div>,
+    useRealBackendModels: () => ({ data: { models: [] }, isLoading: false }),
+  };
+});
 
 function TestWrapper() {
   return (
@@ -143,8 +143,8 @@ describe("CollectionDetailPage Media Visibility & Rendering", () => {
     // Empty state must not appear
     expect(screen.queryByText(/This collection is empty/i)).toBeNull();
 
-    // Collection workflow card must render
-    expect(screen.getByText("Workflow Inside Collection")).toBeDefined();
+    // Collection workflow card must render (title preserves full name even when truncated on M cards)
+    expect(screen.getByTitle("Workflow Inside Collection")).toBeDefined();
 
     // Root workflow must not be present in collection view
     expect(screen.queryByText("Workflow at Root")).toBeNull();

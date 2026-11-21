@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { useToggleWorkflowLike, useRemoveWorkflow } from "../api/workflowsApi";
 import { getItemMetadata } from "@/shared/lib/generationUtils";
 import { resolveMainMedia } from "../core/resolveMediaRef";
@@ -8,9 +9,13 @@ import {
   hasGeneratedPrimaryMedia,
   promptBarService,
   resolveReusableGeneration,
+  usePromptBarSnapshot,
+  useRealBackendModels,
   withPrimaryMediaFallback,
-} from "@/features/prompt-bar/api/promptBarService";
-import { useRealBackendModels } from "@/features/prompt-bar/core/useRealBackendModels";
+} from "@/features/prompt-bar";
+
+const selectIsFrameMode = (snapshot) =>
+  snapshot?.activeMode === "video" && snapshot?.activeSubMode === "frames";
 
 function resolvePrimaryRawMedia(workflow) {
   if (!workflow) return null;
@@ -90,6 +95,15 @@ export function useWorkflowActions(workflow, item = null, options = {}) {
   const canAcceptEntity = isEntity ? canAnyModelAcceptEntity(workflow || targetItem, models) : true;
   const canAddToPrompt = canUseAsInput && canAcceptEntity && !isVideo;
 
+  const promptBarIdentity = useMemo(
+    () => ({
+      templateId: "generated-media",
+      projectId: projectId || "global",
+    }),
+    [projectId]
+  );
+  const isFrameMode = usePromptBarSnapshot(promptBarIdentity, selectIsFrameMode);
+
   const handleLike = () => {
     if (workflow.id || workflow.name) {
       toggleLike({ 
@@ -144,50 +158,85 @@ export function useWorkflowActions(workflow, item = null, options = {}) {
     }
   };
 
+  const hasPromptBarOnRoute = Boolean(
+    pathname?.includes("/assets") ||
+    pathname?.includes("/generations") ||
+    pathname?.includes("/collection")
+  );
+
+  const navigateIfUnmounted = (result) => {
+    if (!result?.ok && result?.reason === "NOT_MOUNTED" && projectId && !hasPromptBarOnRoute) {
+      router.push(`/cinema-studio/${projectId}/assets`);
+      return true;
+    }
+    return false;
+  };
+
+  const buildPromptMedia = () => {
+    const rawMedia = targetItem || workflow;
+    if (!rawMedia) return null;
+    if (workflow && rawMedia !== workflow) {
+      return {
+        ...rawMedia,
+        url: rawMedia.url || url,
+        preview: rawMedia.preview || rawMedia.url || url,
+        workflow_type: rawMedia.workflow_type || workflow.workflow_type,
+        workflow_id: rawMedia.workflow_id || rawMedia.workflowId || workflow.id || workflow.name,
+        displayName: rawMedia.displayName || workflow.metadata?.displayName || workflow.display_name,
+      };
+    }
+    return url && (!rawMedia.url || !rawMedia.preview)
+      ? {
+          ...rawMedia,
+          url: rawMedia.url || url,
+          preview: rawMedia.preview || rawMedia.url || url,
+        }
+      : rawMedia;
+  };
+
   const handleAnimate = () => {
-    if (!canUseAsInput) return;
-    const media = targetItem || workflow;
+    if (!canUseAsInput || isVideo) return;
+    const media = buildPromptMedia();
+    if (!media) return;
     const service = promptBarService({
       templateId: "generated-media",
       projectId: projectId || "global",
     });
 
     const res = service.animateMedia(media);
-    if (!res.ok) {
-      if (
-        projectId &&
-        !pathname?.includes("/assets") &&
-        !pathname?.includes("/generations") &&
-        !pathname?.includes("/collection")
-      ) {
-        router.push(`/cinema-studio/${projectId}/assets`);
-        return;
-      }
-    }
-
-    service.focus();
+    if (navigateIfUnmounted(res)) return;
+    if (res?.ok) service.focus();
   };
 
   const handleAddToPrompt = () => {
     if (!canAddToPrompt) return;
-    const media = targetItem || workflow;
+    const media = buildPromptMedia();
+    if (!media) return;
     const service = promptBarService({
       templateId: "generated-media",
       projectId: projectId || "global",
     });
 
     const res = service.addReference(media);
-    if (!res.ok) {
-      if (
-        projectId &&
-        !pathname?.includes("/assets") &&
-        !pathname?.includes("/generations")
-      ) {
-        router.push(`/cinema-studio/${projectId}/assets`);
-        return;
-      }
-    }
+    navigateIfUnmounted(res);
   };
+
+  const attachFrame = (role) => {
+    if (!canUseAsInput || isVideo) return;
+    const media = buildPromptMedia();
+    if (!media) return;
+    const service = promptBarService({
+      templateId: "generated-media",
+      projectId: projectId || "global",
+    });
+
+    const res = service.attachMedia({ role, value: media });
+    if (navigateIfUnmounted(res)) return;
+    if (res?.ok) service.focus();
+  };
+
+  const handleAddStartFrame = () => attachFrame("start");
+  const handleAddEndFrame = () => attachFrame("end");
 
   const handleSetParameters = () => {
     handleReuseSettings();
@@ -201,7 +250,10 @@ export function useWorkflowActions(workflow, item = null, options = {}) {
     handleEdit,
     handleAnimate,
     handleAddToPrompt,
+    handleAddStartFrame,
+    handleAddEndFrame,
     handleSetParameters,
+    isFrameMode,
     canDelete,
     canReuseSettings,
     showReuseSettings,

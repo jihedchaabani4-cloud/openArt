@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/base/button";
-import { GoogleIcon } from "@/components/primitives/GoogleIcon";
+import { HugeIcon } from "@/components/primitives/HugeIcon";
 
 /**
  * Standardized ProjectError with Legacy Design and Smart Logic.
@@ -66,7 +66,7 @@ export function ProjectError({ error, reset: _reset, onRetry }) {
           className="h-10 px-6 text-sm"
           onClick={handleBack}
         >
-          <GoogleIcon iconName="arrow_back" className="text-base" />
+          <HugeIcon name="arrow-left-02" className="text-base" />
           Retour aux projets
         </Button>
       </div>

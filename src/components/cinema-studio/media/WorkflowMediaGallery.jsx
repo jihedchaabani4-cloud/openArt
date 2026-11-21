@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { GoogleIcon } from "@/components/primitives/GoogleIcon";
+import { HugeIcon } from "@/components/primitives/HugeIcon";
 import { useDeleteMedia, useDetachMedia } from "@/features/workflows/api/workflowsApi";
 import { IconButton } from "@/components/base/icon-button";
 import { ButtonGroup } from "@/components/primitives/button-group";
@@ -92,13 +92,13 @@ function WorkflowMediaGalleryCard({
   const menuItems = [
     {
       key: "detach",
-      icon: "content_cut",
+      icon: "scissor-01",
       label: "Détacher vers un nouveau workflow",
       onClick: () => setDetachOpen(true),
     },
     {
       key: "delete",
-      icon: "delete",
+      icon: "delete-02",
       label: "Supprimer le média",
       variant: "destructive",
       onClick: () => setDeleteOpen(true),
@@ -152,7 +152,7 @@ function WorkflowMediaGalleryCard({
                 }}
                 title="Détacher vers un nouveau workflow"
               >
-                <GoogleIcon iconName="content_cut" className="text-sm" />
+                <HugeIcon name="scissor-01" className="text-sm" />
               </IconButton>
               
               <IconButton
@@ -163,7 +163,7 @@ function WorkflowMediaGalleryCard({
                 }}
                 title="Supprimer le média"
               >
-                <GoogleIcon iconName="delete" className="text-sm" />
+                <HugeIcon name="delete-02" className="text-sm" />
               </IconButton>
             </ButtonGroup>
           </div>
@@ -171,7 +171,7 @@ function WorkflowMediaGalleryCard({
         topRight={
           iVideo ? (
             <div className="p-1.5 bg-black/60 backdrop-blur-md rounded-full border border-white/10">
-              <GoogleIcon iconName="play_arrow" fill={true} className="text-xs text-white" />
+              <HugeIcon name="play" className="text-xs text-white" />
             </div>
           ) : null
         }
@@ -212,7 +212,7 @@ function WorkflowMediaGalleryCard({
                 key={idx}
                 className="relative w-10 h-10 flex items-center justify-center rounded-sm overflow-hidden border border-white/10 bg-white/5 shrink-0"
               >
-                <GoogleIcon iconName="image" className="absolute text-base text-white/20" />
+                <HugeIcon name="image-02" className="absolute text-base text-white/20" />
                 <img 
                   src={refUrl} 
                   className="absolute inset-0 w-full h-full object-cover z-10" 

@@ -1,6 +1,7 @@
+"use client";
+
 import * as React from "react";
-import { GoogleIcon } from "@/components/primitives/GoogleIcon";
-import { cn } from "@/shared/lib/utils";
+import { HugeIcon } from "@/components/primitives/HugeIcon";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,38 +20,31 @@ import {
   ContextMenuSubTrigger,
   ContextMenuSubContent,
 } from "@/components/primitives/context-menu";
-import { Button } from "@/components/base/button";
+import {
+  MenuItemsList,
+  filterActiveMenuItems,
+} from "@/components/base/menu";
 import { IconButton } from "@/components/base/icon-button";
 
-function filterActiveMenuItems(items = []) {
-  if (!items || !items.length) return [];
-  const filtered = items.filter(
-    (m) => m && (m.type === "separator" || m.key === "separator" || m.key?.startsWith("sep-") || !m.disabled)
-  );
-  const result = [];
-  for (let i = 0; i < filtered.length; i++) {
-    const curr = filtered[i];
-    const isSep = curr.type === "separator" || curr.key === "separator" || curr.key?.startsWith("sep-");
-    if (isSep) {
-      if (result.length === 0) continue;
-      const prev = result[result.length - 1];
-      const prevIsSep = prev.type === "separator" || prev.key === "separator" || prev.key?.startsWith("sep-");
-      if (prevIsSep) continue;
-    }
-    result.push(curr);
-  }
-  if (result.length > 0) {
-    const last = result[result.length - 1];
-    if (last.type === "separator" || last.key === "separator" || last.key?.startsWith("sep-")) {
-      result.pop();
-    }
-  }
-  return result;
-}
+const DROPDOWN_MENU_COMPONENTS = {
+  Item: DropdownMenuItem,
+  Separator: DropdownMenuSeparator,
+  Sub: DropdownMenuSub,
+  SubTrigger: DropdownMenuSubTrigger,
+  SubContent: DropdownMenuSubContent,
+};
+
+const CONTEXT_MENU_COMPONENTS = {
+  Item: ContextMenuItem,
+  Separator: ContextMenuSeparator,
+  Sub: ContextMenuSub,
+  SubTrigger: ContextMenuSubTrigger,
+  SubContent: ContextMenuSubContent,
+};
 
 /**
  * Universal Dropdown Menu for Studio Media Items.
- * Accepts a list of items configured with labels, icons, onClick handlers, etc.
+ * Renders items via the shared MenuItemsList component.
  */
 export function StudioItemDropdownMenu({
   items = [],
@@ -58,129 +52,35 @@ export function StudioItemDropdownMenu({
   onOpenChange,
   trigger,
   align = "end",
-  className = "w-52",
 }) {
   const activeItems = React.useMemo(() => filterActiveMenuItems(items), [items]);
 
-  if (!activeItems || activeItems.length === 0) {
-    return (
-      trigger || (
-        <IconButton onClick={(e) => e.stopPropagation()} title="More options">
-          <GoogleIcon iconName="more_vert" className="text-xs" />
-        </IconButton>
-      )
-    );
+  const defaultTrigger = (
+    <IconButton
+      variant="overlay"
+      onClick={(e) => e.stopPropagation()}
+      aria-label="More options"
+      title="More options"
+    >
+      <HugeIcon name="more-vertical" />
+    </IconButton>
+  );
+
+  if (!activeItems.length) {
+    return trigger || defaultTrigger;
   }
 
   return (
     <DropdownMenu open={open} onOpenChange={onOpenChange}>
       <DropdownMenuTrigger asChild>
-        {trigger || (
-          <IconButton onClick={(e) => e.stopPropagation()} title="More options">
-            <GoogleIcon iconName="more_vert" className="text-xs" />
-          </IconButton>
-        )}
+        {trigger || defaultTrigger}
       </DropdownMenuTrigger>
-      <DropdownMenuContent variant="normal" align={align} className={cn("p-1.5 min-w-[12rem] w-52 flow-menu-panel mat-mdc-menu-panel", className)}>
-        {activeItems.map((m, i) => {
-          if (m.key === "separator" || m.type === "separator") {
-            return <DropdownMenuSeparator key={m.key || `sep-${i}`} className="my-1.5" />;
-          }
-          if (m.subItems && m.subItems.length > 0) {
-            return (
-              <DropdownMenuSub key={m.key || i}>
-                <DropdownMenuSubTrigger
-                  className={cn(
-                    "cursor-pointer mat-mdc-menu-item flow-internal-menu-item",
-                    m.variant === "destructive" && "delete-button"
-                  )}
-                >
-                  <span className="mat-mdc-menu-item-text">
-                    <span className="left-content">
-                      {m.icon && (
-                        typeof m.icon === "string" ? (
-                          <GoogleIcon
-                            iconName={m.icon}
-                            className={cn("text-[20px] shrink-0 mat-icon google-symbols", m.iconClassName)}
-                            fill={m.fill}
-                          />
-                        ) : (
-                          m.icon
-                        )
-                      )}
-                      <span className="item-text min-w-0 flex-1 truncate">
-                        <span className="label font-medium">{m.label}</span>
-                      </span>
-                    </span>
-                  </span>
-                </DropdownMenuSubTrigger>
-                <DropdownMenuSubContent className="w-44 p-1">
-                  {m.subItems.map((sub, j) => {
-                    if (sub.type === "separator" || sub.key === "separator" || sub.key?.startsWith("sep-")) {
-                      return <DropdownMenuSeparator key={sub.key || `sub-sep-${j}`} className="my-1.5" />;
-                    }
-                    return (
-                      <DropdownMenuItem
-                        key={sub.key || j}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (sub.disabled) return;
-                          if (onOpenChange) onOpenChange(false);
-                          sub.onClick?.(e);
-                        }}
-                        className="flex items-center gap-2 cursor-pointer"
-                      >
-                        {sub.bgClass && (
-                          <span className={cn("size-3 rounded-full shrink-0", sub.bgClass)} />
-                        )}
-                        <span className="truncate">{sub.label}</span>
-                        {sub.checked && (
-                          <GoogleIcon iconName="check" className="text-xs ml-auto text-on-surface" />
-                        )}
-                      </DropdownMenuItem>
-                    );
-                  })}
-                </DropdownMenuSubContent>
-              </DropdownMenuSub>
-            );
-          }
-          return (
-            <DropdownMenuItem
-              key={m.key || i}
-              variant={m.variant}
-              disabled={m.disabled}
-              onClick={(e) => {
-                e.stopPropagation();
-                if (m.disabled) return;
-                if (onOpenChange) onOpenChange(false);
-                m.onClick?.(e);
-              }}
-              className={cn(
-                "cursor-pointer mat-mdc-menu-item flow-internal-menu-item",
-                m.variant === "destructive" && "delete-button"
-              )}
-            >
-              <span className="mat-mdc-menu-item-text">
-                <span className="left-content">
-                  {m.icon && (
-                    typeof m.icon === "string" ? (
-                      <GoogleIcon
-                        iconName={m.icon}
-                        className={cn("text-[20px] shrink-0 mat-icon google-symbols", m.iconClassName)}
-                        fill={m.fill}
-                      />
-                    ) : (
-                      m.icon
-                    )
-                  )}
-                  <span className="item-text min-w-0 flex-1 truncate">
-                    <span className="label font-medium">{m.label}</span>
-                  </span>
-                </span>
-              </span>
-            </DropdownMenuItem>
-          );
-        })}
+      <DropdownMenuContent align={align}>
+        <MenuItemsList
+          items={activeItems}
+          components={DROPDOWN_MENU_COMPONENTS}
+          onClose={onOpenChange ? () => onOpenChange(false) : undefined}
+        />
       </DropdownMenuContent>
     </DropdownMenu>
   );
@@ -188,113 +88,19 @@ export function StudioItemDropdownMenu({
 
 /**
  * Universal Context Menu Content for Studio Media Items.
- * Renders the same items list inside a ContextMenu.
+ * Renders the exact same items list via the shared MenuItemsList component.
  */
 export function StudioContextMenuContent({
   items = [],
-  className = "w-52",
 }) {
   const activeItems = React.useMemo(() => filterActiveMenuItems(items), [items]);
 
   return (
-    <ContextMenuContent className={cn("p-1.5 min-w-[12rem] w-52 flow-menu-panel mat-mdc-menu-panel", className)}>
-      {activeItems.map((m, i) => {
-        if (m.key === "separator" || m.type === "separator") {
-          return <ContextMenuSeparator key={m.key || `ctx-sep-${i}`} className="my-1.5" />;
-        }
-        if (m.subItems && m.subItems.length > 0) {
-          return (
-            <ContextMenuSub key={m.key || i}>
-              <ContextMenuSubTrigger
-                className={cn(
-                  "cursor-pointer mat-mdc-menu-item flow-internal-menu-item",
-                  m.variant === "destructive" && "delete-button"
-                )}
-              >
-                <span className="mat-mdc-menu-item-text">
-                  <span className="left-content">
-                    {m.icon && (
-                      typeof m.icon === "string" ? (
-                        <GoogleIcon
-                          iconName={m.icon}
-                          className={cn("text-[20px] shrink-0 mat-icon google-symbols", m.iconClassName)}
-                          fill={m.fill}
-                        />
-                      ) : (
-                        m.icon
-                      )
-                    )}
-                    <span className="item-text min-w-0 flex-1 truncate">
-                      <span className="label font-medium">{m.label}</span>
-                    </span>
-                  </span>
-                </span>
-              </ContextMenuSubTrigger>
-              <ContextMenuSubContent className="w-44 p-1">
-                {m.subItems.map((sub, j) => {
-                  if (sub.type === "separator" || sub.key === "separator" || sub.key?.startsWith("sep-")) {
-                    return <ContextMenuSeparator key={sub.key || `sub-sep-${j}`} className="my-1.5" />;
-                  }
-                  return (
-                    <ContextMenuItem
-                      key={sub.key || j}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (sub.disabled) return;
-                        sub.onClick?.(e);
-                      }}
-                      className="flex items-center gap-2 cursor-pointer"
-                    >
-                      {sub.bgClass && (
-                        <span className={cn("size-3 rounded-full shrink-0", sub.bgClass)} />
-                      )}
-                      <span className="truncate">{sub.label}</span>
-                      {sub.checked && (
-                        <GoogleIcon iconName="check" className="text-xs ml-auto text-on-surface" />
-                      )}
-                    </ContextMenuItem>
-                  );
-                })}
-              </ContextMenuSubContent>
-            </ContextMenuSub>
-          );
-        }
-        return (
-          <ContextMenuItem
-            key={m.key || i}
-            variant={m.variant}
-            disabled={m.disabled}
-            onClick={(e) => {
-              e.stopPropagation();
-              if (m.disabled) return;
-              m.onClick?.(e);
-            }}
-            className={cn(
-              "cursor-pointer mat-mdc-menu-item flow-internal-menu-item",
-              m.variant === "destructive" && "delete-button"
-            )}
-          >
-            <span className="mat-mdc-menu-item-text">
-              <span className="left-content">
-                {m.icon && (
-                  typeof m.icon === "string" ? (
-                    <GoogleIcon
-                      iconName={m.icon}
-                      className={cn("text-[20px] shrink-0 mat-icon google-symbols", m.iconClassName)}
-                      fill={m.fill}
-                    />
-                  ) : (
-                    m.icon
-                  )
-                )}
-                <span className="item-text min-w-0 flex-1 truncate">
-                  <span className="label font-medium">{m.label}</span>
-                </span>
-              </span>
-            </span>
-          </ContextMenuItem>
-        );
-      })}
+    <ContextMenuContent>
+      <MenuItemsList
+        items={activeItems}
+        components={CONTEXT_MENU_COMPONENTS}
+      />
     </ContextMenuContent>
   );
 }

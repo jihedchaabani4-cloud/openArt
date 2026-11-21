@@ -17,7 +17,7 @@ describe("ElementsEmptyState", () => {
   });
 
   it("renders all 3 showcase cards with appropriate labels, images, and native site icons", () => {
-    render(<ElementsEmptyState />);
+    const { container } = render(<ElementsEmptyState />);
 
     // Check headings/titles
     const createLabels = screen.getAllByText("Create element");
@@ -34,11 +34,11 @@ describe("ElementsEmptyState", () => {
     expect(img2.getAttribute("src")).toBe("/images/reference-elements/empty-2.webp");
     expect(img3.getAttribute("src")).toBe("/images/reference-elements/empty-3.webp");
 
-    // Check native Google icons rendered
-    expect(screen.getAllByText("alternate_email").length).toBeGreaterThanOrEqual(1);
-    expect(screen.getByText("auto_awesome")).toBeTruthy();
-    expect(screen.getByText("inventory_2")).toBeTruthy();
-    expect(screen.getByText("add")).toBeTruthy();
+    // Check Hugeicons rendered
+    expect(container.querySelectorAll('[data-icon-name="at"]').length).toBeGreaterThanOrEqual(1);
+    expect(container.querySelector('[data-icon-name="sparkles"]')).not.toBeNull();
+    expect(container.querySelector('[data-icon-name="package"]')).not.toBeNull();
+    expect(container.querySelector('[data-icon-name="add-01"]')).not.toBeNull();
   });
 
   it("triggers onCreateElement when clicking the Create element card", () => {

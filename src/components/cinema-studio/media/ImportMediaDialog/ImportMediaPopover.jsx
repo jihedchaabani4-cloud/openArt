@@ -7,7 +7,7 @@ import { useLibraryFilter, extractIdentifyingKeys } from "@/features/studio";
 import { useProjectData } from "@/features/workflows/api/workflowsApi";
 import { useUploadMedia } from "@/features/media/model/useUploadMedia";
 import { resolveMediaUrl } from "@/shared/lib/displayUtils";
-import { GoogleIcon } from "@/components/primitives/GoogleIcon";
+import { HugeIcon } from "@/components/primitives/HugeIcon";
 import { Button } from "@/components/base/button";
 import { IconButton } from "@/components/base/icon-button";
 import { Input } from "@/components/base/input";
@@ -339,7 +339,7 @@ export function ImportMediaPopover({
         is_video: isVid,
         is_upload: isUploadItem,
         display_name: m.mediaMetadata?.displayName || m.name || "Uploaded Media",
-        image_count: m.image_count || 1,
+        image_count: 1,
         items: undefined,
       });
     });
@@ -377,28 +377,28 @@ export function ImportMediaPopover({
 
     // Show "All" if multiple categories are allowed
     if (allowedSpecificCount > 1) {
-      cats.push({ id: "all", label: "All", googleIcon: "dashboard" });
+      cats.push({ id: "all", label: "All", icon: "dashboard-square-01" });
     }
 
     if (allowsImages) {
-      cats.push({ id: "image", label: "Images", googleIcon: "image" });
+      cats.push({ id: "image", label: "Images", icon: "image-02" });
     }
     if (allowsVideos) {
-      cats.push({ id: "video", label: "Videos", googleIcon: "videocam" });
+      cats.push({ id: "video", label: "Videos", icon: "video-01" });
     }
     if (allowsCharacters) {
-      cats.push({ id: "character", label: "Characters", googleIcon: "accessibility_new" });
+      cats.push({ id: "character", label: "Characters", icon: "user" });
     }
     if (allowsElements) {
-      cats.push({ id: "element", label: "Elements", googleIcon: "widgets" });
+      cats.push({ id: "element", label: "Elements", icon: "shapes" });
     }
     if (allowsImages || allowsVideos) {
-      cats.push({ id: "upload", label: "Uploads", googleIcon: "drive_folder_upload" });
+      cats.push({ id: "upload", label: "Uploads", icon: "folder-upload" });
     }
 
     // Fallback if no specific category was added
     if (cats.length === 0) {
-      cats.push({ id: "all", label: "All", googleIcon: "dashboard" });
+      cats.push({ id: "all", label: "All", icon: "dashboard-square-01" });
     }
 
     return cats;
@@ -549,8 +549,8 @@ export function ImportMediaPopover({
           setSelectedCategory("image");
         }
       }
-    } catch (err) {
-      console.error("❌ Upload failed in Popover:", err);
+    } catch {
+      // Upload error state is handled by useUploadMedia
     } finally {
       if (fileInputRef.current) fileInputRef.current.value = "";
     }
@@ -577,7 +577,7 @@ export function ImportMediaPopover({
       }}
       className={cn(
         !isPanel && "fixed bottom-24 left-1/2 -translate-x-1/2 z-50",
-        "flex flex-row gap-2 overflow-hidden rounded-[var(--radius-3xl)] border border-border-weak bg-ui-menu-background p-2 [--blur:40px] text-text-primary font-sans antialiased"
+        "flex flex-row gap-2 overflow-hidden surface-glass bg-surface-menu-glass rounded-xl p-1.5 text-text-primary font-sans antialiased"
       )}
     >
       {/* Hidden file input */}
@@ -611,16 +611,14 @@ export function ImportMediaPopover({
                       setNavZone("sidebar");
                     }}
                     className={cn(
-                      "w-full !justify-start !h-8.5 text-[13px] cursor-pointer group px-2.5 rounded-lg flex items-center gap-2.5 transition-colors",
-                      isActive ? "!bg-white/[0.16] hover:!bg-white/20 text-white font-medium" : "text-white/65 hover:!bg-white/10 hover:text-white font-normal",
-                      isHighlighted && "ring-1 ring-inset ring-white/70 !bg-white/[0.16]"
+                      "w-full !justify-start !h-8.5 ds-text-caption-m cursor-pointer group px-2.5 rounded-lg flex items-center gap-2.5 transition-colors",
+                      isActive ? "bg-surface-tonal-hover hover:bg-surface-tonal-hover text-text-primary font-medium" : "text-text-secondary hover:bg-surface-tonal hover:text-text-primary font-normal",
+                      isHighlighted && "ring-1 ring-inset ring-border-focus bg-surface-tonal-hover"
                     )}
                   >
-                    <GoogleIcon
-                      iconName={cat.googleIcon}
-                      name={cat.googleIcon}
-                      weight={300}
-                      className={cn("text-base shrink-0 transition-colors leading-none", isActive ? "text-white" : "text-white/65 group-hover:text-white")}
+                    <HugeIcon
+                      name={cat.icon}
+                      className={cn("text-base shrink-0 transition-colors leading-none", isActive ? "text-icon-primary" : "text-icon-secondary group-hover:text-icon-primary")}
                     />
                     <span className="truncate leading-none">{cat.label}</span>
                   </Button>
@@ -635,12 +633,11 @@ export function ImportMediaPopover({
               variant="ghost"
               disabled={isUploading}
               onClick={() => fileInputRef.current?.click()}
-              className="mt-auto w-full !justify-start !h-8.5 text-[13px] font-normal gap-2.5 cursor-pointer px-2.5 rounded-lg flex items-center text-white/75 hover:!bg-white/5 hover:text-white"
+              className="mt-auto w-full !justify-start !h-8.5 ds-text-caption-m font-normal gap-2.5 cursor-pointer px-2.5 rounded-lg flex items-center text-text-secondary hover:bg-surface-tonal hover:text-text-primary"
             >
-              <GoogleIcon
-                iconName={isUploading ? "progress_activity" : "upload"}
-                weight={300}
-                className={cn("text-base shrink-0 leading-none", isUploading && "animate-spin text-white/40")}
+              <HugeIcon
+                name={isUploading ? "loading-03" : "upload-04"}
+                className={cn("text-base shrink-0 leading-none", isUploading && "animate-spin text-text-disabled")}
               />
               <span className="truncate leading-none">{isUploading ? "Uploading..." : "Upload media"}</span>
             </Button>
@@ -655,7 +652,7 @@ export function ImportMediaPopover({
           <Input
             ref={searchInputRef}
             variant="ghost"
-            googleIcon="search"
+            iconName="search-01"
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -663,7 +660,7 @@ export function ImportMediaPopover({
             placeholder="Search assets"
             aria-label="Search assets"
             containerClassName="flex-1 min-w-0"
-            className="!h-8 px-2.5 rounded-lg bg-white/[0.07] text-[13px]"
+            className="!h-8 px-2.5 rounded-lg bg-surface-card ds-text-caption-m"
           />
 
           {/* Close Button */}
@@ -674,7 +671,7 @@ export function ImportMediaPopover({
             aria-label="Close"
             className="!size-8 rounded-lg shrink-0"
           >
-            <GoogleIcon iconName="close" weight={300} className="text-base" />
+            <HugeIcon name="cancel-01" className="text-base" />
           </IconButton>
         </header>
 

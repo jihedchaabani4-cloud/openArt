@@ -2,7 +2,7 @@
 
 import React, { useRef, useEffect } from "react";
 import { motion, useMotionValue, useTransform } from "framer-motion";
-import { GoogleIcon } from "@/components/primitives/GoogleIcon";
+import { HugeIcon } from "@/components/primitives/HugeIcon";
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/components/base/button";
 import { MediaView } from "./MediaView";
@@ -186,21 +186,21 @@ export const MediaViewCard = React.forwardRef(function MediaViewCard({
       {/* Video Indicator Corner Badge */}
       {effectiveIsVideo && (
         <div className="absolute bottom-2.5 right-2.5 z-20 flex items-center justify-center w-7 h-7 rounded-full bg-black/40 backdrop-blur-md border border-white/10 pointer-events-none shadow-none">
-          <GoogleIcon iconName="play_arrow" fill weight={300} className="text-[13px] text-white" />
+          <HugeIcon name="play" size="xs" className="text-white" />
         </div>
       )}
 
       {/* Character Indicator Corner Badge */}
       {isCharacter && !effectiveIsVideo && (
         <div className="absolute bottom-2.5 right-2.5 z-20 flex items-center justify-center w-7 h-7 rounded-full bg-black/40 backdrop-blur-md border border-white/10 pointer-events-none shadow-none text-white">
-          <GoogleIcon iconName="accessibility_new" weight={300} opticalSize={34} className="text-lg" />
+          <HugeIcon name="user" size="sm" />
         </div>
       )}
 
       {/* Element Indicator Corner Badge */}
       {isElement && !isCharacter && !effectiveIsVideo && (
         <div className="absolute bottom-2.5 right-2.5 z-20 flex items-center justify-center w-7 h-7 rounded-full bg-black/40 backdrop-blur-md border border-white/10 pointer-events-none shadow-none text-white">
-          <GoogleIcon iconName="widgets" weight={300} opticalSize={24} className="text-lg" />
+          <HugeIcon name="shapes" size="sm" />
         </div>
       )}
 

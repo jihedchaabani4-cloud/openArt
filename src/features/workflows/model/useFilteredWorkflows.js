@@ -19,8 +19,6 @@ export function useFilteredWorkflows(projectId) {
   // Always fetch the FULL project data (cached heavily)
   const queryResult = useProjectData(projectId);
   const filters = useWorkflowsStore((s) => s.filters || s._generationFilters);
-  const showUploadedMedia = useWorkflowsStore((s) => s.showUploadedMedia);
-  const showUploaded = showUploadedMedia !== false;
 
   const rawWorkflows = queryResult.data?.projectContents?.workflows ?? [];
 
@@ -29,9 +27,8 @@ export function useFilteredWorkflows(projectId) {
     return selectStudioWorkflows(queryResult.data?.projectContents, {
       domain: "assets",
       filters,
-      showUploaded,
     });
-  }, [queryResult.data?.projectContents, filters, showUploaded]);
+  }, [queryResult.data?.projectContents, filters]);
 
   // ── availableModels ──────────────────────────────────────────────────────
   const availableModels = useMemo(() => {

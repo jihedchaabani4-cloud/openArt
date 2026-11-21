@@ -48,7 +48,12 @@ export async function apiRequest(endpoint, options = {}) {
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));
             const errMsg = errorData.message || (typeof errorData.error === 'string' ? errorData.error : null) || `API error: ${response.status} ${response.statusText}`;
-            throw new Error(errMsg);
+            const err = new Error(errMsg);
+            err.status = response.status;
+            if (errorData.errorCode ?? errorData.code) {
+                err.errorCode = errorData.errorCode ?? errorData.code;
+            }
+            throw err;
         }
 
         if (response.status === 204 || response.status === 205) {
@@ -71,7 +76,9 @@ export async function apiRequest(endpoint, options = {}) {
             console.error(`🔌 API Request Timed Out [${url}] after ${timeoutMs}ms`);
             throw new Error(`Request timed out after ${Math.round(timeoutMs / 1000)}s. Please check your connection or refresh.`);
         }
-        console.error(`🔌 API Request Failed [${url}]:`, error.message);
+        if (error?.status !== 401) {
+            console.error(`🔌 API Request Failed [${url}]:`, error.message);
+        }
         throw error;
     } finally {
         if (timeoutId) clearTimeout(timeoutId);

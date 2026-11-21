@@ -3,7 +3,7 @@
 import * as React from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useRouter } from "next/navigation"
-import { GoogleIcon } from "@/components/primitives/GoogleIcon";
+import { HugeIcon } from "@/components/primitives/HugeIcon";
 
 import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows"
 import { useCharacterWorkflows } from "@/features/characters"
@@ -12,6 +12,8 @@ import { LoadingScreen } from "@/components/primitives/LoadingScreen"
 
 import { SharedGalleryGrid } from "@/features/media"
 import { MediaGridItem } from "@/components/cinema-studio/media/MediaGridItem"
+import { useStudioSelectionStore } from "@/features/workflows/model/useStudioSelectionStore"
+import { StudioSelectionBar } from "@/components/cinema-studio/media/StudioSelectionBar"
 import { HowToDrawer } from "@/features/elements";
 import { useWorkflowDelete } from "@/features/workflows"
 import { ConfirmDeleteDialog } from "@/components/primitives/ConfirmDeleteDialog"
@@ -34,6 +36,15 @@ export default function CharactersPage({ params }) {
             setActiveStudioTab("characters");
         }
     }, [projectId, setSelectedProjectId, setActiveStudioTab])
+
+    const hasSelection = useStudioSelectionStore(s => s.selectedKeys.length > 0);
+    const setScope = useStudioSelectionStore(s => s.setScope);
+    const clearSelection = useStudioSelectionStore(s => s.clearSelection);
+
+    React.useEffect(() => {
+        setScope(`characters:${projectId}`);
+        return () => clearSelection();
+    }, [projectId, setScope, clearSelection]);
 
     const gridSize = useGenerationsStore(s => s.gridSize);
     const gridSpacing = useGenerationsStore(s => s.gridSpacing);
@@ -152,6 +163,7 @@ export default function CharactersPage({ params }) {
                                 projectId={projectId}
                                 CardComponent={MediaGridItem}
                                 onWorkflowClick={handleWorkflowClick}
+                                selectionEnabled={true}
                             />
                             {hasMore && (
                                 <div className="flex justify-center pt-2 text-sm text-white/45">
@@ -163,16 +175,24 @@ export default function CharactersPage({ params }) {
                 </div>
 
                 {/* Floating Action Button (New Character) */}
-                <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-40">
-                    <Button
-                        type="button"
-                        onClick={() => router.push(`/cinema-studio/${projectId}/characters/new`)}
-                        className="flex items-center gap-2 px-6 py-4 h-auto rounded-full bg-surface-card hover:bg-surface-elevated text-white transition-all active:scale-95 border border-white/10 shadow-none cursor-pointer"
-                    >
-                        <GoogleIcon iconName="add" className="text-xl" />
-                        <span className="font-medium text-[15px]">New character</span>
-                    </Button>
-                </div>
+                {!hasSelection && visibleSheets.length > 0 && (
+                    <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-40">
+                        <Button
+                            type="button"
+                            onClick={() => router.push(`/cinema-studio/${projectId}/characters/new`)}
+                            className="flex items-center gap-2 px-6 py-4 h-auto rounded-full bg-surface-card hover:bg-surface-elevated text-white transition-all active:scale-95 border border-white/10 shadow-none cursor-pointer"
+                        >
+                            <HugeIcon name="add-01" />
+                            <span className="font-medium text-[15px]">New character</span>
+                        </Button>
+                    </div>
+                )}
+
+                <StudioSelectionBar
+                    projectId={projectId}
+                    scope="characters"
+                    workflows={visibleSheets}
+                />
 
                 <HowToDrawer
                     isOpen={isHowToOpen}

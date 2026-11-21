@@ -3,12 +3,14 @@
 import React, { useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/base/button";
-import { GoogleIcon } from "@/components/primitives/GoogleIcon";
+import { HugeIcon } from "@/components/primitives/HugeIcon";
 import { SharedGalleryGrid } from "@/features/media";
 import { useProjectData } from "@/features/workflows/api/queries/useProjectData";
 import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows";
 import { selectStudioWorkflows } from "@/features/workflows/model/selectStudioWorkflows";
 import { MediaGridItem } from "@/components/cinema-studio/media/MediaGridItem";
+import { useStudioSelectionStore } from "@/features/workflows/model/useStudioSelectionStore";
+import { StudioSelectionBar } from "@/components/cinema-studio/media/StudioSelectionBar";
 
 export function TrashView({ projectId }) {
   const { data, isLoading, isError, error, refetch } = useProjectData(projectId);
@@ -22,7 +24,13 @@ export function TrashView({ projectId }) {
 
   const gridSize = useGenerationsStore((s) => s.gridSize);
   const gridSpacing = useGenerationsStore((s) => s.gridSpacing);
-  const setIsNavbarHidden = useGenerationsStore((s) => s.setIsNavbarHidden);
+  const setScope = useStudioSelectionStore((s) => s.setScope);
+  const clearSelection = useStudioSelectionStore((s) => s.clearSelection);
+
+  React.useEffect(() => {
+    setScope(`trash:${projectId}`);
+    return () => clearSelection();
+  }, [projectId, setScope, clearSelection]);
 
   const scrollRef = useRef(null);
   const prevScrollTop = useRef(0);
@@ -50,7 +58,7 @@ export function TrashView({ projectId }) {
     return (
       <div className="flex h-full w-full overflow-hidden text-white bg-background relative">
         <main className="flex-1 flex flex-col items-center justify-center min-h-[400px] p-6 text-center">
-          <GoogleIcon iconName="error_outline" className="text-4xl text-red-400 mb-3" />
+          <HugeIcon name="alert-circle" className="text-4xl text-red-400 mb-3" />
           <p className="text-base text-white/90 mb-1">Impossible de charger la corbeille</p>
           <p className="text-sm text-cool-slate mb-4">{error?.message || "Une erreur est survenue."}</p>
           <Button variant="outline" onClick={() => refetch()}>
@@ -86,6 +94,7 @@ export function TrashView({ projectId }) {
                   gridSpacing={gridSpacing}
                   projectId={projectId}
                   CardComponent={MediaGridItem}
+                  selectionEnabled={true}
                 />
               </motion.div>
             ) : (
@@ -107,6 +116,12 @@ export function TrashView({ projectId }) {
             )}
           </AnimatePresence>
         </div>
+
+        <StudioSelectionBar
+          projectId={projectId}
+          scope="trash"
+          workflows={trashedWorkflows}
+        />
       </main>
     </div>
   );

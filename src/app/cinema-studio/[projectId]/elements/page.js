@@ -3,7 +3,7 @@
 import * as React from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useRouter, useSearchParams } from "next/navigation"
-import { GoogleIcon } from "@/components/primitives/GoogleIcon";
+import { HugeIcon } from "@/components/primitives/HugeIcon";
 
 import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows"
 import { useElementSheetWorkflows } from "@/features/elements"
@@ -14,6 +14,8 @@ import { LoadingScreen } from "@/components/primitives/LoadingScreen";
 
 import { SharedGalleryGrid } from "@/features/media";
 import { MediaGridItem } from "@/components/cinema-studio/media/MediaGridItem";
+import { useStudioSelectionStore } from "@/features/workflows/model/useStudioSelectionStore";
+import { StudioSelectionBar } from "@/components/cinema-studio/media/StudioSelectionBar";
 import { HowToDrawer, ElementsEmptyState } from "@/features/elements";
 import { useWorkflowDelete } from "@/features/workflows";
 import { ConfirmDeleteDialog } from "@/components/primitives/ConfirmDeleteDialog";
@@ -36,6 +38,15 @@ export default function ElementsPage({ params }) {
             setActiveStudioTab("elements");
         }
     }, [projectId, setSelectedProjectId, setActiveStudioTab])
+
+    const hasSelection = useStudioSelectionStore(s => s.selectedKeys.length > 0);
+    const setScope = useStudioSelectionStore(s => s.setScope);
+    const clearSelection = useStudioSelectionStore(s => s.clearSelection);
+
+    React.useEffect(() => {
+        setScope(`elements:${projectId}`);
+        return () => clearSelection();
+    }, [projectId, setScope, clearSelection]);
 
     const gridSize = useGenerationsStore(s => s.gridSize);
     const gridSpacing = useGenerationsStore(s => s.gridSpacing);
@@ -153,6 +164,7 @@ export default function ElementsPage({ params }) {
                                 projectId={projectId}
                                 CardComponent={MediaGridItem}
                                 onWorkflowClick={handleWorkflowClick}
+                                selectionEnabled={true}
                             />
                             {hasMore && (
                                 <div className="flex justify-center pt-2 text-sm text-white/45">
@@ -164,7 +176,7 @@ export default function ElementsPage({ params }) {
                 </div>
 
                 {/* Floating Action Button (New Element) */}
-                {visibleSheets.length > 0 && (
+                {!hasSelection && visibleSheets.length > 0 && (
                     <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-40">
                         <Button
                             type="button"
@@ -172,11 +184,17 @@ export default function ElementsPage({ params }) {
                             className="h-auto px-6 py-4 rounded-2xl bg-surface-secondary hover:bg-surface-secondary text-white/90 hover:text-white active:scale-95 border-none backdrop-blur-md text-sm font-medium"
                             onClick={() => setIsNewElementOpen(true)}
                         >
-                            <GoogleIcon iconName="add" className="text-xl" />
+                            <HugeIcon name="add-01" />
                             <span>New element</span>
                         </Button>
                     </div>
                 )}
+
+                <StudioSelectionBar
+                    projectId={projectId}
+                    scope="elements"
+                    workflows={visibleSheets}
+                />
 
                 <HowToDrawer
                     isOpen={isHowToOpen}

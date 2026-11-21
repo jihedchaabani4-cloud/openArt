@@ -373,7 +373,7 @@ describe("CharacterDetailsGallery - Studio Media Grid Form", () => {
     });
   });
 
-  it("ReferenceMediaGalleryGrid uses RowsPhotoAlbum photo layout conforming to studio media grid", () => {
+  it("ReferenceMediaGalleryGrid uses justified-row layout conforming to studio media grid", () => {
     const multiAspectItems = [
       {
         id: "wide-1",
@@ -396,8 +396,9 @@ describe("CharacterDetailsGallery - Studio Media Grid Form", () => {
       />
     );
 
-    const photoAlbum = container.querySelector(".react-photo-album, .react-photo-album--rows");
-    expect(photoAlbum).not.toBeNull();
+    const grid = container.querySelector('[data-justified-grid="true"]');
+    expect(grid).not.toBeNull();
+    expect(container.querySelectorAll('[data-justified-row="true"]').length).toBeGreaterThan(0);
   });
 
   it("uses the 16px reference gallery spacing by default", () => {
@@ -405,11 +406,9 @@ describe("CharacterDetailsGallery - Studio Media Grid Form", () => {
       <ReferenceMediaGalleryGrid items={mockItems} />
     );
 
-    const photoAlbum = container.querySelector(".react-photo-album");
-    expect(photoAlbum).not.toBeNull();
-    expect(
-      photoAlbum.style.getPropertyValue("--react-photo-album--spacing")
-    ).toBe("16");
+    const grid = container.querySelector('[data-justified-grid="true"]');
+    expect(grid).not.toBeNull();
+    expect(grid.style.rowGap).toBe("16px");
   });
 
   it("honors an explicit spacing prop for reference grids", () => {
@@ -417,14 +416,12 @@ describe("CharacterDetailsGallery - Studio Media Grid Form", () => {
       <ReferenceMediaGalleryGrid items={mockItems} spacing={4} />
     );
 
-    const photoAlbum = container.querySelector(".react-photo-album");
-    expect(photoAlbum).not.toBeNull();
-    expect(
-      photoAlbum.style.getPropertyValue("--react-photo-album--spacing")
-    ).toBe("4");
+    const grid = container.querySelector('[data-justified-grid="true"]');
+    expect(grid).not.toBeNull();
+    expect(grid.style.rowGap).toBe("4px");
   });
 
-  it("configures RowsPhotoAlbum with larger grid size (DEFAULT_CHARACTER_ROW_HEIGHT >= 300)", () => {
+  it("configures justified grid with larger grid size (DEFAULT_CHARACTER_ROW_HEIGHT >= 300)", () => {
     expect(DEFAULT_CHARACTER_ROW_HEIGHT).toBeGreaterThanOrEqual(300);
   });
 
@@ -448,12 +445,12 @@ describe("CharacterDetailsGallery - Studio Media Grid Form", () => {
     // Check Cover (bookmark/save) icon and Delete icon buttons
     const coverBtns = screen.getAllByTitle(/couverture/i);
     expect(coverBtns.length).toBeGreaterThan(0);
-    expect(coverBtns[0].textContent).toContain("bookmark");
+    expect(coverBtns[0].querySelector('[data-icon-name="bookmark-02"]')).not.toBeNull();
     expect(coverBtns[0].className).toContain("ds-icon-btn");
 
     const deleteBtns = screen.getAllByTitle(/supprimer/i);
     expect(deleteBtns.length).toBeGreaterThan(0);
-    expect(deleteBtns[0].textContent).toContain("delete");
+    expect(deleteBtns[0].querySelector('[data-icon-name="delete-02"]')).not.toBeNull();
   });
 
   it("renders cards with rounded-xxxs border radius matching media item standard", () => {

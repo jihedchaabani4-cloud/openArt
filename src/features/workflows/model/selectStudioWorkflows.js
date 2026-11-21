@@ -1,5 +1,73 @@
 import { resolveMainMedia } from "@/features/workflows/core/resolveMediaRef";
+import { isVideoMedia, normalizeMediaStatus, resolveMediaUrl } from "@/features/workflows/core/toMediaItem";
 import { getGenerationConfig } from "@/shared/lib/referenceUtils";
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+function getDateRangeCutoff(dateRange, now = Date.now()) {
+  if (!dateRange || dateRange === "all") return null;
+  if (dateRange === "today") {
+    const startOfDay = new Date(now);
+    startOfDay.setHours(0, 0, 0, 0);
+    return startOfDay.getTime();
+  }
+  if (dateRange === "7d") return now - 7 * DAY_MS;
+  if (dateRange === "30d") return now - 30 * DAY_MS;
+  return null;
+}
+
+function isWorkflowFailed(wf) {
+  if (normalizeMediaStatus(wf.status, wf.error, wf.primary_media_url || wf.url) === "failed") {
+    return true;
+  }
+  if (Array.isArray(wf.items) && wf.items.length > 0) {
+    return wf.items.every(
+      (item) => normalizeMediaStatus(item?.status, item?.error, resolveMediaUrl(item)) === "failed"
+    );
+  }
+  return false;
+}
+
+/**
+ * Extracts unique generation model names present in projectContents.
+ * Matches the exact strings checked by selectStudioWorkflows Phase F.
+ *
+ * @param {Object} projectContents
+ * @returns {string[]}
+ */
+export function extractAvailableModels(projectContents) {
+  if (!projectContents || typeof projectContents !== "object") {
+    return [];
+  }
+
+  const models = new Set();
+  const addModel = (value) => {
+    if (typeof value === "string" && value.trim()) {
+      models.add(value.trim());
+    }
+  };
+
+  for (const b of projectContents.batches ?? []) {
+    addModel(b?.generationConfig?.model || b?.generationConfig?.model_name || b?.model || b?.model_name);
+  }
+  for (const m of projectContents.media ?? []) {
+    const cfg = getGenerationConfig(m);
+    addModel(
+      cfg?.model ||
+        cfg?.model_name ||
+        m?.model ||
+        m?.model_name ||
+        m?.image?.generatedImage?.modelNameType ||
+        m?.video?.generatedVideo?.modelNameType
+    );
+  }
+  for (const wf of projectContents.workflows ?? []) {
+    const cfg = getGenerationConfig(wf);
+    addModel(cfg?.model || cfg?.model_name || wf?.model || wf?.model_name);
+  }
+
+  return Array.from(models).sort((a, b) => a.localeCompare(b));
+}
 
 /**
  * Indexes media items by workflow ID.
@@ -368,16 +436,21 @@ export function selectStudioWorkflows(projectContents, options = {}) {
     });
   }
 
-  // Phase D: Filter by favorites / liked
-  if (isLiked) {
+  // Phase D: Filter by activity / favorites
+  const activity = filters.activity || "all";
+  if (isLiked || activity === "liked") {
     filtered = filtered.filter((wf) => wf.is_liked || wf.metadata?.favorited);
+  } else if (activity === "generated") {
+    filtered = filtered.filter((wf) => wf.category === "generation");
+  } else if (activity === "uploaded") {
+    filtered = filtered.filter((wf) => wf.category === "upload");
   }
 
   // Phase E: Filter by media type (image vs video)
   if (filters.types?.length > 0) {
     filtered = filtered.filter((wf) => {
       return wf.items?.some((m) => {
-        const itemType = m.image ? "image" : m.video ? "video" : null;
+        const itemType = isVideoMedia(m) ? "video" : "image";
         return filters.types.includes(itemType);
       });
     });
@@ -385,10 +458,51 @@ export function selectStudioWorkflows(projectContents, options = {}) {
 
   // Phase F: Filter by model
   if (filters.models?.length > 0) {
+    const normalizeModelKey = (v) =>
+      String(v || "")
+        .trim()
+        .toLowerCase()
+        .replace(/[\s_-]+/g, "");
+    const selectedNormalized = filters.models.map(normalizeModelKey).filter(Boolean);
     filtered = filtered.filter((wf) => {
-      const model = wf.generationConfig?.model || wf.generationConfig?.model_name;
-      return filters.models.includes(model);
+      const candidates = [
+        wf.generationConfig?.model,
+        wf.generationConfig?.model_name,
+        wf.model,
+        wf.model_name,
+        ...(wf.items ?? []).flatMap((m) => [
+          m?.generationConfig?.model,
+          m?.generationConfig?.model_name,
+          m?.mediaMetadata?.requestData?.modelId,
+          m?.mediaMetadata?.requestData?.modelName,
+          m?.image?.generatedImage?.modelNameType,
+          m?.video?.generatedVideo?.modelNameType,
+        ]),
+      ]
+        .map(normalizeModelKey)
+        .filter(Boolean);
+      return candidates.some((c) => selectedNormalized.includes(c));
     });
+  }
+
+  // Phase F2: Filter by date range
+  const dateCutoff = getDateRangeCutoff(filters.dateRange, options.now);
+  if (dateCutoff !== null) {
+    filtered = filtered.filter((wf) => {
+      const rawTime =
+        wf.metadata?.createTime ||
+        wf.create_time ||
+        wf.items?.[0]?.metadata?.createTime ||
+        wf.items?.[0]?.create_time;
+      if (!rawTime) return false;
+      const ts = new Date(rawTime).getTime();
+      return Number.isFinite(ts) && ts >= dateCutoff;
+    });
+  }
+
+  // Phase F3: Hide failed workflows
+  if (filters.hideFailed) {
+    filtered = filtered.filter((wf) => !isWorkflowFailed(wf));
   }
 
   // Phase G: Sort

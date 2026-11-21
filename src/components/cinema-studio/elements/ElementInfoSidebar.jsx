@@ -5,7 +5,7 @@ import { Input } from "@/components/base/input";
 import { Textarea } from "@/components/primitives/textarea";
 import { Button } from "@/components/base/button";
 import { IconButton } from "@/components/base/icon-button";
-import { GoogleIcon } from "@/components/primitives/GoogleIcon";
+import { HugeIcon } from "@/components/primitives/HugeIcon";
 import { ELEMENT_TYPES } from "@/features/workflows/model/elementSheetConfig";
 import {
   DropdownMenu,
@@ -13,6 +13,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/base/dropdown-menu";
+import { MenuItemContent } from "@/components/base/menu";
 import {
   HoverCard,
   HoverCardTrigger,
@@ -46,7 +47,7 @@ export function InputInfoHover({ content, title, testId }) {
           title={content}
           data-testid={testId}
         >
-          <GoogleIcon iconName="info" className="text-[13px] leading-none" />
+          <HugeIcon name="information-circle" className="text-[13px] leading-none" />
         </Button>
       </HoverCardTrigger>
       <HoverCardContent
@@ -137,21 +138,23 @@ export function ElementInfoSidebar({
               variant="secondary"
               className="flex items-center gap-2.5 w-full text-left justify-start"
             >
-              <GoogleIcon
-                iconName={currentType.googleIcon}
-                className="text-[18px] text-white/60 shrink-0"
+              <HugeIcon
+                name={currentType.icon}
+                size="md"
+                className="text-white/60 shrink-0"
               />
               <span className="flex-1 text-white/90">{currentType.label}</span>
-              <GoogleIcon
-                iconName="expand_more"
+              <HugeIcon
+                name="arrow-down-01"
+                size="md"
                 className={cn(
-                  "text-[18px] text-white/40 shrink-0 transition-transform duration-200",
+                  "text-white/40 shrink-0 transition-transform duration-200",
                   typeOpen && "rotate-180"
                 )}
               />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent variant="normal" align="start" sideOffset={6} className="w-52 p-1.5">
+          <DropdownMenuContent align="start">
             {ELEMENT_TYPES.map((type) => {
               const isSelected =
                 type.id.toLowerCase() ===
@@ -159,26 +162,15 @@ export function ElementInfoSidebar({
               return (
                 <DropdownMenuItem
                   key={type.id}
+                  selected={isSelected}
                   onSelect={() => {
                     onSaveElementType && onSaveElementType(type.id);
                     setTypeOpen(false);
                   }}
-                  className={cn(
-                    "flex items-center gap-3 pl-3 pr-4 py-2 min-h-[2.125rem] text-[14px] leading-5 font-medium rounded-sm cursor-pointer transition-colors duration-100 ease-in-out",
-                    isSelected ? "text-white bg-white/10" : "text-white/70 hover:text-white hover:bg-white/5"
-                  )}
                 >
-                  <GoogleIcon
-                    iconName={type.googleIcon}
-                    className={cn(
-                      "text-[20px] shrink-0",
-                      isSelected ? "text-white" : "text-white/50"
-                    )}
-                  />
-                  <span className="flex-1">{type.label}</span>
-                  {isSelected && (
-                    <GoogleIcon iconName="check" className="text-sm text-white/70 ml-auto font-bold" />
-                  )}
+                  <MenuItemContent icon={type.icon} checked={isSelected}>
+                    {type.label}
+                  </MenuItemContent>
                 </DropdownMenuItem>
               );
             })}
@@ -209,9 +201,9 @@ export function ElementInfoSidebar({
               title="Analyser automatiquement les images avec Vision AI"
             >
               {isAnalyzingVision ? (
-                <GoogleIcon iconName="progress_activity" className="text-xs animate-spin text-white/60" />
+                <HugeIcon name="loading-03" className="text-xs animate-spin text-white/60" />
               ) : (
-                <GoogleIcon iconName="auto_awesome" className="text-xs text-white/60" />
+                <HugeIcon name="sparkles" className="text-xs text-white/60" />
               )}
               <span>{isAnalyzingVision ? "Analyse…" : "Vision AI"}</span>
             </Button>
@@ -251,9 +243,9 @@ export function ElementInfoSidebar({
               title="Copier les directives"
             >
               {copied ? (
-                <GoogleIcon iconName="check" className="text-sm text-emerald-400" />
+                <HugeIcon name="tick-02" className="text-sm text-emerald-400" />
               ) : (
-                <GoogleIcon iconName="content_copy" className="text-sm" />
+                <HugeIcon name="copy-01" className="text-sm" />
               )}
             </IconButton>
           )}

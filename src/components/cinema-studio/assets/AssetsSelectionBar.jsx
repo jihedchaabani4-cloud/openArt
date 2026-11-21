@@ -1,6 +1,6 @@
 "use client";
 
-import { GoogleIcon } from "@/components/primitives/GoogleIcon";
+import { HugeIcon } from "@/components/primitives/HugeIcon";
 import { Button } from "@/components/base/button";
 
 export function AssetsSelectionBar({
@@ -30,7 +30,7 @@ export function AssetsSelectionBar({
           className="h-10 px-6 text-sm"
           disabled={isDownloading}
         >
-          <GoogleIcon iconName="download" className="text-base" />
+          <HugeIcon name="download-04" />
           {isDownloading ? "Downloading..." : "Download"}
         </Button>
 
@@ -42,7 +42,7 @@ export function AssetsSelectionBar({
           disabled={isFavoriting || isDeleting}
           aria-label="Favorite selected"
         >
-          <GoogleIcon iconName="favorite" fill={allSelectedAreLiked} className={allSelectedAreLiked ? "text-base text-white" : "text-base"} />
+          <HugeIcon name="favourite" className={allSelectedAreLiked ? "text-white" : undefined} />
         </Button>
 
         <Button
@@ -53,7 +53,7 @@ export function AssetsSelectionBar({
           disabled={isDeleting || isFavoriting}
           aria-label="Delete selected"
         >
-          <GoogleIcon iconName="delete" className="text-base" />
+          <HugeIcon name="delete-02" />
         </Button>
 
         <Button
@@ -63,7 +63,7 @@ export function AssetsSelectionBar({
           onClick={onClearSelection}
           aria-label="Clear selection"
         >
-          <GoogleIcon iconName="close" className="text-lg" />
+          <HugeIcon name="cancel-01" />
         </Button>
       </div>
     </div>

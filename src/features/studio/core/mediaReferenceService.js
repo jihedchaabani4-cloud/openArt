@@ -1,26 +1,11 @@
 /**
- * Prompt Bar Platform — Media Reference & Animation Service (v2 / v3 Architecture)
+ * Studio Media Reference Helpers
  *
- * Core service providing:
- * 1. addMediaToPrompt({ store, media, featureConfig })
- *    - Dynamically evaluates active mode (image/video), sub-mode (frames/reference), and model capabilities.
- *    - In reference mode: adds to reference list / parameter (respects quota & deduplication).
- *    - In keyframes mode: assigns to start frame (or end frame if start is occupied).
- *    - Automatically registers character / element entities in the store if applicable.
- *
- * 2. animateMedia({ store, media, featureConfig })
- *    - Transitions prompt bar to Video mode -> Frames sub-mode regardless of previous mode.
- *    - Clears existing media references (images, reference_images, entities, and prompt tags).
- *    - Automatically switches to an eligible video frames model if currently on an image model.
- *    - Sets the media into the start frame (input_image) parameter and clears end frame.
- *
- * 3. normalizeMediaAsset(media, defaultRole)
- *    - Unifies media objects into the standard shape expected by PromptBar Platform.
+ * Pure read-only helpers for entity capability checks and media asset normalization.
+ * All prompt bar mutations go directly through `promptBarService` from `@/features/prompt-bar`.
  */
 
-import { promptBarService } from "@/features/prompt-bar/api/promptBarService.js";
-import { getEntityImageCount } from "@/features/prompt-bar/core/entityService.js";
-import { getModelReferenceCapability } from "@/features/prompt-bar/core/modelManagement.js";
+import { getEntityImageCount, getModelReferenceCapability } from "@/features/prompt-bar";
 /**
  * Determines whether at least one model in the catalog can accept this entity.
  * Checks image domain and model capacity (maxRefs >= requiredCount).
@@ -135,76 +120,4 @@ export function normalizeMediaAsset(media, defaultRole = "reference") {
     image_count: media.image_count || (Array.isArray(media.items) ? media.items.length : 1),
     role: defaultRole,
   };
-}
-
-/**
- * Adds a media asset to the Prompt Bar according to the current active mode,
- * sub-mode, and model configuration.
- *
- * @param {object} options
- * @param {object} [options.store] - PromptBar store instance (optional, defaults to promptBarService)
- * @param {object} options.media - Media item to add
- * @param {object} [options.featureConfig] - Feature config (e.g. generatedMediaConfig)
- * @returns {boolean} Whether the item was successfully assigned
- */
-export function addMediaToPrompt({
-  store,
-  media,
-  featureConfig: _featureConfig = defaultGeneratedMediaConfig,
-  projectId,
-} = {}) {
-  if (!media) return false;
-  if (store && typeof store.getState === "function") {
-    const s = store.getState();
-    if (typeof s.addReference === "function") {
-      const res = s.addReference(media);
-      return res?.ok !== false;
-    }
-  }
-
-  const targetProjectId = projectId || store?.getState?.()?.identity?.projectId || "global";
-  const service = promptBarService({
-    templateId: "generated-media",
-    projectId: targetProjectId,
-  });
-  const res = service.addReference(media);
-  return Boolean(res.ok);
-}
-
-/**
- * Animates a media asset:
- * - Switches activeMode to "video" and activeSubMode to "frames".
- * - Wipes existing media references (images, reference_images, elements, characters, tags).
- * - Ensures an eligible video model that supports input_image is selected.
- * - Sets the media into the Start Frame (input_image) parameter.
- * - Clears End Frame (last_frame).
- *
- * @param {object} options
- * @param {object} [options.store] - PromptBar store instance (optional, defaults to promptBarService)
- * @param {object} options.media - Media item to animate
- * @param {object} [options.featureConfig] - Feature config (e.g. generatedMediaConfig)
- * @returns {boolean}
- */
-export function animateMedia({
-  store,
-  media,
-  featureConfig: _featureConfig = defaultGeneratedMediaConfig,
-  projectId,
-} = {}) {
-  if (!media) return false;
-  if (store && typeof store.getState === "function") {
-    const s = store.getState();
-    if (typeof s.animateMedia === "function") {
-      const res = s.animateMedia(media);
-      return res?.ok !== false;
-    }
-  }
-
-  const targetProjectId = projectId || store?.getState?.()?.identity?.projectId || "global";
-  const service = promptBarService({
-    templateId: "generated-media",
-    projectId: targetProjectId,
-  });
-  const res = service.animateMedia(media);
-  return Boolean(res.ok);
 }

@@ -157,14 +157,9 @@ export default function NewCharacterPage() {
       });
       if (res?.description) {
         setPrompt(res.description);
-        promptBarService({ templateId: "character", projectId: effectiveProjectId }).setPrompt(res.description);
-        setTimeout(() => {
-          const textarea = document.querySelector("textarea");
-          if (textarea) {
-            textarea.focus();
-            textarea.scrollIntoView({ behavior: "smooth", block: "end" });
-          }
-        }, 100);
+        const service = promptBarService({ templateId: "character", projectId: effectiveProjectId });
+        service.setPrompt(res.description);
+        service.focus();
       }
     } catch (err) {
       console.warn("Character description generation error:", err.message);

@@ -2,7 +2,7 @@
 
 import { useRef, useMemo } from "react";
 import { IconButton } from "@/components/base/icon-button";
-import { GoogleIcon } from "@/components/primitives/GoogleIcon";
+import { HugeIcon } from "@/components/primitives/HugeIcon";
 import { MediaView } from "@/features/media";
 import { ProcessingCard } from "@/components/cinema-studio/media/ProcessingCard";
 import { FlowErrorTile } from "@/components/primitives/FlowErrorTile";
@@ -50,7 +50,7 @@ export function CharacterSheetSection({
             {
               key: "download",
               label: "Télécharger",
-              icon: "download",
+              icon: "download-04",
               onClick: onDownload,
             },
           ]
@@ -58,7 +58,7 @@ export function CharacterSheetSection({
       {
         key: "upload-sheet",
         label: "Importer une image (Turnaround)",
-        icon: "upload",
+        icon: "upload-04",
         onClick: () => fileInputRef.current?.click(),
       },
       ...(onOpenAssets
@@ -66,7 +66,7 @@ export function CharacterSheetSection({
             {
               key: "from-assets",
               label: "Sélectionner depuis le projet",
-              icon: "folder_open",
+              icon: "folder-open",
               onClick: onOpenAssets,
             },
           ]
@@ -76,7 +76,7 @@ export function CharacterSheetSection({
             {
               key: "delete-character",
               label: "Supprimer le personnage",
-              icon: "delete",
+              icon: "delete-02",
               variant: "destructive",
               onClick: onDelete,
             },
@@ -117,7 +117,7 @@ export function CharacterSheetSection({
 
       {isUpdatingSheet && !hasImage ? (
         <div className="flex flex-col items-center gap-3 py-16">
-          <GoogleIcon iconName="progress_activity" className="text-3xl text-violet-400 animate-spin" />
+          <HugeIcon name="loading-03" className="text-3xl text-violet-400 animate-spin" />
           <p className="text-white/60 text-sm">Updating Body Sheet…</p>
         </div>
       ) : isBusy && !hasImage ? (
@@ -134,7 +134,7 @@ export function CharacterSheetSection({
               onClick={() => fileInputRef.current?.click()}
               title="Importer une image de corps (Turnaround)"
             >
-              <GoogleIcon iconName="upload" className="text-[1.25rem]" />
+              <HugeIcon name="upload-04" />
             </IconButton>
             {onOpenAssets && (
               <IconButton
@@ -143,7 +143,7 @@ export function CharacterSheetSection({
                 onClick={onOpenAssets}
                 title="Select Body Sheet from assets"
               >
-                <GoogleIcon iconName="folder_open" className="text-[1.25rem]" />
+                <HugeIcon name="folder-open" />
               </IconButton>
             )}
             {onDelete && (
@@ -153,7 +153,7 @@ export function CharacterSheetSection({
                 onClick={onDelete}
                 title="Delete character"
               >
-                <GoogleIcon iconName="delete" className="text-[1.25rem]" />
+                <HugeIcon name="delete-02" />
               </IconButton>
             )}
           </div>
@@ -173,7 +173,7 @@ export function CharacterSheetSection({
               onClick={() => fileInputRef.current?.click()}
               title="Importer une image de corps (Turnaround)"
             >
-              <GoogleIcon iconName="upload" className="text-[1.25rem]" />
+              <HugeIcon name="upload-04" />
             </IconButton>
             {onOpenAssets && (
               <IconButton
@@ -182,7 +182,7 @@ export function CharacterSheetSection({
                 onClick={onOpenAssets}
                 title="Select Body Sheet from assets"
               >
-                <GoogleIcon iconName="folder_open" className="text-[1.25rem]" />
+                <HugeIcon name="folder-open" />
               </IconButton>
             )}
             {onDelete && (
@@ -192,7 +192,7 @@ export function CharacterSheetSection({
                 onClick={onDelete}
                 title="Delete character"
               >
-                <GoogleIcon iconName="delete" className="text-[1.25rem]" />
+                <HugeIcon name="delete-02" />
               </IconButton>
             )}
           </div>
@@ -218,7 +218,7 @@ export function CharacterSheetSection({
             overlay={
               isUpdatingSheet ? (
                 <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] z-40 flex flex-col items-center justify-center gap-2 rounded-xxxs">
-                  <GoogleIcon iconName="progress_activity" className="text-2xl text-white animate-spin" />
+                  <HugeIcon name="loading-03" className="text-2xl text-white animate-spin" />
                   <span className="text-xs text-white/80">Updating…</span>
                 </div>
               ) : null
@@ -231,7 +231,7 @@ export function CharacterSheetSection({
                   onClick={() => fileInputRef.current?.click()}
                   title="Importer une image de corps (Turnaround)"
                 >
-                  <GoogleIcon iconName="upload" className="text-[1.25rem]" />
+                  <HugeIcon name="upload-04" />
                 </IconButton>
                 {onOpenAssets && (
                   <IconButton
@@ -240,7 +240,7 @@ export function CharacterSheetSection({
                     onClick={onOpenAssets}
                     title="Select Body Sheet from assets"
                   >
-                    <GoogleIcon iconName="folder_open" className="text-[1.25rem]" />
+                    <HugeIcon name="folder-open" />
                   </IconButton>
                 )}
                 {onDownload && (
@@ -250,7 +250,7 @@ export function CharacterSheetSection({
                     onClick={onDownload}
                     title="Download character sheet"
                   >
-                    <GoogleIcon iconName="download" className="text-[1.25rem]" />
+                    <HugeIcon name="download-04" />
                   </IconButton>
                 )}
                 {onDelete && (
@@ -260,7 +260,7 @@ export function CharacterSheetSection({
                     onClick={onDelete}
                     title="Delete character"
                   >
-                    <GoogleIcon iconName="delete" className="text-[1.25rem]" />
+                    <HugeIcon name="delete-02" />
                   </IconButton>
                 )}
               </div>

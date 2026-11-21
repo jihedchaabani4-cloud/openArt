@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { notFound } from "next/navigation";
-import { GoogleIcon } from "@/components/primitives/GoogleIcon";
+import { HugeIcon } from "@/components/primitives/HugeIcon";
 import { ProcessingCard } from "@/components/cinema-studio/media/ProcessingCard";
 import { MediaGridItem } from "@/components/cinema-studio/media/MediaGridItem";
 import { Button } from "@/components/base/button";
@@ -56,7 +56,7 @@ export default function ProcessingCardTestPage() {
               onClick={() => setIsAutoSimulating(!isAutoSimulating)}
               className="gap-2"
             >
-              {isAutoSimulating ? <GoogleIcon iconName="pause" className="text-sm" /> : <GoogleIcon iconName="play_arrow" className="text-sm" />}
+              {isAutoSimulating ? <HugeIcon name="pause" className="text-sm" /> : <HugeIcon name="play" className="text-sm" />}
               {isAutoSimulating ? "Simulating (+1/+2% / 2s)" : "Paused"}
             </Button>
 
@@ -66,7 +66,7 @@ export default function ProcessingCardTestPage() {
               onClick={() => setProgress(29)}
               className="gap-1.5"
             >
-              <GoogleIcon iconName="refresh" className="text-sm" />
+              <HugeIcon name="refresh" className="text-sm" />
               Reset (29%)
             </Button>
 
@@ -220,7 +220,7 @@ export default function ProcessingCardTestPage() {
         {/* ── Specs Breakdown ── */}
         <section className="p-6 rounded-2xl bg-white/[0.02] border border-white/10 flex flex-col gap-3">
           <div className="flex items-center gap-2 text-white/80 font-medium text-sm">
-            <GoogleIcon iconName="auto_awesome" className="text-base text-white/60" />
+            <HugeIcon name="sparkles" className="text-base text-white/60" />
             Reverse Engineered Video Analysis Specifications
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-white/60">

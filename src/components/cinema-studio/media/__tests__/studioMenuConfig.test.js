@@ -20,7 +20,7 @@ describe("studioMenuConfig - Per-type menu list & animate exclusions", () => {
     const animateItem = items.find((i) => i.key === "animate");
     expect(animateItem).toBeDefined();
     expect(animateItem.label).toBe("Animer");
-    expect(animateItem.icon).toBe("movie");
+    expect(animateItem.icon).toBe("film-01");
 
     animateItem.onClick();
     expect(handleAnimate).toHaveBeenCalledTimes(1);
@@ -205,14 +205,14 @@ describe("studioMenuConfig - Per-type menu list & animate exclusions", () => {
     expect(keys).not.toContain("cover");
 
     // Verify icons
-    expect(items.find((i) => i.key === "open_in_new")?.icon).toBe("open_in_new");
-    expect(items.find((i) => i.key === "create_new_folder")?.icon).toBe("create_new_folder");
-    expect(items.find((i) => i.key === "edit")?.icon).toBe("edit");
-    expect(items.find((i) => i.key === "drive_file_move")?.icon).toBe("drive_file_move");
-    expect(items.find((i) => i.key === "like")?.icon).toBe("favorite");
-    expect(items.find((i) => i.key === "download")?.icon).toBe("download");
-    expect(items.find((i) => i.key === "color")?.icon).toBe("palette");
-    expect(items.find((i) => i.key === "delete")?.icon).toBe("delete");
+    expect(items.find((i) => i.key === "open_in_new")?.icon).toBe("link-square-02");
+    expect(items.find((i) => i.key === "create_new_folder")?.icon).toBe("folder-add");
+    expect(items.find((i) => i.key === "edit")?.icon).toBe("pencil-edit-02");
+    expect(items.find((i) => i.key === "drive_file_move")?.icon).toBe("folder-transfer");
+    expect(items.find((i) => i.key === "like")?.icon).toBe("favourite");
+    expect(items.find((i) => i.key === "download")?.icon).toBe("download-04");
+    expect(items.find((i) => i.key === "color")?.icon).toBe("paint-board");
+    expect(items.find((i) => i.key === "delete")?.icon).toBe("delete-02");
 
     // Verify handlers
     items.find((i) => i.key === "open_in_new")?.onClick();
@@ -249,5 +249,151 @@ describe("studioMenuConfig - Per-type menu list & animate exclusions", () => {
   it("detects collection entity type in getWorkflowEntityType", () => {
     expect(getWorkflowEntityType({ type: "collection" })).toBe("collection");
     expect(getWorkflowEntityType({ itemType: "collection" })).toBe("collection");
+  });
+
+  describe("2-phase context-aware prompt actions (Reference Mode vs Frame Mode)", () => {
+    it("Phase 1 (isFrameMode: false): shows 'Ajouter au prompt' + 'Animer' and omits Start/End Frame", () => {
+      const items = getStudioMenuItems({
+        type: "generation",
+        actions: {
+          handleAddToPrompt: vi.fn(),
+          handleAnimate: vi.fn(),
+          handleAddStartFrame: vi.fn(),
+          handleAddEndFrame: vi.fn(),
+          handleLike: vi.fn(),
+          onDelete: vi.fn(),
+        },
+        state: {
+          isVideo: false,
+          isFrameMode: false,
+        },
+      });
+
+      const keys = items.map((i) => i.key);
+      expect(keys).toContain("add");
+      expect(keys).toContain("animate");
+      expect(keys).not.toContain("add-start-frame");
+      expect(keys).not.toContain("add-end-frame");
+    });
+
+    it("Phase 2 (isFrameMode: true) on generation: replaces 'add' & 'animate' with Start Frame and End Frame", () => {
+      const handleAddStartFrame = vi.fn();
+      const handleAddEndFrame = vi.fn();
+      const items = getStudioMenuItems({
+        type: "generation",
+        actions: {
+          handleAddToPrompt: vi.fn(),
+          handleAnimate: vi.fn(),
+          handleAddStartFrame,
+          handleAddEndFrame,
+          handleLike: vi.fn(),
+          onDelete: vi.fn(),
+        },
+        state: {
+          isVideo: false,
+          isFrameMode: true,
+        },
+      });
+
+      const keys = items.map((i) => i.key);
+      expect(keys).not.toContain("add");
+      expect(keys).not.toContain("animate");
+      expect(keys).toContain("add-start-frame");
+      expect(keys).toContain("add-end-frame");
+
+      const startItem = items.find((i) => i.key === "add-start-frame");
+      expect(startItem.label).toBe("Ajouter en Start Frame");
+      expect(startItem.icon).toBe("chevron-first");
+      startItem.onClick();
+      expect(handleAddStartFrame).toHaveBeenCalledTimes(1);
+
+      const endItem = items.find((i) => i.key === "add-end-frame");
+      expect(endItem.label).toBe("Ajouter en End Frame");
+      expect(endItem.icon).toBe("chevron-last");
+      endItem.onClick();
+      expect(handleAddEndFrame).toHaveBeenCalledTimes(1);
+    });
+
+    it("Phase 2 (isFrameMode: true) on upload: shows Start Frame and End Frame instead of 'add' & 'animate'", () => {
+      const items = getStudioMenuItems({
+        type: "upload",
+        actions: {
+          handleAddToPrompt: vi.fn(),
+          handleAnimate: vi.fn(),
+          handleAddStartFrame: vi.fn(),
+          handleAddEndFrame: vi.fn(),
+          handleLike: vi.fn(),
+          onDelete: vi.fn(),
+        },
+        state: {
+          isVideo: false,
+          isFrameMode: true,
+        },
+      });
+
+      const keys = items.map((i) => i.key);
+      expect(keys).toContain("add-start-frame");
+      expect(keys).toContain("add-end-frame");
+      expect(keys).not.toContain("add");
+      expect(keys).not.toContain("animate");
+    });
+
+    it("Phase 2 (isFrameMode: true) hides Start/End Frame for videos and ineligible items", () => {
+      const videoItems = getStudioMenuItems({
+        type: "generation",
+        actions: {
+          handleAddStartFrame: vi.fn(),
+          handleAddEndFrame: vi.fn(),
+          handleLike: vi.fn(),
+          onDelete: vi.fn(),
+        },
+        state: {
+          isVideo: true,
+          isFrameMode: true,
+        },
+      });
+      expect(videoItems.map((i) => i.key)).not.toContain("add-start-frame");
+      expect(videoItems.map((i) => i.key)).not.toContain("add-end-frame");
+
+      const disabledItems = getStudioMenuItems({
+        type: "generation",
+        actions: {
+          handleAddStartFrame: vi.fn(),
+          handleAddEndFrame: vi.fn(),
+          handleLike: vi.fn(),
+          onDelete: vi.fn(),
+        },
+        state: {
+          isVideo: false,
+          canAddToPrompt: false,
+          isFrameMode: true,
+        },
+      });
+      expect(disabledItems.map((i) => i.key)).not.toContain("add-start-frame");
+      expect(disabledItems.map((i) => i.key)).not.toContain("add-end-frame");
+    });
+
+    it("Phase 2 (isFrameMode: true) hides reference & frame items for character/element sheets", () => {
+      for (const type of ["character", "element"]) {
+        const items = getStudioMenuItems({
+          type,
+          actions: {
+            handleAddToPrompt: vi.fn(),
+            handleAddStartFrame: vi.fn(),
+            handleAddEndFrame: vi.fn(),
+            handleLike: vi.fn(),
+            onDelete: vi.fn(),
+          },
+          state: {
+            isVideo: false,
+            isFrameMode: true,
+          },
+        });
+        const keys = items.map((i) => i.key);
+        expect(keys).not.toContain("add");
+        expect(keys).not.toContain("add-start-frame");
+        expect(keys).not.toContain("add-end-frame");
+      }
+    });
   });
 });

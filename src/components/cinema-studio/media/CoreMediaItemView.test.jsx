@@ -74,9 +74,9 @@ describe("CoreMediaItemView - Liked top-left indicator badge", () => {
 
     const likedBadge = screen.getByTitle("Liked");
     expect(likedBadge).toBeDefined();
-    const icon = likedBadge.querySelector(".mat-icon, span");
+    const icon = likedBadge.querySelector('[data-icon-provider="hugeicons"]');
+    expect(icon?.getAttribute("data-icon-name")).toBe("favourite");
     expect(icon?.className).toContain("text-white");
-    expect(icon?.className).toContain("fill-white");
   });
 
   it("does not render the liked badge when showLikedBadge is false (edit page mode)", () => {
@@ -151,8 +151,8 @@ describe("CoreMediaItemView - Liked top-left indicator badge", () => {
     expect(videoBadge.getAttribute("aria-label")).toBe("Video");
     expect(videoBadge.className).toContain("bg-transparent");
     expect(videoBadge.className).not.toContain("bg-black/40");
-    const icon = videoBadge.querySelector(".mat-icon, span");
-    expect(icon?.textContent).toContain("videocam");
+    const icon = videoBadge.querySelector('[data-icon-provider="hugeicons"]');
+    expect(icon?.getAttribute("data-icon-name")).toBe("video-01");
     expect(icon?.className).toContain("text-white");
   });
 

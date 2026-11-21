@@ -3,7 +3,7 @@
 import * as React from "react"
 import Link from "next/link"
 import { motion } from "framer-motion"
-import { GoogleIcon } from "@/components/primitives/GoogleIcon"
+import { HugeIcon } from "@/components/primitives/HugeIcon"
 import { Button } from "@/components/base/button"
 import { Card } from "@/components/primitives/card"
 import { EditableDisplayName } from "@/components/primitives/EditableDisplayName"
@@ -99,7 +99,7 @@ export function ProjectCard({ project, onDelete, onRename }) {
                                 className="size-6 p-0 transition-opacity duration-300 opacity-0 group-hover:opacity-100 shrink-0"
                                 aria-label={`Rename ${project.project_name}`}
                             >
-                                <GoogleIcon iconName="edit" className="text-sm" />
+                                <HugeIcon name="pencil-edit-02" size="sm" />
                             </Button>
                         )}
                     </div>
@@ -115,7 +115,7 @@ export function ProjectCard({ project, onDelete, onRename }) {
                                     aria-label={`Delete ${project.project_name}`}
                                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
                                 >
-                                    <GoogleIcon iconName="delete" className="text-lg" />
+                                    <HugeIcon name="delete-02" size="sm" />
                                 </Button>
                             }
                         />

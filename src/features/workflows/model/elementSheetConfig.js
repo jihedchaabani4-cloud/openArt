@@ -1,7 +1,7 @@
 import { extractFeaturesFromPrompt, getFeatureInfoFromLabel } from "@/features/prompt-bar/model/feature-constants";
 import { getItemMetadata } from "@/shared/lib/generationUtils";
 import { resolveMainMedia } from "@/features/workflows/core/resolveMediaRef";
-import { promptBarService } from "@/features/prompt-bar/api/promptBarService";
+import { promptBarService } from "@/features/prompt-bar";
 
 function resolvePrimaryRawMedia(workflow) {
   if (!workflow) return null;
@@ -21,10 +21,10 @@ const ELEMENT_MODE_BY_DNA_TYPE = {
 };
 
 export const ELEMENT_TYPES = [
-  { id: "object", label: "Object", googleIcon: "category" },
-  { id: "style", label: "Style", googleIcon: "palette" },
-  { id: "font", label: "Font", googleIcon: "match_case" },
-  { id: "logo", label: "Logo", googleIcon: "token" },
+  { id: "object", label: "Object", icon: "grid-view" },
+  { id: "style", label: "Style", icon: "paint-board" },
+  { id: "font", label: "Font", icon: "text-font" },
+  { id: "logo", label: "Logo", icon: "diamond-02" },
 ];
 
 export const ELEMENT_SHEET_CONFIGS = {

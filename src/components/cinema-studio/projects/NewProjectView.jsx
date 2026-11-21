@@ -5,7 +5,7 @@ import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows"
 import {
   GeneratedPromptBar,
   useRealBackendModels,
-} from "@/features/prompt-bar/index.platform"
+} from "@/features/prompt-bar"
 
 
 // ─── Sub-Components ──────────────────────────────────────────────────────────

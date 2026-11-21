@@ -87,6 +87,8 @@ export function getStudioMenuItems({
 }) {
   const {
     handleAddToPrompt,
+    handleAddStartFrame,
+    handleAddEndFrame,
     handleAnimate,
     handleLike,
     handleReuseSettings,
@@ -124,14 +126,14 @@ export function getStudioMenuItems({
     canReuse = false,
     showReuse = false,
     canAddToPrompt = true,
+    isFrameMode = false,
   } = state;
 
   // 1. Favorite / Like
   const itemLike = {
     key: "like",
-    icon: "favorite",
+    icon: "favourite",
     label: isLiked ? "Retirer des favoris" : "Ajouter aux favoris",
-    iconClassName: isLiked ? "fill-white" : undefined,
     fill: isLiked,
     onClick: handleLike,
   };
@@ -139,7 +141,7 @@ export function getStudioMenuItems({
   // 2. Reuse prompt / settings
   const itemReuse = {
     key: "reuse",
-    icon: "keyboard_return",
+    icon: "arrow-turn-backward",
     label: "Réutiliser le prompt",
     disabled: !canReuse,
     onClick: handleReuseSettings,
@@ -148,24 +150,41 @@ export function getStudioMenuItems({
   // 3. Animate (Image to Video start frame - upload & generation only)
   const itemAnimate = {
     key: "animate",
-    icon: "movie",
+    icon: "film-01",
     label: "Animer",
     onClick: handleAnimate,
   };
 
-  // 4. Add to prompt
+  // 4. Add to prompt (Phase 1 — Reference mode)
   const itemAddToPrompt = {
     key: "add",
-    icon: "add_2",
+    icon: "add-01",
     label: "Ajouter au prompt",
     disabled: !canAddToPrompt,
     onClick: handleAddToPrompt,
   };
 
+  // 4b. Add as Start / End Frame (Phase 2 — Video Frames mode)
+  const itemAddStartFrame = {
+    key: "add-start-frame",
+    icon: "chevron-first",
+    label: "Ajouter en Start Frame",
+    disabled: !canAddToPrompt,
+    onClick: handleAddStartFrame,
+  };
+
+  const itemAddEndFrame = {
+    key: "add-end-frame",
+    icon: "chevron-last",
+    label: "Ajouter en End Frame",
+    disabled: !canAddToPrompt,
+    onClick: handleAddEndFrame,
+  };
+
   // 5. Download
   const itemDownload = {
     key: "download",
-    icon: "download",
+    icon: "download-04",
     label: "Télécharger",
     onClick: handleDownload,
   };
@@ -173,7 +192,7 @@ export function getStudioMenuItems({
   // 6. Rename
   const itemRename = {
     key: "rename",
-    icon: "edit",
+    icon: "pencil-edit-02",
     label: "Renommer",
     onClick: onRename,
   };
@@ -181,7 +200,7 @@ export function getStudioMenuItems({
   // 8. Publish to YouTube (video only)
   const itemPublishYoutube = {
     key: "youtube",
-    icon: "video_library",
+    icon: "video-02",
     label: "Publier sur YouTube",
     onClick: handlePublishYoutube,
   };
@@ -189,7 +208,7 @@ export function getStudioMenuItems({
   // 9. Set project cover
   const itemSetCover = {
     key: "cover",
-    icon: "photo_library",
+    icon: "image-01",
     label: "Définir la couverture du projet",
     onClick: handleSetCover,
   };
@@ -197,7 +216,7 @@ export function getStudioMenuItems({
   // 10. Report result
   const itemReport = {
     key: "report",
-    icon: "flag",
+    icon: "flag-02",
     label: "Signaler le résultat",
     onClick: handleReport,
   };
@@ -205,7 +224,7 @@ export function getStudioMenuItems({
   // 11. Tile details (optional toggle)
   const itemTileDetails = {
     key: "tileDetails",
-    icon: showTileDetails ? "visibility_off" : "visibility",
+    icon: showTileDetails ? "view-off-slash" : "view",
     label: showTileDetails ? "Masquer les détails" : "Afficher les détails",
     onClick: toggleTileDetails,
   };
@@ -213,7 +232,7 @@ export function getStudioMenuItems({
   // 12. Delete
   const itemDelete = (label = "Placer dans la corbeille") => ({
     key: "delete",
-    icon: "delete",
+    icon: "delete-02",
     label,
     disabled: !canDelete,
     variant: "destructive",
@@ -224,44 +243,44 @@ export function getStudioMenuItems({
   const itemFolderOpenInNewTab = {
     key: "open_in_new",
     label: "Open in new tab",
-    icon: "open_in_new",
+    icon: "link-square-02",
     onClick: openInNewTabAction,
   };
 
   const itemFolderNewSubfolder = {
     key: "create_new_folder",
     label: "New subfolder",
-    icon: "create_new_folder",
+    icon: "folder-add",
     onClick: createSubfolderAction,
   };
 
   const itemFolderEdit = {
     key: "edit",
     label: "Edit",
-    icon: "edit",
+    icon: "pencil-edit-02",
     onClick: editAction,
   };
 
   const itemFolderMoveTo = {
     key: "drive_file_move",
     label: "Move to...",
-    icon: "drive_file_move",
+    icon: "folder-transfer",
     onClick: moveToAction,
   };
 
   const itemFolderLike = {
     key: "like",
     label: isLiked ? "Unlike collection" : "Like collection",
-    icon: "favorite",
+    icon: "favourite",
     fill: isLiked,
-    iconClassName: isLiked ? "text-red-400 fill-red-400" : undefined,
+    iconClassName: isLiked ? "text-error" : undefined,
     onClick: handleLike,
   };
 
   const itemFolderDownload = {
     key: "download",
     label: isDownloading ? "Downloading..." : "Download collection",
-    icon: "download",
+    icon: "download-04",
     disabled: isDownloading,
     onClick: handleDownload,
   };
@@ -289,7 +308,7 @@ export function getStudioMenuItems({
   const itemFolderColor = {
     key: "color",
     label: "Color",
-    icon: "palette",
+    icon: "paint-board",
     onClick: setColorAction,
     subItems: colorSubItems,
   };
@@ -297,12 +316,28 @@ export function getStudioMenuItems({
   const itemFolderDelete = {
     key: "delete",
     label: "Delete",
-    icon: "delete",
+    icon: "delete-02",
     variant: "destructive",
     onClick: onDelete,
   };
 
   const separator = (id) => ({ key: `sep-${id}`, type: "separator" });
+
+  const frameModeItems =
+    !isVideo && canAddToPrompt
+      ? [
+          ...(handleAddStartFrame ? [itemAddStartFrame] : []),
+          ...(handleAddEndFrame ? [itemAddEndFrame] : []),
+          ...(handleAddStartFrame || handleAddEndFrame ? [separator("frames")] : []),
+        ]
+      : [];
+
+  const referenceModeItems = [
+    ...(handleAnimate && !isVideo ? [itemAnimate, separator("animate")] : []),
+    ...(!isVideo && canAddToPrompt ? [itemAddToPrompt] : []),
+  ];
+
+  const mediaPromptActions = isFrameMode ? frameModeItems : referenceModeItems;
 
   let rawItems = [];
 
@@ -328,7 +363,7 @@ export function getStudioMenuItems({
         itemLike,
         ...(showReuse && canReuse ? [itemReuse] : []),
         separator("fav"),
-        ...(!isVideo && canAddToPrompt ? [itemAddToPrompt] : []),
+        ...(!isFrameMode && !isVideo && canAddToPrompt ? [itemAddToPrompt] : []),
         ...(handleDownload ? [itemDownload] : []),
         ...(onRename ? [itemRename] : []),
         ...(handleSetCover ? [itemSetCover, separator("cover")] : []),
@@ -342,7 +377,7 @@ export function getStudioMenuItems({
         itemLike,
         ...(showReuse && canReuse ? [itemReuse] : []),
         separator("fav"),
-        ...(!isVideo && canAddToPrompt ? [itemAddToPrompt] : []),
+        ...(!isFrameMode && !isVideo && canAddToPrompt ? [itemAddToPrompt] : []),
         ...(handleDownload ? [itemDownload] : []),
         ...(onRename ? [itemRename] : []),
         ...(handleSetCover ? [itemSetCover, separator("cover")] : []),
@@ -355,8 +390,7 @@ export function getStudioMenuItems({
       rawItems = [
         itemLike,
         separator("fav"),
-        ...(handleAnimate && !isVideo ? [itemAnimate, separator("animate")] : []),
-        ...(!isVideo && canAddToPrompt ? [itemAddToPrompt] : []),
+        ...mediaPromptActions,
         ...(handleDownload ? [itemDownload] : []),
         ...(onRename ? [itemRename] : []),
         ...(isVideo && handlePublishYoutube ? [itemPublishYoutube] : []),
@@ -373,8 +407,7 @@ export function getStudioMenuItems({
         itemLike,
         ...(showReuse && canReuse ? [itemReuse] : []),
         separator("fav-reuse"),
-        ...(handleAnimate && !isVideo ? [itemAnimate, separator("animate")] : []),
-        ...(!isVideo && canAddToPrompt ? [itemAddToPrompt] : []),
+        ...mediaPromptActions,
         ...(handleDownload ? [itemDownload] : []),
         ...(onRename ? [itemRename] : []),
         ...(isVideo && handlePublishYoutube ? [itemPublishYoutube] : []),

@@ -2,7 +2,7 @@
 
 import { useRef } from "react";
 import { Button } from "@/components/base/button";
-import { GoogleIcon } from "@/components/primitives/GoogleIcon";
+import { HugeIcon } from "@/components/primitives/HugeIcon";
 import { cn } from "@/shared/lib/utils";
 import { ReferenceMediaGalleryGrid } from "@/features/media";
 import { getAcceptedMimeTypes, ELEMENT_REFERENCE_UPLOAD_POLICY } from "@/features/media";
@@ -72,7 +72,7 @@ export function ElementDetailsGallery({
             onClick={() => !isFull && fileInputRef.current?.click()}
             title="Importer depuis l'ordinateur"
           >
-            <GoogleIcon iconName="upload" className="text-[17px]" />
+            <HugeIcon name="upload-04" />
             <span>Importer</span>
           </Button>
 
@@ -84,7 +84,7 @@ export function ElementDetailsGallery({
               onClick={!isFull ? onOpenAssets : undefined}
               title="Ajouter à partir du projet"
             >
-              <GoogleIcon iconName="add" className="text-[17px]" />
+              <HugeIcon name="add-01" />
               <span>Depuis le projet</span>
             </Button>
           )}
@@ -110,7 +110,7 @@ export function ElementDetailsGallery({
         /* Minimal sleek studio empty state (no big clumsy banner) */
         <div className="w-full flex-1 flex flex-col items-center justify-center py-16 px-4 text-center">
           <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-4 text-white/40 shadow-inner">
-            <GoogleIcon iconName="photo_library" className="text-[28px]" />
+            <HugeIcon name="image-01" className="text-[28px]" />
           </div>
           <h4 className="text-base font-medium text-white/80 mb-1">
             Aucune image de référence
@@ -124,7 +124,7 @@ export function ElementDetailsGallery({
               variant="pill"
               onClick={() => fileInputRef.current?.click()}
             >
-              <GoogleIcon iconName="upload" className="text-[16px]" />
+              <HugeIcon name="upload-04" />
               <span>Importer</span>
             </Button>
 
@@ -134,7 +134,7 @@ export function ElementDetailsGallery({
                 variant="ghost"
                 onClick={onOpenAssets}
               >
-                <GoogleIcon iconName="add" className="text-[16px]" />
+                <HugeIcon name="add-01" />
                 <span>Depuis le projet</span>
               </Button>
             )}

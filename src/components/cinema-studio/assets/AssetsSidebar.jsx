@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { GoogleIcon } from "@/components/primitives/GoogleIcon";
+import { HugeIcon } from "@/components/primitives/HugeIcon";
 
 import { CATEGORY_FILTERS, MEDIA_FILTERS, useAssetsFilters } from "@/features/assets/model/assetsFilters";
 import { Input } from "@/components/base/input";
@@ -35,9 +35,9 @@ export function AssetsSidebar({ hidden = false }) {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search"
-            icon={(p) => <GoogleIcon iconName="search" {...p} />}
+            icon={(p) => <HugeIcon name="search-01" {...p} />}
             onClear={searchQuery ? () => setSearchQuery("") : undefined}
-            clearIcon={(p) => <GoogleIcon iconName="close" {...p} />}
+            clearIcon={(p) => <HugeIcon name="cancel-01" {...p} />}
             className="h-10 rounded-lg px-3 text-[13px]"
           />
         </div>
@@ -48,7 +48,7 @@ export function AssetsSidebar({ hidden = false }) {
             <div className="space-y-1">
               <SidebarFilterButton
                 label="All Assets"
-                icon="folder_open"
+                icon="folder-open"
                 active={categoryFilter === "all"}
                 onClick={() => setCategoryFilter("all")}
               />
@@ -72,10 +72,10 @@ export function AssetsSidebar({ hidden = false }) {
                     label={filter.label}
                     icon={
                       filter.id === "image"
-                        ? "image"
+                        ? "image-02"
                         : filter.id === "video"
-                          ? "videocam"
-                          : "folder_open"
+                          ? "video-01"
+                          : "folder-open"
                     }
                     active={mediaFilter === filter.id}
                     onClick={() => setMediaFilter(filter.id)}

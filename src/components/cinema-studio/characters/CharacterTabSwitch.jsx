@@ -1,7 +1,7 @@
 "use client";
 
 import { PillTabs, PillTabsList, PillTabsTrigger } from "@/components/base/pill-tabs";
-import { GoogleIcon } from "@/components/primitives/GoogleIcon";
+import { HugeIcon } from "@/components/primitives/HugeIcon";
 
 /**
  * CharacterTabSwitch
@@ -36,7 +36,7 @@ export function CharacterTabSwitch({
                 className="w-full h-full object-cover"
               />
             ) : (
-              <GoogleIcon iconName="portrait" className="text-base" />
+              <HugeIcon name="user-square" className="text-base" />
             )}
           </div>
           <span>Body Sheet</span>
@@ -57,7 +57,7 @@ export function CharacterTabSwitch({
                 className="w-full h-full object-cover"
               />
             ) : (
-              <GoogleIcon iconName="accessibility_new" className="text-base" />
+              <HugeIcon name="user" className="text-base" />
             )}
           </div>
           <span>More Details</span>

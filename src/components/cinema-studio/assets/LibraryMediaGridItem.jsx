@@ -2,7 +2,7 @@
 
 import { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { GoogleIcon } from "@/components/primitives/GoogleIcon";
+import { HugeIcon } from "@/components/primitives/HugeIcon";
 
 import { useRemoveWorkflow, useToggleWorkflowLike } from "@/features/workflows/api/workflowsApi";
 import { MediaView } from "@/features/media";
@@ -90,18 +90,18 @@ export function LibraryMediaGridItem({
             )}
             aria-label="Select media"
           >
-            <GoogleIcon iconName="check" className="text-sm font-bold" />
+            <HugeIcon name="tick-02" className="text-sm font-bold" />
           </Button>
 
             <div className="absolute bottom-3 left-3 z-30 flex items-center gap-1">
             {isVideo && (
               <div className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-black/60 text-white border border-white/10">
-                <GoogleIcon iconName="play_arrow" fill={true} className="text-xs text-white" />
+                <HugeIcon name="play" className="text-xs text-white" />
               </div>
             )}
             {isLiked && (
               <div className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-black/60 text-white border border-white/10">
-                <GoogleIcon iconName="favorite" fill={true} className="text-xs text-white" />
+                <HugeIcon name="favourite" className="text-xs text-white" />
               </div>
             )}
           </div>
@@ -135,7 +135,7 @@ export function LibraryMediaGridItem({
                   title={isLiked ? "Unlike" : "Like"}
                   aria-label={isLiked ? "Unlike" : "Like"}
                 >
-                  <GoogleIcon iconName="favorite" fill={isLiked} className={cn("text-base", isLiked ? "text-accent" : "text-white/80")} />
+                  <HugeIcon name="favourite" className={cn("text-base", isLiked ? "text-accent" : "text-white/80")} />
                 </IconButton>
                 <IconButton
                   variant="ghost"
@@ -146,7 +146,7 @@ export function LibraryMediaGridItem({
                   title="Delete"
                   aria-label="Delete"
                 >
-                  <GoogleIcon iconName="delete" className="text-base" />
+                  <HugeIcon name="delete-02" className="text-base" />
                 </IconButton>
               </ButtonGroup>
             </div>

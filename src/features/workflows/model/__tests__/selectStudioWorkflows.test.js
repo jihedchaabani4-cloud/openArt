@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { selectStudioWorkflows } from "../selectStudioWorkflows";
+import { selectStudioWorkflows, extractAvailableModels } from "../selectStudioWorkflows";
 
 describe("selectStudioWorkflows - Unified Workflow Filtering System", () => {
   const sampleProjectContents = {
@@ -285,5 +285,101 @@ describe("selectStudioWorkflows - Unified Workflow Filtering System", () => {
     });
     expect(typeSearch).toHaveLength(1);
     expect(typeSearch[0].id).toBe("wf-trash-char");
+  });
+
+  it("14. Filters by activity (generated / uploaded / liked), dateRange, hideFailed, video/image types, and extracts models", () => {
+    const now = new Date("2026-10-25T12:00:00Z").getTime();
+    const richContents = {
+      workflows: [
+        {
+          id: "wf-today-img",
+          name: "wf-today-img",
+          workflow_type: "GENERATION",
+          metadata: { createTime: "2026-10-25T09:00:00Z", favorited: true },
+        },
+        {
+          id: "wf-5d-vid",
+          name: "wf-5d-vid",
+          workflow_type: "GENERATION",
+          metadata: { createTime: "2026-10-20T10:00:00Z" },
+        },
+        {
+          id: "wf-40d-upload",
+          name: "wf-40d-upload",
+          workflow_type: "UPLOAD",
+          metadata: { createTime: "2026-09-10T10:00:00Z" },
+        },
+        {
+          id: "wf-failed",
+          name: "wf-failed",
+          workflow_type: "GENERATION",
+          status: "failed",
+          metadata: { createTime: "2026-10-25T10:00:00Z" },
+        },
+      ],
+      media: [
+        {
+          id: "m-1",
+          workflow_id: "wf-today-img",
+          url: "https://example.com/a.png",
+          image: true,
+          generationConfig: { model: "GPT Image 2" },
+        },
+        {
+          id: "m-2",
+          workflow_id: "wf-5d-vid",
+          url: "https://example.com/b.mp4",
+          generationConfig: { model: "Google Veo 3.1" },
+        },
+        {
+          id: "m-3",
+          workflow_id: "wf-40d-upload",
+          url: "https://example.com/c.jpg",
+          image: true,
+          asset_type: "upload",
+        },
+        {
+          id: "m-4",
+          workflow_id: "wf-failed",
+          status: "failed",
+          generationConfig: { model: "Google Veo 3.1" },
+        },
+      ],
+    };
+
+    // extractAvailableModels returns sorted unique model names
+    expect(extractAvailableModels(richContents)).toEqual(["Google Veo 3.1", "GPT Image 2"]);
+
+    // Activity: generated vs uploaded vs liked
+    expect(
+      selectStudioWorkflows(richContents, { domain: "assets", filters: { activity: "uploaded" } }).map((w) => w.id)
+    ).toEqual(["wf-40d-upload"]);
+    expect(
+      selectStudioWorkflows(richContents, { domain: "assets", filters: { activity: "liked" } }).map((w) => w.id)
+    ).toEqual(["wf-today-img"]);
+    expect(
+      selectStudioWorkflows(richContents, { domain: "assets", filters: { activity: "generated" } }).map((w) => w.id)
+    ).toEqual(["wf-failed", "wf-today-img", "wf-5d-vid"]);
+
+    // Hide failed
+    expect(
+      selectStudioWorkflows(richContents, { domain: "assets", filters: { hideFailed: true } }).map((w) => w.id)
+    ).not.toContain("wf-failed");
+
+    // Media type: video via .mp4 URL
+    expect(
+      selectStudioWorkflows(richContents, { domain: "assets", filters: { types: ["video"] } }).map((w) => w.id)
+    ).toEqual(["wf-5d-vid"]);
+
+    // Date range: today vs 7d vs 30d
+    expect(
+      selectStudioWorkflows(richContents, { domain: "assets", filters: { dateRange: "today" }, now }).map((w) => w.id)
+    ).toEqual(["wf-failed", "wf-today-img"]);
+    expect(
+      selectStudioWorkflows(richContents, { domain: "assets", filters: { dateRange: "7d" }, now }).map((w) => w.id)
+    ).toEqual(["wf-failed", "wf-today-img", "wf-5d-vid"]);
+    expect(
+      selectStudioWorkflows(richContents, { domain: "assets", filters: { dateRange: "30d" }, now }).map((w) => w.id)
+    ).not.toContain("wf-40d-upload");
   });
 });

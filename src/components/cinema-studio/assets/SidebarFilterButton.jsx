@@ -1,6 +1,6 @@
 "use client";
 
-import { GoogleIcon } from "@/components/primitives/GoogleIcon";
+import { HugeIcon } from "@/components/primitives/HugeIcon";
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/components/base/button";
 
@@ -13,7 +13,7 @@ export function SidebarFilterButton({ label, icon: Icon, active = false, onClick
       className="w-full justify-between px-3 text-left text-[14px]"
     >
       <span className="flex items-center gap-2.5">
-        {Icon ? (typeof Icon === "string" ? <GoogleIcon iconName={Icon} className="text-base" /> : React.isValidElement(Icon) ? Icon : typeof Icon === "function" ? React.createElement(Icon, { className: "text-base" }) : null) : null}
+        {Icon ? (typeof Icon === "string" ? <HugeIcon name={Icon} className="text-base" /> : React.isValidElement(Icon) ? Icon : typeof Icon === "function" ? React.createElement(Icon, { className: "text-base" }) : null) : null}
         <span>{label}</span>
       </span>
     </Button>
@@ -29,7 +29,7 @@ export function SidebarDropdownButton({ label, active = false, onClick }) {
       className="w-full justify-between px-3 text-left text-[14px]"
     >
       <span>{label}</span>
-      <GoogleIcon iconName="keyboard_arrow_down" className="text-base -rotate-90 text-on-surface-subtle" />
+      <HugeIcon name="arrow-down-01" className="text-base -rotate-90 text-on-surface-subtle" />
     </Button>
   );
 }

@@ -1,9 +1,13 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import {
   getItemMetadata,
+  STUDIO_GRID_CONFIG,
   STUDIO_GRID_SPACING_CONFIG,
   getStudioGridDensity,
   getStudioGridSpacingPx,
+  getResponsiveTargetRowHeight,
+  setCachedImageDimensions,
+  subscribeImageDimensions,
 } from "./displayUtils";
 
 describe("displayUtils - getItemMetadata aspect ratio resolution", () => {
@@ -120,6 +124,60 @@ describe("displayUtils - getItemMetadata aspect ratio resolution", () => {
       // Default calls
       expect(getStudioGridDensity().spacing).toBe(4);
       expect(getStudioGridDensity("sm").spacing).toBe(4);
+    });
+
+    it("calibrates S/M/L target row heights and min/max bounds", () => {
+      expect(STUDIO_GRID_CONFIG.sm).toMatchObject({
+        targetRowHeight: 190,
+        minRowHeight: 130,
+        maxRowHeight: 240,
+        maxRowHeightMultiplier: 1.25,
+      });
+      expect(STUDIO_GRID_CONFIG.md).toMatchObject({
+        targetRowHeight: 280,
+        minRowHeight: 190,
+        maxRowHeight: 350,
+        maxRowHeightMultiplier: 1.25,
+      });
+      expect(STUDIO_GRID_CONFIG.lg).toMatchObject({
+        targetRowHeight: 400,
+        minRowHeight: 260,
+        maxRowHeight: 490,
+        maxRowHeightMultiplier: 1.25,
+      });
+    });
+
+    it("scales target row height responsively across viewport widths", () => {
+      expect(getResponsiveTargetRowHeight(280, 500)).toBe(Math.round(280 * 0.72));
+      expect(getResponsiveTargetRowHeight(280, 700)).toBe(Math.round(280 * 0.78));
+      expect(getResponsiveTargetRowHeight(280, 900)).toBe(Math.round(280 * 0.88));
+      expect(getResponsiveTargetRowHeight(280, 1280)).toBe(280);
+      expect(getResponsiveTargetRowHeight(280, 2000)).toBe(Math.round(280 * 1.12));
+    });
+
+    it("notifies subscribeImageDimensions listeners on first measurement and >3% ratio changes only", () => {
+      const listener = vi.fn();
+      const unsubscribe = subscribeImageDimensions(listener);
+      const url = "https://example.com/sub-test-ratio.png";
+
+      // First measurement -> notifies
+      setCachedImageDimensions(url, 1000, 1000);
+      expect(listener).toHaveBeenCalledTimes(1);
+      expect(listener).toHaveBeenLastCalledWith(url, 1000, 1000);
+
+      // Within 3% ratio change (1.02 vs 1.00 = 2%) -> suppressed
+      setCachedImageDimensions(url, 1020, 1000);
+      expect(listener).toHaveBeenCalledTimes(1);
+
+      // Greater than 3% ratio change (16:9 vs 1.02) -> notifies
+      setCachedImageDimensions(url, 1600, 900);
+      expect(listener).toHaveBeenCalledTimes(2);
+      expect(listener).toHaveBeenLastCalledWith(url, 1600, 900);
+
+      // Unsubscribe stops future notifications
+      unsubscribe();
+      setCachedImageDimensions(url, 900, 1600);
+      expect(listener).toHaveBeenCalledTimes(2);
     });
   });
 });

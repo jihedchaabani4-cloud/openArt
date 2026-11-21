@@ -19,7 +19,7 @@ import { Textarea } from "@/components/primitives/textarea";
 import { Button } from "@/components/base/button";
 import { IconButton } from "@/components/base/icon-button";
 import { DashedUploadSlot } from "@/components/base/dashed-upload-slot";
-import { GoogleIcon } from "@/components/primitives/GoogleIcon";
+import { HugeIcon } from "@/components/primitives/HugeIcon";
 import { cn } from "@/shared/lib/utils";
 import { elementService, useCreateElementSheetMutation } from "@/features/elements/api";
 import { useWorkflowsStore } from "@/features/workflows";
@@ -28,13 +28,13 @@ import { queryKeys } from "@/shared/api/queryKeys";
 import { validateFilesAgainstPolicy, getAcceptedMimeTypes, ELEMENT_REFERENCE_UPLOAD_POLICY } from "@/features/media";
 
 const CATEGORY_OPTIONS = [
-  { id: "auto", label: "Auto", googleIcon: "auto_awesome" },
-  { id: "object", label: "Object", googleIcon: "category" },
-  { id: "style", label: "Style", googleIcon: "palette" },
-  { id: "character", label: "Character", googleIcon: "accessibility_new" },
-  { id: "location", label: "Location", googleIcon: "location_on" },
-  { id: "font", label: "Font", googleIcon: "match_case" },
-  { id: "logo", label: "Logo", googleIcon: "token" },
+  { id: "auto", label: "Auto", icon: "sparkles" },
+  { id: "object", label: "Object", icon: "grid-view" },
+  { id: "style", label: "Style", icon: "paint-board" },
+  { id: "character", label: "Character", icon: "user" },
+  { id: "location", label: "Location", icon: "location-01" },
+  { id: "font", label: "Font", icon: "text-font" },
+  { id: "logo", label: "Logo", icon: "diamond-02" },
 ];
 
 /**
@@ -271,7 +271,7 @@ export function NewElementDialog({ open, onOpenChange, projectId: propProjectId 
             onClick={() => handleOpenChange(false)}
             className="size-8 p-0 rounded-full text-white/50 hover:text-white"
           >
-            <GoogleIcon iconName="close" className="text-xl" />
+            <HugeIcon name="cancel-01" />
           </Button>
         </div>
 
@@ -308,7 +308,7 @@ export function NewElementDialog({ open, onOpenChange, projectId: propProjectId 
                 )}
               >
                 <div className="size-14 rounded-lg bg-white/10 group-hover:bg-white/15 flex items-center justify-center text-white/80 group-hover:text-white transition-all shadow-none">
-                  <GoogleIcon iconName="upload" className="text-3xl" />
+                  <HugeIcon name="upload-04" className="text-3xl" />
                 </div>
                 <div className="flex flex-col items-center gap-1.5">
                   <span className="text-[15px] font-medium text-white/85 group-hover:text-white transition-colors">
@@ -348,7 +348,7 @@ export function NewElementDialog({ open, onOpenChange, projectId: propProjectId 
                     className="absolute top-3 right-3 size-8 p-0 rounded-full bg-surface-elevated/80 text-white/80 hover:text-white hover:bg-surface-elevated border border-white/10"
                     title="Supprimer ce fichier"
                   >
-                    <GoogleIcon iconName="close" className="text-base" />
+                    <HugeIcon name="cancel-01" className="text-base" />
                   </IconButton>
                 </div>
 
@@ -399,7 +399,7 @@ export function NewElementDialog({ open, onOpenChange, projectId: propProjectId 
                       className="size-14 p-0"
                       title="Ajouter un autre fichier"
                     >
-                      <GoogleIcon iconName="add" className="text-xl" />
+                      <HugeIcon name="add-01" />
                       <span className="text-[10px] font-medium">Add</span>
                     </DashedUploadSlot>
                   )}
@@ -424,7 +424,7 @@ export function NewElementDialog({ open, onOpenChange, projectId: propProjectId 
                     <SelectItem
                       key={opt.id}
                       value={opt.id}
-                      icon={<GoogleIcon iconName={opt.googleIcon} className="text-[18px]" />}
+                      icon={<HugeIcon name={opt.icon} />}
                     >
                       {opt.label}
                     </SelectItem>
@@ -496,7 +496,7 @@ export function NewElementDialog({ open, onOpenChange, projectId: propProjectId 
             >
               {isUploading ? (
                 <>
-                  <GoogleIcon iconName="progress_activity" className="text-base animate-spin" />
+                  <HugeIcon name="loading-03" className="text-base animate-spin" />
                   <span>Creating...</span>
                 </>
               ) : (
