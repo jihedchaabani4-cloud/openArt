@@ -1,22 +1,12 @@
 import { useMemo, useCallback } from "react";
-import { usePromptBarStore } from "../../store/usePromptBarStore.js";
+import { usePromptBarState, usePromptBarService } from "../../store/PromptBarStoreContext.js";
 import { calculateModelCredits } from "../../core/creditCalculationService.js";
 import { getRatioIcon } from "@/components/cinema-studio/prompt-bar/selectors/FlowPromptBoxSettings.jsx";
 
 /**
  * usePromptBarGenerate
  * Encapsulates generation credit calculation, aspect ratio / variation resolution,
- * generate disabled state evaluation, and the generate execution lifecycle.
- *
- * @param {Object} options
- * @param {Object} [options.currentModel] - Currently selected model object
- * @param {string} [options.selectedId] - Currently selected model ID
- * @param {boolean} [options.isCurrentEligible] - Whether current model satisfies mode/subMode
- * @param {string} [options.activeMode] - Active generation mode ("image"|"video")
- * @param {string} [options.activeSubMode] - Active generation sub-mode ("frames"|"reference")
- * @param {*} [options.startVal] - Value in the start frame slot (if any)
- * @param {Function} [options.onGenerate] - Callback invoked with serialized payload
- * @param {boolean} [options.isGenerating] - External loading state flag
+ * generate disabled state evaluation, and the generate execution lifecycle via the Public Service.
  */
 export function usePromptBarGenerate({
   currentModel,
@@ -30,21 +20,26 @@ export function usePromptBarGenerate({
   hasModels = true,
   template,
 } = {}) {
-  const prompt             = usePromptBarStore((s) => s.prompt);
-  const storeTemplate      = usePromptBarStore((s) => s.template);
-  const paramValues        = usePromptBarStore((s) => s.parameterValues);
-  const storeIsGenerating  = usePromptBarStore((s) => s.isGenerating);
-  const serializeAndEmit   = usePromptBarStore((s) => s.serialize);
-  const beginSubmit        = usePromptBarStore((s) => s.beginSubmit);
-  const endSubmit          = usePromptBarStore((s) => s.endSubmit);
-  const setIsGenerating    = usePromptBarStore((s) => s.setIsGenerating);
+  const service           = usePromptBarService();
+  const prompt            = usePromptBarState((s) => s.prompt);
+  const storeTemplate     = usePromptBarState((s) => s.template);
+  const paramValues       = usePromptBarState((s) => s.parameterValues);
+  const storeIsGenerating = usePromptBarState((s) => s.isGenerating);
 
   const effectiveTemplate = template || storeTemplate;
   const isGenerating = Boolean(propIsGenerating || storeIsGenerating);
 
   const currentRatio = paramValues.aspect_ratio || paramValues.ratio || "1:1";
   const currentRatioIcon = getRatioIcon(currentRatio);
-  const currentCount = Number(paramValues.count || paramValues.variations) || 1;
+  const countParamKey = currentModel?.parameters
+    ? ["count", "variations", "num_outputs", "n"].find((k) => Boolean(currentModel.parameters[k]))
+    : null;
+  const rawCount = countParamKey
+    ? (paramValues[countParamKey] ?? currentModel.parameters[countParamKey]?.default)
+    : !currentModel?.parameters
+      ? (paramValues.count ?? paramValues.variations ?? paramValues.num_outputs ?? paramValues.n)
+      : 1;
+  const currentCount = Math.max(1, Number(rawCount) || 1);
 
   const estimatedCredits = useMemo(() => {
     return calculateModelCredits(currentModel, paramValues, currentCount);
@@ -61,21 +56,20 @@ export function usePromptBarGenerate({
   const isVideoMissingInput = isFramesMode && !startVal && cleanPrompt.length === 0;
   const isGenerateDisabled = isGenerating || modelNotReady || isVideoMissingInput || isPromptTooShort;
 
-
   const handleGenerate = useCallback(async () => {
     if (isGenerateDisabled || isGenerating) return;
-    const token = typeof beginSubmit === "function" ? beginSubmit() : null;
+    const token = service.beginSubmit();
     try {
-      const result = serializeAndEmit();
+      const result = service.serialize();
       await onGenerate?.(result);
     } finally {
-      if (typeof endSubmit === "function") {
-        endSubmit(token);
+      if (token !== null && token !== undefined) {
+        service.endSubmit(token);
       } else {
-        setIsGenerating(false);
+        service.setIsGenerating(false);
       }
     }
-  }, [isGenerateDisabled, isGenerating, beginSubmit, endSubmit, serializeAndEmit, onGenerate, setIsGenerating]);
+  }, [isGenerateDisabled, isGenerating, service, onGenerate]);
 
   return {
     currentRatio,

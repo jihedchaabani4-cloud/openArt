@@ -6,11 +6,15 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { renderHook, act } from "@testing-library/react";
 import fs from "node:fs";
 import path from "node:path";
 import { createRegistry } from "../store/registry.js";
 import { createPromptBarStore } from "../store/createPromptBarStore.js";
 import { promptBarService } from "../api/promptBarService.js";
+import { usePromptBarSnapshot } from "../store/PromptBarStoreContext.js";
+import { generatedMediaTemplate } from "../templates/generatedMedia.template.js";
+import { fixtureModels } from "./fixtures/models.fixture.js";
 import {
   drainPendingActions,
   DEFAULT_PENDING_TTL_MS,
@@ -217,6 +221,96 @@ describe("X1: promptBarService and pendingActions queue", () => {
 
     expect(res.ok).toBe(true);
     expect(storeA.getState().prompt).toBe("");
+  });
+
+  it("subscribe notifies on mount, state changes, and unmount, and stops after unsubscribe", () => {
+    const listener = vi.fn();
+    const serviceA = promptBarService(identityA, { registry: customRegistry, storage: mockStorage });
+    const unsub = serviceA.subscribe(listener);
+
+    const storeA = setupMountedStore(identityA, { activeMode: "image", activeSubMode: "frames" });
+    expect(listener).toHaveBeenCalledTimes(1);
+
+    serviceA.setPrompt("Hello");
+    expect(listener).toHaveBeenCalledTimes(2);
+    expect(storeA.getState().prompt).toBe("Hello");
+
+    customRegistry.markUnmounted(identityA);
+    expect(listener).toHaveBeenCalledTimes(3);
+
+    unsub();
+    customRegistry.markMounted(identityA);
+    expect(listener).toHaveBeenCalledTimes(3);
+  });
+
+  it("usePromptBarSnapshot reacts only when selected primitive flips (no re-render storms)", () => {
+    const selectIsFrameMode = (snap) =>
+      snap.activeMode === "video" && snap.activeSubMode === "frames";
+    let renderCount = 0;
+
+    const { result } = renderHook(() => {
+      renderCount += 1;
+      return usePromptBarSnapshot(identityA, selectIsFrameMode, { registry: customRegistry });
+    });
+
+    // Unmounted -> false
+    expect(result.current).toBe(false);
+    const initialRenders = renderCount;
+
+    // Mount store in image mode -> still false, no extra re-render
+    const videoRefModel = {
+      id: "veo_ref",
+      name: "Veo Reference",
+      domain: "video",
+      category: "video",
+      parameters: {
+        prompt: { type: "string" },
+        images: { type: "image[]", max: 3 },
+      },
+    };
+    const storeA = createPromptBarStore(
+      { identity: identityA, activeMode: "image", activeSubMode: "frames" },
+      { template: generatedMediaTemplate }
+    );
+    storeA.getState().setModels([...fixtureModels, videoRefModel]);
+    act(() => {
+      customRegistry.getOrCreate(identityA, () => storeA);
+      customRegistry.markMounted(identityA);
+    });
+    expect(result.current).toBe(false);
+    expect(renderCount).toBe(initialRenders);
+
+    // Switch to video/frames -> flips true (1 re-render)
+    act(() => {
+      storeA.getState().switchMode("video", "frames");
+    });
+    expect(result.current).toBe(true);
+    expect(renderCount).toBe(initialRenders + 1);
+
+    // Typing prompt or attaching frame while staying in video/frames -> 0 re-renders!
+    act(() => {
+      storeA.getState().setPrompt("Drone shot over neon city");
+      storeA.getState().attachMedia({ role: "start", value: { workflow_id: "wf-1", url: "https://example.com/1.png" } });
+    });
+    expect(result.current).toBe(true);
+    expect(renderCount).toBe(initialRenders + 1);
+
+    // Switch to video/reference -> flips false (1 re-render)
+    act(() => {
+      storeA.getState().switchMode("video", "reference");
+    });
+    expect(result.current).toBe(false);
+    expect(renderCount).toBe(initialRenders + 2);
+
+    // Switch back to video/frames, then unmount -> flips false
+    act(() => {
+      storeA.getState().switchMode("video", "frames");
+    });
+    expect(result.current).toBe(true);
+    act(() => {
+      customRegistry.markUnmounted(identityA);
+    });
+    expect(result.current).toBe(false);
   });
 
   it("DoD: service and queue have 0 occurrences of document. or window.", () => {

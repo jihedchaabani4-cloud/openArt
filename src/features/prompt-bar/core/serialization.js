@@ -12,11 +12,13 @@
  */
 
 import { validateParameter } from "./reconciliation.js";
-import { PARAM } from "./parameterKeys.js";
+import { PARAM, isMediaParamKey } from "./parameterKeys.js";
+import { isCharacterEntity, isElementEntity } from "./entityService.js";
 
 const MEDIA_PARAM_NAMES = new Set([
   PARAM.IMAGES,
   PARAM.REFERENCE_IMAGES,
+  PARAM.REFERENCES,
   PARAM.INPUT_IMAGE,
   PARAM.LAST_FRAME,
   PARAM.INPUT_VIDEO,
@@ -126,8 +128,11 @@ export function serialize(modelId, prompt = "", definitions = {}, values = {}, e
     }
   }
 
-  // Collect all active workflow IDs for root `references` field (required by backend contract)
+  // Collect all active workflow IDs for root `references`, plus derive elements & characters
+  // from the emitted media parameters (single source of truth).
   const referenceIdSet = new Set();
+  const elementIdSet = new Set();
+  const characterIdSet = new Set();
 
   function collectId(item) {
     const id = extractWorkflowId(item);
@@ -136,33 +141,51 @@ export function serialize(modelId, prompt = "", definitions = {}, values = {}, e
     }
   }
 
+  function collectDerivedEntities(rawVal) {
+    if (!rawVal) return;
+    const items = Array.isArray(rawVal) ? rawVal : [rawVal];
+    for (const item of items) {
+      if (!item || typeof item !== "object") continue;
+      const id = extractWorkflowId(item) || item.id;
+      if (!id) continue;
+      if (isCharacterEntity(item)) {
+        characterIdSet.add(id);
+      } else if (isElementEntity(item)) {
+        elementIdSet.add(id);
+      }
+    }
+  }
+
   // 1. From media parameters declared and emitted in parameters
   for (const [k, val] of Object.entries(parameters)) {
     const def = definitions[k];
-    const isMedia =
-      MEDIA_PARAM_NAMES.has(k) ||
-      def?.group === "media" ||
-      def?.type === "image" ||
-      def?.type === "image[]" ||
-      def?.type === "video" ||
-      def?.type === "video[]";
+    const isMedia = MEDIA_PARAM_NAMES.has(k) || isMediaParamKey(k, def);
     if (isMedia) {
       if (Array.isArray(val)) {
         val.forEach(collectId);
       } else if (val) {
         collectId(val);
       }
+      collectDerivedEntities(values[k]);
     }
   }
 
-  // 2. From extra.elements
+  // 2. From explicit extra.elements (optional override/merge)
   if (Array.isArray(extra.elements)) {
-    extra.elements.forEach(collectId);
+    extra.elements.forEach((e) => {
+      collectId(e);
+      const id = typeof e === "object" && e !== null ? e.workflow_id || e.id : e;
+      if (id) elementIdSet.add(id);
+    });
   }
 
-  // 3. From extra.characters
+  // 3. From explicit extra.characters (optional override/merge)
   if (Array.isArray(extra.characters)) {
-    extra.characters.forEach(collectId);
+    extra.characters.forEach((c) => {
+      collectId(c);
+      const id = typeof c === "object" && c !== null ? c.workflow_id || c.id : c;
+      if (id) characterIdSet.add(id);
+    });
   }
 
   // 4. From extra.references
@@ -177,20 +200,12 @@ export function serialize(modelId, prompt = "", definitions = {}, values = {}, e
     references: Array.from(referenceIdSet),
   };
 
-  if (extra.elements !== undefined) {
-    result.elements = Array.isArray(extra.elements)
-      ? extra.elements
-          .map((e) => (typeof e === "object" && e !== null ? e.workflow_id || e.id : e))
-          .filter(Boolean)
-      : [];
+  if (extra.elements !== undefined || elementIdSet.size > 0) {
+    result.elements = Array.from(elementIdSet);
   }
 
-  if (extra.characters !== undefined) {
-    result.characters = Array.isArray(extra.characters)
-      ? extra.characters
-          .map((c) => (typeof c === "object" && c !== null ? c.workflow_id || c.id : c))
-          .filter(Boolean)
-      : [];
+  if (extra.characters !== undefined || characterIdSet.size > 0) {
+    result.characters = Array.from(characterIdSet);
   }
 
   return result;

@@ -1,14 +1,5 @@
 /**
- * SAFE-4: Registry, Key and Persistence Characterization Tests
- *
- * Tests:
- * 1. Key format: <persistKey>_<projectId> when inside project route; <persistKey>_global without project
- * 2. In-memory registry: same key returns same store instance; different project returns different store instance
- * 3. Saved subset: storage holds only prompt, selectedModelId, parameterValues, elements, characters, activeMode, activeSubMode (never isGenerating)
- * 4. Corrupted storage: invalid JSON is safely caught and ignored, starting with defaults
- * 5. Documented known issues:
- *    (a) Module-level activePromptBarStoreInstance is overwritten by last rendered provider
- *    (b) blob: URLs in parameterValues are written to sessionStorage as is
+ * SAFE-4: Registry, Key and Persistence Characterization Tests (Canonical pb2 keys)
  */
 
 import { describe, it, expect, beforeEach } from "vitest";
@@ -20,18 +11,14 @@ import {
   clearPersistentPromptBarStores,
   getActivePromptBarStore,
 } from "../store/PromptBarStoreContext.js";
-import { createPromptBarType } from "../composition/createPromptBarType.js";
+import { generatedMediaTemplate } from "../templates/generatedMedia.template.js";
 import { fixtureModels } from "./fixtures/models.fixture.js";
 
-const testType = createPromptBarType({
+const testType = {
+  ...generatedMediaTemplate,
   id: "test-generated-media",
   name: "Test Media",
-  layout: {
-    showPromptInput: true,
-    showModeSelector: true,
-  },
-  supportedDomains: ["image", "video"],
-});
+};
 
 function StoreCapture({ onStore }) {
   const store = usePromptBarStoreInstance();
@@ -50,12 +37,12 @@ describe("SAFE-4: Registry, Key and Persistence Characterization", () => {
     clearPersistentPromptBarStores();
   });
 
-  describe("1. Key formatting", () => {
-    it("formats key as <persistKey>_<projectId> when inside /cinema-studio/:projectId", () => {
+  describe("1. Canonical pb2 key formatting", () => {
+    it("formats canonical key with projectId when inside /cinema-studio/:projectId", () => {
       window.history.pushState({}, "", "/cinema-studio/project_xyz/assets");
 
       let capturedStore = null;
-      render(
+      const { unmount } = render(
         <PromptBarStoreProvider
           type={testType}
           initialModels={fixtureModels}
@@ -68,18 +55,19 @@ describe("SAFE-4: Registry, Key and Persistence Characterization", () => {
       act(() => {
         capturedStore.getState().setPrompt("Testing project key format");
       });
+      unmount();
 
-      const saved = window.sessionStorage.getItem("studio-prompt-bar_project_xyz");
+      const saved = window.sessionStorage.getItem("pb2:test-generated-media:default:project_xyz");
       expect(saved).not.toBeNull();
       const parsed = JSON.parse(saved);
       expect(parsed.prompt).toBe("Testing project key format");
     });
 
-    it("formats key as <persistKey>_global when route has no project id", () => {
+    it("formats canonical key with global when route has no project id", () => {
       window.history.pushState({}, "", "/");
 
       let capturedStore = null;
-      render(
+      const { unmount } = render(
         <PromptBarStoreProvider
           type={testType}
           initialModels={fixtureModels}
@@ -92,8 +80,9 @@ describe("SAFE-4: Registry, Key and Persistence Characterization", () => {
       act(() => {
         capturedStore.getState().setPrompt("Global prompt without project");
       });
+      unmount();
 
-      const saved = window.sessionStorage.getItem("custom-key_global");
+      const saved = window.sessionStorage.getItem("pb2:test-generated-media:custom-key:global");
       expect(saved).not.toBeNull();
       const parsed = JSON.parse(saved);
       expect(parsed.prompt).toBe("Global prompt without project");
@@ -130,7 +119,7 @@ describe("SAFE-4: Registry, Key and Persistence Characterization", () => {
 
       expect(store1).not.toBeNull();
       expect(store2).not.toBeNull();
-      expect(store1).toBe(store2); // Exact reference identity from persistentStoreRegistry
+      expect(store1).toBe(store2);
     });
 
     it("different project ids return different store instances", () => {
@@ -166,11 +155,11 @@ describe("SAFE-4: Registry, Key and Persistence Characterization", () => {
   });
 
   describe("3. Saved subset in sessionStorage", () => {
-    it("saves only prompt, selectedModelId, parameterValues, elements, characters, activeMode, activeSubMode (never isGenerating)", () => {
+    it("saves only prompt, selectedModelId, parameterValues, derived elements/characters, activeMode, activeSubMode (never isGenerating)", () => {
       window.history.pushState({}, "", "/cinema-studio/proj_subset");
 
       let capturedStore = null;
-      render(
+      const { unmount } = render(
         <PromptBarStoreProvider
           type={testType}
           initialModels={fixtureModels}
@@ -183,28 +172,25 @@ describe("SAFE-4: Registry, Key and Persistence Characterization", () => {
       act(() => {
         capturedStore.getState().setPrompt("Subset test");
         capturedStore.getState().selectModel("nanobana_pro");
-        capturedStore.getState().setParameter("resolution", "2K");
-        capturedStore.getState().addElement({ id: "e1", workflow_id: "e1" });
-        capturedStore.getState().addCharacter({ id: "c1", workflow_id: "c1" });
-        capturedStore.getState().setActiveMode("video");
-        capturedStore.getState().setActiveSubMode("frames");
+        capturedStore.getState().setSetting("resolution", "2K");
+        capturedStore.getState().attachMedia({ role: "reference", value: { id: "e1", workflow_id: "e1", type: "element" } });
+        capturedStore.getState().attachMedia({ role: "reference", value: { id: "c1", workflow_id: "c1", type: "character" } });
         capturedStore.getState().setIsGenerating(true); // Must NOT be persisted
       });
+      unmount();
 
-      const raw = window.sessionStorage.getItem("subset-key_proj_subset");
+      const raw = window.sessionStorage.getItem("pb2:test-generated-media:subset-key:proj_subset");
       expect(raw).not.toBeNull();
       const saved = JSON.parse(raw);
 
-      // Must have the 7 persisted keys
       expect(saved.prompt).toBe("Subset test");
       expect(saved.selectedModelId).toBe("nanobana_pro");
       expect(saved.parameterValues.resolution).toBe("2K");
       expect(saved.elements[0].id).toBe("e1");
       expect(saved.characters[0].id).toBe("c1");
-      expect(saved.activeMode).toBe("video");
+      expect(saved.activeMode).toBe("image");
       expect(saved.activeSubMode).toBe("frames");
 
-      // Must NOT contain transient fields
       expect(saved.isGenerating).toBeUndefined();
       expect(saved.modelsMap).toBeUndefined();
       expect(saved.reconciliationLog).toBeUndefined();
@@ -214,9 +200,9 @@ describe("SAFE-4: Registry, Key and Persistence Characterization", () => {
   });
 
   describe("4. Corrupted storage handling", () => {
-    it("safely handles invalid JSON in storage and initializes with model defaults", () => {
+    it("safely handles invalid JSON in storage and initializes with eligible model defaults", () => {
       window.history.pushState({}, "", "/cinema-studio/proj_corrupt");
-      window.sessionStorage.setItem("corrupt-key_proj_corrupt", "{NOT_VALID_JSON:>>>");
+      window.sessionStorage.setItem("pb2:test-generated-media:corrupt-key:proj_corrupt", "{NOT_VALID_JSON:>>>");
 
       let capturedStore = null;
       expect(() => {
@@ -232,15 +218,14 @@ describe("SAFE-4: Registry, Key and Persistence Characterization", () => {
       }).not.toThrow();
 
       expect(capturedStore).not.toBeNull();
-      expect(capturedStore.getState().selectedModelId).toBe("seedance_2_5");
+      // Default mode is image, so eligible model is nanobana_pro!
+      expect(capturedStore.getState().selectedModelId).toBe("nanobana_pro");
       expect(capturedStore.getState().prompt).toBe("");
     });
   });
 
   describe("5. Resolved Issues (P3 BEHAVIOR)", () => {
     it("pins PB-K4a: module-level active store returns null when more than one instance is mounted", () => {
-      // P3 BEHAVIOR (resolved PB-K4a):
-      // getActivePromptBarStore() returns null when more than one instance is mounted for the project.
       let storeA = null;
       let storeB = null;
 
@@ -268,18 +253,15 @@ describe("SAFE-4: Registry, Key and Persistence Characterization", () => {
       expect(storeB).not.toBeNull();
       expect(storeA).not.toBe(storeB);
 
-      // getActivePromptBarStore() returns null because >1 instance is mounted
       const activeInstance = getActivePromptBarStore();
       expect(activeInstance).toBeNull();
     });
 
     it("pins PB-K4b: blob: URLs inside parameterValues are safely dropped from sessionStorage", () => {
-      // P3 BEHAVIOR (resolved PB-K4b):
-      // selectPersistable() sanitizes parameterValues, so blob: URLs are dropped.
       window.history.pushState({}, "", "/cinema-studio/proj_blob");
 
       let capturedStore = null;
-      render(
+      const { unmount } = render(
         <PromptBarStoreProvider
           type={testType}
           initialModels={fixtureModels}
@@ -291,14 +273,15 @@ describe("SAFE-4: Registry, Key and Persistence Characterization", () => {
 
       const blobUrl = "blob:http://localhost:3000/1234-5678-abcd";
       act(() => {
-        capturedStore.getState().setParameter("input_image", blobUrl);
+        capturedStore.getState().switchMode("video", "frames");
+        capturedStore.getState().attachMedia({ role: "start", value: { url: blobUrl } });
       });
+      unmount();
 
-      const raw = window.sessionStorage.getItem("blob-key_proj_blob");
+      const raw = window.sessionStorage.getItem("pb2:test-generated-media:blob-key:proj_blob");
       expect(raw).not.toBeNull();
       const parsed = JSON.parse(raw);
 
-      // Confirm blob URL is safely stripped from sessionStorage
       expect(parsed.parameterValues.input_image).toBeUndefined();
     });
   });

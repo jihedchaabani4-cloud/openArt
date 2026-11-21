@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback, useContext, useEffect } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/shared/lib/utils";
 
@@ -11,19 +11,19 @@ import { FlowPromptBoxSettings } from "@/components/cinema-studio/prompt-bar/sel
 import { PromptBarTopPanel } from "@/components/cinema-studio/prompt-bar/parts/PromptBarTopPanel.jsx";
 import { PromptBarSlotsRow } from "@/components/cinema-studio/prompt-bar/parts/PromptBarSlotsRow.jsx";
 import { PromptBarControlsRow } from "@/components/cinema-studio/prompt-bar/parts/PromptBarControlsRow.jsx";
-import { Button } from "@/components/base/button";
 import { IconButton } from "@/components/base/icon-button";
-import { GoogleIcon } from "@/components/primitives/GoogleIcon";
+import { HugeIcon } from "@/components/primitives/HugeIcon";
 
-// Platform Architecture
-import { PromptBarStoreProvider, PromptBarStoreContext } from "@/features/prompt-bar/store/PromptBarStoreContext.js";
-import { usePromptBarStore } from "@/features/prompt-bar/store/usePromptBarStore.js";
+// Platform Architecture — Public Service & Read-Only Selectors
+import {
+  PromptBarStoreProvider,
+  usePromptBarService,
+  usePromptBarState,
+} from "@/features/prompt-bar";
 import { usePromptBarModels } from "@/features/prompt-bar/platform/hooks/usePromptBarModels.js";
 import { usePromptBarSlots } from "@/features/prompt-bar/platform/hooks/usePromptBarSlots.js";
 import { usePromptBarReferences } from "@/features/prompt-bar/platform/hooks/usePromptBarReferences.js";
 import { usePromptBarGenerate } from "@/features/prompt-bar/platform/hooks/usePromptBarGenerate.js";
-
-const NOOP = () => {};
 
 /**
  * PromptBarPlatform
@@ -42,10 +42,12 @@ const NOOP = () => {};
  * Platform MUST NOT call setParameter(slot.role, val) — must always resolve role to
  * backend key via featureConfig.resolveParameterMapping first.
  */
+const EMPTY_MODELS = [];
+
 export function PromptBarPlatform({
   type,
   featureConfig,
-  models = [],
+  models = EMPTY_MODELS,
   onGenerate,
   className,
   store,
@@ -61,30 +63,10 @@ export function PromptBarPlatform({
   storage,
   editorPlugins,
 }) {
-  const contextStore = useContext(PromptBarStoreContext);
-  const activeStore = store || contextStore;
-
-  if (activeStore) {
-    return (
-      <PromptBarStoreContext.Provider value={activeStore}>
-        <PromptBarPlatformInner
-          type={type}
-          featureConfig={featureConfig}
-          models={models}
-          onGenerate={onGenerate}
-          className={className}
-          hideBackground={hideBackground}
-          isGenerating={isGenerating}
-          renderRightActions={renderRightActions}
-          renderPopover={renderPopover}
-          editorPlugins={editorPlugins}
-        />
-      </PromptBarStoreContext.Provider>
-    );
-  }
-
   return (
     <PromptBarStoreProvider
+      store={store}
+      reuseParent={!store}
       type={type}
       featureConfig={featureConfig}
       templateId={templateId}
@@ -111,7 +93,7 @@ export function PromptBarPlatform({
   );
 }
 
-/** Inner renderer — lives inside the store provider, has access to usePromptBarStore */
+/** Inner renderer — lives inside the store provider, consumes ONLY sealed Public Service & read-only selectors */
 function PromptBarPlatformInner({
   type,
   featureConfig,
@@ -124,7 +106,8 @@ function PromptBarPlatformInner({
   renderPopover,
   editorPlugins,
 }) {
-  const [drawerOpen, setDrawerOpen] = useState(false); // Collapsed by default (FR-COMP-04)
+  const [activeOverlay, setActiveOverlay] = useState(null); // null | "settings" | "media"
+  const drawerOpen = activeOverlay === "settings";
   const [isPromptExpanded, setIsPromptExpanded] = useState(false);
   const containerRef = useRef(null);
   const tuneButtonRef = useRef(null);
@@ -134,33 +117,18 @@ function PromptBarPlatformInner({
   const { layout = {} } = type || {};
   const hasModes = layout.showModeSelector !== false;
 
-  // Store subscriptions
-  const storeActiveMode    = usePromptBarStore((s) => s.activeMode);
-  const storeActiveSubMode = usePromptBarStore((s) => s.activeSubMode);
-  const storeSetActiveMode = usePromptBarStore((s) => s.setActiveMode);
-  const storeSetActiveSubMode = usePromptBarStore((s) => s.setActiveSubMode);
-  const storeSwitchMode = usePromptBarStore((s) => s.switchMode);
-
-  const activeMode    = storeActiveMode || "image";
-  const activeSubMode = storeActiveSubMode || "frames";
-  const setActiveMode = storeSetActiveMode || NOOP;
-  const setActiveSubMode = storeSetActiveSubMode || NOOP;
-
-  const prompt         = usePromptBarStore((s) => s.prompt);
-  const paramValues    = usePromptBarStore((s) => s.parameterValues);
-  const validationErrs = usePromptBarStore((s) => s.validationErrors);
-
-  // Store actions
-  const setPrompt        = usePromptBarStore((s) => s.setPrompt);
-  const setParameter     = usePromptBarStore((s) => s.setParameter);
-  const focusRequest     = usePromptBarStore((s) => s.focusRequest);
-  const promptFillNonce  = usePromptBarStore((s) => s.promptFillNonce);
-  const clearEntities    = usePromptBarStore((s) => s.clearEntities);
-  const removeMedia      = usePromptBarStore((s) => s.removeMedia);
+  // Sealed Public Service & read-only state selectors
+  const service         = usePromptBarService();
+  const activeMode      = usePromptBarState((s) => s.activeMode) || "image";
+  const activeSubMode   = usePromptBarState((s) => s.activeSubMode) || "frames";
+  const prompt          = usePromptBarState((s) => s.prompt);
+  const paramValues     = usePromptBarState((s) => s.parameterValues);
+  const validationErrs  = usePromptBarState((s) => s.validationErrors);
+  const focusRequest    = usePromptBarState((s) => s.focusRequest);
+  const promptFillNonce = usePromptBarState((s) => s.promptFillNonce);
 
   // Model state and synchronization (H1)
   const {
-    allModelsList,
     eligibleModels,
     currentModel,
     isCurrentEligible,
@@ -178,33 +146,19 @@ function PromptBarPlatformInner({
     activeSubMode,
   });
 
-  const handleModeChange = useCallback((newMode) => {
-    if (storeSwitchMode) {
-      storeSwitchMode(newMode, activeSubMode);
-    } else {
-      setActiveMode(newMode);
-      if (featureConfig?.filterEligibleModels) {
-        const eligible = featureConfig.filterEligibleModels(allModelsList, newMode, activeSubMode, {});
-        if (eligible.length > 0 && !eligible.some((m) => m.id === selectedId)) {
-          selectModel(eligible[0].id);
-        }
-      }
-    }
-  }, [storeSwitchMode, activeSubMode, setActiveMode, featureConfig, allModelsList, selectedId, selectModel]);
+  const handleModeChange = useCallback(
+    (newMode) => {
+      service.switchMode(newMode, activeSubMode);
+    },
+    [service, activeSubMode]
+  );
 
-  const handleSubModeChange = useCallback((newSubMode) => {
-    if (storeSwitchMode) {
-      storeSwitchMode(activeMode, newSubMode);
-    } else {
-      setActiveSubMode(newSubMode);
-      if (featureConfig?.filterEligibleModels) {
-        const eligible = featureConfig.filterEligibleModels(allModelsList, activeMode, newSubMode, {});
-        if (eligible.length > 0 && !eligible.some((m) => m.id === selectedId)) {
-          selectModel(eligible[0].id);
-        }
-      }
-    }
-  }, [storeSwitchMode, activeMode, setActiveSubMode, featureConfig, allModelsList, selectedId, selectModel]);
+  const handleSubModeChange = useCallback(
+    (newSubMode) => {
+      service.switchMode(activeMode, newSubMode);
+    },
+    [service, activeMode]
+  );
 
   // Active slots, drawer parameters, and swap handler (H2)
   const {
@@ -251,7 +205,6 @@ function PromptBarPlatformInner({
     activeReferences,
     allSelectedMedia,
     dialogOpen,
-    setDialogOpen,
     activeDialogSlot,
     activeDialogMode,
     dialogAnchorRef,
@@ -264,8 +217,8 @@ function PromptBarPlatformInner({
     handleSelectMedia,
     handleRemoveReferenceItem,
     handleRemoveSlot,
+    handleClearReferences,
     getReferenceItems,
-    calculateUsedImages,
     remainingImagesQuota,
     activeSlotAllowedType,
     activeSlotMaxAllowed,
@@ -276,6 +229,53 @@ function PromptBarPlatformInner({
     currentModel,
     activeMode,
   });
+
+  const isMediaOpen = activeOverlay === "media" && dialogOpen;
+
+  const handleOpenMediaDialog = useCallback(
+    (slot) => {
+      setActiveOverlay("media");
+      handleOpenDialog(slot);
+    },
+    [handleOpenDialog]
+  );
+
+  const handleTriggerMention = useCallback(
+    (cb) => {
+      setActiveOverlay("media");
+      handleTriggerMentionDialog(cb);
+    },
+    [handleTriggerMentionDialog]
+  );
+
+  const handleMediaDialogOpenChange = useCallback(
+    (open) => {
+      handleOpenChangeDialog(open);
+      setActiveOverlay((curr) => (open ? "media" : curr === "media" ? null : curr));
+    },
+    [handleOpenChangeDialog]
+  );
+
+  const handleToggleSettings = useCallback(() => {
+    setActiveOverlay((curr) => {
+      const next = curr === "settings" ? null : "settings";
+      if (next === "settings") {
+        handleOpenChangeDialog(false);
+      }
+      return next;
+    });
+  }, [handleOpenChangeDialog]);
+
+  const handleAttachSlotMedia = useCallback(
+    (role, value) => {
+      if (value) {
+        service.attachMedia({ role, value });
+      } else {
+        service.clearSlot(role);
+      }
+    },
+    [service]
+  );
 
   const hasReferences = (activeReferences && activeReferences.length > 0) ||
     (allSelectedMedia && allSelectedMedia.length > 0) ||
@@ -351,23 +351,9 @@ function PromptBarPlatformInner({
     isPromptExpanded;
 
   const handleClearAll = useCallback(() => {
-    setPrompt("");
-    if (activeSlots && activeSlots.length > 0) {
-      activeSlots.forEach((slot) => {
-        const backendKey = featureConfig?.resolveParameterMapping
-          ? featureConfig.resolveParameterMapping(currentModel, slot.role) || slot.role
-          : slot.role;
-        setParameter(backendKey, undefined);
-        if (typeof removeMedia === "function") {
-          removeMedia({ role: slot.role });
-        }
-      });
-    }
-    if (typeof clearEntities === "function") {
-      clearEntities();
-    }
+    service.clearDraft();
     setIsPromptExpanded(false);
-  }, [setPrompt, activeSlots, featureConfig, currentModel, setParameter, removeMedia, clearEntities]);
+  }, [service]);
 
   // Close parameter drawer on click outside or Escape key
   useEffect(() => {
@@ -390,12 +376,12 @@ function PromptBarPlatformInner({
         return;
       }
 
-      setDrawerOpen(false);
+      setActiveOverlay((curr) => (curr === "settings" ? null : curr));
     };
 
     const handleKeyDown = (event) => {
       if (event.key === "Escape") {
-        setDrawerOpen(false);
+        setActiveOverlay((curr) => (curr === "settings" ? null : curr));
       }
     };
 
@@ -411,8 +397,8 @@ function PromptBarPlatformInner({
   const topPanelZone = (
     <PromptBarTopPanel
       mentionQuery={mentionQuery}
-      dialogOpen={dialogOpen}
-      onOpenChangeDialog={handleOpenChangeDialog}
+      dialogOpen={isMediaOpen}
+      onOpenChangeDialog={handleMediaDialogOpenChange}
       dialogAnchorRef={dialogAnchorRef}
       activeSlotAllowedType={activeSlotAllowedType}
       activeSlotMaxAllowed={activeSlotMaxAllowed}
@@ -451,7 +437,7 @@ function PromptBarPlatformInner({
             onSelectModel={selectModel}
             parameters={drawerParams}
             paramValues={paramValues}
-            onParamChange={setParameter}
+            onParamChange={service.setSetting}
             validationErrors={validationErrs}
             creditCost={estimatedCredits}
           />
@@ -480,7 +466,7 @@ function PromptBarPlatformInner({
         <fieldset
           data-source="reference"
           className={cn(
-            "relative grid min-w-0 flex-1 overflow-hidden rounded-[var(--radius-2xl)] bg-[color:var(--white-5)] transition-[height] duration-200 ease-out",
+            "relative grid min-w-0 flex-1 overflow-hidden rounded-xl bg-white-5 transition-[height] duration-200 ease-out",
             showUnstackedReferenceTray
               ? "min-h-17 h-auto"
               : isPromptExpanded
@@ -498,10 +484,11 @@ function PromptBarPlatformInner({
               dialogAnchorRef={dialogAnchorRef}
               getReferenceItems={getReferenceItems}
               getSlotMaxRefs={getSlotMaxRefs}
-              calculateUsedImages={calculateUsedImages}
               handleRemoveReferenceItem={handleRemoveReferenceItem}
-              handleOpenDialog={handleOpenDialog}
-              setParameter={setParameter}
+              handleOpenDialog={handleOpenMediaDialog}
+              onAttachMedia={handleAttachSlotMedia}
+              onClearSlot={service.clearSlot}
+              onClearReferences={handleClearReferences}
               handleRemoveSlot={handleRemoveSlot}
               showSwap={showSwap}
               swapEnabled={swapEnabled}
@@ -533,16 +520,16 @@ function PromptBarPlatformInner({
               )}
 
               {layout.showPromptInput && (
-                <div className="min-w-0 flex-1 h-full flex flex-col justify-center px-1.5 py-0.5 overflow-hidden">
+                <div className="min-w-0 flex-1 h-full flex flex-col justify-center px-1.5 py-0.5 overflow-hidden font-sans antialiased ds-text-caption-m">
                   <div ref={editorContainerRef} className="flex-1 min-h-0 overflow-y-auto custom-scrollbar">
                     <PromptEditor
                       value={prompt}
-                      onChange={setPrompt}
+                      onChange={service.setPrompt}
                       onSubmit={handleGenerate}
                       referenceImages={activeReferences}
-                      onTriggerMentionDialog={handleTriggerMentionDialog}
+                      onTriggerMentionDialog={handleTriggerMention}
                       onMentionQueryChange={setMentionQuery}
-                      mentionOpen={dialogOpen}
+                      mentionOpen={isMediaOpen}
                       placeholder="Describe what you want to create..."
                       focusRequest={focusRequest}
                       fillNonce={promptFillNonce}
@@ -565,14 +552,15 @@ function PromptBarPlatformInner({
                     >
                       <IconButton
                         variant="ghost"
+                        size="sm"
                         aria-label="Effacer tout"
                         title="Effacer tout (texte et références)"
                         onClick={handleClearAll}
-                        className="size-7 p-0 border-0 flex items-center justify-center shrink-0 cursor-pointer text-white/70 hover:text-white transition-colors"
+                        className="shrink-0 text-text-body-muted hover:text-text-primary transition-colors"
                       >
-                        <GoogleIcon
-                          iconName="close"
-                          className="text-base leading-none"
+                        <HugeIcon
+                          name="cancel-01"
+                          className="leading-none"
                         />
                       </IconButton>
                     </motion.div>
@@ -588,17 +576,19 @@ function PromptBarPlatformInner({
                     >
                       <IconButton
                         variant="ghost"
+                        size="sm"
+                        data-state={isPromptExpanded ? "open" : "closed"}
                         aria-label={isPromptExpanded ? "Réduire le champ de saisie" : "Agrandir le champ de saisie"}
                         title={isPromptExpanded ? "Collapse prompt input" : "Expand prompt input"}
                         onClick={() => setIsPromptExpanded((v) => !v)}
                         className={cn(
-                          "size-7 p-0 border-0 flex items-center justify-center shrink-0 cursor-pointer text-white/70 hover:text-white transition-colors",
-                          isPromptExpanded && "is-active bg-white/10 text-white"
+                          "shrink-0 text-text-body-muted hover:text-text-primary transition-colors",
+                          isPromptExpanded && "text-text-primary"
                         )}
                       >
-                        <GoogleIcon
-                          iconName={isPromptExpanded ? "close_fullscreen" : "open_in_full"}
-                          className="text-base leading-none"
+                        <HugeIcon
+                          name={isPromptExpanded ? "arrow-shrink-02" : "arrow-expand-02"}
+                          className="leading-none"
                         />
                       </IconButton>
                     </motion.div>
@@ -618,15 +608,7 @@ function PromptBarPlatformInner({
           showSettingsButton={((layout.showParameterDrawer && (hasModes || drawerParams.length > 0)) || layout.showModelSelector)}
           tuneButtonRef={tuneButtonRef}
           drawerOpen={drawerOpen}
-          onToggleDrawer={() => {
-            setDrawerOpen((v) => {
-              const next = !v;
-              if (next) {
-                setDialogOpen(false);
-              }
-              return next;
-            });
-          }}
+          onToggleDrawer={handleToggleSettings}
           currentModel={currentModel}
           currentModelIcon={currentModelIcon}
           currentRatioIcon={currentRatioIcon}

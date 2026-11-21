@@ -4,6 +4,7 @@ import { act } from "react";
 import { render, screen, fireEvent, cleanup, waitFor, renderHook } from "@testing-library/react";
 import { GeneratedPromptBar } from "@/components/cinema-studio/prompt-bar/GeneratedPromptBar.jsx";
 import { clearPersistentPromptBarStores, getActivePromptBarStore } from "../store/PromptBarStoreContext.js";
+import { selectCharacters } from "../core/entityService.js";
 import { promptBarService } from "../api/promptBarService.js";
 import { adaptBackendCatalog } from "../core/modelManagement.js";
 import { useWorkflowActions } from "@/features/workflows/model/useMediaActions";
@@ -242,6 +243,10 @@ vi.mock("@/features/prompt-bar/core/useRealBackendModels", () => ({
   useRealBackendModels: () => ({ data: { models: realModelsAll } }),
 }));
 
+vi.mock("@/features/prompt-bar/adapters/useRealBackendModels", () => ({
+  useRealBackendModels: () => ({ data: { models: realModelsAll } }),
+}));
+
 function realClick(el) {
   fireEvent.pointerDown(el);
   fireEvent.mouseDown(el);
@@ -345,10 +350,12 @@ describe("Phase 1+2 Comprehensive Repro Matrix — Add to prompt", () => {
     const firstStartId = store.getState().parameterValues.input_image?.workflow_id;
     expect(firstStartId).toBeTruthy();
 
-    // Click the filled Start thumbnail (ViewReference) to reopen popover and replace
+    // Click the filled Start thumbnail (ViewReference) to reopen popover and replace with a different image
     const startImg = document.querySelector(`img[src="${store.getState().parameterValues.input_image.url}"]`);
     expect(startImg).toBeTruthy();
     realClick(startImg.parentElement);
+    const otherOption = await screen.findByRole("option", { name: /Neon City Batch/i });
+    realClick(otherOption);
     const addBtnReplace = await screen.findByRole("button", { name: "Add to prompt" });
     realClick(addBtnReplace);
     expect(store.getState().parameterValues.input_image?.workflow_id).not.toBe(firstStartId);
@@ -371,6 +378,7 @@ describe("Phase 1+2 Comprehensive Repro Matrix — Add to prompt", () => {
 
     await waitFor(() => expect(store.getState().parameterValues.images).toBeTruthy());
     expect(Array.isArray(store.getState().parameterValues.images)).toBe(true);
+    await waitFor(() => expect(screen.queryByRole("button", { name: "Add to prompt" })).toBeNull());
 
     // 2nd @ mention -> Add to prompt MUST append 2nd image
     editable.focus();
@@ -426,13 +434,13 @@ describe("Phase 1+2 Comprehensive Repro Matrix — Add to prompt", () => {
         value: { id: "wf-char-2", workflow_id: "wf-char-2", url: "https://cdn.example.com/char-2.png", type: "character", is_character: true, workflow_type: "CHARACTER_SHEET", image_count: 2 },
       });
     });
-    expect(store.getState().characters).toHaveLength(2);
+    expect(selectCharacters(store.getState())).toHaveLength(2);
 
     // Switch to Video Frames mode
     act(() => store.getState().switchMode("video", "frames"));
     expect(store.getState().activeMode).toBe("video");
     // Stale characters from image mode should be cleared on mode change!
-    expect(store.getState().characters).toHaveLength(0);
+    expect(selectCharacters(store.getState())).toHaveLength(0);
 
     // Now type '@' in Video Frames mode and click Add to prompt
     const editable = document.querySelector('[contenteditable="true"]');
@@ -549,12 +557,13 @@ describe("Phase 1+2 Comprehensive Repro Matrix — Add to prompt", () => {
     act(() => genHook.current.handleAddToPrompt());
     expect(store.getState().parameterValues.images).toHaveLength(1);
 
-    // 2. Character sheet card -> MUST preserve character type/metadata & add to store.characters
-    const { result: charHook } = renderHook(() => useWorkflowActions(charWorkflow1, null, { projectId: "proj-real" }));
-    act(() => charHook.current.handleAddToPrompt());
+    // 2. Character sheet workflow via promptBarService -> MUST preserve character type/metadata & derive via selectCharacters
+    act(() => {
+      promptBarService({ templateId: "generated-media", projectId: "proj-real" }).addReference(charWorkflow1);
+    });
     expect(store.getState().parameterValues.images).toHaveLength(2);
-    expect(store.getState().characters).toHaveLength(1);
-    expect(store.getState().characters[0].workflow_id).toBe("wf-char-1");
+    expect(selectCharacters(store.getState())).toHaveLength(1);
+    expect(selectCharacters(store.getState())[0].workflow_id).toBe("wf-char-1");
   });
 
   it("S9B: Card 'Ajouter au prompt' on /characters (unmounted) -> navigates to /assets -> async models load -> pending action MUST attach to images!", async () => {
@@ -588,19 +597,17 @@ describe("Phase 1+2 Comprehensive Repro Matrix — Add to prompt", () => {
     expect(store.getState().parameterValues.images[0].workflow_id).toBe("wf-gen-1");
   });
 
-  it("S9C: Card 'Ajouter au prompt' while PromptBar is in Video/Frames mode — what happens?", async () => {
+  it("S9C: Card 'Ajouter au prompt' while PromptBar is in Video/Frames mode fails cleanly with NO_SLOT_FOR_ROLE (no silent mode switch)", async () => {
     render(<GeneratedPromptBar projectId="proj-real" models={realModelsAll} onGenerate={vi.fn()} />);
     const store = getActivePromptBarStore();
     await waitFor(() => expect(Object.keys(store.getState().modelsMap).length).toBeGreaterThan(5));
     act(() => store.getState().switchMode("video", "frames"));
 
-    const { result: genHook } = renderHook(() => useWorkflowActions(genWorkflow1, null, { projectId: "proj-real" }));
-    act(() => genHook.current.handleAddToPrompt());
-
-    // Either attaches to start/end or adds reference — check whether ANYTHING was attached!
-    const vals = store.getState().parameterValues;
-    const attached = Boolean(vals.input_image || vals.last_frame || (Array.isArray(vals.images) && vals.images.length > 0));
-    expect(attached).toBe(true);
+    const res = promptBarService({ templateId: "generated-media", projectId: "proj-real" }).addReference(genWorkflow1);
+    expect(res.ok).toBe(false);
+    expect(res.reason).toBe("NO_SLOT_FOR_ROLE");
+    expect(store.getState().activeMode).toBe("video");
+    expect(store.getState().activeSubMode).toBe("frames");
   });
 
   it("S9D: Image mode with prompt-only model (seedream_v5) -> Card 'Ajouter au prompt' MUST NOT silently write to dead 'reference' key", async () => {

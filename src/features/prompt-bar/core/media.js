@@ -9,7 +9,7 @@ import { getModelReferenceCapability } from "./modelManagement.js";
 import { getAssetId, sameAsset } from "./mediaRef.js";
 import { getEntityImageCount } from "./entityService.js";
 import { ok, fail, REASONS } from "./commandResult.js";
-import { PARAM, isMediaType } from "./parameterKeys.js";
+import { PARAM, MEDIA_PARAM_KEYS, isMediaType } from "./parameterKeys.js";
 
 export { getModelReferenceCapability };
 
@@ -97,7 +97,8 @@ export function getSlotMaxRefs({
   if (slot.role === "reference") {
     if (model) {
       const cap = getModelReferenceCapability(model);
-      return cap.maxRefs || 4;
+      if (!cap.supports) return 0;
+      return typeof cap.maxRefs === "number" ? cap.maxRefs : 4;
     }
     return config?.mediaLimit || 4;
   }
@@ -107,24 +108,46 @@ export function getSlotMaxRefs({
   return 1;
 }
 
-/** Calculates total used image reference count across parameter values and entity references. */
-export function countUsedRefs(parameterValues = {}, slots = [], entities = []) {
+/** Calculates total used image reference count across parameter values and optional entities. */
+export function countUsedRefs(parameterValues = {}, slots = [], entities = [], options = {}) {
   const entityList = Array.isArray(entities)
     ? entities
     : [...(entities?.elements || []), ...(entities?.characters || [])];
+
+  const config = options?.template || options?.featureConfig || null;
+  const model = options?.model || null;
+  const resolveMapping = config?.resolveParameterMapping;
 
   const seenIds = new Set();
   const allItems = [];
 
   const inspectedKeys = new Set();
+  if (Array.isArray(options?.keys)) {
+    for (const key of options.keys) {
+      if (key) inspectedKeys.add(key);
+    }
+  }
   if (Array.isArray(slots) && slots.length > 0) {
     for (const slot of slots) {
-      if (slot.backendKey) inspectedKeys.add(slot.backendKey);
+      if (slot?.backendKey) {
+        inspectedKeys.add(slot.backendKey);
+      } else if (slot?.role) {
+        const mapped = resolveMapping ? resolveMapping(model, slot.role) : slot.role;
+        if (mapped) inspectedKeys.add(mapped);
+      }
     }
   }
   if (inspectedKeys.size === 0) {
-    inspectedKeys.add(PARAM.IMAGES);
-    inspectedKeys.add(PARAM.REFERENCE_IMAGES);
+    for (const key of MEDIA_PARAM_KEYS) {
+      if (parameterValues[key] !== undefined) {
+        inspectedKeys.add(key);
+      }
+    }
+    if (inspectedKeys.size === 0) {
+      inspectedKeys.add(PARAM.IMAGES);
+      inspectedKeys.add(PARAM.REFERENCE_IMAGES);
+      inspectedKeys.add(PARAM.REFERENCES);
+    }
   }
 
   for (const key of inspectedKeys) {
@@ -196,6 +219,7 @@ export function allowedTypeForSlot({ mode, slot, fallback = "all" } = {}) {
 /** Checks whether a candidate media item can be attached to the given slot. */
 export function canAttach({
   model,
+  mode,
   slot,
   value,
   used = 0,
@@ -207,8 +231,8 @@ export function canAttach({
     return fail(REASONS.INVALID_ARGUMENT, { message: "No media provided" });
   }
 
-  // 1. Type validation
-  const allowed = allowedTypeForSlot({ mode: model?.domain, slot });
+  // 1. Type validation (uses active mode first, falling back to model?.domain)
+  const allowed = allowedTypeForSlot({ mode: mode || model?.domain, slot });
   const isVideoValue =
     value.type === "video" ||
     Boolean(value.is_video) ||

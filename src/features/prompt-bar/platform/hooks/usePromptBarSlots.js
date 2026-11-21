@@ -1,19 +1,11 @@
 import { useMemo, useCallback } from "react";
-import { usePromptBarStore } from "../../store/usePromptBarStore.js";
+import { usePromptBarState, usePromptBarService } from "../../store/PromptBarStoreContext.js";
 import { getActiveSlots } from "../../core/media.js";
 
 /**
  * usePromptBarSlots
  * Encapsulates active slots resolution, drawer parameter partitioning,
- * and keyframe swap handling.
- *
- * @param {Object} options
- * @param {Object} [options.featureConfig] - Feature configuration object
- * @param {Object} [options.type] - CompositionType layout configuration
- * @param {string} [options.activeMode] - Current active mode
- * @param {string} [options.activeSubMode] - Current active sub-mode
- * @param {Object} [options.currentModel] - Currently selected model object
- * @param {Object} [options.parameters] - Model parameters definition dictionary
+ * and atomic keyframe swap handling via the Public Service.
  */
 export function usePromptBarSlots({
   featureConfig,
@@ -23,10 +15,10 @@ export function usePromptBarSlots({
   currentModel,
   parameters = {},
 } = {}) {
-  const storeActiveMode    = usePromptBarStore((s) => s.activeMode);
-  const storeActiveSubMode = usePromptBarStore((s) => s.activeSubMode);
-  const paramValues        = usePromptBarStore((s) => s.parameterValues);
-  const setParameter       = usePromptBarStore((s) => s.setParameter);
+  const service            = usePromptBarService();
+  const storeActiveMode    = usePromptBarState((s) => s.activeMode);
+  const storeActiveSubMode = usePromptBarState((s) => s.activeSubMode);
+  const paramValues        = usePromptBarState((s) => s.parameterValues);
 
   const activeMode    = propActiveMode ?? (storeActiveMode || "image");
   const activeSubMode = propActiveSubMode ?? (storeActiveSubMode || "frames");
@@ -34,7 +26,6 @@ export function usePromptBarSlots({
   const { layout = {}, referenceSlots = [] } = type || {};
   const hasModes = layout.showModeSelector !== false;
 
-  // Active slot definitions — driven by featureConfig.COMPOSITION_REQUIREMENTS and currentModel.
   const activeSlots = useMemo(() => {
     return getActiveSlots({
       featureConfig,
@@ -57,7 +48,6 @@ export function usePromptBarSlots({
     );
   }, [parameters]);
 
-  // Keyframe swap handler — reads/writes backend keys (not role names).
   const startKey = featureConfig?.resolveParameterMapping
     ? featureConfig.resolveParameterMapping(currentModel, "start")
     : null;
@@ -70,9 +60,8 @@ export function usePromptBarSlots({
 
   const handleSwapFrames = useCallback(() => {
     if (!startKey || !endKey) return;
-    setParameter(startKey, endVal);
-    setParameter(endKey, startVal);
-  }, [startKey, endKey, startVal, endVal, setParameter]);
+    service.swapFrames();
+  }, [startKey, endKey, service]);
 
   return {
     activeSlots,

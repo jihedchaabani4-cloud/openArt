@@ -1,7 +1,7 @@
 "use client";
 
 import { PromptBarPlatform } from "./PromptBarPlatform.jsx";
-import { generatedMediaTemplate } from "@/features/prompt-bar/templates/generatedMedia.template.js";
+import { generatedMediaTemplate } from "@/features/prompt-bar";
 
 /**
  * GeneratedPromptBar

@@ -45,7 +45,7 @@ describe("X2: Generated-Media Template Actions (addReference, animateMedia, appl
         selectedModelId: normalizedImagesListModel.id,
       });
 
-      const actions = generatedMediaTemplate.createActions(store.getState());
+      const actions = generatedMediaTemplate.createActions(store);
       const res = actions.addReference({ workflow_id: "ref_1", url: "https://example.com/1.png" });
 
       expect(res.ok).toBe(true);
@@ -63,7 +63,7 @@ describe("X2: Generated-Media Template Actions (addReference, animateMedia, appl
       });
 
       const beforeState = JSON.parse(JSON.stringify(store.getState()));
-      const actions = generatedMediaTemplate.createActions(store.getState());
+      const actions = generatedMediaTemplate.createActions(store);
 
       const res = actions.addReference({ workflow_id: "ref_1" });
       expect(res.ok).toBe(false);
@@ -91,7 +91,7 @@ describe("X2: Generated-Media Template Actions (addReference, animateMedia, appl
       const listener = vi.fn();
       store.subscribe(listener);
 
-      const actions = generatedMediaTemplate.createActions(store.getState());
+      const actions = generatedMediaTemplate.createActions(store);
       const res = actions.animateMedia({
         workflow_id: "anim_media_99",
         url: "https://example.com/anim.png",
@@ -141,7 +141,7 @@ describe("X2: Generated-Media Template Actions (addReference, animateMedia, appl
       const listener = vi.fn();
       store.subscribe(listener);
 
-      const actions = generatedMediaTemplate.createActions(store.getState());
+      const actions = generatedMediaTemplate.createActions(store);
       const res = actions.animateMedia({ workflow_id: "anim_1" });
 
       expect(res.ok).toBe(false);
@@ -161,25 +161,25 @@ describe("X2: Generated-Media Template Actions (addReference, animateMedia, appl
     it("promptMode options: overwrite, append, if-empty", () => {
       // 1. Overwrite
       const store1 = createTestStore({ prompt: "Old prompt" });
-      const actions1 = generatedMediaTemplate.createActions(store1.getState());
+      const actions1 = generatedMediaTemplate.createActions(store1);
       actions1.animateMedia({ workflow_id: "m1" }, { prompt: "New overwritten prompt", promptMode: "overwrite" });
       expect(store1.getState().prompt).toBe("New overwritten prompt");
 
       // 2. Append
       const store2 = createTestStore({ prompt: "First part" });
-      const actions2 = generatedMediaTemplate.createActions(store2.getState());
+      const actions2 = generatedMediaTemplate.createActions(store2);
       actions2.animateMedia({ workflow_id: "m1" }, { prompt: "second part", promptMode: "append" });
       expect(store2.getState().prompt).toBe("First part second part");
 
       // 3. If-empty when empty
       const store3 = createTestStore({ prompt: "" });
-      const actions3 = generatedMediaTemplate.createActions(store3.getState());
+      const actions3 = generatedMediaTemplate.createActions(store3);
       actions3.animateMedia({ workflow_id: "m1" }, { prompt: "Filled because empty", promptMode: "if-empty" });
       expect(store3.getState().prompt).toBe("Filled because empty");
 
       // 4. If-empty when not empty
       const store4 = createTestStore({ prompt: "Already has text" });
-      const actions4 = generatedMediaTemplate.createActions(store4.getState());
+      const actions4 = generatedMediaTemplate.createActions(store4);
       actions4.animateMedia({ workflow_id: "m1" }, { prompt: "Should be ignored", promptMode: "if-empty" });
       expect(store4.getState().prompt).toBe("Already has text");
     });
@@ -195,7 +195,7 @@ describe("X2: Generated-Media Template Actions (addReference, animateMedia, appl
       const listener = vi.fn();
       store.subscribe(listener);
 
-      const actions = generatedMediaTemplate.createActions(store.getState());
+      const actions = generatedMediaTemplate.createActions(store);
       const oldGeneration = {
         mode: "video",
         subMode: "frames",
@@ -234,7 +234,7 @@ describe("X2: Generated-Media Template Actions (addReference, animateMedia, appl
       });
 
       const beforePrompt = store.getState().prompt;
-      const actions = generatedMediaTemplate.createActions(store.getState());
+      const actions = generatedMediaTemplate.createActions(store);
 
       const res = actions.applyGeneration({
         mode: "image",
@@ -259,7 +259,7 @@ describe("X2: Generated-Media Template Actions (addReference, animateMedia, appl
         },
       });
 
-      const actions = generatedMediaTemplate.createActions(store.getState());
+      const actions = generatedMediaTemplate.createActions(store);
       const result = actions.applyGeneration({
         mode: "image",
         modelId: normalizedImagesListModel.id,
@@ -271,11 +271,13 @@ describe("X2: Generated-Media Template Actions (addReference, animateMedia, appl
 
       expect(result.ok).toBe(true);
       expect(store.getState().prompt).toBe("Restored prompt");
-      expect(store.getState().parameterValues).toEqual({
+      expect(store.getState().promptFillNonce).toBeGreaterThan(0);
+      expect(store.getState().parameterValues).toMatchObject({
         resolution: "1K",
         aspect_ratio: "16:9",
-        images: [{ workflow_id: "reference-workflow" }],
+        images: [expect.objectContaining({ workflow_id: "reference-workflow" })],
       });
+      expect(store.getState().parameterValues.stale_parameter).toBeUndefined();
       expect(store.getState().serialize()).toMatchObject({
         parameters: { images: ["reference-workflow"] },
         references: ["reference-workflow"],

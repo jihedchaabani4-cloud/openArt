@@ -1,16 +1,18 @@
 /**
- * SAFE-3: Store Characterization Tests (Vanilla Zustand Store)
+ * SAFE-3: Store Characterization Tests (Sealed Vanilla Zustand Store)
  *
  * Tests:
- * 1. setModels picks default model & default parameter values; honors valid initial selectedModelId
+ * 1. setModels picks eligible default model & default parameter values; honors valid initial selectedModelId
  * 2. selectModel (frames -> imagesList): parameter reconciliation, non-empty reconciliationLog, prompt tag cleanup
  * 3. selectModel (lower max image count): trims excess references and cleans prompt tags directly in store (PB-K3)
- * 4. setParameter, setPrompt, addElement/removeElement, addCharacter/removeCharacter, clearEntities, clearMediaReferences, reset, serialize
+ * 4. setSetting, setPrompt, attachMedia/removeMedia (derived elements/characters), clearSlot, clearDraft, reset, serialize
  * 5. setIsGenerating only mutates isGenerating flag
  */
 
 import { describe, it, expect } from "vitest";
 import { createPromptBarStore } from "../store/createPromptBarStore.js";
+import { generatedMediaTemplate } from "../templates/generatedMedia.template.js";
+import { selectElements, selectCharacters } from "../core/entityService.js";
 import {
   fixtureModels,
   normalizedImagesListModel,
@@ -48,15 +50,15 @@ describe("SAFE-3: Store Characterization", () => {
 
   describe("2. selectModel (frames -> imagesList)", () => {
     it("reconciles parameters, logs changes in reconciliationLog, and cleans prompt tags of dropped media", () => {
-      const store = createPromptBarStore();
+      const store = createPromptBarStore({ activeMode: "video", activeSubMode: "frames" }, { template: generatedMediaTemplate });
       store.getState().setModels(fixtureModels);
 
       // Start on frames model with media and prompt tag
       store.getState().setPrompt("Drone shot at sunset <MediaAsset:wf_end>");
-      store.getState().setParameter("input_image", { workflow_id: "wf_start" });
-      store.getState().setParameter("last_frame", { workflow_id: "wf_end" });
-      store.getState().setParameter("aspect_ratio", "16:9");
-      store.getState().setParameter("resolution", "720p");
+      store.getState().attachMedia({ role: "start", value: { workflow_id: "wf_start" } });
+      store.getState().attachMedia({ role: "end", value: { workflow_id: "wf_end" } });
+      store.getState().setSetting("aspect_ratio", "16:9");
+      store.getState().setSetting("resolution", "720p");
 
       // Switch to imagesList model (nanobana_pro)
       store.getState().selectModel("nanobana_pro");
@@ -83,7 +85,6 @@ describe("SAFE-3: Store Characterization", () => {
 
   describe("3. selectModel reference trimming (PB-K3)", () => {
     it("pins PB-K3: store trims excess references and cleans orphan prompt tags when switching to model with lower maxRefs", () => {
-      // Model with lower max images (max: 1)
       const restrictedModel = {
         id: "restricted_image_model",
         name: "Restricted Single Image",
@@ -96,16 +97,14 @@ describe("SAFE-3: Store Characterization", () => {
         },
       };
 
-      const store = createPromptBarStore();
+      const store = createPromptBarStore({}, { template: generatedMediaTemplate });
       store.getState().setModels([normalizedImagesListModel, restrictedModel]);
       store.getState().selectModel("nanobana_pro");
 
       // Attach 2 references with tags in prompt
       store.getState().setPrompt("Combining <MediaAsset:ref_alpha> and <MediaAsset:ref_beta>");
-      store.getState().setParameter("images", [
-        { workflow_id: "ref_alpha", name: "Alpha" },
-        { workflow_id: "ref_beta", name: "Beta" },
-      ]);
+      store.getState().attachMedia({ role: "reference", value: { workflow_id: "ref_alpha", name: "Alpha" } });
+      store.getState().attachMedia({ role: "reference", value: { workflow_id: "ref_beta", name: "Beta" } });
 
       // Switch to restricted model (maxRefs = 1)
       store.getState().selectModel("restricted_image_model");
@@ -113,9 +112,7 @@ describe("SAFE-3: Store Characterization", () => {
       const state = store.getState();
       expect(state.selectedModelId).toBe("restricted_image_model");
 
-      // CURRENT BEHAVIOR (known issue PB-K3):
-      // The store trims the list to 1 item and cleans the trimmed item's tag from prompt on its own!
-      expect(state.parameterValues.images).toEqual({ workflow_id: "ref_alpha", name: "Alpha" });
+      expect(state.parameterValues.images).toMatchObject({ workflow_id: "ref_alpha", displayName: "Alpha" });
       expect(state.prompt).toBe("Combining <MediaAsset:ref_alpha> and");
       expect(state.prompt.includes("ref_beta")).toBe(false);
     });
@@ -128,85 +125,81 @@ describe("SAFE-3: Store Characterization", () => {
       expect(store.getState().prompt).toBe("Hello world");
     });
 
-    it("updates parameter with setParameter", () => {
-      const store = createPromptBarStore();
-      store.getState().setParameter("aspect_ratio", "16:9");
+    it("updates validated non-media setting with setSetting and rejects media keys", () => {
+      const store = createPromptBarStore({}, { template: generatedMediaTemplate });
+      store.getState().setModels(fixtureModels);
+      const okRes = store.getState().setSetting("aspect_ratio", "16:9");
+      expect(okRes.ok).toBe(true);
       expect(store.getState().parameterValues.aspect_ratio).toBe("16:9");
+
+      const badRes = store.getState().setSetting("images", [{ workflow_id: "x" }]);
+      expect(badRes.ok).toBe(false);
     });
 
-    it("adds and removes elements, cleaning prompt tags on remove", () => {
-      const store = createPromptBarStore();
+    it("attaches and removes elements via attachMedia/removeMedia, deriving via selectElements and cleaning prompt tags", () => {
+      const store = createPromptBarStore({}, { template: generatedMediaTemplate });
+      store.getState().setModels(fixtureModels);
       store.getState().setPrompt("A cyber ninja <element:elem_1> in Tokyo");
 
-      const elem = { id: "elem_1", name: "Cyber Ninja", workflow_id: "elem_1" };
-      store.getState().addElement(elem);
-      expect(store.getState().elements.length).toBe(1);
+      const elem = { id: "elem_1", name: "Cyber Ninja", workflow_id: "elem_1", type: "element" };
+      store.getState().attachMedia({ role: "reference", value: elem });
+      expect(selectElements(store.getState()).length).toBe(1);
 
-      store.getState().removeElement("elem_1");
-      expect(store.getState().elements.length).toBe(0);
+      store.getState().removeMedia({ role: "reference", value: elem });
+      expect(selectElements(store.getState()).length).toBe(0);
       expect(store.getState().prompt).toBe("A cyber ninja in Tokyo");
     });
 
-    it("adds and removes characters, cleaning prompt tags on remove", () => {
-      const store = createPromptBarStore();
+    it("attaches and removes characters via attachMedia/removeMedia, deriving via selectCharacters and cleaning prompt tags", () => {
+      const store = createPromptBarStore({}, { template: generatedMediaTemplate });
+      store.getState().setModels(fixtureModels);
       store.getState().setPrompt("Hero <character:char_1> on a mission");
 
-      const char = { id: "char_1", name: "Hero", workflow_id: "char_1" };
-      store.getState().addCharacter(char);
-      expect(store.getState().characters.length).toBe(1);
+      const char = { id: "char_1", name: "Hero", workflow_id: "char_1", type: "character" };
+      store.getState().attachMedia({ role: "reference", value: char });
+      expect(selectCharacters(store.getState()).length).toBe(1);
 
-      store.getState().removeCharacter("char_1");
-      expect(store.getState().characters.length).toBe(0);
+      store.getState().removeMedia({ role: "reference", value: char });
+      expect(selectCharacters(store.getState()).length).toBe(0);
       expect(store.getState().prompt).toBe("Hero on a mission");
     });
 
-    it("clears all entities with clearEntities", () => {
-      const store = createPromptBarStore();
-      store.getState().addElement({ id: "e1", workflow_id: "e1" });
-      store.getState().addCharacter({ id: "c1", workflow_id: "c1" });
-      expect(store.getState().elements.length).toBe(1);
-      expect(store.getState().characters.length).toBe(1);
-
-      store.getState().clearEntities();
-      expect(store.getState().elements).toEqual([]);
-      expect(store.getState().characters).toEqual([]);
-    });
-
-    it("clears media references and cleans prompt tags with clearMediaReferences", () => {
-      const store = createPromptBarStore();
+    it("clears slot and prompt tags atomically with clearSlot", () => {
+      const store = createPromptBarStore({}, { template: generatedMediaTemplate });
+      store.getState().setModels(fixtureModels);
       store.getState().setPrompt("Scene with <MediaAsset:img_1> and <character:c_1>");
-      store.getState().setParameter("images", [{ workflow_id: "img_1" }]);
-      store.getState().addCharacter({ id: "c_1", workflow_id: "c_1" });
+      store.getState().attachMedia({ role: "reference", value: { workflow_id: "img_1" } });
+      store.getState().attachMedia({ role: "reference", value: { id: "c_1", workflow_id: "c_1", type: "character" } });
 
-      store.getState().clearMediaReferences();
+      store.getState().clearSlot("reference");
 
       const state = store.getState();
       expect(state.parameterValues.images).toBeUndefined();
-      expect(state.characters).toEqual([]);
-      expect(state.elements).toEqual([]);
+      expect(selectCharacters(state)).toEqual([]);
+      expect(selectElements(state)).toEqual([]);
       expect(state.prompt).toBe("Scene with and");
     });
 
-    it("resets prompt, parameters, entities, and logs to model defaults with reset", () => {
-      const store = createPromptBarStore();
+    it("resets prompt, parameters, derived entities, and logs to model defaults with reset", () => {
+      const store = createPromptBarStore({}, { template: generatedMediaTemplate });
       store.getState().setModels(fixtureModels);
       store.getState().selectModel("nanobana_pro");
       store.getState().setPrompt("Something custom");
-      store.getState().setParameter("resolution", "2K");
-      store.getState().addElement({ id: "e1", workflow_id: "e1" });
+      store.getState().setSetting("resolution", "2K");
+      store.getState().attachMedia({ role: "reference", value: { id: "e1", workflow_id: "e1", type: "element" } });
 
       store.getState().reset();
 
       const state = store.getState();
       expect(state.prompt).toBe("");
-      expect(state.elements).toEqual([]);
-      expect(state.characters).toEqual([]);
+      expect(selectElements(state)).toEqual([]);
+      expect(selectCharacters(state)).toEqual([]);
       expect(state.reconciliationLog).toEqual([]);
       expect(state.lastSerializedRequest).toBeNull();
       expect(state.parameterValues).toEqual({
-        resolution: "1K", // default
-        aspect_ratio: "1:1", // default
-        images: [], // default
+        resolution: "1K",
+        aspect_ratio: "1:1",
+        images: [],
       });
     });
 
@@ -215,7 +208,7 @@ describe("SAFE-3: Store Characterization", () => {
       store.getState().setModels(fixtureModels);
       store.getState().selectModel("nanobana_pro");
       store.getState().setPrompt("Stylized portrait");
-      store.getState().setParameter("resolution", "2K");
+      store.getState().setSetting("resolution", "2K");
 
       const result = store.getState().serialize();
 
@@ -239,7 +232,7 @@ describe("SAFE-3: Store Characterization", () => {
     it("only modifies isGenerating without altering prompt or parameterValues", () => {
       const store = createPromptBarStore();
       store.getState().setPrompt("Test prompt");
-      store.getState().setParameter("resolution", "1K");
+      store.getState().setSetting("resolution", "1K");
 
       expect(store.getState().isGenerating).toBe(false);
 

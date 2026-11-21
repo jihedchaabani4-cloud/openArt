@@ -27,7 +27,7 @@ import {
 import { SHINE_TEXT_SWEEP_MS } from "@/components/primitives/ShineText";
 
 const theme = {
-  paragraph: "text-white/90 text-[14.5px] leading-relaxed",
+  paragraph: "ds-text-control font-normal text-text-primary",
 };
 
 // ── Sync external value + Enter to submit ────────────────────────────────────
@@ -303,19 +303,19 @@ export function PromptEditor({
 
   return (
     <LexicalComposer initialConfig={initialConfig} key={editorKey}>
-      <div className="relative w-full h-full min-h-[38px] items-start">
+      <div className="relative w-full h-full min-h-8 items-start">
         <RichTextPlugin
           contentEditable={
             <ContentEditable
               className={cn(
-                "ds-input-ghost bg-transparent hover:bg-transparent focus:bg-transparent outline-none text-white text-[14.5px] leading-relaxed py-1.5 overflow-y-auto scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent w-full h-full min-h-[36px]",
+                "ds-input-ghost ds-text-control font-normal bg-transparent hover:bg-transparent focus:bg-transparent outline-none text-text-primary py-1.5 overflow-y-auto scrollbar-thin scrollbar-thumb-border-heavy scrollbar-track-transparent w-full h-full min-h-8",
                 sweeping && "shine-text--sweep shine-text--sweep--once"
               )}
             />
           }
           placeholder={
             !value && (
-              <span className="absolute top-1.5 left-0 text-white/50 text-[14.5px] pointer-events-none">
+              <span className="absolute top-1.5 left-0 ds-text-control font-normal text-text-secondary pointer-events-none">
                 {placeholder}
               </span>
             )

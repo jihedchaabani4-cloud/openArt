@@ -2,13 +2,14 @@
  * Prompt Bar Platform — attachMedia Command
  *
  * Pure command executing media attachment per PB-D-03.
+ * Single source of truth: normalizes every attached item via normalizeEntity
+ * and stores it ONLY in parameterValues[targetKey].
  * Zero React, zero DOM, zero store mutation.
  */
 
 import { ok, fail, REASONS } from "../../core/commandResult.js";
 import { canAttach, countUsedRefs, getSlotMaxRefs } from "../../core/media.js";
-import { getAssetId } from "../../core/tagsService.js";
-import { addEntity } from "../../core/entityService.js";
+import { normalizeEntity } from "../../core/entityService.js";
 
 /**
  * Pure attachMedia command.
@@ -16,9 +17,9 @@ import { addEntity } from "../../core/entityService.js";
  * @param {object} state - Current Zustand store state
  * @param {object} args - { role, value }
  * @param {string} args.role - Slot role ("start", "end", "reference", etc.)
- * @param {object} args.value - Media item or asset to attach
- * @param {object} [deps] - { template }
- * @returns {CommandResult}
+ * @param {object|string} args.value - Media item or asset to attach
+ * @param {object} [deps] - { template, modelsMap }
+ * @returns {import("../../core/commandResult.js").CommandResult}
  */
 export function attachMedia(state, { role, value } = {}, deps = {}) {
   if (!role || !value) {
@@ -29,24 +30,37 @@ export function attachMedia(state, { role, value } = {}, deps = {}) {
   const modelsMap = state.modelsMap || deps.modelsMap || {};
   const currentModel = modelsMap[state.selectedModelId] || null;
 
-  // 1. Resolve slots for activeMode and activeSubMode
+  const effectiveMode = state.activeMode || "image";
+  const effectiveSubMode = effectiveMode === "video" ? (state.activeSubMode || "frames") : (state.activeSubMode || "frames");
+
+  // 1. Resolve slots for activeMode and effectiveSubMode
   let activeSlots = [];
   if (typeof template?.getSlots === "function") {
-    activeSlots = template.getSlots(state.activeMode, state.activeSubMode);
+    activeSlots = template.getSlots(effectiveMode, effectiveSubMode, currentModel) || [];
   } else if (template?.COMPOSITION_REQUIREMENTS) {
     const req = template.COMPOSITION_REQUIREMENTS;
-    const modeSlots = req[state.activeMode];
-    activeSlots = Array.isArray(modeSlots) ? modeSlots : (modeSlots?.[state.activeSubMode] || []);
+    const modeSlots = req[effectiveMode];
+    activeSlots = Array.isArray(modeSlots) ? modeSlots : (modeSlots?.[effectiveSubMode] || []);
   }
 
   const slot = (activeSlots || []).find((s) => s.role === role);
   if (!slot) {
-    return fail(REASONS.NO_SLOT_FOR_ROLE, { role, mode: state.activeMode, subMode: state.activeSubMode });
+    return fail(REASONS.NO_SLOT_FOR_ROLE, { role, mode: effectiveMode, subMode: effectiveSubMode });
   }
 
-  // 2. Resolve parameter key for this slot
+  // 2. Resolve parameter key for this slot.
+  // If the template defines resolveParameterMapping and returns falsy, the active model
+  // does NOT support this slot role — reject instead of writing to a dead key.
   const resolveMapping = template?.resolveParameterMapping;
-  const targetKey = resolveMapping ? resolveMapping(currentModel, role) || role : role;
+  const targetKey = resolveMapping ? resolveMapping(currentModel, role) : role;
+  if (!targetKey) {
+    return fail(REASONS.NO_SLOT_FOR_ROLE, {
+      role,
+      mode: effectiveMode,
+      subMode: effectiveSubMode,
+      modelId: state.selectedModelId,
+    });
+  }
 
   const paramDef = currentModel?.parameters?.[targetKey] || template?.parameters?.[targetKey];
   const isList = paramDef?.type === "image[]" || paramDef?.type === "video[]" || role === "reference";
@@ -58,16 +72,23 @@ export function attachMedia(state, { role, value } = {}, deps = {}) {
     ? (Array.isArray(currentRaw) ? currentRaw : (currentRaw ? [currentRaw] : []))
     : [];
   const used = isList
-    ? countUsedRefs(state.parameterValues, activeSlots, [
-        ...(state.elements || []),
-        ...(state.characters || []),
-      ])
+    ? countUsedRefs(state.parameterValues, activeSlots, [], {
+        model: currentModel,
+        template,
+      })
     : 0;
+
+  // 4. Normalize value via single canonical entity normalizer
+  const normalized = normalizeEntity(value, null);
+  if (!normalized) {
+    return fail(REASONS.INVALID_ARGUMENT, { role, value });
+  }
 
   const check = canAttach({
     model: currentModel,
+    mode: effectiveMode,
     slot,
-    value,
+    value: normalized,
     used,
     existing,
     template,
@@ -77,17 +98,7 @@ export function attachMedia(state, { role, value } = {}, deps = {}) {
     return check;
   }
 
-  // 4. Normalize value
-  const id = getAssetId(value) || value.id || value.workflow_id;
-  const normalized = {
-    ...value,
-    workflow_id: id,
-    id,
-  };
-
-  const nextParameterValues = { ...state.parameterValues };
-  let nextElements = [...(state.elements || [])];
-  let nextCharacters = [...(state.characters || [])];
+  const nextParameterValues = { ...(state.parameterValues || {}) };
 
   if (isList) {
     const maxRefs = getSlotMaxRefs({ slot, model: currentModel, template });
@@ -97,19 +108,7 @@ export function attachMedia(state, { role, value } = {}, deps = {}) {
     nextParameterValues[targetKey] = normalized;
   }
 
-  // 5. Update elements and characters if applicable
-  const isElement = normalized.type === "element" || normalized.is_element;
-  const isCharacter = normalized.type === "character" || normalized.is_character;
-
-  if (isElement) {
-    nextElements = addEntity(nextElements, normalized, "element");
-  } else if (isCharacter) {
-    nextCharacters = addEntity(nextCharacters, normalized, "character");
-  }
-
   return ok({
     parameterValues: nextParameterValues,
-    elements: nextElements,
-    characters: nextCharacters,
   });
 }

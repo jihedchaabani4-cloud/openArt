@@ -1,25 +1,31 @@
 "use client"
 
 import * as React from "react"
-import { GoogleIcon } from "@/components/primitives/GoogleIcon"
+import { HugeIcon } from "@/components/primitives/HugeIcon"
 import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
 } from "@/components/base/dropdown-menu"
+import { MenuItemContent } from "@/components/base/menu"
 import { Button } from "@/components/base/button"
 import { Switch } from "@/components/base/switch"
+import { Slider } from "@/components/primitives/slider"
+import { STUDIO_GRID_SIZE_STOPS } from "@/shared/lib/displayUtils"
 import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows"
+
+const GRID_SIZE_STOPS = STUDIO_GRID_SIZE_STOPS
 
 export function StudioSettingsDropdown(props) {
   const storeGridSize = useGenerationsStore(s => s.gridSize);
   const storeSetGridSize = useGenerationsStore(s => s.setGridSize);
-  const storeGridSpacing = useGenerationsStore(s => s.gridSpacing);
-  const storeSetGridSpacing = useGenerationsStore(s => s.setGridSpacing);
-  const storeShowUploadedMedia = useGenerationsStore(s => s.showUploadedMedia);
-  const storeSetShowUploadedMedia = useGenerationsStore(s => s.setShowUploadedMedia);
+  const storeSplitByDate = useGenerationsStore(s => s.splitByDate);
+  const storeSetSplitByDate = useGenerationsStore(s => s.setSplitByDate);
+  const storeShowFolders = useGenerationsStore(s => s.showFolders);
+  const storeSetShowFolders = useGenerationsStore(s => s.setShowFolders);
   const storeShowTileDetails = useGenerationsStore(s => s.showTileDetails);
   const storeSetShowTileDetails = useGenerationsStore(s => s.setShowTileDetails);
   const storeSoundOnHover = useGenerationsStore(s => s.soundOnHover);
@@ -29,10 +35,10 @@ export function StudioSettingsDropdown(props) {
 
   const gridSize = props.gridSize ?? storeGridSize;
   const setGridSize = props.setGridSize ?? storeSetGridSize;
-  const gridSpacing = props.gridSpacing ?? (typeof storeGridSpacing === "string" ? storeGridSpacing : "sm");
-  const setGridSpacing = props.setGridSpacing ?? storeSetGridSpacing;
-  const showUploadedMedia = props.showUploadedMedia ?? storeShowUploadedMedia;
-  const setShowUploadedMedia = props.setShowUploadedMedia ?? storeSetShowUploadedMedia;
+  const splitByDate = props.splitByDate ?? storeSplitByDate;
+  const setSplitByDate = props.setSplitByDate ?? storeSetSplitByDate;
+  const showFolders = props.showFolders ?? (storeShowFolders !== false);
+  const setShowFolders = props.setShowFolders ?? storeSetShowFolders;
   const showTileDetails = props.showTileDetails ?? storeShowTileDetails;
   const setShowTileDetails = props.setShowTileDetails ?? storeSetShowTileDetails;
   const soundOnHover = props.soundOnHover ?? storeSoundOnHover;
@@ -42,165 +48,183 @@ export function StudioSettingsDropdown(props) {
 
   const [open, setOpen] = React.useState(false)
 
+  const resolvedIndex = GRID_SIZE_STOPS.indexOf(gridSize);
+  const sliderValue = resolvedIndex >= 0 ? resolvedIndex + 1 : 3;
+
+  const handleSliderChange = React.useCallback(
+    ([nextVal]) => {
+      const idx = Math.min(GRID_SIZE_STOPS.length - 1, Math.max(0, (Number(nextVal) || 1) - 1));
+      setGridSize?.(GRID_SIZE_STOPS[idx]);
+    },
+    [setGridSize]
+  );
+
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
         <Button
           type="button"
-          variant="ghost"
-          size="icon"
+          variant="outline"
           title="Paramètres d'affichage"
           aria-label="Paramètres de la grille de blocs"
           aria-haspopup="menu"
           aria-expanded={open}
         >
-          <GoogleIcon iconName="settings_2" className="text-xl" />
+          <HugeIcon name="grid-view" />
+          <span>View</span>
         </Button>
       </DropdownMenuTrigger>
-      
-      <DropdownMenuContent variant="normal" align="end" className="w-72 p-2 flex flex-col gap-1 font-sans antialiased">
-        {/* ── 1. Grid Size Selector ── */}
-        <div className="flex flex-col gap-1 px-0.5 mb-1">
-          <span className="text-xs font-medium text-text-body-muted">
-            Taille de la grille
-          </span>
-          <div
-            className="flex items-center gap-1 p-0.5 bg-surface-card border border-border-weak rounded-xl w-full select-none"
-            role="radiogroup"
-            aria-label="Taille de la grille"
+
+      <DropdownMenuContent align="end">
+        {/* ── 1. Card Size Stepped Slider ── */}
+        <DropdownMenuLabel>Card size</DropdownMenuLabel>
+        <div
+          className="px-1 pb-1.5"
+          onKeyDown={(e) => {
+            if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+              e.stopPropagation();
+            }
+          }}
+        >
+          <Slider
+            variant="stepped"
+            min={0}
+            max={GRID_SIZE_STOPS.length}
+            minSelectable={1}
+            step={1}
+            value={[sliderValue]}
+            onValueChange={handleSliderChange}
+            aria-label="Card size"
+          />
+        </div>
+
+        <DropdownMenuSeparator />
+
+        {/* ── 2. Display Toggles with Base UI Switch ── */}
+        {setSplitByDate && (
+          <DropdownMenuItem
+            role="menuitemcheckbox"
+            aria-checked={splitByDate}
+            onSelect={(e) => {
+              e.preventDefault()
+              setSplitByDate(!splitByDate)
+            }}
           >
-            {[
-              { value: "sm", label: "S" },
-              { value: "md", label: "M" },
-              { value: "lg", label: "L" },
-            ].map((opt) => {
-              const isChecked = gridSize === opt.value;
-              return (
-                <Button
-                  key={opt.value}
-                  type="button"
-                  role="radio"
-                  aria-checked={isChecked}
-                  variant={isChecked ? "secondary" : "ghost"}
-                  onClick={() => setGridSize?.(opt.value)}
-                  className="flex-1"
-                >
-                  <span>{opt.label}</span>
-                </Button>
-              );
-            })}
-          </div>
-        </div>
+            <MenuItemContent
+              icon="calendar-03"
+              trailing={
+                <Switch
+                  checked={splitByDate}
+                  tabIndex={-1}
+                  aria-hidden="true"
+                  className="pointer-events-none"
+                />
+              }
+            >
+              Split by date
+            </MenuItemContent>
+          </DropdownMenuItem>
+        )}
 
-        {/* ── 2. Space Between Media (S: 4px, M: 8px, L: 16px) ── */}
-        <div className="flex flex-col gap-1 px-0.5 mb-1">
-          <span className="text-xs font-medium text-text-body-muted">
-            Space between media
-          </span>
-          <div
-            className="flex items-center gap-1 p-0.5 bg-surface-card border border-border-weak rounded-xl w-full select-none"
-            role="radiogroup"
-            aria-label="Space between media"
+        {setShowFolders && (
+          <DropdownMenuItem
+            role="menuitemcheckbox"
+            aria-checked={showFolders}
+            onSelect={(e) => {
+              e.preventDefault()
+              setShowFolders(!showFolders)
+            }}
           >
-            {[
-              { value: "sm", label: "S" },
-              { value: "md", label: "M" },
-              { value: "lg", label: "L" },
-            ].map((opt) => {
-              const isChecked = gridSpacing === opt.value;
-              return (
-                <Button
-                  key={opt.value}
-                  type="button"
-                  role="radio"
-                  aria-checked={isChecked}
-                  variant={isChecked ? "secondary" : "ghost"}
-                  onClick={() => setGridSpacing?.(opt.value)}
-                  className="flex-1"
-                >
-                  <span>{opt.label}</span>
-                </Button>
-              );
-            })}
-          </div>
-        </div>
-
-        <DropdownMenuSeparator className="my-1.5 bg-border-weak" />
-
-        {/* ── 3. Display Toggles with Base UI Switch ── */}
-        <div className="flex flex-col gap-0.5">
-          {setShowUploadedMedia && (
-            <DropdownMenuItem 
-              onClick={(e) => {
-                e.preventDefault()
-                setShowUploadedMedia(!showUploadedMedia)
-              }}
-              className="flex items-center justify-between cursor-pointer px-2.5 h-[36px] rounded-xl hover:bg-surface-tonal transition-colors"
+            <MenuItemContent
+              icon="folder-01"
+              trailing={
+                <Switch
+                  checked={showFolders}
+                  tabIndex={-1}
+                  aria-hidden="true"
+                  className="pointer-events-none"
+                />
+              }
             >
-              <div className="flex items-center gap-2.5">
-                <GoogleIcon iconName="upload" className="text-lg text-text-body-muted shrink-0" />
-                <span className="text-sm font-medium text-text-primary">
-                  Médias importés
-                </span>
-              </div>
-              <Switch checked={showUploadedMedia} aria-label="Médias importés" />
-            </DropdownMenuItem>
-          )}
+              Show folders
+            </MenuItemContent>
+          </DropdownMenuItem>
+        )}
 
-          {setShowTileDetails && (
-            <DropdownMenuItem 
-              onClick={(e) => {
-                e.preventDefault()
-                setShowTileDetails(!showTileDetails)
-              }}
-              className="flex items-center justify-between cursor-pointer px-2.5 h-[36px] rounded-xl hover:bg-surface-tonal transition-colors"
+        {setShowTileDetails && (
+          <DropdownMenuItem
+            role="menuitemcheckbox"
+            aria-checked={showTileDetails}
+            onSelect={(e) => {
+              e.preventDefault()
+              setShowTileDetails(!showTileDetails)
+            }}
+          >
+            <MenuItemContent
+              icon="view"
+              trailing={
+                <Switch
+                  checked={showTileDetails}
+                  tabIndex={-1}
+                  aria-hidden="true"
+                  className="pointer-events-none"
+                />
+              }
             >
-              <div className="flex items-center gap-2.5">
-                <GoogleIcon iconName="visibility" className="text-lg text-text-body-muted shrink-0" />
-                <span className="text-sm font-medium text-text-primary">
-                  Détails des blocs
-                </span>
-              </div>
-              <Switch checked={showTileDetails} aria-label="Détails des blocs" />
-            </DropdownMenuItem>
-          )}
+              Détails des blocs
+            </MenuItemContent>
+          </DropdownMenuItem>
+        )}
 
-          {setSoundOnHover && (
-            <DropdownMenuItem 
-              onClick={(e) => {
-                e.preventDefault()
-                setSoundOnHover(!soundOnHover)
-              }}
-              className="flex items-center justify-between cursor-pointer px-2.5 h-[36px] rounded-xl hover:bg-surface-tonal transition-colors"
+        {setSoundOnHover && (
+          <DropdownMenuItem
+            role="menuitemcheckbox"
+            aria-checked={soundOnHover}
+            onSelect={(e) => {
+              e.preventDefault()
+              setSoundOnHover(!soundOnHover)
+            }}
+          >
+            <MenuItemContent
+              icon="volume-high"
+              trailing={
+                <Switch
+                  checked={soundOnHover}
+                  tabIndex={-1}
+                  aria-hidden="true"
+                  className="pointer-events-none"
+                />
+              }
             >
-              <div className="flex items-center gap-2.5">
-                <GoogleIcon iconName="volume_up" className="text-lg text-text-body-muted shrink-0" />
-                <span className="text-sm font-medium text-text-primary">
-                  Son au survol
-                </span>
-              </div>
-              <Switch checked={soundOnHover} aria-label="Son au survol" />
-            </DropdownMenuItem>
-          )}
+              Son au survol
+            </MenuItemContent>
+          </DropdownMenuItem>
+        )}
 
-          {setClearPromptOnSubmit && (
-            <DropdownMenuItem 
-              onClick={(e) => {
-                e.preventDefault()
-                setClearPromptOnSubmit(!clearPromptOnSubmit)
-              }}
-              className="flex items-center justify-between cursor-pointer px-2.5 h-[36px] rounded-xl hover:bg-surface-tonal transition-colors"
+        {setClearPromptOnSubmit && (
+          <DropdownMenuItem
+            role="menuitemcheckbox"
+            aria-checked={clearPromptOnSubmit}
+            onSelect={(e) => {
+              e.preventDefault()
+              setClearPromptOnSubmit(!clearPromptOnSubmit)
+            }}
+          >
+            <MenuItemContent
+              icon="delete-put-back"
+              trailing={
+                <Switch
+                  checked={clearPromptOnSubmit}
+                  tabIndex={-1}
+                  aria-hidden="true"
+                  className="pointer-events-none"
+                />
+              }
             >
-              <div className="flex items-center gap-2.5">
-                <GoogleIcon iconName="backspace" className="text-lg text-text-body-muted shrink-0" />
-                <span className="text-sm font-medium text-text-primary">
-                  Effacer le prompt
-                </span>
-              </div>
-              <Switch checked={clearPromptOnSubmit} aria-label="Effacer le prompt" />
-            </DropdownMenuItem>
-          )}
-        </div>
+              Effacer le prompt
+            </MenuItemContent>
+          </DropdownMenuItem>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   )

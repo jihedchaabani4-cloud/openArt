@@ -20,11 +20,13 @@ function openSettings() {
   expect(trigger.getAttribute("aria-expanded")).toBe("true");
 }
 
-describe("StudioSettingsDropdown - Space between media (S / M / L)", () => {
+describe("StudioSettingsDropdown - Stepped Card Size Slider", () => {
   beforeEach(() => {
     useWorkflowUiStore.setState({
-      gridSize: "lg",
+      gridSize: "md",
       gridSpacing: "sm",
+      splitByDate: false,
+      showFolders: true,
     });
   });
 
@@ -32,67 +34,77 @@ describe("StudioSettingsDropdown - Space between media (S / M / L)", () => {
     cleanup();
   });
 
-  it("renders both 'Taille de la grille' and 'Space between media' toggle groups", () => {
+  it("renders 'Card size' stepped slider with 4 interior ticks and removes 'Space between media'", () => {
     render(<StudioSettingsDropdown />);
     openSettings();
 
-    expect(screen.getByText("Taille de la grille")).toBeDefined();
-    expect(screen.getByText("Space between media")).toBeDefined();
+    expect(screen.getByText("Card size")).toBeDefined();
+    expect(screen.queryByText("Space between media")).toBeNull();
+    expect(screen.queryByText("Médias importés")).toBeNull();
 
-    // Verify S, M, L radio buttons are present
-    const radioGroups = screen.getAllByRole("radiogroup");
-    expect(radioGroups.length).toBe(2);
+    const slider = screen.getByRole("slider", { name: "Card size" });
+    expect(slider).toBeDefined();
+    expect(slider.getAttribute("aria-valuenow")).toBe("3"); // md = stop 3 of 5
 
-    const spacingRadios = radioGroups[1].querySelectorAll("button[role='radio']");
-    expect(spacingRadios.length).toBe(3);
-    expect(spacingRadios[0].textContent).toBe("S");
-    expect(spacingRadios[1].textContent).toBe("M");
-    expect(spacingRadios[2].textContent).toBe("L");
-
-    // S is checked by default
-    expect(spacingRadios[0].getAttribute("aria-checked")).toBe("true");
-    expect(spacingRadios[1].getAttribute("aria-checked")).toBe("false");
-    expect(spacingRadios[2].getAttribute("aria-checked")).toBe("false");
+    const ticks = document.querySelectorAll('[data-slot="slider-tick"]');
+    expect(ticks.length).toBe(4);
   });
 
-  it("clicking M and L updates store gridSpacing", () => {
+  it("steps gridSize across xs / sm / md / lg / xl via keyboard arrows and clamps minimum to xs", () => {
     render(<StudioSettingsDropdown />);
     openSettings();
 
-    const radioGroups = screen.getAllByRole("radiogroup");
-    const spacingRadios = radioGroups[1].querySelectorAll("button[role='radio']");
+    const slider = screen.getByRole("slider", { name: "Card size" });
 
-    // Click M
-    fireEvent.click(spacingRadios[1]);
-    expect(useWorkflowUiStore.getState().gridSpacing).toBe("md");
+    fireEvent.keyDown(slider, { key: "ArrowRight" });
+    expect(useWorkflowUiStore.getState().gridSize).toBe("lg");
 
-    // Click L
-    fireEvent.click(spacingRadios[2]);
-    expect(useWorkflowUiStore.getState().gridSpacing).toBe("lg");
+    fireEvent.keyDown(slider, { key: "ArrowRight" });
+    expect(useWorkflowUiStore.getState().gridSize).toBe("xl");
 
-    // Click S
-    fireEvent.click(spacingRadios[0]);
-    expect(useWorkflowUiStore.getState().gridSpacing).toBe("sm");
+    fireEvent.keyDown(slider, { key: "ArrowLeft" });
+    fireEvent.keyDown(slider, { key: "ArrowLeft" });
+    fireEvent.keyDown(slider, { key: "ArrowLeft" });
+    expect(useWorkflowUiStore.getState().gridSize).toBe("sm");
+
+    fireEvent.keyDown(slider, { key: "ArrowLeft" });
+    expect(useWorkflowUiStore.getState().gridSize).toBe("xs");
+
+    // Pressing ArrowLeft again at xs stays clamped at xs (never empty 0%)
+    fireEvent.keyDown(slider, { key: "ArrowLeft" });
+    expect(useWorkflowUiStore.getState().gridSize).toBe("xs");
   });
 
-  it("respects custom gridSpacing and setGridSpacing props when provided", () => {
-    const handleSetGridSpacing = vi.fn();
+  it("respects custom gridSize and setGridSize props when provided", () => {
+    const handleSetGridSize = vi.fn();
     render(
       <StudioSettingsDropdown
-        gridSpacing="md"
-        setGridSpacing={handleSetGridSpacing}
+        gridSize="sm"
+        setGridSize={handleSetGridSize}
       />
     );
     openSettings();
 
-    const radioGroups = screen.getAllByRole("radiogroup");
-    const spacingRadios = radioGroups[1].querySelectorAll("button[role='radio']");
+    const slider = screen.getByRole("slider", { name: "Card size" });
+    expect(slider.getAttribute("aria-valuenow")).toBe("2");
 
-    // M is checked
-    expect(spacingRadios[1].getAttribute("aria-checked")).toBe("true");
+    fireEvent.keyDown(slider, { key: "ArrowRight" });
+    expect(handleSetGridSize).toHaveBeenCalledWith("md");
+  });
 
-    // Click L
-    fireEvent.click(spacingRadios[2]);
-    expect(handleSetGridSpacing).toHaveBeenCalledWith("lg");
+  it("toggles 'Split by date' switch in the store", () => {
+    render(<StudioSettingsDropdown />);
+    openSettings();
+
+    const splitItem = screen.getByRole("menuitemcheckbox", { name: /Split by date/i });
+    expect(splitItem.getAttribute("aria-checked")).toBe("false");
+
+    fireEvent.click(splitItem);
+    expect(useWorkflowUiStore.getState().splitByDate).toBe(true);
+
+    const foldersItem = screen.getByRole("menuitemcheckbox", { name: /Show folders/i });
+    expect(foldersItem.getAttribute("aria-checked")).toBe("true");
+    fireEvent.click(foldersItem);
+    expect(useWorkflowUiStore.getState().showFolders).toBe(false);
   });
 });

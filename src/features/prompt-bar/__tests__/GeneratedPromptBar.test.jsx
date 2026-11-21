@@ -93,23 +93,28 @@ describe("GeneratedPromptBar Wrapper", () => {
     expect(store).not.toBeNull();
 
     act(() => {
-      store.getState().setActiveMode("video");
-      store.getState().setActiveSubMode("frames");
+      store.getState().switchMode("video", "frames");
       store.getState().selectModel("seedance_2_5");
       store.getState().setPrompt("A drone flying over forest");
-      store.getState().setParameter("input_image", {
-        id: "start_1",
-        workflow_id: "wf_start",
-        url: "https://example.com/start.png",
+      store.getState().attachMedia({
+        role: "start",
+        value: {
+          id: "start_1",
+          workflow_id: "wf_start",
+          url: "https://example.com/start.png",
+        },
       });
-      store.getState().setParameter("last_frame", {
-        id: "end_1",
-        workflow_id: "wf_end",
-        url: "https://example.com/end.png",
+      store.getState().attachMedia({
+        role: "end",
+        value: {
+          id: "end_1",
+          workflow_id: "wf_end",
+          url: "https://example.com/end.png",
+        },
       });
-      store.getState().setParameter("duration", 10);
-      store.getState().setParameter("aspect_ratio", "16:9");
-      store.getState().setParameter("resolution", "1080p");
+      store.getState().setSetting("duration", 10);
+      store.getState().setSetting("aspect_ratio", "16:9");
+      store.getState().setSetting("resolution", "1080p");
     });
 
     const generateBtn = screen.getByRole("button", { name: "Generate" });

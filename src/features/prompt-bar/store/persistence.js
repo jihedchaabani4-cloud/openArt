@@ -6,6 +6,7 @@
  */
 
 import { isPersistableMedia } from "../core/mediaRef.js";
+import { deriveEntitiesFromParameters } from "../core/entityService.js";
 
 /** Default trailing debounce window for storage writes in milliseconds (PB-D-09). */
 export const DEFAULT_PERSIST_DEBOUNCE_MS = 300;
@@ -89,13 +90,18 @@ function sanitizeEntityList(list = []) {
  * @returns {object}
  */
 export function selectPersistable(state = {}) {
+  const cleanParams = sanitizeParameterValues(state.parameterValues);
+  const derived = deriveEntitiesFromParameters(cleanParams);
+  const elements = derived.elements.length > 0 ? derived.elements : sanitizeEntityList(state.elements);
+  const characters = derived.characters.length > 0 ? derived.characters : sanitizeEntityList(state.characters);
+
   return {
     v: 2,
     prompt: typeof state.prompt === "string" ? state.prompt : "",
     selectedModelId: state.selectedModelId || null,
-    parameterValues: sanitizeParameterValues(state.parameterValues),
-    elements: sanitizeEntityList(state.elements),
-    characters: sanitizeEntityList(state.characters),
+    parameterValues: cleanParams,
+    elements,
+    characters,
     activeMode: state.activeMode || "image",
     activeSubMode: state.activeSubMode || "frames",
   };

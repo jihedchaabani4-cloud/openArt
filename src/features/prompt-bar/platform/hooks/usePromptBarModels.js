@@ -1,18 +1,11 @@
 import { useEffect, useMemo } from "react";
-import { usePromptBarStore } from "../../store/usePromptBarStore.js";
-import { resolveModelIcon } from "../../core/modelManagement.js";
+import { usePromptBarState, usePromptBarService } from "../../store/PromptBarStoreContext.js";
+import { resolveModelIcon, resolveEligibleModels } from "../../core/modelManagement.js";
 
 /**
  * usePromptBarModels
- * Encapsulates model synchronization, eligible model filtering by template/capability,
- * current model resolution, and default selection.
- *
- * @param {Object} options
- * @param {Array} [options.models] - Incoming models array from props
- * @param {Object} [options.type] - CompositionType layout configuration
- * @param {Object} [options.featureConfig] - Feature configuration object
- * @param {string} [options.activeMode] - Optional override for activeMode
- * @param {string} [options.activeSubMode] - Optional override for activeSubMode
+ * Consumes ONLY the sealed Public Service & read-only selectors.
+ * Uses the exact same resolveEligibleModels rule as the store (no post-render auto-select repair effect).
  */
 export function usePromptBarModels({
   models,
@@ -21,44 +14,46 @@ export function usePromptBarModels({
   activeMode: propActiveMode,
   activeSubMode: propActiveSubMode,
 } = {}) {
-  const storeActiveMode    = usePromptBarStore((s) => s.activeMode);
-  const storeActiveSubMode = usePromptBarStore((s) => s.activeSubMode);
-  const modelsMap          = usePromptBarStore((s) => s.modelsMap);
-  const selectedId         = usePromptBarStore((s) => s.selectedModelId);
-  const setModels          = usePromptBarStore((s) => s.setModels);
-  const selectModel        = usePromptBarStore((s) => s.selectModel);
+  const service            = usePromptBarService();
+  const storeActiveMode    = usePromptBarState((s) => s.activeMode);
+  const storeActiveSubMode = usePromptBarState((s) => s.activeSubMode);
+  const modelsMap          = usePromptBarState((s) => s.modelsMap);
+  const selectedId         = usePromptBarState((s) => s.selectedModelId);
+  const storeTemplate      = usePromptBarState((s) => s.template);
 
   const activeMode    = propActiveMode ?? (storeActiveMode || "image");
   const activeSubMode = propActiveSubMode ?? (storeActiveSubMode || "frames");
 
-  const { layout = {}, supportedDomains = [] } = type || {};
+  const effectiveTemplate = featureConfig || storeTemplate || type || null;
+  const { layout = {}, supportedDomains = [] } = type || effectiveTemplate || {};
   const hasModes = layout.showModeSelector !== false;
 
-  // Sync incoming models into the store
+  // Sync incoming models catalog into the store (store synchronously picks eligible model + reconciles + drains pendingActions)
   useEffect(() => {
-    if (models && models.length > 0) {
-      setModels(models);
+    if (!models || models.length === 0) return;
+    const currentKeys = Object.keys(modelsMap || {});
+    const needsSync =
+      currentKeys.length !== models.length ||
+      models.some((m) => modelsMap?.[m.id] !== m);
+    if (needsSync) {
+      service.setModels(models);
     }
-  }, [models, setModels]);
+  }, [models, modelsMap, service]);
 
   const allModelsList = useMemo(() => Object.values(modelsMap || {}), [modelsMap]);
 
-  // Capability Filter: featureConfig decides which models are eligible for this mode+subMode.
-  // Models list is master: adding references NEVER reduces or filters available models.
+  // ONE consistent eligibility rule shared with setModels, hydrate, and switchMode
   const eligibleModels = useMemo(() => {
-    if (!featureConfig) {
-      if (!hasModes) {
-        if (!supportedDomains.length) return allModelsList;
-        return allModelsList.filter((m) => supportedDomains.includes(m.domain));
-      }
-      return allModelsList;
-    }
     if (!hasModes) {
       if (!supportedDomains.length) return allModelsList;
       return allModelsList.filter((m) => supportedDomains.includes(m.domain));
     }
-    return featureConfig.filterEligibleModels(allModelsList, activeMode, activeSubMode, {});
-  }, [featureConfig, hasModes, supportedDomains, allModelsList, activeMode, activeSubMode]);
+    return resolveEligibleModels(allModelsList, {
+      template: effectiveTemplate,
+      activeMode,
+      activeSubMode,
+    });
+  }, [effectiveTemplate, hasModes, supportedDomains, allModelsList, activeMode, activeSubMode]);
 
   const isCurrentEligible = useMemo(
     () => eligibleModels.some((m) => m.id === selectedId),
@@ -71,33 +66,27 @@ export function usePromptBarModels({
     return currentModel.icon || resolveModelIcon(currentModel);
   }, [currentModel]);
 
-  // Auto-select first eligible model when current model does not satisfy mode/subMode parameter requirements
-  useEffect(() => {
-    if (eligibleModels.length > 0) {
-      const isEligible = eligibleModels.some((m) => m.id === selectedId);
-      if (!isEligible) {
-        selectModel(eligibleModels[0].id);
-      }
-    } else {
-      if (selectedId !== null) {
-        selectModel(null);
-      }
-    }
-  }, [eligibleModels, selectedId, selectModel]);
-
   const availableModes = useMemo(() => {
     return ["image", "video"].filter((mode) => {
-      if (!featureConfig?.filterEligibleModels) return true;
-      return featureConfig.filterEligibleModels(allModelsList, mode, null, {}).length > 0;
+      if (!effectiveTemplate?.filterEligibleModels) return true;
+      return resolveEligibleModels(allModelsList, {
+        template: effectiveTemplate,
+        activeMode: mode,
+        activeSubMode: null,
+      }).length > 0;
     });
-  }, [featureConfig, allModelsList]);
+  }, [effectiveTemplate, allModelsList]);
 
   const availableSubModes = useMemo(() => {
     return ["frames", "reference"].filter((subMode) => {
-      if (!featureConfig?.filterEligibleModels) return true;
-      return featureConfig.filterEligibleModels(allModelsList, activeMode, subMode, {}).length > 0;
+      if (!effectiveTemplate?.filterEligibleModels) return true;
+      return resolveEligibleModels(allModelsList, {
+        template: effectiveTemplate,
+        activeMode,
+        activeSubMode: subMode,
+      }).length > 0;
     });
-  }, [featureConfig, allModelsList, activeMode]);
+  }, [effectiveTemplate, allModelsList, activeMode]);
 
   return {
     allModelsList,
@@ -109,6 +98,6 @@ export function usePromptBarModels({
     currentModelIcon,
     availableModes,
     availableSubModes,
-    selectModel,
+    selectModel: service.selectModel,
   };
 }

@@ -3,7 +3,6 @@ import { renderHook, act } from "@testing-library/react";
 import { usePromptBarGenerate } from "../platform/hooks/usePromptBarGenerate.js";
 import { PromptBarStoreContext } from "../store/PromptBarStoreContext.js";
 import { createPromptBarStore } from "../store/createPromptBarStore.js";
-import { createPromptBarType } from "../composition/createPromptBarType.js";
 
 const imageModel = {
   id: "img-nano",
@@ -17,8 +16,7 @@ const imageModel = {
 
 describe("usePromptBarGenerate hook", () => {
   it("computes estimatedCredits and ratio info", () => {
-    const type = createPromptBarType({ id: "test", layout: {} });
-    const store = createPromptBarStore({ type });
+    const store = createPromptBarStore();
     store.getState().setModels([imageModel]);
     store.getState().selectModel("img-nano");
 
@@ -49,8 +47,7 @@ describe("usePromptBarGenerate hook", () => {
   });
 
   it("disables generate in frames mode if startVal is missing", () => {
-    const type = createPromptBarType({ id: "test", layout: {} });
-    const store = createPromptBarStore({ type });
+    const store = createPromptBarStore();
 
     const wrapper = ({ children }) => (
       <PromptBarStoreContext.Provider value={store}>
@@ -77,8 +74,7 @@ describe("usePromptBarGenerate hook", () => {
   });
 
   it("allows generate in video frames mode when startVal is null but prompt is provided (Text-to-Video)", () => {
-    const type = createPromptBarType({ id: "test", layout: {} });
-    const store = createPromptBarStore({ type });
+    const store = createPromptBarStore();
     store.getState().setPrompt("A majestic dragon in flight");
 
     const wrapper = ({ children }) => (
@@ -106,8 +102,7 @@ describe("usePromptBarGenerate hook", () => {
   });
 
   it("triggers onGenerate with serialized result on handleGenerate", async () => {
-    const type = createPromptBarType({ id: "test", layout: {} });
-    const store = createPromptBarStore({ type });
+    const store = createPromptBarStore();
     store.getState().setPrompt("A cybernetic apple");
     store.getState().setModels([imageModel]);
     store.getState().selectModel("img-nano");
@@ -140,5 +135,47 @@ describe("usePromptBarGenerate hook", () => {
 
     expect(onGenerate).toHaveBeenCalledTimes(1);
     expect(onGenerate.mock.calls[0][0].prompt).toBe("A cybernetic apple");
+  });
+
+  it("reads declared num_outputs for credit calculation and defaults to 1 without mutating state when undeclared", () => {
+    const modelWithOutputs = {
+      id: "img-outputs",
+      name: "Outputs Model",
+      domain: "image",
+      pricing: { fixedPrice: 4 },
+      parameters: {
+        prompt: { type: "string" },
+        num_outputs: { type: "number", min: 1, max: 4, default: 1 },
+      },
+    };
+
+    const store = createPromptBarStore();
+    store.getState().setModels([modelWithOutputs]);
+    store.getState().selectModel("img-outputs");
+    store.getState().setSetting("num_outputs", 3);
+
+    const wrapper = ({ children }) => (
+      <PromptBarStoreContext.Provider value={store}>
+        {children}
+      </PromptBarStoreContext.Provider>
+    );
+
+    const { result } = renderHook(
+      () =>
+        usePromptBarGenerate({
+          currentModel: modelWithOutputs,
+          selectedId: "img-outputs",
+          isCurrentEligible: true,
+          activeMode: "image",
+          activeSubMode: "frames",
+          startVal: null,
+          onGenerate: vi.fn(),
+        }),
+      { wrapper }
+    );
+
+    expect(result.current.currentCount).toBe(3);
+    expect(result.current.estimatedCredits).toBe(12);
+    expect("count" in store.getState().parameterValues).toBe(false);
   });
 });

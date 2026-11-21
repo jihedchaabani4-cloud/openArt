@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
 import { characterTemplate } from "../templates/character.template.js";
+import { isPathAllowed } from "../store/routePolicy.js";
 import { CharacterPromptBar } from "@/components/cinema-studio/prompt-bar/CharacterPromptBar.jsx";
 import { createPromptBarStore } from "../store/createPromptBarStore.js";
 
@@ -20,6 +21,13 @@ describe("Character Template & CharacterPromptBar", () => {
       expect(characterTemplate.layout.showParameterDrawer).toBe(false);
       expect(characterTemplate.layout.showAttachmentBar).toBe(true);
       expect(characterTemplate.layout.showPromptInput).toBe(true);
+    });
+
+    it("persistRoutes matches /characters and /characters/new but not /assets", () => {
+      expect(characterTemplate.persistRoutes).toEqual(["/cinema-studio/:projectId/characters/*"]);
+      expect(isPathAllowed("/cinema-studio/p1/characters", characterTemplate.persistRoutes)).toBe(true);
+      expect(isPathAllowed("/cinema-studio/p1/characters/new", characterTemplate.persistRoutes)).toBe(true);
+      expect(isPathAllowed("/cinema-studio/p1/assets", characterTemplate.persistRoutes)).toBe(false);
     });
 
     it("getSlots returns 1 Reference slot", () => {

@@ -10,14 +10,13 @@ import {
   clearPersistentPromptBarStores,
 } from "../store/PromptBarStoreContext.js";
 import { registry } from "../store/registry.js";
-import { createPromptBarType } from "../composition/createPromptBarType.js";
 import { fixtureModels } from "./fixtures/models.fixture.js";
 
-const testType = createPromptBarType({
+const testType = {
   id: "test-lifecycle-media",
   name: "Lifecycle Test Media",
   layout: { showPromptInput: true },
-});
+};
 
 function StoreCapture({ onStore }) {
   const store = usePromptBarStoreInstance();
@@ -183,6 +182,65 @@ describe("S3: PromptBarStoreProvider on Registry & Hydration", () => {
     // After unmount, isMounted is false
     unmount();
     expect(registry.isMounted({ templateId: testType.id, instanceId: "strict-test", projectId: "test-proj" })).toBe(false);
+  });
+
+  it("parent re-render without models prop does NOT re-run mount/unmount/hydrate", () => {
+    const savedState = {
+      v: 2,
+      prompt: "Persisted draft",
+      selectedModelId: null,
+      parameterValues: {},
+      activeMode: "image",
+    };
+
+    const storage = {
+      getItem: vi.fn(() => JSON.stringify(savedState)),
+      setItem: vi.fn(),
+      removeItem: vi.fn(),
+    };
+
+    const markMountedSpy = vi.spyOn(registry, "markMounted");
+    const markUnmountedSpy = vi.spyOn(registry, "markUnmounted");
+
+    let capturedStore = null;
+    function Parent({ counter }) {
+      return (
+        <PromptBarStoreProvider
+          type={testType}
+          templateId="rerender-stability-template"
+          instanceId="rerender-test"
+          storage={storage}
+        >
+          <StoreCapture onStore={(s) => { capturedStore = s; }} />
+          <span data-testid="counter">{counter}</span>
+        </PromptBarStoreProvider>
+      );
+    }
+
+    const { rerender, unmount } = render(<Parent counter={0} />);
+
+    expect(capturedStore).not.toBeNull();
+    expect(markMountedSpy).toHaveBeenCalledTimes(1);
+    expect(markUnmountedSpy).toHaveBeenCalledTimes(0);
+    expect(storage.getItem).toHaveBeenCalledTimes(1);
+
+    const hydrateSpy = vi.spyOn(capturedStore.getState(), "hydrate");
+
+    rerender(<Parent counter={1} />);
+    rerender(<Parent counter={2} />);
+
+    expect(markMountedSpy).toHaveBeenCalledTimes(1);
+    expect(markUnmountedSpy).toHaveBeenCalledTimes(0);
+    expect(hydrateSpy).not.toHaveBeenCalled();
+    expect(storage.getItem).toHaveBeenCalledTimes(1);
+    expect(storage.setItem).not.toHaveBeenCalled();
+
+    unmount();
+    expect(markUnmountedSpy).toHaveBeenCalledTimes(1);
+
+    markMountedSpy.mockRestore();
+    markUnmountedSpy.mockRestore();
+    hydrateSpy.mockRestore();
   });
 
   it("preserves deprecated shims", () => {

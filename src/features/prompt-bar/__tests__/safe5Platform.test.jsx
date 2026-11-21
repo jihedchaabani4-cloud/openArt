@@ -1,23 +1,10 @@
 /**
  * SAFE-5: Platform Integration Harness & Characterization Tests
- *
- * Test harness: mountPromptBar
- * Mounts PromptBarPlatform within jsdom, mocking only unavoidable dependencies
- * (next/navigation routing, Lexical PromptEditor).
- *
- * Tests:
- * 1. Mode/subMode slot rendering: image -> Reference; video/frames -> Start & End; video/reference -> Reference
- * 2. Generate execution: frames model with input_image & last_frame clicking Generate calls onGenerate with golden payload
- * 3. Frames -> Reference transition: clears last_frame and input_image via mode-switch cleanup effect
- * 4. PB-K1 collision: reference in input_image in image mode survives transition to video/frames
- * 5. Prompt-only model hides all reference slots
- * 6. Generate button is disabled while isGenerating is true
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { render, act, fireEvent, screen, cleanup } from "@testing-library/react";
 
-// Mock unavoidable DOM/routing dependencies
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
   usePathname: () => "/cinema-studio/proj_test/assets",
@@ -36,10 +23,10 @@ vi.mock("@/components/cinema-studio/prompt-bar/editor/PromptEditor.jsx", () => (
 
 import { PromptBarPlatform } from "@/components/cinema-studio/prompt-bar/PromptBarPlatform.jsx";
 import {
+  generatedMediaTemplate,
   COMPOSITION_REQUIREMENTS,
   filterEligibleModels,
   resolveParameterMapping,
-  generatedMediaType,
 } from "../templates/generatedMedia.template.js";
 import { clearPersistentPromptBarStores, getActivePromptBarStore } from "../store/PromptBarStoreContext.js";
 import {
@@ -54,24 +41,9 @@ const featureConfig = {
   resolveParameterMapping,
 };
 
-/**
- * Test Harness Helper: mountPromptBar
- *
- * Mounts PromptBarPlatform with real dependencies (Core, Store, Config, Platform),
- * mocking only Lexical editor and Next.js router.
- *
- * @param {object} options
- * @param {object[]} [options.models] - Models catalog (defaults to fixtureModels)
- * @param {object} [options.type] - CompositionType (defaults to generatedMediaType)
- * @param {object} [options.featureConfig] - FeatureConfig (defaults to generatedMedia featureConfig)
- * @param {string} [options.projectId] - Project ID for route simulation
- * @param {boolean} [options.isGenerating] - Generation prop override
- * @param {function} [options.onGenerate] - Callback spy
- * @returns {{ renderResult: object, store: object, onGenerate: function, unmount: function }}
- */
 function mountPromptBar({
   models = fixtureModels,
-  type = generatedMediaType,
+  type = generatedMediaTemplate,
   featureConfig: config = featureConfig,
   projectId = "proj_test",
   isGenerating = false,
@@ -111,9 +83,8 @@ describe("SAFE-5: Platform Integration Harness", () => {
     it("image mode renders one Reference slot; video/frames shows Start and End slots; video/reference shows one Reference slot", async () => {
       const { store, unmount } = mountPromptBar();
 
-      // Default: image mode with nanobana_pro
       act(() => {
-        store.getState().setActiveMode("image");
+        store.getState().switchMode("image");
         store.getState().selectModel("nanobana_pro");
       });
 
@@ -121,10 +92,8 @@ describe("SAFE-5: Platform Integration Harness", () => {
       expect(screen.queryByText("Start")).toBeNull();
       expect(screen.queryByText("End")).toBeNull();
 
-      // Switch to video mode, frames subMode
       act(() => {
-        store.getState().setActiveMode("video");
-        store.getState().setActiveSubMode("frames");
+        store.getState().switchMode("video", "frames");
         store.getState().selectModel("seedance_2_5");
       });
 
@@ -134,7 +103,6 @@ describe("SAFE-5: Platform Integration Harness", () => {
 
       unmount();
 
-      // Switch to video mode, reference subMode
       const videoRefModel = {
         id: "video_with_refs",
         name: "Video With References",
@@ -152,8 +120,7 @@ describe("SAFE-5: Platform Integration Harness", () => {
       });
 
       act(() => {
-        refStore.getState().setActiveMode("video");
-        refStore.getState().setActiveSubMode("reference");
+        refStore.getState().switchMode("video", "reference");
         refStore.getState().selectModel("video_with_refs");
       });
 
@@ -169,15 +136,14 @@ describe("SAFE-5: Platform Integration Harness", () => {
       const { store } = mountPromptBar({ onGenerate: onGenerateSpy });
 
       act(() => {
-        store.getState().setActiveMode("video");
-        store.getState().setActiveSubMode("frames");
+        store.getState().switchMode("video", "frames");
         store.getState().selectModel("seedance_2_5");
         store.getState().setPrompt("A drone flying over forest");
-        store.getState().setParameter("input_image", { workflow_id: "wf_start" });
-        store.getState().setParameter("last_frame", { workflow_id: "wf_end" });
-        store.getState().setParameter("duration", 10);
-        store.getState().setParameter("aspect_ratio", "16:9");
-        store.getState().setParameter("resolution", "1080p");
+        store.getState().attachMedia({ role: "start", value: { workflow_id: "wf_start" } });
+        store.getState().attachMedia({ role: "end", value: { workflow_id: "wf_end" } });
+        store.getState().setSetting("duration", 10);
+        store.getState().setSetting("aspect_ratio", "16:9");
+        store.getState().setSetting("resolution", "1080p");
       });
 
       const generateBtn = screen.getByRole("button", { name: "Generate" });
@@ -190,7 +156,6 @@ describe("SAFE-5: Platform Integration Harness", () => {
       expect(onGenerateSpy).toHaveBeenCalledTimes(1);
       const generatedPayload = onGenerateSpy.mock.calls[0][0];
 
-      // Must match golden payload from SAFE-1
       expect(generatedPayload).toEqual({
         model: "seedance_2_5",
         prompt: "A drone flying over forest",
@@ -229,22 +194,19 @@ describe("SAFE-5: Platform Integration Harness", () => {
       });
 
       act(() => {
-        store.getState().setActiveMode("video");
-        store.getState().setActiveSubMode("frames");
+        store.getState().switchMode("video", "frames");
         store.getState().selectModel("video_ref_clean");
-        store.getState().setParameter("input_image", { workflow_id: "wf_start_val" });
-        store.getState().setParameter("last_frame", { workflow_id: "wf_end_val" });
+        store.getState().attachMedia({ role: "start", value: { workflow_id: "wf_start_val" } });
+        store.getState().attachMedia({ role: "end", value: { workflow_id: "wf_end_val" } });
       });
 
       expect(store.getState().parameterValues.input_image).toBeDefined();
       expect(store.getState().parameterValues.last_frame).toBeDefined();
 
-      // Switch to Reference subMode
       act(() => {
-        store.getState().setActiveSubMode("reference");
+        store.getState().switchMode("video", "reference");
       });
 
-      // Mode-switch cleanup effect clears keys not part of the active composition
       expect(store.getState().parameterValues.input_image).toBeUndefined();
       expect(store.getState().parameterValues.last_frame).toBeUndefined();
     });
@@ -252,9 +214,6 @@ describe("SAFE-5: Platform Integration Harness", () => {
 
   describe("4. PB-K1 Collision on Image -> Video/Frames Transition (Resolved PB-D-03)", () => {
     it("verifies PB-K1 resolution: reference stored in input_image is pruned on transition to video/frames", () => {
-      // PB-D-03 resolution:
-      // When switching to video/frames, media parameters are pruned so the reference
-      // does NOT silently become Start Frame.
       const imageModel = {
         id: "img_model_k1",
         name: "Image Model K1",
@@ -271,23 +230,20 @@ describe("SAFE-5: Platform Integration Harness", () => {
         projectId: "proj_pb_k1",
       });
 
-      // 1. Image mode: user attaches a reference (stored in input_image)
       act(() => {
-        store.getState().setActiveMode("image");
+        store.getState().switchMode("image");
         store.getState().selectModel("img_model_k1");
-        store.getState().setParameter("input_image", { workflow_id: "wf_ref_turned_start" });
+        store.getState().attachMedia({ role: "reference", value: { workflow_id: "wf_ref_turned_start" } });
       });
 
-      expect(store.getState().parameterValues.input_image).toEqual({
+      expect(store.getState().parameterValues.input_image).toMatchObject({
         workflow_id: "wf_ref_turned_start",
       });
 
-      // 2. User switches to video mode with frames subMode
       act(() => {
         store.getState().switchMode("video", "frames");
       });
 
-      // Verify PB-K1 resolution: input_image is pruned and absent!
       expect(store.getState().parameterValues.input_image).toBeUndefined();
     });
   });
@@ -300,7 +256,7 @@ describe("SAFE-5: Platform Integration Harness", () => {
       });
 
       act(() => {
-        store.getState().setActiveMode("image");
+        store.getState().switchMode("image");
         store.getState().selectModel("seedream_v5");
       });
 
@@ -319,16 +275,14 @@ describe("SAFE-5: Platform Integration Harness", () => {
       });
 
       act(() => {
-        store.getState().setActiveMode("video");
-        store.getState().setActiveSubMode("frames");
+        store.getState().switchMode("video", "frames");
         store.getState().selectModel("seedance_2_5");
-        store.getState().setParameter("input_image", { workflow_id: "wf_start" });
+        store.getState().attachMedia({ role: "start", value: { workflow_id: "wf_start" } });
       });
 
       const generateBtn = screen.getByRole("button", { name: "Generate" });
       expect(generateBtn.disabled).toBe(true);
 
-      // Attempt to click
       fireEvent.click(generateBtn);
       expect(onGenerateSpy).not.toHaveBeenCalled();
     });

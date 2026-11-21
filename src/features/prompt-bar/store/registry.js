@@ -64,10 +64,77 @@ function resolveKey(identity) {
  */
 export function createRegistry() {
   const entries = new Map();
+  const keySubscribers = new Map();
 
   function getEntry(identity) {
     const key = resolveKey(identity);
     return entries.get(key);
+  }
+
+  function syncSubscribers(key, notify = true) {
+    const subs = keySubscribers.get(key);
+    if (!subs || subs.size === 0) return;
+    for (const sub of Array.from(subs)) {
+      sub.sync(notify);
+    }
+  }
+
+  function subscribe(identity, listener) {
+    if (typeof listener !== "function") {
+      return () => {};
+    }
+    const key = resolveKey(identity);
+    let boundStore = null;
+    let unsubStore = null;
+
+    const bindStore = (store) => {
+      if (store === boundStore) return;
+      if (typeof unsubStore === "function") {
+        unsubStore();
+        unsubStore = null;
+      }
+      boundStore = store || null;
+      if (boundStore && typeof boundStore.subscribe === "function") {
+        unsubStore = boundStore.subscribe(() => {
+          listener();
+        });
+      }
+    };
+
+    const record = {
+      sync(notify) {
+        const entry = entries.get(key);
+        bindStore(entry?.store || null);
+        if (notify) {
+          listener();
+        }
+      },
+    };
+
+    let subs = keySubscribers.get(key);
+    if (!subs) {
+      subs = new Set();
+      keySubscribers.set(key, subs);
+    }
+    subs.add(record);
+
+    const existing = entries.get(key);
+    bindStore(existing?.store || null);
+
+    return () => {
+      if (typeof unsubStore === "function") {
+        unsubStore();
+        unsubStore = null;
+      }
+      boundStore = null;
+      const set = keySubscribers.get(key);
+      if (set) {
+        set.delete(record);
+        if (set.size === 0) {
+          keySubscribers.delete(key);
+        }
+      }
+    };
   }
 
   function getOrCreate(identity, factory, meta = {}) {
@@ -88,6 +155,13 @@ export function createRegistry() {
         submitCounter: 0,
       };
       entries.set(key, entry);
+      syncSubscribers(key, false);
+    } else if (!entry.store && typeof factory === "function") {
+      entry.store = factory();
+      if (meta && Object.keys(meta).length > 0) {
+        entry.meta = { ...(entry.meta || {}), ...meta };
+      }
+      syncSubscribers(key, entry.mountCount > 0);
     } else if (meta && Object.keys(meta).length > 0) {
       entry.meta = { ...(entry.meta || {}), ...meta };
     }
@@ -123,7 +197,11 @@ export function createRegistry() {
 
   function dispose(identity) {
     const key = resolveKey(identity);
-    return entries.delete(key);
+    const deleted = entries.delete(key);
+    if (deleted) {
+      syncSubscribers(key, true);
+    }
+    return deleted;
   }
 
   function setMeta(identity, meta = {}) {
@@ -167,13 +245,16 @@ export function createRegistry() {
       entry.meta = { ...(entry.meta || {}), ...meta };
     }
     entry.mountCount = (entry.mountCount || 0) + 1;
+    syncSubscribers(key, true);
     return entry.mountCount;
   }
 
   function markUnmounted(identity) {
-    const entry = getEntry(identity);
+    const key = resolveKey(identity);
+    const entry = entries.get(key);
     if (!entry) return 0;
     entry.mountCount = Math.max(0, (entry.mountCount || 0) - 1);
+    syncSubscribers(key, true);
     return entry.mountCount;
   }
 
@@ -242,6 +323,7 @@ export function createRegistry() {
     reset,
     dispose,
     list,
+    subscribe,
     setMeta,
     getMeta,
     markMounted,

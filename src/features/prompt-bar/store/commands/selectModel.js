@@ -2,6 +2,7 @@
  * Prompt Bar Platform — selectModel Command
  *
  * Pure command executing atomic model selection and reference trimming per PB-D-03 / PB-K3.
+ * Single source of truth: derives entities from parameterValues; zero separate entity arrays.
  * Zero React, zero DOM, zero store mutation.
  */
 
@@ -17,7 +18,7 @@ import { getModelReferenceCapability } from "../../core/modelManagement.js";
  * @param {object} state - Current Zustand store state
  * @param {string|object} modelIdOrArgs - Target modelId or { modelId }
  * @param {object} [deps]
- * @returns {CommandResult}
+ * @returns {import("../../core/commandResult.js").CommandResult}
  */
 export function selectModel(state, modelIdOrArgs, deps = {}) {
   const modelId =
@@ -55,7 +56,7 @@ export function selectModel(state, modelIdOrArgs, deps = {}) {
   const targetKey = nextCap?.backendKey || "images";
 
   // For single-reference models (max === 1), if the parameter was an array with 1 item,
-  // convert to single item object for backward compatibility with SAFE-3 / legacy callers
+  // convert to single item object for single-ref compatibility
   if (
     nextCap?.maxRefs === 1 &&
     Array.isArray(pruned.parameterValues[targetKey]) &&
@@ -67,28 +68,27 @@ export function selectModel(state, modelIdOrArgs, deps = {}) {
   // 3. Collect removed asset IDs from reconciliation and media trimming
   const idsToClean = new Set();
 
+  function addItemIds(v) {
+    const id = getAssetId(v);
+    if (id) idsToClean.add(id);
+    if (v?.workflow_id) idsToClean.add(v.workflow_id);
+    if (v?.workflowId) idsToClean.add(v.workflowId);
+    if (v?.id) idsToClean.add(v.id);
+    if (v?.asset_id) idsToClean.add(v.asset_id);
+    if (v?.name) idsToClean.add(v.name);
+    if (v?.displayName) idsToClean.add(v.displayName);
+  }
+
   changes.forEach((c) => {
     if ((c.action === "removed" || c.action === "reset") && c.previousValue) {
       const vals = Array.isArray(c.previousValue) ? c.previousValue : [c.previousValue];
-      vals.forEach((v) => {
-        const id = getAssetId(v);
-        if (id) idsToClean.add(id);
-        if (v?.workflow_id) idsToClean.add(v.workflow_id);
-        if (v?.workflowId) idsToClean.add(v.workflowId);
-        if (v?.id) idsToClean.add(v.id);
-        if (v?.asset_id) idsToClean.add(v.asset_id);
-        if (v?.name) idsToClean.add(v.name);
-        if (v?.displayName) idsToClean.add(v.displayName);
-      });
+      vals.forEach(addItemIds);
     }
   });
 
   (pruned.removed || []).forEach((r) => {
     (r.assetIds || []).forEach((id) => idsToClean.add(id));
   });
-
-  let nextElements = [...(state.elements || [])];
-  let nextCharacters = [...(state.characters || [])];
 
   if (!nextCap?.supports || nextCap?.maxRefs === 0) {
     delete pruned.parameterValues.images;
@@ -105,26 +105,9 @@ export function selectModel(state, modelIdOrArgs, deps = {}) {
         : state.parameterValues?.reference_images
         ? [state.parameterValues.reference_images]
         : []),
-      ...nextElements,
-      ...nextCharacters,
     ];
 
-    oldRefItems.forEach((v) => {
-      const id = getAssetId(v);
-      if (id) idsToClean.add(id);
-      if (v?.workflow_id) idsToClean.add(v.workflow_id);
-      if (v?.workflowId) idsToClean.add(v.workflowId);
-      if (v?.id) idsToClean.add(v.id);
-      if (v?.asset_id) idsToClean.add(v.asset_id);
-      if (v?.name) idsToClean.add(v.name);
-      if (v?.displayName) idsToClean.add(v.displayName);
-    });
-
-    nextElements = [];
-    nextCharacters = [];
-  } else if (idsToClean.size > 0) {
-    nextElements = nextElements.filter((e) => !idsToClean.has(e.id) && !idsToClean.has(e.workflow_id));
-    nextCharacters = nextCharacters.filter((c) => !idsToClean.has(c.id) && !idsToClean.has(c.workflow_id));
+    oldRefItems.forEach(addItemIds);
   }
 
   // 4. Clean orphan tags from prompt
@@ -137,8 +120,6 @@ export function selectModel(state, modelIdOrArgs, deps = {}) {
     selectedModelId: modelId,
     parameterValues: pruned.parameterValues,
     prompt: nextPrompt,
-    elements: nextElements,
-    characters: nextCharacters,
     reconciliationLog: changes,
   });
 }

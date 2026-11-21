@@ -10,7 +10,16 @@ import {
   KEY_DOWN_COMMAND,
 } from "lexical";
 import { $createMentionNode } from "./MentionNode";
-import { GoogleIcon } from "@/components/primitives/GoogleIcon";
+import { HugeIcon } from "@/components/primitives/HugeIcon";
+import {
+  MENU_LABEL_CLASS,
+  MENU_PANEL_DEFAULT_WIDTH,
+  MENU_SEPARATOR_CLASS,
+  MenuItemContent,
+  menuItemClassName,
+  menuPanelClassName,
+} from "@/components/base/menu";
+import { cn } from "@/shared/lib/utils";
 
 /**
  * MentionPlugin (Version 1: Floating In-Editor Dropdown)
@@ -188,16 +197,16 @@ export function MentionPlugin({ references = [], onOpenMediaLibrary }) {
     <div
       ref={menuRef}
       style={{ top: pos.top, left: pos.left }}
-      className="absolute z-[9999] w-64 rounded-lg border border-border-weak bg-omni-bg/95 backdrop-blur-80 p-1.5 shadow-none animate-in fade-in zoom-in-95 duration-150"
+      className={menuPanelClassName({ className: cn("absolute z-[9999]", MENU_PANEL_DEFAULT_WIDTH) })}
     >
-      <div className="px-2.5 py-1 text-[10px] font-semibold tracking-wider uppercase text-text-secondary flex items-center justify-between">
+      <div className={cn(MENU_LABEL_CLASS, "flex items-center justify-between")}>
         <span>Mention Reference</span>
-        {query && <span className="text-text-body-muted lowercase font-mono">@{query}</span>}
+        {query && <span className="ds-text-caption-s text-text-body-muted font-mono">@{query}</span>}
       </div>
 
       <div className="flex flex-col gap-0.5 max-h-56 overflow-y-auto custom-scrollbar">
         {filtered.length === 0 ? (
-          <div className="px-3 py-3 text-center text-[12px] text-text-secondary">
+          <div className="px-3 py-3 text-center ds-text-caption-s text-text-secondary">
             No matching references
           </div>
         ) : (
@@ -214,23 +223,23 @@ export function MentionPlugin({ references = [], onOpenMediaLibrary }) {
                   e.preventDefault();
                   insertMention(item, i);
                 }}
-                className={`flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg cursor-pointer transition-colors ${
-                  isSelected ? "bg-white-15 text-text-primary" : "hover:bg-ui-button-tonal text-text-body-muted"
-                }`}
+                className={menuItemClassName({
+                  selected: isSelected,
+                })}
               >
-                <div className="shrink-0 size-7 rounded-lg overflow-hidden bg-ui-button-tonal border border-border-weak flex items-center justify-center">
+                <div className="shrink-0 size-7 rounded-lg overflow-hidden bg-surface-tonal border border-border-menu-subtle flex items-center justify-center">
                   {imgUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={imgUrl} alt="" className="size-full object-cover" />
                   ) : (
-                    <GoogleIcon iconName="image" className="text-[14px] text-icon-secondary" />
+                    <HugeIcon name="image-02" size="sm" className="text-icon-secondary" />
                   )}
                 </div>
                 <div className="flex flex-col min-w-0 flex-1">
-                  <span className="text-[13px] font-medium text-text-primary truncate leading-tight">
+                  <span className="ds-text-caption-m font-medium text-text-primary truncate leading-tight">
                     {title}
                   </span>
-                  <span className="text-[10px] text-text-secondary uppercase tracking-wide truncate">
+                  <span className="ds-text-caption-s text-text-secondary truncate">
                     {sub}
                   </span>
                 </div>
@@ -241,25 +250,27 @@ export function MentionPlugin({ references = [], onOpenMediaLibrary }) {
 
         {onOpenMediaLibrary && (
           <>
-            <div className="h-px bg-border-weak my-1" />
+            <div className={MENU_SEPARATOR_CLASS} />
             <div
               onMouseDown={(e) => {
                 e.preventDefault();
                 setOpen(false);
                 onOpenMediaLibrary();
               }}
-              className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg cursor-pointer transition-colors text-[12px] ${
-                activeIdx === filtered.length ? "bg-white-15 text-text-primary" : "hover:bg-ui-button-tonal text-text-body-muted hover:text-text-primary"
-              }`}
+              className={menuItemClassName({
+                selected: activeIdx === filtered.length,
+              })}
             >
-              <GoogleIcon iconName="add_photo_alternate" className="text-[16px] text-icon-secondary" />
-              <span>Choose from Library / Upload...</span>
+              <MenuItemContent icon="image-add-02">
+                Choose from Library / Upload...
+              </MenuItemContent>
             </div>
           </>
         )}
       </div>
 
-      <div className="px-2 py-1 mt-1 border-t border-border-subtle flex items-center justify-between text-[10px] text-text-disabled">
+      <div className={MENU_SEPARATOR_CLASS} />
+      <div className="px-2 py-1 flex items-center justify-between ds-text-caption-s text-text-disabled">
         <span>Use ↑↓ to navigate</span>
         <span>↵ Enter to select</span>
       </div>

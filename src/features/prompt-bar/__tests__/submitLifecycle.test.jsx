@@ -6,17 +6,16 @@ import {
   usePromptBarStoreInstance,
 } from "../store/PromptBarStoreContext.js";
 import { registry } from "../store/registry.js";
-import { createPromptBarType } from "../composition/createPromptBarType.js";
 import { fixtureModels } from "./fixtures/models.fixture.js";
 import { selectPersistable } from "../store/persistence.js";
 
 import { createPromptBarStore } from "../store/createPromptBarStore.js";
 
-const testType = createPromptBarType({
+const testType = {
   id: "test-submit-lifecycle",
   name: "Submit Lifecycle Media",
   layout: { showPromptInput: true },
-});
+};
 
 function StoreCapture({ onStore }) {
   const store = usePromptBarStoreInstance();

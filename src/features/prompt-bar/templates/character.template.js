@@ -65,8 +65,7 @@ export function createActions(_core) {
 export const characterTemplate = defineTemplate({
   id: "character",
   persistRoutes: [
-    "/cinema-studio/:projectId/characters*",
-    "/cinema-studio/:projectId/characters/new*",
+    "/cinema-studio/:projectId/characters/*",
   ],
   layout: {
     showPromptInput: true,

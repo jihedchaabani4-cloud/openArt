@@ -2,32 +2,38 @@
 
 import { useMemo, useState } from "react";
 import { cn } from "@/shared/lib/utils";
-import { GoogleIcon } from "@/components/primitives/GoogleIcon";
+import { HugeIcon } from "@/components/primitives/HugeIcon";
 import { Button } from "@/components/base/button";
 import { ButtonGroup } from "@/components/primitives/button-group";
 import { Switch } from "@/components/base/switch";
 import { Slider } from "@/components/primitives/slider";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/primitives/popover";
-import { resolveModelIcon } from "@/features/prompt-bar/core/modelManagement.js";
-import { calculateModelCredits } from "@/features/prompt-bar/core/creditCalculationService.js";
+import {
+  MENU_LABEL_CLASS,
+  MenuItemContent,
+  MenuSubChevronIcon,
+  menuItemClassName,
+  menuPanelClassName,
+} from "@/components/base/menu";
+import { resolveModelIcon, calculateModelCredits } from "@/features/prompt-bar";
 
 /**
- * Ratio icon mapping using official Google Symbols
+ * Ratio icon mapping using Hugeicons
  */
 const RATIO_ICONS = {
-  "16:9": "crop_16_9",
-  "4:3": "crop_landscape",
-  "1:1": "crop_square",
-  "3:4": "crop_portrait",
-  "9:16": "crop_9_16",
-  "21:9": "crop_16_9",
-  "9:21": "crop_9_16",
-  "3:2": "crop_landscape",
-  "2:3": "crop_portrait",
-  "4:5": "crop_portrait",
-  "5:4": "crop_landscape",
-  "1:2": "crop_portrait",
-  "2:1": "crop_16_9",
+  "16:9": "rectangle-horizontal",
+  "4:3": "rectangle-horizontal",
+  "1:1": "square",
+  "3:4": "rectangle-vertical",
+  "9:16": "rectangle-vertical",
+  "21:9": "rectangle-horizontal",
+  "9:21": "rectangle-vertical",
+  "3:2": "rectangle-horizontal",
+  "2:3": "rectangle-vertical",
+  "4:5": "rectangle-vertical",
+  "5:4": "rectangle-horizontal",
+  "1:2": "rectangle-vertical",
+  "2:1": "rectangle-horizontal",
 };
 
 export function getRatioIcon(ratio) {
@@ -35,15 +41,36 @@ export function getRatioIcon(ratio) {
   if (typeof ratio === "string" && ratio.includes(":")) {
     const [w, h] = ratio.split(":").map(Number);
     if (!isNaN(w) && !isNaN(h)) {
-      if (w > h) return "crop_landscape";
-      if (w < h) return "crop_portrait";
-      return "crop_square";
+      if (w > h) return "rectangle-horizontal";
+      if (w < h) return "rectangle-vertical";
+      return "square";
     }
   }
-  return "crop_square";
+  return "square";
 }
 
-const DEFAULT_RATIOS = ["16:9", "4:3", "1:1", "3:4", "9:16"];
+const RATIO_PARAM_KEYS = ["aspect_ratio", "ratio"];
+const COUNT_PARAM_KEYS = ["count", "variations", "num_outputs", "n"];
+
+function extractSelectValues(def) {
+  const raw = def?.values || def?.options || def?.enum;
+  if (!Array.isArray(raw) || raw.length === 0) return [];
+  return raw.map((v) => (typeof v === "object" && v !== null ? v.value : v));
+}
+
+function extractCountOptions(def) {
+  const explicit = extractSelectValues(def);
+  if (explicit.length > 0) return explicit;
+  if (typeof def?.min === "number" && typeof def?.max === "number" && def.max >= def.min) {
+    const step = typeof def.step === "number" && def.step > 0 ? def.step : 1;
+    const options = [];
+    for (let v = def.min; v <= def.max && options.length < 20; v += step) {
+      options.push(v);
+    }
+    return options;
+  }
+  return [];
+}
 
 export function formatParamLabel(str) {
   if (!str || typeof str !== "string") return str;
@@ -77,7 +104,7 @@ export function FlowSelect({
           <Button
             type="button"
             variant="dropdown-card"
-            className="w-full h-[50px] justify-between bg-ui-button-tonal hover:bg-surface-tonal-hover rounded-[10px]"
+            className="w-full justify-between rounded-lg ds-text-caption-m data-[state=open]:bg-surface-tonal-hover"
             aria-label={ariaLabel || label || displayValue}
             data-state={open ? "open" : "closed"}
           >
@@ -85,24 +112,19 @@ export function FlowSelect({
               {icon}
               <span className="flex min-w-0 flex-col items-start gap-0.5 font-medium">
                 {label && (
-                  <span className="text-xs leading-[15px] text-text-secondary">{label}</span>
+                  <span className="ds-text-caption-s text-text-secondary">{label}</span>
                 )}
-                <span className="max-w-full truncate text-sm leading-[17px] text-text-primary font-medium">
+                <span className="max-w-full truncate ds-text-caption-m text-text-primary">
                   {displayValue}
                 </span>
               </span>
             </div>
-            <svg
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              aria-hidden="true"
+            <MenuSubChevronIcon
               className={cn(
-                "size-4 shrink-0 text-icon-secondary transition-transform duration-150 ease-out",
+                "text-icon-secondary transition-transform duration-150 ease-out",
                 open && "rotate-90"
               )}
-            >
-              <path d="M9.29301 6.29295C9.68354 5.90243 10.3166 5.90243 10.7071 6.29295L15.7071 11.293C16.0974 11.6835 16.0975 12.3165 15.7071 12.707L10.7071 17.707L10.6309 17.7754C10.2382 18.0957 9.65913 18.0731 9.29301 17.707C8.9269 17.3409 8.90432 16.7619 9.22465 16.3691L9.29301 16.293L13.4092 12.1767C13.5068 12.0791 13.5067 11.9209 13.4092 11.8232L9.29301 7.70702C8.90249 7.31649 8.90249 6.68348 9.29301 6.29295Z" />
-            </svg>
+            />
           </Button>
         </PopoverTrigger>
 
@@ -114,12 +136,16 @@ export function FlowSelect({
           sideOffset={sideOffset}
           collisionPadding={16}
           avoidCollisions
-          className="z-[99999] max-h-[240px] overflow-y-auto overflow-x-hidden font-sans antialiased bg-ui-menu-background p-2 [--blur:40px] text-text-primary border border-border-weak rounded-[var(--radius-3xl)] shadow-2xl"
+          onOpenAutoFocus={(e) => e.preventDefault()}
+          className={menuPanelClassName({
+            variant: "listbox",
+            className: "z-100 max-h-60",
+          })}
           style={{
             width: `${width}px`,
           }}
         >
-          <div className="overflow-hidden flex flex-col gap-1 w-full" role="group">
+          <div className="overflow-hidden flex flex-col gap-0.5 w-full" role="group">
             {items.map((item) => {
               const isSelected = String(value) === String(item.value);
 
@@ -127,39 +153,25 @@ export function FlowSelect({
                 <div
                   key={String(item.value)}
                   role="option"
+                  tabIndex={0}
                   aria-selected={isSelected}
-                  data-selected={isSelected}
+                  data-selected={isSelected ? "true" : undefined}
                   onClick={() => {
                     onChange?.(item.value);
                     setOpen(false);
                   }}
-                  className={cn(
-                    "relative flex gap-2 select-none items-center py-1.5 outline-none min-h-8 rounded-[10px] px-2 text-sm font-medium cursor-pointer transition-colors duration-150 ease-out",
-                    isSelected
-                      ? "bg-white-15 text-text-primary ring-1 ring-inset ring-border-heavy hover:bg-ui-button-active"
-                      : "bg-transparent text-text-body-muted hover:bg-ui-button-tonal hover:text-text-primary"
-                  )}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      onChange?.(item.value);
+                      setOpen(false);
+                    }
+                  }}
+                  className={menuItemClassName({ selected: isSelected })}
                 >
-                  <svg
-                    width="15"
-                    height="15"
-                    viewBox="0 0 15 15"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                    className={cn(
-                      "mr-2 h-4 w-4 shrink-0 transition-opacity duration-150",
-                      isSelected ? "opacity-100 text-text-primary" : "opacity-0"
-                    )}
-                  >
-                    <path
-                      d="M11.4669 3.72684C11.7558 3.91574 11.8369 4.30308 11.648 4.59198L7.39799 11.092C7.29783 11.2452 7.13556 11.3467 6.95402 11.3699C6.77247 11.3931 6.58989 11.3355 6.45446 11.2124L3.70446 8.71241C3.44905 8.48022 3.43023 8.08494 3.66242 7.82953C3.89461 7.57412 4.28989 7.55529 4.5453 7.78749L6.75292 9.79441L10.6018 3.90792C10.7907 3.61902 11.178 3.53795 11.4669 3.72684Z"
-                      fill="currentColor"
-                      fillRule="evenodd"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                  {item.icon && <span className="shrink-0">{item.icon}</span>}
-                  <span className="truncate">{item.label}</span>
+                  <MenuItemContent icon={item.icon} checked={isSelected}>
+                    {item.label}
+                  </MenuItemContent>
                 </div>
               );
             })}
@@ -184,13 +196,6 @@ function FlowParamSelect({ paramKey, def, value, onChange }) {
   const rawLabel = selectedItem ? selectedItem.label : value || def.default || "Default";
   const displayValue = formatParamLabel(String(rawLabel));
   const paramTitle = def.label || formatParamLabel(paramKey);
-
-  const getParamIcon = () => {
-    if (paramKey.includes("camera")) return "videocam";
-    if (paramKey.includes("mode")) return "tune";
-    if (paramKey.includes("resolution")) return "hd";
-    return "tune";
-  };
 
   return (
     <FlowSelect
@@ -234,8 +239,8 @@ export function FlowPromptBoxSettings({
   // Mode Options
   const modeOptions = useMemo(() => {
     const all = [
-      { value: "image", label: "Image", icon: "image" },
-      { value: "video", label: "Vidéo", icon: "videocam" },
+      { value: "image", label: "Image", icon: "image-02" },
+      { value: "video", label: "Vidéo", icon: "video-01" },
     ];
     if (!availableModes || availableModes.length === 0) return all;
     const filtered = all.filter((m) => availableModes.includes(m.value));
@@ -245,8 +250,8 @@ export function FlowPromptBoxSettings({
   // SubMode Options (Type de vidéo for Video)
   const subModeOptions = useMemo(() => {
     const all = [
-      { value: "frames", label: "Frames", icon: "panorama_wide_angle" },
-      { value: "reference", label: "Reference", icon: "extension" },
+      { value: "frames", label: "Frames", icon: "aspect-ratio" },
+      { value: "reference", label: "Reference", icon: "puzzle" },
     ];
     if (!availableSubModes || availableSubModes.length === 0) return all;
     return all.filter((s) => availableSubModes.includes(s.value));
@@ -260,45 +265,59 @@ export function FlowPromptBoxSettings({
     return subModeOptions.find((s) => s.value === activeSubMode) || subModeOptions[0];
   }, [subModeOptions, activeSubMode]);
 
-  // Ratio Parameter detection (from parameters array or currentModel)
+  // Ratio Parameter detection (strictly model-declared: aspect_ratio or ratio)
   const ratioParamEntry = useMemo(() => {
-    const found = parameters.find(([k]) => k === "aspect_ratio" || k === "ratio");
+    if (!currentModel || models.length === 0) return null;
+    const found = parameters.find(([k]) => RATIO_PARAM_KEYS.includes(k));
     if (found) return found;
-    if (currentModel?.parameters?.aspect_ratio) return ["aspect_ratio", currentModel.parameters.aspect_ratio];
-    if (currentModel?.parameters?.ratio) return ["ratio", currentModel.parameters.ratio];
+    const modelParams = currentModel?.parameters || {};
+    for (const key of RATIO_PARAM_KEYS) {
+      if (modelParams[key]) return [key, modelParams[key]];
+    }
     return null;
-  }, [parameters, currentModel]);
+  }, [parameters, currentModel, models.length]);
 
   const ratioOptions = useMemo(() => {
-    if (!currentModel || models.length === 0) return [];
-    const def = ratioParamEntry ? ratioParamEntry[1] : (currentModel?.parameters?.aspect_ratio || currentModel?.parameters?.ratio);
-    const rawValues = def?.values;
-    if (Array.isArray(rawValues) && rawValues.length > 0) {
-      return rawValues.map((v) => (typeof v === "object" ? v.value : String(v)));
-    }
-    return DEFAULT_RATIOS;
-  }, [ratioParamEntry, currentModel, models.length]);
+    if (!ratioParamEntry) return [];
+    const [, def] = ratioParamEntry;
+    return extractSelectValues(def).map((v) => String(v));
+  }, [ratioParamEntry]);
 
   const currentRatio = useMemo(() => {
-    if (ratioParamEntry && paramValues[ratioParamEntry[0]]) {
-      return String(paramValues[ratioParamEntry[0]]);
-    }
-    if (paramValues.aspect_ratio) return String(paramValues.aspect_ratio);
-    if (paramValues.ratio) return String(paramValues.ratio);
-    return ratioOptions[0] || "16:9";
+    if (!ratioParamEntry) return "";
+    const [key, def] = ratioParamEntry;
+    const val = paramValues[key] ?? def?.default;
+    return val !== undefined && val !== null ? String(val) : (ratioOptions[0] || "");
   }, [ratioParamEntry, paramValues, ratioOptions]);
 
-  // Variation / Outputs detection (count or variations)
-  const variationParamEntry = useMemo(() => {
-    return parameters.find(([k]) => k === "count" || k === "variations");
-  }, [parameters]);
+  // Outputs / Variations detection (strictly model-declared: count, variations, num_outputs, n)
+  const countParamEntry = useMemo(() => {
+    if (!currentModel || models.length === 0) return null;
+    const found = parameters.find(([k]) => COUNT_PARAM_KEYS.includes(k));
+    if (found) return found;
+    const modelParams = currentModel?.parameters || {};
+    for (const key of COUNT_PARAM_KEYS) {
+      if (modelParams[key]) return [key, modelParams[key]];
+    }
+    return null;
+  }, [parameters, currentModel, models.length]);
+
+  const countOptions = useMemo(() => {
+    if (!countParamEntry) return [];
+    return extractCountOptions(countParamEntry[1]);
+  }, [countParamEntry]);
+
+  const currentCountValue = useMemo(() => {
+    if (!countParamEntry) return 1;
+    const [key, def] = countParamEntry;
+    const val = paramValues[key] ?? def?.default ?? countOptions[0];
+    return val !== undefined && val !== null ? val : 1;
+  }, [countParamEntry, paramValues, countOptions]);
 
   const currentCount = useMemo(() => {
-    if (variationParamEntry) {
-      return Number(paramValues[variationParamEntry[0]]) || 1;
-    }
-    return Number(paramValues.count || paramValues.variations) || 1;
-  }, [variationParamEntry, paramValues]);
+    const num = Number(currentCountValue);
+    return Number.isFinite(num) && num > 0 ? num : 1;
+  }, [currentCountValue]);
 
   const displayCredits = useMemo(() => {
     if (typeof creditCost === "number" && creditCost > 0) return creditCost;
@@ -308,7 +327,9 @@ export function FlowPromptBoxSettings({
   // Other non-ratio non-count parameters (Quality, Duration, Sliders, etc.)
   const otherParams = useMemo(() => {
     if (!currentModel || models.length === 0) return [];
-    return parameters.filter(([k]) => k !== "aspect_ratio" && k !== "ratio" && k !== "count" && k !== "variations");
+    return parameters.filter(
+      ([k]) => !RATIO_PARAM_KEYS.includes(k) && !COUNT_PARAM_KEYS.includes(k)
+    );
   }, [parameters, currentModel, models.length]);
 
   // Current Model Icon
@@ -319,28 +340,24 @@ export function FlowPromptBoxSettings({
   const handleRatioClick = (val) => {
     if (ratioParamEntry && onParamChange) {
       onParamChange(ratioParamEntry[0], val);
-    } else if (onParamChange) {
-      onParamChange("aspect_ratio", val);
     }
   };
 
   const handleCountClick = (cnt) => {
-    if (variationParamEntry && onParamChange) {
-      onParamChange(variationParamEntry[0], cnt);
-    } else if (onParamChange) {
-      onParamChange("count", cnt);
+    if (countParamEntry && onParamChange) {
+      onParamChange(countParamEntry[0], cnt);
     }
   };
 
   return (
     <div
       data-slot="prompt-box-settings"
-      className={cn(
-        "settings-content-overlay flow-prompt-box-settings block box-border w-[var(--prompt-box-settings-width,18rem)] rounded-[var(--radius-3xl)]",
-        "bg-ui-menu-background p-2 [--blur:40px] border border-border-weak shadow-2xl",
-        "text-text-primary select-none font-sans antialiased",
-        className
-      )}
+      className={menuPanelClassName({
+        className: cn(
+          "settings-content-overlay flow-prompt-box-settings block box-border w-[var(--prompt-box-settings-width,15.5rem)] select-none",
+          className
+        ),
+      })}
     >
       <div className="settings-content flex flex-col gap-1">
         {/* ── 1. MODE TOGGLES ── */}
@@ -348,7 +365,7 @@ export function FlowPromptBoxSettings({
           <div
             role="radiogroup"
             aria-label="Mode"
-            className="flex items-center gap-1 p-0.5 bg-surface-card border border-border-weak rounded-xl w-full"
+            className="flex items-center gap-1 p-0.5 bg-surface-card border border-border-menu-subtle rounded-lg w-full"
           >
             {modeOptions.map((opt) => {
               const isChecked = activeMode === opt.value;
@@ -361,11 +378,11 @@ export function FlowPromptBoxSettings({
                   role="radio"
                   aria-pressed={isChecked}
                   aria-checked={isChecked}
-                  className="flex-1 rounded-[10px] text-xs h-[34px]"
+                  className="flex-1 rounded-lg ds-text-caption-m"
                 >
-                  <GoogleIcon
-                    iconName={opt.icon}
-                    className="!text-[16px] leading-none text-icon-primary"
+                  <HugeIcon
+                    name={opt.icon}
+                    className="leading-none text-icon-primary"
                   />
                   <span>{opt.label}</span>
                 </Button>
@@ -379,7 +396,7 @@ export function FlowPromptBoxSettings({
           <div
             role="radiogroup"
             aria-label="Type de vidéo"
-            className="flex items-center gap-1 p-0.5 bg-surface-card border border-border-weak rounded-xl w-full"
+            className="flex items-center gap-1 p-0.5 bg-surface-card border border-border-menu-subtle rounded-lg w-full"
           >
             {subModeOptions.map((opt) => {
               const isChecked = activeSubMode === opt.value;
@@ -392,11 +409,11 @@ export function FlowPromptBoxSettings({
                   role="radio"
                   aria-pressed={isChecked}
                   aria-checked={isChecked}
-                  className="flex-1 rounded-[10px] text-xs h-[34px]"
+                  className="flex-1 rounded-lg ds-text-caption-m"
                 >
-                  <GoogleIcon
-                    iconName={opt.icon}
-                    className="!text-[16px] leading-none text-icon-primary"
+                  <HugeIcon
+                    name={opt.icon}
+                    className="leading-none text-icon-primary"
                   />
                   <span>{opt.label}</span>
                 </Button>
@@ -406,14 +423,14 @@ export function FlowPromptBoxSettings({
         )}
 
         {/* ── 2. FORMAT / ASPECT RATIO TOGGLES ── */}
-        {ratioOptions.length > 0 && (
+        {ratioParamEntry && ratioOptions.length > 0 && (
           <div
             role="radiogroup"
             aria-label="Format"
             style={{
               gridTemplateColumns: `repeat(${Math.min(ratioOptions.length, 5)}, minmax(0, 1fr))`,
             }}
-            className="grid gap-1 p-0.5 bg-surface-card border border-border-weak rounded-xl w-full"
+            className="grid gap-1 p-0.5 bg-surface-card border border-border-menu-subtle rounded-lg w-full"
           >
             {ratioOptions.map((ratio) => {
               const isChecked = currentRatio === ratio;
@@ -428,13 +445,13 @@ export function FlowPromptBoxSettings({
                   role="radio"
                   aria-pressed={isChecked}
                   aria-checked={isChecked}
-                  className="w-full min-w-0 !h-[34px] flex-col !gap-0.5 !py-0.5 !px-1 rounded-[10px]"
+                  className="w-full min-w-0 h-8 flex-col !gap-0.5 !py-0.5 !px-1 rounded-lg"
                 >
-                  <GoogleIcon
-                    iconName={iconName}
-                    className="!text-[14px] leading-none text-icon-primary"
+                  <HugeIcon
+                    name={iconName}
+                    className="leading-none text-icon-primary"
                   />
-                  <span className="text-[10px] leading-none font-medium text-text-primary">
+                  <span className="ds-text-caption-s leading-none text-text-primary">
                     {ratio}
                   </span>
                 </Button>
@@ -479,7 +496,7 @@ export function FlowPromptBoxSettings({
                     role="radiogroup"
                     aria-label={def.label || key}
                     className={cn(
-                      "p-0.5 bg-surface-card border border-border-weak rounded-xl w-full max-w-full",
+                      "p-0.5 bg-surface-card border border-border-menu-subtle rounded-lg w-full max-w-full",
                       isGrid ? cn("grid", gridColsClass, "gap-1") : "flex items-center gap-1"
                     )}
                   >
@@ -505,17 +522,18 @@ export function FlowPromptBoxSettings({
                           aria-pressed={isChecked}
                           aria-checked={isChecked}
                           aria-description={infoText || undefined}
-                          className={cn(!isGrid ? "flex-1" : undefined, "rounded-[10px] text-xs h-[34px]")}
+                          className={cn(!isGrid ? "flex-1" : undefined, "rounded-lg ds-text-caption-m")}
                         >
                           <span className="flex items-center justify-center gap-1 truncate w-full text-center">
                             <span className="truncate text-text-primary">{itemLabel}</span>
                             {hasInfo && (
-                              <GoogleIcon
-                                iconName="info"
+                              <HugeIcon
+                                name="information-circle"
+                                size="sm"
                                 role="img"
                                 aria-hidden={false}
                                 aria-label={infoText}
-                                className="text-[14px] text-icon-primary hover:text-text-primary"
+                                className="text-icon-primary hover:text-text-primary"
                               />
                             )}
                           </span>
@@ -530,8 +548,11 @@ export function FlowPromptBoxSettings({
               if (def.type === "boolean") {
                 const isChecked = Boolean(val);
                 return (
-                  <div key={key} className="flex items-center justify-between px-3 py-2 bg-surface-card border border-border-weak rounded-xl">
-                    <span className="text-xs text-text-primary font-medium">
+                  <div
+                    key={key}
+                    className="flex items-center justify-between min-h-[30px] px-2 py-1 rounded-lg ds-text-caption-m font-normal text-text-primary hover:bg-surface-tonal transition-colors"
+                  >
+                    <span className="truncate">
                       {def.label || key}
                     </span>
                     <Switch
@@ -551,19 +572,21 @@ export function FlowPromptBoxSettings({
                 const numVal = val !== undefined && val !== null ? Number(val) : (def.default ?? min);
 
                 return (
-                  <div key={key} className="flex flex-col gap-1.5 p-2.5 bg-surface-card border border-border-weak rounded-xl">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="text-text-primary font-medium">{def.label || key}</span>
-                      <span className="font-mono text-text-primary-soft font-semibold tabular-nums">{numVal}</span>
+                  <div key={key} className="flex flex-col gap-1 py-1 rounded-lg">
+                    <div className={cn(MENU_LABEL_CLASS, "flex items-center justify-between py-0.5")}>
+                      <span>{def.label || key}</span>
+                      <span className="font-mono ds-text-caption-s text-text-primary tabular-nums">{numVal}</span>
                     </div>
-                    <Slider
-                      min={min}
-                      max={max}
-                      step={step}
-                      value={[Number.isNaN(numVal) ? min : numVal]}
-                      onValueChange={([newVal]) => onParamChange?.(key, newVal)}
-                      className="w-full py-1.5"
-                    />
+                    <div className="px-2 pb-1">
+                      <Slider
+                        min={min}
+                        max={max}
+                        step={step}
+                        value={[Number.isNaN(numVal) ? min : numVal]}
+                        onValueChange={([newVal]) => onParamChange?.(key, newVal)}
+                        className="w-full py-1"
+                      />
+                    </div>
                   </div>
                 );
               }
@@ -594,7 +617,7 @@ export function FlowPromptBoxSettings({
                     }}
                   />
                 ) : (
-                  <GoogleIcon iconName={icon || "volume_up"} className="text-[16px] text-icon-primary shrink-0" />
+                  <HugeIcon name={icon || "volume-high"} className="text-icon-primary shrink-0" />
                 ),
               };
             })}
@@ -607,25 +630,28 @@ export function FlowPromptBoxSettings({
         )}
 
         {/* ── 5. OUTPUTS / VARIATIONS TOGGLES ── */}
-        {models && models.length > 0 && currentModel && (
+        {models && models.length > 0 && currentModel && countParamEntry && countOptions.length > 0 && (
           <div
             role="radiogroup"
             aria-label="Nombre de sorties"
-            className="grid grid-cols-4 gap-1 p-0.5 bg-surface-card border border-border-weak rounded-xl w-full"
+            style={{
+              gridTemplateColumns: `repeat(${Math.min(countOptions.length, 4)}, minmax(0, 1fr))`,
+            }}
+            className="grid gap-1 p-0.5 bg-surface-card border border-border-menu-subtle rounded-lg w-full"
           >
-            {[1, 2, 3, 4].map((countVal) => {
-              const isChecked = currentCount === countVal;
+            {countOptions.map((countVal) => {
+              const isChecked = String(currentCountValue) === String(countVal);
 
               return (
                 <Button
-                  key={countVal}
+                  key={String(countVal)}
                   type="button"
                   variant="segmented"
                   onClick={() => handleCountClick(countVal)}
                   role="radio"
                   aria-pressed={isChecked}
                   aria-checked={isChecked}
-                  className="w-full h-[34px] rounded-[10px]"
+                  className="w-full rounded-lg ds-text-caption-m"
                 >
                   {countVal}
                 </Button>
@@ -637,7 +663,7 @@ export function FlowPromptBoxSettings({
         {/* ── 6. CREDIT COST LABEL ── */}
         {models && models.length > 0 && currentModel && (
           <div className="settings-credit-cost block text-center pt-1 pb-0.5">
-            <span className="credit-cost-label block text-xs text-text-secondary">
+            <span className="credit-cost-label block ds-text-caption-s text-text-secondary">
               <span>
                 La génération utilisera{" "}
                 <a
@@ -655,7 +681,7 @@ export function FlowPromptBoxSettings({
 
         {/* ── Empty notice if no models available for this mode ── */}
         {(!models || models.length === 0) && (
-          <div className="py-3 px-2 text-center text-xs text-text-secondary">
+          <div className="py-3 px-2 text-center ds-text-caption-s text-text-secondary">
             Aucun modèle disponible
           </div>
         )}

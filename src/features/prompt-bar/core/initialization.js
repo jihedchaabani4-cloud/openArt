@@ -6,11 +6,13 @@
  */
 
 import { initializeValues, getActiveDefinitions } from "./parameterState.js";
+import { resolveEligibleModels } from "./modelManagement.js";
 
 /**
- * Derives the initial PromptBar instance state from a composition type and available models.
+ * Derives the initial PromptBar instance state from a template/config and available models.
+ * Uses the same resolveEligibleModels rule as setModels, hydrate, and switchMode.
  *
- * @param {object}                 typeConfig - CompositionType (from createPromptBarType)
+ * @param {object}                 typeConfig - Template or layout config
  * @param {Record<string, object>} modelsMap  - Keyed ModelContract map
  * @returns {{ selectedModelId: string|null, parameterValues: Record<string, any> }}
  */
@@ -20,21 +22,22 @@ export function initializeFromType(typeConfig, modelsMap = {}) {
     return { selectedModelId: null, parameterValues };
   }
 
-  const { defaultModelId, supportedDomains } = typeConfig || {};
+  const { defaultModelId } = typeConfig || {};
+  const activeMode = typeConfig?.defaultState?.activeMode || "image";
+  const activeSubMode = typeConfig?.defaultState?.activeSubMode || "frames";
 
-  // Filter models by supported domains
-  const eligible = Object.values(modelsMap).filter(
-    (m) => !supportedDomains?.length || supportedDomains.includes(m.domain)
-  );
+  const eligible = resolveEligibleModels(Object.values(modelsMap), {
+    template: typeConfig,
+    activeMode,
+    activeSubMode,
+  });
 
   // Resolve starting model
   let selectedModelId = null;
-  if (defaultModelId && modelsMap[defaultModelId]) {
+  if (defaultModelId && eligible.some((m) => m.id === defaultModelId)) {
     selectedModelId = defaultModelId;
   } else if (eligible.length > 0) {
     selectedModelId = eligible[0].id;
-  } else if (Object.keys(modelsMap).length > 0) {
-    selectedModelId = Object.keys(modelsMap)[0];
   }
 
   const model = selectedModelId ? modelsMap[selectedModelId] : null;

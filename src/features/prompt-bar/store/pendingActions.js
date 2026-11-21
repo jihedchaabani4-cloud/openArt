@@ -2,12 +2,14 @@
  * Prompt Bar Store — Pending Action Queue
  *
  * Manages queued actions for prompt bar instances that are not yet mounted.
- * When the instance mounts, pending actions are drained in order and executed exactly once.
+ * When the instance mounts (and models are ready, if required), pending actions
+ * are drained in order and executed exactly once through the public action allowlist.
  *
  * Pure module: zero direct window/document access, storage passed in or defaults to memory fallback.
  */
 
 import { identityKey } from "./registry.js";
+import { executePublicAction } from "./publicActions.js";
 
 export const DEFAULT_PENDING_TTL_MS = 120000; // 2 minutes
 export const PENDING_QUEUE_STORAGE_KEY = "pb2:pending_actions";
@@ -101,7 +103,7 @@ export function enqueuePendingAction(identity, actionDescriptor, { storage, now 
 }
 
 /**
- * Drains and executes pending actions for a mounting Prompt Bar instance.
+ * Drains and executes pending actions for a mounting/ready Prompt Bar instance.
  * Entries are removed from storage BEFORE execution to guarantee no double run.
  *
  * @param {object|string} identity
@@ -165,34 +167,13 @@ export function drainPendingActions(
       continue;
     }
 
-    // 3. Execute
+    // 3. Execute via custom executor or allowlisted public action dispatcher
     if (typeof executor === "function") {
       executor(entry, targetStore);
       executedCount++;
       executedActions.push(entry);
     } else if (targetStore && typeof targetStore.getState === "function") {
-      const state = targetStore.getState();
-      if (entry.actionName === "setPrompt") {
-        if (typeof state.setPromptExternal === "function") {
-          state.setPromptExternal(entry.args[0]);
-        } else if (typeof state.setPrompt === "function") {
-          state.setPrompt(entry.args[0]);
-        }
-      } else if (entry.actionName === "reset") {
-        if (typeof state.resetStoreState === "function") {
-          state.resetStoreState();
-        } else if (typeof state.reset === "function") {
-          state.reset();
-        }
-      } else if (entry.actionName === "focus" && typeof state.requestFocus === "function") {
-        state.requestFocus();
-      } else if (entry.actionName === "animate" && typeof state.animateMedia === "function") {
-        state.animateMedia(entry.args?.[0]?.media || entry.args?.[0]);
-      } else if (entry.actionName === "add_reference" && typeof state.addReference === "function") {
-        state.addReference(entry.args?.[0]?.media || entry.args?.[0]);
-      } else if (typeof state[entry.actionName] === "function") {
-        state[entry.actionName](...entry.args);
-      }
+      executePublicAction(targetStore, entry.actionName, entry.args || [], { external: true });
       executedCount++;
       executedActions.push(entry);
     }

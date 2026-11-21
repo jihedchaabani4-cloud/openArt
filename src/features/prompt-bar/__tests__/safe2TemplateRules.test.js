@@ -5,7 +5,7 @@
  * 1. resolveParameterMapping table tests across 6 model shapes and 4 roles (including PB-K1 collision)
  * 2. filterEligibleModels capability-based filtering across modes/subModes and list isolation
  * 3. COMPOSITION_REQUIREMENTS exact slot declarations per mode & subMode
- * 4. createPromptBarType immutability and layout configurations
+ * 4. Template immutability and layout configurations (generatedMediaTemplate, characterTemplate)
  */
 
 import { describe, it, expect } from "vitest";
@@ -13,17 +13,15 @@ import {
   COMPOSITION_REQUIREMENTS,
   filterEligibleModels,
   resolveParameterMapping,
-  generatedMediaType,
+  generatedMediaTemplate,
 } from "../templates/generatedMedia.template.js";
-import { createPromptBarType } from "../composition/createPromptBarType.js";
-import { characterType } from "../composition/character.type.js";
+import { characterTemplate } from "../templates/character.template.js";
 import {
   normalizedFramesModel,
   normalizedImagesListModel,
   normalizedPromptOnlyModel,
 } from "./fixtures/models.fixture.js";
 
-// Additional models required for resolveParameterMapping table test
 const modelWithStartFrame = {
   id: "model_start_frame",
   domain: "video",
@@ -63,7 +61,6 @@ const modelImg2ImgCollision = {
 describe("SAFE-2: Template Rules Characterization", () => {
   describe("1. resolveParameterMapping table test", () => {
     const tableCases = [
-      // Fixture models
       { model: normalizedFramesModel, role: "start", expected: "input_image" },
       { model: normalizedFramesModel, role: "end", expected: "last_frame" },
       { model: normalizedFramesModel, role: "reference", expected: null },
@@ -74,23 +71,22 @@ describe("SAFE-2: Template Rules Characterization", () => {
       { model: normalizedImagesListModel, role: "reference", expected: "images" },
       { model: normalizedImagesListModel, role: "unknown", expected: null },
 
-      { model: normalizedPromptOnlyModel, role: "start", expected: "input_image" }, // fallback in code today
+      { model: normalizedPromptOnlyModel, role: "start", expected: "input_image" },
       { model: normalizedPromptOnlyModel, role: "end", expected: null },
       { model: normalizedPromptOnlyModel, role: "reference", expected: null },
       { model: normalizedPromptOnlyModel, role: "unknown", expected: null },
 
-      // Additional variants
       { model: modelWithStartFrame, role: "start", expected: "start_frame" },
       { model: modelWithStartFrame, role: "end", expected: null },
       { model: modelWithStartFrame, role: "reference", expected: null },
       { model: modelWithStartFrame, role: "unknown", expected: null },
 
-      { model: modelWithLastImage, role: "start", expected: "input_image" }, // fallback in code today
+      { model: modelWithLastImage, role: "start", expected: "input_image" },
       { model: modelWithLastImage, role: "end", expected: "last_image" },
       { model: modelWithLastImage, role: "reference", expected: null },
       { model: modelWithLastImage, role: "unknown", expected: null },
 
-      { model: modelWithRefImages, role: "start", expected: "input_image" }, // fallback in code today
+      { model: modelWithRefImages, role: "start", expected: "input_image" },
       { model: modelWithRefImages, role: "end", expected: null },
       { model: modelWithRefImages, role: "reference", expected: "reference_images" },
       { model: modelWithRefImages, role: "unknown", expected: null },
@@ -103,15 +99,12 @@ describe("SAFE-2: Template Rules Characterization", () => {
     });
 
     it("pins PB-K1: image domain model with input_image maps both start and reference to input_image", () => {
-      // CURRENT BEHAVIOR (known issue PB-K1):
-      // For image models with input_image, role "start" returns "input_image"
-      // and role "reference" ALSO returns "input_image".
       const startKey = resolveParameterMapping(modelImg2ImgCollision, "start");
       const refKey = resolveParameterMapping(modelImg2ImgCollision, "reference");
 
       expect(startKey).toBe("input_image");
       expect(refKey).toBe("input_image");
-      expect(startKey).toBe(refKey); // Collision!
+      expect(startKey).toBe(refKey);
     });
   });
 
@@ -146,7 +139,7 @@ describe("SAFE-2: Template Rules Characterization", () => {
 
     it("returns only reference-capable video models for video mode with reference subMode", () => {
       const eligible = filterEligibleModels(allModels, "video", "reference");
-      expect(eligible).toEqual([]); // None of the fixture video models have `images`
+      expect(eligible).toEqual([]);
     });
 
     it("filters only the models list passed as argument (isolated, not global)", () => {
@@ -177,47 +170,29 @@ describe("SAFE-2: Template Rules Characterization", () => {
     });
   });
 
-  describe("4. createPromptBarType and composition types", () => {
-    it("returns a deeply frozen object", () => {
-      const customType = createPromptBarType({
-        id: "custom-test-type",
-        referenceSlots: [{ role: "front", label: "Front" }],
-        modes: { active: true },
-      });
-
-      expect(Object.isFrozen(customType)).toBe(true);
-      expect(Object.isFrozen(customType.layout)).toBe(true);
-      expect(Object.isFrozen(customType.referenceSlots)).toBe(true);
-      expect(Object.isFrozen(customType.referenceSlots[0])).toBe(true);
-      expect(Object.isFrozen(customType.modes)).toBe(true);
-    });
-
-    it("throws error if config.id is missing", () => {
-      expect(() => createPromptBarType({})).toThrow("createPromptBarType: config.id is required");
-    });
-
-    it("generatedMediaType exposes declared layout flags", () => {
-      expect(generatedMediaType.id).toBe("generated-media");
-      expect(generatedMediaType.layout).toEqual({
+  describe("4. Template contracts and layout configurations", () => {
+    it("generatedMediaTemplate is frozen and exposes declared layout flags", () => {
+      expect(Object.isFrozen(generatedMediaTemplate)).toBe(true);
+      expect(generatedMediaTemplate.id).toBe("generated-media");
+      expect(generatedMediaTemplate.layout).toEqual({
         showPromptInput: true,
         showModelSelector: true,
         showParameterDrawer: true,
         showAttachmentBar: true,
         showModeSelector: true,
       });
-      expect(generatedMediaType.supportedDomains).toEqual(["image", "video"]);
     });
 
-    it("characterType exposes declared layout flags", () => {
-      expect(characterType.id).toBe("character");
-      expect(characterType.layout).toEqual({
+    it("characterTemplate is frozen and exposes declared layout flags", () => {
+      expect(Object.isFrozen(characterTemplate)).toBe(true);
+      expect(characterTemplate.id).toBe("character");
+      expect(characterTemplate.layout).toEqual({
         showPromptInput: true,
-        showModelSelector: true,
-        showParameterDrawer: true,
-        showAttachmentBar: false,
+        showModelSelector: false,
+        showParameterDrawer: false,
+        showAttachmentBar: true,
         showModeSelector: false,
       });
-      expect(characterType.supportedDomains).toEqual(["image"]);
     });
   });
 });

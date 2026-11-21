@@ -44,7 +44,6 @@ vi.mock("@/components/cinema-studio/prompt-bar/editor/PromptEditor.jsx", () => (
 
 import { PromptBarPlatform } from "@/components/cinema-studio/prompt-bar/PromptBarPlatform.jsx";
 import { generatedMediaTemplate } from "../templates/generatedMedia.template.js";
-import { generatedMediaType } from "../templates/generatedMedia.template.js";
 
 describe("X3: Editor Focus without DOM Query", () => {
   let customRegistry;
@@ -95,7 +94,7 @@ describe("X3: Editor Focus without DOM Query", () => {
         <PromptBarPlatform
           projectId="proj_focus_1"
           templateId="generated-media"
-          type={generatedMediaType}
+          type={generatedMediaTemplate}
           models={[]}
         />
       </PromptBarStoreContext.Provider>
@@ -135,7 +134,7 @@ describe("X3: Editor Focus without DOM Query", () => {
         <PromptBarPlatform
           projectId="proj_focus_1"
           templateId="generated-media"
-          type={generatedMediaType}
+          type={generatedMediaTemplate}
           models={[]}
         />
       </PromptBarStoreContext.Provider>

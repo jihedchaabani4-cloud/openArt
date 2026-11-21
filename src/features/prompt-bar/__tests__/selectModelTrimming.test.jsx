@@ -29,7 +29,7 @@ vi.mock("@/components/cinema-studio/prompt-bar/editor/PromptEditor.jsx", () => (
 import { createPromptBarStore } from "../store/createPromptBarStore.js";
 import { PromptBarPlatform } from "@/components/cinema-studio/prompt-bar/PromptBarPlatform.jsx";
 import {
-  generatedMediaType,
+  generatedMediaTemplate,
   COMPOSITION_REQUIREMENTS,
   filterEligibleModels,
   resolveParameterMapping,
@@ -116,24 +116,28 @@ describe("T4: One Place for Model-Switch Trimming (PB-K3)", () => {
     expect(subscriberSpy).toHaveBeenCalledTimes(1);
   });
 
-  it("platform-level: PromptBarPlatform does NOT call setParameter or setPrompt again after selectModel", async () => {
-    const store = createPromptBarStore({
-      modelsMap,
-      selectedModelId: "model_many_refs",
-      activeMode: "image",
-      prompt: "Picture with <media:ref_1> and <media:ref_2>",
-      parameterValues: {
-        images: [
-          { workflow_id: "ref_1", name: "Ref 1" },
-          { workflow_id: "ref_2", name: "Ref 2" },
-        ],
-        aspect_ratio: "1:1",
+  it("platform-level: PromptBarPlatform does NOT dispatch duplicate trimming mutations after selectModel", async () => {
+    const store = createPromptBarStore(
+      {
+        template: generatedMediaTemplate,
+        modelsMap,
+        selectedModelId: "model_many_refs",
+        activeMode: "image",
+        prompt: "Picture with <media:ref_1> and <media:ref_2>",
+        parameterValues: {
+          images: [
+            { workflow_id: "ref_1", name: "Ref 1" },
+            { workflow_id: "ref_2", name: "Ref 2" },
+          ],
+          aspect_ratio: "1:1",
+        },
       },
-    });
+      { template: generatedMediaTemplate }
+    );
 
     render(
       <PromptBarPlatform
-        type={generatedMediaType}
+        type={generatedMediaTemplate}
         featureConfig={featureConfig}
         models={modelsList}
         store={store}
@@ -141,28 +145,49 @@ describe("T4: One Place for Model-Switch Trimming (PB-K3)", () => {
       />
     );
 
-    // Spy on setParameter and setPrompt
-    const originalSetParameter = store.getState().setParameter;
+    // Spy on real sealed store commands and store notifications
+    const originalSetSetting = store.getState().setSetting;
+    const originalRemoveMedia = store.getState().removeMedia;
+    const originalClearSlot = store.getState().clearSlot;
     const originalSetPrompt = store.getState().setPrompt;
-    const setParameterSpy = vi.fn((...args) => originalSetParameter(...args));
+
+    expect(typeof originalSetSetting).toBe("function");
+    expect(typeof originalRemoveMedia).toBe("function");
+    expect(typeof originalClearSlot).toBe("function");
+    expect(typeof originalSetPrompt).toBe("function");
+
+    const setSettingSpy = vi.fn((...args) => originalSetSetting(...args));
+    const removeMediaSpy = vi.fn((...args) => originalRemoveMedia(...args));
+    const clearSlotSpy = vi.fn((...args) => originalClearSlot(...args));
     const setPromptSpy = vi.fn((...args) => originalSetPrompt(...args));
 
     store.setState({
-      setParameter: setParameterSpy,
+      setSetting: setSettingSpy,
+      removeMedia: removeMediaSpy,
+      clearSlot: clearSlotSpy,
       setPrompt: setPromptSpy,
     });
+
+    const subscriberSpy = vi.fn();
+    const unsubscribe = store.subscribe(subscriberSpy);
 
     // Switch model directly on the store
     act(() => {
       store.getState().selectModel("model_one_ref");
     });
 
-    // Verify store state has already trimmed
+    unsubscribe();
+
+    // Verify store state has trimmed cleanly in a single atomic notification
+    expect(store.getState().selectedModelId).toBe("model_one_ref");
     expect(store.getState().parameterValues.images).toEqual({ workflow_id: "ref_1", name: "Ref 1" });
     expect(store.getState().prompt).toBe("Picture with <media:ref_1> and");
+    expect(subscriberSpy).toHaveBeenCalledTimes(1);
 
-    // The Platform's duplicate effect MUST NOT have called setParameter or setPrompt!
-    expect(setParameterSpy).toHaveBeenCalledTimes(0);
+    // PromptBarPlatform MUST NOT have triggered any follow-up store mutations
+    expect(setSettingSpy).toHaveBeenCalledTimes(0);
+    expect(removeMediaSpy).toHaveBeenCalledTimes(0);
+    expect(clearSlotSpy).toHaveBeenCalledTimes(0);
     expect(setPromptSpy).toHaveBeenCalledTimes(0);
   });
 });

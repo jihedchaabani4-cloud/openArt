@@ -66,9 +66,8 @@ export function CharacterFeatureEditor({ open, onOpenChange, anchorRef }) {
           className={cn(
             "absolute bottom-full left-1/2 -translate-x-1/2 mb-4 z-50 pointer-events-auto",
             "flex flex-col h-[470px] w-[880px] max-w-[95vw] overflow-hidden",
-            "gap-2 rounded-[var(--radius-3xl)] bg-ui-menu-background p-2 [--blur:40px]",
-            "border border-border-weak shadow-none",
-            "text-text-primary"
+            "gap-2 surface-glass bg-surface-menu-glass rounded-xl p-2",
+            "text-text-primary font-sans antialiased"
           )}
         >
           {/* Header - Tabs */}
@@ -184,7 +183,7 @@ function IdentitySection() {
                 setActiveSubTab(tab.id);
                 setFeatureEditorView({ activeTab: "identity", activeSubTab: tab.id });
               }}
-              className="w-full justify-start text-sm"
+              className="w-full justify-start ds-text-caption-m rounded-lg"
             >
               {tab.label}
             </Button>
@@ -285,7 +284,7 @@ function HeadSection() {
                 setActiveSubTab(tab.id);
                 setFeatureEditorView({ activeTab: "head", activeSubTab: tab.id });
               }}
-              className="w-full justify-start text-sm"
+              className="w-full justify-start ds-text-caption-m rounded-lg"
             >
               {tab.label}
             </Button>
@@ -341,7 +340,7 @@ function DetailsSection() {
                 setActiveSubTab(tab.id);
                 setFeatureEditorView({ activeTab: "details", activeSubTab: tab.id });
               }}
-              className="w-full justify-start text-sm"
+              className="w-full justify-start ds-text-caption-m rounded-lg"
             >
               {tab.label}
             </Button>

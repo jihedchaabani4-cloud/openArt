@@ -35,7 +35,7 @@ describe("PromptBar Padding & Row Spacing Layout Contract", () => {
 
     // The text 'Generate' label inside button must be replaced with the right arrow icon
     expect(controlsContent).not.toContain("<span>Generate</span>");
-    expect(controlsContent).toMatch(/arrow_forward|ArrowRight/);
+    expect(controlsContent).toMatch(/arrow-right-02|ArrowRight/);
     expect(controlsContent).toMatch(/size-8/);
   });
 });

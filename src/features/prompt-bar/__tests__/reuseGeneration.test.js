@@ -1,5 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
 import { createRegistry } from "../store/registry.js";
+import { createPromptBarStore } from "../store/createPromptBarStore.js";
+import { generatedMediaTemplate } from "../templates/generatedMedia.template.js";
+import { normalizedFramesModel } from "./fixtures/models.fixture.js";
 import {
   promptBarService,
   resolveReusableGeneration,
@@ -142,6 +145,63 @@ describe("Reuse generation config", () => {
       modelId: "gpt_image_2",
       prompt: "Saved prompt before the generation failed",
       parameters: { quality: "medium", aspect_ratio: "16:9" },
+    });
+  });
+
+  it("applyGeneration preserves start/end keyframe URLs when resolveReusableGeneration also emits matching references without url", () => {
+    const store = createPromptBarStore(
+      { template: generatedMediaTemplate },
+      { template: generatedMediaTemplate }
+    );
+    store.getState().setModels([normalizedFramesModel]);
+
+    const workflow = {
+      id: "wf-video-reuse",
+      workflow_type: "GENERATION",
+      primary_media_id: "primary-vid",
+      items: [
+        {
+          id: "primary-vid",
+          is_primary: true,
+          is_video: true,
+          generationConfig: {
+            model: normalizedFramesModel.id,
+            prompt: "Camera pans smoothly across the skyline",
+            duration: 5,
+            input_image: {
+              workflow_id: "wf-start-frame",
+              url: "https://cdn.example.com/start-frame.png",
+              name: "Start Frame",
+            },
+            last_frame: {
+              workflow_id: "wf-end-frame",
+              url: "https://cdn.example.com/end-frame.png",
+              name: "End Frame",
+            },
+          },
+        },
+      ],
+    };
+
+    const reusable = resolveReusableGeneration(workflow);
+    expect(reusable.references).toEqual(
+      expect.arrayContaining([
+        { workflow_id: "wf-start-frame", role: "start" },
+        { workflow_id: "wf-end-frame", role: "end" },
+      ])
+    );
+
+    const res = store.getState().applyGeneration(reusable);
+    expect(res.ok).toBe(true);
+
+    const { parameterValues } = store.getState();
+    expect(parameterValues.input_image).toMatchObject({
+      workflow_id: "wf-start-frame",
+      url: "https://cdn.example.com/start-frame.png",
+    });
+    expect(parameterValues.last_frame).toMatchObject({
+      workflow_id: "wf-end-frame",
+      url: "https://cdn.example.com/end-frame.png",
     });
   });
 });

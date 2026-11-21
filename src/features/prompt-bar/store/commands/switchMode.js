@@ -2,12 +2,15 @@
  * Prompt Bar Platform — switchMode Command
  *
  * Pure command executing atomic mode and subMode transitions per PB-D-03.
+ * Uses ONE consistent resolveEligibleModels rule, prunes all media parameters
+ * (leaving zero orphan entities), reconciles remaining settings, and cleans prompt tags.
  * Zero React, zero DOM, zero store mutation.
  */
 
 import { ok, fail, REASONS } from "../../core/commandResult.js";
 import { reconcile } from "../../core/reconciliation.js";
 import { pruneMedia } from "../../core/media.js";
+import { resolveEligibleModels } from "../../core/modelManagement.js";
 import { cleanTagsForAsset } from "../../core/tagsService.js";
 import { isMediaType } from "../../core/parameterKeys.js";
 
@@ -18,8 +21,8 @@ import { isMediaType } from "../../core/parameterKeys.js";
  * @param {object} args - { mode, subMode }
  * @param {string} [args.mode] - Target mode ("image" | "video")
  * @param {string} [args.subMode] - Target subMode ("frames" | "reference")
- * @param {object} [deps] - { template, filterEligibleModels, models }
- * @returns {CommandResult}
+ * @param {object} [deps] - { template, filterEligibleModels, modelsMap }
+ * @returns {import("../../core/commandResult.js").CommandResult}
  */
 export function switchMode(state, { mode, subMode } = {}, deps = {}) {
   const targetMode = mode || state.activeMode || "image";
@@ -29,16 +32,25 @@ export function switchMode(state, { mode, subMode } = {}, deps = {}) {
   const modelsMap = state.modelsMap || deps.modelsMap || {};
   const allModelsList = Object.values(modelsMap);
 
-  const filterEligible =
-    template?.filterEligibleModels ||
-    deps.filterEligibleModels ||
-    (typeof template?.getEligibleModels === "function" ? template.getEligibleModels : null);
+  const effectiveTemplate =
+    template ||
+    (typeof deps.filterEligibleModels === "function"
+      ? { filterEligibleModels: deps.filterEligibleModels }
+      : null);
 
   let nextModelId = state.selectedModelId;
   let nextModel = modelsMap[nextModelId] || null;
 
-  if (typeof filterEligible === "function" && allModelsList.length > 0) {
-    const eligible = filterEligible(allModelsList, targetMode, targetSubMode, state.parameterValues || {});
+  const hasEligibilityFilter =
+    typeof effectiveTemplate?.filterEligibleModels === "function" ||
+    typeof effectiveTemplate?.getEligibleModels === "function";
+
+  if (hasEligibilityFilter && allModelsList.length > 0) {
+    const eligible = resolveEligibleModels(allModelsList, {
+      template: effectiveTemplate,
+      activeMode: targetMode,
+      activeSubMode: targetSubMode,
+    });
     if (!eligible || eligible.length === 0) {
       return fail(REASONS.NO_ELIGIBLE_MODEL, { mode: targetMode, subMode: targetSubMode });
     }
@@ -68,7 +80,7 @@ export function switchMode(state, { mode, subMode } = {}, deps = {}) {
 
   // PB-D-03: On mode-change, ensure media parameters are not populated with defaults
   for (const [key, def] of Object.entries(nextDef)) {
-    if (isMediaType(def.type)) {
+    if (isMediaType(def.type) || def.group === "media") {
       delete nextValues[key];
     }
   }

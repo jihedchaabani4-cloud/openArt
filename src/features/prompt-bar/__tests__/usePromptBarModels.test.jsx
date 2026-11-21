@@ -1,15 +1,16 @@
 import { describe, it, expect } from "vitest";
-import { renderHook } from "@testing-library/react";
+import { renderHook, act } from "@testing-library/react";
 import { usePromptBarModels } from "../platform/hooks/usePromptBarModels.js";
-import { PromptBarStoreProvider } from "../store/PromptBarStoreContext.js";
-import { createPromptBarType } from "../composition/createPromptBarType.js";
+import { PromptBarStoreProvider, usePromptBarService } from "../store/PromptBarStoreContext.js";
 
 const mockModels = [
   { id: "img-1", name: "Image Model 1", domain: "image", parameters: { prompt: { type: "string" } } },
   { id: "vid-1", name: "Video Model 1", domain: "video", parameters: { input_image: { type: "image" }, last_frame: { type: "image" } } },
 ];
 
-const mockFeatureConfig = {
+const mockTemplate = {
+  id: "test-models-hook",
+  layout: { showModeSelector: true },
   filterEligibleModels: (models, mode, _subMode) => {
     if (mode === "video") return models.filter((m) => m.domain === "video");
     return models.filter((m) => m.domain === "image");
@@ -18,10 +19,9 @@ const mockFeatureConfig = {
 };
 
 describe("usePromptBarModels hook", () => {
-  it("syncs models into the store and filters eligible models", () => {
-    const type = createPromptBarType({ id: "test", layout: { showModeSelector: true } });
+  it("syncs models into the store and filters eligible models synchronously", () => {
     const wrapper = ({ children }) => (
-      <PromptBarStoreProvider type={type} persist={false}>
+      <PromptBarStoreProvider template={mockTemplate} instanceId="models-1" persist={false}>
         {children}
       </PromptBarStoreProvider>
     );
@@ -30,8 +30,8 @@ describe("usePromptBarModels hook", () => {
       () =>
         usePromptBarModels({
           models: mockModels,
-          type,
-          featureConfig: mockFeatureConfig,
+          type: mockTemplate,
+          featureConfig: mockTemplate,
         }),
       { wrapper }
     );
@@ -43,31 +43,33 @@ describe("usePromptBarModels hook", () => {
     expect(result.current.availableModes).toEqual(["image", "video"]);
   });
 
-  it("auto-selects first eligible model when mode changes", () => {
-    const type = createPromptBarType({ id: "test", layout: { showModeSelector: true } });
+  it("synchronously switches to first eligible model on service.switchMode without post-render repair effect", () => {
     const wrapper = ({ children }) => (
-      <PromptBarStoreProvider type={type} persist={false}>
+      <PromptBarStoreProvider template={mockTemplate} instanceId="models-2" persist={false}>
         {children}
       </PromptBarStoreProvider>
     );
 
-    const { result, rerender } = renderHook(
-      ({ activeMode }) =>
-        usePromptBarModels({
+    const { result } = renderHook(
+      () => {
+        const service = usePromptBarService();
+        const modelsHook = usePromptBarModels({
           models: mockModels,
-          type,
-          featureConfig: mockFeatureConfig,
-          activeMode,
-        }),
-      {
-        wrapper,
-        initialProps: { activeMode: "image" },
-      }
+          type: mockTemplate,
+          featureConfig: mockTemplate,
+        });
+        return { service, ...modelsHook };
+      },
+      { wrapper }
     );
 
     expect(result.current.currentModel?.id).toBe("img-1");
 
-    rerender({ activeMode: "video" });
+    act(() => {
+      result.current.service.switchMode("video");
+    });
+
     expect(result.current.currentModel?.id).toBe("vid-1");
+    expect(result.current.isCurrentEligible).toBe(true);
   });
 });

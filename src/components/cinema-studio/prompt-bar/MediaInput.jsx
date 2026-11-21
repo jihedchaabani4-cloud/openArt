@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState, useEffect, useCallback } from "react";
-import { GoogleIcon } from "@/components/primitives/GoogleIcon";
+import { HugeIcon } from "@/components/primitives/HugeIcon";
 import { ReferenceButton, ViewReference } from "./ReferenceButton.jsx";
 import { Button } from "@/components/base/button";
 import { IconButton } from "@/components/base/icon-button";
@@ -185,7 +185,7 @@ export function MediaInput({
           data-testid="media-input-uploading"
           role="status"
           aria-label={`Uploading ${label || "media"}`}
-          className="chip-container group size-12 relative rounded-xl overflow-hidden bg-white/5 border border-white/10 flex items-center justify-center select-none"
+          className="chip-container group size-12 relative rounded-xl overflow-hidden bg-white-5 border border-border-subtle flex items-center justify-center select-none"
         >
           {tempPreview && (
             <img
@@ -194,16 +194,16 @@ export function MediaInput({
               className="absolute inset-0 w-full h-full object-cover opacity-30"
             />
           )}
-          <GoogleIcon iconName="progress_activity" className="text-xl text-white/80 animate-spin relative z-10" />
+          <HugeIcon name="loading-03" size="lg" className="text-text-primary animate-spin relative z-10" />
         </div>
       ) : status === "failed" ? (
         <div
           data-testid="media-input-failed"
           role="alert"
           aria-label={error || "Upload failed"}
-          className="chip-container group size-12 relative rounded-xl overflow-hidden bg-red-500/10 border border-red-500/30 flex flex-col items-center justify-center p-1 text-center select-none"
+          className="chip-container group size-12 relative rounded-xl overflow-hidden bg-error/10 border border-error/30 flex flex-col items-center justify-center p-1 text-center select-none"
         >
-          <span className="text-xs text-red-400 font-medium leading-none mb-1 scale-75">Failed</span>
+          <span className="ds-text-caption-s text-error font-medium leading-none mb-1">Failed</span>
           <Button
             type="button"
             variant="secondary"
@@ -212,7 +212,7 @@ export function MediaInput({
             onClick={handleRetry}
             title="Retry upload"
           >
-            <GoogleIcon iconName="refresh" className="text-xs" />
+            <HugeIcon name="refresh" size="xs" />
             <span>Retry</span>
           </Button>
           <IconButton
@@ -224,7 +224,7 @@ export function MediaInput({
             title="Dismiss error"
             aria-label="Dismiss error"
           >
-            <GoogleIcon iconName="close" className="text-xs" />
+            <HugeIcon name="cancel-01" size="xs" />
           </IconButton>
         </div>
       ) : value ? (

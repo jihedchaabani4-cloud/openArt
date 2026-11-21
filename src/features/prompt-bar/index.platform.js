@@ -1,52 +1,55 @@
 /**
- * Prompt Bar Platform — Public API
+ * Prompt Bar Platform — Public API (Sealed Black-Box Core)
  *
- * Clean public export for the new Platform architecture.
- * Does NOT re-export the existing production prompt bar.
+ * Exports ONLY the public service contract, provider, read-only hooks,
+ * public template descriptors/constants, and UI host components.
+ * Private store internals and raw mutators are NOT exported here.
  */
 
-// ── Renderer & Wrappers ──────────────────────────────────
-export { PromptBarPlatform } from "@/components/cinema-studio/prompt-bar/PromptBarPlatform.jsx";
-export { GeneratedPromptBar } from "@/components/cinema-studio/prompt-bar/GeneratedPromptBar.jsx";
-export { generatedMediaTemplate } from "./templates/generatedMedia.template.js";
-export { CharacterPromptBar } from "@/components/cinema-studio/prompt-bar/CharacterPromptBar.jsx";
-export { characterTemplate } from "./templates/character.template.js";
-export { CharacterFeatureEditor, ElementFeatureEditor } from "@/components/cinema-studio/prompt-bar/CharacterFeatureEditor.jsx";
-export { useCharacterStore, useElementStore } from "./model/useCharacterStore.js";
-export { promptBarService } from "./api/promptBarService.js";
-
-
-// ── Composition Types & Feature Configs ───────────────────────
-export { createPromptBarType } from "./composition/createPromptBarType.js";
-export { generatedMediaType, filterEligibleModels } from "./templates/generatedMedia.template.js";
-export { characterType }       from "./composition/character.type.js";
-export * as generatedMediaConfig from "./templates/generatedMedia.template.js";
-
-// ── Store & Route Policy ──────────────────────────────────
-export { createPromptBarStore }    from "./store/createPromptBarStore.js";
-export { PromptBarStoreProvider, PromptBarStoreContext } from "./store/PromptBarStoreContext.js";
-export { usePromptBarStore }       from "./store/usePromptBarStore.js";
-export { matchRoute, isPathAllowed, normalizePathSegments } from "./store/routePolicy.js";
+// ── Public Service & React Hooks ──────────────────────────
+export {
+  promptBarService,
+  resolveReusableGeneration,
+  hasGeneratedPrimaryMedia,
+  withPrimaryMediaFallback,
+} from "./api/promptBarService.js";
+export {
+  PromptBarStoreProvider,
+  usePromptBarService,
+  usePromptBarState,
+  usePromptBarSnapshot,
+} from "./store/PromptBarStoreContext.js";
 export { usePromptBarRouteWatcher } from "./store/usePromptBarRouteWatcher.js";
 
-// ── Core (for testing / advanced use) ────────────────────
-export { reconcile, validateParameter } from "./core/reconciliation.js";
-export { serialize }                    from "./core/serialization.js";
-export { adaptBackendModel, adaptBackendCatalog, getModelReferenceCapability } from "./core/modelManagement.js";
-export { useRealBackendModels }         from "./core/useRealBackendModels.js";
-export * as tagsService                 from "./core/tagsService.js";
-export * as tagsResolver                from "./core/tagsResolver.js";
-export * as entityService               from "./core/entityService.js";
+// ── Read-Only Derived Selectors, Helpers & Constants ──────
+export {
+  selectElements,
+  selectCharacters,
+  deriveEntitiesFromParameters,
+  getEntityImageCount,
+} from "./core/entityService.js";
+export { resolveMediaUrl } from "./core/mediaRef.js";
+export { resolveModelIcon, getModelReferenceCapability } from "./core/modelManagement.js";
+export { calculateModelCredits } from "./core/creditCalculationService.js";
+export { REASONS } from "./core/commandResult.js";
 
-// ── Production Selectors (Reused) ─────────────────────────
+// ── Public Templates & Model Adapter ──────────────────────
+export { defineTemplate } from "./core/templateContract.js";
+export {
+  generatedMediaTemplate,
+  filterEligibleModels,
+  COMPOSITION_REQUIREMENTS,
+  resolveParameterMapping,
+} from "./templates/generatedMedia.template.js";
+export { characterTemplate } from "./templates/character.template.js";
+export { useRealBackendModels } from "./adapters/useRealBackendModels.js";
+
+// ── UI Wrappers & Layout Helpers Needed by Consumers ──────
+export { PromptBarPlatform } from "@/components/cinema-studio/prompt-bar/PromptBarPlatform.jsx";
+export { GeneratedPromptBar } from "@/components/cinema-studio/prompt-bar/GeneratedPromptBar.jsx";
+export { CharacterPromptBar } from "@/components/cinema-studio/prompt-bar/CharacterPromptBar.jsx";
+export { CharacterFeatureEditor, ElementFeatureEditor } from "@/components/cinema-studio/prompt-bar/CharacterFeatureEditor.jsx";
 export { PromptBarShell } from "@/components/cinema-studio/prompt-bar/PromptBarShell.jsx";
 export { MediaInput } from "@/components/cinema-studio/prompt-bar/MediaInput.jsx";
 export { ReferenceButton, ViewReference, SwapIcon } from "@/components/cinema-studio/prompt-bar/ReferenceButton.jsx";
-export { RatioSelector } from "@/components/cinema-studio/prompt-bar/selectors/RatioSelector.jsx";
-export { QualitySelector } from "@/components/cinema-studio/prompt-bar/selectors/QualitySelector.jsx";
-export { VideoResolutionSelector } from "@/components/cinema-studio/prompt-bar/selectors/VideoResolutionSelector.jsx";
-export { VariationSelector } from "@/components/cinema-studio/prompt-bar/selectors/VariationSelector.jsx";
-export { DurationSelector } from "@/components/cinema-studio/prompt-bar/selectors/DurationSelector.jsx";
-export { BaseSelector } from "@/components/cinema-studio/prompt-bar/selectors/BaseSelector.jsx";
-export { FeatureModeSelector } from "@/components/cinema-studio/prompt-bar/selectors/FeatureModeSelector.jsx";
 export { FlowPromptBoxSettings } from "@/components/cinema-studio/prompt-bar/selectors/FlowPromptBoxSettings.jsx";

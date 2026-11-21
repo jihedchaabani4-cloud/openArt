@@ -23,6 +23,10 @@ vi.mock("@/features/prompt-bar/core/useRealBackendModels", () => ({
   useRealBackendModels: () => ({ data: { models: [] } }),
 }));
 
+vi.mock("@/features/prompt-bar/adapters/useRealBackendModels", () => ({
+  useRealBackendModels: () => ({ data: { models: [] } }),
+}));
+
 // Mock promptBarService
 const mockAnimateMedia = vi.fn();
 const mockAddReference = vi.fn();

@@ -1,36 +1,33 @@
 /**
- * Prompt Bar Platform — Store Factory
+ * Prompt Bar Platform — Sealed Core Store Factory
  *
- * Creates a new isolated Zustand vanilla store per PromptBar mount.
- * Uses createStore() (not create()) so each instance is independent.
- *
- * Per-instance isolation: createStore() returns a new store instance every call — not a singleton.
- * US1: Multiple instances share the Core engine code but have zero shared state.
- * US3: Unmounting a PromptBar garbage-collects this store; no residual state.
+ * Creates an isolated Zustand vanilla store per PromptBar mount.
+ * Exposes ONLY semantic, invariant-enforcing commands — zero raw setters or escape hatches.
+ * Single source of truth: media & entities live ONLY in parameterValues[slotKey].
  */
 
 import { createStore } from "zustand/vanilla";
 import { reconcile } from "../core/reconciliation.js";
 import { serialize } from "../core/serialization.js";
 import { initializeValues } from "../core/parameterState.js";
-import {
-  addEntity,
-  normalizeEntity,
-  removeEntityWithPromptClean,
-} from "../core/entityService.js";
-import { cleanTagsForAsset, getAssetId } from "../core/tagsService.js";
+import { deriveEntitiesFromParameters } from "../core/entityService.js";
+import { resolveEligibleModels } from "../core/modelManagement.js";
 import { registry } from "./registry.js";
+import { drainPendingActions } from "./pendingActions.js";
 import { switchMode as switchModeCommand } from "./commands/switchMode.js";
 import { selectModel as selectModelCommand } from "./commands/selectModel.js";
+import { setSetting as setSettingCommand } from "./commands/setSetting.js";
 import { attachMedia as attachMediaCommand } from "./commands/attachMedia.js";
 import { removeMedia as removeMediaCommand } from "./commands/removeMedia.js";
+import { swapFrames as swapFramesCommand } from "./commands/swapFrames.js";
+import { clearDraft as clearDraftCommand } from "./commands/clearDraft.js";
 
 /**
  * Creates a new isolated PromptBar Zustand vanilla store.
  *
- * @param {Partial<PromptBarInstanceState>} overrides - Optional initial state overrides
- * @param {object} [initialDeps={}] - Store dependencies (template, models)
- * @returns {ZustandVanillaStore}
+ * @param {Partial<PromptBarInstanceState>} [overrides={}] - Optional initial state overrides
+ * @param {object} [initialDeps={}] - Store dependencies ({ template, models })
+ * @returns {import("zustand/vanilla").StoreApi}
  */
 export function createPromptBarStore(overrides = {}, initialDeps = {}) {
   const deps = { ...initialDeps };
@@ -38,7 +35,13 @@ export function createPromptBarStore(overrides = {}, initialDeps = {}) {
     deps.template = overrides.template;
   }
   const effectiveTemplate = overrides.template || deps.template || null;
-  const initialParams = overrides.parameterValues || (effectiveTemplate?.parameters ? initializeValues(effectiveTemplate.parameters) : {});
+  const initialParams =
+    overrides.parameterValues ||
+    (effectiveTemplate?.parameters ? initializeValues(effectiveTemplate.parameters) : {});
+
+  // Strip deprecated mutable entity arrays if passed via legacy overrides
+  const { elements: _ignoredElements, characters: _ignoredCharacters, ...cleanOverrides } = overrides || {};
+
   let cachedTemplate = null;
   let cachedActions = null;
   let storeGet = null;
@@ -57,10 +60,13 @@ export function createPromptBarStore(overrides = {}, initialDeps = {}) {
         store: { getState: storeGet, setState: storeSet },
         switchMode: (mode, subMode) => storeGet().switchMode(mode, subMode),
         selectModel: (modelId) => storeGet().selectModel(modelId),
+        setSetting: (key, value) => storeGet().setSetting(key, value),
         attachMedia: (args) => storeGet().attachMedia(args),
         removeMedia: (args) => storeGet().removeMedia(args),
+        clearSlot: (role) => storeGet().clearSlot(role),
+        swapFrames: () => storeGet().swapFrames(),
+        clearDraft: () => storeGet().clearDraft(),
         setPrompt: (text) => storeGet().setPromptExternal(text),
-        setParametersBatch: (params) => storeGet().setParametersBatch(params),
       });
     } else {
       cachedActions = {};
@@ -73,418 +79,357 @@ export function createPromptBarStore(overrides = {}, initialDeps = {}) {
     storeSet = set;
 
     return {
-    // ── State ──────────────────────────────────────────────────────────────
-    modelsMap: {},
-    rawModelsMap: {},
-    selectedModelId: null,
-    prompt: "",
-    promptFillNonce: 0,
-    parameterValues: initialParams,
-    elements: [],
-    characters: [],
-    reconciliationLog: [],
-    validationErrors: {},
-    isGenerating: false,
-    lastSerializedRequest: null,
-    activeMode: overrides.activeMode || "image",
-    activeSubMode: overrides.activeSubMode || "frames",
-    pendingHydration: overrides.pendingHydration || null,
-    identity: overrides.identity || null,
-    template: overrides.template || deps.template || null,
-    focusRequest: overrides.focusRequest || 0,
-    ...overrides,
+      // ── State ──────────────────────────────────────────────────────────────
+      modelsMap: {},
+      rawModelsMap: {},
+      selectedModelId: null,
+      prompt: "",
+      promptFillNonce: 0,
+      parameterValues: initialParams,
+      reconciliationLog: [],
+      validationErrors: {},
+      isGenerating: false,
+      lastSerializedRequest: null,
+      activeMode: cleanOverrides.activeMode || "image",
+      activeSubMode: cleanOverrides.activeSubMode || "frames",
+      pendingHydration: cleanOverrides.pendingHydration || null,
+      identity: cleanOverrides.identity || null,
+      template: cleanOverrides.template || deps.template || null,
+      focusRequest: cleanOverrides.focusRequest || 0,
+      ...cleanOverrides,
 
-    // ── Actions ────────────────────────────────────────────────────────────
+      // ── Lifecycle & Catalog Sync ───────────────────────────────────────────
 
-    /**
-     * Hydrates persisted state after mount.
-     * If modelsMap is empty, stores as pendingHydration for setModels to consume.
-     * @param {object} saved
-     */
-    hydrate: (saved) => {
-      if (!saved || typeof saved !== "object") return;
-      const { modelsMap, selectedModelId, parameterValues } = get();
-      const hasModels = Object.keys(modelsMap).length > 0;
+      /**
+       * Hydrates persisted state after mount.
+       * Applies ONE consistent resolveEligibleModels rule when models are loaded;
+       * otherwise stashes pendingHydration for setModels to reconcile synchronously.
+       *
+       * @param {object} saved
+       */
+      hydrate: (saved) => {
+        if (!saved || typeof saved !== "object") return;
+        const state = get();
+        const { modelsMap, selectedModelId, parameterValues } = state;
+        const tmpl = state.template || deps.template || null;
+        const hasModels = Object.keys(modelsMap || {}).length > 0;
+        const targetMode = saved.activeMode || state.activeMode || "image";
+        const targetSubMode = saved.activeSubMode || state.activeSubMode || "frames";
 
-      if (!hasModels) {
-        set({
-          prompt: saved.prompt !== undefined ? saved.prompt : get().prompt,
-          elements: Array.isArray(saved.elements) ? saved.elements : get().elements,
-          characters: Array.isArray(saved.characters) ? saved.characters : get().characters,
-          activeMode: saved.activeMode || get().activeMode,
-          activeSubMode: saved.activeSubMode || get().activeSubMode,
-          selectedModelId: saved.selectedModelId || selectedModelId,
-          parameterValues: {
-            ...parameterValues,
-            ...(saved.parameterValues || {}),
-          },
-          pendingHydration: saved,
+        if (!hasModels) {
+          const expectsModels = tmpl?.features?.models !== false;
+          set({
+            prompt: saved.prompt !== undefined ? saved.prompt : state.prompt,
+            activeMode: targetMode,
+            activeSubMode: targetSubMode,
+            selectedModelId: expectsModels ? (saved.selectedModelId || selectedModelId) : null,
+            parameterValues: {
+              ...parameterValues,
+              ...(saved.parameterValues || {}),
+            },
+            pendingHydration: expectsModels ? saved : null,
+          });
+          return;
+        }
+
+        const eligible = resolveEligibleModels(Object.values(modelsMap), {
+          template: tmpl,
+          activeMode: targetMode,
+          activeSubMode: targetSubMode,
         });
-        return;
-      }
 
-      let targetModelId = selectedModelId;
-      if (saved.selectedModelId && modelsMap[saved.selectedModelId]) {
-        targetModelId = saved.selectedModelId;
-      }
+        let targetModelId = null;
+        if (saved.selectedModelId && eligible.some((m) => m.id === saved.selectedModelId)) {
+          targetModelId = saved.selectedModelId;
+        } else if (selectedModelId && eligible.some((m) => m.id === selectedModelId)) {
+          targetModelId = selectedModelId;
+        } else if (eligible.length > 0) {
+          targetModelId = eligible[0].id;
+        }
 
-      const targetDefs = modelsMap[targetModelId]?.parameters || {};
-      const currentDefs = selectedModelId ? (modelsMap[selectedModelId]?.parameters || {}) : {};
-      const savedParams = {
-        ...parameterValues,
-        ...(saved.parameterValues || {}),
-      };
-
-      const { nextValues, changes } = reconcile(savedParams, currentDefs, targetDefs);
-
-      set({
-        prompt: saved.prompt !== undefined ? saved.prompt : get().prompt,
-        selectedModelId: targetModelId,
-        parameterValues: {
-          ...savedParams,
-          ...nextValues,
-        },
-        elements: Array.isArray(saved.elements) ? saved.elements : get().elements,
-        characters: Array.isArray(saved.characters) ? saved.characters : get().characters,
-        activeMode: saved.activeMode || get().activeMode,
-        activeSubMode: saved.activeSubMode || get().activeSubMode,
-        reconciliationLog: changes,
-        pendingHydration: null,
-      });
-    },
-
-    /**
-     * Replace the available model catalog and reconcile state.
-     * If selectedModelId is no longer valid, selects the first available model.
-     *
-     * @param {object[]} models - Array of ModelContract objects
-     * @param {Record<string, object>} rawModelsMap - Raw backend models map (for inspector)
-     */
-    setModels: (models, rawModelsMap = {}) => {
-      const nextModelsMap = {};
-      const rawList = Array.isArray(models) ? models : [];
-      for (const m of rawList) {
-        nextModelsMap[m.id] = m;
-      }
-
-      const { selectedModelId, parameterValues, modelsMap, pendingHydration } = get();
-      let nextModelId = selectedModelId;
-
-      if (pendingHydration?.selectedModelId && nextModelsMap[pendingHydration.selectedModelId]) {
-        nextModelId = pendingHydration.selectedModelId;
-      } else if (!nextModelId || !nextModelsMap[nextModelId]) {
-        nextModelId = rawList[0]?.id || null;
-      }
-
-      const sourceParams = pendingHydration?.parameterValues
-        ? { ...parameterValues, ...pendingHydration.parameterValues }
-        : parameterValues;
-
-      let nextValues = sourceParams;
-      let reconciliationLog = [];
-
-      if (nextModelId && nextModelId !== selectedModelId) {
-        const prevDefs = selectedModelId ? (modelsMap[selectedModelId]?.parameters || {}) : {};
-        const nextDefs = nextModelsMap[nextModelId]?.parameters || {};
-        const result = reconcile(sourceParams, prevDefs, nextDefs);
-        nextValues = {
-          ...sourceParams,
-          ...result.nextValues,
+        const targetDefs = targetModelId ? (modelsMap[targetModelId]?.parameters || {}) : (tmpl?.parameters || {});
+        const currentDefs = selectedModelId ? (modelsMap[selectedModelId]?.parameters || {}) : {};
+        const savedParams = {
+          ...parameterValues,
+          ...(saved.parameterValues || {}),
         };
-        reconciliationLog = result.changes;
-      } else if (nextModelId && !selectedModelId) {
-        const nextDefs = nextModelsMap[nextModelId]?.parameters || {};
-        const result = reconcile(sourceParams, {}, nextDefs);
-        nextValues = {
-          ...sourceParams,
-          ...result.nextValues,
-        };
-        reconciliationLog = result.changes;
-      } else {
-        nextValues = sourceParams;
-      }
 
-      set({
-        modelsMap: nextModelsMap,
-        rawModelsMap,
-        selectedModelId: nextModelId,
-        parameterValues: nextValues,
-        reconciliationLog,
-        pendingHydration: null,
-      });
-    },
+        const { nextValues, changes } = reconcile(savedParams, currentDefs, targetDefs);
 
-    /**
-     * Switch the active model and auto-reconcile parameter state.
-     * @param {string} modelId
-     */
-    selectModel: (modelId) => {
-      const res = selectModelCommand(get(), modelId, deps);
-      if (res.ok && res.patch) {
-        set(res.patch);
-      }
-    },
+        set({
+          prompt: saved.prompt !== undefined ? saved.prompt : state.prompt,
+          selectedModelId: targetModelId,
+          parameterValues: targetModelId ? nextValues : savedParams,
+          activeMode: targetMode,
+          activeSubMode: targetSubMode,
+          reconciliationLog: changes,
+          pendingHydration: null,
+        });
+      },
 
-    /** Update prompt text. */
-    setPrompt: (prompt) => set({ prompt }),
+      /**
+       * Replaces the available model catalog, synchronously selects an eligible model
+       * using resolveEligibleModels, reconciles parameters, and drains pendingActions
+       * once models are ready.
+       *
+       * @param {object[]} models - Array of ModelContract objects
+       * @param {Record<string, object>} [rawModelsMap={}] - Raw backend models map
+       */
+      setModels: (models, rawModelsMap = {}) => {
+        const nextModelsMap = {};
+        const rawList = Array.isArray(models) ? models : [];
+        for (const m of rawList) {
+          nextModelsMap[m.id] = m;
+        }
 
-    /**
-     * Set prompt from a programmatic source (service dispatch, template action,
-     * or pending queue replay). Bumps promptFillNonce in the SAME set() call so
-     * the editor can play a one-shot ShineText fill sweep (DECISIONS PB-D-24).
-     * User typing must use setPrompt — it never animates.
-     */
-    setPromptExternal: (prompt) =>
-      set((state) => ({ prompt, promptFillNonce: state.promptFillNonce + 1 })),
+        const state = get();
+        const { selectedModelId, parameterValues, modelsMap, pendingHydration, identity } = state;
+        const tmpl = state.template || deps.template || null;
+        const nextMode = pendingHydration?.activeMode || state.activeMode || "image";
+        const nextSubMode = pendingHydration?.activeSubMode || state.activeSubMode || "frames";
 
-    /** Update a single parameter value. */
-    setParameter: (key, value) =>
-      set((state) => ({ parameterValues: { ...state.parameterValues, [key]: value } })),
+        const eligible = resolveEligibleModels(rawList, {
+          template: tmpl,
+          activeMode: nextMode,
+          activeSubMode: nextSubMode,
+        });
 
-    /** Update generation loading state without touching prompt or parameterValues (FR-CORE-07). */
-    setIsGenerating: (isGenerating) => set({ isGenerating: Boolean(isGenerating) }),
+        let nextModelId = null;
+        if (tmpl?.features?.models === false) {
+          nextModelId = null;
+        } else if (
+          pendingHydration?.selectedModelId &&
+          eligible.some((m) => m.id === pendingHydration.selectedModelId)
+        ) {
+          nextModelId = pendingHydration.selectedModelId;
+        } else if (selectedModelId && eligible.some((m) => m.id === selectedModelId)) {
+          nextModelId = selectedModelId;
+        } else if (eligible.length > 0) {
+          nextModelId = eligible[0].id;
+        }
 
-    /**
-     * Begins submit lifecycle tracking.
-     * Sets isGenerating true and registers with external registry tracking.
-     * @returns {string|null} token
-     */
-    beginSubmit: () => {
-      const { identity } = get();
-      let token = null;
-      if (identity) {
-        token = registry.beginSubmit(identity);
-      }
-      set({ isGenerating: true });
-      return token;
-    },
+        const sourceParams = pendingHydration?.parameterValues
+          ? { ...parameterValues, ...pendingHydration.parameterValues }
+          : parameterValues;
 
-    /**
-     * Ends submit lifecycle tracking.
-     * Validates in-flight token; if token is old or unrecognized, does nothing.
-     * Sets isGenerating false when successful.
-     * @param {string} [token]
-     * @returns {boolean}
-     */
-    endSubmit: (token) => {
-      const { identity } = get();
-      if (identity && token) {
-        const ended = registry.endSubmit(identity, token);
-        if (!ended) return false;
-      }
-      set({ isGenerating: false });
-      return true;
-    },
+        let nextValues = sourceParams;
+        let reconciliationLog = [];
 
-    /** Feature-level Entities (Elements & Characters) */
-    addElement: (element) =>
-      set((state) => ({ elements: addEntity(state.elements, element, "element") })),
+        if (nextModelId) {
+          const prevDefs = selectedModelId ? (modelsMap[selectedModelId]?.parameters || {}) : {};
+          const nextDefs = nextModelsMap[nextModelId]?.parameters || {};
+          if (nextModelId !== selectedModelId || pendingHydration || !modelsMap[nextModelId]) {
+            const result = reconcile(sourceParams, prevDefs, nextDefs);
+            nextValues = result.nextValues;
+            reconciliationLog = result.changes;
+          }
+        }
 
-    removeElement: (elementId) =>
-      set((state) => {
-        const { nextList, nextPrompt } = removeEntityWithPromptClean(state.elements, elementId, state.prompt);
-        return { elements: nextList, prompt: nextPrompt };
-      }),
+        set({
+          modelsMap: nextModelsMap,
+          rawModelsMap,
+          selectedModelId: nextModelId,
+          activeMode: nextMode,
+          activeSubMode: nextSubMode,
+          parameterValues: nextValues,
+          reconciliationLog,
+          pendingHydration: null,
+        });
 
-    setElements: (elements) =>
-      set(() => ({
-        elements: (elements || []).map((e) => normalizeEntity(e, "element")).filter(Boolean),
-      })),
+        // Drain any pending actions that were waiting for models to arrive
+        if (rawList.length > 0 && identity) {
+          const meta = registry.getMeta(identity);
+          drainPendingActions(identity, {
+            registry,
+            storage: meta?.storage,
+            currentProjectId: identity.projectId,
+          });
+        }
+      },
 
-    addCharacter: (character) =>
-      set((state) => ({ characters: addEntity(state.characters, character, "character") })),
+      // ── Semantic Commands ──────────────────────────────────────────────────
 
-    removeCharacter: (characterId) =>
-      set((state) => {
-        const { nextList, nextPrompt } = removeEntityWithPromptClean(state.characters, characterId, state.prompt);
-        return { characters: nextList, prompt: nextPrompt };
-      }),
+      /** Switch the active model and auto-reconcile parameter state. */
+      selectModel: (modelId) => {
+        const res = selectModelCommand(get(), modelId, deps);
+        if (res.ok && res.patch) {
+          set(res.patch);
+        }
+        return res;
+      },
 
-    setCharacters: (characters) =>
-      set(() => ({
-        characters: (characters || []).map((c) => normalizeEntity(c, "character")).filter(Boolean),
-      })),
+      /** Atomically switches mode and subMode per PB-D-03. */
+      switchMode: (modeOrOptions, maybeSubMode) => {
+        const args =
+          typeof modeOrOptions === "object" && modeOrOptions !== null
+            ? modeOrOptions
+            : { mode: modeOrOptions, subMode: maybeSubMode };
 
-    clearEntities: () => set({ elements: [], characters: [] }),
+        const res = switchModeCommand(get(), args, deps);
+        if (res.ok && res.patch) {
+          set(res.patch);
+        }
+        return res;
+      },
 
-    /**
-     * Atomically switches mode and subMode per PB-D-03.
-     * Selects eligible model, reconciles parameters, prunes media, cleans tags, and sets in a single notification.
-     * @param {string|object} modeOrOptions
-     * @param {string} [maybeSubMode]
-     * @returns {import("../core/commandResult.js").CommandResult}
-     */
-    switchMode: (modeOrOptions, maybeSubMode) => {
-      const args =
-        typeof modeOrOptions === "object" && modeOrOptions !== null
-          ? modeOrOptions
-          : { mode: modeOrOptions, subMode: maybeSubMode };
+      /** Update prompt text from user typing (never triggers fill animation). */
+      setPrompt: (prompt) => set({ prompt }),
 
-      const res = switchModeCommand(get(), args, deps);
-      if (res.ok && res.patch) {
-        set(res.patch);
-      }
-      return res;
-    },
+      /**
+       * Set prompt from a programmatic source (service dispatch, template action,
+       * or pending queue replay). Bumps promptFillNonce in the SAME set() call so
+       * the editor plays a one-shot ShineText fill sweep (PB-D-24).
+       */
+      setPromptExternal: (prompt) =>
+        set((state) => ({ prompt, promptFillNonce: state.promptFillNonce + 1 })),
 
-    /** Active Mode & SubMode actions */
-    setActiveMode: (activeMode) => set({ activeMode }),
-    setActiveSubMode: (activeSubMode) => {
-      const state = get();
-      if (state.activeSubMode === activeSubMode) return;
-      if (typeof state.switchMode === "function") {
-        state.switchMode({ subMode: activeSubMode });
-      } else {
-        set({ activeSubMode });
-      }
-    },
+      /**
+       * Update a single non-media setting parameter.
+       * Validates against the active model schema and REJECTS media keys.
+       */
+      setSetting: (key, value) => {
+        const res = setSettingCommand(get(), { key, value }, deps);
+        if (res.ok && res.patch) {
+          set(res.patch);
+        }
+        return res;
+      },
 
-    /** Deprecated shim (PB-D-23): first template wins; ignored if template was already set. */
-    setTemplate: (template) => {
-      if (!template) return;
-      if (deps.template || get().template) {
-        return;
-      }
-      deps.template = template;
-      set({ template });
-    },
+      /** Attach media to a composition slot (normalizes via normalizeEntity). */
+      attachMedia: (args) => {
+        const res = attachMediaCommand(get(), args, deps);
+        if (res.ok && res.patch) {
+          set(res.patch);
+        }
+        return res;
+      },
 
-    /**
-     * Attach media to a composition slot per PB-D-03.
-     * @param {object} args - { role, value }
-     * @returns {import("../core/commandResult.js").CommandResult}
-     */
-    attachMedia: (args) => {
-      const res = attachMediaCommand(get(), args, deps);
-      if (res.ok && res.patch) {
-        set(res.patch);
-      }
-      return res;
-    },
+      /** Remove media from a composition slot or list and clean orphan prompt tags. */
+      removeMedia: (args) => {
+        const res = removeMediaCommand(get(), args, deps);
+        if (res.ok && res.patch) {
+          set(res.patch);
+        }
+        return res;
+      },
 
-    /**
-     * Remove media from a composition slot or list per PB-D-03.
-     * @param {object} args - { role, value }
-     * @returns {import("../core/commandResult.js").CommandResult}
-     */
-    removeMedia: (args) => {
-      const res = removeMediaCommand(get(), args, deps);
-      if (res.ok && res.patch) {
-        set(res.patch);
-      }
-      return res;
-    },
+      /** Clear an entire media slot by role and clean orphan prompt tags. */
+      clearSlot: (role) => {
+        const res = removeMediaCommand(get(), { role }, deps);
+        if (res.ok && res.patch) {
+          set(res.patch);
+        }
+        return res;
+      },
 
-    /** Clears media references (images, reference_images, elements, characters) and cleans prompt tags */
-    clearMediaReferences: () => {
-      const { prompt, elements, characters, parameterValues } = get();
-      const allOldItems = [
-        ...(Array.isArray(parameterValues.images) ? parameterValues.images : parameterValues.images ? [parameterValues.images] : []),
-        ...(Array.isArray(parameterValues.reference_images) ? parameterValues.reference_images : parameterValues.reference_images ? [parameterValues.reference_images] : []),
-        ...(elements || []),
-        ...(characters || []),
-      ];
+      /** Atomically swap start and end frames in one patch. */
+      swapFrames: () => {
+        const res = swapFramesCommand(get(), deps);
+        if (res.ok && res.patch) {
+          set(res.patch);
+        }
+        return res;
+      },
 
-      const idsToClean = allOldItems.flatMap((item) => [
-        getAssetId(item),
-        item?.workflow_id,
-        item?.id,
-        item?.asset_id,
-        item?.name,
-        item?.displayName,
-      ]).filter(Boolean);
+      /** Atomically clear prompt and all attached media slots while keeping non-media settings. */
+      clearDraft: () => {
+        const res = clearDraftCommand(get(), deps);
+        if (res.ok && res.patch) {
+          set(res.patch);
+        }
+        return res;
+      },
 
-      const nextValues = { ...parameterValues };
-      delete nextValues.images;
-      delete nextValues.reference_images;
+      /** Update generation loading state without touching prompt or parameterValues (FR-CORE-07). */
+      setIsGenerating: (isGenerating) => set({ isGenerating: Boolean(isGenerating) }),
 
-      const nextPrompt = idsToClean.length > 0 ? cleanTagsForAsset(prompt, idsToClean) : prompt;
+      /** Begins submit lifecycle tracking. */
+      beginSubmit: () => {
+        const { identity } = get();
+        let token = null;
+        if (identity) {
+          token = registry.beginSubmit(identity);
+        }
+        set({ isGenerating: true });
+        return token;
+      },
 
-      set({
-        parameterValues: nextValues,
-        elements: [],
-        characters: [],
-        prompt: nextPrompt,
-      });
-    },
+      /** Ends submit lifecycle tracking. */
+      endSubmit: (token) => {
+        const { identity } = get();
+        if (identity && token) {
+          const ended = registry.endSubmit(identity, token);
+          if (!ended) return false;
+        }
+        set({ isGenerating: false });
+        return true;
+      },
 
-    /**
-     * Serialize current state into the pass-through API payload.
-     * FR-CORE-06: null, undefined, empty string values are omitted.
-     *
-     * @returns {{ model: string, prompt: string, parameters: Record<string, any>, elements?: string[], characters?: string[] }}
-     */
-    serialize: () => {
-      const { selectedModelId, prompt, modelsMap, parameterValues, elements, characters, template } = get();
-      const definitions = (selectedModelId ? modelsMap[selectedModelId]?.parameters : null) || template?.parameters || {};
-      const result = serialize(selectedModelId, prompt, definitions, parameterValues, {
-        elements,
-        characters,
-      });
-      set({ lastSerializedRequest: result });
-      return result;
-    },
+      /**
+       * Serialize current state into the pass-through API payload.
+       * Derives elements and characters from parameterValues (single source of truth).
+       */
+      serialize: () => {
+        const { selectedModelId, prompt, modelsMap, parameterValues, template } = get();
+        const definitions =
+          (selectedModelId ? modelsMap[selectedModelId]?.parameters : null) ||
+          template?.parameters ||
+          {};
+        const { elements, characters } = deriveEntitiesFromParameters(parameterValues);
+        const result = serialize(selectedModelId, prompt, definitions, parameterValues, {
+          elements,
+          characters,
+        });
+        set({ lastSerializedRequest: result });
+        return result;
+      },
 
-    /** Reset prompt, parameters, and entities to model defaults. */
-    reset: () => {
-      const { modelsMap, selectedModelId, template } = get();
-      const definitions = (selectedModelId ? modelsMap[selectedModelId]?.parameters : null) || template?.parameters || {};
-      const parameterValues = initializeValues(definitions);
-      set({
-        prompt: "",
-        parameterValues,
-        elements: [],
-        characters: [],
-        reconciliationLog: [],
-        validationErrors: {},
-        lastSerializedRequest: null,
-        focusRequest: 0,
-      });
-    },
+      /** Reset prompt and parameters to model/template defaults. */
+      reset: () => {
+        const { modelsMap, selectedModelId, template } = get();
+        const definitions =
+          (selectedModelId ? modelsMap[selectedModelId]?.parameters : null) ||
+          template?.parameters ||
+          {};
+        const parameterValues = initializeValues(definitions);
+        set({
+          prompt: "",
+          parameterValues,
+          reconciliationLog: [],
+          validationErrors: {},
+          lastSerializedRequest: null,
+          focusRequest: 0,
+        });
+      },
 
-    /** Requests focus on the prompt editor without DOM query. */
-    requestFocus: () => {
-      set((state) => ({
-        focusRequest: (state.focusRequest || 0) + 1,
-      }));
-    },
+      /** Requests focus on the prompt editor without DOM query. */
+      requestFocus: () => {
+        set((state) => ({
+          focusRequest: (state.focusRequest || 0) + 1,
+        }));
+      },
 
-    /**
-     * Updates multiple parameter values in batch.
-     * @param {Record<string, any>} newParams
-     */
-    setParametersBatch: (newParams) => {
-      set((state) => ({
-        parameterValues: {
-          ...state.parameterValues,
-          ...newParams,
-        },
-      }));
-    },
+      /** Dynamic actions provided by the template */
+      get actions() {
+        return getOrComputeActions();
+      },
 
-    _store: { getState: get, setState: set },
+      animateMedia: (media, options) => {
+        const act = getOrComputeActions();
+        return act.animateMedia ? act.animateMedia(media, options) : undefined;
+      },
 
-    /** Dynamic actions provided by the template */
-    get actions() {
-      return getOrComputeActions();
-    },
+      addReference: (media) => {
+        const act = getOrComputeActions();
+        return act.addReference ? act.addReference(media) : undefined;
+      },
 
-    animateMedia: (media, options) => {
-      const act = getOrComputeActions();
-      return act.animateMedia ? act.animateMedia(media, options) : undefined;
-    },
-
-    addReference: (media) => {
-      const act = getOrComputeActions();
-      return act.addReference ? act.addReference(media) : undefined;
-    },
-
-    applyGeneration: (old) => {
-      const act = getOrComputeActions();
-      return act.applyGeneration ? act.applyGeneration(old) : undefined;
-    },
-  };
-});
+      applyGeneration: (old) => {
+        const act = getOrComputeActions();
+        return act.applyGeneration ? act.applyGeneration(old) : undefined;
+      },
+    };
+  });
 
   Object.defineProperty(store, "actions", {
     get: getOrComputeActions,

@@ -102,6 +102,24 @@ describe("C5: media.js slots and limits contract", () => {
       expect(refMax).toBe(14);
     });
 
+    it("returns 0 for reference slot on text-only model (supports: false, maxRefs: 0)", () => {
+      const refMax = getSlotMaxRefs({
+        slot: { role: "reference" },
+        model: normalizedPromptOnlyModel,
+        template: generatedMediaTemplate,
+      });
+      expect(refMax).toBe(0);
+
+      expect(
+        remainingQuota({
+          model: normalizedPromptOnlyModel,
+          used: 0,
+          slot: { role: "reference" },
+          template: generatedMediaTemplate,
+        })
+      ).toBe(0);
+    });
+
     it("returns 0 if slot or model is missing", () => {
       expect(getSlotMaxRefs({ slot: null, model: normalizedFramesModel })).toBe(0);
       expect(getSlotMaxRefs({ slot: { role: "start" }, model: null })).toBe(0);

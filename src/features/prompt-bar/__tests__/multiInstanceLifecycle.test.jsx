@@ -29,9 +29,8 @@ import {
   COMPOSITION_REQUIREMENTS,
   filterEligibleModels,
   resolveParameterMapping,
-  generatedMediaType,
+  generatedMediaTemplate,
 } from "../templates/generatedMedia.template.js";
-import { createPromptBarType } from "../composition/createPromptBarType.js";
 import { registry } from "../store/registry.js";
 import { clearPersistentPromptBarStores } from "../store/PromptBarStoreContext.js";
 import { fixtureModels } from "./fixtures/models.fixture.js";
@@ -42,17 +41,17 @@ const featureConfig = {
   resolveParameterMapping,
 };
 
-const templateA = createPromptBarType({
+const templateA = {
   id: "template-alpha",
   name: "Alpha Template",
   layout: { showPromptInput: true },
-});
+};
 
-const templateB = createPromptBarType({
+const templateB = {
   id: "template-beta",
   name: "Beta Template",
   layout: { showPromptInput: true },
-});
+};
 
 describe("S6: Multi-Instance & Lifecycle Integration (SAFE-5 Harness)", () => {
   let fakeStorageData = {};
@@ -140,7 +139,7 @@ describe("S6: Multi-Instance & Lifecycle Integration (SAFE-5 Harness)", () => {
     render(
       <div>
         <PromptBarPlatform
-          type={generatedMediaType}
+          type={generatedMediaTemplate}
           templateId="generated-media"
           instanceId="panel-left"
           featureConfig={featureConfig}
@@ -148,7 +147,7 @@ describe("S6: Multi-Instance & Lifecycle Integration (SAFE-5 Harness)", () => {
           storage={fakeStorage}
         />
         <PromptBarPlatform
-          type={generatedMediaType}
+          type={generatedMediaTemplate}
           templateId="generated-media"
           instanceId="panel-right"
           featureConfig={featureConfig}
@@ -187,7 +186,7 @@ describe("S6: Multi-Instance & Lifecycle Integration (SAFE-5 Harness)", () => {
     let store1 = null;
     const { unmount: unmount1 } = render(
       <PromptBarPlatform
-        type={generatedMediaType}
+        type={generatedMediaTemplate}
         templateId="generated-media"
         instanceId="main"
         featureConfig={featureConfig}
@@ -207,7 +206,7 @@ describe("S6: Multi-Instance & Lifecycle Integration (SAFE-5 Harness)", () => {
     let store2 = null;
     const { unmount: unmount2 } = render(
       <PromptBarPlatform
-        type={generatedMediaType}
+        type={generatedMediaTemplate}
         templateId="generated-media"
         instanceId="main"
         featureConfig={featureConfig}
@@ -236,7 +235,7 @@ describe("S6: Multi-Instance & Lifecycle Integration (SAFE-5 Harness)", () => {
 
     const { unmount } = render(
       <PromptBarPlatform
-        type={generatedMediaType}
+        type={generatedMediaTemplate}
         templateId="generated-media"
         instanceId="persisted-bar"
         featureConfig={featureConfig}
@@ -253,7 +252,7 @@ describe("S6: Multi-Instance & Lifecycle Integration (SAFE-5 Harness)", () => {
 
     act(() => {
       initialStore.getState().setPrompt("Persistent prompt to be restored");
-      initialStore.getState().setParameter("aspect_ratio", "9:16");
+      initialStore.getState().setSetting("aspect_ratio", "9:16");
     });
 
     // Unmount flushes saver to storage
@@ -266,7 +265,7 @@ describe("S6: Multi-Instance & Lifecycle Integration (SAFE-5 Harness)", () => {
     // Remount with same identity
     render(
       <PromptBarPlatform
-        type={generatedMediaType}
+        type={generatedMediaTemplate}
         templateId="generated-media"
         instanceId="persisted-bar"
         featureConfig={featureConfig}

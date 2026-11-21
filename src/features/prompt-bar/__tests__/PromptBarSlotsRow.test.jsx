@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { PromptBarSlotsRow } from "@/components/cinema-studio/prompt-bar/parts/PromptBarSlotsRow";
@@ -36,31 +37,40 @@ describe("PromptBarSlotsRow", () => {
     expect(container.firstChild).toBeNull();
   });
 
-  it("renders reference slot with stacked thumbnails, expands into tray on click, and collapses back", () => {
+  it("renders reference slot with stacked thumbnails, expands into tray on click, collapses back, and clears atomically", () => {
+    const handleClearReferences = vi.fn();
     const handleRemoveRef = vi.fn();
     const handleOpenDialog = vi.fn();
 
     const activeSlots = [{ role: "reference", label: "References" }];
     const refItems = [{ id: "ref-1", displayName: "My Ref", url: "https://example.com/ref1.png" }];
 
-    render(
-      <PromptBarSlotsRow
-        activeSlots={activeSlots}
-        paramValues={{}}
-        getReferenceItems={() => refItems}
-        getSlotMaxRefs={() => 4}
-        calculateUsedImages={() => 1}
-        handleRemoveReferenceItem={handleRemoveRef}
-        handleOpenDialog={handleOpenDialog}
-      />
-    );
+    function ControlledHost() {
+      const [unstacked, setUnstacked] = useState(false);
+      return (
+        <PromptBarSlotsRow
+          activeSlots={activeSlots}
+          paramValues={{}}
+          getReferenceItems={() => refItems}
+          getSlotMaxRefs={() => 4}
+          calculateUsedImages={() => 1}
+          handleRemoveReferenceItem={handleRemoveRef}
+          onClearReferences={handleClearReferences}
+          handleOpenDialog={handleOpenDialog}
+          isReferenceUnstacked={unstacked}
+          onToggleReferenceUnstacked={setUnstacked}
+        />
+      );
+    }
+
+    render(<ControlledHost />);
 
     expect(screen.getByTestId("view-reference-ref-1")).toBeTruthy();
     expect(screen.getByText("Uploaded")).toBeTruthy();
     expect(screen.getByText("Used as reference")).toBeTruthy();
 
     fireEvent.click(screen.getByTestId("reference-remove-all-btn"));
-    expect(handleRemoveRef).toHaveBeenCalledWith(refItems[0], "reference");
+    expect(handleClearReferences).toHaveBeenCalledTimes(1);
 
     // Clicking the stacked fan expands the reference tray
     const stackBtn = screen.getByTestId("reference-stack-btn");

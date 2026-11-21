@@ -4,7 +4,7 @@ import { cn } from "@/shared/lib/utils";
 import { IconButton } from "@/components/base/icon-button";
 import { MediaInput } from "@/components/cinema-studio/prompt-bar/MediaInput.jsx";
 import { SwapIcon, ReferenceButton } from "@/components/cinema-studio/prompt-bar/ReferenceButton.jsx";
-import { resolveMediaUrl } from "@/features/prompt-bar/core/mediaRef.js";
+import { resolveMediaUrl } from "@/features/prompt-bar";
 
 const STACK_POSITIONS = [
   {
@@ -85,22 +85,18 @@ export function PromptBarSlotsRow({
   getSlotMaxRefs,
   handleRemoveReferenceItem,
   handleOpenDialog,
-  setParameter,
+  onAttachMedia,
+  onClearSlot,
+  onClearReferences,
   handleRemoveSlot,
   showSwap,
   swapEnabled,
   handleSwapFrames,
-  isReferenceUnstacked: controlledUnstacked,
+  isReferenceUnstacked = false,
   onToggleReferenceUnstacked,
 }) {
   const layoutScopeId = useId();
-  const [internalUnstacked, setInternalUnstacked] = useState(false);
   const [isStackHovered, setIsStackHovered] = useState(false);
-  const isReferenceUnstacked = controlledUnstacked ?? internalUnstacked;
-  const setReferenceUnstacked = (next) => {
-    setInternalUnstacked(next);
-    onToggleReferenceUnstacked?.(next);
-  };
 
   if (!activeSlots || activeSlots.length === 0) {
     return null;
@@ -156,7 +152,7 @@ export function PromptBarSlotsRow({
                     initial={{ opacity: 0, x: -12, scale: 0.92 }}
                     animate={{ opacity: 1, x: 0, scale: 1 }}
                     transition={{ duration: 0.24, ease: [0.25, 1, 0.5, 1] }}
-                    onClick={() => setReferenceUnstacked(false)}
+                    onClick={() => onToggleReferenceUnstacked?.(false)}
                     className="group relative flex cursor-pointer flex-col items-center justify-center rounded-[10px] text-[color:var(--text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--border-heavy)] self-stretch min-h-14 w-9.5 shrink-0"
                   >
                     <span
@@ -242,12 +238,7 @@ export function PromptBarSlotsRow({
                                   e.stopPropagation();
                                   handleRemoveReferenceItem?.(item, backendKey);
                                 }}
-                                className="absolute grid size-5 cursor-pointer place-items-center rounded-full bg-[color:var(--ui-menu-background)] text-[color:var(--icon-primary)] [--blur:20px] hover:bg-[color:var(--ui-menu-background-strong)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--border-heavy)] transition-colors duration-200 z-10"
-                                style={{
-                                  backdropFilter: "blur(var(--blur, 40px))",
-                                  right: "-8px",
-                                  top: "-7px",
-                                }}
+                                className="absolute -right-2 -top-[7px] grid size-5 cursor-pointer place-items-center rounded-full surface-glass bg-surface-menu-glass text-icon-primary hover:bg-surface-tonal-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-heavy transition-colors duration-200 z-10"
                               >
                                 <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18" aria-hidden="true">
                                   <path fillRule="evenodd" clipRule="evenodd" d={REMOVE_ICON_PATH} />
@@ -286,7 +277,7 @@ export function PromptBarSlotsRow({
                   aria-label={`Show all ${refList.length} uploaded images`}
                   onClick={() => {
                     setIsStackHovered(false);
-                    setReferenceUnstacked(true);
+                    onToggleReferenceUnstacked?.(true);
                   }}
                   className="flex cursor-pointer items-center gap-2 rounded-[var(--radius-card)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--border-heavy)] focus-visible:ring-offset-4 focus-visible:ring-offset-transparent"
                 >
@@ -349,12 +340,13 @@ export function PromptBarSlotsRow({
                   transition={{ delay: 0.12, duration: 0.18, ease: [0.34, 1.36, 0.64, 1] }}
                   onClick={(e) => {
                     e.stopPropagation();
-                    refList.forEach((refItem) => handleRemoveReferenceItem?.(refItem, backendKey));
+                    if (onClearReferences) {
+                      onClearReferences();
+                    } else {
+                      onClearSlot?.(slot.role);
+                    }
                   }}
-                  className="absolute -top-0.5 right-0.5 grid size-5 cursor-pointer place-items-center rounded-full bg-[color:var(--ui-menu-background)] text-[color:var(--icon-primary)] [--blur:20px] hover:bg-[color:var(--ui-menu-background-strong)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--border-heavy)] transition-colors duration-200 z-40"
-                  style={{
-                    backdropFilter: "blur(var(--blur, 40px))",
-                  }}
+                  className="absolute -top-0.5 right-0.5 grid size-5 cursor-pointer place-items-center rounded-full surface-glass bg-surface-menu-glass text-icon-primary hover:bg-surface-tonal-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-heavy transition-colors duration-200 z-40"
                 >
                   <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18" aria-hidden="true">
                     <path fillRule="evenodd" clipRule="evenodd" d={REMOVE_ICON_PATH} />
@@ -374,7 +366,13 @@ export function PromptBarSlotsRow({
                 value={media}
                 accept={slot.accepts || "image/*"}
                 onClick={() => handleOpenDialog?.(slot)}
-                onChange={(val) => setParameter?.(backendKey, val)}
+                onChange={(val) => {
+                  if (val) {
+                    onAttachMedia?.(slot.role, val);
+                  } else {
+                    onClearSlot?.(slot.role);
+                  }
+                }}
                 onRemove={() => handleRemoveSlot?.(slot)}
               />
               {isStart && showSwap && (

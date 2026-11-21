@@ -7,15 +7,14 @@ import {
   clearPersistentPromptBarStores,
 } from "../store/PromptBarStoreContext.js";
 import { registry, createRegistry } from "../store/registry.js";
-import { createPromptBarType } from "../composition/createPromptBarType.js";
 import { fixtureModels } from "./fixtures/models.fixture.js";
 import { createPromptBarStore } from "../store/createPromptBarStore.js";
 
-const testType = createPromptBarType({
+const testType = {
   id: "test-memory-policy",
   name: "Memory Policy Media",
   layout: { showPromptInput: true },
-});
+};
 
 function StoreCapture({ onStore }) {
   const store = usePromptBarStoreInstance();
@@ -122,7 +121,7 @@ describe("S5: Memory Policy (pruneOtherProjects & Project Navigation)", () => {
       // User enters prompt and changes parameter
       act(() => {
         storeA.getState().setPrompt("Epic cinematic landscape for Project Alpha");
-        storeA.getState().setParameter("aspect_ratio", "16:9");
+        storeA.getState().setSetting("aspect_ratio", "16:9");
       });
 
       // 2. Unmount Project A (flushes saver and unmounts)

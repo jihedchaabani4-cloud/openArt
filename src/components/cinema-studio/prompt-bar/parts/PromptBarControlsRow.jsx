@@ -1,5 +1,5 @@
 import { cn } from "@/shared/lib/utils";
-import { GoogleIcon } from "@/components/primitives/GoogleIcon";
+import { HugeIcon } from "@/components/primitives/HugeIcon";
 import { Button } from "@/components/base/button";
 import { IconButton } from "@/components/base/icon-button";
 
@@ -38,13 +38,11 @@ export function PromptBarControlsRow({
           ref={tuneButtonRef}
           type="button"
           variant="ghost"
+          data-state={drawerOpen ? "open" : "closed"}
           aria-label="Déclencheur des paramètres"
           title="Paramètres de génération et modèles"
           onClick={onToggleDrawer}
-          className={cn(
-            "settings-trigger-button flex items-center gap-1.5 cursor-pointer select-none border-0",
-            drawerOpen && "is-active bg-white/10"
-          )}
+          className={cn("settings-trigger-button", drawerOpen && "is-active")}
         >
           {currentModel && (
             <div className="flex items-center gap-1.5 max-w-[180px] truncate">
@@ -52,20 +50,20 @@ export function PromptBarControlsRow({
                 <img
                   src={currentModelIcon}
                   alt=""
-                  className="size-5 rounded-sm object-contain brightness-0 invert shrink-0"
+                  className="size-4 rounded-sm object-contain brightness-0 invert shrink-0"
                   onError={(e) => {
                     e.currentTarget.style.display = "none";
                   }}
                 />
               )}
-              <span className="font-medium text-[12px] truncate text-white">
+              <span className="ds-text-caption-m font-medium truncate text-text-primary">
                 {currentModel.name || currentModel.displayName || currentModel.id}
               </span>
             </div>
           )}
-          <GoogleIcon
-            iconName={drawerOpen ? "keyboard_arrow_up" : "keyboard_arrow_down"}
-            className="text-base leading-none shrink-0 text-white/70"
+          <HugeIcon
+            name={drawerOpen ? "arrow-up-01" : "arrow-down-01"}
+            className="leading-none shrink-0 text-text-body-muted"
           />
         </Button>
       )}
@@ -73,17 +71,19 @@ export function PromptBarControlsRow({
       {onToggleExpand && (
         <IconButton
           variant="ghost"
+          size="sm"
+          data-state={isExpanded ? "open" : "closed"}
           aria-label={isExpanded ? "Réduire le champ de saisie" : "Agrandir le champ de saisie"}
           title={isExpanded ? "Collapse prompt input" : "Expand prompt input"}
           onClick={onToggleExpand}
           className={cn(
-            "size-8 p-0 border-0 flex items-center justify-center shrink-0 cursor-pointer text-white/70 hover:text-white transition-colors",
-            isExpanded && "is-active bg-white/10 text-white"
+            "shrink-0 text-text-body-muted hover:text-text-primary transition-colors",
+            isExpanded && "text-text-primary"
           )}
         >
-          <GoogleIcon
-            iconName={isExpanded ? "close_fullscreen" : "open_in_full"}
-            className="text-base leading-none"
+          <HugeIcon
+            name={isExpanded ? "arrow-shrink-02" : "arrow-expand-02"}
+            className="leading-none"
           />
         </IconButton>
       )}
@@ -98,9 +98,9 @@ export function PromptBarControlsRow({
         className="size-8 p-0 rounded-full shrink-0"
       >
         {isGenerating ? (
-          <span className="size-3.5 rounded-full border-2 border-black/30 border-t-black animate-spin" />
+          <span className="size-3.5 rounded-full border-2 border-text-inverse/30 border-t-text-inverse animate-spin" />
         ) : (
-          <GoogleIcon iconName="arrow_forward" className="text-base shrink-0 font-bold" />
+          <HugeIcon name="arrow-right-02" className="shrink-0 font-bold" />
         )}
       </Button>
     </div>

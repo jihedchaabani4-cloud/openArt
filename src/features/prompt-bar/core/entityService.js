@@ -6,13 +6,45 @@
  */
 
 import { cleanTagsForAsset } from "./tagsService.js";
-import { resolveMediaUrl } from "./mediaRef.js";
+import { resolveMediaUrl, getAssetId } from "./mediaRef.js";
 
 /**
- * Normalizes an entity asset into a consistent canonical shape.
+ * Checks whether an item represents a Character entity.
+ * @param {any} item
+ * @returns {boolean}
+ */
+export function isCharacterEntity(item) {
+  if (!item || typeof item !== "object") return false;
+  return (
+    item.type === "character" ||
+    Boolean(item.is_character) ||
+    Boolean(item.characterId) ||
+    item.entity_type === "character" ||
+    String(item.workflow_type || item.workflowType || "").toUpperCase().includes("CHARACTER")
+  );
+}
+
+/**
+ * Checks whether an item represents an Element entity.
+ * @param {any} item
+ * @returns {boolean}
+ */
+export function isElementEntity(item) {
+  if (!item || typeof item !== "object") return false;
+  return (
+    item.type === "element" ||
+    Boolean(item.is_element) ||
+    Boolean(item.elementId) ||
+    item.entity_type === "element" ||
+    String(item.workflow_type || item.workflowType || "").toUpperCase().includes("ELEMENT")
+  );
+}
+
+/**
+ * Normalizes an entity or media asset into a consistent canonical shape.
  *
  * @param {object|string} asset
- * @param {"element"|"character"} [defaultType="element"]
+ * @param {"element"|"character"|null} [defaultType="element"]
  * @returns {object|null}
  */
 export function normalizeEntity(asset, defaultType = "element") {
@@ -38,31 +70,27 @@ export function normalizeEntity(asset, defaultType = "element") {
     asset.id ||
     asset.asset_id ||
     asset.characterId ||
-    asset.elementId;
+    asset.elementId ||
+    getAssetId(asset);
   if (!id) return null;
 
-  const isChar =
-    asset.type === "character" ||
-    asset.is_character ||
-    Boolean(asset.characterId) ||
-    asset.entity_type === "character" ||
-    String(asset.workflow_type || "").toUpperCase().includes("CHARACTER");
-  const isElem =
-    asset.type === "element" ||
-    asset.is_element ||
-    Boolean(asset.elementId) ||
-    asset.entity_type === "element" ||
-    String(asset.workflow_type || "").toUpperCase().includes("ELEMENT");
+  const isChar = isCharacterEntity(asset);
+  const isElem = isElementEntity(asset);
+
+  const isVideo =
+    asset.type === "video" ||
+    Boolean(asset.is_video) ||
+    Boolean(asset.isVideo);
 
   const resolvedType = isChar
     ? "character"
     : isElem
     ? "element"
-    : defaultType || asset.type || (asset.is_video ? "video" : "image");
+    : defaultType || asset.type || (isVideo ? "video" : "image");
 
   const mediaUrl = resolveMediaUrl(asset);
 
-  return {
+  const normalized = {
     id,
     workflow_id: id,
     displayName:
@@ -75,18 +103,65 @@ export function normalizeEntity(asset, defaultType = "element") {
     type: resolvedType,
     workflow_type:
       asset.workflow_type ||
+      asset.workflowType ||
       (resolvedType === "character" ? "CHARACTER_SHEET" : resolvedType === "element" ? "ELEMENT_SHEET" : undefined),
-    image_count:
-      typeof asset.image_count === "number" && asset.image_count > 0
-        ? asset.image_count
-        : typeof asset.images_count === "number" && asset.images_count > 0
-        ? asset.images_count
-        : Array.isArray(asset.items) && asset.items.length > 0
-        ? asset.items.length
-        : Array.isArray(asset.images) && asset.images.length > 0
-        ? asset.images.length
-        : 1,
+    image_count: getEntityImageCount({ ...asset, type: resolvedType }),
   };
+
+  if (isVideo) normalized.is_video = true;
+  if (asset.is_upload || asset.type === "upload" || asset.workflow_type === "UPLOAD") {
+    normalized.is_upload = true;
+  }
+  const elementType = asset.element_type || asset.elementType || asset.category;
+  if (elementType) normalized.element_type = elementType;
+
+  return normalized;
+}
+
+/**
+ * Derives unique elements and characters directly from parameterValues (single source of truth).
+ *
+ * @param {Record<string, any>} [parameterValues={}]
+ * @returns {{ elements: Array<object>, characters: Array<object> }}
+ */
+export function deriveEntitiesFromParameters(parameterValues = {}) {
+  const elements = [];
+  const characters = [];
+  const seenElements = new Set();
+  const seenCharacters = new Set();
+
+  for (const val of Object.values(parameterValues || {})) {
+    if (!val) continue;
+    const items = Array.isArray(val) ? val : [val];
+    for (const item of items) {
+      if (!item || typeof item !== "object") continue;
+      const id = item.workflow_id || item.workflowId || item.id || item.asset_id;
+      if (!id) continue;
+      if (isCharacterEntity(item)) {
+        if (!seenCharacters.has(id)) {
+          seenCharacters.add(id);
+          characters.push(item);
+        }
+      } else if (isElementEntity(item)) {
+        if (!seenElements.has(id)) {
+          seenElements.add(id);
+          elements.push(item);
+        }
+      }
+    }
+  }
+
+  return { elements, characters };
+}
+
+/** Pure selector: derives attached element entities from store state. */
+export function selectElements(state) {
+  return deriveEntitiesFromParameters(state?.parameterValues).elements;
+}
+
+/** Pure selector: derives attached character entities from store state. */
+export function selectCharacters(state) {
+  return deriveEntitiesFromParameters(state?.parameterValues).characters;
 }
 
 /**
@@ -169,26 +244,28 @@ export function getEntityImageCount(item) {
   if (!item) return 0;
   if (typeof item === "string") return 1;
 
-  const wType = String(item.workflow_type || item.workflowType || "").toUpperCase();
-  const isMultiImageEntity =
-    item.type === "character" ||
-    item.type === "element" ||
-    Boolean(item.is_character) ||
-    Boolean(item.is_element) ||
-    Boolean(item.characterId) ||
-    Boolean(item.elementId) ||
-    item.entity_type === "character" ||
-    item.entity_type === "element" ||
-    wType.includes("CHARACTER") ||
-    wType.includes("ELEMENT");
+  const isMultiImageEntity = isCharacterEntity(item) || isElementEntity(item);
+  const isExplicitSingleMedia =
+    !isMultiImageEntity &&
+    (item.type === "image" ||
+      item.type === "video" ||
+      item.type === "upload" ||
+      Boolean(item.is_upload) ||
+      item.workflow_type === "UPLOAD");
+
+  if (isExplicitSingleMedia) {
+    return 1;
+  }
 
   if (!isMultiImageEntity) {
+    if (typeof item.images_count === "number" && item.images_count > 0) return item.images_count;
     return 1;
   }
 
   if (typeof item.image_count === "number" && item.image_count > 0) return item.image_count;
   if (typeof item.images_count === "number" && item.images_count > 0) return item.images_count;
   if (typeof item.imageCount === "number" && item.imageCount > 0) return item.imageCount;
+
   if (Array.isArray(item.items) && item.items.length > 0) return item.items.length;
   if (Array.isArray(item.images) && item.images.length > 0) return item.images.length;
   if (Array.isArray(item.views) && item.views.length > 0) return item.views.length;

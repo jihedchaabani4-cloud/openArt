@@ -7,8 +7,11 @@ import {
   removeEntity,
   extractEntityIds,
   removeEntityWithPromptClean,
+  selectElements,
+  selectCharacters,
 } from "../core/entityService.js";
 import { createPromptBarStore } from "../store/createPromptBarStore.js";
+import { generatedMediaTemplate } from "../templates/generatedMedia.template.js";
 
 // ── Unit Tests: entityService ─────────────────────────────────────────────────
 
@@ -53,11 +56,9 @@ test("entityService: addEntity adds entity and prevents duplicates", () => {
   assert.equal(list.length, 1);
   assert.equal(list[0].id, "elem_1");
 
-  // Adding item2
   list = addEntity(list, item2, "element");
   assert.equal(list.length, 2);
 
-  // Duplicate add of item1
   list = addEntity(list, item1, "element");
   assert.equal(list.length, 2, "Should not add duplicate entity");
 });
@@ -93,55 +94,69 @@ test("entityService: removeEntityWithPromptClean removes entity and prompt tags"
   assert.equal(nextPrompt, "A knight holding in a castle");
 });
 
-// ── Store Integration Tests: createPromptBarStore ─────────────────────────────
+// ── Store Integration Tests: Single Source of Truth ───────────────────────────
 
-test("Store: initial state contains empty elements and characters arrays", () => {
-  const store = createPromptBarStore();
+const imageRefModel = {
+  id: "flux_pro",
+  name: "Flux Pro",
+  domain: "image",
+  parameters: {
+    images: { type: "image[]", group: "media", max: 6 },
+  },
+};
+
+test("Store: derives empty elements and characters initially with no mutable entity arrays", () => {
+  const store = createPromptBarStore({}, { template: generatedMediaTemplate });
   const state = store.getState();
 
-  assert.deepEqual(state.elements, []);
-  assert.deepEqual(state.characters, []);
+  assert.equal("elements" in state, false);
+  assert.equal("characters" in state, false);
+  assert.deepEqual(selectElements(state), []);
+  assert.deepEqual(selectCharacters(state), []);
 });
 
-test("Store: addElement, removeElement, and cascade prompt cleansing", () => {
-  const store = createPromptBarStore();
+test("Store: attachMedia/removeMedia for elements and cascade prompt cleansing", () => {
+  const store = createPromptBarStore({}, { template: generatedMediaTemplate });
+  store.getState().setModels([imageRefModel]);
   store.getState().setPrompt("Hero with <element:elem_helmet> in ruins");
 
-  store.getState().addElement({ workflow_id: "elem_helmet", name: "Cyber Helmet" });
-  assert.equal(store.getState().elements.length, 1);
-  assert.equal(store.getState().elements[0].id, "elem_helmet");
+  store.getState().attachMedia({
+    role: "reference",
+    value: { workflow_id: "elem_helmet", name: "Cyber Helmet", workflow_type: "ELEMENT_SHEET" },
+  });
+  assert.equal(selectElements(store.getState()).length, 1);
+  assert.equal(selectElements(store.getState())[0].id, "elem_helmet");
 
-  // Remove element: verifies both state removal and prompt cleanup
-  store.getState().removeElement("elem_helmet");
-  assert.equal(store.getState().elements.length, 0);
+  store.getState().removeMedia({ role: "reference", value: { workflow_id: "elem_helmet" } });
+  assert.equal(selectElements(store.getState()).length, 0);
   assert.equal(store.getState().prompt, "Hero with in ruins");
 });
 
-test("Store: addCharacter, removeCharacter, and cascade prompt cleansing", () => {
-  const store = createPromptBarStore();
+test("Store: attachMedia/removeMedia for characters and cascade prompt cleansing", () => {
+  const store = createPromptBarStore({}, { template: generatedMediaTemplate });
+  store.getState().setModels([imageRefModel]);
   store.getState().setPrompt("Portrait of <character:char_alice> at sunset");
 
-  store.getState().addCharacter({ id: "char_alice", name: "Alice", is_character: true });
-  assert.equal(store.getState().characters.length, 1);
-  assert.equal(store.getState().characters[0].id, "char_alice");
+  store.getState().attachMedia({
+    role: "reference",
+    value: { id: "char_alice", name: "Alice", is_character: true },
+  });
+  assert.equal(selectCharacters(store.getState()).length, 1);
+  assert.equal(selectCharacters(store.getState())[0].id, "char_alice");
 
-  // Remove character: verifies both state removal and prompt cleanup
-  store.getState().removeCharacter("char_alice");
-  assert.equal(store.getState().characters.length, 0);
+  store.getState().removeMedia({ role: "reference", value: { id: "char_alice" } });
+  assert.equal(selectCharacters(store.getState()).length, 0);
   assert.equal(store.getState().prompt, "Portrait of at sunset");
 });
 
-test("Store: serialize outputs elements and characters as string ID lists", () => {
-  const store = createPromptBarStore();
-  store.getState().setModels([
-    { id: "flux_pro", name: "Flux Pro", domain: "image", parameters: {} },
-  ]);
-  store.getState().selectModel("flux_pro");
+test("Store: serialize derives elements and characters as string ID lists from parameterValues", () => {
+  const store = createPromptBarStore({}, { template: generatedMediaTemplate });
+  store.getState().setModels([imageRefModel]);
   store.getState().setPrompt("Testing generation");
 
-  store.getState().addElement({ workflow_id: "elem_101", name: "Jacket" });
-  store.getState().addElement({ workflow_id: "elem_102", name: "Boots" });
-  store.getState().addCharacter({ id: "char_201", name: "Geralt" });
+  store.getState().attachMedia({ role: "reference", value: { workflow_id: "elem_101", name: "Jacket", type: "element" } });
+  store.getState().attachMedia({ role: "reference", value: { workflow_id: "elem_102", name: "Boots", type: "element" } });
+  store.getState().attachMedia({ role: "reference", value: { id: "char_201", name: "Geralt", type: "character" } });
 
   const serialized = store.getState().serialize();
 
@@ -151,23 +166,25 @@ test("Store: serialize outputs elements and characters as string ID lists", () =
   assert.deepEqual(serialized.characters, ["char_201"]);
 });
 
-test("Store: reset resets elements and characters to empty arrays", () => {
-  const store = createPromptBarStore();
-  store.getState().addElement({ workflow_id: "elem_101", name: "Jacket" });
-  store.getState().addCharacter({ id: "char_201", name: "Geralt" });
+test("Store: reset clears attached entities", () => {
+  const store = createPromptBarStore({}, { template: generatedMediaTemplate });
+  store.getState().setModels([imageRefModel]);
+  store.getState().attachMedia({ role: "reference", value: { workflow_id: "elem_101", name: "Jacket", type: "element" } });
+  store.getState().attachMedia({ role: "reference", value: { id: "char_201", name: "Geralt", type: "character" } });
 
   store.getState().reset();
-  assert.deepEqual(store.getState().elements, []);
-  assert.deepEqual(store.getState().characters, []);
+  assert.deepEqual(selectElements(store.getState()), []);
+  assert.deepEqual(selectCharacters(store.getState()), []);
 });
 
 test("Store: serialize extracts workflow IDs into parameters and references without raw URLs", () => {
-  const store = createPromptBarStore();
+  const store = createPromptBarStore({ activeMode: "video", activeSubMode: "frames" }, { template: generatedMediaTemplate });
   store.getState().setModels([
     {
       id: "seedance_2_5",
       name: "ByteDance Seedance 2.5",
       domain: "video",
+      capabilities: { input_image: true, last_frame: true },
       parameters: {
         prompt: { type: "text", required: true },
         input_image: { type: "image", group: "media" },
@@ -176,18 +193,22 @@ test("Store: serialize extracts workflow IDs into parameters and references with
       },
     },
   ]);
-  store.getState().selectModel("seedance_2_5");
   store.getState().setPrompt("A cyber samurai walking in the rain");
-  store.getState().setParameter("duration", "5");
-  store.getState().setParameter("input_image", {
-    workflow_id: "wf_start_001",
-    url: "https://cdn.example.com/start.png",
+  store.getState().setSetting("duration", "5");
+  store.getState().attachMedia({
+    role: "start",
+    value: {
+      workflow_id: "wf_start_001",
+      url: "https://cdn.example.com/start.png",
+    },
   });
-  store.getState().setParameter("last_frame", {
-    workflow_id: "wf_end_002",
-    url: "https://cdn.example.com/end.png",
+  store.getState().attachMedia({
+    role: "end",
+    value: {
+      workflow_id: "wf_end_002",
+      url: "https://cdn.example.com/end.png",
+    },
   });
-  store.getState().addElement({ workflow_id: "elem_sword", name: "Katana" });
 
   const serialized = store.getState().serialize();
 
@@ -196,11 +217,8 @@ test("Store: serialize extracts workflow IDs into parameters and references with
   assert.equal(serialized.parameters.duration, "5");
   assert.equal(serialized.parameters.input_image, "wf_start_001");
   assert.equal(serialized.parameters.last_frame, "wf_end_002");
-  assert.deepEqual(serialized.elements, ["elem_sword"]);
   assert.ok(Array.isArray(serialized.references));
   assert.ok(serialized.references.includes("wf_start_001"));
   assert.ok(serialized.references.includes("wf_end_002"));
-  assert.ok(serialized.references.includes("elem_sword"));
   assert.ok(!serialized.references.some((r) => r.startsWith("http")));
 });
-

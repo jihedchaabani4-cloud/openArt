@@ -1,11 +1,11 @@
 "use client";
 
 import { useRef } from "react";
-import { GoogleIcon } from "@/components/primitives/GoogleIcon";
+import { HugeIcon } from "@/components/primitives/HugeIcon";
 import { Button } from "@/components/base/button";
 import { cn } from "@/shared/lib/utils";
 import { PromptBarPlatform } from "./PromptBarPlatform.jsx";
-import { characterTemplate } from "@/features/prompt-bar/templates/character.template.js";
+import { characterTemplate } from "@/features/prompt-bar";
 import { useCharacterStore } from "@/features/prompt-bar/model/useCharacterStore.js";
 import { CharacterFeatureEditor } from "./CharacterFeatureEditor.jsx";
 import { SyncFeaturesPlugin } from "./editor/plugins/SyncFeaturesPlugin.jsx";
@@ -56,16 +56,16 @@ export function CharacterPromptBar({
             type="button"
             onClick={() => setFeatureEditorOpen(!featureEditorOpen)}
             variant="ghost"
-            size="sm"
+            data-state={featureEditorOpen ? "open" : "closed"}
             className={cn(
-              "rounded-sm transition-all shrink-0 gap-1.5 h-8 px-2.5 text-xs font-medium relative overflow-hidden",
+              "rounded-lg ds-text-caption-m font-medium",
               featureEditorOpen
-                ? "bg-white/10 text-white"
-                : "text-white/50 hover:bg-white/5 hover:text-white/90"
+                ? "text-text-primary"
+                : "text-text-secondary hover:text-text-primary"
             )}
             title="Character Form Features"
           >
-            <GoogleIcon iconName="account_circle" className="text-sm shrink-0" />
+            <HugeIcon name="user-circle" className="shrink-0" />
             <span>Form</span>
           </Button>
           {propRenderRightActions && propRenderRightActions(args)}

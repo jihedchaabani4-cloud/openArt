@@ -3,23 +3,13 @@ import { renderHook, act } from "@testing-library/react";
 import { usePromptBarSlots } from "../platform/hooks/usePromptBarSlots.js";
 import { PromptBarStoreProvider, PromptBarStoreContext } from "../store/PromptBarStoreContext.js";
 import { createPromptBarStore } from "../store/createPromptBarStore.js";
-import { createPromptBarType } from "../composition/createPromptBarType.js";
-import {
-  COMPOSITION_REQUIREMENTS,
-  filterEligibleModels,
-  resolveParameterMapping,
-} from "../templates/generatedMedia.template.js";
-
-const featureConfig = {
-  COMPOSITION_REQUIREMENTS,
-  filterEligibleModels,
-  resolveParameterMapping,
-};
+import { generatedMediaTemplate } from "../templates/generatedMedia.template.js";
 
 const framesModel = {
   id: "video-ltx",
   name: "LTX Video",
   domain: "video",
+  capabilities: { input_image: true, last_frame: true },
   parameters: {
     input_image: { type: "image", group: "media" },
     last_frame: { type: "image", group: "media" },
@@ -30,17 +20,8 @@ const framesModel = {
 
 describe("usePromptBarSlots hook", () => {
   it("resolves activeSlots and drawerParams for video frames mode", () => {
-    const type = createPromptBarType({
-      id: "generated-media",
-      layout: { showModeSelector: true },
-      referenceSlots: [
-        { role: "start", label: "Start Frame" },
-        { role: "end", label: "End Frame" },
-      ],
-    });
-
     const wrapper = ({ children }) => (
-      <PromptBarStoreProvider type={type} persist={false}>
+      <PromptBarStoreProvider template={generatedMediaTemplate} instanceId="slots-1" persist={false}>
         {children}
       </PromptBarStoreProvider>
     );
@@ -48,8 +29,8 @@ describe("usePromptBarSlots hook", () => {
     const { result } = renderHook(
       () =>
         usePromptBarSlots({
-          featureConfig,
-          type,
+          featureConfig: generatedMediaTemplate,
+          type: generatedMediaTemplate,
           activeMode: "video",
           activeSubMode: "frames",
           currentModel: framesModel,
@@ -63,21 +44,16 @@ describe("usePromptBarSlots hook", () => {
     expect(result.current.hasEnd).toBe(true);
     expect(result.current.showSwap).toBe(true);
 
-    // drawerParams excludes media group and isPrompt
     expect(result.current.drawerParams).toHaveLength(1);
     expect(result.current.drawerParams[0][0]).toBe("duration");
   });
 
-  it("handles frame swap when both start and end frames are filled", () => {
-    const type = createPromptBarType({
-      id: "generated-media",
-      layout: { showModeSelector: true },
-      referenceSlots: [
-        { role: "start", label: "Start Frame" },
-        { role: "end", label: "End Frame" },
-      ],
-    });
-    const testStore = createPromptBarStore({ type, templateConfig: featureConfig });
+  it("atomically swaps start and end frames via service.swapFrames()", () => {
+    const testStore = createPromptBarStore(
+      { activeMode: "video", activeSubMode: "frames" },
+      { template: generatedMediaTemplate }
+    );
+    testStore.getState().setModels([framesModel]);
 
     const wrapper = ({ children }) => (
       <PromptBarStoreContext.Provider value={testStore}>
@@ -88,8 +64,8 @@ describe("usePromptBarSlots hook", () => {
     const { result } = renderHook(
       () =>
         usePromptBarSlots({
-          featureConfig,
-          type,
+          featureConfig: generatedMediaTemplate,
+          type: generatedMediaTemplate,
           activeMode: "video",
           activeSubMode: "frames",
           currentModel: framesModel,
@@ -101,12 +77,12 @@ describe("usePromptBarSlots hook", () => {
     expect(result.current.swapEnabled).toBe(false);
 
     act(() => {
-      testStore.getState().setParameter("input_image", "start.jpg");
+      testStore.getState().attachMedia({ role: "start", value: { workflow_id: "start_1", url: "start.jpg" } });
     });
     expect(result.current.swapEnabled).toBe(false);
 
     act(() => {
-      testStore.getState().setParameter("last_frame", "end.jpg");
+      testStore.getState().attachMedia({ role: "end", value: { workflow_id: "end_1", url: "end.jpg" } });
     });
     expect(result.current.swapEnabled).toBe(true);
 
@@ -114,7 +90,7 @@ describe("usePromptBarSlots hook", () => {
       result.current.handleSwapFrames();
     });
 
-    expect(testStore.getState().parameterValues.input_image).toBe("end.jpg");
-    expect(testStore.getState().parameterValues.last_frame).toBe("start.jpg");
+    expect(testStore.getState().parameterValues.input_image.workflow_id).toBe("end_1");
+    expect(testStore.getState().parameterValues.last_frame.workflow_id).toBe("start_1");
   });
 });

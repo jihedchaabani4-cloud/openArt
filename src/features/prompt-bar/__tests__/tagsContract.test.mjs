@@ -187,23 +187,33 @@ test("Tags Resolver: resolveTagsWithReferences separates valid from orphan tags"
   assert.equal(orphanTags[0].assetId, "orphan-2");
 });
 
-test("Integration: Deleting reference slot cleanses prompt in store", () => {
-  const store = createPromptBarStore();
-  
-  // Set up prompt with two tags
-  store.getState().setPrompt("A video transitioning from <MediaAsset:start_id> to <MediaAsset:end_id>");
-  store.getState().setParameter("input_image", { workflow_id: "start_id" });
-  store.getState().setParameter("last_frame", { workflow_id: "end_id" });
+test("Integration: Deleting reference slot via clearSlot cleanses prompt in store", () => {
+  const framesTemplate = {
+    id: "test-frames",
+    getSlots: () => MOCK_FRAMES_SLOTS,
+    resolveParameterMapping: MOCK_FEATURE_CONFIG.resolveParameterMapping,
+    filterEligibleModels: (m) => m,
+  };
+  const store = createPromptBarStore({ activeMode: "video", activeSubMode: "frames" }, { template: framesTemplate });
+  store.getState().setModels([
+    {
+      id: "vid",
+      domain: "video",
+      parameters: {
+        input_image: { type: "image", group: "media" },
+        last_frame: { type: "image", group: "media" },
+      },
+    },
+  ]);
 
-  // Simulate user removing start frame slot
+  store.getState().setPrompt("A video transitioning from <MediaAsset:start_id> to <MediaAsset:end_id>");
+  store.getState().attachMedia({ role: "start", value: { workflow_id: "start_id" } });
+  store.getState().attachMedia({ role: "end", value: { workflow_id: "end_id" } });
+
   const removedId = getAssetId(store.getState().parameterValues.input_image);
   assert.equal(removedId, "start_id");
 
-  // 1. Remove slot
-  store.getState().setParameter("input_image", undefined);
-  // 2. Clean prompt
-  const updatedPrompt = cleanTagsForAsset(store.getState().prompt, removedId);
-  store.getState().setPrompt(updatedPrompt);
+  store.getState().clearSlot("start");
 
   assert.equal(store.getState().prompt, "A video transitioning from to <MediaAsset:end_id>");
   assert.equal(store.getState().parameterValues.input_image, undefined);

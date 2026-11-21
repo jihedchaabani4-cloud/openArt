@@ -8,7 +8,7 @@ import { motion } from "framer-motion";
 import {
   GeneratedPromptBar,
   useRealBackendModels,
-} from "@/features/prompt-bar/index.platform";
+} from "@/features/prompt-bar";
 import { Button } from "@/components/base/button";
 
 // ── Payload log ───────────────────────────────────────────────────────────────

@@ -34,17 +34,15 @@ describe("CLEAN-2: Template injected at store creation (PB-D-23)", () => {
     vi.unstubAllGlobals();
   });
 
-  it("(a) store created via provider/registry has template before any React effect runs; switchMode('video','frames') returns ok and setTemplate call count is 0", () => {
+  it("(a) store created via provider/registry has template before any React effect runs; switchMode('video','frames') returns ok and setTemplate is sealed out", () => {
     let renderPhaseTemplate = null;
     let renderPhaseSwitchResult = null;
-    let setTemplateSpy = null;
+    let hasSetTemplate = null;
 
     function RenderPhaseProbe() {
       const store = usePromptBarStoreInstance();
-      if (!setTemplateSpy) {
-        const orig = store.getState().setTemplate;
-        setTemplateSpy = vi.fn((...args) => orig(...args));
-        store.setState({ setTemplate: setTemplateSpy });
+      if (renderPhaseTemplate === null) {
+        hasSetTemplate = "setTemplate" in store.getState();
         renderPhaseTemplate = store.getState().template;
         renderPhaseSwitchResult = store.getState().switchMode("video", "frames");
       }
@@ -69,10 +67,10 @@ describe("CLEAN-2: Template injected at store creation (PB-D-23)", () => {
     expect(typeof renderPhaseTemplate?.createActions).toBe("function");
     expect("minPromptLength" in renderPhaseTemplate).toBe(true);
     expect(renderPhaseSwitchResult?.ok).toBe(true);
-    expect(setTemplateSpy).toHaveBeenCalledTimes(0);
+    expect(hasSetTemplate).toBe(false);
   });
 
-  it("(b) pending-actions drain path applies queued animateMedia on provider mount without child useEffect and with setTemplate call count 0", () => {
+  it("(b) pending-actions drain path applies queued animateMedia on provider mount without child useEffect", () => {
     const mockStorage = createMockStorage();
     const projectId = "proj_clean2_b";
     const service = promptBarService(
@@ -90,15 +88,11 @@ describe("CLEAN-2: Template injected at store creation (PB-D-23)", () => {
     expect(queueRes.details?.queued).toBe(true);
 
     let capturedStore = null;
-    let setTemplateSpy = null;
 
     function ChildWithoutSetTemplateEffect() {
       const store = usePromptBarStoreInstance();
       if (!capturedStore) {
         capturedStore = store;
-        const orig = store.getState().setTemplate;
-        setTemplateSpy = vi.fn((...args) => orig(...args));
-        store.setState({ setTemplate: setTemplateSpy });
       }
       return null;
     }
@@ -116,7 +110,7 @@ describe("CLEAN-2: Template injected at store creation (PB-D-23)", () => {
     );
 
     expect(capturedStore).not.toBeNull();
-    expect(setTemplateSpy).toHaveBeenCalledTimes(0);
+    expect(capturedStore.getState().setTemplate).toBeUndefined();
     const state = capturedStore.getState();
     expect(state.activeMode).toBe("video");
     expect(state.activeSubMode).toBe("frames");
@@ -152,7 +146,7 @@ describe("CLEAN-2: Template injected at store creation (PB-D-23)", () => {
     expect(ssrStore.getState().template).toBe(generatedMediaTemplate);
   });
 
-  it("(d) calling setTemplate with a different template after creation does not change behavior (first template wins)", () => {
+  it("(d) setTemplate is removed so template is immutable after store creation", () => {
     let capturedStore = null;
     function Capture() {
       capturedStore = usePromptBarStoreInstance();
@@ -172,12 +166,9 @@ describe("CLEAN-2: Template injected at store creation (PB-D-23)", () => {
     );
 
     expect(capturedStore.getState().template).toBe(generatedMediaTemplate);
+    expect(capturedStore.getState().setTemplate).toBeUndefined();
+    expect(characterTemplate.id).toBe("character");
 
-    // Attempt to overwrite template with characterTemplate
-    capturedStore.getState().setTemplate(characterTemplate);
-
-    // First template wins
-    expect(capturedStore.getState().template).toBe(generatedMediaTemplate);
     const switchRes = capturedStore.getState().switchMode("video", "frames");
     expect(switchRes.ok).toBe(true);
     expect(capturedStore.getState().activeMode).toBe("video");

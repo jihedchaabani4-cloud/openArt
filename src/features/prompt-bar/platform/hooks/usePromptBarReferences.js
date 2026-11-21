@@ -1,6 +1,6 @@
-import { useState, useRef, useEffect, useCallback, useMemo } from "react";
-import { usePromptBarStore } from "../../store/usePromptBarStore.js";
-import { getActiveReferences, autoAssignReference } from "../../core/tagsService.js";
+import { useState, useRef, useCallback, useMemo } from "react";
+import { usePromptBarState, usePromptBarService } from "../../store/PromptBarStoreContext.js";
+import { getActiveReferences } from "../../core/tagsService.js";
 import {
   getSlotMaxRefs as resolveSlotMaxRefs,
   remainingQuota,
@@ -10,8 +10,9 @@ import { calculateUsedImages, normalizeEntity } from "../../core/entityService.j
 
 /**
  * usePromptBarReferences
- * Encapsulates active references extraction, reference dialog state,
- * quick mention dropdown management, image quotas, and outside-click listeners.
+ * Single source of truth: reads ONLY parameterValues via usePromptBarState and mutates
+ * exclusively through usePromptBarService() (attachMedia, removeMedia, clearSlot).
+ * Both slot picks and @mentions route through service.attachMedia.
  */
 export function usePromptBarReferences({
   activeSlots = [],
@@ -19,15 +20,8 @@ export function usePromptBarReferences({
   currentModel,
   activeMode = "image",
 } = {}) {
-  // Store subscriptions
-  const paramValues   = usePromptBarStore((s) => s.parameterValues);
-  const elements      = usePromptBarStore((s) => s.elements);
-  const characters    = usePromptBarStore((s) => s.characters);
-  const setParameter  = usePromptBarStore((s) => s.setParameter);
-  const addElement    = usePromptBarStore((s) => s.addElement);
-  const addCharacter  = usePromptBarStore((s) => s.addCharacter);
-  const attachMedia   = usePromptBarStore((s) => s.attachMedia);
-  const removeMedia   = usePromptBarStore((s) => s.removeMedia);
+  const service     = usePromptBarService();
+  const paramValues = usePromptBarState((s) => s.parameterValues);
 
   // Dialog & mention states
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -37,67 +31,15 @@ export function usePromptBarReferences({
   const [mentionQuery, setMentionQuery] = useState("");
   const dialogAnchorRef = useRef(null);
 
-  // Active references list for tags & mentions
+  // Active references derived purely from activeSlots + parameterValues
   const activeReferences = useMemo(() => {
-    const fromSlots = getActiveReferences(activeSlots, paramValues, featureConfig, currentModel);
-    const map = new Map();
+    return getActiveReferences(activeSlots, paramValues, featureConfig, currentModel);
+  }, [activeSlots, paramValues, featureConfig, currentModel]);
 
-    (fromSlots || []).forEach((ref) => {
-      const id = ref.assetId || ref.id;
-      if (id) map.set(id, ref);
-    });
-
-    (elements || []).forEach((el) => {
-      const id = el?.workflow_id || el?.id;
-      if (id && !map.has(id)) {
-        map.set(id, {
-          ...el,
-          id,
-          assetId: id,
-          displayName: el.displayName || el.name || "Element",
-          url: el.url || el.preview || "",
-          type: "element",
-          role: "element",
-          element_type: el.element_type || el.type || el.category || "object",
-        });
-      }
-    });
-
-    (characters || []).forEach((ch) => {
-      const id = ch?.workflow_id || ch?.id;
-      if (id && !map.has(id)) {
-        map.set(id, {
-          ...ch,
-          id,
-          assetId: id,
-          displayName: ch.displayName || ch.name || "Character",
-          url: ch.url || ch.preview || "",
-          type: "character",
-          role: "character",
-        });
-      }
-    });
-
-    return Array.from(map.values());
-  }, [activeSlots, paramValues, featureConfig, currentModel, elements, characters]);
-
-  // All selected media/references currently in slots/parameters/elements/characters
+  // All selected media currently attached in active slots
   const allSelectedMedia = useMemo(() => {
-    const list = [...(activeReferences || [])];
-    (elements || []).forEach((el) => list.push(el));
-    (characters || []).forEach((ch) => list.push(ch));
-    activeSlots.forEach((slot) => {
-      const backendKey = featureConfig?.resolveParameterMapping
-        ? featureConfig.resolveParameterMapping(currentModel, slot.role) || slot.role
-        : slot.role;
-      const val = paramValues[backendKey];
-      if (val) {
-        if (Array.isArray(val)) val.forEach((v) => list.push(v));
-        else list.push(val);
-      }
-    });
-    return list;
-  }, [activeReferences, elements, characters, activeSlots, featureConfig, currentModel, paramValues]);
+    return activeReferences;
+  }, [activeReferences]);
 
   const handleOpenDialog = useCallback((slot) => {
     setActiveDialogSlot(slot);
@@ -107,45 +49,27 @@ export function usePromptBarReferences({
     setDialogOpen(true);
   }, []);
 
-  const getSlotMaxRefs = useCallback((slot) => {
-    return resolveSlotMaxRefs({
-      slot,
-      model: currentModel,
-      featureConfig,
-    });
-  }, [currentModel, featureConfig]);
+  const getSlotMaxRefs = useCallback(
+    (slot) => {
+      return resolveSlotMaxRefs({
+        slot,
+        model: currentModel,
+        featureConfig,
+      });
+    },
+    [currentModel, featureConfig]
+  );
 
-  // Merges reference parameter items with elements and characters into a unified, deduplicated list
-  const getReferenceItems = useCallback((backendKey) => {
-    const key = backendKey || "images";
-    const rawVal = paramValues[key];
-    const list = Array.isArray(rawVal) ? rawVal : (rawVal ? [rawVal] : []);
-
-    const map = new Map();
-    // 1. Existing items in paramValues
-    list.forEach((item) => {
-      const id = item?.workflow_id || item?.id;
-      if (id) map.set(id, item);
-    });
-
-    // 2. Guarantee all store elements are included
-    (elements || []).forEach((el) => {
-      const id = el?.workflow_id || el?.id;
-      if (id && !map.has(id)) {
-        map.set(id, { ...el, type: "element" });
-      }
-    });
-
-    // 3. Guarantee all store characters are included
-    (characters || []).forEach((ch) => {
-      const id = ch?.workflow_id || ch?.id;
-      if (id && !map.has(id)) {
-        map.set(id, { ...ch, type: "character" });
-      }
-    });
-
-    return Array.from(map.values());
-  }, [paramValues, elements, characters]);
+  // Reads attached reference items directly from parameterValues[backendKey]
+  const getReferenceItems = useCallback(
+    (backendKey) => {
+      const key = backendKey || "images";
+      const rawVal = paramValues?.[key];
+      if (!rawVal) return [];
+      return Array.isArray(rawVal) ? rawVal : [rawVal];
+    },
+    [paramValues]
+  );
 
   // Typing '@' -> opens ImportMediaPopover directly
   const handleTriggerMentionDialog = useCallback((cb) => {
@@ -155,17 +79,20 @@ export function usePromptBarReferences({
     setDialogOpen(true);
   }, []);
 
-  const handleMentionQueryChange = useCallback((q) => {
-    if (q === null) {
-      if (mentionCallback) {
-        setDialogOpen(false);
-        setMentionCallback(null);
-        setMentionQuery("");
+  const handleMentionQueryChange = useCallback(
+    (q) => {
+      if (q === null) {
+        if (mentionCallback) {
+          setDialogOpen(false);
+          setMentionCallback(null);
+          setMentionQuery("");
+        }
+        return;
       }
-      return;
-    }
-    setMentionQuery(q);
-  }, [mentionCallback]);
+      setMentionQuery(q);
+    },
+    [mentionCallback]
+  );
 
   const handleOpenChangeDialog = useCallback((val) => {
     setDialogOpen(val);
@@ -175,70 +102,89 @@ export function usePromptBarReferences({
     }
   }, []);
 
-  const handleSelectMedia = useCallback((assets, options = {}) => {
-    const items = Array.isArray(assets) ? assets : [assets];
-    if (items.length === 0) {
-      setDialogOpen(false);
-      return;
-    }
+  const handleSelectMedia = useCallback(
+    (assets, options = {}) => {
+      const items = Array.isArray(assets) ? assets : [assets];
+      if (items.length === 0) {
+        setDialogOpen(false);
+        return;
+      }
 
-    const normalizedItems = items
-      .map((item) => normalizeEntity(item, null))
-      .filter(Boolean);
+      const normalizedItems = items
+        .map((item) => normalizeEntity(item, null))
+        .filter(Boolean);
 
-    // Case 1: Triggered from a slot click
-    if (activeDialogSlot) {
-      normalizedItems.forEach((norm) => {
-        if (typeof attachMedia === "function") {
-          attachMedia({ role: activeDialogSlot.role, value: norm });
-        }
-      });
-    }
-    // Case 2: Triggered from @ mention
-    else if (mentionCallback) {
-      normalizedItems.forEach((norm) => {
-        if (norm.type === "element") {
-          addElement(norm);
-        } else if (norm.type === "character") {
-          addCharacter(norm);
-        }
-        autoAssignReference({
-          asset: norm,
-          activeSlots,
-          paramValues,
-          featureConfig,
-          currentModel,
-          setParameter,
+      const attachedItems = [];
+
+      // Case 1: Triggered from a slot click
+      if (activeDialogSlot) {
+        normalizedItems.forEach((norm) => {
+          const res = service.attachMedia({ role: activeDialogSlot.role, value: norm });
+          if (res?.ok === true) {
+            attachedItems.push(norm);
+          }
         });
-      });
-    }
+      }
+      // Case 2: Triggered from @ mention — always routes through service.attachMedia using live state
+      else if (mentionCallback && activeSlots.length > 0) {
+        const refSlot = activeSlots.find((s) => s.role === "reference");
+        normalizedItems.forEach((norm) => {
+          let targetRole = refSlot?.role || null;
+          if (!targetRole) {
+            const liveParams = service.getSnapshot().parameterValues || {};
+            const emptySlot = activeSlots.find((slot) => {
+              const key = featureConfig?.resolveParameterMapping
+                ? featureConfig.resolveParameterMapping(currentModel, slot.role)
+                : slot.role;
+              const val = key ? liveParams[key] : undefined;
+              return val === undefined || val === null || val === "";
+            });
+            targetRole = (emptySlot || activeSlots[0])?.role || null;
+          }
+          if (!targetRole) return;
+          const res = service.attachMedia({ role: targetRole, value: norm });
+          if (res?.ok === true) {
+            attachedItems.push(norm);
+          }
+        });
+      }
 
-    if (mentionCallback) {
-      mentionCallback(normalizedItems);
-      setMentionCallback(null);
-      setMentionQuery("");
-      setDialogOpen(false);
-      setActiveDialogSlot(null);
-      return;
-    }
+      if (mentionCallback) {
+        if (attachedItems.length > 0) {
+          mentionCallback(attachedItems);
+        }
+        setMentionCallback(null);
+        setMentionQuery("");
+        setDialogOpen(false);
+        setActiveDialogSlot(null);
+        return;
+      }
 
-    if (options?.keepOpen !== true && options?.closeDialog !== false) {
-      setDialogOpen(false);
-      setActiveDialogSlot(null);
-    }
-  }, [activeDialogSlot, mentionCallback, attachMedia, addElement, addCharacter, activeSlots, paramValues, featureConfig, currentModel, setParameter]);
+      if (options?.keepOpen !== true && options?.closeDialog !== false) {
+        setDialogOpen(false);
+        setActiveDialogSlot(null);
+      }
+    },
+    [activeDialogSlot, mentionCallback, service, activeSlots, featureConfig, currentModel]
+  );
 
-  const handleRemoveReferenceItem = useCallback((itemToRemove) => {
-    if (typeof removeMedia === "function") {
-      removeMedia({ role: "reference", value: itemToRemove });
-    }
-  }, [removeMedia]);
+  const handleRemoveReferenceItem = useCallback(
+    (itemToRemove) => {
+      service.removeMedia({ role: "reference", value: itemToRemove });
+    },
+    [service]
+  );
 
-  const handleRemoveSlot = useCallback((slot) => {
-    if (typeof removeMedia === "function") {
-      removeMedia({ role: slot.role });
-    }
-  }, [removeMedia]);
+  const handleRemoveSlot = useCallback(
+    (slot) => {
+      service.clearSlot(slot.role);
+    },
+    [service]
+  );
+
+  const handleClearReferences = useCallback(() => {
+    service.clearSlot("reference");
+  }, [service]);
 
   // Calculate real images quota for references
   const currentRefBackendKey = useMemo(() => {
@@ -255,7 +201,9 @@ export function usePromptBarReferences({
   }, [currentRefList]);
 
   const remainingImagesQuota = useMemo(() => {
+    if (activeSlots.length === 0) return 0;
     const refSlot = activeSlots.find((s) => s.role === "reference");
+    if (!refSlot) return undefined;
     return remainingQuota({
       model: currentModel,
       used: usedImagesCount,
@@ -274,7 +222,7 @@ export function usePromptBarReferences({
 
   const activeSlotMaxAllowed = useMemo(() => {
     if (activeDialogSlot && activeDialogSlot.role !== "reference") return 1;
-    return typeof remainingImagesQuota === "number" ? Math.max(1, remainingImagesQuota) : 4;
+    return typeof remainingImagesQuota === "number" ? Math.max(1, remainingImagesQuota) : 1;
   }, [activeDialogSlot, remainingImagesQuota]);
 
   // Only filter out items for the multi-reference slot in image and video modes
@@ -304,6 +252,7 @@ export function usePromptBarReferences({
     handleSelectMedia,
     handleRemoveReferenceItem,
     handleRemoveSlot,
+    handleClearReferences,
     getReferenceItems,
     calculateUsedImages,
     currentRefBackendKey,

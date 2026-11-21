@@ -1,8 +1,8 @@
 /**
  * Prompt Bar Service — Public Facade
  *
- * Provides a unified public API for interacting with Prompt Bar instances by identity.
- * Actions are dispatched directly to mounted instances via pure store commands,
+ * Provides ONE clean Public Service contract for interacting with Prompt Bar instances by identity.
+ * Actions are dispatched directly to mounted instances via allowlisted semantic commands & template actions,
  * or queued in pendingActions when an instance is not yet mounted.
  *
  * Zero React, zero DOM (document/window), zero direct fetch calls.
@@ -10,7 +10,12 @@
 
 import { registry as defaultRegistry, identityKey } from "../store/registry.js";
 import { enqueuePendingAction } from "../store/pendingActions.js";
-import { ok, fail, REASONS } from "../core/commandResult.js";
+import {
+  isAllowedQueuedAction,
+  executePublicAction,
+  readStoreSnapshot,
+} from "../store/publicActions.js";
+import { fail, REASONS } from "../core/commandResult.js";
 
 function asObject(value) {
   return value && typeof value === "object" && !Array.isArray(value) ? value : {};
@@ -220,7 +225,8 @@ export function resolveReusableGeneration(workflow) {
  * @param {number} [options.now] - Current timestamp override
  * @param {object} [options.targetInstanceIdentity] - For testing project mismatch
  * @param {(workflowId: string) => object|null} [options.resolveWorkflow] - Cache-backed workflow lookup
- * @returns {object} Service interface with action methods
+ * @param {string[]} [options.allowedActions] - Optional extra template action names allowed when unmounted
+ * @returns {object} Public service interface
  */
 export function promptBarService(
   identity,
@@ -230,6 +236,7 @@ export function promptBarService(
     now,
     targetInstanceIdentity,
     resolveWorkflow,
+    allowedActions,
   } = {}
 ) {
   if (!identity) {
@@ -287,7 +294,13 @@ export function promptBarService(
       if (resolution.error) {
         return resolution.error;
       }
-      // Not mounted: enqueue action and return canonical fail
+      // Enforce public allowlist even before queueing for an unmounted instance
+      if (!isAllowedQueuedAction(actionName, allowedActions)) {
+        return fail(REASONS.INVALID_ARGUMENT, {
+          actionName,
+          message: `Action "${actionName}" is not part of the public PromptBar service API.`,
+        });
+      }
       enqueuePendingAction(
         targetIdentity,
         { actionName, args },
@@ -296,140 +309,112 @@ export function promptBarService(
       return fail(REASONS.NOT_MOUNTED, { queued: true });
     }
 
-    const store = resolution.store;
-    const state = store.getState();
-
-    if (actionName === "setPrompt") {
-      if (typeof state.setPromptExternal === "function") {
-        state.setPromptExternal(args[0]);
-      } else {
-        state.setPrompt(args[0]);
-      }
-      return ok({ prompt: args[0] });
-    }
-
-    if (actionName === "reset") {
-      if (typeof state.resetStoreState === "function") {
-        state.resetStoreState();
-      } else if (typeof state.reset === "function") {
-        state.reset();
-      }
-      return ok();
-    }
-
-    if (actionName === "focus") {
-      if (typeof state.requestFocus === "function") {
-        state.requestFocus();
-      }
-      return ok();
-    }
-
-    if (typeof state[actionName] === "function") {
-      const result = state[actionName](...args);
-      return result !== undefined ? result : ok();
-    }
-
-    return fail(REASONS.INVALID_ARGUMENT, {
-      message: `Action "${actionName}" is not available on this store.`,
-    });
+    return executePublicAction(resolution.store, actionName, args, { external: true });
   }
 
   return {
-    /**
-     * Updates prompt text.
-     * @param {string} text
-     * @returns {object} CommandResult
-     */
+    /** Updates prompt text (triggers programmatic fill animation). */
     setPrompt(text) {
       return dispatchOrQueue("setPrompt", [text]);
     },
 
-    /**
-     * Requests focus on the prompt input/editor.
-     * @returns {object} CommandResult
-     */
+    /** Atomically switches generation mode and sub-mode. */
+    switchMode(modeOrOptions, maybeSubMode) {
+      return dispatchOrQueue(
+        "switchMode",
+        maybeSubMode !== undefined ? [modeOrOptions, maybeSubMode] : [modeOrOptions]
+      );
+    },
+
+    /** Selects an eligible model and reconciles settings/media. */
+    selectModel(modelId) {
+      return dispatchOrQueue("selectModel", [modelId]);
+    },
+
+    /** Updates a validated non-media setting (rejects media keys). */
+    setSetting(key, value) {
+      return dispatchOrQueue("setSetting", [key, value]);
+    },
+
+    /** Attaches media to a composition slot. */
+    attachMedia(args) {
+      return dispatchOrQueue("attachMedia", [args]);
+    },
+
+    /** Removes media from a composition slot. */
+    removeMedia(args) {
+      return dispatchOrQueue("removeMedia", [args]);
+    },
+
+    /** Clears an entire media slot by role. */
+    clearSlot(role) {
+      return dispatchOrQueue("clearSlot", [role]);
+    },
+
+    /** Atomically swaps start and end keyframe slots. */
+    swapFrames() {
+      return dispatchOrQueue("swapFrames", []);
+    },
+
+    /** Atomically clears prompt and all media slots while keeping settings. */
+    clearDraft() {
+      return dispatchOrQueue("clearDraft", []);
+    },
+
+    /** Requests focus on the prompt input/editor. */
     focus() {
       return dispatchOrQueue("focus", []);
     },
 
-    /**
-     * Resets the prompt bar state to defaults.
-     * @returns {object} CommandResult
-     */
+    /** Resets the prompt bar state to defaults. */
     reset() {
       return dispatchOrQueue("reset", []);
     },
 
-    /**
-     * Returns a read-only copy of the instance state.
-     * @returns {{ prompt: string, selectedModelId: string|null, activeMode: string, activeSubMode: string, isGenerating: boolean }}
-     */
+    /** Returns a read-only snapshot of the instance state. */
     getSnapshot() {
       const store = registry.get(targetIdentity);
-      if (store && typeof store.getState === "function") {
-        const s = store.getState();
-        return {
-          prompt: s.prompt || "",
-          selectedModelId: s.selectedModelId || null,
-          activeMode: s.activeMode || "image",
-          activeSubMode: s.activeSubMode || "frames",
-          isGenerating: Boolean(s.isGenerating),
-        };
-      }
+      const snap = readStoreSnapshot(store);
       return {
-        prompt: "",
-        selectedModelId: null,
-        activeMode: "image",
-        activeSubMode: "frames",
-        isGenerating: false,
+        prompt: snap.prompt,
+        selectedModelId: snap.selectedModelId,
+        activeMode: snap.activeMode,
+        activeSubMode: snap.activeSubMode,
+        isGenerating: snap.isGenerating,
       };
     },
 
+    /** Subscribes to mount/unmount and state changes for this Prompt Bar identity. */
+    subscribe(listener) {
+      if (typeof listener !== "function") return () => {};
+      if (checkProjectGuard()) return () => {};
+      return registry.subscribe(targetIdentity, listener);
+    },
+
     /**
-     * Dispatches an arbitrary action or command by name.
-     * @param {string} actionName
-     * @param  {...any} args
-     * @returns {object} CommandResult
+     * Dispatches an allowlisted public command or template action by name.
+     * Rejects private or non-allowlisted names.
      */
     run(actionName, ...args) {
       return dispatchOrQueue(actionName, args);
     },
 
-    /**
-     * Attaches a reference item.
-     * @param {object} media
-     * @returns {object} CommandResult
-     */
+    /** Template flow: attaches a reference item. */
     addReference(media) {
       return dispatchOrQueue("addReference", [media]);
     },
 
-    /**
-     * Animates a media asset (transitions to video/frames and sets input_image).
-     * @param {object} media
-     * @param {object} [options]
-     * @returns {object} CommandResult
-     */
+    /** Template flow: animates a media asset (video/frames + start frame). */
     animateMedia(media, options) {
       return dispatchOrQueue("animateMedia", options !== undefined ? [media, options] : [media]);
     },
 
-    /**
-     * Reuses historic generation settings.
-     * @param {object} old
-     * @returns {object} CommandResult
-     */
+    /** Template flow: applies historic generation settings. */
     applyGeneration(old) {
       return dispatchOrQueue("applyGeneration", [old]);
     },
 
-    /**
-     * Restores the saved generation config for a workflow's primary media.
-     * The resolver is supplied by the UI and must read its current project cache.
-     *
-     * @param {string} workflowId
-     * @returns {object} CommandResult
-     */
+    /** Template flow: restores saved generation config for a workflow's primary media. */
     reuseGeneration(workflowId) {
       if (!workflowId || typeof resolveWorkflow !== "function") {
         return fail(REASONS.INVALID_ARGUMENT, { message: "workflowId and resolveWorkflow are required." });

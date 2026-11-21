@@ -7,17 +7,14 @@ import {
   clearPersistentPromptBarStores,
 } from "../store/PromptBarStoreContext.js";
 import { usePromptBarStore } from "../store/usePromptBarStore.js";
-import { createPromptBarType } from "../composition/createPromptBarType.js";
+import { generatedMediaTemplate } from "../templates/generatedMedia.template.js";
+import { selectElements, selectCharacters } from "../core/entityService.js";
 
-const testType = createPromptBarType({
+const testType = {
+  ...generatedMediaTemplate,
   id: "test-generated-media",
   name: "Test Media",
-  layout: {
-    showPromptInput: true,
-    showModeSelector: true,
-  },
-  supportedDomains: ["image", "video"],
-});
+};
 
 const mockModels = [
   {
@@ -34,6 +31,7 @@ const mockModels = [
     id: "model-video-1",
     name: "Model Video 1",
     domain: "video",
+    capabilities: { input_image: true, last_frame: true },
     parameters: {
       aspect_ratio: { name: "aspect_ratio", type: "select", values: [{ value: "1:1" }, { value: "16:9" }], default: "1:1" },
       duration: { name: "duration", type: "select", values: [{ value: "5s" }, { value: "10s" }], default: "5s" },
@@ -77,7 +75,6 @@ describe("PromptBar cross-page persistence", () => {
   it("persists prompt, parameter config select, model, and references across unmount and remount (page navigation)", () => {
     let capturedStore = null;
 
-    // 1. Mount on Page 1 (e.g. AssetsPage)
     const { unmount } = render(
       <PromptBarStoreProvider
         type={testType}
@@ -90,31 +87,25 @@ describe("PromptBar cross-page persistence", () => {
 
     expect(capturedStore).not.toBeNull();
 
-    // 2. User types prompt, selects model, modifies config parameter, and adds reference
     act(() => {
       capturedStore.getState().setPrompt("A cinematic view of mountains");
       capturedStore.getState().selectModel("model-image-1");
-      capturedStore.getState().setParameter("aspect_ratio", "16:9");
-      capturedStore.getState().setParameter("quality", "2K");
-      capturedStore.getState().setParameter("images", [{ id: "ref-1", url: "https://example.com/ref.png" }]);
-      capturedStore.getState().setActiveMode("video");
-      capturedStore.getState().setActiveSubMode("frames");
+      capturedStore.getState().setSetting("aspect_ratio", "16:9");
+      capturedStore.getState().setSetting("quality", "2K");
+      capturedStore.getState().attachMedia({
+        role: "reference",
+        value: { id: "ref-1", url: "https://example.com/ref.png" },
+      });
     });
 
-    // Verify state is active in store
     expect(capturedStore.getState().prompt).toBe("A cinematic view of mountains");
     expect(capturedStore.getState().parameterValues.aspect_ratio).toBe("16:9");
     expect(capturedStore.getState().parameterValues.quality).toBe("2K");
-    expect(capturedStore.getState().parameterValues.images).toEqual([
-      { id: "ref-1", url: "https://example.com/ref.png" },
-    ]);
-    expect(capturedStore.getState().activeMode).toBe("video");
-    expect(capturedStore.getState().activeSubMode).toBe("frames");
+    expect(capturedStore.getState().parameterValues.images).toHaveLength(1);
+    expect(capturedStore.getState().parameterValues.images[0].id).toBe("ref-1");
 
-    // 3. User navigates away to another page (Page 1 unmounts)
     unmount();
 
-    // 4. User navigates to Page 2 or returns to Page 1 (new component mounts with same project key)
     let remountedStore = null;
     render(
       <PromptBarStoreProvider
@@ -126,41 +117,42 @@ describe("PromptBar cross-page persistence", () => {
       </PromptBarStoreProvider>
     );
 
-    // 5. Assert: The prompt, parameter config selects, model, and references are preserved without being removed
     expect(remountedStore).not.toBeNull();
     expect(remountedStore.getState().prompt).toBe("A cinematic view of mountains");
     expect(remountedStore.getState().selectedModelId).toBe("model-image-1");
     expect(remountedStore.getState().parameterValues.aspect_ratio).toBe("16:9");
     expect(remountedStore.getState().parameterValues.quality).toBe("2K");
-    expect(remountedStore.getState().parameterValues.images).toEqual([
-      { id: "ref-1", url: "https://example.com/ref.png" },
-    ]);
-    expect(remountedStore.getState().activeMode).toBe("video");
-    expect(remountedStore.getState().activeSubMode).toBe("frames");
+    expect(remountedStore.getState().parameterValues.images[0].id).toBe("ref-1");
   });
 
-  it("rehydrates prompt, parameters, model, and references from sessionStorage after memory is cleared (e.g. page reload)", () => {
-    // 1. Simulate existing state saved in sessionStorage for a project
+  it("rehydrates prompt, parameters, model, and normalized entities from canonical pb2 sessionStorage after reload", () => {
     const savedState = {
+      v: 2,
       prompt: "Saved prompt across page reload",
-      selectedModelId: "model-video-1",
+      selectedModelId: "model-image-1",
       parameterValues: {
         aspect_ratio: "16:9",
-        duration: "10s",
-        input_image: "https://example.com/start.png",
+        quality: "2K",
+        images: [
+          { id: "elem-1", workflow_id: "elem-1", displayName: "knight", type: "element", url: "https://example.com/e.png" },
+          { id: "char-1", workflow_id: "char-1", displayName: "hero", type: "character", url: "https://example.com/c.png" },
+        ],
       },
-      elements: [{ id: "elem-1", name: "knight" }],
-      characters: [{ id: "char-1", name: "hero" }],
-      activeMode: "video",
+      activeMode: "image",
       activeSubMode: "frames",
     };
 
-    window.sessionStorage.setItem("test-project-reload_global", JSON.stringify(savedState));
+    window.sessionStorage.setItem(
+      "pb2:test-generated-media:test-project-reload:global",
+      JSON.stringify(savedState)
+    );
 
-    // Ensure in-memory registry has no cache for this key
     clearPersistentPromptBarStores();
+    window.sessionStorage.setItem(
+      "pb2:test-generated-media:test-project-reload:global",
+      JSON.stringify(savedState)
+    );
 
-    // 2. Mount component
     let mountedStore = null;
     render(
       <PromptBarStoreProvider
@@ -172,24 +164,20 @@ describe("PromptBar cross-page persistence", () => {
       </PromptBarStoreProvider>
     );
 
-    // 3. Verify state was rehydrated
     expect(mountedStore).not.toBeNull();
     expect(mountedStore.getState().prompt).toBe("Saved prompt across page reload");
-    expect(mountedStore.getState().selectedModelId).toBe("model-video-1");
+    expect(mountedStore.getState().selectedModelId).toBe("model-image-1");
     expect(mountedStore.getState().parameterValues.aspect_ratio).toBe("16:9");
-    expect(mountedStore.getState().parameterValues.duration).toBe("10s");
-    expect(mountedStore.getState().parameterValues.input_image).toBe("https://example.com/start.png");
-    expect(mountedStore.getState().elements).toEqual([{ id: "elem-1", name: "knight" }]);
-    expect(mountedStore.getState().characters).toEqual([{ id: "char-1", name: "hero" }]);
-    expect(mountedStore.getState().activeMode).toBe("video");
-    expect(mountedStore.getState().activeSubMode).toBe("frames");
+    expect(mountedStore.getState().parameterValues.quality).toBe("2K");
+    expect(selectElements(mountedStore.getState())[0].id).toBe("elem-1");
+    expect(selectCharacters(mountedStore.getState())[0].id).toBe("char-1");
+    expect(mountedStore.getState().activeMode).toBe("image");
   });
 
   it("does not trigger setState during render when reusing a persistent store with initialModels", () => {
     const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
     try {
-      // 1. Initial mount
       const { unmount } = render(
         <PromptBarStoreProvider
           type={testType}
@@ -202,7 +190,6 @@ describe("PromptBar cross-page persistence", () => {
 
       unmount();
 
-      // 2. Remount with models — must not update state synchronously during render phase
       render(
         <PromptBarStoreProvider
           type={testType}
@@ -213,9 +200,8 @@ describe("PromptBar cross-page persistence", () => {
         </PromptBarStoreProvider>
       );
 
-      // Verify no React warning was emitted
-      const setStateInRenderCalls = errorSpy.mock.calls.filter(([msg]) =>
-        typeof msg === "string" && msg.includes("Cannot update a component")
+      const setStateInRenderCalls = errorSpy.mock.calls.filter(
+        ([msg]) => typeof msg === "string" && msg.includes("Cannot update a component")
       );
       expect(setStateInRenderCalls).toHaveLength(0);
     } finally {

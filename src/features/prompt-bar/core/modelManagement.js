@@ -263,3 +263,41 @@ export function getModelReferenceCapability(model) {
   return { supports: false, maxRefs: 0, backendKey: null };
 }
 
+/**
+ * Single consistent eligibility rule shared by store commands (setModels, hydrate, switchMode)
+ * and UI hooks (usePromptBarModels).
+ *
+ * @param {Array<object>|Record<string, object>} modelsList
+ * @param {object} [options]
+ * @param {object} [options.template]
+ * @param {string} [options.activeMode="image"]
+ * @param {string} [options.activeSubMode="frames"]
+ * @returns {Array<object>}
+ */
+export function resolveEligibleModels(
+  modelsList,
+  { template = null, activeMode = "image", activeSubMode = "frames" } = {}
+) {
+  const list = Array.isArray(modelsList) ? modelsList : Object.values(modelsList || {});
+  if (template?.features?.models === false) return [];
+
+  const effectiveSubMode = activeMode === "video" ? (activeSubMode || "frames") : activeSubMode;
+
+  const filterFn =
+    typeof template?.filterEligibleModels === "function"
+      ? template.filterEligibleModels
+      : typeof template?.getEligibleModels === "function"
+      ? template.getEligibleModels
+      : null;
+
+  if (filterFn) {
+    return filterFn(list, activeMode, effectiveSubMode, {});
+  }
+
+  if (template?.supportedDomains?.length) {
+    return list.filter((m) => template.supportedDomains.includes(m.domain));
+  }
+
+  return list;
+}
+

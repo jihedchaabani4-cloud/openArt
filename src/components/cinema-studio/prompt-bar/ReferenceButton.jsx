@@ -3,15 +3,15 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/shared/lib/utils";
-import { GoogleIcon } from "@/components/primitives/GoogleIcon";
-import { resolveMediaUrl } from "@/features/prompt-bar/core/mediaRef.js";
+import { HugeIcon } from "@/components/primitives/HugeIcon";
+import { resolveMediaUrl } from "@/features/prompt-bar";
 
 const VARIANTS = {
-  start:  { word: "Start",  HoverContent: () => <GoogleIcon iconName="add" className="text-base text-cool-slate" /> },
-  end:    { word: "End",    HoverContent: () => <GoogleIcon iconName="add" className="text-base text-cool-slate" /> },
-  motion: { word: "Motion", HoverContent: () => <GoogleIcon iconName="play_arrow" className="text-base text-cool-slate" /> },
-  ref:    { word: "Ref",    HoverContent: () => <GoogleIcon iconName="add" className="text-base text-cool-slate" /> },
-  add:    { word: "Add",    HoverContent: () => <GoogleIcon iconName="add" className="text-base text-cool-slate" /> },
+  start:  { word: "Start",  HoverContent: () => <HugeIcon name="add-01" size="md" className="text-text-secondary" /> },
+  end:    { word: "End",    HoverContent: () => <HugeIcon name="add-01" size="md" className="text-text-secondary" /> },
+  motion: { word: "Motion", HoverContent: () => <HugeIcon name="play" size="md" className="text-text-secondary" /> },
+  ref:    { word: "Ref",    HoverContent: () => <HugeIcon name="add-01" size="md" className="text-text-secondary" /> },
+  add:    { word: "Add",    HoverContent: () => <HugeIcon name="add-01" size="md" className="text-text-secondary" /> },
 };
 
 export function ReferenceButton({
@@ -45,9 +45,9 @@ export function ReferenceButton({
         "group relative shrink-0",
         "w-[50px] h-[50px] rounded-xl",
         "flex items-center justify-center",
-        "bg-white-5",
+        "bg-white-5 border border-border-subtle",
         "transition-all duration-200 ease-out",
-        "hover:bg-ui-button-hover",
+        "hover:bg-ui-button-hover hover:border-border-heavy",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-heavy",
         "active:scale-95",
         pulse && "animate-pulse-border",
@@ -60,7 +60,7 @@ export function ReferenceButton({
         <span
           className={cn(
             "pointer-events-none select-none",
-            "text-[13px] font-medium text-cool-slate",
+            "ds-text-caption-m text-text-secondary",
             "tracking-[0.01em] whitespace-nowrap",
             "transition-all duration-200 ease-out",
             HoverContent
@@ -93,7 +93,7 @@ export function ReferenceButton({
 export function SwapIcon({ className }) {
   return (
     <div className={cn("flex items-center justify-center shrink-0", className)}>
-      <GoogleIcon iconName="swap_horiz" className="text-base" />
+      <HugeIcon name="arrow-left-right" size="md" />
     </div>
   );
 }
@@ -175,12 +175,7 @@ export function ViewReference({
           e.stopPropagation();
           onRemove?.();
         }}
-        className="absolute grid size-5 cursor-pointer place-items-center rounded-full bg-[color:var(--ui-menu-background)] text-[color:var(--icon-primary)] [--blur:20px] hover:bg-[color:var(--ui-menu-background-strong)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--border-heavy)] transition-colors duration-200 z-10"
-        style={{
-          backdropFilter: "blur(var(--blur, 40px))",
-          right: "-8px",
-          top: "-7px",
-        }}
+        className="absolute -right-2 -top-[7px] grid size-5 cursor-pointer place-items-center rounded-full surface-glass bg-surface-menu-glass text-icon-primary hover:bg-surface-tonal-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-heavy transition-colors duration-200 z-10"
       >
         <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18" aria-hidden="true">
           <path fillRule="evenodd" clipRule="evenodd" d={REMOVE_ICON_PATH} />
@@ -197,11 +192,11 @@ export function ViewReference({
             transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
             className="absolute bottom-[calc(100%+12px)] left-1/2 -translate-x-1/2 z-[100] pointer-events-none flex flex-col items-center"
           >
-            <div className="rounded-xxxs overflow-hidden shadow-none bg-omni-bg border border-border-weak flex items-center justify-center">
+            <div className="surface-glass bg-surface-menu-glass rounded-xl p-1 overflow-hidden flex items-center justify-center">
               {isVideo ? (
                 <video
                   src={src}
-                  className="max-w-[200px] max-h-[280px] w-auto h-auto rounded-xxxs object-contain block"
+                  className="max-w-[200px] max-h-[280px] w-auto h-auto rounded-lg object-contain block"
                   autoPlay
                   loop
                   muted
@@ -211,7 +206,7 @@ export function ViewReference({
                 <img
                   src={src}
                   alt=""
-                  className="max-w-[200px] max-h-[280px] w-auto h-auto rounded-xxxs object-contain block select-none pointer-events-none"
+                  className="max-w-[200px] max-h-[280px] w-auto h-auto rounded-lg object-contain block select-none pointer-events-none"
                 />
               )}
             </div>
