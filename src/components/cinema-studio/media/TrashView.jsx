@@ -11,6 +11,7 @@ import { selectStudioWorkflows } from "@/features/workflows/model/selectStudioWo
 import { MediaGridItem } from "@/components/cinema-studio/media/MediaGridItem";
 import { useStudioSelectionStore } from "@/features/workflows/model/useStudioSelectionStore";
 import { StudioSelectionBar } from "@/components/cinema-studio/media/StudioSelectionBar";
+import { GalleryCanvasContextMenu } from "@/components/cinema-studio/media/GalleryCanvasContextMenu";
 
 export function TrashView({ projectId }) {
   const { data, isLoading, isError, error, refetch } = useProjectData(projectId);
@@ -70,52 +71,58 @@ export function TrashView({ projectId }) {
   }
 
   return (
-    <div className="flex h-full w-full overflow-hidden text-white bg-background relative">
+    <div className="flex h-full w-full overflow-hidden text-white bg-transparent relative">
       <main className="flex-1 flex flex-col relative min-w-0 overflow-hidden z-10">
-        <div
-          ref={scrollRef}
-          onScroll={handleScroll}
-          data-scroll-container="true"
-          className="flex-1 overflow-y-auto overflow-x-hidden px-6 sm:px-10 lg:px-14 custom-scrollbar w-full"
+        <GalleryCanvasContextMenu
+          scope="trash"
+          projectId={projectId}
+          workflows={trashedWorkflows}
         >
-          <AnimatePresence mode="wait">
-            {trashedWorkflows.length > 0 ? (
-              <motion.div
-                key="trash-feed"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.15 }}
-                className="flex flex-col gap-6 w-full pb-32"
-              >
-                <SharedGalleryGrid
-                  workflows={trashedWorkflows}
-                  gridSize={gridSize}
-                  gridSpacing={gridSpacing}
-                  projectId={projectId}
-                  CardComponent={MediaGridItem}
-                  selectionEnabled={true}
-                />
-              </motion.div>
-            ) : (
-              <motion.div
-                key="trash-empty"
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 1.05 }}
-                className="flex-1 flex flex-col items-center justify-center min-h-96 w-full my-auto"
-              >
-                <div className="flex flex-col items-center gap-1">
-                  <p className="text-lg text-cool-slate font-normal tracking-wide text-center">
-                    {Boolean(filters?.prompt?.trim()) && (data?.projectContents?.trashedWorkflows?.length || 0) > 0
-                      ? "Aucun élément ne correspond à votre recherche"
-                      : "La corbeille est vide"}
-                  </p>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+          <div
+            ref={scrollRef}
+            onScroll={handleScroll}
+            data-scroll-container="true"
+            className="flex-1 overflow-y-auto overflow-x-hidden p-0 custom-scrollbar w-full"
+          >
+            <AnimatePresence mode="wait">
+              {trashedWorkflows.length > 0 ? (
+                <motion.div
+                  key="trash-feed"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.15 }}
+                  className="flex flex-col gap-6 w-full pb-32"
+                >
+                  <SharedGalleryGrid
+                    workflows={trashedWorkflows}
+                    gridSize={gridSize}
+                    gridSpacing={gridSpacing}
+                    projectId={projectId}
+                    CardComponent={MediaGridItem}
+                    selectionEnabled={true}
+                  />
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="trash-empty"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 1.05 }}
+                  className="flex-1 flex flex-col items-center justify-center min-h-96 w-full my-auto"
+                >
+                  <div className="flex flex-col items-center gap-1">
+                    <p className="text-lg text-cool-slate font-normal tracking-wide text-center">
+                      {Boolean(filters?.prompt?.trim()) && (data?.projectContents?.trashedWorkflows?.length || 0) > 0
+                        ? "Aucun élément ne correspond à votre recherche"
+                        : "La corbeille est vide"}
+                    </p>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </GalleryCanvasContextMenu>
 
         <StudioSelectionBar
           projectId={projectId}

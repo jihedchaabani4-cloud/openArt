@@ -282,7 +282,7 @@ describe("TrashView and Selector Isolation", () => {
     useWorkflowsStore.getState().setFilter("prompt", "");
   });
 
-  it("7. Applies horizontal padding (px-6 sm:px-10 lg:px-14) to the Trash media grid scroll container so items do not hug the viewport edges", () => {
+  it("7. Matches Assets/Elements/Characters scroll layout (p-0 container + padded SharedGalleryGrid)", () => {
     queryClient.setQueryData(queryKeys.projectData.byProject("proj-1"), mockProjectPayload);
 
     const { container } = render(
@@ -293,9 +293,8 @@ describe("TrashView and Selector Isolation", () => {
 
     const scrollContainer = container.querySelector('[data-scroll-container="true"]');
     expect(scrollContainer).not.toBeNull();
-    expect(scrollContainer.className).toContain("px-6");
-    expect(scrollContainer.className).toContain("sm:px-10");
-    expect(scrollContainer.className).toContain("lg:px-14");
-    expect(scrollContainer.className).not.toContain("px-3");
+    expect(scrollContainer.className).toContain("p-0");
+    const grid = container.querySelector('[data-justified-grid="true"]');
+    expect(grid?.className).toContain("p-3");
   });
 });

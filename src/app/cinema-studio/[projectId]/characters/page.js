@@ -14,6 +14,7 @@ import { SharedGalleryGrid } from "@/features/media"
 import { MediaGridItem } from "@/components/cinema-studio/media/MediaGridItem"
 import { useStudioSelectionStore } from "@/features/workflows/model/useStudioSelectionStore"
 import { StudioSelectionBar } from "@/components/cinema-studio/media/StudioSelectionBar"
+import { GalleryCanvasContextMenu } from "@/components/cinema-studio/media/GalleryCanvasContextMenu"
 import { HowToDrawer } from "@/features/elements";
 import { useWorkflowDelete } from "@/features/workflows"
 import { ConfirmDeleteDialog } from "@/components/primitives/ConfirmDeleteDialog"
@@ -139,40 +140,51 @@ export default function CharactersPage({ params }) {
                     )}
                 </AnimatePresence>
 
-                <div 
-                    ref={scrollRef}
-                    onScroll={handleScroll}
-                    data-scroll-container="true"
-                    className="flex-1 overflow-y-auto overflow-x-hidden p-0 custom-scrollbar w-full"
+                <GalleryCanvasContextMenu
+                    scope="characters"
+                    projectId={projectId}
+                    workflows={visibleSheets}
+                    primaryAction={{
+                        label: "New character",
+                        icon: "add-01",
+                        onClick: () => router.push(`/cinema-studio/${projectId}/characters/new`),
+                    }}
                 >
-                    {visibleSheets.length === 0 ? (
-                        <div className="w-full flex flex-col items-center justify-center py-28 text-center">
-                            <p className="text-[18px] text-white/35 font-normal tracking-wide">
-                                No characters yet
-                            </p>
-                            <p className="text-[13px] text-white/20 mt-1">
-                                Click &quot;New character&quot; below to create your first character.
-                            </p>
-                        </div>
-                    ) : (
-                        <div className="flex flex-col gap-6 w-full pb-32">
-                            <SharedGalleryGrid
-                                workflows={visibleSheets}
-                                gridSize={gridSize}
-                                gridSpacing={gridSpacing}
-                                projectId={projectId}
-                                CardComponent={MediaGridItem}
-                                onWorkflowClick={handleWorkflowClick}
-                                selectionEnabled={true}
-                            />
-                            {hasMore && (
-                                <div className="flex justify-center pt-2 text-sm text-white/45">
-                                    Scroll down to load more
-                                </div>
-                            )}
-                        </div>
-                    )}
-                </div>
+                    <div 
+                        ref={scrollRef}
+                        onScroll={handleScroll}
+                        data-scroll-container="true"
+                        className="flex-1 overflow-y-auto overflow-x-hidden p-0 custom-scrollbar w-full"
+                    >
+                        {visibleSheets.length === 0 ? (
+                            <div className="w-full flex flex-col items-center justify-center py-28 text-center">
+                                <p className="text-[18px] text-white/35 font-normal tracking-wide">
+                                    No characters yet
+                                </p>
+                                <p className="text-[13px] text-white/20 mt-1">
+                                    Click &quot;New character&quot; below to create your first character.
+                                </p>
+                            </div>
+                        ) : (
+                            <div className="flex flex-col gap-6 w-full pb-32">
+                                <SharedGalleryGrid
+                                    workflows={visibleSheets}
+                                    gridSize={gridSize}
+                                    gridSpacing={gridSpacing}
+                                    projectId={projectId}
+                                    CardComponent={MediaGridItem}
+                                    onWorkflowClick={handleWorkflowClick}
+                                    selectionEnabled={true}
+                                />
+                                {hasMore && (
+                                    <div className="flex justify-center pt-2 text-sm text-white/45">
+                                        Scroll down to load more
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                </GalleryCanvasContextMenu>
 
                 {/* Floating Action Button (New Character) */}
                 {!hasSelection && visibleSheets.length > 0 && (

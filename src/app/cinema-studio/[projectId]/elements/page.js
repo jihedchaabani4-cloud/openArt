@@ -16,6 +16,7 @@ import { SharedGalleryGrid } from "@/features/media";
 import { MediaGridItem } from "@/components/cinema-studio/media/MediaGridItem";
 import { useStudioSelectionStore } from "@/features/workflows/model/useStudioSelectionStore";
 import { StudioSelectionBar } from "@/components/cinema-studio/media/StudioSelectionBar";
+import { GalleryCanvasContextMenu } from "@/components/cinema-studio/media/GalleryCanvasContextMenu";
 import { HowToDrawer, ElementsEmptyState } from "@/features/elements";
 import { useWorkflowDelete } from "@/features/workflows";
 import { ConfirmDeleteDialog } from "@/components/primitives/ConfirmDeleteDialog";
@@ -144,36 +145,47 @@ export default function ElementsPage({ params }) {
                     )}
                 </AnimatePresence>
 
-                <div 
-                    ref={scrollRef}
-                    onScroll={handleScroll}
-                    data-scroll-container="true"
-                    className="flex-1 overflow-y-auto overflow-x-hidden p-0 custom-scrollbar w-full"
+                <GalleryCanvasContextMenu
+                    scope="elements"
+                    projectId={projectId}
+                    workflows={visibleSheets}
+                    primaryAction={{
+                        label: "New element",
+                        icon: "add-01",
+                        onClick: () => setIsNewElementOpen(true),
+                    }}
                 >
-                    {/* ── Elements Grid (Full Width 100%) ── */}
-                    {visibleSheets.length === 0 ? (
-                        <div className="flex-1 flex flex-col items-center justify-center min-h-[calc(100vh-140px)] w-full my-auto">
-                            <ElementsEmptyState onCreateElement={() => setIsNewElementOpen(true)} />
-                        </div>
-                    ) : (
-                        <div className="flex flex-col gap-6 w-full pb-32">
-                            <SharedGalleryGrid
-                                workflows={visibleSheets}
-                                gridSize={gridSize}
-                                gridSpacing={gridSpacing}
-                                projectId={projectId}
-                                CardComponent={MediaGridItem}
-                                onWorkflowClick={handleWorkflowClick}
-                                selectionEnabled={true}
-                            />
-                            {hasMore && (
-                                <div className="flex justify-center pt-2 text-sm text-white/45">
-                                    Scroll down to load more
-                                </div>
-                            )}
-                        </div>
-                    )}
-                </div>
+                    <div 
+                        ref={scrollRef}
+                        onScroll={handleScroll}
+                        data-scroll-container="true"
+                        className="flex-1 overflow-y-auto overflow-x-hidden p-0 custom-scrollbar w-full"
+                    >
+                        {/* ── Elements Grid (Full Width 100%) ── */}
+                        {visibleSheets.length === 0 ? (
+                            <div className="flex-1 flex flex-col items-center justify-center min-h-[calc(100vh-140px)] w-full my-auto">
+                                <ElementsEmptyState onCreateElement={() => setIsNewElementOpen(true)} />
+                            </div>
+                        ) : (
+                            <div className="flex flex-col gap-6 w-full pb-32">
+                                <SharedGalleryGrid
+                                    workflows={visibleSheets}
+                                    gridSize={gridSize}
+                                    gridSpacing={gridSpacing}
+                                    projectId={projectId}
+                                    CardComponent={MediaGridItem}
+                                    onWorkflowClick={handleWorkflowClick}
+                                    selectionEnabled={true}
+                                />
+                                {hasMore && (
+                                    <div className="flex justify-center pt-2 text-sm text-white/45">
+                                        Scroll down to load more
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                </GalleryCanvasContextMenu>
 
                 {/* Floating Action Button (New Element) */}
                 {!hasSelection && visibleSheets.length > 0 && (

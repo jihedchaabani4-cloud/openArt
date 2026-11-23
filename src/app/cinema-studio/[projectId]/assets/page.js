@@ -18,6 +18,7 @@ import { SharedGalleryGrid } from "@/features/media"
 import { MediaGridItem } from "@/components/cinema-studio/media/MediaGridItem"
 import { useStudioSelectionStore } from "@/features/workflows/model/useStudioSelectionStore"
 import { StudioSelectionBar } from "@/components/cinema-studio/media/StudioSelectionBar"
+import { GalleryCanvasContextMenu } from "@/components/cinema-studio/media/GalleryCanvasContextMenu"
 
 import { usePromptStore } from "@/features/prompt-bar/model/usePromptStore";
 import { buildCollectionCoverById, buildCollectionDirectCountById } from "@/shared/lib/displayUtils";
@@ -258,53 +259,61 @@ export default function AssetsPage({ params }) {
                     </div>
                 )}
 
-                <div 
-                    ref={scrollRef}
-                    onScroll={handleScroll}
-                    data-scroll-container="true"
-                    className="flex-1 overflow-y-auto overflow-x-hidden p-0 custom-scrollbar"
+                <GalleryCanvasContextMenu
+                    scope="assets"
+                    projectId={projectId}
+                    entries={visibleItems}
+                    allowCreateFolder={true}
+                    allowUpload={true}
                 >
-                    <AnimatePresence mode="wait">
-                        {combinedItems.length > 0 ? (
-                            <motion.div 
-                                key="feed"
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                exit={{ opacity: 0 }}
-                                transition={{ duration: 0.15 }}
-                                className="flex flex-col gap-6 w-full pb-32"
-                            >
-                                <SharedGalleryGrid
-                                    entries={visibleItems}
-                                    collectionCoverById={collectionCoverById}
-                                    collectionCountById={collectionCountById}
-                                    gridSize={gridSize}
-                                    gridSpacing={gridSpacing}
-                                    projectId={projectId}
-                                    CardComponent={MediaGridItem}
-                                    onWorkflowClick={handleWorkflowClick}
-                                    onCollectionClick={handleCollectionClick}
-                                    selectionEnabled={true}
-                                />
-                                {hasMore && (
-                                    <div className="flex justify-center pt-2 text-sm text-white/45">
-                                        Scroll down to load 30 more
-                                    </div>
-                                )}
-                            </motion.div>
-                        ) : (
-                            <motion.div 
-                                key="empty"
-                                initial={{ opacity: 0, scale: 0.95 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 1.05 }}
-                                className="w-full h-full flex items-center justify-center"
-                            >
-                                <EmptyState />
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-                </div>
+                    <div 
+                        ref={scrollRef}
+                        onScroll={handleScroll}
+                        data-scroll-container="true"
+                        className="flex-1 overflow-y-auto overflow-x-hidden p-0 custom-scrollbar"
+                    >
+                        <AnimatePresence mode="wait">
+                            {combinedItems.length > 0 ? (
+                                <motion.div 
+                                    key="feed"
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    transition={{ duration: 0.15 }}
+                                    className="flex flex-col gap-6 w-full pb-32"
+                                >
+                                    <SharedGalleryGrid
+                                        entries={visibleItems}
+                                        collectionCoverById={collectionCoverById}
+                                        collectionCountById={collectionCountById}
+                                        gridSize={gridSize}
+                                        gridSpacing={gridSpacing}
+                                        projectId={projectId}
+                                        CardComponent={MediaGridItem}
+                                        onWorkflowClick={handleWorkflowClick}
+                                        onCollectionClick={handleCollectionClick}
+                                        selectionEnabled={true}
+                                    />
+                                    {hasMore && (
+                                        <div className="flex justify-center pt-2 text-sm text-white/45">
+                                            Scroll down to load 30 more
+                                        </div>
+                                    )}
+                                </motion.div>
+                            ) : (
+                                <motion.div 
+                                    key="empty"
+                                    initial={{ opacity: 0, scale: 0.95 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 1.05 }}
+                                    className="w-full h-full flex items-center justify-center"
+                                >
+                                    <EmptyState />
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </div>
+                </GalleryCanvasContextMenu>
 
                 {/* Dedicated Generations PromptBar (Platform Architecture) */}
                 <div className={hasSelection ? "hidden" : undefined}>

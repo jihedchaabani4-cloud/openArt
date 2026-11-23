@@ -19,6 +19,7 @@ import { SharedGalleryGrid } from "@/features/media";
 import { MediaGridItem } from "@/components/cinema-studio/media/MediaGridItem";
 import { useStudioSelectionStore } from "@/features/workflows/model/useStudioSelectionStore";
 import { StudioSelectionBar } from "@/components/cinema-studio/media/StudioSelectionBar";
+import { GalleryCanvasContextMenu } from "@/components/cinema-studio/media/GalleryCanvasContextMenu";
 import { HugeIcon } from "@/components/primitives/HugeIcon";
 import { Button } from "@/components/base/button";
 
@@ -264,71 +265,81 @@ export default function CollectionDetailPage({ params }) {
           accept="image/*,video/mp4,video/webm"
         />
 
-        <div
-          ref={scrollRef}
-          onScroll={handleScroll}
-          data-scroll-container="true"
-          className="flex-1 overflow-y-auto overflow-x-hidden p-0 custom-scrollbar"
+        <GalleryCanvasContextMenu
+          scope="collection"
+          projectId={projectId}
+          currentFolderId={collectionId}
+          entries={visibleItems}
+          allowCreateFolder={true}
+          allowUpload={true}
+          onUploadClick={() => fileInputRef.current?.click()}
         >
-          {/* ── Content Feed or Empty State ── */}
-          <AnimatePresence mode="wait">
-            {combinedItems.length > 0 ? (
-              <motion.div
-                key="collection-grid"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.15 }}
-                className="flex flex-col gap-6 w-full pb-32"
-              >
-                <SharedGalleryGrid
-                  entries={visibleItems}
-                  collectionCoverById={collectionCoverById}
-                  collectionCountById={collectionCountById}
-                  gridSize={gridSize}
-                  gridSpacing={gridSpacing}
-                  projectId={projectId}
-                  CardComponent={MediaGridItem}
-                  onWorkflowClick={handleWorkflowClick}
-                  onCollectionClick={handleCollectionClick}
-                  selectionEnabled={true}
-                />
-                {hasMore && (
-                  <div className="flex justify-center pt-2 text-sm text-white/45">
-                    Scroll down to load 30 more
-                  </div>
-                )}
-              </motion.div>
-            ) : (
-              <motion.div
-                key="collection-empty"
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 1.05 }}
-                className="w-full min-h-[420px] flex flex-col items-center justify-center gap-4 text-center px-4"
-              >
-                <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center">
-                  <HugeIcon name="folder-open" className="text-3xl text-white/40" />
-                </div>
-                <div className="flex flex-col items-center gap-1.5 max-w-sm">
-                  <h3 className="text-lg font-medium text-white/90">This collection is empty</h3>
-                  <p className="text-sm text-white/45">
-                    Upload media or generate images and videos to add them to this collection.
-                  </p>
-                </div>
-                <Button
-                  variant="primary"
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={isUploading}
-                  className="mt-2 h-9 px-4 rounded-sm gap-2 text-sm font-medium"
+          <div
+            ref={scrollRef}
+            onScroll={handleScroll}
+            data-scroll-container="true"
+            className="flex-1 overflow-y-auto overflow-x-hidden p-0 custom-scrollbar"
+          >
+            {/* ── Content Feed or Empty State ── */}
+            <AnimatePresence mode="wait">
+              {combinedItems.length > 0 ? (
+                <motion.div
+                  key="collection-grid"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.15 }}
+                  className="flex flex-col gap-6 w-full pb-32"
                 >
-                  <HugeIcon name="upload-04" className="text-base" />
-                  <span>Upload media</span>
-                </Button>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+                  <SharedGalleryGrid
+                    entries={visibleItems}
+                    collectionCoverById={collectionCoverById}
+                    collectionCountById={collectionCountById}
+                    gridSize={gridSize}
+                    gridSpacing={gridSpacing}
+                    projectId={projectId}
+                    CardComponent={MediaGridItem}
+                    onWorkflowClick={handleWorkflowClick}
+                    onCollectionClick={handleCollectionClick}
+                    selectionEnabled={true}
+                  />
+                  {hasMore && (
+                    <div className="flex justify-center pt-2 text-sm text-white/45">
+                      Scroll down to load 30 more
+                    </div>
+                  )}
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="collection-empty"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 1.05 }}
+                  className="w-full min-h-[420px] flex flex-col items-center justify-center gap-4 text-center px-4"
+                >
+                  <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center">
+                    <HugeIcon name="folder-open" className="text-3xl text-white/40" />
+                  </div>
+                  <div className="flex flex-col items-center gap-1.5 max-w-sm">
+                    <h3 className="text-lg font-medium text-white/90">This collection is empty</h3>
+                    <p className="text-sm text-white/45">
+                      Upload media or generate images and videos to add them to this collection.
+                    </p>
+                  </div>
+                  <Button
+                    variant="primary"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isUploading}
+                    className="mt-2 h-9 px-4 rounded-sm gap-2 text-sm font-medium"
+                  >
+                    <HugeIcon name="upload-04" className="text-base" />
+                    <span>Upload media</span>
+                  </Button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </GalleryCanvasContextMenu>
 
         {/* Dedicated Generations PromptBar (Platform Architecture) */}
         <div className={hasSelection ? "hidden" : undefined}>
