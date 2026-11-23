@@ -4,6 +4,8 @@
 import React from "react";
 import { HugeIcon } from "@/components/primitives/HugeIcon";
 import { cn } from "@/shared/lib/utils";
+import { ProcessingCard } from "./ProcessingCard";
+import { UploadingCard } from "./UploadingCard";
 
 /**
  * Normalizes aspect ratio strings (e.g. '16/9' -> '16 / 9').
@@ -57,9 +59,13 @@ export const MediaRenderer = React.memo(
   const url = propUrl ?? item?.url ?? null;
   const thumbUrl = propThumbUrl ?? item?.thumbUrl ?? null;
   const kind = propKind ?? item?.kind ?? "image";
-  const status = propStatus ?? item?.status ?? "ready";
+  const status = String(propStatus ?? item?.status ?? "ready").trim().toLowerCase();
+  const underlyingStatus = String(item?.raw?.status ?? "").trim().toLowerCase();
+  const isUploading = status === "uploading" || (status === "processing" && underlyingStatus === "uploading");
   const error = propError ?? item?.error ?? null;
   const displayName = alt ?? item?.name ?? "Media";
+  const uploadId = item?.uploadId ?? item?.raw?.uploadId ?? item?.workflowId ?? null;
+  const uploadProgress = item?.progress ?? item?.raw?.progress ?? null;
 
   // Compute CSS aspect ratio
   const rawAspectRatio =
@@ -72,6 +78,26 @@ export const MediaRenderer = React.memo(
     ...style,
   };
 
+  // 0. Uploading state
+  if (isUploading) {
+    return (
+      <div
+        ref={ref}
+        className={cn("relative overflow-hidden", className)}
+        style={containerStyle}
+        {...props}
+      >
+        <UploadingCard
+          src={url}
+          isVideo={kind === "video"}
+          progress={uploadProgress}
+          uploadId={uploadId}
+          alt={displayName}
+        />
+      </div>
+    );
+  }
+
   // 1. Processing state
   if (status === "processing" && !url) {
     return (
@@ -79,15 +105,16 @@ export const MediaRenderer = React.memo(
         ref={ref}
         role="status"
         aria-label="Processing media"
-        className={cn(
-          "relative flex flex-col items-center justify-center bg-surface-secondary/60 p-4 text-white/50 select-none animate-pulse",
-          className
-        )}
+        className={cn("relative overflow-hidden", className)}
         style={containerStyle}
         {...props}
       >
-        <HugeIcon name="hourglass" className="text-3xl text-white/50 animate-spin mb-2" />
-        <span className="text-xs font-medium tracking-wide">Processing...</span>
+        <ProcessingCard
+          progress={uploadProgress}
+          isVideo={kind === "video"}
+          prompt={item?.prompt ?? item?.raw?.prompt ?? null}
+          className="w-full h-full rounded-none border-0"
+        />
       </div>
     );
   }

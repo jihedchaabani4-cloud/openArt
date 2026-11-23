@@ -190,7 +190,8 @@ export function getItemMetadata(item, group) {
   const normalizeStatus = (rawStatus, resolvedUrl, rawError, _createdAt) => {
     const s = (rawStatus || "").toString().toLowerCase();
     if (s === "success" || s === "completed") return "completed";
-    if (s === "processing" || s === "pending" || s === "uploading" || s === "queued" || s === "in_progress" || s === "starting") {
+    if (s === "uploading") return "uploading";
+    if (s === "processing" || s === "pending" || s === "queued" || s === "in_progress" || s === "starting") {
       return "processing";
     }
     if (s === "rejected") return "rejected";

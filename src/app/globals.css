@@ -16,6 +16,10 @@
   -webkit-font-smoothing: antialiased;
 }
 
+.huge-icon.absolute {
+  position: absolute;
+}
+
 /* ── Scrollbar Utilities ── */
 .scrollbar-hide {
   -ms-overflow-style: none;
@@ -116,6 +120,7 @@
   --color-surface-nav-active: var(--surface-nav-active);
   --color-surface-tonal: var(--surface-tonal);
   --color-surface-tonal-hover: var(--surface-tonal-hover);
+  --color-surface-tonal-hover-strong: var(--surface-tonal-hover-strong);
   --color-prompt-bar-bg: var(--prompt-bar-bg);
   --color-popover: rgb(var(--popover));
   --color-popover-foreground: rgb(var(--popover-foreground));
@@ -167,6 +172,7 @@
   --font-mono: var(--font-geist-mono), "Geist Mono", ui-monospace, Consolas, monospace;
   --radius-button: var(--radius-button);
   --radius-card: var(--radius-card);
+  --radius-row: var(--radius-row);
   --radius-control: var(--radius-control);
   --radius-slot: var(--radius-slot);
   --radius-preview: var(--radius-preview);
@@ -1001,7 +1007,7 @@
     gap: 8px;
     width: 100%;
     height: 34px;
-    padding: 6px 8px;
+    padding: 6px 9px;
     border-radius: var(--radius-row);
     border: 1px solid transparent;
     background-color: transparent;
@@ -1015,12 +1021,15 @@
     --ds-icon-size: var(--icon-size-md);
     transition: background-color 150ms var(--ease-standard), border-color 150ms var(--ease-standard), color 150ms var(--ease-standard);
   }
-  .ds-nav-item:hover,
   .ds-nav-item[data-active="true"],
   .ds-nav-item[aria-current="page"],
   .ds-nav-item[aria-selected="true"] {
-    background-color: var(--surface-nav-active);
-    border-color: var(--border-structural);
+    background-color: var(--surface-tonal);
+    border-color: var(--border-menu-subtle);
+  }
+  .ds-nav-item:hover {
+    background-color: var(--surface-tonal-hover);
+    border-color: var(--border-menu-subtle);
   }
   .ds-nav-item:focus-visible {
     outline: none;
@@ -1181,7 +1190,7 @@
   }
   .ds-btn-ghost:hover:not(:disabled),
   .ds-btn-ghost[data-state="open"] {
-    background-color: var(--surface-tonal);
+    background-color: var(--surface-tonal-hover);
   }
 
   .ds-btn-link {
@@ -1218,8 +1227,8 @@
   }
   .ds-btn-outline:hover:not(:disabled),
   .ds-btn-outline[data-state="open"] {
-    background-color: var(--surface-tonal);
-    border-color: transparent;
+    background-color: var(--surface-tonal-hover);
+    border-color: var(--border-menu-subtle);
     color: var(--text-primary);
   }
 
@@ -1388,8 +1397,8 @@
   }
   .ds-icon-btn-outline:hover:not(:disabled),
   .ds-icon-btn-outline[data-state="open"] {
-    background-color: var(--surface-tonal);
-    border-color: transparent;
+    background-color: var(--surface-tonal-hover);
+    border-color: var(--border-menu-subtle);
     color: var(--text-primary);
   }
 
@@ -1483,11 +1492,11 @@
   .ds-menu-item:focus-visible,
   .ds-menu-item[data-highlighted],
   .ds-menu-item[data-state="open"] {
-    background-color: var(--surface-tonal);
+    background-color: var(--surface-tonal-hover);
   }
   .ds-menu-item[data-selected="true"],
   .ds-menu-item[aria-selected="true"] {
-    background-color: var(--surface-tonal-hover);
+    background-color: var(--surface-tonal-hover-strong);
   }
 
   /* --- 07. Pill Tabs & Composer Folder Tabs --- */
@@ -2177,4 +2186,302 @@
 
 .shine-text--idle {
   color: rgba(255, 255, 255, 0.38);
+}
+
+/* ==========================================================================
+   UPLOADING CARD — BLURRED WAVE OVERLAY & PROGRESS SHEEN
+   ========================================================================== */
+@keyframes uploadWaveSweep {
+  0% {
+    transform: translate3d(-65%, 4%, 0) skewX(-16deg) scaleY(1.04);
+    opacity: 0.45;
+  }
+  50% {
+    transform: translate3d(0%, -4%, 0) skewX(-16deg) scaleY(1);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate3d(65%, 4%, 0) skewX(-16deg) scaleY(1.04);
+    opacity: 0.45;
+  }
+}
+
+@keyframes uploadWaveDrift {
+  0%, 100% {
+    transform: translate3d(35%, -6%, 0) skewX(14deg) scale(1.02);
+    opacity: 0.3;
+  }
+  50% {
+    transform: translate3d(-35%, 6%, 0) skewX(14deg) scale(1.08);
+    opacity: 0.65;
+  }
+}
+
+@keyframes uploadBarSheen {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(250%);
+  }
+}
+
+@keyframes uploadBarIndeterminate {
+  0% {
+    transform: translateX(-100%) scaleX(0.45);
+  }
+  50% {
+    transform: translateX(90%) scaleX(0.85);
+  }
+  100% {
+    transform: translateX(260%) scaleX(0.45);
+  }
+}
+
+.ds-upload-wave-primary {
+  position: absolute;
+  inset: -25% -55%;
+  background: linear-gradient(
+    105deg,
+    transparent 20%,
+    rgba(255, 255, 255, 0.06) 36%,
+    rgba(255, 255, 255, 0.24) 50%,
+    rgba(255, 255, 255, 0.06) 64%,
+    transparent 80%
+  );
+  filter: blur(18px);
+  animation: uploadWaveSweep 2.4s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+  will-change: transform, opacity;
+}
+
+.ds-upload-wave-secondary {
+  position: absolute;
+  inset: -30% -40%;
+  background: radial-gradient(
+    ellipse 60% 45% at 50% 50%,
+    rgba(255, 255, 255, 0.16) 0%,
+    rgba(255, 255, 255, 0.04) 55%,
+    transparent 80%
+  );
+  filter: blur(24px);
+  animation: uploadWaveDrift 3.6s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+.ds-upload-bar-sheen {
+  position: absolute;
+  inset: 0;
+  width: 45%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.45) 50%,
+    transparent 100%
+  );
+  animation: uploadBarSheen 1.6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  will-change: transform;
+}
+
+.ds-upload-bar-indeterminate {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 42%;
+  border-radius: 9999px;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.2) 0%,
+    rgba(255, 255, 255, 0.95) 50%,
+    rgba(255, 255, 255, 0.2) 100%
+  );
+  animation: uploadBarIndeterminate 1.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  will-change: transform;
+}
+
+/* ==========================================================================
+   PROCESSING CARD — VOLUMETRIC WAVE & SOFT CHARCOAL CORE (BANDING-FREE)
+   ========================================================================== */
+@keyframes procWaveAOrbit {
+  0%, 100% {
+    transform: translate3d(-18%, -72%, 0) scale(1.08, 0.96);
+    opacity: 0.94;
+  }
+  25% {
+    transform: translate3d(-78%, -68%, 0) scale(0.98, 1.08);
+    opacity: 0.88;
+  }
+  50% {
+    transform: translate3d(-72%, -22%, 0) scale(1.1, 0.94);
+    opacity: 0.96;
+  }
+  75% {
+    transform: translate3d(-16%, -28%, 0) scale(1, 1.06);
+    opacity: 0.9;
+  }
+}
+
+@keyframes procWaveBDrift {
+  0%, 100% {
+    transform: translate3d(-34%, -46%, 0) rotate(-22deg) scale(1.06, 0.96);
+    opacity: 0.84;
+  }
+  33% {
+    transform: translate3d(-64%, -56%, 0) rotate(16deg) scale(1.14, 1.04);
+    opacity: 0.92;
+  }
+  66% {
+    transform: translate3d(-44%, -32%, 0) rotate(-28deg) scale(0.98, 1.08);
+    opacity: 0.86;
+  }
+}
+
+@keyframes procGlowCDrift {
+  0%, 100% {
+    transform: translate3d(-20%, -22%, 0) scale(1.02, 1);
+    opacity: 0.82;
+  }
+  35% {
+    transform: translate3d(-74%, -36%, 0) scale(1.1, 0.96);
+    opacity: 0.72;
+  }
+  70% {
+    transform: translate3d(-38%, -76%, 0) scale(0.96, 1.08);
+    opacity: 0.86;
+  }
+}
+
+@keyframes procOrbCoreOrbit {
+  0%, 100% {
+    transform: translate3d(-68%, -56%, 0) scale(1.04, 0.96);
+    opacity: 0.82;
+  }
+  28% {
+    transform: translate3d(-50%, -34%, 0) scale(0.96, 1.06);
+    opacity: 0.78;
+  }
+  58% {
+    transform: translate3d(-30%, -46%, 0) scale(1.06, 0.98);
+    opacity: 0.84;
+  }
+  82% {
+    transform: translate3d(-42%, -64%, 0) scale(0.98, 1.04);
+    opacity: 0.76;
+  }
+}
+
+.ds-proc-stage {
+  position: absolute;
+  inset: -38%;
+  pointer-events: none;
+  overflow: hidden;
+  filter: blur(68px) saturate(0);
+  transform: translateZ(0);
+}
+
+.ds-proc-wave-a {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 118%;
+  height: 118%;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(255, 255, 255, 0.34) 0%,
+    rgba(245, 246, 248, 0.28) 18%,
+    rgba(232, 234, 238, 0.2) 36%,
+    rgba(218, 220, 225, 0.12) 54%,
+    rgba(205, 208, 214, 0.05) 72%,
+    rgba(195, 198, 205, 0.015) 86%,
+    transparent 100%
+  );
+  transform: translate3d(-18%, -72%, 0);
+  animation: procWaveAOrbit 11s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+.ds-proc-wave-b {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 134%;
+  height: 82%;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse 64% 50% at 50% 50%,
+    rgba(255, 255, 255, 0.26) 0%,
+    rgba(240, 242, 246, 0.2) 22%,
+    rgba(225, 228, 233, 0.12) 44%,
+    rgba(210, 213, 220, 0.05) 66%,
+    rgba(200, 204, 210, 0.015) 84%,
+    transparent 100%
+  );
+  transform: translate3d(-34%, -46%, 0) rotate(-22deg);
+  animation: procWaveBDrift 15s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+.ds-proc-glow-c {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 112%;
+  height: 112%;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(255, 255, 255, 0.22) 0%,
+    rgba(238, 240, 244, 0.16) 24%,
+    rgba(222, 225, 230, 0.09) 48%,
+    rgba(208, 212, 218, 0.035) 70%,
+    transparent 100%
+  );
+  transform: translate3d(-20%, -22%, 0);
+  animation: procGlowCDrift 19s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+.ds-proc-orb-core {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 78%;
+  height: 84%;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(14, 14, 16, 0.78) 0%,
+    rgba(16, 16, 19, 0.62) 20%,
+    rgba(19, 19, 22, 0.44) 38%,
+    rgba(22, 22, 26, 0.26) 56%,
+    rgba(26, 26, 30, 0.11) 74%,
+    rgba(30, 30, 34, 0.03) 88%,
+    transparent 100%
+  );
+  transform: translate3d(-68%, -56%, 0);
+  animation: procOrbCoreOrbit 13s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+/* Subtle anti-banding micro-grain dither layer so dark monochrome gradients stay silky */
+.ds-proc-dither {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.038;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  background-size: 120px 120px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ds-upload-wave-primary,
+  .ds-upload-wave-secondary,
+  .ds-upload-bar-sheen,
+  .ds-upload-bar-indeterminate,
+  .ds-proc-wave-a,
+  .ds-proc-wave-b,
+  .ds-proc-glow-c,
+  .ds-proc-orb-core {
+    animation: none;
+  }
 }

@@ -3,6 +3,8 @@ export { MediaRenderer } from "@/components/cinema-studio/media/MediaRenderer";
 export { MediaCard } from "@/components/cinema-studio/media/MediaCard";
 export { MediaTile } from "@/components/cinema-studio/media/MediaTile";
 export { MediaView } from "@/components/cinema-studio/media/MediaView";
+export { UploadingCard } from "@/components/cinema-studio/media/UploadingCard";
+export { WorkflowTypeBadge } from "@/components/cinema-studio/media/WorkflowTypeBadge";
 export { MediaViewCard } from "@/components/cinema-studio/media/MediaViewCard";
 export { SharedGalleryGrid } from "@/components/cinema-studio/media/SharedGalleryGrid";
 export { AssetListItem } from "@/components/cinema-studio/media/AssetListItem";

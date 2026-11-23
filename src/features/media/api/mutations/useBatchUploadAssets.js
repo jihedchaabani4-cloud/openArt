@@ -5,6 +5,12 @@ import { api } from '@/shared/api/client';
 import { queryKeys } from '@/shared/api/queryKeys';
 import { intrinsicSizeToRatioLabel, setCachedImageDimensions } from '@/shared/lib/displayUtils';
 import { validateBatchCount, BATCH_UPLOAD_CONCURRENCY } from '../../uploadPolicy';
+import {
+  registerUploadFile,
+  takeUploadIdForFile,
+  setUploadProgress,
+  clearUploadProgress,
+} from '../../model/uploadProgressStore';
 
 // ── Helper: extract width/height/ratio from file before upload ──────────────
 function getMediaMetadata(file) {
@@ -122,7 +128,16 @@ export function useBatchUploadAssets() {
               formData.append("ratio", metadata.ratio || "");
             }
             formData.append("file", file);
-            const res = await api.postForm("/assets/upload", formData, { signal: abortController.signal });
+            const uploadId = takeUploadIdForFile(file);
+            const res = await api.postForm("/assets/upload", formData, {
+              signal: abortController.signal,
+              onUploadProgress: uploadId
+                ? (percent, meta) => setUploadProgress(uploadId, percent, meta?.phase || "uploading")
+                : undefined,
+            });
+            if (uploadId) {
+              setUploadProgress(uploadId, 100, "done");
+            }
             if (res?.url && (res?.width || metadata?.width) && (res?.height || metadata?.height)) {
               setCachedImageDimensions(
                 res.url,
@@ -155,6 +170,7 @@ export function useBatchUploadAssets() {
       const optimisticWorkflows = [];
       const optimisticMediaItems = [];
       const optimisticEntries = [];
+      const optimisticIds = [];
       const localUrls = [];
 
       // Parallelize metadata extraction
@@ -165,7 +181,10 @@ export function useBatchUploadAssets() {
         const optimisticId = `optimistic-upload-${Date.now()}-${idx}`;
         const isVideo = file.type.startsWith('video/');
         const localUrl = URL.createObjectURL(file);
+        optimisticIds.push(optimisticId);
         localUrls.push(localUrl);
+        registerUploadFile(file, optimisticId);
+        setUploadProgress(optimisticId, 0);
 
         if (metadata?.width && metadata?.height) {
           setCachedImageDimensions(localUrl, metadata.width, metadata.height);
@@ -188,6 +207,7 @@ export function useBatchUploadAssets() {
           created_at:      new Date().toISOString(),
           items: [{
             id:         `${optimisticId}-item`,
+            uploadId:   optimisticId,
             index:      0,
             status:     'uploading',
             is_liked:   false,
@@ -206,6 +226,7 @@ export function useBatchUploadAssets() {
         // ProjectData format — all 4 folder_id variants written so folder filtering works immediately
         optimisticWorkflows.push({
           name:          optimisticId,
+          uploadId:      optimisticId,
           projectId:     projectId,
           folder_id:     effectiveFolderId,
           folderId:      effectiveFolderId,
@@ -228,6 +249,7 @@ export function useBatchUploadAssets() {
         optimisticMediaItems.push({
           id:             `${optimisticId}-item`,
           name:           `${optimisticId}-item`,
+          uploadId:       optimisticId,
           url:            localUrl,
           status:         'uploading',
           projectId:      projectId,
@@ -281,7 +303,7 @@ export function useBatchUploadAssets() {
         };
       });
 
-      return { previousGenerations, previousProjectData, generationsKey, projectDataKey, localUrls };
+      return { previousGenerations, previousProjectData, generationsKey, projectDataKey, localUrls, optimisticIds };
     },
 
     onError: (_err, _vars, context) => {
@@ -292,12 +314,14 @@ export function useBatchUploadAssets() {
         queryClient.setQueryData(context.projectDataKey, context.previousProjectData);
       }
       context?.localUrls?.forEach(url => URL.revokeObjectURL(url));
+      context?.optimisticIds?.forEach(clearUploadProgress);
     },
 
     onSettled: (_data, _err, variables, context) => {
       // Delay blob URL revocation to avoid image flicker while real server data loads
       setTimeout(() => {
         context?.localUrls?.forEach(url => URL.revokeObjectURL(url));
+        context?.optimisticIds?.forEach(clearUploadProgress);
       }, 2000);
       queryClient.invalidateQueries({ queryKey: queryKeys.assets.byProject(variables.projectId) });
       queryClient.invalidateQueries({ queryKey: queryKeys.generations.byProject(variables.projectId) });

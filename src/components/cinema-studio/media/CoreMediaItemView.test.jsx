@@ -137,8 +137,8 @@ describe("CoreMediaItemView - Liked top-left indicator badge", () => {
     expect(card.className).not.toContain("border-white/10");
   });
 
-  it("renders a video indicator icon on the left when isVideo is true", () => {
-    render(
+  it("renders a unified bottom-right video badge with white background and black icon when isVideo is true", () => {
+    const { container } = render(
       <CoreMediaItemView
         src="https://example.com/test.mp4"
         status="completed"
@@ -149,11 +149,14 @@ describe("CoreMediaItemView - Liked top-left indicator badge", () => {
     const videoBadge = screen.getByTitle("Video");
     expect(videoBadge).toBeDefined();
     expect(videoBadge.getAttribute("aria-label")).toBe("Video");
-    expect(videoBadge.className).toContain("bg-transparent");
-    expect(videoBadge.className).not.toContain("bg-black/40");
+    expect(videoBadge.className).toContain("size-6");
+    expect(videoBadge.className).toContain("rounded-control");
+    expect(videoBadge.className).toContain("bg-white");
+    expect(videoBadge.className).toContain("text-black");
+    expect(container.querySelector('[data-slot="media-bottom-right"]')?.contains(videoBadge)).toBe(true);
     const icon = videoBadge.querySelector('[data-icon-provider="hugeicons"]');
     expect(icon?.getAttribute("data-icon-name")).toBe("video-01");
-    expect(icon?.className).toContain("text-white");
+    expect(icon?.className).toContain("text-black");
   });
 
   it("does not render video indicator icon when isVideo is false", () => {
