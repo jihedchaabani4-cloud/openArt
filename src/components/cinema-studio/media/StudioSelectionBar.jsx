@@ -642,7 +642,7 @@ function StudioSelectionBarContent({
                 title={isAllLiked ? "Unlike selected" : "Like selected"}
                 className="rounded-control"
               >
-                <HugeIcon name="favourite" />
+                <HugeIcon name="favourite" filled={isAllLiked} />
               </IconButton>
             )}
 

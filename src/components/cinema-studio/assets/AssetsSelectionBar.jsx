@@ -42,7 +42,7 @@ export function AssetsSelectionBar({
           disabled={isFavoriting || isDeleting}
           aria-label="Favorite selected"
         >
-          <HugeIcon name="favourite" className={allSelectedAreLiked ? "text-white" : undefined} />
+          <HugeIcon name="favourite" filled={allSelectedAreLiked} className={allSelectedAreLiked ? "text-white" : undefined} />
         </Button>
 
         <Button

@@ -109,6 +109,7 @@ export function EntityEditNavbar({
             >
               <HugeIcon
                 name="favourite"
+                filled={isLiked}
                 className="text-white"
               />
             </IconButton>

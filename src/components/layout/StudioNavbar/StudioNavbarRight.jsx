@@ -7,7 +7,6 @@ import { NavbarFilterDropdown } from "./NavbarFilterDropdown"
 import { NavbarImportButton } from "./NavbarImportButton"
 import { NavbarRestoreAllButton } from "./NavbarRestoreAllButton"
 import { NavbarEmptyTrashButton } from "./NavbarEmptyTrashButton"
-import { UserDropdown } from "@/components/layout/UserDropdown"
 
 export const StudioNavbarRight = React.memo(function StudioNavbarRight({ searchExpanded, availableModels }) {
     return (
@@ -20,7 +19,6 @@ export const StudioNavbarRight = React.memo(function StudioNavbarRight({ searchE
             <NavbarFilterDropdown availableModels={availableModels} />
             <StudioSettingsDropdown />
             <NavbarImportButton />
-            <UserDropdown />
         </div>
     )
 });

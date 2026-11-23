@@ -107,9 +107,9 @@ describe("NavbarFilterDropdown", () => {
     expect(mainPanel.contains(subPanel)).toBe(false);
   });
 
-  it("hides itself on the trash tab", () => {
+  it("renders on the trash tab just like Assets, Elements, and Characters", () => {
     useWorkflowUiStore.setState({ activeStudioTab: "trash" });
-    const { container } = render(<NavbarFilterDropdown />);
-    expect(container.innerHTML).toBe("");
+    render(<NavbarFilterDropdown />);
+    expect(screen.getByRole("button", { name: /^Filter$/i })).toBeTruthy();
   });
 });

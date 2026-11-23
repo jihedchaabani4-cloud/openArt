@@ -43,9 +43,10 @@ describe("FileTree Component (shadcn.io/ui/file-tree)", () => {
     expect(handleSelect).toHaveBeenCalledWith("item-1");
   });
 
-  it("toggles folder expand/collapse when clicking folder row", () => {
+  it("expands on folder row click, stays open on re-click, and collapses only via hover chevron toggle", () => {
+    const handleSelect = vi.fn();
     const { container } = render(
-      <FileTree initialExpandedItems={[]}>
+      <FileTree initialExpandedItems={[]} onSelectChange={handleSelect}>
         <FileTreeFolder value="folder-toggle" element="Toggle Folder">
           <FileTreeItem value="child-1" element="Child Item" />
         </FileTreeFolder>
@@ -55,11 +56,22 @@ describe("FileTree Component (shadcn.io/ui/file-tree)", () => {
     const folderRow = container.querySelector('[role="treeitem"]');
     expect(folderRow?.getAttribute("aria-expanded")).toBe("false");
 
+    // Clicking the folder row selects and expands it
     fireEvent.click(screen.getByText("Toggle Folder"));
     expect(folderRow?.getAttribute("aria-expanded")).toBe("true");
+    expect(handleSelect).toHaveBeenCalledTimes(1);
 
+    // Clicking the folder row again keeps it expanded (does not collapse)
     fireEvent.click(screen.getByText("Toggle Folder"));
+    expect(folderRow?.getAttribute("aria-expanded")).toBe("true");
+    expect(handleSelect).toHaveBeenCalledTimes(2);
+
+    // Clicking the hover chevron toggle collapses it without firing row selection
+    const toggle = container.querySelector('[data-slot="folder-toggle"]');
+    expect(toggle).toBeTruthy();
+    fireEvent.click(toggle);
     expect(folderRow?.getAttribute("aria-expanded")).toBe("false");
+    expect(handleSelect).toHaveBeenCalledTimes(2);
   });
 
   it("passes size prop down to Folder and File buttons", () => {

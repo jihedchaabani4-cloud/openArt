@@ -16,12 +16,50 @@ import {
 } from "@/components/base/menu";
 import { cn } from "@/shared/lib/utils";
 
-function ContextMenu({ ...props }) {
-  return <ContextMenuPrimitive.Root data-slot="context-menu" {...props} />;
+const ContextMenuPositionContext = React.createContext(null);
+
+function ContextMenu({ modal = false, ...props }) {
+  const [positionKey, setPositionKey] = React.useState(0);
+  const bumpPosition = React.useCallback(() => {
+    setPositionKey((key) => key + 1);
+  }, []);
+  const positionContextValue = React.useMemo(
+    () => ({ positionKey, bumpPosition }),
+    [positionKey, bumpPosition]
+  );
+
+  return (
+    <ContextMenuPositionContext.Provider value={positionContextValue}>
+      <ContextMenuPrimitive.Root data-slot="context-menu" modal={modal} {...props} />
+    </ContextMenuPositionContext.Provider>
+  );
 }
 
-const ContextMenuTrigger = React.forwardRef(function ContextMenuTrigger(props, ref) {
-  return <ContextMenuPrimitive.Trigger ref={ref} data-slot="context-menu-trigger" {...props} />;
+const ContextMenuTrigger = React.forwardRef(function ContextMenuTrigger(
+  { onContextMenu, disabled, ...props },
+  ref
+) {
+  const positionContext = React.useContext(ContextMenuPositionContext);
+
+  const handleContextMenu = React.useCallback(
+    (event) => {
+      onContextMenu?.(event);
+      if (!event.defaultPrevented && !disabled) {
+        positionContext?.bumpPosition();
+      }
+    },
+    [onContextMenu, disabled, positionContext]
+  );
+
+  return (
+    <ContextMenuPrimitive.Trigger
+      ref={ref}
+      data-slot="context-menu-trigger"
+      disabled={disabled}
+      onContextMenu={handleContextMenu}
+      {...props}
+    />
+  );
 });
 ContextMenuTrigger.displayName = "ContextMenuTrigger";
 
@@ -109,9 +147,12 @@ const ContextMenuContent = React.forwardRef(function ContextMenuContent(
   },
   ref
 ) {
+  const positionContext = React.useContext(ContextMenuPositionContext);
+
   return (
     <ContextMenuPrimitive.Portal>
       <ContextMenuPrimitive.Content
+        key={positionContext?.positionKey}
         ref={ref}
         data-slot="context-menu-content"
         data-variant={variant}

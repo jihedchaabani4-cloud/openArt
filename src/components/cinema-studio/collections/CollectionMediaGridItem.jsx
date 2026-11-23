@@ -26,6 +26,7 @@ import { stripWorkflowPrefix } from "@/features/workflows/lib/cacheHelpers";
 const DRAG_TARGET_LABELS = {
   "add-to-collection": "Move to folder",
   "move-to-root": "Move to root",
+  "move-to-trash": "Move to trash",
   "move-out": "Move out",
 };
 
@@ -456,6 +457,7 @@ export const CollectionMediaGridItem = React.memo(function CollectionMediaGridIt
                 >
                   <HugeIcon
                     name="favourite"
+                    filled={isLiked}
                     className="text-text-primary"
                   />
                 </IconButton>

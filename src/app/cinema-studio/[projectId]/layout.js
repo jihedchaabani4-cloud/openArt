@@ -58,8 +58,6 @@ export default function StudioLayout({ children }) {
     // 🔹 Local Entry state
     const [isEntryLoading, setIsEntryLoading] = useState(true)
 
-    const isTrashPage = pathname?.includes("/trash");
-
     const isEditPage =
         pathname?.includes("/assets/edit/") ||
         pathname?.includes("/generations/edit/") ||
@@ -142,7 +140,7 @@ export default function StudioLayout({ children }) {
                     >
                         {!isEditPage ? (
                             <div className="flex-1 min-h-0 flex overflow-hidden relative w-full h-full p-2 gap-2 bg-main">
-                                {!isTrashPage && <LeftNavigationRail />}
+                                <LeftNavigationRail />
                                 <div className="flex-1 min-w-0 flex flex-col relative overflow-hidden h-full rounded-3xl border border-border-subtle bg-main">
                                     <StudioNavbar />
                                     <div className="flex-1 min-h-0 relative overflow-hidden flex flex-col">

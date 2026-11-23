@@ -41,14 +41,14 @@ export function menuItemClassName({
 } = {}) {
   return cn(
     "ds-menu-item ds-text-caption-m font-normal group relative flex cursor-pointer items-center gap-2 rounded-lg text-text-primary font-sans antialiased outline-none select-none transition-colors",
-    "hover:bg-surface-tonal focus:bg-surface-tonal data-[highlighted]:bg-surface-tonal data-[state=open]:bg-surface-tonal",
-    "data-[selected=true]:bg-surface-tonal-hover aria-selected:bg-surface-tonal-hover",
-    selected && "bg-surface-tonal-hover",
+    "hover:bg-surface-tonal-hover focus:bg-surface-tonal-hover data-[highlighted]:bg-surface-tonal-hover data-[state=open]:bg-surface-tonal-hover",
+    "data-[selected=true]:bg-surface-tonal-hover-strong aria-selected:bg-surface-tonal-hover-strong",
+    selected && "bg-surface-tonal-hover-strong",
     "[&_svg:not([class*='text-'])]:text-icon-primary [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 [&_.huge-icon:not([class*='text-'])]:text-icon-primary",
     "data-[disabled]:pointer-events-none data-[disabled]:opacity-40 data-[inset]:pl-8",
     inset && "pl-8",
     hasIndicator && "pl-8",
-    "data-[variant=destructive]:!text-error data-[variant=destructive]:hover:!text-error data-[variant=destructive]:focus:!text-error data-[variant=destructive]:hover:bg-surface-tonal data-[variant=destructive]:focus:bg-surface-tonal data-[variant=destructive]:data-[highlighted]:bg-surface-tonal data-[variant=destructive]:[&_svg]:!text-error data-[variant=destructive]:[&_.huge-icon]:!text-error",
+    "data-[variant=destructive]:!text-error data-[variant=destructive]:hover:!text-error data-[variant=destructive]:focus:!text-error data-[variant=destructive]:hover:bg-surface-tonal-hover data-[variant=destructive]:focus:bg-surface-tonal-hover data-[variant=destructive]:data-[highlighted]:bg-surface-tonal-hover data-[variant=destructive]:[&_svg]:!text-error data-[variant=destructive]:[&_.huge-icon]:!text-error",
     className
   );
 }

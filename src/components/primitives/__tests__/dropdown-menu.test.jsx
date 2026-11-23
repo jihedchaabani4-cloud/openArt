@@ -1,6 +1,6 @@
 import * as React from "react";
 import { describe, it, expect, afterEach } from "vitest";
-import { render, screen, fireEvent, cleanup } from "@testing-library/react";
+import { render, screen, fireEvent, cleanup, waitFor } from "@testing-library/react";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -312,5 +312,61 @@ describe("Unified Menu System — DropdownMenu, ContextMenu, and Select parity",
     expect(menuPanelClassName({ variant: "normal" })).toContain("surface-glass");
     expect(menuPanelClassName({ variant: "normal" })).not.toContain("shadow-none");
     expect(menuItemClassName()).not.toContain("data-[variant=danger]");
+  });
+
+  it("repositions ContextMenu to the new cursor coordinates when right-clicking again while open without locking body pointer-events", async () => {
+    function getPopperCoords() {
+      const wrapper = document.querySelector("[data-radix-popper-content-wrapper]");
+      const match = /translate\((-?\d+(?:\.\d+)?)px,\s*(-?\d+(?:\.\d+)?)px\)/.exec(
+        wrapper?.style?.transform || ""
+      );
+      return match ? { x: Number(match[1]), y: Number(match[2]) } : null;
+    }
+
+    render(
+      <ContextMenu>
+        <ContextMenuTrigger asChild>
+          <div data-testid="ctx-surface" style={{ width: 800, height: 600 }}>
+            Surface
+          </div>
+        </ContextMenuTrigger>
+        <ContextMenuContent>
+          <ContextMenuItem>Context Action</ContextMenuItem>
+        </ContextMenuContent>
+      </ContextMenu>
+    );
+
+    const surface = screen.getByTestId("ctx-surface");
+
+    // 1. Open at point A (100, 100)
+    fireEvent.contextMenu(surface, { clientX: 100, clientY: 100 });
+    await waitFor(() => {
+      const coords = getPopperCoords();
+      expect(coords).not.toBeNull();
+      expect(Math.abs(coords.x - 100)).toBeLessThanOrEqual(5);
+      expect(Math.abs(coords.y - 100)).toBeLessThanOrEqual(5);
+    });
+
+    // Must not disable body pointer-events so a second right-click reaches triggers directly
+    expect(document.body.style.pointerEvents).not.toBe("none");
+
+    // 2. Right-click at point B (400, 300) WHILE menu is still open
+    fireEvent.contextMenu(surface, { clientX: 400, clientY: 300 });
+    await waitFor(() => {
+      const coords = getPopperCoords();
+      expect(coords).not.toBeNull();
+      expect(Math.abs(coords.x - 400)).toBeLessThanOrEqual(5);
+      expect(Math.abs(coords.y - 300)).toBeLessThanOrEqual(5);
+    });
+
+    // 3. Real browser right-click sequence (pointerdown outside + contextmenu) at point C (240, 180)
+    fireEvent.pointerDown(surface, { button: 2, pointerType: "mouse", clientX: 240, clientY: 180 });
+    fireEvent.contextMenu(surface, { clientX: 240, clientY: 180 });
+    await waitFor(() => {
+      const coords = getPopperCoords();
+      expect(coords).not.toBeNull();
+      expect(Math.abs(coords.x - 240)).toBeLessThanOrEqual(5);
+      expect(Math.abs(coords.y - 180)).toBeLessThanOrEqual(5);
+    });
   });
 });

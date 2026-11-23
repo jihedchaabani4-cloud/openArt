@@ -75,7 +75,6 @@ export function NavbarFilterDropdown({ availableModels = EMPTY_LIST }) {
   const filters = useGenerationsStore((s) => s.filters);
   const setFilter = useGenerationsStore((s) => s.setFilter);
   const clearFilters = useGenerationsStore((s) => s.clearFilters);
-  const activeStudioTab = useGenerationsStore((s) => s.activeStudioTab);
 
   const [open, setOpen] = React.useState(false);
   const [modelSearch, setModelSearch] = React.useState("");
@@ -119,8 +118,6 @@ export function NavbarFilterDropdown({ availableModels = EMPTY_LIST }) {
     () => filteredModels.filter((m) => m.domain === "video"),
     [filteredModels]
   );
-
-  if (activeStudioTab === "trash") return null;
 
   const activeFilterCount =
     (selectedTypes.length > 0 ? 1 : 0) +

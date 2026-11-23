@@ -12,7 +12,6 @@ import { useRealBackendModels, resolveModelIcon } from "@/features/prompt-bar"
 
 import { StudioNavbarLeft } from "./StudioNavbarLeft"
 import { StudioNavbarRight } from "./StudioNavbarRight"
-import { UserDropdown } from "@/components/layout/UserDropdown"
 
 export function StudioNavbar() {
     const activeProjectId = useGenerationsStore(s => s.selectedProjectId);
@@ -81,12 +80,8 @@ export function StudioNavbar() {
                     activeProjectId={activeProjectId}
                 />
 
-                {!isCleanNavbarTab ? (
+                {!isCleanNavbarTab && (
                     <StudioNavbarRight searchExpanded={false} availableModels={availableModels} />
-                ) : (
-                    <div className="ml-auto flex flex-none items-center gap-2 z-50">
-                        <UserDropdown />
-                    </div>
                 )}
             </div>
         </nav>

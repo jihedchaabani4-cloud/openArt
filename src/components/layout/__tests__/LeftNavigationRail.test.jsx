@@ -35,6 +35,24 @@ vi.mock("@/features/workflows", () => ({
       favoriteFolderIds: {},
       toggleFavoriteFolder: vi.fn(),
     }),
+  useProjectData: () => ({
+    data: {
+      projectContents: {
+        workflows: [
+          { id: "wf-1", folder_id: "col-1" },
+          { id: "wf-2", folder_id: "col-1" },
+          { id: "wf-trash-1", deleted_at: "2026-11-20T00:00:00Z" },
+        ],
+      },
+    },
+  }),
+  selectStudioWorkflows: (contents, opts) => {
+    const wfs = contents?.workflows ?? [];
+    if (opts?.lifecycle === "trash") {
+      return wfs.filter((w) => Boolean(w.deleted_at));
+    }
+    return wfs.filter((w) => !w.deleted_at);
+  },
 }));
 
 vi.mock("@/features/characters", () => ({
@@ -47,7 +65,10 @@ vi.mock("@/features/elements", () => ({
 
 vi.mock("@/features/projects/api/projectsApi", () => ({
   useProjects: () => ({
-    data: [{ id: "proj-1", project_id: "proj-1", project_name: "First project" }],
+    data: [
+      { id: "proj-1", project_id: "proj-1", project_name: "First project" },
+      { id: "proj-2", project_id: "proj-2", project_name: "Second project" },
+    ],
   }),
   useUpdateProject: () => ({ mutateAsync: updateProjectMock }),
   useDeleteProject: () => ({ mutateAsync: deleteProjectMock }),
@@ -87,6 +108,20 @@ vi.mock("@/components/cinema-studio/collections/MoveToDialog", () => ({
   MoveToDialog: () => null,
 }));
 
+vi.mock("@/components/layout/UserDropdown", () => ({
+  UserDropdown: ({ variant, expanded }) => (
+    <button
+      type="button"
+      data-testid="sidebar-user-dropdown"
+      data-variant={variant}
+      data-expanded={String(Boolean(expanded))}
+      aria-label="Open user menu"
+    >
+      User
+    </button>
+  ),
+}));
+
 describe("LeftNavigationRail sidebar geometry & token contract", () => {
   beforeEach(() => {
     mockPathname = "/cinema-studio/proj-1/assets";
@@ -118,7 +153,7 @@ describe("LeftNavigationRail sidebar geometry & token contract", () => {
     const assetsLink = screen.getByRole("link", { name: "All assets" });
     expect(assetsLink.className).toContain("ds-nav-item");
     expect(assetsLink.className).toContain("rounded-lg");
-    expect(assetsLink.className).toContain("justify-center");
+    expect(assetsLink.className).not.toContain("justify-center");
     expect(assetsLink.getAttribute("data-active")).toBe("true");
     expect(assetsLink.getAttribute("aria-current")).toBe("page");
 
@@ -349,5 +384,47 @@ describe("LeftNavigationRail sidebar geometry & token contract", () => {
     expect(assetsLink.className).not.toContain("bg-surface-tonal-hover");
     expect(parentFolderRow.getAttribute("data-drag-over")).toBeNull();
     expect(childFolderRow.getAttribute("data-drag-over")).toBeNull();
+  });
+
+  it("supports Quick Project Switcher, subtle folder/trash counts, and Drag-to-Trash hover highlight", () => {
+    const { container } = render(<LeftNavigationRail />);
+    fireEvent.click(screen.getByRole("button", { name: "Développer la barre" }));
+
+    // Subtle counts: col-1 has 2 direct workflows, Corbeille has 1 trashed workflow
+    expect(screen.getByTestId("sidebar-folder-count-col-1").textContent).toBe("2");
+    expect(screen.getByTestId("sidebar-count-trash").textContent).toBe("1");
+
+    // Drag-to-Trash attribute and hover highlight
+    const trashLink = container.querySelector('[data-drop-trash="true"]');
+    expect(trashLink).toBeTruthy();
+    act(() => {
+      window.dispatchEvent(
+        new CustomEvent("studio:pointer-hover-target", {
+          detail: { target: "move-to-trash", area: "sidebar-trash" },
+        })
+      );
+    });
+    expect(trashLink.getAttribute("data-drag-over")).toBe("true");
+    expect(trashLink.className).toContain("ring-error/70");
+
+    // Quick Project Switcher expands INLINE inside the sidebar (not a floating popover) and navigates
+    const switcher = screen.getByTestId("sidebar-project-switcher");
+    expect(switcher.getAttribute("aria-expanded")).toBe("false");
+    fireEvent.click(switcher);
+    expect(switcher.getAttribute("aria-expanded")).toBe("true");
+    const inlineCard = screen.getByTestId("sidebar-project-row").querySelector('[data-slot="inline-dropdown"]');
+    expect(inlineCard?.getAttribute("data-state")).toBe("open");
+
+    // Right-clicking another project item opens its own ContextMenu (Open, Open in new tab, Delete)
+    const secondProjectItem = screen.getByText("Second project");
+    fireEvent.contextMenu(secondProjectItem, { clientX: 80, clientY: 160 });
+    expect(screen.getByText("Open in new tab")).toBeTruthy();
+    fireEvent.click(screen.getByText("Delete"));
+    fireEvent.click(screen.getByText("Confirm delete"));
+    expect(deleteProjectMock).toHaveBeenCalledWith("proj-2");
+    expect(pushMock).not.toHaveBeenCalledWith("/cinema-studio");
+
+    fireEvent.click(secondProjectItem);
+    expect(pushMock).toHaveBeenCalledWith("/cinema-studio/proj-2/assets");
   });
 });

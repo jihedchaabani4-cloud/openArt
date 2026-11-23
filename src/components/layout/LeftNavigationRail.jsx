@@ -32,8 +32,15 @@ import { MenuItemContent } from "@/components/base/menu";
 import { CreateFolderDialog } from "@/components/cinema-studio/collections/CreateFolderDialog";
 import { ConfirmDeleteDialog } from "@/components/primitives/ConfirmDeleteDialog";
 import { MoveToDialog } from "@/components/cinema-studio/collections/MoveToDialog";
+import { UserDropdown } from "@/components/layout/UserDropdown";
+import { InlineDropdown, InlineDropdownItem } from "@/components/primitives/inline-dropdown";
 import { cn } from "@/shared/lib/utils";
-import { useWorkflowsStore as useGenerationsStore } from "@/features/workflows";
+import { buildCollectionDirectCountById } from "@/shared/lib/displayUtils";
+import {
+  useWorkflowsStore as useGenerationsStore,
+  useProjectData,
+  selectStudioWorkflows,
+} from "@/features/workflows";
 import { useCharacterWorkflows } from "@/features/characters";
 import { useElementSheetWorkflows } from "@/features/elements";
 import {
@@ -73,19 +80,36 @@ export function LeftNavigationRail() {
   const { mutateAsync: updateProject } = useUpdateProject();
   const { mutateAsync: deleteProject } = useDeleteProject();
   const { data: rawFolders = [] } = useProjectFolders(selectedProjectId);
+  const { data: projectData } = useProjectData(selectedProjectId);
+
+  const projectList = useMemo(
+    () => (Array.isArray(projects) ? projects : []),
+    [projects]
+  );
+
+  const folderDirectCountById = useMemo(
+    () => buildCollectionDirectCountById(projectData?.projectContents?.workflows ?? []),
+    [projectData?.projectContents?.workflows]
+  );
+
+  const trashCount = useMemo(
+    () => selectStudioWorkflows(projectData?.projectContents, { lifecycle: "trash" }).length,
+    [projectData?.projectContents]
+  );
 
   const activeProject = useMemo(
     () =>
-      (Array.isArray(projects) ? projects : []).find(
+      projectList.find(
         (p) => String(p.project_id ?? p.id) === String(selectedProjectId)
       ) || null,
-    [projects, selectedProjectId]
+    [projectList, selectedProjectId]
   );
   const activeProjectName =
     activeProject?.project_name || activeProject?.name || "Project";
 
   // Expands / collapses via toggle button or interactive drag resize
   const DEFAULT_EXPANDED_WIDTH = 224;
+  const MAX_EXPANDED_WIDTH = 320;
   const [isExpanded, setIsExpanded] = useState(false);
   const [sidebarWidth, setSidebarWidth] = useState(DEFAULT_EXPANDED_WIDTH);
   const [isResizing, setIsResizing] = useState(false);
@@ -104,7 +128,7 @@ export function LeftNavigationRail() {
         setIsExpanded(false);
       } else {
         setIsExpanded(true);
-        const clamped = Math.max(170, Math.min(newWidth, DEFAULT_EXPANDED_WIDTH));
+        const clamped = Math.max(170, Math.min(newWidth, MAX_EXPANDED_WIDTH));
         setSidebarWidth(clamped);
       }
     };
@@ -199,8 +223,9 @@ export function LeftNavigationRail() {
   const [editingFolder, setEditingFolder] = useState(null);
   const [movingFolder, setMovingFolder] = useState(null);
   const [isRenamingProject, setIsRenamingProject] = useState(false);
+  const [isProjectSwitcherOpen, setIsProjectSwitcherOpen] = useState(false);
   const [projectNameDraft, setProjectNameDraft] = useState("");
-  const [isDeletingProject, setIsDeletingProject] = useState(false);
+  const [deletingProject, setDeletingProject] = useState(null);
   const [dragOverTarget, setDragOverTarget] = useState(null);
   const projectNameInputRef = React.useRef(null);
   const pendingRenameFocusRef = React.useRef(false);
@@ -217,6 +242,10 @@ export function LeftNavigationRail() {
       } else if (detail?.target === "move-to-root") {
         setDragOverTarget((prev) =>
           prev?.type === "move-to-root" ? prev : { type: "move-to-root", collectionId: null }
+        );
+      } else if (detail?.target === "move-to-trash") {
+        setDragOverTarget((prev) =>
+          prev?.type === "move-to-trash" ? prev : { type: "move-to-trash", collectionId: null }
         );
       } else {
         setDragOverTarget((prev) => (prev === null ? prev : null));
@@ -235,10 +264,10 @@ export function LeftNavigationRail() {
     }
   }, [isRenamingProject]);
 
-  const handleOpenProjectInNewTab = () => {
-    if (selectedProjectId && typeof window !== "undefined") {
+  const handleOpenProjectInNewTab = (targetProjectId = selectedProjectId) => {
+    if (targetProjectId && typeof window !== "undefined") {
       window.open(
-        `/cinema-studio/${selectedProjectId}/assets`,
+        `/cinema-studio/${targetProjectId}/assets`,
         "_blank",
         "noopener,noreferrer"
       );
@@ -246,6 +275,7 @@ export function LeftNavigationRail() {
   };
 
   const handleStartRenameProject = () => {
+    setIsProjectSwitcherOpen(false);
     pendingRenameFocusRef.current = true;
     setProjectNameDraft(activeProjectName);
     setIsRenamingProject(true);
@@ -277,7 +307,7 @@ export function LeftNavigationRail() {
   const renderProjectMenuItems = ({ Label, Item, Separator }) => (
     <>
       <Label>Actions</Label>
-      <Item onSelect={handleOpenProjectInNewTab}>
+      <Item onSelect={() => handleOpenProjectInNewTab(selectedProjectId)}>
         <MenuItemContent icon="link-square-02">Open in new tab</MenuItemContent>
       </Item>
       <Item onSelect={handleStartRenameProject}>
@@ -287,18 +317,25 @@ export function LeftNavigationRail() {
         <MenuItemContent icon="folder-add">Add folder</MenuItemContent>
       </Item>
       <Separator />
-      <Item variant="destructive" onSelect={() => setIsDeletingProject(true)}>
+      <Item
+        variant="destructive"
+        onSelect={() => setDeletingProject({ id: String(selectedProjectId), name: activeProjectName })}
+      >
         <MenuItemContent icon="delete-02">Delete</MenuItemContent>
       </Item>
     </>
   );
 
   const handleConfirmDeleteProject = async () => {
-    if (!selectedProjectId) return;
-    setIsDeletingProject(false);
-    router.push("/cinema-studio");
+    const targetId = deletingProject?.id;
+    if (!targetId) return;
+    const isCurrent = String(targetId) === String(selectedProjectId);
+    setDeletingProject(null);
+    if (isCurrent) {
+      router.push("/cinema-studio");
+    }
     try {
-      await deleteProject(selectedProjectId);
+      await deleteProject(targetId);
     } catch {
       // Optimistic rollback handled by useDeleteProject
     }
@@ -369,7 +406,7 @@ export function LeftNavigationRail() {
     setIsExpanded((prev) => !prev);
   };
 
-  if (!selectedProjectId || isTrashActive) return null;
+  if (!selectedProjectId) return null;
 
   const elementsHref = `/cinema-studio/${selectedProjectId}/elements`;
 
@@ -416,17 +453,19 @@ export function LeftNavigationRail() {
     icon: "delete-02",
     href: `/cinema-studio/${selectedProjectId}/trash`,
     isActive: currentActiveTab === "trash",
+    count: trashCount,
   };
 
-  const renderNavItem = (item, extraClassName) => (
+  const renderNavItem = (item, extraClassName, extraProps = {}) => (
     <Button
       key={item.id}
       asChild
       variant="nav"
       data-active={item.isActive ? "true" : undefined}
       data-tour={item.id === "home" ? "sidebar-back" : undefined}
-      className={cn("group overflow-hidden", !isExpanded && "justify-center", extraClassName)}
+      className={cn("group overflow-hidden", extraClassName)}
       title={!isExpanded ? item.label : undefined}
+      {...extraProps}
     >
       <Link
         href={item.href}
@@ -445,6 +484,15 @@ export function LeftNavigationRail() {
         >
           {item.label}
         </span>
+        {isExpanded && item.count > 0 && (
+          <span
+            aria-hidden="true"
+            data-testid={`sidebar-count-${item.id}`}
+            className="ds-text-caption-s text-text-tertiary tabular-nums shrink-0"
+          >
+            {item.count}
+          </span>
+        )}
       </Link>
     </Button>
   );
@@ -454,13 +502,25 @@ export function LeftNavigationRail() {
     const hasChildren = Array.isArray(node.children) && node.children.length > 0;
     const folderColor = node.color || null;
     const isNodeLiked = Boolean(favoriteFolderIds[node.id] ?? node.favorited ?? node.is_liked);
+    const directCount = folderDirectCountById.get(String(node.id)) || 0;
 
     const folderIconElement = (
       <FolderGlyphIcon color={folderColor} size={20} />
     );
 
     const labelElement = (
-      <span className="truncate">{folderName}</span>
+      <span className="flex items-center justify-between gap-1.5 min-w-0 w-full">
+        <span className="truncate">{folderName}</span>
+        {directCount > 0 && (
+          <span
+            aria-hidden="true"
+            data-testid={`sidebar-folder-count-${node.id}`}
+            className="ds-text-caption-s text-text-tertiary tabular-nums shrink-0"
+          >
+            {directCount}
+          </span>
+        )}
+      </span>
     );
 
     const folderContextMenu = (
@@ -580,11 +640,11 @@ export function LeftNavigationRail() {
       aria-label="Navigation Studio"
       style={{
         width: isExpanded ? `${sidebarWidth}px` : "var(--studio-sidebar-width, 56px)",
-        maxWidth: `${DEFAULT_EXPANDED_WIDTH}px`,
+        maxWidth: `${MAX_EXPANDED_WIDTH}px`,
       }}
       className={cn(
         "h-full shrink-0 relative z-40 bg-transparent flex flex-col gap-y-4 select-none px-2 py-3 rounded-2xl border border-border-subtle",
-        isResizing ? "transition-none" : "transition-all duration-200 ease-out"
+        isResizing ? "transition-none" : "transition-[width] duration-200 ease-out"
       )}
     >
       {/* ── Primary Navigation & Collections Sections ── */}
@@ -595,8 +655,8 @@ export function LeftNavigationRail() {
         >
           <div
             className={cn(
-              "flex w-full items-center",
-              isExpanded ? "flex-row justify-between gap-1.5" : "flex-col-reverse gap-1"
+              "flex w-full",
+              isExpanded ? "flex-row items-center justify-between gap-1.5" : "flex-col-reverse items-start gap-1"
             )}
           >
             {renderNavItem(homeNavItem, isExpanded ? "w-auto flex-1 shrink min-w-0" : undefined)}
@@ -604,7 +664,7 @@ export function LeftNavigationRail() {
               type="button"
               variant="tonal"
               onClick={handleToggleExpand}
-              className="shrink-0 rounded-lg"
+              className={cn("shrink-0 rounded-lg", !isExpanded && "ml-1")}
               title={isExpanded ? "Réduire la barre" : "Développer la barre"}
               aria-label={isExpanded ? "Réduire la barre" : "Développer la barre"}
             >
@@ -621,68 +681,144 @@ export function LeftNavigationRail() {
           {isExpanded && (
             <ContextMenu>
               <ContextMenuTrigger asChild>
-                <div
-                  data-testid="sidebar-project-row"
-                  className="flex items-center justify-between gap-1.5 w-full min-h-[34px] px-2 py-1 my-3 rounded-lg border border-transparent hover:bg-surface-nav-active/60 transition-colors"
-                >
-                  <div className="flex items-center gap-2 min-w-0 flex-1">
-                    <span className="relative size-5 flex items-center justify-center shrink-0 text-icon-primary">
-                      <HugeIcon name="film-02" />
-                    </span>
-                    {isRenamingProject ? (
-                      <Input
-                        ref={projectNameInputRef}
-                        type="text"
-                        value={projectNameDraft}
-                        onChange={(e) => setProjectNameDraft(e.target.value.slice(0, 120))}
-                        onBlur={handleSaveProjectName}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
+                <div data-testid="sidebar-project-row" className="w-full my-3">
+                  <InlineDropdown
+                    open={isProjectSwitcherOpen && !isRenamingProject}
+                    onOpenChange={(next) => {
+                      if (!isRenamingProject) setIsProjectSwitcherOpen(next);
+                    }}
+                    trigger={({ open: switcherOpen, toggle, chevron }) =>
+                      isRenamingProject ? (
+                        <div className="flex items-center gap-2 min-w-0 flex-1">
+                          <span className="relative size-5 flex items-center justify-center shrink-0 text-icon-primary">
+                            <HugeIcon name="film-02" />
+                          </span>
+                          <Input
+                            ref={projectNameInputRef}
+                            type="text"
+                            value={projectNameDraft}
+                            onChange={(e) => setProjectNameDraft(e.target.value.slice(0, 120))}
+                            onBlur={handleSaveProjectName}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                e.preventDefault();
+                                e.currentTarget.blur();
+                              } else if (e.key === "Escape") {
+                                e.preventDefault();
+                                setIsRenamingProject(false);
+                              }
+                            }}
+                            aria-label="Nom du projet"
+                            className="h-7 px-1.5 py-0 ds-text-caption-l flex-1 min-w-0 rounded-md"
+                          />
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={toggle}
+                          onDoubleClick={(e) => {
                             e.preventDefault();
-                            e.currentTarget.blur();
-                          } else if (e.key === "Escape") {
-                            e.preventDefault();
-                            setIsRenamingProject(false);
-                          }
-                        }}
-                        aria-label="Nom du projet"
-                        className="h-7 px-1.5 py-0 ds-text-caption-l flex-1 min-w-0 rounded-md"
-                      />
-                    ) : (
-                      <span
-                        onDoubleClick={handleStartRenameProject}
-                        title={activeProjectName}
-                        className="truncate font-sans ds-text-caption-l font-medium text-text-primary cursor-default"
-                      >
-                        {activeProjectName}
-                      </span>
-                    )}
-                  </div>
-
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <IconButton
-                        type="button"
-                        variant="ghost"
-                        size="xs"
-                        aria-label="Actions du projet"
-                        title="Actions du projet"
-                        className="shrink-0 rounded-md text-muted-foreground hover:text-text-primary"
-                      >
-                        <HugeIcon name="more-vertical" />
-                      </IconButton>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent
-                      align="start"
-                      onCloseAutoFocus={handleProjectMenuCloseAutoFocus}
-                    >
-                      {renderProjectMenuItems({
-                        Label: DropdownMenuLabel,
-                        Item: DropdownMenuItem,
-                        Separator: DropdownMenuSeparator,
+                            handleStartRenameProject();
+                          }}
+                          title={activeProjectName}
+                          aria-label="Switch project"
+                          aria-expanded={switcherOpen}
+                          data-testid="sidebar-project-switcher"
+                          className="flex items-center gap-2 min-w-0 flex-1 text-left cursor-pointer focus-visible:outline-none"
+                        >
+                          <span className="relative size-5 flex items-center justify-center shrink-0 text-icon-primary">
+                            <HugeIcon name="film-02" />
+                          </span>
+                          <span className="truncate flex-1 font-sans ds-text-caption-l font-medium text-text-primary">
+                            {activeProjectName}
+                          </span>
+                          {chevron}
+                        </button>
+                      )
+                    }
+                    trailing={
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <IconButton
+                            type="button"
+                            variant="ghost"
+                            size="xs"
+                            aria-label="Actions du projet"
+                            title="Actions du projet"
+                            className="shrink-0 rounded-md text-muted-foreground hover:text-text-primary"
+                          >
+                            <HugeIcon name="more-vertical" />
+                          </IconButton>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent
+                          align="start"
+                          onCloseAutoFocus={handleProjectMenuCloseAutoFocus}
+                        >
+                          {renderProjectMenuItems({
+                            Label: DropdownMenuLabel,
+                            Item: DropdownMenuItem,
+                            Separator: DropdownMenuSeparator,
+                          })}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    }
+                  >
+                    {projectList
+                      .filter((proj) => String(proj.project_id ?? proj.id ?? "") !== String(selectedProjectId))
+                      .map((proj) => {
+                        const projId = String(proj.project_id ?? proj.id ?? "");
+                        const projName = proj.project_name || proj.name || "Project";
+                        return (
+                          <ContextMenu key={projId}>
+                            <ContextMenuTrigger asChild>
+                              <InlineDropdownItem
+                                icon="film-02"
+                                onClick={() => {
+                                  setIsProjectSwitcherOpen(false);
+                                  if (projId) router.push(`/cinema-studio/${projId}/assets`);
+                                }}
+                              >
+                                {projName}
+                              </InlineDropdownItem>
+                            </ContextMenuTrigger>
+                            <ContextMenuContent>
+                              <ContextMenuLabel>Actions</ContextMenuLabel>
+                              <ContextMenuItem
+                                onSelect={() => {
+                                  setIsProjectSwitcherOpen(false);
+                                  if (projId) router.push(`/cinema-studio/${projId}/assets`);
+                                }}
+                              >
+                                <MenuItemContent icon="arrow-right-01">Open</MenuItemContent>
+                              </ContextMenuItem>
+                              <ContextMenuItem
+                                onSelect={() => handleOpenProjectInNewTab(projId)}
+                              >
+                                <MenuItemContent icon="link-square-02">Open in new tab</MenuItemContent>
+                              </ContextMenuItem>
+                              <ContextMenuSeparator />
+                              <ContextMenuItem
+                                variant="destructive"
+                                onSelect={() => setDeletingProject({ id: projId, name: projName })}
+                              >
+                                <MenuItemContent icon="delete-02">Delete</MenuItemContent>
+                              </ContextMenuItem>
+                            </ContextMenuContent>
+                          </ContextMenu>
+                        );
                       })}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                    {projectList.filter((proj) => String(proj.project_id ?? proj.id ?? "") !== String(selectedProjectId)).length === 0 && (
+                      <InlineDropdownItem
+                        icon="home-03"
+                        onClick={() => {
+                          setIsProjectSwitcherOpen(false);
+                          router.push("/cinema-studio");
+                        }}
+                      >
+                        All projects
+                      </InlineDropdownItem>
+                    )}
+                  </InlineDropdown>
                 </div>
               </ContextMenuTrigger>
               <ContextMenuContent onCloseAutoFocus={handleProjectMenuCloseAutoFocus}>
@@ -720,7 +856,6 @@ export function LeftNavigationRail() {
               data-drag-over={dragOverTarget?.type === "move-to-root" ? "true" : undefined}
               className={cn(
                 "group overflow-hidden shrink-0",
-                !isExpanded && "justify-center",
                 dragOverTarget?.type === "move-to-root" &&
                   "bg-surface-tonal-hover ring-1 ring-text-primary/70"
               )}
@@ -777,9 +912,19 @@ export function LeftNavigationRail() {
         </section>
       </div>
 
-      {/* ── Dedicated Bottom Action: Corbeille (Trash) ── */}
+      {/* ── Dedicated Bottom Actions: Corbeille (Trash) + User ── */}
       <div className="mt-auto flex flex-col gap-0.5 items-start w-full shrink-0">
-        {renderNavItem(trashItem)}
+        {renderNavItem(
+          trashItem,
+          dragOverTarget?.type === "move-to-trash"
+            ? "bg-error/15 ring-1 ring-error/70 text-error"
+            : undefined,
+          {
+            "data-drop-trash": "true",
+            "data-drag-over": dragOverTarget?.type === "move-to-trash" ? "true" : undefined,
+          }
+        )}
+        <UserDropdown variant="sidebar" expanded={isExpanded} />
       </div>
 
       {isCreateFolderOpen && (
@@ -827,13 +972,15 @@ export function LeftNavigationRail() {
         />
       )}
 
-      {isDeletingProject && (
+      {deletingProject && (
         <ConfirmDeleteDialog
-          open={isDeletingProject}
-          onOpenChange={setIsDeletingProject}
+          open={Boolean(deletingProject)}
+          onOpenChange={(open) => {
+            if (!open) setDeletingProject(null);
+          }}
           onConfirm={handleConfirmDeleteProject}
           title="Supprimer le projet"
-          description={`Êtes-vous sûr de vouloir supprimer "${activeProjectName}" ?`}
+          description={`Êtes-vous sûr de vouloir supprimer "${deletingProject.name || activeProjectName}" ?`}
         />
       )}
 

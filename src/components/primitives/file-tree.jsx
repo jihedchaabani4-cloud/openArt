@@ -57,6 +57,10 @@ const Tree = forwardRef(function Tree(
     );
   }, []);
 
+  const expandItem = useCallback((id) => {
+    setExpandedItems((prev) => (prev.includes(id) ? prev : [...prev, id]));
+  }, []);
+
   return (
     <TreeContext.Provider
       value={{
@@ -65,6 +69,7 @@ const Tree = forwardRef(function Tree(
         expandedItems,
         setExpandedItems,
         toggleExpanded,
+        expandItem,
         indicator,
         direction: dir,
         openIcon,
@@ -112,6 +117,7 @@ const Folder = forwardRef(function Folder(
     handleSelect,
     expandedItems,
     toggleExpanded,
+    expandItem,
     indicator,
     openIcon: treeOpenIcon,
     closeIcon: treeCloseIcon,
@@ -127,10 +133,17 @@ const Folder = forwardRef(function Folder(
   const resolvedSize = size || treeSize || undefined;
   const activeFolderIcon = isExpanded ? resolvedOpenIcon : resolvedCloseIcon;
 
-  const onRowClick = (e) => {
+  const onRowClick = () => {
     if (isSelectable) {
       handleSelect(value);
     }
+    if (!isExpanded) {
+      expandItem(value);
+    }
+  };
+
+  const onToggleClick = (e) => {
+    e.stopPropagation();
     toggleExpanded(value);
   };
 
@@ -149,11 +162,31 @@ const Folder = forwardRef(function Folder(
       {...props}
     >
       <span className="relative size-4 flex items-center justify-center shrink-0 text-icon-primary">
-        {React.isValidElement(activeFolderIcon) ? (
-          activeFolderIcon
-        ) : (
-          <HugeIcon name={activeFolderIcon} />
-        )}
+        <span className="flex items-center justify-center transition-opacity duration-150 group-hover:opacity-0">
+          {React.isValidElement(activeFolderIcon) ? (
+            activeFolderIcon
+          ) : (
+            <HugeIcon name={activeFolderIcon} />
+          )}
+        </span>
+        <span
+          role="button"
+          tabIndex={-1}
+          data-slot="folder-toggle"
+          aria-label={isExpanded ? "Collapse folder" : "Expand folder"}
+          title={isExpanded ? "Collapse" : "Expand"}
+          onClick={onToggleClick}
+          className="absolute inset-0 -m-0.5 flex items-center justify-center rounded-md bg-surface-tonal hover:bg-surface-tonal-hover text-icon-secondary hover:text-text-primary opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity duration-150"
+        >
+          <HugeIcon
+            name="arrow-right-01"
+            size="xs"
+            className={cn(
+              "transition-transform duration-150",
+              isExpanded && "rotate-90"
+            )}
+          />
+        </span>
       </span>
 
       <span className="truncate flex-1 text-left">

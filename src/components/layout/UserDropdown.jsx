@@ -38,7 +38,14 @@ function getDisplayName(user) {
   return user?.name || user?.email?.split("@")[0] || `${appName} User`;
 }
 
-export function UserDropdown({ className }) {
+export function UserDropdown({
+  className,
+  variant = "icon",
+  expanded = false,
+  side,
+  align = "end",
+}) {
+  const isSidebar = variant === "sidebar";
   const router = useRouter();
   const queryClient = useQueryClient();
   const [loginOpen, setLoginOpen] = React.useState(false);
@@ -61,20 +68,46 @@ export function UserDropdown({ className }) {
   });
 
   if (isLoading) {
+    if (isSidebar) {
+      return (
+        <div className={cn("ds-nav-item pointer-events-none", className)}>
+          <span className="size-5 rounded-full animate-pulse bg-surface-card shrink-0" />
+          <span className={cn("h-3 w-20 rounded animate-pulse bg-surface-card", !expanded && "sr-only")} />
+        </div>
+      );
+    }
     return <div className={cn("size-7 max-h-full aspect-square animate-pulse rounded-full bg-surface-card", className)} />;
   }
 
   if (!currentUser) {
     return (
       <>
-        <Button
-          onClick={() => setLoginOpen(true)}
-          variant="ghost"
-          size="s"
-          className={cn("h-7 max-h-full px-3 ds-text-caption-m font-semibold text-text-primary", className)}
-        >
-          Login
-        </Button>
+        {isSidebar ? (
+          <Button
+            type="button"
+            variant="nav"
+            onClick={() => setLoginOpen(true)}
+            title={!expanded ? "Login" : undefined}
+            aria-label="Login"
+            className={cn("group overflow-hidden", className)}
+          >
+            <span className="relative size-5 flex items-center justify-center shrink-0 text-icon-primary">
+              <HugeIcon name="user-circle" />
+            </span>
+            <span className={cn("truncate flex-1 text-left", !expanded && "sr-only")}>
+              Login
+            </span>
+          </Button>
+        ) : (
+          <Button
+            onClick={() => setLoginOpen(true)}
+            variant="ghost"
+            size="s"
+            className={cn("h-7 max-h-full px-3 ds-text-caption-m font-semibold text-text-primary", className)}
+          >
+            Login
+          </Button>
+        )}
         <LoginDialog open={loginOpen} onClose={() => setLoginOpen(false)} />
       </>
     );
@@ -89,22 +122,51 @@ export function UserDropdown({ className }) {
     <>
       <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen} modal={false}>
         <DropdownMenuTrigger asChild>
-          <Button
-            type="button"
-            variant="ghost"
-            className={cn("size-7 max-h-full aspect-square p-0", className)}
-            aria-label="Open user menu"
-          >
-            <Avatar className="size-full rounded-full bg-transparent">
-              <AvatarImage src={avatarUrl} alt={displayName} />
-              <AvatarFallback className="rounded-full bg-ui-button-tonal ds-text-caption-s font-semibold text-text-primary-soft">
-                {initials}
-              </AvatarFallback>
-            </Avatar>
-          </Button>
+          {isSidebar ? (
+            <Button
+              type="button"
+              variant="nav"
+              title={!expanded ? `${displayName} · ${walletBalance} Crédits` : undefined}
+              aria-label="Open user menu"
+              className={cn("group overflow-hidden", className)}
+            >
+              <Avatar className="size-5 rounded-full bg-transparent shrink-0">
+                <AvatarImage src={avatarUrl} alt={displayName} />
+                <AvatarFallback className="rounded-full bg-ui-button-tonal ds-text-caption-s font-semibold text-text-primary-soft">
+                  {initials}
+                </AvatarFallback>
+              </Avatar>
+              <span className={cn("truncate flex-1 text-left", !expanded && "sr-only")}>
+                {displayName}
+              </span>
+              {expanded && (
+                <span
+                  data-testid="sidebar-credits-badge"
+                  className="inline-flex items-center gap-1 rounded-md bg-surface-tonal px-1.5 py-0.5 ds-text-caption-s font-medium text-text-secondary tabular-nums shrink-0"
+                >
+                  <HugeIcon name="flash" size="xs" className="text-icon-secondary" />
+                  <span>{walletBalance}</span>
+                </span>
+              )}
+            </Button>
+          ) : (
+            <Button
+              type="button"
+              variant="ghost"
+              className={cn("size-7 max-h-full aspect-square p-0", className)}
+              aria-label="Open user menu"
+            >
+              <Avatar className="size-full rounded-full bg-transparent">
+                <AvatarImage src={avatarUrl} alt={displayName} />
+                <AvatarFallback className="rounded-full bg-ui-button-tonal ds-text-caption-s font-semibold text-text-primary-soft">
+                  {initials}
+                </AvatarFallback>
+              </Avatar>
+            </Button>
+          )}
         </DropdownMenuTrigger>
 
-        <DropdownMenuContent align="end">
+        <DropdownMenuContent side={side ?? (isSidebar ? "right" : "bottom")} align={align}>
           <div className="flex items-center gap-2.5 px-2 py-2">
             <Avatar className="size-9 rounded-full bg-transparent shrink-0">
               <AvatarImage src={avatarUrl} alt={displayName} />
