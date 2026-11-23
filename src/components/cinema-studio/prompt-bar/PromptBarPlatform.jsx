@@ -466,7 +466,7 @@ function PromptBarPlatformInner({
         <fieldset
           data-source="reference"
           className={cn(
-            "relative grid min-w-0 flex-1 overflow-hidden rounded-xl bg-white-5 transition-[height] duration-200 ease-out",
+            "relative grid grid-cols-1 grid-rows-1 min-w-0 flex-1 overflow-visible rounded-xl bg-white-5 transition-[height] duration-200 ease-out",
             showUnstackedReferenceTray
               ? "min-h-17 h-auto"
               : isPromptExpanded
@@ -475,7 +475,7 @@ function PromptBarPlatformInner({
           )}
         >
           <legend className="sr-only">(Optional) Add a reference</legend>
-          <div className="col-start-1 row-start-1 relative flex min-w-0 items-center gap-1.5 p-1.5 h-full">
+          <div className="col-start-1 row-start-1 relative flex min-w-0 min-h-0 items-center gap-1.5 p-1.5 h-full">
             <PromptBarSlotsRow
               activeSlots={activeSlots}
               featureConfig={featureConfig}
@@ -509,7 +509,7 @@ function PromptBarPlatformInner({
                 "flex min-w-0 items-center gap-1.5",
                 showUnstackedReferenceTray
                   ? "pointer-events-none absolute inset-y-1.5 right-1.5 left-20"
-                  : "flex-1 h-full"
+                  : "flex-1 h-full min-h-0"
               )}
             >
               {activeSlots && activeSlots.length > 0 && layout.showPromptInput && (
@@ -520,8 +520,8 @@ function PromptBarPlatformInner({
               )}
 
               {layout.showPromptInput && (
-                <div className="min-w-0 flex-1 h-full flex flex-col justify-center px-1.5 py-0.5 overflow-hidden font-sans antialiased ds-text-caption-m">
-                  <div ref={editorContainerRef} className="flex-1 min-h-0 overflow-y-auto custom-scrollbar">
+                <div className="min-w-0 min-h-0 flex-1 h-full flex flex-col px-1.5 py-0.5 overflow-hidden font-sans antialiased ds-text-caption-m">
+                  <div ref={editorContainerRef} className="flex-1 h-full min-h-0 overflow-y-auto custom-scrollbar">
                     <PromptEditor
                       value={prompt}
                       onChange={service.setPrompt}

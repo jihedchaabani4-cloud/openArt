@@ -303,12 +303,12 @@ export function PromptEditor({
 
   return (
     <LexicalComposer initialConfig={initialConfig} key={editorKey}>
-      <div className="relative w-full h-full min-h-8 items-start">
+      <div className="relative w-full min-h-full">
         <RichTextPlugin
           contentEditable={
             <ContentEditable
               className={cn(
-                "ds-input-ghost ds-text-control font-normal bg-transparent hover:bg-transparent focus:bg-transparent outline-none text-text-primary py-1.5 overflow-y-auto scrollbar-thin scrollbar-thumb-border-heavy scrollbar-track-transparent w-full h-full min-h-8",
+                "ds-text-control font-normal bg-transparent outline-none text-text-primary py-1.5 w-full min-h-full break-words",
                 sweeping && "shine-text--sweep shine-text--sweep--once"
               )}
             />

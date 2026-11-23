@@ -271,87 +271,89 @@ export function PromptBarSlotsRow({
                 onMouseLeave={() => setIsStackHovered(false)}
                 className="relative flex h-full shrink-0 items-center justify-center px-2 group/filled"
               >
-                <button
-                  type="button"
-                  data-testid="reference-stack-btn"
-                  aria-label={`Show all ${refList.length} uploaded images`}
-                  onClick={() => {
-                    setIsStackHovered(false);
-                    onToggleReferenceUnstacked?.(true);
-                  }}
-                  className="flex cursor-pointer items-center gap-2 rounded-[var(--radius-card)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--border-heavy)] focus-visible:ring-offset-4 focus-visible:ring-offset-transparent"
-                >
-                  <span className="relative h-11 w-14 shrink-0 block">
-                    {stackLayers.map(({ item, idx, wrapperClass, rotate, scale, hoverScale, opacity, zIndex }) => {
-                      const itemId = item.workflow_id || item.id || item.url || String(idx);
-                      const src = resolveMediaUrl(item) || item.url || "";
-                      const isVid = item.type === "video" || Boolean(item.is_video) || Boolean(item.isVideo);
-                      return (
-                        <motion.span
-                          key={itemId}
-                          layoutId={`ref-card-${layoutScopeId}-${slot.role}-${itemId}`}
-                          layout
-                          data-testid={`view-reference-${item.id || item.workflow_id || idx}`}
-                          className={cn(
-                            wrapperClass,
-                            "rounded-xl [corner-shape:squircle] border-2 border-[color:var(--border-heavy)] [--rim:2px] block"
-                          )}
-                          style={{ zIndex }}
-                          animate={{
-                            rotate: isStackHovered ? 0 : rotate,
-                            scale: isStackHovered ? hoverScale : scale,
-                            opacity,
-                          }}
-                          transition={CARD_SPRING_TRANSITION}
-                        >
-                          {isVid ? (
-                            <video
-                              src={src}
-                              muted
-                              loop
-                              autoPlay
-                              playsInline
-                              className="block size-full object-cover overflow-hidden rounded-[calc(12px-var(--rim,0px))] [corner-shape:squircle]"
-                            />
-                          ) : (
-                            <img
-                              alt=""
-                              decoding="async"
-                              className="block size-full object-cover overflow-hidden rounded-[calc(12px-var(--rim,0px))] [corner-shape:squircle]"
-                              src={src}
-                            />
-                          )}
-                        </motion.span>
-                      );
-                    })}
-                  </span>
-                  <span className="sr-only">
-                    <span>Uploaded</span>
-                    <span>Used as reference</span>
-                  </span>
-                </button>
+                <div className="relative inline-flex items-center">
+                  <button
+                    type="button"
+                    data-testid="reference-stack-btn"
+                    aria-label={`Show all ${refList.length} uploaded images`}
+                    onClick={() => {
+                      setIsStackHovered(false);
+                      onToggleReferenceUnstacked?.(true);
+                    }}
+                    className="flex cursor-pointer items-center gap-2 rounded-[var(--radius-card)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--border-heavy)] focus-visible:ring-offset-4 focus-visible:ring-offset-transparent"
+                  >
+                    <span className="relative h-11 w-14 shrink-0 block">
+                      {stackLayers.map(({ item, idx, wrapperClass, rotate, scale, hoverScale, opacity, zIndex }) => {
+                        const itemId = item.workflow_id || item.id || item.url || String(idx);
+                        const src = resolveMediaUrl(item) || item.url || "";
+                        const isVid = item.type === "video" || Boolean(item.is_video) || Boolean(item.isVideo);
+                        return (
+                          <motion.span
+                            key={itemId}
+                            layoutId={`ref-card-${layoutScopeId}-${slot.role}-${itemId}`}
+                            layout
+                            data-testid={`view-reference-${item.id || item.workflow_id || idx}`}
+                            className={cn(
+                              wrapperClass,
+                              "rounded-xl [corner-shape:squircle] border-2 border-[color:var(--border-heavy)] [--rim:2px] block"
+                            )}
+                            style={{ zIndex }}
+                            animate={{
+                              rotate: isStackHovered ? 0 : rotate,
+                              scale: isStackHovered ? hoverScale : scale,
+                              opacity,
+                            }}
+                            transition={CARD_SPRING_TRANSITION}
+                          >
+                            {isVid ? (
+                              <video
+                                src={src}
+                                muted
+                                loop
+                                autoPlay
+                                playsInline
+                                className="block size-full object-cover overflow-hidden rounded-[calc(12px-var(--rim,0px))] [corner-shape:squircle]"
+                              />
+                            ) : (
+                              <img
+                                alt=""
+                                decoding="async"
+                                className="block size-full object-cover overflow-hidden rounded-[calc(12px-var(--rim,0px))] [corner-shape:squircle]"
+                                src={src}
+                              />
+                            )}
+                          </motion.span>
+                        );
+                      })}
+                    </span>
+                    <span className="sr-only">
+                      <span>Uploaded</span>
+                      <span>Used as reference</span>
+                    </span>
+                  </button>
 
-                <motion.button
-                  type="button"
-                  data-testid="reference-remove-all-btn"
-                  aria-label={`Remove all ${refList.length} uploaded images`}
-                  initial={{ opacity: 0, scale: 0.4 }}
-                  animate={{ opacity: 1, scale: 1, rotate: isStackHovered ? 0 : -4 }}
-                  transition={{ delay: 0.12, duration: 0.18, ease: [0.34, 1.36, 0.64, 1] }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (onClearReferences) {
-                      onClearReferences();
-                    } else {
-                      onClearSlot?.(slot.role);
-                    }
-                  }}
-                  className="absolute -top-0.5 right-0.5 grid size-5 cursor-pointer place-items-center rounded-full surface-glass bg-surface-menu-glass text-icon-primary hover:bg-surface-tonal-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-heavy transition-colors duration-200 z-40"
-                >
-                  <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18" aria-hidden="true">
-                    <path fillRule="evenodd" clipRule="evenodd" d={REMOVE_ICON_PATH} />
-                  </svg>
-                </motion.button>
+                  <motion.button
+                    type="button"
+                    data-testid="reference-remove-all-btn"
+                    aria-label={`Remove all ${refList.length} uploaded images`}
+                    initial={{ opacity: 0, scale: 0.4 }}
+                    animate={{ opacity: 1, scale: 1, rotate: isStackHovered ? 0 : -4 }}
+                    transition={{ delay: 0.12, duration: 0.18, ease: [0.34, 1.36, 0.64, 1] }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (onClearReferences) {
+                        onClearReferences();
+                      } else {
+                        onClearSlot?.(slot.role);
+                      }
+                    }}
+                    className="absolute -top-1.5 -right-1.5 grid size-5 cursor-pointer place-items-center rounded-full surface-glass bg-surface-menu-glass text-icon-primary hover:bg-surface-tonal-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-heavy transition-colors duration-200 z-40"
+                  >
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18" aria-hidden="true">
+                      <path fillRule="evenodd" clipRule="evenodd" d={REMOVE_ICON_PATH} />
+                    </svg>
+                  </motion.button>
+                </div>
               </div>
             );
           }
