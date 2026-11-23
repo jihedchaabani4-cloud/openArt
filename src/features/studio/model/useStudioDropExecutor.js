@@ -8,6 +8,7 @@ import { queryKeys } from "@/shared/api/queryKeys";
 import { useMoveAssetToFolder } from "@/features/folders/api/mutations/useMoveAssetToFolder";
 import { useUpdateFolder } from "@/features/folders/api/mutations/useUpdateFolder";
 import { getParentFolderId, isFolderDescendant } from "@/features/folders/model/useFolderMove";
+import { useWorkspaceBulkDelete } from "@/features/workflows/api/mutations/useWorkspaceBulkDelete";
 import { useWorkflowUiStore } from "@/features/workflows/model/useWorkflowUiStore";
 import {
   useStudioSelectionStore,
@@ -15,6 +16,11 @@ import {
   hasSelectedKey,
 } from "@/features/workflows/model/useStudioSelectionStore";
 import { stripWorkflowPrefix } from "@/features/workflows/lib/cacheHelpers";
+import {
+  hasInFlightMedia,
+  hasInFlightWorkspaceDeleteTargets,
+  MEDIA_PROCESSING_DEFAULT_MESSAGE,
+} from "@/features/workflows/lib/mediaStatusHelpers";
 
 function readCachedFolders(queryClient, projectId) {
   if (!queryClient || !projectId) return [];
@@ -91,11 +97,14 @@ export function useStudioDropExecutor(projectId) {
   const queryClient = useQueryClient();
   const { mutateAsync: moveAsset } = useMoveAssetToFolder();
   const { mutateAsync: updateFolder } = useUpdateFolder();
+  const { mutateAsync: bulkDelete } = useWorkspaceBulkDelete();
 
   const moveAssetRef = useRef(moveAsset);
   moveAssetRef.current = moveAsset;
   const updateFolderRef = useRef(updateFolder);
   updateFolderRef.current = updateFolder;
+  const bulkDeleteRef = useRef(bulkDelete);
+  bulkDeleteRef.current = bulkDelete;
 
   useEffect(() => {
     if (!projectId || typeof window === "undefined") return undefined;
@@ -188,14 +197,78 @@ export function useStudioDropExecutor(projectId) {
       executeDrop(e.detail, parentFolderId);
     };
 
+    const onDropToTrash = async (e) => {
+      if (useWorkflowUiStore.getState().activeStudioTab === "trash") return;
+      const items = resolveDropItems(e.detail);
+      if (items.length === 0) return;
+
+      const workflow_ids = [];
+      const folder_ids = [];
+      for (const item of items) {
+        if (item.itemType === "collection") {
+          folder_ids.push(item.id);
+        } else {
+          workflow_ids.push(item.id);
+        }
+      }
+      if (workflow_ids.length === 0 && folder_ids.length === 0) return;
+
+      const cachedProject = queryClient.getQueryData(
+        queryKeys.projectData.byProject(projectId)
+      );
+      const folders = readCachedFolders(queryClient, projectId);
+      const explicitWorkflow = e.detail?.workflow || e.detail?.item || null;
+
+      if (
+        hasInFlightMedia(explicitWorkflow) ||
+        hasInFlightWorkspaceDeleteTargets({
+          workflowIds: workflow_ids,
+          folderIds: folder_ids,
+          projectData: cachedProject,
+          folders,
+        })
+      ) {
+        toast.error(MEDIA_PROCESSING_DEFAULT_MESSAGE);
+        return;
+      }
+
+      const selectionState = useStudioSelectionStore.getState();
+      const shouldClearSelection =
+        items.length > 1 || isAnyItemSelected(selectionState, items);
+
+      try {
+        const result = await bulkDeleteRef.current({
+          projectId,
+          workflow_ids,
+          folder_ids,
+        });
+        if (shouldClearSelection) {
+          useStudioSelectionStore.getState().clearSelection();
+        }
+        const trashedCount = (result?.trashed_workflow_ids || []).length;
+        const deletedWfCount = (result?.deleted_workflow_ids || []).length;
+        const deletedFolderCount = (result?.deleted_folder_ids || []).length;
+        if (deletedWfCount > 0 && trashedCount === 0 && deletedFolderCount === 0) {
+          toast.success("Deleted permanently");
+        } else {
+          const total = workflow_ids.length + folder_ids.length;
+          toast.success(`Moved ${total} ${total === 1 ? "item" : "items"} to Trash`);
+        }
+      } catch {
+        // Error toast & cache re-sync already handled by useWorkspaceBulkDelete.onError
+      }
+    };
+
     window.addEventListener("studio:drop-to-collection", onDropToCollection);
     window.addEventListener("studio:drop-to-project-root", onDropToProjectRoot);
     window.addEventListener("studio:drop-to-back", onDropToBack);
+    window.addEventListener("studio:drop-to-trash", onDropToTrash);
 
     return () => {
       window.removeEventListener("studio:drop-to-collection", onDropToCollection);
       window.removeEventListener("studio:drop-to-project-root", onDropToProjectRoot);
       window.removeEventListener("studio:drop-to-back", onDropToBack);
+      window.removeEventListener("studio:drop-to-trash", onDropToTrash);
     };
   }, [projectId, queryClient]);
 }

@@ -664,4 +664,68 @@ describe("useStudioBulkActions", () => {
     expect(mockFocus).toHaveBeenCalledTimes(1);
     expect(clearSelection).toHaveBeenCalledTimes(1);
   });
+
+  it("excludes failed workflows from bulk Like, Move, and Download on mixed completed + failed selections", async () => {
+    const { wrapper } = createQueryWrapper();
+    const clearSelection = vi.fn();
+    mockApiPatch.mockResolvedValue({ ok: true });
+
+    const mixedCompletedAndFailed = [
+      {
+        key: "workflow:w-ok",
+        itemType: "workflow",
+        id: "w-ok",
+        workflow: {
+          id: "w-ok",
+          display_name: "Good Shot",
+          metadata: { favorited: false },
+          items: [{ id: "m-ok", url: "https://cdn.example.com/good.png", status: "completed" }],
+        },
+        mediaUrl: "https://cdn.example.com/good.png",
+      },
+      {
+        key: "workflow:w-fail",
+        itemType: "workflow",
+        id: "w-fail",
+        workflow: {
+          id: "w-fail",
+          display_name: "Failed Shot",
+          items: [{ id: "m-fail", url: null, status: "failed" }],
+        },
+      },
+    ];
+
+    const { result } = renderHook(
+      () =>
+        useStudioBulkActions({
+          projectId: "proj-1",
+          scope: "assets",
+          selectedEntries: mixedCompletedAndFailed,
+          clearSelection,
+        }),
+      { wrapper }
+    );
+
+    // Bulk Like sends ONLY the completed workflow (single-item endpoint, never w-fail)
+    await act(async () => {
+      await result.current.bulkToggleLike();
+    });
+    expect(mockApiPatch).toHaveBeenCalledTimes(1);
+    expect(mockApiPatch).toHaveBeenCalledWith("/workflows/workflows/w-ok/like");
+
+    // Bulk Move moves ONLY the completed workflow
+    mockApiPatch.mockClear();
+    await act(async () => {
+      await result.current.bulkMoveToFolder("folder-target");
+    });
+    expect(mockApiPatch).toHaveBeenCalledTimes(1);
+    expect(mockApiPatch).toHaveBeenCalledWith("/assets/w-ok/folder", { folderId: "folder-target" });
+
+    // Bulk Download uses single-file direct download fast path (1 actionable workflow) instead of ZIP
+    await act(async () => {
+      await result.current.bulkDownload();
+    });
+    expect(mockDownloadMediaItem).toHaveBeenCalledWith("https://cdn.example.com/good.png", "Good Shot.png");
+    expect(mockDownloadBlob).not.toHaveBeenCalled();
+  });
 });

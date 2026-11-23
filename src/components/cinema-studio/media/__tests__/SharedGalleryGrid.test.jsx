@@ -479,10 +479,10 @@ describe("SharedGalleryGrid - multi-select & date-group tri-state checkbox", () 
     expect(onToggleSelect.mock.calls[0][0].shiftKey).toBe(true);
     expect(onCardClick).not.toHaveBeenCalled();
 
-    // Video badge sits cleanly alongside checkbox inside the same top-left flex row
+    // Unified video badge sits cleanly in the bottom-right corner without colliding with top-left checkbox
     const videoBadge = container.querySelector('[aria-label="Video"]');
     expect(videoBadge).not.toBeNull();
-    expect(videoBadge.parentElement.contains(checkbox)).toBe(true);
+    expect(container.querySelector('[data-slot="media-bottom-right"]')?.contains(videoBadge)).toBe(true);
 
     // Selected state adds data-selected and delicate 1px ring-text-primary/80 outline
     rerender(
@@ -1038,5 +1038,87 @@ describe("SharedGalleryGrid - multi-select & date-group tri-state checkbox", () 
     expect(renderCounts["col-1"]).toBe(countsAfterFirstSelect["col-1"]);
     expect(renderCounts["wf-1"]).toBe(countsAfterFirstSelect["wf-1"]);
     expect(renderCounts["wf-3"]).toBe(countsAfterFirstSelect["wf-3"]);
+  });
+
+  it("treats selection as a disallowed action for processing and uploading cards across checkboxes, Ctrl+A, date-group toggle, and MediaView", () => {
+    const entriesWithInFlight = [
+      {
+        type: "workflow",
+        key: "wf-done",
+        data: {
+          id: "wf-done",
+          status: "completed",
+          metadata: { createTime: "2026-04-12T10:00:00.000Z" },
+          items: [{ id: "m-done", url: "https://example.com/done.jpg", status: "completed" }],
+        },
+      },
+      {
+        type: "workflow",
+        key: "wf-proc",
+        data: {
+          id: "wf-proc",
+          status: "processing",
+          metadata: { createTime: "2026-04-12T10:05:00.000Z" },
+          items: [{ id: "m-proc", url: null, status: "processing" }],
+        },
+      },
+      {
+        type: "workflow",
+        key: "wf-up",
+        data: {
+          id: "wf-up",
+          status: "uploading",
+          metadata: { createTime: "2026-04-12T10:06:00.000Z" },
+          items: [{ id: "m-up", url: "blob:http://localhost/up", status: "uploading" }],
+        },
+      },
+      {
+        type: "workflow",
+        key: "wf-only-proc-day",
+        data: {
+          id: "wf-only-proc-day",
+          status: "processing",
+          metadata: { createTime: "2026-04-13T10:00:00.000Z" },
+          items: [{ id: "m-proc-2", url: null, status: "processing" }],
+        },
+      },
+    ];
+
+    const { container } = render(
+      <SharedGalleryGrid
+        entries={entriesWithInFlight}
+        selectionEnabled={true}
+        splitByDate={true}
+        CardComponent={MediaView}
+        defaultContainerWidth={1200}
+      />
+    );
+
+    // Only the completed workflow gets a data-selection-key wrapper and checkbox
+    const selectableWrappers = container.querySelectorAll("[data-selection-key]");
+    expect(selectableWrappers).toHaveLength(1);
+    expect(selectableWrappers[0].getAttribute("data-selection-key")).toBe("workflow:wf-done");
+
+    // Date group containing ONLY a processing workflow renders NO date-group checkbox
+    const procOnlyHeader = container.querySelector('[data-date-group-header="2026-04-13"]');
+    expect(procOnlyHeader).not.toBeNull();
+    expect(procOnlyHeader.querySelector('[role="checkbox"]')).toBeNull();
+
+    // Ctrl+A selects ONLY the completed card, never processing or uploading cards
+    fireEvent.keyDown(window, { key: "a", ctrlKey: true });
+    expect(useStudioSelectionStore.getState().selectedKeys).toEqual(["workflow:wf-done"]);
+
+    // Processing & uploading cards stay cursor-default and expose zero selection outline/checkbox
+    const procCard = container.querySelector('[data-slot="processing-card"]')?.closest("div.group");
+    expect(procCard?.className).toContain("cursor-default");
+    expect(procCard?.className).not.toContain("cursor-pointer");
+    expect(procCard?.querySelector('[data-slot="card-select-checkbox"]')).toBeNull();
+    expect(procCard?.querySelector('[data-slot="card-selected-outline"]')).toBeNull();
+
+    const uploadCard = container.querySelector('[data-slot="uploading-card"]')?.closest("div.group");
+    expect(uploadCard?.className).toContain("cursor-default");
+    expect(uploadCard?.className).not.toContain("cursor-pointer");
+    expect(uploadCard?.querySelector('[data-slot="card-select-checkbox"]')).toBeNull();
+    expect(uploadCard?.querySelector('[data-slot="card-selected-outline"]')).toBeNull();
   });
 });

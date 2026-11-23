@@ -3,6 +3,10 @@
 import { api } from '@/shared/api/client';
 import { queryKeys } from '@/shared/api/queryKeys';
 import { matchMediaId } from '@/features/workflows/lib/cacheHelpers';
+import {
+  isMediaProcessingConflictError,
+  getMediaProcessingConflictMessage,
+} from '@/features/workflows/lib/mediaStatusHelpers';
 import { useOptimisticMutation } from '@/shared/lib/optimistic/useOptimisticMutation';
 import { mediaEntity } from '@/shared/lib/optimistic/entityKeys';
 
@@ -10,7 +14,12 @@ export function useRemoveWorkflowItem() {
   return useOptimisticMutation({
     mutationFn: async ({ itemId }) => {
       const res = await api.delete(`/workflows/items/${itemId}`);
-      if (!res.ok) throw new Error(res.message || 'Failed to remove item');
+      if (!res || res.ok === false || res.success === false) {
+        const err = new Error(res?.message || res?.error || 'Failed to remove item');
+        if (res?.status || res?.statusCode) err.status = res.status || res.statusCode;
+        if (res?.errorCode || res?.code) err.errorCode = res.errorCode || res.code;
+        throw err;
+      }
       return itemId;
     },
     getCacheKeys: ({ projectId }) => (projectId ? [queryKeys.projectData.byProject(projectId)] : []),
@@ -45,7 +54,10 @@ export function useRemoveWorkflowItem() {
       ...(projectId ? [queryKeys.projectData.byProject(projectId)] : []),
       ['workflows'],
     ],
-    errorMessage: 'Failed to remove workflow item. Changes were reverted.',
+    errorMessage: (err) =>
+      isMediaProcessingConflictError(err)
+        ? getMediaProcessingConflictMessage(err)
+        : 'Failed to remove workflow item. Changes were reverted.',
   });
 }
 

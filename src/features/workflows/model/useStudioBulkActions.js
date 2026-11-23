@@ -20,6 +20,15 @@ import { promptBarService } from "@/features/prompt-bar";
 import { useToggleWorkflowLike } from "../api/mutations/useToggleWorkflowLike";
 import { useWorkspaceBulkDelete } from "../api/mutations/useWorkspaceBulkDelete";
 import { resolveMainMedia } from "../core/resolveMediaRef";
+import {
+  areAllWorkflowMediaFailed,
+  hasInFlightWorkspaceDeleteTargets,
+  MEDIA_PROCESSING_DEFAULT_MESSAGE,
+} from "../lib/mediaStatusHelpers";
+import {
+  resolveBulkActionRules,
+  resolveStudioActions,
+} from "../lib/studioActionRules";
 
 const KNOWN_MEDIA_EXTS = new Set(["jpg", "jpeg", "png", "webp", "gif", "mp4", "webm", "mov", "svg"]);
 
@@ -340,12 +349,24 @@ export function useStudioBulkActions({
   const collectionCount = collectionEntries.length;
   const hasWorkflows = workflowCount > 0;
   const hasCollections = collectionCount > 0;
-
-  const canDownload = scope !== "trash" && selectedEntries.length > 0;
-  const canMove = (scope === "assets" || scope === "collection") && selectedEntries.length > 0;
-  const canLike = hasWorkflows && !hasCollections && scope !== "trash";
-  const canAddToPrompt = hasWorkflows && !hasCollections && scope !== "trash";
-  const isAllLiked = hasWorkflows && workflowEntries.every(isWorkflowLiked);
+  const {
+    actionableWorkflowEntries,
+    hasActionableWorkflows,
+    canDownload,
+    canMove,
+    canLike,
+    canAddToPrompt,
+  } = useMemo(
+    () =>
+      resolveBulkActionRules({
+        scope,
+        workflowEntries,
+        collectionEntries,
+      }),
+    [scope, workflowEntries, collectionEntries]
+  );
+  const isAllLiked =
+    hasActionableWorkflows && actionableWorkflowEntries.every(isWorkflowLiked);
   const needsDeleteConfirm = true;
 
   const bulkDownload = useCallback(async () => {
@@ -356,9 +377,9 @@ export function useStudioBulkActions({
       const { workflows: cachedWorkflows, media: cachedMedia, folders: cachedFolders, mediaByWorkflow } =
         readCachedProjectContext(queryClient, projectId);
 
-      // Fast path: 1 workflow with a single media URL -> direct download
-      if (workflowEntries.length === 1 && collectionEntries.length === 0) {
-        const entry = workflowEntries[0];
+      // Fast path: 1 actionable workflow with a single media URL -> direct download
+      if (actionableWorkflowEntries.length === 1 && collectionEntries.length === 0) {
+        const entry = actionableWorkflowEntries[0];
         const files = collectWorkflowDownloadFiles(
           entry.workflow || { id: entry.id },
           entry.mediaUrl,
@@ -403,8 +424,8 @@ export function useStudioBulkActions({
       const toastId = toast.loading("Preparing download archive...");
 
       try {
-        // 1. Selected standalone workflows at archive root
-        for (const entry of workflowEntries) {
+        // 1. Selected standalone actionable workflows at archive root
+        for (const entry of actionableWorkflowEntries) {
           const wf = entry.workflow || { id: entry.id };
           const files = collectWorkflowDownloadFiles(wf, entry.mediaUrl, mediaByWorkflow);
           await writeFilesToZipFolder(files, zip, rootUsedNames);
@@ -479,7 +500,7 @@ export function useStudioBulkActions({
 
         const zipBlob = await zip.generateAsync({ type: "blob" });
         const zipFilename =
-          collectionEntries.length === 1 && workflowEntries.length === 0
+          collectionEntries.length === 1 && actionableWorkflowEntries.length === 0
             ? `${sanitizeFilename(collectionEntries[0].collection?.name || "collection")}.zip`
             : `studio-selection-${buildZipTimestamp()}.zip`;
 
@@ -494,11 +515,11 @@ export function useStudioBulkActions({
     } finally {
       setBusyAction(null);
     }
-  }, [busyAction, canDownload, collectionEntries, projectId, queryClient, workflowEntries]);
+  }, [actionableWorkflowEntries, busyAction, canDownload, collectionEntries, projectId, queryClient]);
 
   const bulkToggleLike = useCallback(async () => {
     if (!canLike || busyAction) return;
-    const workflowIds = workflowEntries.map((e) => cleanWorkflowId(e.id)).filter(Boolean);
+    const workflowIds = actionableWorkflowEntries.map((e) => cleanWorkflowId(e.id)).filter(Boolean);
     if (workflowIds.length === 0) return;
 
     const nextFavorited = !isAllLiked;
@@ -520,7 +541,7 @@ export function useStudioBulkActions({
     } finally {
       setBusyAction(null);
     }
-  }, [busyAction, canLike, isAllLiked, projectId, toggleWorkflowLike, workflowEntries]);
+  }, [actionableWorkflowEntries, busyAction, canLike, isAllLiked, projectId, toggleWorkflowLike]);
 
   const bulkMoveToFolder = useCallback(
     async (targetFolderId = null) => {
@@ -530,7 +551,7 @@ export function useStudioBulkActions({
 
       const tasks = [];
 
-      for (const entry of workflowEntries) {
+      for (const entry of actionableWorkflowEntries) {
         const assetId = cleanWorkflowId(entry.id);
         if (!assetId) continue;
         tasks.push(
@@ -585,6 +606,7 @@ export function useStudioBulkActions({
       }
     },
     [
+      actionableWorkflowEntries,
       busyAction,
       canMove,
       clearSelection,
@@ -593,7 +615,6 @@ export function useStudioBulkActions({
       projectId,
       queryClient,
       updateFolder,
-      workflowEntries,
     ]
   );
 
@@ -639,6 +660,27 @@ export function useStudioBulkActions({
         return;
       }
 
+      const cachedProject = projectId
+        ? queryClient.getQueryData(queryKeys.projectData.byProject(projectId))
+        : null;
+      const { folders: cachedFolders, mediaByWorkflow } = readCachedProjectContext(
+        queryClient,
+        projectId
+      );
+
+      if (
+        hasInFlightWorkspaceDeleteTargets({
+          selectedEntries,
+          workflowIds: workflow_ids,
+          folderIds: folder_ids,
+          projectData: cachedProject,
+          folders: cachedFolders,
+        })
+      ) {
+        toast.error(MEDIA_PROCESSING_DEFAULT_MESSAGE);
+        return;
+      }
+
       try {
         const result = await workspaceBulkDelete({
           projectId,
@@ -658,26 +700,44 @@ export function useStudioBulkActions({
 
         const deletedFolderCount = deletedFolderIds.length;
         const trashedCount = (result?.trashed_workflow_ids || []).length;
+        const deletedWfCount = (result?.deleted_workflow_ids || []).length;
         const orphanCount =
           (result?.deleted_orphan_character_ids || []).length +
           (result?.deleted_orphan_element_ids || []).length;
+        const allSelectedFailedOnly =
+          workflowEntries.length > 0 &&
+          collectionEntries.length === 0 &&
+          workflowEntries.every((e) => {
+            const cleanId = cleanWorkflowId(e.id || e.workflow?.id || e.workflow?.name);
+            return areAllWorkflowMediaFailed(e.workflow, mediaByWorkflow[cleanId]);
+          });
 
-        if (deletedFolderCount > 0 && trashedCount > 0) {
+        if (
+          deletedFolderCount === 0 &&
+          trashedCount === 0 &&
+          orphanCount === 0 &&
+          (deletedWfCount > 0 || allSelectedFailedOnly)
+        ) {
+          toast.success("Deleted permanently");
+        } else if (deletedFolderCount > 0 && trashedCount > 0) {
           toast.success(
             `Deleted ${deletedFolderCount} ${deletedFolderCount === 1 ? "folder" : "folders"} and moved ${trashedCount} ${trashedCount === 1 ? "item" : "items"} to Trash`
           );
-        } else if (deletedFolderCount > 0 && orphanCount > 0) {
+        } else if (deletedFolderCount > 0 && (orphanCount > 0 || deletedWfCount > 0)) {
+          const permCount = orphanCount + deletedWfCount;
           toast.success(
-            `Deleted ${deletedFolderCount} ${deletedFolderCount === 1 ? "folder" : "folders"} and ${orphanCount} ${orphanCount === 1 ? "item" : "items"}`
+            `Deleted ${deletedFolderCount} ${deletedFolderCount === 1 ? "folder" : "folders"} and ${permCount} ${permCount === 1 ? "item" : "items"}`
           );
         } else if (deletedFolderCount > 0) {
           toast.success(
             `Deleted ${deletedFolderCount} ${deletedFolderCount === 1 ? "folder" : "folders"}`
           );
-        } else if (trashedCount > 0) {
+        } else if (trashedCount > 0 && deletedWfCount > 0) {
           toast.success(
-            `Moved ${trashedCount} ${trashedCount === 1 ? "item" : "items"} to Trash`
+            `Moved to Trash and deleted ${deletedWfCount} ${deletedWfCount === 1 ? "item" : "items"} permanently`
           );
+        } else if (trashedCount > 0) {
+          toast.success("Moved to Trash");
         } else if (orphanCount > 0) {
           toast.success(`Deleted ${orphanCount} ${orphanCount === 1 ? "item" : "items"}`);
         } else if ((result?.already_trashed_workflow_ids || []).length > 0) {
@@ -695,9 +755,11 @@ export function useStudioBulkActions({
     allTrashSelected,
     busyAction,
     clearSelection,
+    collectionEntries,
     currentFolderId,
     onNavigateUp,
     projectId,
+    queryClient,
     scope,
     selectedEntries,
     trashDelete,
@@ -771,9 +833,15 @@ export function useStudioBulkActions({
           meta?.status ||
           (resolved?.status === "ready" ? "completed" : resolved?.status) ||
           wf?.status;
-        const isCompleted = status === "completed" || status === "ready";
+        const entryRules = resolveStudioActions({
+          workflow: wf,
+          item: targetItem,
+          status,
+          isVideo,
+          hasUrl: Boolean(url),
+        });
 
-        if (!isCompleted || !url || isVideo) {
+        if (!entryRules.can.addToPrompt) {
           skippedCount += 1;
           continue;
         }

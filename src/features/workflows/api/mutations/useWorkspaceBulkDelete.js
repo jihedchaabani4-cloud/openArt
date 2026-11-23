@@ -1,6 +1,7 @@
 // [FSD Layer: features/workflows/api/mutations] — Explicit-intent workspace bulk delete mutation.
 // Calls POST /workspace/bulk-delete in sequential chunks of <= 100 total IDs, updates project/folder caches
-// from the server response, and re-syncs caches on stale-ID (400/404) or partial-batch errors.
+// from the server response (handling both trashed_workflow_ids and deleted_workflow_ids),
+// rolls back on 409 MEDIA_PROCESSING conflict, and re-syncs caches on stale-ID (400/404) or partial-batch errors.
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { api } from "@/shared/api/client";
@@ -11,6 +12,11 @@ import {
   matchWorkflowId,
   patchWorkflowFolder,
 } from "@/shared/lib/optimistic/cacheOps";
+import {
+  areAllWorkflowMediaFailed,
+  isMediaProcessingConflictError,
+  getMediaProcessingConflictMessage,
+} from "@/features/workflows/lib/mediaStatusHelpers";
 
 const MAX_BATCH_SIZE = 100;
 const RATE_LIMIT_MESSAGE = "Too many bulk delete requests, please wait a moment";
@@ -111,7 +117,7 @@ function getErrorStatus(err) {
     err?.data?.status ??
     null;
   if (typeof raw === "number") return raw;
-  const match = String(err?.message || "").match(/\b(400|404|429)\b/);
+  const match = String(err?.message || "").match(/\b(400|404|409|429)\b/);
   return match ? Number(match[1]) : null;
 }
 
@@ -122,6 +128,7 @@ function getErrorCode(err) {
 function createApiError(res, fallbackMessage) {
   const err = new Error(res?.message || res?.error || fallbackMessage);
   if (typeof res?.status === "number") err.status = res.status;
+  if (typeof res?.statusCode === "number") err.statusCode = res.statusCode;
   if (res?.errorCode || res?.code) err.errorCode = res.errorCode || res.code;
   err.data = res;
   return err;
@@ -132,16 +139,21 @@ function normalizeBulkDeleteError(err) {
   const errorCode = getErrorCode(err);
   const rawMessage = String(err?.message || "").trim();
 
-  const isRateLimited = status === 429 || /too many|rate limit/i.test(rawMessage);
+  const isMediaProcessing = isMediaProcessingConflictError(err);
+  const isRateLimited =
+    !isMediaProcessing && (status === 429 || /too many|rate limit/i.test(rawMessage));
   const isStaleOrInvalid =
-    status === 404 ||
-    status === 400 ||
-    errorCode === "WORKFLOW_NOT_IN_TRASH" ||
-    rawMessage.includes("WORKFLOW_NOT_IN_TRASH") ||
-    /not found|does not exist|not in trash|invalid/i.test(rawMessage);
+    !isMediaProcessing &&
+    (status === 404 ||
+      status === 400 ||
+      errorCode === "WORKFLOW_NOT_IN_TRASH" ||
+      rawMessage.includes("WORKFLOW_NOT_IN_TRASH") ||
+      /not found|does not exist|not in trash|invalid/i.test(rawMessage));
 
   let message = rawMessage || FALLBACK_ERROR_MESSAGE;
-  if (isRateLimited) {
+  if (isMediaProcessing) {
+    message = getMediaProcessingConflictMessage(err);
+  } else if (isRateLimited) {
     message = RATE_LIMIT_MESSAGE;
   } else if (isStaleOrInvalid) {
     const isRawTechnicalMsg =
@@ -152,9 +164,10 @@ function normalizeBulkDeleteError(err) {
   }
 
   const normalized = new Error(message);
-  normalized.status = status;
-  normalized.errorCode = errorCode;
+  normalized.status = isMediaProcessing ? status || 409 : status;
+  normalized.errorCode = isMediaProcessing ? errorCode || "MEDIA_PROCESSING" : errorCode;
   normalized.data = err?.data;
+  normalized.isMediaProcessing = isMediaProcessing;
   normalized.isStaleOrInvalid = isStaleOrInvalid;
   normalized.isRateLimited = isRateLimited;
   return normalized;
@@ -215,6 +228,23 @@ function patchFoldersCache(oldData, deletedFolderIds) {
   return oldData;
 }
 
+function patchFlatWorkflowCache(oldData, removedIds) {
+  if (!oldData || !Array.isArray(removedIds) || removedIds.length === 0) return oldData;
+  const filterList = (list) =>
+    list.filter((entity) => !removedIds.some((id) => matchWorkflowId(entity, id)));
+  if (Array.isArray(oldData)) {
+    return filterList(oldData);
+  }
+  if (typeof oldData === "object") {
+    const next = { ...oldData };
+    if (Array.isArray(oldData.workflows)) next.workflows = filterList(oldData.workflows);
+    if (Array.isArray(oldData.items)) next.items = filterList(oldData.items);
+    if (Array.isArray(oldData.data)) next.data = filterList(oldData.data);
+    return next;
+  }
+  return oldData;
+}
+
 function patchProjectDataCache(oldData, result) {
   if (!oldData?.projectContents) return oldData;
 
@@ -223,11 +253,15 @@ function patchProjectDataCache(oldData, result) {
     ...(result?.trashed_workflow_ids || []),
     ...(result?.already_trashed_workflow_ids || []),
   ];
+  const deletedWorkflowIds = result?.deleted_workflow_ids || [];
+  const allRemovedWorkflowIds = [...trashedWorkflowIds, ...deletedWorkflowIds];
+
   const deletedCharIds = result?.deleted_orphan_character_ids || [];
   const deletedElemIds = result?.deleted_orphan_element_ids || [];
 
   const deletedFolderSet = new Set(deletedFolderIds.map(String));
-  const trashedWfSet = new Set(trashedWorkflowIds.map(cleanWorkflowId).filter(Boolean));
+  const deletedWfSet = new Set(deletedWorkflowIds.map(cleanWorkflowId).filter(Boolean));
+  const removedWfSet = new Set(allRemovedWorkflowIds.map(cleanWorkflowId).filter(Boolean));
   const deletedCharSet = new Set(deletedCharIds.map(String));
   const deletedElemSet = new Set(deletedElemIds.map(String));
 
@@ -240,6 +274,10 @@ function patchProjectDataCache(oldData, result) {
 
   const matchesTrashedWorkflow = (entity) =>
     trashedWorkflowIds.some((id) => matchWorkflowId(entity, id));
+  const matchesDeletedWorkflow = (entity) =>
+    deletedWorkflowIds.some((id) => matchWorkflowId(entity, id));
+  const matchesRemovedWorkflow = (entity) =>
+    allRemovedWorkflowIds.some((id) => matchWorkflowId(entity, id));
 
   const nowIso = new Date().toISOString();
   const newlyTrashed = [];
@@ -249,9 +287,19 @@ function patchProjectDataCache(oldData, result) {
 
   const nextWorkflows = [];
   for (const wf of currentWorkflows) {
+    const cleanId = cleanWorkflowId(wf?.id || wf?.name);
+    const wfMedia = currentMedia.filter(
+      (m) => cleanWorkflowId(m?.workflowId || m?.workflow_id || m?.workflowName) === cleanId
+    );
+    const isFailedOnly = areAllWorkflowMediaFailed(wf, wfMedia);
+
+    // Permanently deleted failed workflows are removed from active workflows and NEVER added to Trash
+    if (matchesDeletedWorkflow(wf) || (matchesTrashedWorkflow(wf) && isFailedOnly)) {
+      continue;
+    }
+
     if (matchesTrashedWorkflow(wf)) {
-      const cleanId = cleanWorkflowId(wf?.id || wf?.name);
-      if (cleanId && !existingTrashedIds.has(cleanId)) {
+      if (cleanId && !existingTrashedIds.has(cleanId) && !deletedWfSet.has(cleanId)) {
         existingTrashedIds.add(cleanId);
         const cleared = isWorkflowInDeletedFolder(wf, deletedFolderSet)
           ? patchWorkflowFolder(wf, null)
@@ -276,12 +324,18 @@ function patchProjectDataCache(oldData, result) {
     }
   }
 
+  // Ensure permanently deleted workflow IDs are never left in trashedWorkflows
+  const filteredExistingTrashed =
+    deletedWorkflowIds.length > 0
+      ? currentTrashed.filter((wf) => !matchesDeletedWorkflow(wf))
+      : currentTrashed;
+
   const nextCharacters = currentCharacters.filter((c) => {
     if (!c) return false;
     if (c.id != null && deletedCharSet.has(String(c.id))) return false;
     const wfId = cleanWorkflowId(c.workflow_id || c.workflowId);
-    if (wfId && trashedWfSet.has(wfId)) return false;
-    if (matchesTrashedWorkflow(c)) return false;
+    if (wfId && removedWfSet.has(wfId)) return false;
+    if (matchesRemovedWorkflow(c)) return false;
     return true;
   });
 
@@ -289,20 +343,20 @@ function patchProjectDataCache(oldData, result) {
     if (!el) return false;
     if (el.id != null && deletedElemSet.has(String(el.id))) return false;
     const wfId = cleanWorkflowId(el.workflow_id || el.workflowId);
-    if (wfId && trashedWfSet.has(wfId)) return false;
-    if (matchesTrashedWorkflow(el)) return false;
+    if (wfId && removedWfSet.has(wfId)) return false;
+    if (matchesRemovedWorkflow(el)) return false;
     return true;
   });
 
   const nextMedia = currentMedia.filter((m) => {
     const mWf = cleanWorkflowId(m?.workflowId || m?.workflow_id || m?.workflowName);
-    return !mWf || !trashedWfSet.has(mWf);
+    return !mWf || !removedWfSet.has(mWf);
   });
 
   const nextProjectContents = {
     ...pc,
     workflows: nextWorkflows,
-    trashedWorkflows: [...newlyTrashed, ...currentTrashed],
+    trashedWorkflows: [...newlyTrashed, ...filteredExistingTrashed],
     characters: nextCharacters,
     elements: nextElements,
     media: nextMedia,
@@ -344,17 +398,20 @@ export function useWorkspaceBulkDelete() {
 
       const deleted_folder_ids = [];
       const trashed_workflow_ids = [];
+      const deleted_workflow_ids = [];
       const already_trashed_workflow_ids = [];
       const deleted_orphan_character_ids = [];
       const deleted_orphan_element_ids = [];
 
       const seenFolders = new Set();
       const seenTrashed = new Set();
+      const seenDeletedWorkflows = new Set();
       const seenAlreadyTrashed = new Set();
       const seenChars = new Set();
       const seenElements = new Set();
 
       let completedChunks = 0;
+      let hasDeletedWorkflowIdsField = false;
 
       try {
         for (const chunk of chunks) {
@@ -363,8 +420,15 @@ export function useWorkspaceBulkDelete() {
             throw createApiError(res, FALLBACK_ERROR_MESSAGE);
           }
 
+          if (res && "deleted_workflow_ids" in res) {
+            hasDeletedWorkflowIdsField = true;
+          }
+
           appendUnique(deleted_folder_ids, seenFolders, res?.deleted_folder_ids);
           appendUnique(trashed_workflow_ids, seenTrashed, res?.trashed_workflow_ids, {
+            stripWorkflow: true,
+          });
+          appendUnique(deleted_workflow_ids, seenDeletedWorkflows, res?.deleted_workflow_ids, {
             stripWorkflow: true,
           });
           appendUnique(
@@ -391,7 +455,7 @@ export function useWorkspaceBulkDelete() {
         throw normalized;
       }
 
-      return {
+      const out = {
         ok: true,
         deleted_folder_ids,
         trashed_workflow_ids,
@@ -399,10 +463,40 @@ export function useWorkspaceBulkDelete() {
         deleted_orphan_character_ids,
         deleted_orphan_element_ids,
       };
+      if (hasDeletedWorkflowIdsField || deleted_workflow_ids.length > 0) {
+        out.deleted_workflow_ids = deleted_workflow_ids;
+      }
+      return out;
+    },
+
+    onMutate: async (variables = {}) => {
+      const projectId = variables?.projectId ?? variables?.project_id ?? null;
+      if (!projectId) return { snapshots: [] };
+
+      const keys = [
+        queryKeys.projectData.byProject(projectId),
+        queryKeys.folders.byProject(projectId),
+        queryKeys.generations.byProject(projectId),
+        queryKeys.trash.all(),
+      ];
+
+      const snapshots = [];
+      for (const key of keys) {
+        const previousData = queryClient.getQueryData(key);
+        if (previousData !== undefined) {
+          snapshots.push({ key, previousData });
+        }
+      }
+      return { snapshots };
     },
 
     onSuccess: (result, variables = {}) => {
       const projectId = variables?.projectId ?? variables?.project_id ?? null;
+      const allRemovedWorkflowIds = [
+        ...(result?.trashed_workflow_ids || []),
+        ...(result?.already_trashed_workflow_ids || []),
+        ...(result?.deleted_workflow_ids || []),
+      ];
 
       if (projectId) {
         queryClient.setQueryData(queryKeys.folders.byProject(projectId), (old) =>
@@ -412,17 +506,46 @@ export function useWorkspaceBulkDelete() {
           patchProjectDataCache(old, result)
         );
 
+        const existingGenerations = queryClient.getQueryData(
+          queryKeys.generations.byProject(projectId)
+        );
+        if (existingGenerations !== undefined && allRemovedWorkflowIds.length > 0) {
+          queryClient.setQueryData(
+            queryKeys.generations.byProject(projectId),
+            (old) => patchFlatWorkflowCache(old, allRemovedWorkflowIds)
+          );
+        }
+
         queryClient.invalidateQueries({ queryKey: queryKeys.projectData.byProject(projectId) });
         queryClient.invalidateQueries({ queryKey: queryKeys.folders.byProject(projectId) });
       }
 
+      if (result?.deleted_workflow_ids?.length > 0) {
+        const existingTrash = queryClient.getQueryData(queryKeys.trash.all());
+        if (existingTrash !== undefined) {
+          queryClient.setQueryData(queryKeys.trash.all(), (old) =>
+            patchFlatWorkflowCache(old, result.deleted_workflow_ids)
+          );
+        }
+      }
+
       queryClient.invalidateQueries({ queryKey: queryKeys.folders.all() });
-      queryClient.invalidateQueries({ queryKey: queryKeys.trash.all() });
+      if ((result?.trashed_workflow_ids || []).length > 0 || !result?.deleted_workflow_ids?.length) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.trash.all() });
+      }
       queryClient.invalidateQueries({ queryKey: queryKeys.library.all() });
     },
 
-    onError: (err, variables = {}) => {
+    onError: (err, variables = {}, context) => {
       const projectId = variables?.projectId ?? variables?.project_id ?? null;
+
+      if (err?.isMediaProcessing && Array.isArray(context?.snapshots)) {
+        for (const { key, previousData } of context.snapshots) {
+          if (previousData !== undefined) {
+            queryClient.setQueryData(key, previousData);
+          }
+        }
+      }
 
       if (err?.isStaleOrInvalid || (err?.completedChunks || 0) > 0) {
         if (projectId) {

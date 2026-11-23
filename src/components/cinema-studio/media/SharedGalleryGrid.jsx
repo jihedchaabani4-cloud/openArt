@@ -9,6 +9,7 @@ import {
   makeSelectionKey,
   hasSelectedKey,
 } from "@/features/workflows/model/useStudioSelectionStore";
+import { resolveStudioActions } from "@/features/workflows/lib/studioActionRules";
 import { useMarqueeSelection } from "@/features/workflows/model/useMarqueeSelection";
 import { Checkbox } from "@/components/base/checkbox";
 import {
@@ -177,6 +178,7 @@ const SelectableCardSlot = React.memo(function SelectableCardSlot({
 
   return (
     <div
+      data-gallery-card="true"
       data-selection-key={selKey || undefined}
       className="shrink-0"
       style={{ width, height }}
@@ -190,9 +192,17 @@ SelectableCardSlot.displayName = "SelectableCardSlot";
 function getPhotoSelectionKey(photo) {
   if (!photo) return null;
   if (photo.itemType === "collection") {
+    if (!resolveStudioActions({ entityType: "collection", item: photo.collection }).can.select) {
+      return null;
+    }
     const id = photo.collection?.id || photo.collection?.folder_id || photo.collection?.folderId;
     return id ? makeSelectionKey("collection", id) : null;
   }
+  const { can } = resolveStudioActions({
+    workflow: photo.workflow,
+    item: photo.item,
+  });
+  if (!can.select) return null;
   if (photo.itemType === "workflow") {
     const id = photo.workflow?.id || photo.workflow?.name;
     return id ? makeSelectionKey("workflow", id) : null;

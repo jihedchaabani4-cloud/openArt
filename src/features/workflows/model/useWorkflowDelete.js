@@ -6,6 +6,10 @@ import { queryKeys } from "@/shared/api/queryKeys";
 import { matchWorkflowId } from "@/shared/lib/optimistic/cacheOps";
 import { workflowEntity } from "@/shared/lib/optimistic/entityKeys";
 import { useOptimisticMutation } from "@/shared/lib/optimistic/useOptimisticMutation";
+import {
+  isMediaProcessingConflictError,
+  getMediaProcessingConflictMessage,
+} from "@/features/workflows/lib/mediaStatusHelpers";
 
 /**
  * useWorkflowDelete Component/Hook
@@ -68,7 +72,10 @@ export function useWorkflowDelete() {
 
     invalidateKeys: ({ projectId }) => (projectId ? [queryKeys.projectData.byProject(projectId)] : []),
 
-    errorMessage: "Failed to delete item. Changes were reverted.",
+    errorMessage: (err) =>
+      isMediaProcessingConflictError(err)
+        ? getMediaProcessingConflictMessage(err)
+        : "Failed to delete item. Changes were reverted.",
   });
 
   // Prompt confirmation dialog

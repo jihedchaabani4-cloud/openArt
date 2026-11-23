@@ -3,6 +3,10 @@
 import { api } from '@/shared/api/client';
 import { queryKeys } from '@/shared/api/queryKeys';
 import { matchMediaId } from '@/features/workflows/lib/cacheHelpers';
+import {
+  isMediaProcessingConflictError,
+  getMediaProcessingConflictMessage,
+} from '@/features/workflows/lib/mediaStatusHelpers';
 import { useOptimisticMutation } from '@/shared/lib/optimistic/useOptimisticMutation';
 import { mediaEntity } from '@/shared/lib/optimistic/entityKeys';
 
@@ -10,7 +14,12 @@ export function useDeleteMedia() {
   return useOptimisticMutation({
     mutationFn: async ({ mediaId }) => {
       const res = await api.delete(`/workflows/media/${mediaId}`);
-      if (!res.ok) throw new Error(res.message || 'Failed to delete media');
+      if (!res || res.ok === false || res.success === false) {
+        const err = new Error(res?.message || res?.error || 'Failed to delete media');
+        if (res?.status || res?.statusCode) err.status = res.status || res.statusCode;
+        if (res?.errorCode || res?.code) err.errorCode = res.errorCode || res.code;
+        throw err;
+      }
       return res;
     },
     getCacheKeys: ({ projectId }) => (projectId ? [queryKeys.projectData.byProject(projectId)] : []),
@@ -45,7 +54,10 @@ export function useDeleteMedia() {
       ...(projectId ? [queryKeys.projectData.byProject(projectId)] : []),
       ['workflows'],
     ],
-    errorMessage: 'Failed to delete media. Changes were reverted.',
+    errorMessage: (err) =>
+      isMediaProcessingConflictError(err)
+        ? getMediaProcessingConflictMessage(err)
+        : 'Failed to delete media. Changes were reverted.',
   });
 }
 

@@ -4,6 +4,11 @@
 import { useRef, useState, useEffect, useCallback, forwardRef, memo } from "react";
 import { cn } from "@/shared/lib/utils";
 import { ProcessingCard } from "@/components/cinema-studio/media/ProcessingCard";
+import { UploadingCard } from "@/components/cinema-studio/media/UploadingCard";
+import {
+  WorkflowTypeBadge,
+  resolveWorkflowBadgeType,
+} from "@/components/cinema-studio/media/WorkflowTypeBadge";
 import { FlowErrorTile } from "@/components/primitives/FlowErrorTile";
 import {
   ContextMenu,
@@ -19,6 +24,10 @@ import {
 import { MenuItemsList } from "@/components/base/menu";
 import { StudioContextMenuContent } from "@/components/cinema-studio/media/StudioItemMenu";
 import { useMediaViewerCore } from "@/features/workflows/core/useMediaViewerCore";
+import {
+  resolveMediaLifecycle,
+  resolveStudioActions,
+} from "@/features/workflows/lib/studioActionRules";
 import { getBulkContextMenuSnapshot } from "@/features/workflows/model/studioBulkMenuBridge";
 import { HugeIcon } from "@/components/primitives/HugeIcon";
 import { Button } from "@/components/base/button";
@@ -169,6 +178,7 @@ export const CoreMediaItemPresenter = memo(
       aspectRatio: propAspectRatio = null,
       error: propError = null,
       progress: propProgress = null,
+      prompt: propPrompt = null,
 
       // Display configuration
       fit = "contain",
@@ -223,6 +233,7 @@ export const CoreMediaItemPresenter = memo(
       isLiked: propIsLiked = null,
       onLikeToggle = null,
       showLikedBadge = true,
+      showTypeBadge = true,
       showVideoBadge = true,
       isSelected = false,
       isSelectionMode = false,
@@ -246,15 +257,47 @@ export const CoreMediaItemPresenter = memo(
           item?.asset_type === "video" ||
           (url && /\.(mp4|webm|mov|m4v)(\?.*)?$/i.test(url))
         );
-    const rawStatus = propStatus || core.status || item?.status || (url ? "completed" : null);
-    const status = String(rawStatus || "").trim().toLowerCase();
+    const rawStatus = propStatus || core.status || item?.raw?.status || item?.status || workflow?.status || (url ? "completed" : null);
     const error = propError || core.error || item?.error || null;
+    const effectiveStatus =
+      rawStatus && String(rawStatus).trim().toLowerCase() !== "completed"
+        ? rawStatus
+        : error && !url
+          ? "failed"
+          : rawStatus;
     const progress = propProgress !== null ? propProgress : (core.progress !== undefined ? core.progress : item?.progress ?? null);
+    const uploadId =
+      item?.uploadId ||
+      item?.raw?.uploadId ||
+      workflow?.uploadId ||
+      item?.workflowId ||
+      item?.workflow_id ||
+      workflow?.name ||
+      workflow?.id ||
+      null;
     const displayAspect = propAspect || propAspectRatio || core.displayAspect;
 
-    const isCompleted = (status === "completed" || status === "success" || status === "ready") && Boolean(url);
-    const isProcessing = ["processing", "pending", "uploading", "queued", "in_progress", "starting"].includes(status);
-    const isFailed = ["failed", "error", "rejected"].includes(status) || Boolean(error && !url);
+    const actionRules = resolveStudioActions({
+      workflow,
+      item,
+      status: effectiveStatus,
+      isVideo,
+      hasUrl: Boolean(url),
+      hasReusablePrompt: canReusePrompt,
+      isSelectionMode,
+      isSelected,
+    });
+    // Render media visuals from the targeted item so a sibling in-flight item in workflow.items
+    // never replaces a completed preview with ProcessingCard.
+    const visualLifecycle = resolveMediaLifecycle({
+      status: effectiveStatus,
+      item,
+      workflow: item || propStatus ? null : workflow,
+    });
+    const isUploading = visualLifecycle === "uploading";
+    const isCompleted = visualLifecycle === "completed" && Boolean(url);
+    const isProcessing = visualLifecycle === "processing";
+    const isFailed = visualLifecycle === "failed";
     const isLiked = propIsLiked !== null
       ? Boolean(propIsLiked)
       : Boolean(
@@ -267,14 +310,25 @@ export const CoreMediaItemPresenter = memo(
 
     // Directly respect showLikedBadge (no route-sniffing hazard)
     const effectiveShowLikedBadge = Boolean(showLikedBadge);
-    const effectiveShowVideoBadge = Boolean(showVideoBadge) && Boolean(isVideo) && Boolean(url) && !isProcessing && !isFailed;
+    const workflowBadgeType = resolveWorkflowBadgeType({ workflow, item, isVideo });
+    const effectiveShowTypeBadge =
+      Boolean(showTypeBadge) &&
+      Boolean(showVideoBadge) &&
+      Boolean(workflowBadgeType) &&
+      Boolean(url) &&
+      !isUploading &&
+      !isProcessing &&
+      !isFailed;
 
     // Local or controlled menu open state
     const [internalMenuOpen, setInternalMenuOpen] = useState(false);
     const isMenuOpen = controlledMenuOpen !== undefined ? controlledMenuOpen : internalMenuOpen;
     const _setMenuOpen = controlledOnMenuOpenChange || setInternalMenuOpen;
 
-    const isMenuActive = !isSelectionMode && Boolean(showMenu || activeMenu || menuSlot || menuTrigger);
+    const isMenuActive =
+      actionRules.can.openMenu &&
+      !isSelectionMode &&
+      Boolean(showMenu || activeMenu || menuSlot || menuTrigger);
 
     // Local hover state for overlay visibility
     const [isHovered, setIsHovered] = useState(false);
@@ -307,12 +361,19 @@ export const CoreMediaItemPresenter = memo(
       }
     }, [isSelectionMode, videoRef]);
 
+    const isInFlight = actionRules.isInFlight;
+
     const handleContextMenu = useCallback((e) => {
+      if (isInFlight) {
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
       propOnContextMenu?.(e);
       if (isSelectionMode && !isSelected) {
         e.preventDefault();
       }
-    }, [propOnContextMenu, isSelectionMode, isSelected]);
+    }, [isInFlight, propOnContextMenu, isSelectionMode, isSelected]);
 
     const handleVideoLoaded = useCallback((e) => {
       core.handleVideoLoadedMetadata?.(e);
@@ -331,11 +392,15 @@ export const CoreMediaItemPresenter = memo(
     }, [onClick, workflow, core.targetItem, item, url]);
 
     const isContain = fit === "contain";
-    const hasContextMenu = Boolean((contextMenuItems && contextMenuItems.length > 0) || contextMenuContent);
-    const showBulkContextMenu = Boolean(isSelectionMode && isSelected);
-    const showSingleContextMenu = Boolean(!isSelectionMode && hasContextMenu);
-    const shouldWrapContextMenu = Boolean(hasContextMenu || selectionEnabled || showBulkContextMenu);
-    const isContextMenuDisabled = !showBulkContextMenu && !showSingleContextMenu;
+    const effectiveSelectionEnabled = Boolean(selectionEnabled && actionRules.can.select);
+    const canNativeDrag = Boolean(draggable && !isSelectionMode && actionRules.can.drag);
+    const hasContextMenu = Boolean(
+      !isInFlight && ((contextMenuItems && contextMenuItems.length > 0) || contextMenuContent)
+    );
+    const showBulkContextMenu = Boolean(actionRules.can.openMenu && isSelectionMode && isSelected);
+    const showSingleContextMenu = Boolean(actionRules.can.openMenu && !isSelectionMode && hasContextMenu);
+    const shouldWrapContextMenu = Boolean(hasContextMenu || effectiveSelectionEnabled || showBulkContextMenu);
+    const isContextMenuDisabled = !actionRules.can.openMenu || (!showBulkContextMenu && !showSingleContextMenu);
 
     const [bulkMenuSnapshot, setBulkMenuSnapshot] = useState(null);
     const handleContextMenuOpenChange = useCallback(
@@ -357,10 +422,20 @@ export const CoreMediaItemPresenter = memo(
 
     const containerStyle = displayAspect ? { aspectRatio: displayAspect, ...propStyle } : propStyle;
 
-    const displayName =
+    const resolvedPrompt =
+      propPrompt ||
       core.prompt ||
+      item?.params?.prompt ||
       item?.prompt ||
       core.targetItem?.prompt ||
+      workflow?.prompt ||
+      workflow?.metadata?.prompt ||
+      workflow?.metadata?.generationConfig?.prompt ||
+      item?.generationConfig?.prompt ||
+      null;
+
+    const displayName =
+      resolvedPrompt ||
       item?.name ||
       core.targetItem?.name ||
       "Media";
@@ -368,23 +443,27 @@ export const CoreMediaItemPresenter = memo(
     const cardElement = (
       <div
         ref={ref}
-        data-selected={isSelected ? "true" : undefined}
+        data-selected={isSelected && !isInFlight ? "true" : undefined}
         className={cn(
           "group relative select-none items-center justify-center overflow-hidden rounded-xxxs shadow-none transition-opacity duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
           surface === "card" ? "bg-surface-card border-0" : "bg-black/40",
           isContain ? "inline-flex w-fit h-fit max-w-full max-h-full shrink-0" : "flex w-full h-full",
-          draggable && !isSelectionMode
-            ? "cursor-grab active:cursor-grabbing"
-            : isSelectionMode || onClick
-              ? "cursor-pointer"
-              : "",
-          isSelectionMode && !isSelected ? "opacity-50 hover:opacity-75" : "opacity-100",
+          isInFlight
+            ? "cursor-default"
+            : canNativeDrag
+              ? "cursor-grab active:cursor-grabbing"
+              : isSelectionMode || onClick
+                ? "cursor-pointer"
+                : "",
+          isSelectionMode && !isSelected
+            ? (isInFlight ? "opacity-50" : "opacity-50 hover:opacity-75")
+            : "opacity-100",
           className
         )}
-        draggable={draggable && !isSelectionMode}
-        onDragStart={draggable && !isSelectionMode ? onDragStart : undefined}
-        onDragEnd={draggable && !isSelectionMode ? onDragEnd : undefined}
-        onClick={handleCardClick}
+        draggable={canNativeDrag}
+        onDragStart={canNativeDrag ? onDragStart : undefined}
+        onDragEnd={canNativeDrag ? onDragEnd : undefined}
+        onClick={isInFlight ? undefined : handleCardClick}
         onContextMenu={handleContextMenu}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
@@ -450,21 +529,35 @@ export const CoreMediaItemPresenter = memo(
             </div>
           )}
 
+          {isUploading && (
+            <UploadingCard
+              src={url}
+              isVideo={isVideo}
+              progress={progress}
+              uploadId={uploadId}
+              alt={displayName}
+              className="w-full h-full rounded-none"
+            />
+          )}
+
           {isProcessing && (
             <ProcessingCard
               progress={progress}
               isVideo={isVideo}
               showPlayIcon={isVideo}
-              className="w-full h-full rounded-none"
+              prompt={resolvedPrompt}
+              onReusePrompt={undefined}
+              canReusePrompt={false}
+              className="w-full h-full rounded-none border-0"
             />
           )}
 
           {isFailed && (
             <FlowErrorTile
               error={error}
-              onReusePrompt={isSelectionMode ? undefined : onRetry}
-              canReusePrompt={!isSelectionMode && canReusePrompt}
-              onDelete={isSelectionMode ? undefined : onDelete}
+              onReusePrompt={actionRules.can.reusePrompt ? onRetry : undefined}
+              canReusePrompt={actionRules.can.reusePrompt}
+              onDelete={actionRules.can.delete ? onDelete : undefined}
               hideActions={isSelectionMode}
             />
           )}
@@ -484,8 +577,8 @@ export const CoreMediaItemPresenter = memo(
           className={cn(
             "absolute inset-0 z-20 pointer-events-none flex flex-col justify-between transition-opacity duration-200",
             showHoverOverlay &&
-              !(isLiked && effectiveShowLikedBadge) &&
-              !effectiveShowVideoBadge &&
+              !(actionRules.can.like && isLiked && effectiveShowLikedBadge) &&
+              !effectiveShowTypeBadge &&
               !(isSelectionMode || isSelected)
               ? (isHovered || isMenuOpen ? "opacity-100" : "opacity-0")
               : "opacity-100"
@@ -495,7 +588,7 @@ export const CoreMediaItemPresenter = memo(
           <div className="w-full flex items-start justify-between p-2.5 gap-2">
             {/* Top Left Slot */}
             <div className="pointer-events-auto flex items-center gap-1.5">
-              {selectionEnabled && (
+              {effectiveSelectionEnabled && (
                 <div
                   data-slot="card-select-checkbox"
                   className={cn(
@@ -522,7 +615,7 @@ export const CoreMediaItemPresenter = memo(
                   />
                 </div>
               )}
-              {!isSelectionMode && isLiked && effectiveShowLikedBadge && (
+              {actionRules.can.like && isLiked && effectiveShowLikedBadge && (
                 <Button
                   type="button"
                   variant="ghost"
@@ -539,23 +632,11 @@ export const CoreMediaItemPresenter = memo(
                 >
                   <HugeIcon
                     name="favourite"
+                    filled
                     size="sm"
                     className="text-white drop-shadow"
                   />
                 </Button>
-              )}
-              {effectiveShowVideoBadge && (
-                <div
-                  className="flex items-center justify-center w-7 h-7 bg-transparent border-0 shadow-none pointer-events-none select-none"
-                  title="Video"
-                  aria-label="Video"
-                >
-                  <HugeIcon
-                    name="video-01"
-                    size="sm"
-                    className="text-white drop-shadow"
-                  />
-                </div>
               )}
               {!isSelectionMode && topLeft}
               {isMenuActive && menuPosition === "topLeft" && renderDropdownMenu()}
@@ -571,18 +652,26 @@ export const CoreMediaItemPresenter = memo(
           </div>
 
           {/* Bottom edge slots */}
-          {!isSelectionMode && (
+          {(!isSelectionMode || effectiveShowTypeBadge) && (
             <div className="w-full flex items-end justify-between p-3 gap-2">
               {/* Bottom Left Slot */}
-              <div className="pointer-events-auto flex items-center gap-2 min-w-0">
-                {bottomLeft}
-                {isMenuActive && menuPosition === "bottomLeft" && renderDropdownMenu()}
-              </div>
+              {!isSelectionMode && (
+                <div className="pointer-events-auto flex items-center gap-2 min-w-0">
+                  {bottomLeft}
+                  {isMenuActive && menuPosition === "bottomLeft" && renderDropdownMenu()}
+                </div>
+              )}
 
               {/* Bottom Right Slot */}
-              <div className="pointer-events-auto flex items-center gap-2 ml-auto shrink-0">
-                {bottomRight}
-                {isMenuActive && menuPosition === "bottomRight" && renderDropdownMenu()}
+              <div
+                data-slot="media-bottom-right"
+                className="pointer-events-auto flex items-center gap-2 ml-auto shrink-0"
+              >
+                {!isSelectionMode && bottomRight}
+                {effectiveShowTypeBadge && (
+                  <WorkflowTypeBadge type={workflowBadgeType} />
+                )}
+                {!isSelectionMode && isMenuActive && menuPosition === "bottomRight" && renderDropdownMenu()}
               </div>
             </div>
           )}
@@ -603,7 +692,7 @@ export const CoreMediaItemPresenter = memo(
         )}
 
         {/* ── 6. Subtle Dark Hover Scrim (Cards) ── */}
-        {!isContain && !isProcessing && !isFailed && !isSelectionMode && (
+        {!isContain && !isUploading && !isProcessing && !isFailed && !isSelectionMode && (
           <div
             aria-hidden="true"
             className="pointer-events-none absolute inset-0 z-10 bg-black/25 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
@@ -611,14 +700,14 @@ export const CoreMediaItemPresenter = memo(
         )}
 
         {/* ── 7. Selected Frame Outline (single hairline 1px border inside contain: paint) ── */}
-        {(selectionEnabled || isSelected) && (
+        {(effectiveSelectionEnabled || (isSelected && !isInFlight)) && (
           <div
             data-slot="card-selected-outline"
             aria-hidden="true"
             className={cn(
               "pointer-events-none absolute inset-0 z-30 rounded-xxxs border border-text-primary/65 transition-opacity duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
               outlineClassName,
-              isSelected ? "opacity-100" : "opacity-0"
+              isSelected && !isInFlight ? "opacity-100" : "opacity-0"
             )}
           />
         )}

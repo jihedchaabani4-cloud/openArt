@@ -4,6 +4,10 @@
 
 import { toast } from "sonner";
 import { logger } from "@/shared/lib/logger";
+import {
+  isMediaProcessingConflictError,
+  getMediaProcessingConflictMessage,
+} from "@/features/workflows/lib/mediaStatusHelpers";
 
 const DEFAULT_ERROR_MESSAGE = "Action failed. Changes were reverted.";
 const SENSITIVE_KEY_REGEX = /prompt|token|secret|password|apikey|api_key|bearer/i;
@@ -36,7 +40,9 @@ function sanitizeLogContext(obj) {
 export function notifyOptimisticError(error, customMessage, context = {}) {
   let message;
 
-  if (typeof customMessage === "function") {
+  if (isMediaProcessingConflictError(error)) {
+    message = getMediaProcessingConflictMessage(error);
+  } else if (typeof customMessage === "function") {
     message = customMessage(error);
   } else if (typeof customMessage === "string" && customMessage.trim() !== "") {
     message = customMessage.trim();

@@ -2,6 +2,10 @@ import { useMemo } from "react";
 import { useToggleWorkflowLike, useRemoveWorkflow } from "../api/workflowsApi";
 import { getItemMetadata } from "@/shared/lib/generationUtils";
 import { resolveMainMedia } from "../core/resolveMediaRef";
+import {
+  getWorkflowEntityType,
+  resolveStudioActions,
+} from "../lib/studioActionRules";
 import { downloadFile } from "@/shared/lib/utils";
 import { usePathname, useRouter } from "next/navigation";
 import { canAnyModelAcceptEntity } from "@/features/studio";
@@ -64,7 +68,6 @@ export function useWorkflowActions(workflow, item = null, options = {}) {
     : { status: 'processing', url: null, isVideo: false, isAudio: false, aspect: '1/1', ratioStr: null, prompt: '' };
   const { isVideo, url } = metadata;
 
-  const isInProgress = ["processing", "pending", "uploading"].includes(metadata?.status);
   const prompt = targetItem?.params?.prompt 
                 || targetItem?.prompt
                 || targetItem?.mediaMetadata?.requestData?.promptInputs?.[0]?.textInput 
@@ -76,24 +79,17 @@ export function useWorkflowActions(workflow, item = null, options = {}) {
                 || workflow?.metadata?.displayName 
                 || "";
 
-  const canUseAsInput = metadata?.status === "completed" && !!url;
-  const reuseWorkflow = withPrimaryMediaFallback(workflow, targetItem);
-  const reusableGeneration = resolveReusableGeneration(reuseWorkflow);
-  const showReuseSettings = hasGeneratedPrimaryMedia(reuseWorkflow);
-  const canReuseSettings = !isInProgress && Boolean(reusableGeneration);
-  const canEnterEdit = metadata?.status === "completed" || isInProgress;
-  // Delete is allowed in UI (server enforces auth separately);
-  // only block while a job is in progress to avoid race/confusion.
-  const canDelete = !isInProgress;
+  const entityType = getWorkflowEntityType(workflow);
   const isElementSheet = workflow?.workflow_type === "ELEMENT_SHEET";
-  const isCharacter = workflow?.workflow_type === "CHARACTER_SHEET" || Boolean(workflow?.is_character) || workflow?.entity_type === "character";
+  const isEntity = entityType === "character" || entityType === "element";
   const projectId = effectiveProjectId;
   const { data: modelsData } = useRealBackendModels({ projectId });
   const models = modelsData?.models || [];
 
-  const isEntity = isElementSheet || isCharacter;
+  const reuseWorkflow = withPrimaryMediaFallback(workflow, targetItem);
+  const reusableGeneration = resolveReusableGeneration(reuseWorkflow);
+  const showReuseSettings = hasGeneratedPrimaryMedia(reuseWorkflow);
   const canAcceptEntity = isEntity ? canAnyModelAcceptEntity(workflow || targetItem, models) : true;
-  const canAddToPrompt = canUseAsInput && canAcceptEntity && !isVideo;
 
   const promptBarIdentity = useMemo(
     () => ({
@@ -104,7 +100,26 @@ export function useWorkflowActions(workflow, item = null, options = {}) {
   );
   const isFrameMode = usePromptBarSnapshot(promptBarIdentity, selectIsFrameMode);
 
+  const actionRules = resolveStudioActions({
+    entityType,
+    workflow,
+    item: targetItem,
+    status: metadata?.status,
+    isVideo,
+    isFrameMode,
+    hasUrl: Boolean(url),
+    hasReusablePrompt: Boolean(reusableGeneration),
+    showReuse: showReuseSettings,
+    canModelAcceptEntity: canAcceptEntity,
+  });
+
+  const canUseAsInput = actionRules.isCompleted && Boolean(url);
+  const canReuseSettings = actionRules.can.reusePrompt;
+  const canDelete = actionRules.can.delete;
+  const canAddToPrompt = actionRules.can.addToPrompt || actionRules.can.addFrame;
+
   const handleLike = () => {
+    if (!actionRules.can.like) return;
     if (workflow.id || workflow.name) {
       toggleLike({ 
         workflowId: workflow.id || workflow.name,
@@ -127,6 +142,7 @@ export function useWorkflowActions(workflow, item = null, options = {}) {
   };
 
   const handleDownload = () => {
+    if (!actionRules.can.download) return;
     downloadFile(url, isVideo ? "video.mp4" : "image.png");
   };
 
@@ -148,7 +164,7 @@ export function useWorkflowActions(workflow, item = null, options = {}) {
   };
 
   const handleEdit = () => {
-    if (!canEnterEdit) return;
+    if (!actionRules.can.navigate) return;
     const assetId = targetItem?.asset_id || targetItem?.name || targetItem?.id || "";
 
     // Redirect to edit page

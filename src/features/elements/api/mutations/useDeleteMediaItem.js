@@ -4,6 +4,10 @@ import { api } from "@/shared/api/client";
 import { elementService } from "../elementService";
 import { queryKeys } from "@/shared/api/queryKeys";
 import { matchMediaId } from "@/features/workflows/lib/cacheHelpers";
+import {
+  isMediaProcessingConflictError,
+  getMediaProcessingConflictMessage,
+} from "@/features/workflows/lib/mediaStatusHelpers";
 import { useOptimisticMutation } from "@/shared/lib/optimistic/useOptimisticMutation";
 import { mediaEntity } from "@/shared/lib/optimistic/entityKeys";
 
@@ -60,7 +64,10 @@ export function useDeleteMediaItem() {
       ...(projectId ? [queryKeys.projectData.byProject(projectId)] : []),
       ['workflows'],
     ],
-    errorMessage: "Failed to delete element media. Changes were reverted.",
+    errorMessage: (err) =>
+      isMediaProcessingConflictError(err)
+        ? getMediaProcessingConflictMessage(err)
+        : "Failed to delete element media. Changes were reverted.",
   });
 }
 

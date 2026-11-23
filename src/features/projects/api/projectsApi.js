@@ -5,6 +5,10 @@ import { queryKeys } from '@/shared/api/queryKeys';
 import { useAuthSession } from '@/shared/api/auth';
 import { projectEntity } from '@/shared/lib/optimistic/entityKeys';
 import { useOptimisticMutation } from '@/shared/lib/optimistic/useOptimisticMutation';
+import {
+  isMediaProcessingConflictError,
+  getMediaProcessingConflictMessage,
+} from '@/features/workflows/lib/mediaStatusHelpers';
 
 export function useProjects() {
   const { data: user, isLoading: authLoading } = useAuthSession();
@@ -93,7 +97,12 @@ export function useDeleteProject() {
   return useOptimisticMutation({
     mutationFn: async (projectId) => {
       const res = await api.delete(`/projects/${projectId}`);
-      if (res.ok === false || res.success === false) throw new Error(res.message || 'Failed to delete project');
+      if (res && (res.ok === false || res.success === false)) {
+        const err = new Error(res.message || res.error || 'Failed to delete project');
+        if (res.status || res.statusCode) err.status = res.status || res.statusCode;
+        if (res.errorCode || res.code) err.errorCode = res.errorCode || res.code;
+        throw err;
+      }
       return projectId;
     },
 
@@ -111,7 +120,10 @@ export function useDeleteProject() {
 
     invalidateKeys: () => [queryKeys.projects.all()],
 
-    errorMessage: "Failed to delete project. Changes were reverted.",
+    errorMessage: (err) =>
+      isMediaProcessingConflictError(err)
+        ? getMediaProcessingConflictMessage(err)
+        : "Failed to delete project. Changes were reverted.",
   });
 }
 

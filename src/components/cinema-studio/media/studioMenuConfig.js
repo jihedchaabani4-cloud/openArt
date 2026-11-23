@@ -1,61 +1,13 @@
 import { FOLDER_COLOR_OPTIONS, DEFAULT_FOLDER_GRADIENT } from "@/features/folders/model/folder-color-tokens";
+import {
+  getWorkflowEntityType,
+  resolveStudioActions,
+} from "@/features/workflows/lib/studioActionRules";
+
+export { getWorkflowEntityType };
 
 /**
- * Detects the entity type of a workflow:
- * - "character"
- * - "element"
- * - "upload"
- * - "generation"
- */
-export function getWorkflowEntityType(workflow) {
-  if (!workflow) return "generation";
-  if (
-    workflow.type === "collection" ||
-    workflow.itemType === "collection" ||
-    workflow.entity_type === "collection" ||
-    workflow.entity_type === "folder" ||
-    Boolean(workflow.is_collection) ||
-    Boolean(workflow.is_folder)
-  ) {
-    return "collection";
-  }
-  const wType = String(workflow.workflow_type || workflow.workflowType || "").toUpperCase();
-  if (
-    wType === "CHARACTER" ||
-    wType === "CHARACTER_SHEET" ||
-    Boolean(workflow.is_character) ||
-    workflow.entity_type === "character" ||
-    Boolean(workflow.characterId) ||
-    Boolean(workflow.character)
-  ) {
-    return "character";
-  }
-  if (
-    wType === "ELEMENT" ||
-    wType === "ELEMENT_SHEET" ||
-    Boolean(workflow.is_element) ||
-    workflow.entity_type === "element" ||
-    Boolean(workflow.elementId) ||
-    Boolean(workflow.element)
-  ) {
-    return "element";
-  }
-  if (wType === "UPLOAD" || workflow.feed_type === "upload") {
-    return "upload";
-  }
-  return "generation";
-}
-
-/**
- * Builds a structured, type-specific list of menu items.
- * Supports:
- * - "character"
- * - "element"
- * - "upload"
- * - "generation"
- *
- * Each item has { key, label, icon, onClick, disabled, variant, iconClassName, fill }
- * or { key, type: "separator" }.
+ * Strips leading, trailing, and consecutive duplicate separators.
  */
 function sanitizeSeparators(items) {
   const result = [];
@@ -78,9 +30,14 @@ function sanitizeSeparators(items) {
   return result;
 }
 
+/**
+ * Builds a structured, rule-driven list of menu items for:
+ * "collection" | "folder" | "character" | "element" | "upload" | "generation".
+ * All allowed/disabled gates come from `studioActionRules.js`.
+ */
 export function getStudioMenuItems({
   type = "generation",
-  workflow: _workflow = null,
+  workflow = null,
   item = null,
   actions = {},
   state = {},
@@ -129,7 +86,27 @@ export function getStudioMenuItems({
     isFrameMode = false,
   } = state;
 
-  // 1. Favorite / Like
+  const isCollection = type === "collection" || type === "folder";
+  const resolvedStatus = isCollection
+    ? null
+    : state.status ?? (state.isFailed ? "failed" : state.isInFlight ? "processing" : null);
+
+  const rules = resolveStudioActions({
+    entityType: type,
+    workflow: isCollection ? null : workflow,
+    item: isCollection ? null : item,
+    status: resolvedStatus,
+    isVideo,
+    isFrameMode,
+    hasReusablePrompt: canReuse,
+    showReuse,
+    canModelAcceptEntity: canAddToPrompt,
+  });
+
+  if (!rules.can.openMenu) {
+    return [];
+  }
+
   const itemLike = {
     key: "like",
     icon: "favourite",
@@ -138,16 +115,14 @@ export function getStudioMenuItems({
     onClick: handleLike,
   };
 
-  // 2. Reuse prompt / settings
   const itemReuse = {
     key: "reuse",
     icon: "arrow-turn-backward",
     label: "Réutiliser le prompt",
-    disabled: !canReuse,
+    disabled: !rules.can.reusePrompt,
     onClick: handleReuseSettings,
   };
 
-  // 3. Animate (Image to Video start frame - upload & generation only)
   const itemAnimate = {
     key: "animate",
     icon: "film-01",
@@ -155,21 +130,19 @@ export function getStudioMenuItems({
     onClick: handleAnimate,
   };
 
-  // 4. Add to prompt (Phase 1 — Reference mode)
   const itemAddToPrompt = {
     key: "add",
     icon: "add-01",
     label: "Ajouter au prompt",
-    disabled: !canAddToPrompt,
+    disabled: !rules.can.addToPrompt,
     onClick: handleAddToPrompt,
   };
 
-  // 4b. Add as Start / End Frame (Phase 2 — Video Frames mode)
   const itemAddStartFrame = {
     key: "add-start-frame",
     icon: "chevron-first",
     label: "Ajouter en Start Frame",
-    disabled: !canAddToPrompt,
+    disabled: !rules.can.addFrame,
     onClick: handleAddStartFrame,
   };
 
@@ -177,11 +150,10 @@ export function getStudioMenuItems({
     key: "add-end-frame",
     icon: "chevron-last",
     label: "Ajouter en End Frame",
-    disabled: !canAddToPrompt,
+    disabled: !rules.can.addFrame,
     onClick: handleAddEndFrame,
   };
 
-  // 5. Download
   const itemDownload = {
     key: "download",
     icon: "download-04",
@@ -189,7 +161,6 @@ export function getStudioMenuItems({
     onClick: handleDownload,
   };
 
-  // 6. Rename
   const itemRename = {
     key: "rename",
     icon: "pencil-edit-02",
@@ -197,7 +168,6 @@ export function getStudioMenuItems({
     onClick: onRename,
   };
 
-  // 8. Publish to YouTube (video only)
   const itemPublishYoutube = {
     key: "youtube",
     icon: "video-02",
@@ -205,7 +175,6 @@ export function getStudioMenuItems({
     onClick: handlePublishYoutube,
   };
 
-  // 9. Set project cover
   const itemSetCover = {
     key: "cover",
     icon: "image-01",
@@ -213,7 +182,6 @@ export function getStudioMenuItems({
     onClick: handleSetCover,
   };
 
-  // 10. Report result
   const itemReport = {
     key: "report",
     icon: "flag-02",
@@ -221,7 +189,6 @@ export function getStudioMenuItems({
     onClick: handleReport,
   };
 
-  // 11. Tile details (optional toggle)
   const itemTileDetails = {
     key: "tileDetails",
     icon: showTileDetails ? "view-off-slash" : "view",
@@ -229,198 +196,120 @@ export function getStudioMenuItems({
     onClick: toggleTileDetails,
   };
 
-  // 12. Delete
-  const itemDelete = (label = "Placer dans la corbeille") => ({
+  const deleteLabel =
+    rules.deleteMode === "permanent"
+      ? "Supprimer définitivement"
+      : "Placer dans la corbeille";
+
+  const itemDelete = {
     key: "delete",
     icon: "delete-02",
-    label,
-    disabled: !canDelete,
-    variant: "destructive",
-    onClick: onDelete,
-  });
-
-  // Folder / Collection specific items
-  const itemFolderOpenInNewTab = {
-    key: "open_in_new",
-    label: "Open in new tab",
-    icon: "link-square-02",
-    onClick: openInNewTabAction,
-  };
-
-  const itemFolderNewSubfolder = {
-    key: "create_new_folder",
-    label: "New subfolder",
-    icon: "folder-add",
-    onClick: createSubfolderAction,
-  };
-
-  const itemFolderEdit = {
-    key: "edit",
-    label: "Edit",
-    icon: "pencil-edit-02",
-    onClick: editAction,
-  };
-
-  const itemFolderMoveTo = {
-    key: "drive_file_move",
-    label: "Move to...",
-    icon: "folder-transfer",
-    onClick: moveToAction,
-  };
-
-  const itemFolderLike = {
-    key: "like",
-    label: isLiked ? "Unlike collection" : "Like collection",
-    icon: "favourite",
-    fill: isLiked,
-    iconClassName: isLiked ? "text-error" : undefined,
-    onClick: handleLike,
-  };
-
-  const itemFolderDownload = {
-    key: "download",
-    label: isDownloading ? "Downloading..." : "Download collection",
-    icon: "download-04",
-    disabled: isDownloading,
-    onClick: handleDownload,
-  };
-
-  const folderColor = state.folderColor || (item?.color ?? null);
-  const colorSubItems = (FOLDER_COLOR_OPTIONS || []).map((c) => ({
-    key: `color-${c.id}`,
-    label: c.label,
-    hex: c.hex,
-    bgClass: c.bgClass,
-    checked: folderColor?.toLowerCase() === c.hex.toLowerCase(),
-    onClick: () => setColorAction?.(c.hex),
-  })).concat([
-    { key: "sep-color-default", type: "separator" },
-    {
-      key: "color-default",
-      label: "Blanc (Défaut)",
-      hex: null,
-      bgClass: "border border-border folder-swatch-white",
-      checked: !folderColor || folderColor.toLowerCase() === DEFAULT_FOLDER_GRADIENT?.hex?.toLowerCase(),
-      onClick: () => setColorAction?.(null),
-    },
-  ]);
-
-  const itemFolderColor = {
-    key: "color",
-    label: "Color",
-    icon: "paint-board",
-    onClick: setColorAction,
-    subItems: colorSubItems,
-  };
-
-  const itemFolderDelete = {
-    key: "delete",
-    label: "Delete",
-    icon: "delete-02",
+    label: deleteLabel,
+    disabled: !(rules.can.delete && canDelete),
     variant: "destructive",
     onClick: onDelete,
   };
 
   const separator = (id) => ({ key: `sep-${id}`, type: "separator" });
 
-  const frameModeItems =
-    !isVideo && canAddToPrompt
-      ? [
-          ...(handleAddStartFrame ? [itemAddStartFrame] : []),
-          ...(handleAddEndFrame ? [itemAddEndFrame] : []),
-          ...(handleAddStartFrame || handleAddEndFrame ? [separator("frames")] : []),
-        ]
-      : [];
+  let rawItems;
 
-  const referenceModeItems = [
-    ...(handleAnimate && !isVideo ? [itemAnimate, separator("animate")] : []),
-    ...(!isVideo && canAddToPrompt ? [itemAddToPrompt] : []),
-  ];
+  if (rules.entityType === "collection") {
+    const folderColor = state.folderColor || (item?.color ?? null);
+    const colorSubItems = (FOLDER_COLOR_OPTIONS || [])
+      .map((c) => ({
+        key: `color-${c.id}`,
+        label: c.label,
+        hex: c.hex,
+        bgClass: c.bgClass,
+        checked: folderColor?.toLowerCase() === c.hex.toLowerCase(),
+        onClick: () => setColorAction?.(c.hex),
+      }))
+      .concat([
+        { key: "sep-color-default", type: "separator" },
+        {
+          key: "color-default",
+          label: "Blanc (Défaut)",
+          hex: null,
+          bgClass: "border border-border folder-swatch-white",
+          checked:
+            !folderColor ||
+            folderColor.toLowerCase() === DEFAULT_FOLDER_GRADIENT?.hex?.toLowerCase(),
+          onClick: () => setColorAction?.(null),
+        },
+      ]);
 
-  const mediaPromptActions = isFrameMode ? frameModeItems : referenceModeItems;
-
-  let rawItems = [];
-
-  switch (type) {
-    case "collection":
-    case "folder":
-      rawItems = [
-        itemFolderOpenInNewTab,
-        itemFolderNewSubfolder,
-        itemFolderEdit,
-        itemFolderMoveTo,
-        itemFolderLike,
-        itemFolderDownload,
-        separator("color"),
-        itemFolderColor,
-        separator("delete"),
-        itemFolderDelete,
-      ];
-      break;
-
-    case "character":
-      rawItems = [
-        itemLike,
-        ...(showReuse && canReuse ? [itemReuse] : []),
-        separator("fav"),
-        ...(!isFrameMode && !isVideo && canAddToPrompt ? [itemAddToPrompt] : []),
-        ...(handleDownload ? [itemDownload] : []),
-        ...(onRename ? [itemRename] : []),
-        ...(handleSetCover ? [itemSetCover, separator("cover")] : []),
-        ...(toggleTileDetails ? [itemTileDetails, separator("details")] : []),
-        ...(canDelete ? [itemDelete("Placer dans la corbeille")] : []),
-      ];
-      break;
-
-    case "element":
-      rawItems = [
-        itemLike,
-        ...(showReuse && canReuse ? [itemReuse] : []),
-        separator("fav"),
-        ...(!isFrameMode && !isVideo && canAddToPrompt ? [itemAddToPrompt] : []),
-        ...(handleDownload ? [itemDownload] : []),
-        ...(onRename ? [itemRename] : []),
-        ...(handleSetCover ? [itemSetCover, separator("cover")] : []),
-        ...(toggleTileDetails ? [itemTileDetails, separator("details")] : []),
-        ...(canDelete ? [itemDelete("Placer dans la corbeille")] : []),
-      ];
-      break;
-
-    case "upload":
-      rawItems = [
-        itemLike,
-        separator("fav"),
-        ...mediaPromptActions,
-        ...(handleDownload ? [itemDownload] : []),
-        ...(onRename ? [itemRename] : []),
-        ...(isVideo && handlePublishYoutube ? [itemPublishYoutube] : []),
-        ...(handleSetCover ? [itemSetCover, separator("cover")] : []),
-        ...(handleReport ? [itemReport, separator("report")] : []),
-        ...(toggleTileDetails ? [itemTileDetails, separator("details")] : []),
-        ...(canDelete ? [itemDelete("Placer dans la corbeille")] : []),
-      ];
-      break;
-
-    case "generation":
-    default:
-      rawItems = [
-        itemLike,
-        ...(showReuse && canReuse ? [itemReuse] : []),
-        separator("fav-reuse"),
-        ...mediaPromptActions,
-        ...(handleDownload ? [itemDownload] : []),
-        ...(onRename ? [itemRename] : []),
-        ...(isVideo && handlePublishYoutube ? [itemPublishYoutube] : []),
-        ...(handleSetCover ? [itemSetCover, separator("cover")] : []),
-        ...(handleReport ? [itemReport, separator("report")] : []),
-        ...(toggleTileDetails ? [itemTileDetails, separator("details")] : []),
-        ...(canDelete ? [itemDelete("Placer dans la corbeille")] : []),
-      ];
-      break;
+    rawItems = [
+      ...(rules.can.openInNewTab
+        ? [{ key: "open_in_new", label: "Open in new tab", icon: "link-square-02", onClick: openInNewTabAction }]
+        : []),
+      ...(rules.can.createSubfolder
+        ? [{ key: "create_new_folder", label: "New subfolder", icon: "folder-add", onClick: createSubfolderAction }]
+        : []),
+      ...(rules.can.edit
+        ? [{ key: "edit", label: "Edit", icon: "pencil-edit-02", onClick: editAction }]
+        : []),
+      ...(rules.can.move
+        ? [{ key: "drive_file_move", label: "Move to...", icon: "folder-transfer", onClick: moveToAction }]
+        : []),
+      ...(rules.can.like
+        ? [
+            {
+              key: "like",
+              label: isLiked ? "Unlike collection" : "Like collection",
+              icon: "favourite",
+              fill: isLiked,
+              iconClassName: isLiked ? "text-error" : undefined,
+              onClick: handleLike,
+            },
+          ]
+        : []),
+      ...(rules.can.download
+        ? [
+            {
+              key: "download",
+              label: isDownloading ? "Downloading..." : "Download collection",
+              icon: "download-04",
+              disabled: isDownloading,
+              onClick: handleDownload,
+            },
+          ]
+        : []),
+      separator("color"),
+      ...(rules.can.setColor
+        ? [{ key: "color", label: "Color", icon: "paint-board", onClick: setColorAction, subItems: colorSubItems }]
+        : []),
+      separator("delete"),
+      ...(rules.can.delete
+        ? [{ key: "delete", label: "Delete", icon: "delete-02", variant: "destructive", onClick: onDelete }]
+        : []),
+    ];
+  } else {
+    rawItems = [
+      ...(rules.can.like ? [itemLike] : []),
+      ...(rules.can.reusePrompt && handleReuseSettings ? [itemReuse] : []),
+      separator("fav"),
+      ...(rules.can.addFrame
+        ? [
+            ...(handleAddStartFrame ? [itemAddStartFrame] : []),
+            ...(handleAddEndFrame ? [itemAddEndFrame] : []),
+            ...(handleAddStartFrame || handleAddEndFrame ? [separator("frames")] : []),
+          ]
+        : []),
+      ...(rules.can.animate && handleAnimate ? [itemAnimate, separator("animate")] : []),
+      ...(rules.can.addToPrompt ? [itemAddToPrompt] : []),
+      ...(rules.can.download && handleDownload ? [itemDownload] : []),
+      ...(rules.can.rename && onRename ? [itemRename] : []),
+      ...(rules.can.publishYoutube && handlePublishYoutube ? [itemPublishYoutube] : []),
+      ...(rules.can.setCover && handleSetCover ? [itemSetCover, separator("cover")] : []),
+      ...(rules.can.report && handleReport ? [itemReport, separator("report")] : []),
+      ...(rules.can.details && toggleTileDetails ? [itemTileDetails, separator("details")] : []),
+      ...(rules.can.delete && canDelete && (!rules.isFailed || onDelete) ? [itemDelete] : []),
+    ];
   }
 
   const activeItems = rawItems.filter(
-    (item) => !item || item.type === "separator" || item.key?.startsWith("sep-") || !item.disabled
+    (entry) => !entry || entry.type === "separator" || entry.key?.startsWith("sep-") || !entry.disabled
   );
   return sanitizeSeparators(activeItems);
 }

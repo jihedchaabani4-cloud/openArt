@@ -14,18 +14,23 @@ import {
   parseSelectionKey,
 } from "@/features/workflows/model/useStudioSelectionStore";
 import { stripWorkflowPrefix } from "@/features/workflows/lib/cacheHelpers";
+import {
+  getWorkflowEntityType,
+  resolveStudioActions,
+} from "@/features/workflows/lib/studioActionRules";
 import { isFolderDescendant } from "@/features/folders/model/useFolderMove";
 import { usePromptStore, useStudioItemDrag } from "@/features/studio";
 import { useWorkflowsStore } from "@/features/workflows/model/useWorkflowsStore";
 import { Button } from "@/components/base/button";
 import { IconButton } from "@/components/base/icon-button";
 import { StudioItemDropdownMenu } from "./StudioItemMenu";
-import { getStudioMenuItems, getWorkflowEntityType } from "./studioMenuConfig";
+import { getStudioMenuItems } from "./studioMenuConfig";
 import { MediaView } from "@/features/media";
 
 const DRAG_TARGET_LABELS = {
   "add-to-collection": "Move to folder",
   "move-to-root": "Move to root",
+  "move-to-trash": "Move to trash",
   "move-out": "Move out",
 };
 
@@ -178,15 +183,24 @@ export const StudioMediaGridCard = React.memo(function StudioMediaGridCard({
   const entityType = getWorkflowEntityType(workflow);
 
   // ── Derived values (pure computation — no hooks) ───────────────────────
-  const isDone = status === "completed" && !!url;
-  const isError = ["rejected", "failed", "error"].includes(status);
-
-  const isCharacter = entityType === "character";
-  const isElement = entityType === "element";
-
-  const canReuse = canReuseSettings;
-  const isElementSheet = isElement;
-  const isDraggable = isDone && !isElementSheet && !isCharacter;
+  const actionRules = resolveStudioActions({
+    entityType,
+    workflow,
+    item,
+    status,
+    isVideo,
+    isFrameMode,
+    hasUrl: Boolean(url),
+    hasReusablePrompt: canReuseSettings,
+    showReuse: showReuseSettings,
+    canModelAcceptEntity: canAddToPrompt,
+    isSelectionMode,
+    isSelected,
+  });
+  const isDone = actionRules.isCompleted && Boolean(url);
+  const isError = actionRules.isFailed;
+  const isInFlight = actionRules.isInFlight;
+  const canDrag = actionRules.can.drag && canDelete;
 
   const displayName = workflow?.display_name
                    || workflow?.metadata?.displayName
@@ -272,18 +286,18 @@ export const StudioMediaGridCard = React.memo(function StudioMediaGridCard({
       onRename: startRename,
     },
     state: {
+      status,
       isLiked,
       isVideo,
       showTileDetails,
       canDelete,
-      canReuse,
+      canReuse: canReuseSettings,
       showReuse: showReuseSettings,
       canAddToPrompt,
       isFrameMode,
     },
   });
 
-  const canDrag = isDraggable && (!isSelectionMode || isSelected);
   const rawWfId = workflow?.id || workflow?.name || item?.workflow_id || item?.workflowId || item?.id;
   const wfId = rawWfId ? stripWorkflowPrefix(rawWfId) : null;
 
@@ -370,8 +384,10 @@ export const StudioMediaGridCard = React.memo(function StudioMediaGridCard({
   const dragTargetType = getDragTargetType(dragTarget);
   const dragTargetLabel = dragTargetType ? DRAG_TARGET_LABELS[dragTargetType] || null : null;
 
-  const hasAnyValidMedia = workflow?.items?.some((i) => ["completed", "processing"].includes(i.status));
-  const canNavigate = isDone || status === "processing" || hasAnyValidMedia;
+  const hasAnyCompletedMedia = workflow?.items?.some((i) =>
+    ["completed", "success", "ready"].includes(String(i?.status || "").toLowerCase())
+  );
+  const canNavigate = actionRules.can.navigate && (isDone || hasAnyCompletedMedia);
 
   const errorMsg = isError ? (
     item?.error ||
@@ -423,6 +439,7 @@ export const StudioMediaGridCard = React.memo(function StudioMediaGridCard({
         showLikedBadge={false}
         onLikeToggle={handleLike}
         progress={item?.progress ?? workflow?.progress}
+        prompt={prompt}
         fit="cover"
         surface="card"
         videoRef={videoRef}
@@ -436,39 +453,39 @@ export const StudioMediaGridCard = React.memo(function StudioMediaGridCard({
           progress.set(0);
         }}
         draggable={false}
-        isSelected={isSelected}
+        isSelected={actionRules.can.select && isSelected}
         isSelectionMode={isSelectionMode}
-        selectionEnabled={selectionEnabled}
-        onToggleSelect={onToggleSelect}
+        selectionEnabled={selectionEnabled && actionRules.can.select}
+        onToggleSelect={actionRules.can.select ? onToggleSelect : null}
         data-draggable-card={canDrag ? "true" : undefined}
         onPointerDown={canDrag && !isRenaming ? handlePointerDown : undefined}
         onDragStartCapture={canDrag ? (e) => e.preventDefault() : undefined}
-        onClick={!isRenaming || isSelectionMode ? (e) => {
+        onClick={isInFlight ? undefined : (!isRenaming || isSelectionMode ? (e) => {
           if (justDraggedRef.current) return;
-          if (isSelectionMode && onToggleSelect) {
+          if (isSelectionMode && actionRules.can.select && onToggleSelect) {
             onToggleSelect(e);
             return;
           }
           if (!canNavigate) return;
           onClick(workflow, e);
-        } : undefined}
+        } : undefined)}
         showHoverOverlay={false}
-        contextMenuItems={isDone || isError ? menuItems : null}
-        onRetry={isSelectionMode ? undefined : (e) => {
+        contextMenuItems={!isSelectionMode && actionRules.can.openMenu && (isDone || isError) ? menuItems : null}
+        onRetry={actionRules.can.reusePrompt ? (e) => {
           e?.stopPropagation();
           handleReuseSettings();
-        }}
-        canReusePrompt={!isSelectionMode && canReuse}
-        onDelete={isSelectionMode ? undefined : (e) => {
+        } : undefined}
+        canReusePrompt={actionRules.can.reusePrompt}
+        onDelete={actionRules.can.delete && canDelete ? (e) => {
           e?.stopPropagation();
           setIsDeleteConfirmOpen(true);
-        }}
+        } : undefined}
         className={cn(
           "shrink-0",
           isGalleryDragging && "opacity-50",
           canDrag && !isRenaming
             ? "cursor-grab active:cursor-grabbing"
-            : isSelectionMode || (canNavigate && !isRenaming)
+            : (isSelectionMode && actionRules.can.select) || (canNavigate && !isRenaming)
               ? "cursor-pointer"
               : "cursor-default",
           className
@@ -480,7 +497,7 @@ export const StudioMediaGridCard = React.memo(function StudioMediaGridCard({
             ? null
             : customTopRight !== null
             ? customTopRight
-            : (isDone && (
+            : (actionRules.can.like && isDone && (
               <div className="flex flex-col items-center gap-1.5 pointer-events-auto">
                 <div className={cn(
                   "transition-opacity duration-200",
@@ -494,6 +511,7 @@ export const StudioMediaGridCard = React.memo(function StudioMediaGridCard({
                   >
                     <HugeIcon
                       name="favourite"
+                      filled={isLiked}
                       className="text-white"
                     />
                   </IconButton>
@@ -512,7 +530,7 @@ export const StudioMediaGridCard = React.memo(function StudioMediaGridCard({
             ))
         }
         bottomLeft={
-          !isSelectionMode && displayName && !isRenaming && (
+          actionRules.can.rename && displayName && !isRenaming && (
             <div className={cn(
               "transition-opacity duration-200 pointer-events-auto",
               isError ? "max-w-[calc(100%-80px)]" : "max-w-[calc(100%-40px)]",
@@ -528,20 +546,6 @@ export const StudioMediaGridCard = React.memo(function StudioMediaGridCard({
               >
                 {truncatedDisplayName}
               </span>
-            </div>
-          )
-        }
-        bottomRight={
-          !isSelectionMode && isDone && (isCharacter || isElement) && (
-            <div
-              className="flex items-center justify-center w-7 h-7 rounded-full bg-white text-black shadow-none pointer-events-none transition-all duration-200 group-hover:scale-105"
-              title={isCharacter ? "Character" : "Element"}
-            >
-              <HugeIcon
-                name={isCharacter ? "user" : "shapes"}
-                size="sm"
-                className="text-black"
-              />
             </div>
           )
         }

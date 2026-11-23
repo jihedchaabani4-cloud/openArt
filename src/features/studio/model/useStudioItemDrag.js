@@ -24,6 +24,7 @@
 
 import * as React from "react";
 import { usePromptStore } from "@/features/prompt-bar/model/usePromptStore";
+import { hasInFlightMedia } from "@/features/workflows/lib/mediaStatusHelpers";
 
 function isInvalidFolder(invalidFolderIds, colId) {
   if (!invalidFolderIds || !colId) return false;
@@ -75,6 +76,11 @@ export function detectDropTargetAtPoint(
   const projectRootDrop = targetEl.closest('[data-drop-project-root="true"]');
   if (projectRootDrop) {
     return { target: "move-to-root", area: "sidebar-root" };
+  }
+
+  const trashDrop = targetEl.closest('[data-drop-trash="true"]');
+  if (trashDrop) {
+    return { target: "move-to-trash", area: "sidebar-trash" };
   }
 
   const backBtn = targetEl.closest("[data-drop-back]");
@@ -222,7 +228,8 @@ export function useStudioItemDrag({
 
   const handlePointerDown = React.useCallback(
     (e) => {
-      if (e.button !== 0 || isRenaming || !isDraggable) return;
+      const isInFlightItem = itemType === "workflow" && hasInFlightMedia(item);
+      if (e.button !== 0 || isRenaming || !isDraggable || isInFlightItem) return;
       if (e.target?.closest?.("button, input, textarea, [data-prevent-drag], a, [role='menuitem']")) return;
 
       clearClickSuppression();
@@ -390,6 +397,17 @@ export function useStudioItemDrag({
                     itemType,
                     itemId,
                     targetFolderId: null,
+                    items: resolvedItems,
+                  },
+                })
+              );
+            } else if (dropInfo.target === "move-to-trash") {
+              window.dispatchEvent(
+                new CustomEvent("studio:drop-to-trash", {
+                  detail: {
+                    itemType,
+                    itemId,
+                    workflow: itemType === "workflow" ? item : undefined,
                     items: resolvedItems,
                   },
                 })

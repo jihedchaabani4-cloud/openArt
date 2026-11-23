@@ -259,4 +259,22 @@ describe("useWorkflowActions — Public Service & Route Fallback", () => {
     expect(mockAttachMedia).not.toHaveBeenCalled();
     expect(mockFocus).not.toHaveBeenCalled();
   });
+
+  it("blocks handleEdit navigation while uploading or processing", () => {
+    for (const status of ["uploading", "processing", "queued"]) {
+      mockPush.mockClear();
+      const inFlightWorkflow = {
+        id: `wf-${status}`,
+        projectId: "proj-1",
+        items: [{ id: `item-${status}`, status, url: null }],
+      };
+
+      const { result } = renderHook(() => useWorkflowActions(inFlightWorkflow));
+      act(() => {
+        result.current.handleEdit();
+      });
+
+      expect(mockPush).not.toHaveBeenCalled();
+    }
+  });
 });

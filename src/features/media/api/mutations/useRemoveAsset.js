@@ -3,6 +3,10 @@
 import { api } from '@/shared/api/client';
 import { queryKeys } from '@/shared/api/queryKeys';
 import { matchMediaId } from '@/features/workflows/lib/cacheHelpers';
+import {
+  isMediaProcessingConflictError,
+  getMediaProcessingConflictMessage,
+} from '@/features/workflows/lib/mediaStatusHelpers';
 import { mediaEntity } from '@/shared/lib/optimistic/entityKeys';
 import { useOptimisticMutation } from '@/shared/lib/optimistic/useOptimisticMutation';
 
@@ -10,7 +14,12 @@ export function useRemoveAsset() {
   return useOptimisticMutation({
     mutationFn: async ({ assetId }) => {
       const res = await api.delete(`/assets/${assetId}`);
-      if (res.ok === false) throw new Error(res.error || 'Failed to delete asset');
+      if (res && (res.ok === false || res.success === false)) {
+        const err = new Error(res.message || res.error || 'Failed to delete asset');
+        if (res.status || res.statusCode) err.status = res.status || res.statusCode;
+        if (res.errorCode || res.code) err.errorCode = res.errorCode || res.code;
+        throw err;
+      }
       return res;
     },
 
@@ -53,7 +62,10 @@ export function useRemoveAsset() {
       queryKeys.generations.all(),
     ],
 
-    errorMessage: 'Failed to delete asset. Changes were reverted.',
+    errorMessage: (err) =>
+      isMediaProcessingConflictError(err)
+        ? getMediaProcessingConflictMessage(err)
+        : 'Failed to delete asset. Changes were reverted.',
   });
 }
 

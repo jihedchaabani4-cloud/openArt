@@ -396,4 +396,71 @@ describe("studioMenuConfig - Per-type menu list & animate exclusions", () => {
       }
     });
   });
+
+  describe("Status-driven action rules (failed / processing / uploading)", () => {
+    const fullActions = {
+      handleLike: vi.fn(),
+      handleReuseSettings: vi.fn(),
+      handleAnimate: vi.fn(),
+      handleAddToPrompt: vi.fn(),
+      handleDownload: vi.fn(),
+      onRename: vi.fn(),
+      toggleTileDetails: vi.fn(),
+      onDelete: vi.fn(),
+    };
+
+    it("failed media menu exposes ONLY reuse prompt and permanent delete (no like, animate, download, rename, details)", () => {
+      for (const status of ["failed", "error", "rejected"]) {
+        const items = getStudioMenuItems({
+          type: "generation",
+          actions: fullActions,
+          state: {
+            status,
+            isVideo: false,
+            canReuse: true,
+            showReuse: false,
+            canDelete: true,
+            canAddToPrompt: true,
+          },
+        });
+
+        const actionItems = items.filter((i) => i.type !== "separator");
+        expect(actionItems.map((i) => i.key)).toEqual(["reuse", "delete"]);
+        expect(actionItems.find((i) => i.key === "delete")?.label).toBe("Supprimer définitivement");
+      }
+    });
+
+    it("failed media without reusable prompt exposes ONLY permanent delete", () => {
+      const items = getStudioMenuItems({
+        type: "generation",
+        actions: fullActions,
+        state: {
+          status: "failed",
+          canReuse: false,
+          canDelete: true,
+        },
+      });
+
+      expect(items.map((i) => i.key)).toEqual(["delete"]);
+      expect(items[0].label).toBe("Supprimer définitivement");
+    });
+
+    it("processing and uploading media expose ZERO menu actions", () => {
+      for (const status of ["processing", "pending", "queued", "uploading", "in_progress", "starting"]) {
+        const items = getStudioMenuItems({
+          type: "generation",
+          actions: fullActions,
+          state: {
+            status,
+            canReuse: true,
+            showReuse: true,
+            canDelete: true,
+            canAddToPrompt: true,
+          },
+        });
+
+        expect(items).toEqual([]);
+      }
+    });
+  });
 });

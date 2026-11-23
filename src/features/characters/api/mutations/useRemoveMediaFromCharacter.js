@@ -4,6 +4,10 @@ import { queryKeys } from "@/shared/api/queryKeys";
 import { characterService } from "../characterService";
 import { mediaEntity } from "@/shared/lib/optimistic/entityKeys";
 import { useOptimisticMutation } from "@/shared/lib/optimistic/useOptimisticMutation";
+import {
+  isMediaProcessingConflictError,
+  getMediaProcessingConflictMessage,
+} from "@/features/workflows/lib/mediaStatusHelpers";
 
 /**
  * useRemoveMediaFromCharacter
@@ -38,7 +42,10 @@ export function useRemoveMediaFromCharacter() {
     invalidateKeys: ({ projectId }) =>
       projectId ? [queryKeys.projectData.byProject(projectId)] : [["projectData"]],
 
-    errorMessage: "Failed to remove image from character. Changes were reverted.",
+    errorMessage: (err) =>
+      isMediaProcessingConflictError(err)
+        ? getMediaProcessingConflictMessage(err)
+        : "Failed to remove image from character. Changes were reverted.",
   });
 }
 
