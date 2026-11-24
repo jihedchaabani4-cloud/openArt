@@ -33,6 +33,7 @@ export const queryKeys = {
 
   models: {
     studio: () => ["studioModels"],
+    byCategory: (category) => ["models", category],
   },
 
   projectData: {

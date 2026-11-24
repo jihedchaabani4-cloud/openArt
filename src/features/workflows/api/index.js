@@ -16,6 +16,12 @@ export { useLibraryWorkflowDetail } from "@/features/media/api/queries/useLibrar
 
 // ── Mutations
 export { useGenerateMutation } from "./mutations/useGenerateMutation";
+export { useImageAnglesEdit } from "./mutations/useImageAnglesEdit";
+export { useImageRelightEdit } from "./mutations/useImageRelightEdit";
+export {
+  useImageRemoveBackgroundEdit,
+  useRemoveBackgroundModels,
+} from "./mutations/useImageRemoveBackgroundEdit";
 
 export { useRemoveWorkflow } from "./mutations/useRemoveWorkflow";
 export { useRemoveWorkflowItem } from "./mutations/useRemoveWorkflowItem";
