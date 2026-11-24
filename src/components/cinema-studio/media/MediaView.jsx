@@ -392,6 +392,8 @@ export const CoreMediaItemPresenter = memo(
     }, [onClick, workflow, core.targetItem, item, url]);
 
     const isContain = fit === "contain";
+    const isLandscapeContainFallback =
+      isContain && !isCompleted && Number(core.aspectRatioNumber || 1) > 1;
     const effectiveSelectionEnabled = Boolean(selectionEnabled && actionRules.can.select);
     const canNativeDrag = Boolean(draggable && !isSelectionMode && actionRules.can.drag);
     const hasContextMenu = Boolean(
@@ -420,7 +422,8 @@ export const CoreMediaItemPresenter = memo(
       return null;
     };
 
-    const containerStyle = displayAspect ? { aspectRatio: displayAspect, ...propStyle } : propStyle;
+    const effectiveAspect = displayAspect || (!isCompleted && isContain ? "1 / 1" : null);
+    const containerStyle = effectiveAspect ? { aspectRatio: effectiveAspect, ...propStyle } : propStyle;
 
     const resolvedPrompt =
       propPrompt ||
@@ -446,8 +449,16 @@ export const CoreMediaItemPresenter = memo(
         data-selected={isSelected && !isInFlight ? "true" : undefined}
         className={cn(
           "group relative select-none items-center justify-center overflow-hidden rounded-xxxs shadow-none transition-opacity duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
-          surface === "card" ? "bg-surface-card border-0" : "bg-black/40",
-          isContain ? "inline-flex w-fit h-fit max-w-full max-h-full shrink-0" : "flex w-full h-full",
+          surface === "card"
+            ? "bg-surface-card border-0"
+            : isContain && isCompleted
+              ? "bg-transparent"
+              : "bg-black/40",
+          isContain && !isCompleted
+            ? isLandscapeContainFallback
+              ? "flex w-full h-auto max-w-full max-h-full shrink-0 rounded-2xl"
+              : "flex h-full w-auto max-w-full max-h-full shrink-0 rounded-2xl"
+            : "flex w-full h-full",
           isInFlight
             ? "cursor-default"
             : canNativeDrag
@@ -471,7 +482,7 @@ export const CoreMediaItemPresenter = memo(
         {...props}
       >
         {/* ── 1. The Media Layer ── */}
-        <div className={cn("relative flex items-center justify-center", isContain ? "w-fit h-fit max-w-full max-h-full" : "w-full h-full")}>
+        <div className="relative flex items-center justify-center w-full h-full">
           {isCompleted && isVideo && (
             <video
               ref={videoRef}
@@ -485,7 +496,7 @@ export const CoreMediaItemPresenter = memo(
               onClick={isSelectionMode ? undefined : (onVideoClick || core.togglePlay)}
               className={cn(
                 isContain
-                  ? "max-w-full max-h-full w-auto h-auto block object-contain select-none"
+                  ? "w-full h-full block object-contain select-none"
                   : "w-full h-full object-cover",
                 mediaClassName
               )}
@@ -493,17 +504,19 @@ export const CoreMediaItemPresenter = memo(
           )}
 
           {isCompleted && !isVideo && (
-            <div className={cn("relative flex items-center justify-center", isContain ? "w-fit h-fit max-w-full max-h-full" : "w-full h-full")}>
+            <div className="relative flex items-center justify-center w-full h-full">
               {core.isMediaLoaded === false && (
                 <div className="absolute inset-0 bg-surface-panel animate-pulse" />
               )}
               <img
                 ref={(el) => {
-                  if (el?.complete && el?.naturalWidth > 0 && core.isMediaLoaded === false) {
+                  if (el?.complete && el?.naturalWidth > 0) {
                     if (el.naturalWidth && el.naturalHeight) {
                       core.handleIntrinsicDimensions?.(el.naturalWidth, el.naturalHeight);
                     }
-                    core.onMediaLoaded?.();
+                    if (core.isMediaLoaded === false) {
+                      core.onMediaLoaded?.();
+                    }
                   }
                 }}
                 src={url}
@@ -520,7 +533,7 @@ export const CoreMediaItemPresenter = memo(
                 className={cn(
                   "transition-opacity duration-300 select-none",
                   isContain
-                    ? "max-w-full max-h-full w-auto h-auto block object-contain"
+                    ? "w-full h-full block object-contain"
                     : "w-full h-full object-cover",
                   core.isMediaLoaded === false ? "opacity-0" : "opacity-100",
                   mediaClassName

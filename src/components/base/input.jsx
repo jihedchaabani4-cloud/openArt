@@ -84,6 +84,7 @@ const Input = React.forwardRef(({
 
   const isBare = variant === "composer" || variant === "navbar" || variant === "inline" || variant === "transparent";
   const isGhost = variant === "ghost" || variant === "blurinput";
+  const isOutline = variant === "outline";
   const isAccent = variant === "accent" || variant === "search" || variant === "filled";
   const isSearch = variant === "search";
   const resolvedIconName = iconName || (isSearch && !Icon ? "search-01" : undefined);
@@ -189,11 +190,13 @@ const Input = React.forwardRef(({
       className={cn(
         isBare
           ? "ds-input-bare bg-transparent border-none outline-none ds-text-caption-m font-normal text-text-primary placeholder:text-text-secondary focus:ring-0 hover:bg-transparent focus:bg-transparent p-0 shadow-none cursor-text disabled:opacity-50 font-sans antialiased"
-          : isGhost
-            ? "ds-input-ghost flex w-full h-7 px-2.5 rounded-lg bg-white-5 hover:bg-ui-button-hover focus:bg-ui-button-hover border-none outline-none placeholder:text-text-secondary text-text-primary ds-text-caption-m font-normal transition-colors cursor-text"
-            : isAccent
-              ? "ds-input ds-input-accent ds-input-search flex w-full h-7 px-2.5 rounded-lg bg-surface-card hover:bg-surface-tonal focus:bg-surface-tonal border-none outline-none placeholder:text-text-secondary text-text-primary ds-text-caption-m font-normal transition-colors cursor-text"
-              : "ds-input flex w-full border-none outline-none placeholder:text-text-secondary disabled:cursor-not-allowed disabled:opacity-50 cursor-text",
+          : isOutline
+            ? "ds-input-outline flex w-full h-9 px-3 rounded-xl placeholder:text-text-secondary disabled:cursor-not-allowed disabled:opacity-50 cursor-text"
+            : isGhost
+              ? "ds-input-ghost flex w-full h-7 px-2.5 rounded-lg bg-white-5 hover:bg-ui-button-hover focus:bg-ui-button-hover border-none outline-none placeholder:text-text-secondary text-text-primary ds-text-caption-m font-normal transition-colors cursor-text"
+              : isAccent
+                ? "ds-input ds-input-accent ds-input-search flex w-full h-7 px-2.5 rounded-lg bg-surface-card hover:bg-surface-tonal focus:bg-surface-tonal border-none outline-none placeholder:text-text-secondary text-text-primary ds-text-caption-m font-normal transition-colors cursor-text"
+                : "ds-input flex w-full border-none outline-none placeholder:text-text-secondary disabled:cursor-not-allowed disabled:opacity-50 cursor-text",
         className
       )}
       {...props}

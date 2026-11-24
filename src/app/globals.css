@@ -1816,6 +1816,33 @@
   .ds-slider-stepped-range[data-full="true"] {
     border-right-color: transparent;
   }
+  .ds-slider-stepped-range[data-continuous="true"] {
+    transition: background-color 150ms var(--ease-standard);
+  }
+  .ds-slider-stepped-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 12px;
+    pointer-events: none;
+  }
+  .ds-slider-stepped-label {
+    font-size: var(--type-size-xs);
+    line-height: 1rem;
+    font-weight: var(--type-weight-medium);
+    color: var(--text-secondary);
+  }
+  .ds-slider-stepped-value {
+    font-size: var(--type-size-xs);
+    line-height: 1rem;
+    font-weight: var(--type-weight-semibold);
+    font-family: var(--font-geist-mono);
+    font-variant-numeric: tabular-nums;
+    color: var(--text-primary);
+  }
   .ds-slider-stepped-tick {
     position: absolute;
     top: 50%;
@@ -1921,6 +1948,25 @@
   .ds-input-search:focus-within {
     background-color: var(--surface-tonal);
     box-shadow: inset 0 0 0 1px var(--border-subtle);
+    outline: none;
+  }
+
+  .ds-input-outline {
+    border-radius: var(--radius-control);
+    background-color: transparent;
+    border: 1px solid var(--border-subtle);
+    color: var(--text-primary);
+    font-size: var(--type-size-xs);
+    font-weight: var(--type-weight-regular);
+    line-height: var(--type-leading-xs);
+    transition: border-color 150ms var(--ease-standard), background-color 150ms var(--ease-standard);
+  }
+  .ds-input-outline:hover:not(:disabled) {
+    border-color: rgba(255, 255, 255, 0.24);
+  }
+  .ds-input-outline:focus,
+  .ds-input-outline:focus-within {
+    border-color: rgba(255, 255, 255, 0.38);
     outline: none;
   }
 

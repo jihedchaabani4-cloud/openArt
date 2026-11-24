@@ -185,6 +185,15 @@ describe("CoreMediaItemView - Liked top-left indicator badge", () => {
 
       const card = container.firstChild;
       expect(card.style.aspectRatio).toBe("16/9");
+      // Regression: fit="contain" must use definite w-full h-full (never w-fit h-fit) so images never clip
+      expect(card.className).toContain("w-full");
+      expect(card.className).toContain("h-full");
+      expect(card.className).not.toContain("w-fit");
+      expect(card.className).not.toContain("h-fit");
+      const img = container.querySelector("img");
+      expect(img.className).toContain("w-full");
+      expect(img.className).toContain("h-full");
+      expect(img.className).toContain("object-contain");
     });
 
     it("applies displayAspect to cardElement style when fit is cover", () => {

@@ -93,17 +93,21 @@ export function FlowSelect({
   width = 220,
   maxHeightLimit = 320,
   ariaLabel,
+  side = "left",
+  align = "end",
   sideOffset = 12,
+  disabled = false,
 }) {
   const [open, setOpen] = useState(false);
 
   return (
     <div className="relative w-full">
-      <Popover open={open} onOpenChange={setOpen}>
+      <Popover open={open} onOpenChange={(next) => !disabled && setOpen(next)}>
         <PopoverTrigger asChild>
           <Button
             type="button"
             variant="dropdown-card"
+            disabled={disabled}
             className="w-full justify-between rounded-lg ds-text-caption-m data-[state=open]:bg-surface-tonal-hover"
             aria-label={ariaLabel || label || displayValue}
             data-state={open ? "open" : "closed"}
@@ -131,8 +135,8 @@ export function FlowSelect({
         <PopoverContent
           role="listbox"
           data-portal="true"
-          side="left"
-          align="end"
+          side={side}
+          align={align}
           sideOffset={sideOffset}
           collisionPadding={16}
           avoidCollisions
@@ -143,6 +147,7 @@ export function FlowSelect({
           })}
           style={{
             width: `${width}px`,
+            maxHeight: `${maxHeightLimit}px`,
           }}
         >
           <div className="overflow-hidden flex flex-col gap-0.5 w-full" role="group">
@@ -169,7 +174,12 @@ export function FlowSelect({
                   }}
                   className={menuItemClassName({ selected: isSelected })}
                 >
-                  <MenuItemContent icon={item.icon} checked={isSelected}>
+                  <MenuItemContent
+                    icon={item.icon}
+                    subtitle={item.subtitle}
+                    badge={item.badge}
+                    checked={isSelected}
+                  >
                     {item.label}
                   </MenuItemContent>
                 </div>

@@ -47,12 +47,15 @@ const Textarea = React.forwardRef(({
   const hasContainer = !!label || !!hint;
 
   const isBlur = variant === "blur" || variant === "blurinput";
+  const isOutline = variant === "outline";
   const isPersonality = variant === "personality" || variant === "flow";
 
   const textareaElement = (
     <div 
       className={cn(
-        isPersonality
+        isOutline
+          ? "ds-input-outline relative w-full rounded-xl p-3"
+          : isPersonality
           ? "personality-textarea-wrapper relative w-full rounded-md bg-surface-container p-3.5 sm:p-4 transition-all border border-outline-variant hover:border-outline focus-within:border-primary focus-within:bg-surface-container-high"
           : isBlur
           ? "relative w-full rounded-sm p-3 transition-all border border-outline-variant bg-surface-container hover:border-outline focus-within:border-primary"
@@ -67,7 +70,9 @@ const Textarea = React.forwardRef(({
         rows={rows}
         placeholder={placeholder}
         className={cn(
-          "w-full bg-transparent text-xs sm:text-sm text-on-surface placeholder:text-on-surface-subtle resize-none outline-none custom-scrollbar leading-relaxed font-sans transition-all duration-150 ease-out",
+          isOutline
+            ? "w-full bg-transparent ds-text-caption-m text-text-primary placeholder:text-text-secondary resize-none outline-none custom-scrollbar leading-relaxed font-sans disabled:opacity-50"
+            : "w-full bg-transparent text-xs sm:text-sm text-on-surface placeholder:text-on-surface-subtle resize-none outline-none custom-scrollbar leading-relaxed font-sans transition-all duration-150 ease-out",
           isPersonality && "personality-textarea text-on-surface",
           isOverflowing ? "overflow-y-auto" : "overflow-hidden",
           className
@@ -110,10 +115,28 @@ const Textarea = React.forwardRef(({
     }
 
     return (
-      <div className={cn("flex flex-col gap-2 w-full", containerClassName)}>
+      <div className={cn("flex flex-col gap-1.5 w-full", containerClassName)}>
         {label && (
-          <label className="text-xs font-semibold text-on-surface flex items-center justify-between">
-            <span>{label} {labelExtra && <span className="font-normal text-on-surface-subtle">{labelExtra}</span>}</span>
+          <label
+            htmlFor={props.id}
+            className={cn(
+              "flex items-center justify-between",
+              isOutline
+                ? "ds-text-caption-m font-normal text-text-secondary"
+                : "text-xs font-semibold text-on-surface"
+            )}
+          >
+            <span>{label}</span>
+            {labelExtra && (
+              <span
+                className={cn(
+                  "font-normal tabular-nums",
+                  isOutline ? "ds-text-caption-s text-text-secondary" : "text-on-surface-subtle"
+                )}
+              >
+                {labelExtra}
+              </span>
+            )}
           </label>
         )}
 

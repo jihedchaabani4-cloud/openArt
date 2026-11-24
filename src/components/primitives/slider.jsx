@@ -26,6 +26,8 @@ const Slider = React.forwardRef(({
   step = 1,
   minSelectable,
   showTicks = true,
+  label,
+  valueLabel,
   disabled = false,
   ...props
 }, ref) => {
@@ -101,6 +103,7 @@ const Slider = React.forwardRef(({
           <SliderPrimitive.Range
             data-slot="slider-range"
             data-full={isFull ? "true" : undefined}
+            data-continuous={!showTicks ? "true" : undefined}
             className="ds-slider-stepped-range"
           />
           {tickPercentages.map((pct) => (
@@ -113,9 +116,23 @@ const Slider = React.forwardRef(({
             />
           ))}
         </SliderPrimitive.Track>
+        {(label !== undefined || valueLabel !== undefined) && (
+          <div
+            data-slot="slider-overlay"
+            aria-hidden="true"
+            className="ds-slider-stepped-overlay"
+          >
+            {label !== undefined && (
+              <span className="ds-slider-stepped-label">{label}</span>
+            )}
+            {valueLabel !== undefined && (
+              <span className="ds-slider-stepped-value">{valueLabel}</span>
+            )}
+          </div>
+        )}
         <SliderPrimitive.Thumb
           data-slot="slider-thumb"
-          aria-label={props["aria-label"]}
+          aria-label={props["aria-label"] || (typeof label === "string" ? label : undefined)}
           className="ds-slider-stepped-thumb"
         />
       </SliderPrimitive.Root>
