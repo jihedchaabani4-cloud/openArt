@@ -16,6 +16,10 @@ import { IconButton } from "@/components/base/icon-button";
 import { HugeIcon } from "@/components/primitives/HugeIcon";
 import { LoadingScreen } from "@/components/primitives/LoadingScreen";
 import { getItemMetadata } from "@/shared/lib/generationUtils";
+import {
+  filterWorkflowsByFolderScope,
+  getWorkflowFolderId,
+} from "@/shared/lib/displayUtils";
 import { downloadFile, cn } from "@/shared/lib/utils";
 import { resolveMainMedia } from "@/features/workflows/core/resolveMediaRef";
 import {
@@ -128,15 +132,26 @@ export default function AssetEditPage() {
     return [];
   }, [rawFolders]);
 
-  const workflows = React.useMemo(
+  const allWorkflows = React.useMemo(
     () => fetchResult?.filteredWorkflows || [],
     [fetchResult?.filteredWorkflows]
+  );
+  const workflow = React.useMemo(
+    () => allWorkflows.find((w) => getWorkflowId(w) === workflowId) || null,
+    [allWorkflows, workflowId]
+  );
+  const activeFolderId = React.useMemo(
+    () => (workflow ? getWorkflowFolderId(workflow) : (queryCollectionId || null)),
+    [workflow, queryCollectionId]
+  );
+  const workflows = React.useMemo(
+    () => filterWorkflowsByFolderScope(allWorkflows, workflow, queryCollectionId),
+    [allWorkflows, workflow, queryCollectionId]
   );
   const currentWorkflowIndex = React.useMemo(
     () => workflows.findIndex((w) => getWorkflowId(w) === workflowId),
     [workflows, workflowId]
   );
-  const workflow = currentWorkflowIndex >= 0 ? workflows[currentWorkflowIndex] : null;
 
   const { destination: backDestination, label: backLabel } = React.useMemo(
     () =>
@@ -151,10 +166,10 @@ export default function AssetEditPage() {
 
   // Redirect back to collection or assets if workflow is not found after loading
   React.useEffect(() => {
-    if (!isLoading && !workflow && workflows.length > 0) {
+    if (!isLoading && !workflow && allWorkflows.length > 0) {
       router.replace(backDestination);
     }
-  }, [isLoading, workflow, workflows.length, router, backDestination]);
+  }, [isLoading, workflow, allWorkflows.length, router, backDestination]);
 
   const [selectedItemId, setSelectedItemId] = React.useState(null);
   const [activeEditTool, setActiveEditTool] = React.useState(null); // null | "angles" | "relight" | "remove-background"
@@ -249,15 +264,16 @@ export default function AssetEditPage() {
       setActiveEditTool(null);
       setZoomLevel(1);
 
-      const suffix = queryCollectionId
-        ? `?collectionId=${encodeURIComponent(queryCollectionId)}`
+      const effectiveCollectionId = activeFolderId || queryCollectionId;
+      const suffix = effectiveCollectionId
+        ? `?collectionId=${encodeURIComponent(effectiveCollectionId)}`
         : "";
       const nextUrl = `/cinema-studio/${projectId}/assets/edit/${targetId}${suffix}`;
       if (typeof window !== "undefined") {
         window.history.replaceState(null, "", nextUrl);
       }
     },
-    [projectId, workflowId, queryCollectionId]
+    [projectId, workflowId, activeFolderId, queryCollectionId]
   );
 
   const prevWorkflow =

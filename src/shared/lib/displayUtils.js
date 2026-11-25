@@ -711,6 +711,27 @@ export function getWorkflowFolderId(workflow) {
   );
 }
 
+/**
+ * Scopes a list of workflows to the exact same direct folder as `currentWorkflow`.
+ * - If `currentWorkflow` belongs to a folder, returns only workflows in that same folder.
+ * - If `currentWorkflow` is at project root (no folder), returns only root-level workflows.
+ */
+export function filterWorkflowsByFolderScope(
+  workflows,
+  currentWorkflow = null,
+  fallbackFolderId = null
+) {
+  if (!Array.isArray(workflows) || workflows.length === 0) return [];
+  const targetFolderId = currentWorkflow
+    ? getWorkflowFolderId(currentWorkflow)
+    : (fallbackFolderId || null);
+
+  return workflows.filter((wf) => {
+    const wfFolderId = getWorkflowFolderId(wf);
+    return targetFolderId ? wfFolderId === targetFolderId : !wfFolderId;
+  });
+}
+
 function getWorkflowMediaTime(workflow) {
   const media = resolvePrimaryRawMedia(workflow);
   const raw =

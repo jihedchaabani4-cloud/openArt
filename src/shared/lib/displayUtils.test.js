@@ -11,6 +11,7 @@ import {
   subscribeImageDimensions,
   parseAspectRatioValue,
   normalizeCssAspectRatio,
+  filterWorkflowsByFolderScope,
 } from "./displayUtils";
 
 describe("displayUtils - getItemMetadata aspect ratio resolution", () => {
@@ -248,6 +249,36 @@ describe("displayUtils - getItemMetadata aspect ratio resolution", () => {
       unsubscribe();
       setCachedImageDimensions(url, 900, 1600);
       expect(listener).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe("filterWorkflowsByFolderScope - Edit switch bar folder scoping", () => {
+    const wfRoot1 = { id: "wf-root-1", folder_id: null };
+    const wfRoot2 = { id: "wf-root-2", folder_id: null, collection_id: "stale-col" };
+    const wfFolderA1 = { id: "wf-a-1", folder_id: "folder-a" };
+    const wfFolderA2 = { id: "wf-a-2", metadata: { folderId: "folder-a" } };
+    const wfFolderB1 = { id: "wf-b-1", folderId: "folder-b" };
+    const wfSubA1 = { id: "wf-sub-a-1", folder_id: "folder-a-child" };
+    const allWorkflows = [wfRoot1, wfRoot2, wfFolderA1, wfFolderA2, wfFolderB1, wfSubA1];
+
+    it("shows only sibling workflows from the same folder when current workflow is inside a folder", () => {
+      const scoped = filterWorkflowsByFolderScope(allWorkflows, wfFolderA1);
+      expect(scoped.map((w) => w.id)).toEqual(["wf-a-1", "wf-a-2"]);
+    });
+
+    it("shows only root workflows when current workflow is not in any folder", () => {
+      const scoped = filterWorkflowsByFolderScope(allWorkflows, wfRoot1);
+      expect(scoped.map((w) => w.id)).toEqual(["wf-root-1", "wf-root-2"]);
+    });
+
+    it("returns only the single workflow when it is the sole item in its folder", () => {
+      const scoped = filterWorkflowsByFolderScope(allWorkflows, wfFolderB1);
+      expect(scoped.map((w) => w.id)).toEqual(["wf-b-1"]);
+    });
+
+    it("falls back to fallbackFolderId when currentWorkflow is not yet resolved", () => {
+      const scoped = filterWorkflowsByFolderScope(allWorkflows, null, "folder-a");
+      expect(scoped.map((w) => w.id)).toEqual(["wf-a-1", "wf-a-2"]);
     });
   });
 });
