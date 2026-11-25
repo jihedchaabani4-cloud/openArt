@@ -66,7 +66,7 @@ export function CharacterFeatureEditor({ open, onOpenChange, anchorRef }) {
           className={cn(
             "absolute bottom-full left-1/2 -translate-x-1/2 mb-4 z-50 pointer-events-auto",
             "flex flex-col h-[470px] w-[880px] max-w-[95vw] overflow-hidden",
-            "gap-2 surface-glass bg-surface-menu-glass rounded-xl p-2",
+            "gap-2 surface-glass bg-surface-menu-glass rounded-comfortable p-2",
             "text-text-primary font-sans antialiased"
           )}
         >
@@ -170,7 +170,7 @@ function IdentitySection() {
   }, [prompt, activeSubTab]);
 
   return (
-    <div className="flex rounded-lg overflow-hidden h-full">
+    <div className="flex rounded-comfortable overflow-hidden h-full">
       {/* Left Sidebar - Sub-tabs */}
       <div className="w-1/6 p-2 space-y-1">
         {IDENTITY_SUB_TABS.map((tab) => {
@@ -183,7 +183,7 @@ function IdentitySection() {
                 setActiveSubTab(tab.id);
                 setFeatureEditorView({ activeTab: "identity", activeSubTab: tab.id });
               }}
-              className="w-full justify-start ds-text-caption-m rounded-lg"
+              className="w-full justify-start ds-type-small rounded-subtle"
             >
               {tab.label}
             </Button>
@@ -272,7 +272,7 @@ function HeadSection() {
   }, [prompt, activeSubTab]);
 
   return (
-    <div className="flex rounded-lg overflow-hidden h-full">
+    <div className="flex rounded-comfortable overflow-hidden h-full">
       <div className="w-1/6 p-2 space-y-1">
         {HEAD_SUB_TABS.map((tab) => {
           const isActive = activeSubTab === tab.id;
@@ -284,7 +284,7 @@ function HeadSection() {
                 setActiveSubTab(tab.id);
                 setFeatureEditorView({ activeTab: "head", activeSubTab: tab.id });
               }}
-              className="w-full justify-start ds-text-caption-m rounded-lg"
+              className="w-full justify-start ds-type-small rounded-subtle"
             >
               {tab.label}
             </Button>
@@ -328,7 +328,7 @@ function DetailsSection() {
   }, [prompt, activeSubTab]);
 
   return (
-    <div className="flex rounded-lg overflow-hidden h-full">
+    <div className="flex rounded-comfortable overflow-hidden h-full">
       <div className="w-1/6 p-2 space-y-1">
         {DETAILS_SUB_TABS.map((tab) => {
           const isActive = activeSubTab === tab.id;
@@ -340,7 +340,7 @@ function DetailsSection() {
                 setActiveSubTab(tab.id);
                 setFeatureEditorView({ activeTab: "details", activeSubTab: tab.id });
               }}
-              className="w-full justify-start ds-text-caption-m rounded-lg"
+              className="w-full justify-start ds-type-small rounded-subtle"
             >
               {tab.label}
             </Button>

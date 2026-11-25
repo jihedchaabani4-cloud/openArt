@@ -149,7 +149,7 @@ function LeftPanel({ open }) {
   }, []);
 
   return (
-    <div className="relative hidden h-full min-h-0 flex-1 overflow-hidden rounded-2xl bg-gradient-to-b from-omni-bg to-canvas-deep lg:flex">
+    <div className="relative hidden h-full min-h-0 flex-1 overflow-hidden rounded-comfortable bg-gradient-to-b from-omni-bg to-canvas-deep lg:flex">
       <div className="relative size-full overflow-hidden">
         <div className="absolute inset-0">
           {previousVideo ? (
@@ -189,18 +189,18 @@ function LeftPanel({ open }) {
           </video>
         </div>
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-white/10" />
-        <div className="pointer-events-none absolute bottom-7 left-7 right-7 z-10 h-[2px] overflow-hidden rounded-full bg-white/20">
+        <div className="pointer-events-none absolute bottom-7 left-7 right-7 z-10 h-[2px] overflow-hidden rounded-sharp bg-white/20">
           <div
-            className="h-full rounded-full bg-white"
+            className="h-full rounded-sharp bg-white"
             style={{ width: `${progress}%` }}
           />
         </div>
         <div className="relative z-10 flex h-full flex-col justify-end p-10">
           <div className="space-y-3">
-            <p className="max-w-[320px] ds-text-h-sm text-white">
+            <p className="max-w-[320px] ds-type-sub-heading text-white">
               Bring your ideas to life faster.
             </p>
-            <p className="max-w-[360px] ds-text-caption-l font-normal text-white/68">
+            <p className="max-w-[360px] ds-type-small text-white/68">
               Sign in to generate images, edit visuals, and access stronger creative tools with your account.
             </p>
           </div>
@@ -248,10 +248,10 @@ export function LoginDialog({ open, onClose }) {
           <div className="flex h-full w-full flex-col justify-center md:items-center lg:w-[400px] xl:w-[400px]">
             <div className="flex w-full flex-col gap-8 px-2 py-10 md:max-w-[360px] md:px-6 md:py-6">
               <div className="space-y-2 text-center">
-                <p className="ds-text-h-sm text-white">
+                <p className="ds-type-sub-heading text-white">
                   Sign in or create your account
                 </p>
-                <p className="ds-text-caption-l font-normal text-white/58">
+                <p className="ds-type-small text-white/58">
                   Get smarter results, save your work, and unlock premium image and video tools.
                 </p>
               </div>
@@ -266,11 +266,11 @@ export function LoginDialog({ open, onClose }) {
               </div>
 
               <div className="space-y-3 text-center">
-                <div className="inline-flex items-center gap-2 ds-text-caption-m font-normal text-white/55">
-                  <span className="size-3 rounded-sm border border-white/25" />
+                <div className="inline-flex items-center gap-2 ds-type-small text-white/55">
+                  <span className="size-3 rounded-sharp border border-white/25" />
                   Your account data stays secure and private.
                 </div>
-                <p className="ds-text-caption-s font-normal text-white/38">
+                <p className="ds-type-micro-tag text-white/38">
                   By continuing, you agree to our Terms of Service and Privacy Policy.
                 </p>
               </div>

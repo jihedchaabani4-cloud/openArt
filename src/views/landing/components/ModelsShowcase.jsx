@@ -56,7 +56,7 @@ export function ModelsShowcase() {
             opacity: { duration: 0.8 },
             y: { duration: 0.8 },
           }}
-          className="text-3xl md:text-5xl lg:text-[54px] font-extrabold tracking-tight leading-[1.1] text-white mb-16 h-[2.2em] md:h-auto"
+          className="ds-type-display-hero text-white mb-16 h-[2.2em] md:h-auto"
         >
           The industry's best{" "}
           <span className="inline-flex relative overflow-hidden align-middle h-[1.25em] text-left">
@@ -107,7 +107,7 @@ export function ModelsShowcase() {
                     className="w-5 h-5 object-contain opacity-45 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300 pointer-events-none invert brightness-200"
                   />
                 </div>
-                <span className="text-sm md:text-[15px] font-bold tracking-tight">
+                <span className="ds-type-caption-label">
                   {model.name}
                 </span>
               </div>

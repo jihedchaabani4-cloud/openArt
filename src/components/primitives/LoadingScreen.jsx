@@ -18,7 +18,7 @@ export function LoadingScreen({ message = "Art", fullScreen = false }) {
         className="relative z-10 flex flex-col items-center"
       >
         {/* Branding Text */}
-        <h1 className="text-2xl md:text-3xl font-black tracking-tighter text-white/70 mb-4 uppercase">
+        <h1 className="ds-type-sub-heading text-white/70 mb-4 uppercase">
           {message}
         </h1>
 

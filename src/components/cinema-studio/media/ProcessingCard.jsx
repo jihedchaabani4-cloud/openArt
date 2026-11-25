@@ -50,7 +50,7 @@ export function ProcessingCard({
       aria-label={hasProgress ? `Generating media ${formattedProgress}%` : "Generating media"}
       data-slot="processing-card"
       className={cn(
-        "relative overflow-hidden rounded-2xl border border-border-subtle bg-omni-bg select-none",
+        "relative overflow-hidden rounded-comfortable border border-border-subtle bg-omni-bg select-none",
         !aspectRatio && !className?.includes("aspect-") && !style?.aspectRatio ? "aspect-video" : "",
         className
       )}
@@ -97,7 +97,7 @@ export function ProcessingCard({
             <span
               data-slot="processing-prompt"
               title={trimmedPrompt}
-              className="text-xs font-medium text-white/75 truncate leading-snug min-w-0"
+              className="ds-type-small text-white/75 truncate min-w-0"
             >
               {trimmedPrompt}
             </span>
@@ -112,7 +112,7 @@ export function ProcessingCard({
               size="xs"
               aria-label="Reuse prompt"
               title="Reuse prompt"
-              className="pointer-events-auto shrink-0 size-7 rounded-row bg-surface-tonal hover:bg-surface-tonal-hover text-text-primary"
+              className="pointer-events-auto shrink-0 size-7 rounded-subtle bg-surface-tonal hover:bg-surface-tonal-hover text-text-primary"
               onClick={(e) => {
                 e.stopPropagation();
                 onReusePrompt(e);

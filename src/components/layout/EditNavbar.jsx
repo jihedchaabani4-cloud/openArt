@@ -211,7 +211,7 @@ export function EditNavbar({
                             displayName={workflow?.display_name || workflow?.metadata?.displayName || displayTitle}
                             placeholder="Untitled Workflow"
                             onSave={handleEditWorkflowName}
-                            inputClassName="text-md font-medium tracking-tight max-w-[260px] focus:text-white"
+                            inputClassName="ds-type-caption-label max-w-[260px] focus:text-white"
                         />
 
                         <DropdownMenu>

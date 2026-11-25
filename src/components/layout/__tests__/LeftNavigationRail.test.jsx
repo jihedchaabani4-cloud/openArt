@@ -144,7 +144,7 @@ describe("LeftNavigationRail sidebar geometry & token contract", () => {
     const aside = screen.getByLabelText("Navigation Studio");
 
     expect(aside.style.width).toBe("var(--studio-sidebar-width, 56px)");
-    expect(aside.className).toContain("rounded-2xl");
+    expect(aside.className).toContain("rounded-comfortable");
     expect(aside.className).toContain("bg-transparent");
     expect(aside.className).toContain("px-2");
     expect(aside.className).toContain("py-3");
@@ -152,7 +152,7 @@ describe("LeftNavigationRail sidebar geometry & token contract", () => {
 
     const assetsLink = screen.getByRole("link", { name: "All assets" });
     expect(assetsLink.className).toContain("ds-nav-item");
-    expect(assetsLink.className).toContain("rounded-lg");
+    expect(assetsLink.className).toContain("rounded-subtle");
     expect(assetsLink.className).not.toContain("justify-center");
     expect(assetsLink.getAttribute("data-active")).toBe("true");
     expect(assetsLink.getAttribute("aria-current")).toBe("page");
@@ -204,9 +204,9 @@ describe("LeftNavigationRail sidebar geometry & token contract", () => {
     expect(assetsLabel.className).not.toContain("sr-only");
 
     const foldersHeading = screen.getByText("Folders");
-    expect(foldersHeading.tagName).toBe("P");
-    expect(foldersHeading.className).toContain("text-sm");
-    expect(foldersHeading.className).toContain("text-muted-foreground");
+    expect(foldersHeading.tagName).toBe("SPAN");
+    expect(foldersHeading.getAttribute("data-slot")).toBe("label");
+    expect(foldersHeading.className).toContain("ds-label");
 
     const addFolderBtn = screen.getByRole("button", { name: "Add folder" });
     expect(addFolderBtn.className).toContain("ds-nav-item");
@@ -214,7 +214,7 @@ describe("LeftNavigationRail sidebar geometry & token contract", () => {
 
     const folderRow = screen.getByRole("treeitem", { name: "Scenes" });
     expect(folderRow.className).toContain("ds-nav-item");
-    expect(folderRow.className).toContain("rounded-lg");
+    expect(folderRow.className).toContain("rounded-subtle");
     expect(folderRow.firstElementChild?.className).toContain("size-4");
 
     // Order check: All assets -> Add folder -> Scenes folder

@@ -70,7 +70,7 @@ export function WorkflowTypeBadge({
       data-slot="workflow-type-badge"
       data-workflow-type={resolvedType}
       className={cn(
-        "flex items-center justify-center size-6 rounded-control bg-white text-black shadow-none pointer-events-none select-none transition-all duration-200 group-hover:scale-105",
+        "flex items-center justify-center size-6 rounded-sharp bg-white text-black shadow-none pointer-events-none select-none transition-all duration-200 group-hover:scale-105",
         className
       )}
       title={config.label}

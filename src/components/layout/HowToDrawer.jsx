@@ -37,7 +37,7 @@ export function HowToDrawer({ isOpen, onClose }) {
               <div className="flex items-center justify-between pb-6 border-b border-line-subtle">
                 <div className="flex items-center gap-2">
                   <HugeIcon name="sparkles" size="md" className="text-content-base/80" />
-                  <h2 className="text-lg font-bold text-content-base">How AI Elements Work</h2>
+                  <h2 className="ds-type-feature-title text-content-base">How AI Elements Work</h2>
                 </div>
               <IconButton
                 type="button"
@@ -53,12 +53,12 @@ export function HowToDrawer({ isOpen, onClose }) {
             <div className="flex flex-col gap-6 pt-6">
               {/* Step 1 */}
               <div className="flex gap-4 items-start">
-                <div className="w-8 h-8 rounded-full bg-ui-button-tonal border border-border-weak text-text-primary flex items-center justify-center text-xs font-bold shrink-0">
+                <div className="w-8 h-8 rounded-full bg-ui-button-tonal border border-border-weak text-text-primary flex items-center justify-center ds-type-small shrink-0">
                   1
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold text-text-primary">Upload Reference Photos</h3>
-                  <p className="text-xs text-text-secondary mt-1 leading-relaxed">
+                  <h3 className="ds-type-caption-label text-text-primary">Upload Reference Photos</h3>
+                  <p className="ds-type-small text-text-secondary mt-1">
                     Provide 1 to 6 clear photos of your product, character, or object.
                   </p>
                 </div>
@@ -66,12 +66,12 @@ export function HowToDrawer({ isOpen, onClose }) {
 
               {/* Step 2 */}
               <div className="flex gap-4 items-start">
-                <div className="w-8 h-8 rounded-full bg-ui-button-tonal border border-border-weak text-text-primary flex items-center justify-center text-xs font-bold shrink-0">
+                <div className="w-8 h-8 rounded-full bg-ui-button-tonal border border-border-weak text-text-primary flex items-center justify-center ds-type-small shrink-0">
                   2
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold text-text-primary">AI Vision Analysis</h3>
-                  <p className="text-xs text-text-secondary mt-1 leading-relaxed">
+                  <h3 className="ds-type-caption-label text-text-primary">AI Vision Analysis</h3>
+                  <p className="ds-type-small text-text-secondary mt-1">
                     Our AI Vision extracts identity traits, materials, aesthetics, and optimal generation directives.
                   </p>
                 </div>
@@ -79,13 +79,13 @@ export function HowToDrawer({ isOpen, onClose }) {
 
               {/* Step 3 */}
               <div className="flex gap-4 items-start">
-                <div className="w-8 h-8 rounded-full bg-ui-button-tonal border border-border-weak text-text-primary flex items-center justify-center text-xs font-bold shrink-0">
+                <div className="w-8 h-8 rounded-full bg-ui-button-tonal border border-border-weak text-text-primary flex items-center justify-center ds-type-small shrink-0">
                   3
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold text-text-primary">Reuse in Studio Prompts</h3>
-                  <p className="text-xs text-text-secondary mt-1 leading-relaxed">
-                    Type <code className="px-1.5 py-0.5 rounded bg-ui-button-tonal text-text-primary font-mono text-[11px]">@Element</code> in the prompt bar to integrate it consistently across any scene.
+                  <h3 className="ds-type-caption-label text-text-primary">Reuse in Studio Prompts</h3>
+                  <p className="ds-type-small text-text-secondary mt-1">
+                    Type <code className="px-1.5 py-0.5 rounded-sharp bg-ui-button-tonal text-text-primary ds-type-micro-tag font-mono">@Element</code> in the prompt bar to integrate it consistently across any scene.
                   </p>
                 </div>
               </div>

@@ -40,8 +40,7 @@ describe("StudioItemDropdownMenu & StudioContextMenuContent unified menu contrac
     const menuItem = favItem.closest('[data-slot="dropdown-menu-item"]');
     expect(menuItem).not.toBeNull();
     expect(menuItem.className).toContain("ds-menu-item");
-    expect(menuItem.className).toContain("ds-text-caption-m");
-    expect(menuItem.className).toContain("font-normal");
+    expect(menuItem.className).toContain("ds-type-small");
     expect(menuItem.className).toContain("text-text-primary");
     expect(menuItem.className).toContain("[&_.huge-icon:not([class*='text-'])]:text-icon-primary");
     expect(menuItem.className).not.toContain("mat-mdc-menu-item");
@@ -57,7 +56,7 @@ describe("StudioItemDropdownMenu & StudioContextMenuContent unified menu contrac
     expect(menuContent.className).toContain("w-56");
     expect(menuContent.className).toContain("surface-glass");
     expect(menuContent.className).toContain("bg-surface-menu-glass");
-    expect(menuContent.className).toContain("rounded-xl");
+    expect(menuContent.className).toContain("rounded-comfortable");
     expect(menuContent.className).toContain("p-1.5");
     expect(menuContent.className).not.toContain("mat-mdc-menu-panel");
 
@@ -86,8 +85,7 @@ describe("StudioItemDropdownMenu & StudioContextMenuContent unified menu contrac
     const ctxItem = favItem.closest('[data-slot="context-menu-item"]');
     expect(ctxItem).not.toBeNull();
     expect(ctxItem.className).toContain("ds-menu-item");
-    expect(ctxItem.className).toContain("ds-text-caption-m");
-    expect(ctxItem.className).toContain("font-normal");
+    expect(ctxItem.className).toContain("ds-type-small");
     expect(ctxItem.className).toContain("text-text-primary");
 
     const trashItem = screen.getByText("Move to trash").closest('[data-slot="context-menu-item"]');
@@ -98,7 +96,7 @@ describe("StudioItemDropdownMenu & StudioContextMenuContent unified menu contrac
     expect(ctxContent.className).toContain("w-56");
     expect(ctxContent.className).toContain("surface-glass");
     expect(ctxContent.className).toContain("bg-surface-menu-glass");
-    expect(ctxContent.className).toContain("rounded-xl");
+    expect(ctxContent.className).toContain("rounded-comfortable");
     expect(ctxContent.className).toContain("p-1.5");
 
     const sep = ctxContent.querySelector('[data-slot="context-menu-separator"]');

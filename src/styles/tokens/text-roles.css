@@ -1,0 +1,86 @@
+/* ==========================================================================
+   TIER 2 — SEMANTIC TEXT ROLES (`src/styles/tokens/text-roles.css`)
+   Built strictly on Tier 1 typography tokens + canonical DESIGN.md colors.
+   ========================================================================== */
+
+@layer base {
+  :root,
+  html.dark,
+  :root.opus {
+    --role-label-size: var(--type-small-size);
+    --role-label-leading: var(--type-small-leading);
+    --role-label-weight: var(--type-small-weight);
+    --role-label-tracking: var(--type-small-tracking);
+    --role-label-color: var(--text-muted-fg);
+  }
+}
+
+@layer components {
+  .ds-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: var(--role-label-size);
+    line-height: var(--role-label-leading);
+    font-weight: var(--role-label-weight);
+    letter-spacing: var(--role-label-tracking);
+    color: var(--role-label-color);
+    text-transform: none;
+    user-select: none;
+  }
+  .ds-label[data-disabled="true"] {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .ds-label-caption {
+    font-size: var(--type-caption-label-size);
+    line-height: var(--type-caption-label-leading);
+    font-weight: var(--type-caption-label-weight);
+    letter-spacing: var(--type-caption-label-tracking);
+    color: var(--text-muted-fg);
+  }
+  .ds-label-primary {
+    color: var(--text-primary);
+  }
+}
+
+@layer utilities {
+  .ds-text-button {
+    font-size: var(--type-button-size);
+    font-weight: var(--type-button-weight);
+    line-height: var(--type-button-leading);
+    letter-spacing: var(--type-button-tracking);
+  }
+  .ds-text-button-sm {
+    font-size: var(--type-small-size);
+    font-weight: var(--type-weight-medium);
+    line-height: var(--type-small-leading);
+    letter-spacing: var(--type-small-tracking);
+  }
+  .ds-text-nav,
+  .ds-text-tab {
+    font-size: var(--type-caption-label-size);
+    font-weight: var(--type-caption-label-weight);
+    line-height: var(--type-caption-label-leading);
+    letter-spacing: var(--type-caption-label-tracking);
+  }
+  .ds-text-input,
+  .ds-text-menu {
+    font-size: var(--type-small-size);
+    font-weight: var(--type-small-weight);
+    line-height: var(--type-small-leading);
+    letter-spacing: var(--type-small-tracking);
+  }
+  .ds-text-badge {
+    font-size: var(--type-micro-tag-size);
+    font-weight: var(--type-micro-tag-weight);
+    line-height: var(--type-micro-tag-leading);
+    letter-spacing: var(--type-micro-tag-tracking);
+  }
+  .ds-text-body {
+    font-size: var(--type-body-size);
+    font-weight: var(--type-body-weight);
+    line-height: var(--type-body-leading);
+    letter-spacing: var(--type-body-tracking);
+  }
+}

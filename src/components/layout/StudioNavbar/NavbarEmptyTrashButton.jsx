@@ -71,7 +71,7 @@ export function NavbarEmptyTrashButton() {
         variant="outline"
         onClick={() => setIsConfirmOpen(true)}
         disabled={isPending || !projectId}
-        className="flex items-center gap-1.5 cursor-pointer h-7 max-h-full ds-text-caption-m text-destructive"
+        className="flex items-center gap-1.5 cursor-pointer h-7 max-h-full text-destructive"
       >
         <HugeIcon name="delete-02" />
         <span>{isPending ? "Emptying..." : "Empty Trash"}</span>

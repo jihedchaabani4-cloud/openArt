@@ -3,6 +3,7 @@
 import * as React from "react";
 import { Button } from "@/components/base/button";
 import { IconButton } from "@/components/base/icon-button";
+import { Label } from "@/components/base/label";
 import { HugeIcon } from "@/components/primitives/HugeIcon";
 import { Slider } from "@/components/primitives/slider";
 import { CameraAngleSphere } from "@/components/cinema-studio/media/CameraAngleSphere";
@@ -99,12 +100,12 @@ export function AnglesPanel({
       aria-label="Angles camera pose editor"
       data-slot="angles-panel"
       className={cn(
-        "flex flex-col h-full w-full sm:w-[320px] rounded-2xl bg-omni-bg border border-border-subtle overflow-hidden",
+        "flex flex-col h-full ds-edit-sidebar-rail rounded-comfortable bg-omni-bg border border-border-subtle overflow-hidden",
         className
       )}
     >
       {/* Header */}
-      <header className="flex items-center justify-between gap-2 px-3 py-2.5 border-b border-border-subtle shrink-0">
+      <header className="flex items-center justify-between gap-2 px-4 py-3 border-b border-border-subtle shrink-0">
         <div className="flex items-center gap-2 min-w-0">
           <IconButton
             type="button"
@@ -116,7 +117,7 @@ export function AnglesPanel({
             <HugeIcon name="arrow-left-01" size="sm" />
           </IconButton>
 
-          <h2 className="ds-text-caption-l font-semibold text-text-primary truncate">
+          <h2 className="ds-type-caption-label text-text-primary truncate">
             Angles
           </h2>
         </div>
@@ -147,9 +148,7 @@ export function AnglesPanel({
         {/* Quick Camera Angle Templates */}
         <div className="flex flex-col gap-1.5" data-slot="angles-presets">
           <div className="flex items-center justify-between px-0.5">
-            <span className="ds-text-caption-s font-semibold uppercase tracking-wide text-text-secondary">
-              Templates
-            </span>
+            <Label as="span">Templates</Label>
             {!isNoOp && (
               <Button
                 type="button"
@@ -157,12 +156,13 @@ export function AnglesPanel({
                 size="xs"
                 disabled={isSubmitting}
                 onClick={handleReset}
+                className="ds-type-small"
               >
                 Reset
               </Button>
             )}
           </div>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-3 gap-1.5">
             {ANGLES_PRESETS.map((preset) => {
               const isActive =
                 pose.rotation === preset.rotation &&
@@ -173,11 +173,11 @@ export function AnglesPanel({
                   key={preset.id}
                   type="button"
                   variant={isActive ? "primary" : "tonal"}
-                  size="m"
+                  size="s"
                   aria-pressed={isActive}
                   disabled={isSubmitting}
                   onClick={() => applyPreset(preset)}
-                  className="w-full justify-center ds-text-caption-m font-medium"
+                  className="w-full justify-center px-1.5 ds-type-micro-tag"
                 >
                   {preset.label}
                 </Button>
@@ -244,7 +244,7 @@ export function AnglesPanel({
           variant="cta-lg"
           disabled={isGenerateDisabled}
           onClick={handleSubmit}
-          className="w-full"
+          className="w-full h-9 ds-type-button"
         >
           {isBusy ? (
             <span>{isSubmitting ? "Starting…" : "Processing…"}</span>

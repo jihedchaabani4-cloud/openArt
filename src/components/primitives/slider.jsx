@@ -165,7 +165,7 @@ const Slider = React.forwardRef(({
         className={cn(
           "relative w-full grow overflow-hidden transition-colors",
           isBar
-            ? "h-full rounded-sm bg-transparent"
+            ? "h-full rounded-subtle bg-transparent"
             : cn("rounded-full bg-white/20 hover:bg-white/30", isSm ? "h-1" : "h-1.5")
         )}
       >

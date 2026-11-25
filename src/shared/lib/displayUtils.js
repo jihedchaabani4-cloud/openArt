@@ -65,6 +65,122 @@ export function getResponsiveTargetRowHeight(baseTargetHeight, containerWidth) {
 const imageDimensionCache = new Map();
 const imageDimensionListeners = new Set();
 
+const EPHEMERAL_URL_QUERY_PARAMS = new Set([
+  "token",
+  "sig",
+  "signature",
+  "expires",
+  "policy",
+  "key-pair-id",
+  "googleaccessid",
+  "x-amz-algorithm",
+  "x-amz-credential",
+  "x-amz-date",
+  "x-amz-expires",
+  "x-amz-security-token",
+  "x-amz-signature",
+  "x-amz-signedheaders",
+  "x-goog-algorithm",
+  "x-goog-credential",
+  "x-goog-date",
+  "x-goog-expires",
+  "x-goog-signature",
+  "x-goog-signedheaders",
+]);
+
+/**
+ * Normalizes a media URL into a stable dimension-cache key by stripping ephemeral
+ * signed-URL auth query params (e.g. Supabase ?token=..., S3/GCS signatures)
+ * while preserving meaningful params (transform, id, version, etc.).
+ */
+export function normalizeDimensionCacheKey(url) {
+  if (!url || typeof url !== "string") return "";
+  const trimmed = url.trim();
+  if (!trimmed || trimmed.startsWith("data:") || trimmed.startsWith("blob:")) {
+    return trimmed;
+  }
+  if (!trimmed.includes("?")) return trimmed;
+  try {
+    const parsed = new URL(trimmed);
+    let changed = false;
+    for (const key of Array.from(parsed.searchParams.keys())) {
+      if (EPHEMERAL_URL_QUERY_PARAMS.has(key.toLowerCase())) {
+        parsed.searchParams.delete(key);
+        changed = true;
+      }
+    }
+    if (!changed) return trimmed;
+    const qs = parsed.searchParams.toString();
+    return `${parsed.origin}${parsed.pathname}${qs ? `?${qs}` : ""}`;
+  } catch {
+    return trimmed;
+  }
+}
+
+const ASPECT_RATIO_ENUM_MAP = {
+  IMAGE_ASPECT_RATIO_LANDSCAPE: "16/9",
+  VIDEO_ASPECT_RATIO_LANDSCAPE: "16/9",
+  IMAGE_ASPECT_RATIO_PORTRAIT: "9/16",
+  VIDEO_ASPECT_RATIO_PORTRAIT: "9/16",
+  IMAGE_ASPECT_RATIO_SQUARE: "1/1",
+  VIDEO_ASPECT_RATIO_SQUARE: "1/1",
+};
+
+const RATIO_PAIR_RE = /^\s*(\d+(?:\.\d+)?)\s*[:/x×]\s*(\d+(?:\.\d+)?)\s*$/i;
+const POSITIVE_NUMBER_RE = /^\s*(\d+(?:\.\d+)?)\s*$/;
+
+/**
+ * Parses a ratio input ("16:9", "16/9", "9x16", "16 / 9", enum, or positive number)
+ * into { ratio, css, label }. Returns null for "auto", unspecified enums, or invalid text.
+ */
+export function parseAspectRatioValue(raw) {
+  if (raw == null) return null;
+  if (typeof raw === "number") {
+    if (!Number.isFinite(raw) || raw <= 0) return null;
+    const css = String(raw);
+    return { ratio: raw, css, label: css };
+  }
+  if (typeof raw !== "string") return null;
+
+  const trimmed = raw.trim();
+  if (!trimmed) return null;
+
+  const upper = trimmed.toUpperCase();
+  if (upper in ASPECT_RATIO_ENUM_MAP) {
+    const mapped = ASPECT_RATIO_ENUM_MAP[upper];
+    const [w, h] = mapped.split("/").map(Number);
+    return { ratio: w / h, css: mapped, label: `${w}:${h}` };
+  }
+
+  const pairMatch = RATIO_PAIR_RE.exec(trimmed);
+  if (pairMatch) {
+    const w = parseFloat(pairMatch[1]);
+    const h = parseFloat(pairMatch[2]);
+    if (Number.isFinite(w) && Number.isFinite(h) && w > 0 && h > 0) {
+      return { ratio: w / h, css: `${pairMatch[1]}/${pairMatch[2]}`, label: `${pairMatch[1]}:${pairMatch[2]}` };
+    }
+    return null;
+  }
+
+  const numMatch = POSITIVE_NUMBER_RE.exec(trimmed);
+  if (numMatch) {
+    const num = parseFloat(numMatch[1]);
+    if (Number.isFinite(num) && num > 0) {
+      return { ratio: num, css: String(num), label: String(num) };
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Normalizes a ratio string into a valid CSS `aspect-ratio` value (e.g. "9:16" -> "9/16").
+ * Returns null for invalid or non-ratio values like "auto".
+ */
+export function normalizeCssAspectRatio(raw) {
+  return parseAspectRatioValue(raw)?.css ?? null;
+}
+
 /**
  * Subscribe to verified natural image/video dimension updates (>3% ratio change or first measurement).
  * Returns an unsubscribe function.
@@ -81,8 +197,9 @@ export function subscribeImageDimensions(listener) {
  * Retrieve verified natural dimensions for an image URL if already loaded.
  */
 export function getCachedImageDimensions(url) {
-  if (!url) return null;
-  return imageDimensionCache.get(url) || null;
+  const key = normalizeDimensionCacheKey(url);
+  if (!key) return null;
+  return imageDimensionCache.get(key) || null;
 }
 
 const MAX_DIMENSION_CACHE = 500;
@@ -92,12 +209,13 @@ const DIMENSION_RATIO_NOTIFY_THRESHOLD = 0.03;
  * Store verified natural pixel width/height for an image URL to preserve authentic ratio.
  */
 export function setCachedImageDimensions(url, width, height) {
-  if (!url || !width || !height || isNaN(width) || isNaN(height)) return;
+  const key = normalizeDimensionCacheKey(url);
+  if (!key || !width || !height || isNaN(width) || isNaN(height)) return;
   const w = Math.round(width);
   const h = Math.round(height);
   if (w <= 0 || h <= 0) return;
 
-  const prev = imageDimensionCache.get(url);
+  const prev = imageDimensionCache.get(key);
   const prevRatio = prev ? prev.width / prev.height : null;
   const nextRatio = w / h;
   const shouldNotify =
@@ -108,7 +226,7 @@ export function setCachedImageDimensions(url, width, height) {
     const firstKey = imageDimensionCache.keys().next().value;
     imageDimensionCache.delete(firstKey);
   }
-  imageDimensionCache.set(url, {
+  imageDimensionCache.set(key, {
     width: w,
     height: h,
     aspect: `${w}/${h}`,
@@ -211,56 +329,137 @@ export function getItemMetadata(item, group) {
 
   const itemCreatedAt = item.create_time || item.created_at || item.createdAt;
 
-  // ── Unified URL Resolution ────────────────────────────────────────────────
-  const url = item.url ?? 
-              item.image?.url ?? 
-              item.video?.url ?? 
-              item.image?.generatedImage?.url ?? 
-              item.video?.generatedVideo?.url ?? 
-              item.file_url ?? 
-              item.asset?.file_url ?? 
-              (item._displayType === 'shot' ? item.video_url : null);
+  // ── Unified URL Resolution (aligned with toMediaItem.resolveMediaUrl) ────
+  const url =
+    resolveMediaUrl(item) ??
+    (item._displayType === 'shot' ? item.video_url : null);
 
-/**
- * Safely extracts configured or declared aspect ratio string from item or group.
- */
-function extractRawRatio(item, group) {
-  if (!item && !group) return null;
-  const mediaObj = item?.image ?? item?.video;
-
-  const candidates = [
-    item?.aspectRatio,
-    item?.ratio,
-    item?.params?.ratio,
-    item?.params?.aspectRatio,
-    item?.generationConfig?.aspectRatio,
-    item?.generationConfig?.ratio,
-    item?.metadata?.generationConfig?.aspectRatio,
-    item?.metadata?.generationConfig?.ratio,
-    item?.mediaMetadata?.requestData?.generationConfig?.aspectRatio,
-    item?.mediaMetadata?.requestData?.generationConfig?.ratio,
-    mediaObj?.userUploadedImage?.aspectRatio,
-    mediaObj?.generatedImage?.aspectRatio,
-    item?.asset?.meta_data?.ratio,
-    item?.asset?.meta_data?.aspectRatio,
-    group?.generationConfig?.ratio,
-    group?.generationConfig?.aspectRatio,
-    group?.metadata?.generationConfig?.ratio,
-    group?.metadata?.generationConfig?.aspectRatio,
-    group?.params?.ratio,
-    group?.params?.aspectRatio,
-    group?.aspectRatio,
-    group?.ratio,
-    item?._displayType === 'shot' ? '16:9' : null,
-  ];
-
-  for (const c of candidates) {
-    if (c && typeof c === 'string' && c !== 'IMAGE_ASPECT_RATIO_UNSPECIFIED' && c.trim().length > 0) {
-      return c.trim();
+  function pickValidRatio(candidates) {
+    for (const c of candidates) {
+      const parsed = parseAspectRatioValue(c);
+      if (parsed) return parsed;
     }
+    return null;
   }
-  return null;
-}
+
+  function extractItemRatio(targetItem) {
+    if (!targetItem) return null;
+    const mediaObj = targetItem?.image ?? targetItem?.video;
+    return pickValidRatio([
+      targetItem?.aspectRatio,
+      targetItem?.aspect_ratio,
+      targetItem?.ratio,
+      targetItem?.params?.ratio,
+      targetItem?.params?.aspectRatio,
+      targetItem?.params?.aspect_ratio,
+      targetItem?.generationConfig?.aspectRatio,
+      targetItem?.generationConfig?.aspect_ratio,
+      targetItem?.generationConfig?.ratio,
+      targetItem?.generation_config?.aspectRatio,
+      targetItem?.generation_config?.aspect_ratio,
+      targetItem?.generation_config?.ratio,
+      targetItem?.metadata?.generationConfig?.aspectRatio,
+      targetItem?.metadata?.generationConfig?.aspect_ratio,
+      targetItem?.metadata?.generationConfig?.ratio,
+      targetItem?.metadata?.generation_config?.aspectRatio,
+      targetItem?.metadata?.generation_config?.aspect_ratio,
+      targetItem?.metadata?.generation_config?.ratio,
+      targetItem?.mediaMetadata?.requestData?.generationConfig?.aspectRatio,
+      targetItem?.mediaMetadata?.requestData?.generationConfig?.aspect_ratio,
+      targetItem?.mediaMetadata?.requestData?.generationConfig?.ratio,
+      mediaObj?.userUploadedImage?.aspectRatio,
+      mediaObj?.userUploadedImage?.aspect_ratio,
+      mediaObj?.generatedImage?.aspectRatio,
+      mediaObj?.generatedImage?.aspect_ratio,
+      targetItem?.asset?.meta_data?.ratio,
+      targetItem?.asset?.meta_data?.aspectRatio,
+      targetItem?.asset?.meta_data?.aspect_ratio,
+      targetItem?._displayType === 'shot' ? '16:9' : null,
+    ]);
+  }
+
+  function extractGroupRatio(targetGroup) {
+    if (!targetGroup) return null;
+    return pickValidRatio([
+      targetGroup?.generationConfig?.ratio,
+      targetGroup?.generationConfig?.aspectRatio,
+      targetGroup?.generationConfig?.aspect_ratio,
+      targetGroup?.generation_config?.ratio,
+      targetGroup?.generation_config?.aspectRatio,
+      targetGroup?.generation_config?.aspect_ratio,
+      targetGroup?.metadata?.generationConfig?.ratio,
+      targetGroup?.metadata?.generationConfig?.aspectRatio,
+      targetGroup?.metadata?.generationConfig?.aspect_ratio,
+      targetGroup?.metadata?.generation_config?.ratio,
+      targetGroup?.metadata?.generation_config?.aspectRatio,
+      targetGroup?.metadata?.generation_config?.aspect_ratio,
+      targetGroup?.params?.ratio,
+      targetGroup?.params?.aspectRatio,
+      targetGroup?.params?.aspect_ratio,
+      targetGroup?.aspectRatio,
+      targetGroup?.aspect_ratio,
+      targetGroup?.ratio,
+    ]);
+  }
+
+  function isPositivePair(w, h) {
+    const nw = Number(w);
+    const nh = Number(h);
+    return Number.isFinite(nw) && Number.isFinite(nh) && nw > 0 && nh > 0;
+  }
+
+  function resolveAspectAndLabel({ isAudioFlag, isVideoFlag, itemW, itemH, groupW, groupH }) {
+    const itemRatio = extractItemRatio(item);
+    const groupRatio = extractGroupRatio(group);
+    const hasItemDims = isPositivePair(itemW, itemH);
+    const hasGroupDims = isPositivePair(groupW, groupH);
+
+    const role = String(item?.role || item?.mediaRole || "").trim().toLowerCase();
+    const isDetail = role === "detail" || role === "reference";
+    const isChar =
+      !isDetail &&
+      (group?.workflow_type === "CHARACTER" ||
+        group?.workflow_type === "CHARACTER_SHEET" ||
+        group?.is_character ||
+        group?.entity_type === "character" ||
+        role === "sheet" ||
+        role === "turnaround");
+    const isElem =
+      group?.workflow_type === "ELEMENT_SHEET" ||
+      group?.is_element ||
+      group?.entity_type === "element";
+
+    let aspect;
+    if (isAudioFlag) {
+      aspect = "4/1";
+    } else if (cachedDims?.aspect) {
+      aspect = cachedDims.aspect;
+    } else if (itemRatio) {
+      aspect = itemRatio.css;
+    } else if (hasItemDims) {
+      aspect = `${Number(itemW)}/${Number(itemH)}`;
+    } else if (groupRatio) {
+      aspect = groupRatio.css;
+    } else if (hasGroupDims) {
+      aspect = `${Number(groupW)}/${Number(groupH)}`;
+    } else {
+      aspect = isElem ? null : (isChar ? "16/9" : (isVideoFlag ? "16/9" : null));
+    }
+
+    const ratioStr = cachedDims
+      ? intrinsicSizeToRatioLabel(cachedDims.width, cachedDims.height)
+      : itemRatio
+        ? itemRatio.label
+        : hasItemDims
+          ? intrinsicSizeToRatioLabel(itemW, itemH)
+          : groupRatio
+            ? groupRatio.label
+            : hasGroupDims
+              ? intrinsicSizeToRatioLabel(groupW, groupH)
+              : null;
+
+    return { aspect, ratioStr };
+  }
 
   const cachedDims = getCachedImageDimensions(url);
 
@@ -270,32 +469,20 @@ function extractRawRatio(item, group) {
     const isAudio = item.asset_type === 'audio';
 
     const mediaObj = item.image ?? item.video;
-    // Dimensions from the nested image/video object, or item directly
-    const dims = mediaObj?.dimensions ?? (item.image?.generatedImage) ?? item.dimensions ?? group?.dimensions ?? null;
-    const w = cachedDims?.width ?? dims?.width ?? item.width ?? item.params?.width ?? group?.params?.width ?? null;
-    const h = cachedDims?.height ?? dims?.height ?? item.height ?? item.params?.height ?? group?.params?.height ?? null;
-    const hasValidDims = w && h && !isNaN(w) && !isNaN(h) && Number(w) > 0 && Number(h) > 0;
+    const itemDims = mediaObj?.dimensions ?? item.image?.generatedImage ?? item.dimensions ?? null;
+    const itemW = itemDims?.width ?? item.width ?? item.params?.width ?? null;
+    const itemH = itemDims?.height ?? item.height ?? item.params?.height ?? null;
+    const groupW = group?.dimensions?.width ?? group?.params?.width ?? null;
+    const groupH = group?.dimensions?.height ?? group?.params?.height ?? null;
 
-    const rawRatio = extractRawRatio(item, group);
-
-    let aspect;
-    if (isAudio) {
-      aspect = '4/1';
-    } else if (cachedDims?.aspect) {
-      aspect = cachedDims.aspect;
-    } else if (rawRatio) {
-      aspect = rawRatio.replace(':', '/');
-    } else if (hasValidDims) {
-      aspect = `${w}/${h}`;
-    } else {
-      const isChar = group?.workflow_type === "CHARACTER" || group?.workflow_type === "CHARACTER_SHEET" || group?.is_character || group?.entity_type === "character" || item?.role === "sheet" || item?.mediaRole === "sheet";
-      const isElem = group?.workflow_type === "ELEMENT_SHEET" || group?.is_element || group?.entity_type === "element";
-      aspect = isElem ? null : (isChar ? '16/9' : (isVideo ? '16/9' : null));
-    }
-
-    const ratioStr = cachedDims 
-      ? intrinsicSizeToRatioLabel(cachedDims.width, cachedDims.height)
-      : (rawRatio || (hasValidDims ? intrinsicSizeToRatioLabel(w, h) : null));
+    const { aspect, ratioStr } = resolveAspectAndLabel({
+      isAudioFlag: isAudio,
+      isVideoFlag: isVideo,
+      itemW,
+      itemH,
+      groupW,
+      groupH,
+    });
 
     return {
       isVideo,
@@ -317,31 +504,19 @@ function extractRawRatio(item, group) {
     item.asset_type === 'audio' ||
     item.asset?.asset_type === 'audio';
 
-  const w = cachedDims?.width ?? item.dimensions?.width ?? item.asset?.meta_data?.width ?? item.width ?? item.params?.width ?? group?.params?.width ?? null;
-  const h = cachedDims?.height ?? item.dimensions?.height ?? item.asset?.meta_data?.height ?? item.height ?? item.params?.height ?? group?.params?.height ?? null;
-  const hasValidDims = w && h && !isNaN(w) && !isNaN(h) && Number(w) > 0 && Number(h) > 0;
+  const itemW = item.dimensions?.width ?? item.asset?.meta_data?.width ?? item.width ?? item.params?.width ?? null;
+  const itemH = item.dimensions?.height ?? item.asset?.meta_data?.height ?? item.height ?? item.params?.height ?? null;
+  const groupW = group?.dimensions?.width ?? group?.params?.width ?? null;
+  const groupH = group?.dimensions?.height ?? group?.params?.height ?? null;
 
-  const rawRatio = extractRawRatio(item, group);
-
-  let aspect;
-  if (isAudio) {
-    aspect = '4/1';
-  } else if (cachedDims?.aspect) {
-    aspect = cachedDims.aspect;
-  } else if (rawRatio) {
-    aspect = rawRatio.replace(':', '/');
-  } else if (hasValidDims) {
-    aspect = `${w}/${h}`;
-  } else {
-    const isChar = group?.workflow_type === "CHARACTER" || group?.workflow_type === "CHARACTER_SHEET" || group?.is_character || group?.entity_type === "character" || item?.role === "sheet" || item?.mediaRole === "sheet";
-    const isElem = group?.workflow_type === "ELEMENT_SHEET" || group?.is_element || group?.entity_type === "element";
-    const defaultRatio = isElem ? null : (isChar ? '16/9' : (isVideo ? '16/9' : null));
-    aspect = defaultRatio;
-  }
-
-  const ratioStr = cachedDims
-    ? intrinsicSizeToRatioLabel(cachedDims.width, cachedDims.height)
-    : (rawRatio || (hasValidDims ? intrinsicSizeToRatioLabel(w, h) : null));
+  const { aspect, ratioStr } = resolveAspectAndLabel({
+    isAudioFlag: isAudio,
+    isVideoFlag: isVideo,
+    itemW,
+    itemH,
+    groupW,
+    groupH,
+  });
 
   return {
     isVideo,
@@ -468,8 +643,12 @@ export function resolveMediaUrl(item) {
     item.video?.generatedVideo?.uri       ??
     item.video?.generatedVideo?.url       ??
     item.video?.url                       ??
+    item.preview                          ??
+    item.thumbnail                        ??
     item.file_url                         ??
     item.asset?.file_url                  ??
+    item.image_url                        ??
+    item.src                              ??
     null
   );
 }

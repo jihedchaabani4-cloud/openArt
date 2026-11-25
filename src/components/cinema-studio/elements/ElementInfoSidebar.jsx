@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Input } from "@/components/base/input";
+import { Label } from "@/components/base/label";
 import { Textarea } from "@/components/primitives/textarea";
 import { Button } from "@/components/base/button";
 import { IconButton } from "@/components/base/icon-button";
@@ -47,14 +48,14 @@ export function InputInfoHover({ content, title, testId }) {
           title={content}
           data-testid={testId}
         >
-          <HugeIcon name="information-circle" className="text-[13px] leading-none" />
+          <HugeIcon name="information-circle" size="sm" />
         </Button>
       </HoverCardTrigger>
       <HoverCardContent
         side="top"
         align="start"
         sideOffset={6}
-        className="z-50 w-64 rounded-lg border border-white/10 bg-omni-bg backdrop-blur-xl p-3 text-[11.5px] text-white/80 shadow-none leading-relaxed"
+        className="z-50 w-64 rounded-comfortable border border-white/10 bg-omni-bg backdrop-blur-xl p-3 ds-type-small text-white/80 shadow-none"
       >
         {content}
       </HoverCardContent>
@@ -116,7 +117,7 @@ export function ElementInfoSidebar({
               e.currentTarget.blur();
             }
           }}
-          className="text-[2rem] leading-[2.5rem] font-normal text-white"
+          className="ds-type-sub-heading text-white"
           containerClassName="w-full"
         />
       </div>
@@ -124,7 +125,7 @@ export function ElementInfoSidebar({
       {/* 2. Element Type Dropdown — style matches DropdownSegmented (bg-white/5, no border, blur) */}
       <div className="flex flex-col gap-1.5">
         <div className="flex items-center gap-1.5">
-          <span className="text-xs font-semibold text-white/70">Type d'élément</span>
+          <Label as="span">Type d'élément</Label>
           <InputInfoHover
             content="Définit la catégorie de référence (Objet, Style, Police ou Logo) pour guider la génération."
             title="Info type"
@@ -182,8 +183,8 @@ export function ElementInfoSidebar({
       <div className="personality-section gap-1">
         <div className="label-row pb-1">
           <div className="flex items-center gap-1.5">
-            <span className="field-label text-xs font-semibold">Description / Contexte</span>
-            <span className="field-label-optional text-[11px]">(optionnel)</span>
+            <Label as="span" className="field-label">Description / Contexte</Label>
+            <span className="field-label-optional ds-type-micro-tag">(optionnel)</span>
             <InputInfoHover
               content="Le modèle utilisera cette description pour intégrer fidèlement l'élément dans vos prompts."
               title="Info description"
@@ -201,9 +202,9 @@ export function ElementInfoSidebar({
               title="Analyser automatiquement les images avec Vision AI"
             >
               {isAnalyzingVision ? (
-                <HugeIcon name="loading-03" className="text-xs animate-spin text-white/60" />
+                <HugeIcon name="loading-03" size="xs" className="animate-spin text-white/60" />
               ) : (
-                <HugeIcon name="sparkles" className="text-xs text-white/60" />
+                <HugeIcon name="sparkles" size="xs" className="text-white/60" />
               )}
               <span>{isAnalyzingVision ? "Analyse…" : "Vision AI"}</span>
             </Button>
@@ -226,8 +227,8 @@ export function ElementInfoSidebar({
       <div className="personality-section gap-1 pt-1.5 border-t border-white/10">
         <div className="label-row pb-1">
           <div className="flex items-center gap-1.5">
-            <span className="field-label text-xs font-semibold">Directives de rendu</span>
-            <span className="field-label-optional text-[11px]">(règles d'utilisation)</span>
+            <Label as="span" className="field-label">Directives de rendu</Label>
+            <span className="field-label-optional ds-type-micro-tag">(règles d'utilisation)</span>
             <InputInfoHover
               content="Consignes et règles spécifiques que l'IA doit suivre lors de l'utilisation de cet élément."
               title="Info directives"
@@ -243,9 +244,9 @@ export function ElementInfoSidebar({
               title="Copier les directives"
             >
               {copied ? (
-                <HugeIcon name="tick-02" className="text-sm text-emerald-400" />
+                <HugeIcon name="tick-02" size="sm" className="text-emerald-400" />
               ) : (
-                <HugeIcon name="copy-01" className="text-sm" />
+                <HugeIcon name="copy-01" size="sm" />
               )}
             </IconButton>
           )}

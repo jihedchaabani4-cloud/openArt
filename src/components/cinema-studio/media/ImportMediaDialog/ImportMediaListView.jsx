@@ -219,7 +219,7 @@ export function ImportMediaListView({
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.18, delay: prefersReducedMotion ? 0 : 0.12 }}
-              className="flex-1 flex items-center justify-center text-white/30 text-xs"
+              className="flex-1 flex items-center justify-center text-white/30 ds-type-small"
             >
               No assets found
             </motion.div>
@@ -235,7 +235,7 @@ export function ImportMediaListView({
       </div>
 
       {/* ── Right Pane: Large Detail & Preview Hero Pane (flow-add-menu-detail-pane) ── */}
-      <div className="flex-1 min-w-0 min-h-0 flex flex-col gap-2 rounded-xl bg-black/25 p-2 overflow-hidden">
+      <div className="flex-1 min-w-0 min-h-0 flex flex-col gap-2 rounded-comfortable bg-black/25 p-2 overflow-hidden">
         {/* Detail Preview Box */}
         <div className="flex-1 w-full min-h-0 relative flex items-center justify-center overflow-hidden">
           <AnimatePresence mode="popLayout" initial={false}>
@@ -255,13 +255,13 @@ export function ImportMediaListView({
                     autoPlay
                     loop
                     muted
-                    className="max-h-full max-w-full rounded-lg object-contain"
+                    className="max-h-full max-w-full rounded-comfortable object-contain"
                   />
                 ) : (
                   <img
                     src={focusedUrl}
                     alt={focusedMeta?.title || ""}
-                    className="max-h-full max-w-full rounded-lg object-contain"
+                    className="max-h-full max-w-full rounded-comfortable object-contain"
                   />
                 )}
               </motion.div>
@@ -272,7 +272,7 @@ export function ImportMediaListView({
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.18 }}
-                className="size-full flex items-center justify-center text-white/25 text-xs"
+                className="size-full flex items-center justify-center text-white/25 ds-type-small"
               >
                 No item selected
               </motion.div>
@@ -298,7 +298,7 @@ export function ImportMediaListView({
                     }
                   }}
                   disabled={isFocusedOverQuota}
-                  className="w-full !h-8.5 rounded-lg text-xs font-medium justify-center"
+                  className="w-full !h-8.5 rounded-subtle justify-center"
                 >
                   Add to prompt
                 </Button>

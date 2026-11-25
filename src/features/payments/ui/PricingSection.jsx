@@ -99,7 +99,7 @@ function CompareCategorySection({ title, items, packages, initialVisibleCount = 
     return (
         <div className=" ">
             <div className="px-5 py-5">
-                <h3 className="text-[28px] font-bold tracking-[-0.03em] text-white">{title}</h3>
+                <h3 className="ds-type-card-title text-white">{title}</h3>
             </div>
 
 
@@ -111,8 +111,8 @@ function CompareCategorySection({ title, items, packages, initialVisibleCount = 
                     style={{ gridTemplateColumns }}
                 >
                     <div className="pr-5">
-                        <p className="text-sm font-semibold text-white">{item.displayName}</p>
-                        <p className="mt-1 text-xs text-muted-foreground">{formatModelBasis(item)}</p>
+                        <p className="ds-type-caption-label text-white">{item.displayName}</p>
+                        <p className="mt-1 ds-type-small text-muted-foreground">{formatModelBasis(item)}</p>
                     </div>
 
                     {packages.map((pkg) => {
@@ -120,7 +120,7 @@ function CompareCategorySection({ title, items, packages, initialVisibleCount = 
                         return (
                             <div
                                 key={`${item.key}-${pkg.id}`}
-                                className="text-sm font-medium text-white"
+                                className="ds-type-caption-label text-white"
                             >
                                 {formatGenerationCount(packageCount?.count ?? 0, item.unitLabel)}
                             </div>
@@ -135,11 +135,12 @@ function CompareCategorySection({ title, items, packages, initialVisibleCount = 
                         type="button"
                         variant="ghost"
                         onClick={() => setIsExpanded((current) => !current)}
-                        className="h-auto p-0 text-sm font-medium text-muted-foreground hover:bg-transparent hover:text-white"
+                        className="h-auto p-0 text-muted-foreground hover:bg-transparent hover:text-white"
                     >
                         <HugeIcon
                             name="arrow-down-01"
-                            className={`text-base transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`}
+                            size="md"
+                            className={`transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`}
                         />
                         {isExpanded ? "View less" : "View more"}
                     </Button>
@@ -177,17 +178,17 @@ function ComparePlansSection({ packages, modelsComparison, onBuy, isPending, pen
     return (
         <div className="space-y-5">
             <div className="text-center">
-                <h2 className="text-[40px] font-bold uppercase tracking-[-0.04em] text-white md:text-[52px]">
+                <h2 className="ds-type-section-heading uppercase text-white">
                     Compare Credit Packs
                 </h2>
             </div>
 
             <div
-                className="rounded-lg  "
+                className="rounded-comfortable"
             >
                 <div className="">
                     <div
-                        className="sticky rounded-lg bg-white/5 backdrop-blur-[80px] top-0 z-30 
+                        className="sticky rounded-comfortable bg-white/5 backdrop-blur-[80px] top-0 z-30 
                         "
                     >
                         <div
@@ -210,23 +211,23 @@ function ComparePlansSection({ packages, modelsComparison, onBuy, isPending, pen
 
                                         return (
                                             <div key={`sticky-${pkg.id}`} className="pr-3">
-                                                <p className="text-base font-bold text-white">{pkg.label}</p>
+                                                <p className="ds-type-body text-white">{pkg.label}</p>
                                                 {price && (
-                                                    <p className="mt-2 text-sm font-semibold text-white">
+                                                    <p className="mt-2 ds-type-caption-label text-white">
                                                         {price}
                                                         {getPlanKind(pkg) === "subscription" ? "/month" : ""}
                                                     </p>
                                                 )}
-                                                <p className="mt-1 text-xs text-muted-foreground">{pkg.credits} credits</p>
+                                                <p className="mt-1 ds-type-small text-muted-foreground">{pkg.credits} credits</p>
                                                 <Button
                                                     type="button"
                                                     variant="tonal"
                                                     onClick={() => onBuy(pkg.id)}
                                                     disabled={isPending && pendingPackageId === pkg.id}
-                                                    className="mt-3 h-10 w-full rounded-lg px-4 text-sm font-semibold text-white hover:text-white"
+                                                    className="mt-3 h-10 w-full rounded-subtle px-4 text-white hover:text-white"
                                                 >
                                                     {isPending && pendingPackageId === pkg.id ? (
-                                                        <HugeIcon name="loading-03" className="text-base animate-spin" />
+                                                        <HugeIcon name="loading-03" size="md" className="animate-spin" />
                                                     ) : (
                                                         ctaLabel
                                                     )}
@@ -396,13 +397,13 @@ function TemplatePricingCard({ pkg, modelsComparison, onBuy, isLoading }) {
         <article className="mx-auto flex w-full max-w-[290px] flex-col border-t border-white/12 pt-4 text-white sm:max-w-[310px]">
             <div className="space-y-3">
                 <div className="space-y-2.5">
-                    <p className="text-center text-[22px] font-medium tracking-[-0.04em] text-white sm:text-[25px] opacity-80">
+                    <p className="text-center ds-type-card-title text-white opacity-80">
                         {pkg.label}
                     </p>
                     {price && (
-                        <p className="text-center text-[33px] font-semibold tracking-[-0.06em] text-white sm:text-[42px]">
+                        <p className="text-center ds-type-display-hero text-white">
                             ${Number(pkg.price).toFixed(2)}
-                            <span className="text-[0.8em]">{getPlanSuffix(pkg) || ""}</span>
+                            <span className="ds-type-card-title">{getPlanSuffix(pkg) || ""}</span>
                         </p>
                     )}
                 </div>
@@ -413,18 +414,18 @@ function TemplatePricingCard({ pkg, modelsComparison, onBuy, isLoading }) {
                     variant="primary"
                     onClick={() => onBuy(pkg.id)}
                     disabled={isLoading}
-                    className="h-9 w-full rounded-full px-4 text-[13px] font-medium transition-colors duration-200 sm:h-10 sm:text-sm"
+                    className="h-9 w-full rounded-subtle px-4 transition-colors duration-200 sm:h-10"
                 >
-                    {isLoading ? <HugeIcon name="loading-03" className="text-base animate-spin" /> : "Get Started"}
+                    {isLoading ? <HugeIcon name="loading-03" size="md" className="animate-spin" /> : "Get Started"}
                 </Button>
             </div>
 
             <div className="mt-7 flex flex-1 flex-col gap-4">
 
-                <ul className="space-y-4 text-[13px] leading-5.5 text-white sm:text-[13px]">
+                <ul className="space-y-4 ds-type-small text-white">
                     {primaryFeatures.map((feature) => (
                         <li key={feature} className="flex items-start gap-3">
-                            <HugeIcon name="tick-02" className="text-base mt-1 shrink-0 font-bold" />
+                            <HugeIcon name="tick-02" size="md" weight="bold" className="mt-1 shrink-0" />
                             <span>{feature}</span>
                         </li>
                     ))}
@@ -433,15 +434,15 @@ function TemplatePricingCard({ pkg, modelsComparison, onBuy, isLoading }) {
                 {(secondaryFeatures.length > 0 || generatedBreakdown.length > 0) && (
                     <div className="flex items-center gap-4 py-1">
                         <div className="h-px flex-1 bg-white/10" />
-                        <HugeIcon name="add-01" className="text-lg shrink-0 text-white" />
+                        <HugeIcon name="add-01" size="lg" className="shrink-0 text-white" />
                         <div className="h-px flex-1 bg-white/10" />
                     </div>
                 )}
 
-                <ul className="space-y-4 text-[13px] leading-5.5 text-white sm:text-[13px]">
+                <ul className="space-y-4 ds-type-small text-white">
                     {secondaryFeatures.map((feature) => (
                         <li key={feature} className="flex items-start gap-3">
-                            <HugeIcon name="tick-02" className="text-base mt-1 shrink-0 font-bold" />
+                            <HugeIcon name="tick-02" size="md" weight="bold" className="mt-1 shrink-0" />
                             <span>{feature}</span>
                         </li>
                     ))}
@@ -450,7 +451,7 @@ function TemplatePricingCard({ pkg, modelsComparison, onBuy, isLoading }) {
                         const cleanText = item.text.replace(/^[≈~]\s*/, "");
                         return (
                             <li key={item.text} className="flex items-start gap-3">
-                                <span className="mt-0.5 flex w-4 shrink-0 rounded-2xl justify-center text-[20px] font-normal opacity-90">
+                                <span className="mt-0.5 flex w-4 shrink-0 rounded-sharp justify-center ds-type-feature-title opacity-90">
                                     {prefix}
                                 </span>
                                 <span>{cleanText}</span>
@@ -465,7 +466,7 @@ function TemplatePricingCard({ pkg, modelsComparison, onBuy, isLoading }) {
 
 function SkeletonCard() {
     return (
-        <div className="aspect-[1/1.08] w-full rounded-lg border border-border bg-surface-secondary" />
+        <div className="aspect-[1/1.08] w-full rounded-comfortable border border-border bg-surface-secondary" />
     );
 }
 
@@ -533,7 +534,7 @@ export function PricingSection({ hideFaq = false }) {
     return (
         <section className="mx-auto flex w-full max-w-[1200px] flex-col gap-8 space-y-4 px-5 py-14">
             <div className="text-center">
-                <h2 className="mt-4 text-[40px] font-bold tracking-[-0.05em] text-white md:text-[52px]">
+                <h2 className="mt-4 ds-type-display-hero text-white">
                     Choose the plan that suits you best
                 </h2>
             </div>
@@ -553,13 +554,13 @@ export function PricingSection({ hideFaq = false }) {
                 </div>
 
                 {isError && (
-                    <div className="rounded-lg border border-border bg-surface-secondary px-6 py-12 text-center text-sm text-muted-foreground md:col-span-3">
+                    <div className="rounded-comfortable border border-border bg-surface-secondary px-6 py-12 text-center ds-type-small text-muted-foreground md:col-span-3">
                         Could not load packages. Please try again later.
                     </div>
                 )}
             </div>
 
-            <p className="text-center text-xs text-(--text-secondary)">
+            <p className="text-center ds-type-small text-(--text-secondary)">
                 Secure payments powered by Lemon Squeezy. Credits are added instantly after payment.
             </p>
 
@@ -591,7 +592,7 @@ export function PricingSection({ hideFaq = false }) {
                 <div className="w-full pt-10">
                     <div className="grid gap-10 lg:grid-cols-[340px_minmax(0,1fr)] lg:gap-14">
                         <div className="lg:pt-3">
-                            <h2 className="max-w-[280px] text-[52px] font-bold leading-[0.94] tracking-[-0.06em] text-white sm:text-[64px] md:text-[76px]">
+                            <h2 className="max-w-[280px] ds-type-display-hero text-white">
                                 Your
                                 <br />
                                 questions,
@@ -608,16 +609,16 @@ export function PricingSection({ hideFaq = false }) {
                                 className="border-b border-border first:border-t"
                             >
                                 <AccordionTrigger
-                                    className="py-6 text-left text-[20px] font-semibold tracking-[-0.03em] text-white hover:no-underline"
+                                    className="py-6 text-left ds-type-feature-title text-white hover:no-underline"
                                     icon={
                                         <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/8 text-white">
-                                            <HugeIcon name="add-01" className="text-base" />
+                                            <HugeIcon name="add-01" size="md" />
                                         </span>
                                     }
                                 >
                                     {item.question}
                                 </AccordionTrigger>
-                                <AccordionContent className="max-w-3xl pb-6 pr-12 text-sm leading-7 text-white/80">
+                                <AccordionContent className="max-w-3xl pb-6 pr-12 ds-type-small text-white/80">
                                     {item.answer}
                                 </AccordionContent>
                             </AccordionItem>
@@ -626,7 +627,7 @@ export function PricingSection({ hideFaq = false }) {
                     </div>
 
                     <div className="mt-10 flex items-center justify-center gap-4 text-center">
-                        <p className="text-sm font-semibold text-white/80">Ready to get started?</p>
+                        <p className="ds-type-caption-label text-white/80">Ready to get started?</p>
                         <Button
                             type="button"
                             variant="primary"
@@ -646,7 +647,7 @@ export function PricingSection({ hideFaq = false }) {
                                 });
                             }}
                             disabled={!nonTrialPackages.length}
-                            className="h-10 rounded-lg px-5 text-sm font-semibold transition-colors"
+                            className="h-10 rounded-subtle px-5 transition-colors"
                         >
                             Choose your pack
                         </Button>

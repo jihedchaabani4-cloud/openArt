@@ -292,7 +292,7 @@ export function CameraAngleSphere({
       )}
     >
       {/* Full-Width Square 3D Stage */}
-      <div className="relative w-full aspect-square rounded-2xl bg-surface-card border border-border-subtle flex items-center justify-center">
+      <div className="relative w-full aspect-square rounded-comfortable bg-surface-card border border-border-subtle flex items-center justify-center">
         {/* Top Tilt Up Arrow */}
         <IconButton
           type="button"
@@ -403,7 +403,7 @@ export function CameraAngleSphere({
               data-slot="camera-subject-preview"
               className="pointer-events-none absolute z-10 flex items-center justify-center"
             >
-              <div className="relative size-16 rounded-xl overflow-hidden border border-border-subtle bg-canvas-deep flex items-center justify-center">
+              <div className="relative size-16 rounded-comfortable overflow-hidden border border-border-subtle bg-canvas-deep flex items-center justify-center">
                 {previewUrl ? (
                   /* eslint-disable-next-line @next/next/no-img-element */
                   <img
@@ -527,7 +527,7 @@ export function CameraAngleSphere({
             >
               <span
                 className={cn(
-                  "size-9 rounded-lg border flex items-center justify-center shadow-lg",
+                  "size-9 rounded-subtle border flex items-center justify-center shadow-lg",
                   camera.isBack
                     ? "bg-omni-bg border-border-subtle text-text-secondary"
                     : "bg-canvas-deep border-white/50 text-text-primary"
@@ -569,7 +569,7 @@ export function CameraAngleSphere({
         {/* Bottom Centered Caption Inside Square */}
         <span
           data-slot="camera-direction-label"
-          className="pointer-events-none absolute bottom-1.5 inset-x-3 z-30 text-center ds-text-caption-s text-text-secondary font-medium truncate"
+          className="pointer-events-none absolute bottom-1.5 inset-x-3 z-30 text-center ds-type-micro-tag text-text-secondary truncate"
         >
           {directionLabel}
           {camera.isBack ? " (Behind)" : ""}

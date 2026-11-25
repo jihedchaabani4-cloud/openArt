@@ -15,15 +15,15 @@ import { Button } from "@/components/base/button";
 function PayloadLog({ entries, label, color }) {
   if (entries.length === 0) return null;
   return (
-    <div className="mt-3 rounded-2xl bg-black/40 border border-white/10 overflow-hidden">
-      <div className={`px-4 py-2 text-[11px] font-semibold tracking-wider uppercase ${color} border-b border-white/10`}>
+    <div className="mt-3 rounded-comfortable bg-black/40 border border-white/10 overflow-hidden">
+      <div className={`px-4 py-2 ds-type-micro-tag uppercase ${color} border-b border-white/10`}>
         {label} — Last {entries.length} payload{entries.length > 1 ? "s" : ""}
       </div>
       <div className="max-h-[200px] overflow-y-auto">
         {entries.slice().reverse().map((entry, i) => (
           <div key={i} className="px-4 py-3 border-b border-white/5 last:border-0">
-            <div className="text-[10px] text-white/30 mb-1">{entry.time}</div>
-            <pre className="text-[11px] text-green-300/90 font-mono whitespace-pre-wrap break-all leading-relaxed">
+            <div className="ds-type-micro-tag text-white/30 mb-1">{entry.time}</div>
+            <pre className="ds-type-micro-tag text-green-300/90 font-mono whitespace-pre-wrap break-all">
               {JSON.stringify(entry.payload, null, 2)}
             </pre>
           </div>
@@ -42,10 +42,10 @@ function V3Panel({ instanceLabel, color }) {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center gap-3">
-        <div className={`px-3 py-1 rounded-full text-[11px] font-semibold tracking-wider uppercase ${color.badge}`}>
+        <div className={`px-3 py-1 rounded-sharp ds-type-micro-tag uppercase ${color.badge}`}>
           v3 Platform — {instanceLabel}
         </div>
-        <div className="text-[12px] text-white/40">
+        <div className="ds-type-small text-white/40">
           Per-instance store · {models.length} models
         </div>
       </div>
@@ -80,12 +80,12 @@ export default function PromptBarTestPage() {
       {/* Top bar */}
       <div className="sticky top-0 z-40 bg-canvas-bg/90 backdrop-blur-xl border-b border-white/5 px-8 py-4 flex items-center justify-between">
         <div>
-          <h1 className="text-[16px] font-semibold text-white">Prompt Bar v3 — Test Page</h1>
-          <p className="text-[12px] text-white/40 mt-0.5">
+          <h1 className="ds-type-feature-title text-white">Prompt Bar v3 — Test Page</h1>
+          <p className="ds-type-small text-white/40 mt-0.5">
             PromptBarPlatform · featureConfig · per-instance store
           </p>
         </div>
-        <div className="flex items-center gap-1 bg-white/5 rounded-lg p-1">
+        <div className="flex items-center gap-1 bg-white/5 rounded-comfortable p-1">
           {tabs.map((tab) => (
             <Button
               key={tab.id}
@@ -108,7 +108,7 @@ export default function PromptBarTestPage() {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.2 }}
-            className="rounded-2xl bg-white/[0.02] border border-white/5 p-8"
+            className="rounded-comfortable bg-white/[0.02] border border-white/5 p-8"
           >
             <V3Panel
               instanceLabel="Main"
@@ -126,18 +126,18 @@ export default function PromptBarTestPage() {
             transition={{ duration: 0.2 }}
             className="flex flex-col gap-6"
           >
-            <div className="rounded-2xl bg-purple-500/5 border border-purple-500/20 px-5 py-3 text-[12px] text-white/50 leading-relaxed">
+            <div className="rounded-comfortable bg-purple-500/5 border border-purple-500/20 px-5 py-3 ds-type-small text-white/50">
               <span className="text-purple-400">ℹ</span> غيّر model أو mode في Instance A — Instance B ما يتأثرش. كل واحد عنده store منفصل 100%.
             </div>
 
             <div className="grid grid-cols-2 gap-8">
-              <div className="rounded-2xl bg-white/[0.02] border border-white/5 p-6">
+              <div className="rounded-comfortable bg-white/[0.02] border border-white/5 p-6">
                 <V3Panel
                   instanceLabel="Instance A"
                   color={{ badge: "bg-purple-500/20 border border-purple-500/30 text-purple-400", text: "text-purple-400" }}
                 />
               </div>
-              <div className="rounded-2xl bg-white/[0.02] border border-white/5 p-6">
+              <div className="rounded-comfortable bg-white/[0.02] border border-white/5 p-6">
                 <V3Panel
                   instanceLabel="Instance B"
                   color={{ badge: "bg-blue-500/20 border border-blue-500/30 text-blue-400", text: "text-blue-400" }}
@@ -148,9 +148,9 @@ export default function PromptBarTestPage() {
         )}
 
         {/* ── Architecture Summary ────────────────────────────── */}
-        <div className="mt-8 rounded-2xl bg-white/[0.02] border border-white/5 p-6">
-          <h2 className="text-[13px] font-semibold text-white/70 mb-4 uppercase tracking-wider">v3 Architecture</h2>
-          <div className="grid grid-cols-2 gap-4 text-[12px]">
+        <div className="mt-8 rounded-comfortable bg-white/[0.02] border border-white/5 p-6">
+          <h2 className="ds-type-caption-label text-white/70 mb-4">v3 Architecture</h2>
+          <div className="grid grid-cols-2 gap-4 ds-type-small">
             {[
               ["Store", "Per-instance createStore() — Zustand vanilla, zero shared state"],
               ["Model eligibility", "featureConfig.filterEligibleModels — manifest capabilities only"],
@@ -159,11 +159,11 @@ export default function PromptBarTestPage() {
               ["Serialization", "serialize() → { model, prompt, parameters } via backend keys"],
               ["Parameter routing", "ParameterControl → RatioSelector / DurationSelector / VariationSelector..."],
             ].map(([feat, desc]) => (
-              <div key={feat} className="flex gap-3 py-2.5 px-3 rounded-lg bg-white/[0.03]">
+              <div key={feat} className="flex gap-3 py-2.5 px-3 rounded-subtle bg-white/[0.03]">
                 <div className="text-emerald-400 shrink-0">✓</div>
                 <div>
-                  <div className="font-semibold text-white/80 mb-0.5">{feat}</div>
-                  <div className="text-white/40 text-[11px] leading-relaxed">{desc}</div>
+                  <div className="ds-type-caption-label text-white/80 mb-0.5">{feat}</div>
+                  <div className="text-white/40 ds-type-micro-tag">{desc}</div>
                 </div>
               </div>
             ))}

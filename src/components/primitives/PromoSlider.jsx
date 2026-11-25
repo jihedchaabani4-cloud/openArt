@@ -133,7 +133,7 @@ function SingleViewSlider({ items, isEmpty }) {
 
   return (
     <div 
-      className="relative w-full overflow-hidden rounded-lg transition-all duration-500 mb-10"
+      className="relative w-full overflow-hidden rounded-comfortable transition-all duration-500 mb-10"
       style={{ height: cardHeight }}
     >
       <AnimatePresence initial={false}>
@@ -155,7 +155,7 @@ function SingleViewSlider({ items, isEmpty }) {
 
           {/* Content */}
           <div className="relative z-20 p-5 flex flex-col items-start gap-3">
-            <h2 className="text-4xl md:text-[44px] font-medium text-white m-0 tracking-tight leading-[1.1] whitespace-pre-line">
+            <h2 className="ds-type-section-heading text-white m-0 whitespace-pre-line">
               {activeItem.title}
             </h2>
           </div>

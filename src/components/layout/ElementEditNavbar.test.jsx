@@ -141,15 +141,15 @@ describe("ElementEditNavbar", () => {
     );
 
     const doneBtn = container.querySelector("button[data-variant='white']");
-    expect(doneBtn.className).toContain("rounded-sm");
+    expect(doneBtn.className).toContain("rounded-subtle");
 
     const deleteBtn = container.querySelector("button[title='Delete']");
-    expect(deleteBtn.className).toContain("rounded-sm");
+    expect(deleteBtn.className).toContain("rounded-subtle");
 
     const likeBtn = container.querySelector("[data-testid='like-element-button']");
-    expect(likeBtn.className).toMatch(/rounded-sm|ds-icon-btn/);
+    expect(likeBtn.className).toMatch(/rounded-subtle|ds-icon-btn/);
 
     const addBtn = container.querySelector("[data-testid='import-dropdown-trigger']");
-    expect(addBtn.className).toMatch(/rounded-sm|ds-icon-btn/);
+    expect(addBtn.className).toMatch(/rounded-subtle|ds-icon-btn/);
   });
 });

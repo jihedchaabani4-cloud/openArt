@@ -62,7 +62,7 @@ export function LibraryMediaGridItem({
           }
         }}
         className={cn(
-          "group relative overflow-hidden rounded-xxxs bg-surface-card border border-white/10 shadow-none transition-none hover:border-white/20",
+          "group relative overflow-hidden rounded-comfortable bg-surface-card border border-white/10 shadow-none transition-none hover:border-white/20",
           actionRules.can.navigate ? "cursor-pointer" : "cursor-default",
           isSelected && actionRules.can.select && "ring-2 ring-white shadow-none",
           className
@@ -79,21 +79,21 @@ export function LibraryMediaGridItem({
                 onToggleSelect?.();
               }}
               className={cn(
-                "absolute left-3 top-3 z-30 flex h-6 w-6 items-center justify-center rounded-sm border transition p-0",
+                "absolute left-3 top-3 z-30 flex h-6 w-6 items-center justify-center rounded-sharp border transition p-0",
                 isSelected
                   ? "border-white bg-white text-black hover:bg-white/90"
                   : "border-white/20 bg-black/50 backdrop-blur-sm text-transparent hover:border-white/40 hover:text-white/70"
               )}
               aria-label="Select media"
             >
-              <HugeIcon name="tick-02" className="text-sm font-bold" />
+              <HugeIcon name="tick-02" size="sm" weight="bold" />
             </Button>
           )}
 
           {isLiked && (
             <div className="absolute bottom-3 left-3 z-30 flex items-center gap-1">
-              <div className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-black/60 text-white border border-white/10">
-                <HugeIcon name="favourite" filled className="text-xs text-white" />
+              <div className="inline-flex h-7 w-7 items-center justify-center rounded-sharp bg-black/60 text-white border border-white/10">
+                <HugeIcon name="favourite" filled size="xs" className="text-white" />
               </div>
             </div>
           )}
@@ -133,7 +133,7 @@ export function LibraryMediaGridItem({
                       title={isLiked ? "Unlike" : "Like"}
                       aria-label={isLiked ? "Unlike" : "Like"}
                     >
-                      <HugeIcon name="favourite" filled={isLiked} className={cn("text-base", isLiked ? "text-accent" : "text-white/80")} />
+                      <HugeIcon name="favourite" filled={isLiked} size="md" className={isLiked ? "text-accent" : "text-white/80"} />
                     </IconButton>
                   )}
                   {actionRules.can.delete && (
@@ -146,7 +146,7 @@ export function LibraryMediaGridItem({
                       title="Delete"
                       aria-label="Delete"
                     >
-                      <HugeIcon name="delete-02" className="text-base" />
+                      <HugeIcon name="delete-02" size="md" />
                     </IconButton>
                   )}
                 </ButtonGroup>

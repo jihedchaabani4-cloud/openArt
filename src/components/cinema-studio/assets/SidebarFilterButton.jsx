@@ -10,10 +10,10 @@ export function SidebarFilterButton({ label, icon: Icon, active = false, onClick
       type="button"
       variant={active ? "secondary" : "ghost"}
       onClick={onClick}
-      className="w-full justify-between px-3 text-left text-[14px]"
+      className="w-full justify-between px-3 text-left ds-type-caption-label"
     >
       <span className="flex items-center gap-2.5">
-        {Icon ? (typeof Icon === "string" ? <HugeIcon name={Icon} className="text-base" /> : React.isValidElement(Icon) ? Icon : typeof Icon === "function" ? React.createElement(Icon, { className: "text-base" }) : null) : null}
+        {Icon ? (typeof Icon === "string" ? <HugeIcon name={Icon} size="md" /> : React.isValidElement(Icon) ? Icon : typeof Icon === "function" ? React.createElement(Icon, { className: "ds-icon-md" }) : null) : null}
         <span>{label}</span>
       </span>
     </Button>
@@ -26,10 +26,10 @@ export function SidebarDropdownButton({ label, active = false, onClick }) {
       type="button"
       variant={active ? "secondary" : "ghost"}
       onClick={onClick}
-      className="w-full justify-between px-3 text-left text-[14px]"
+      className="w-full justify-between px-3 text-left ds-type-caption-label"
     >
       <span>{label}</span>
-      <HugeIcon name="arrow-down-01" className="text-base -rotate-90 text-on-surface-subtle" />
+      <HugeIcon name="arrow-down-01" size="md" className="-rotate-90 text-on-surface-subtle" />
     </Button>
   );
 }

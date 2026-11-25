@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from "@/components/base/select";
 import { Input } from "@/components/base/input";
+import { Label } from "@/components/base/label";
 import { Textarea } from "@/components/primitives/textarea";
 import { Button } from "@/components/base/button";
 import { IconButton } from "@/components/base/icon-button";
@@ -262,14 +263,14 @@ export function NewElementDialog({ open, onOpenChange, projectId: propProjectId 
       >
         {/* ── Dialog Header (Borderless) ── */}
         <div className="flex items-center justify-between w-full mb-4 shrink-0">
-          <DialogTitle className="text-[19px] font-semibold text-white tracking-tight">
+          <DialogTitle className="ds-type-feature-title text-white">
             New element
           </DialogTitle>
           <Button
             type="button"
             variant="ghost"
             onClick={() => handleOpenChange(false)}
-            className="size-8 p-0 rounded-full text-white/50 hover:text-white"
+            className="size-8 p-0 rounded-subtle text-white/50 hover:text-white"
           >
             <HugeIcon name="cancel-01" />
           </Button>
@@ -293,7 +294,7 @@ export function NewElementDialog({ open, onOpenChange, projectId: propProjectId 
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
             className={cn(
-              "flex-1 min-h-[300px] h-full rounded-xxxs bg-surface-card flex flex-col items-center justify-center relative overflow-hidden transition-all duration-300 border border-white/5",
+              "flex-1 min-h-[300px] h-full rounded-comfortable bg-surface-card flex flex-col items-center justify-center relative overflow-hidden transition-all duration-300 border border-white/5",
               isDragging && "bg-surface-elevated scale-[0.995]"
             )}
           >
@@ -302,19 +303,19 @@ export function NewElementDialog({ open, onOpenChange, projectId: propProjectId 
               <div
                 onClick={() => fileInputRef.current?.click()}
                 className={cn(
-                  "w-[90%] max-w-[440px] h-[280px] rounded-lg bg-white/5 hover:bg-white/10 active:bg-white/15",
+                  "w-[90%] max-w-[440px] h-[280px] rounded-comfortable bg-white/5 hover:bg-white/10 active:bg-white/15",
                   "flex flex-col items-center justify-center gap-4 transition-all duration-200 cursor-pointer p-8 text-center group border border-white/5",
                   isDragging && "bg-white/20 scale-[1.01] shadow-none"
                 )}
               >
-                <div className="size-14 rounded-lg bg-white/10 group-hover:bg-white/15 flex items-center justify-center text-white/80 group-hover:text-white transition-all shadow-none">
-                  <HugeIcon name="upload-04" className="text-3xl" />
+                <div className="size-14 rounded-comfortable bg-white/10 group-hover:bg-white/15 flex items-center justify-center text-white/80 group-hover:text-white transition-all shadow-none">
+                  <HugeIcon name="upload-04" size="2xl" />
                 </div>
                 <div className="flex flex-col items-center gap-1.5">
-                  <span className="text-[15px] font-medium text-white/85 group-hover:text-white transition-colors">
+                  <span className="ds-type-body text-white/85 group-hover:text-white transition-colors">
                     Drop image or video here to add to element
                   </span>
-                  <span className="text-[12px] text-white/40">
+                  <span className="ds-type-small text-white/40">
                     Click to browse or drag and drop (Max 6)
                   </span>
                 </div>
@@ -323,7 +324,7 @@ export function NewElementDialog({ open, onOpenChange, projectId: propProjectId 
               /* Media Preview Area */
               <div className="w-full h-full flex flex-col p-3 gap-3">
                 {/* Hero Preview Frame */}
-                <div className="flex-1 min-h-0 w-full relative flex items-center justify-center rounded-xxxs overflow-hidden bg-black/40">
+                <div className="flex-1 min-h-0 w-full relative flex items-center justify-center rounded-comfortable overflow-hidden bg-black/40">
                   {activeMedia?.isVideo ? (
                     <video
                       src={activeMedia.url}
@@ -345,10 +346,10 @@ export function NewElementDialog({ open, onOpenChange, projectId: propProjectId 
                   <IconButton
                     type="button"
                     onClick={(e) => handleRemoveMedia(activePreviewIndex, e)}
-                    className="absolute top-3 right-3 size-8 p-0 rounded-full bg-surface-elevated/80 text-white/80 hover:text-white hover:bg-surface-elevated border border-white/10"
+                    className="absolute top-3 right-3 size-8 p-0 rounded-subtle bg-surface-elevated/80 text-white/80 hover:text-white hover:bg-surface-elevated border border-white/10"
                     title="Supprimer ce fichier"
                   >
-                    <HugeIcon name="cancel-01" className="text-base" />
+                    <HugeIcon name="cancel-01" size="md" />
                   </IconButton>
                 </div>
 
@@ -361,7 +362,7 @@ export function NewElementDialog({ open, onOpenChange, projectId: propProjectId 
                         key={idx}
                         onClick={() => setActivePreviewIndex(idx)}
                         className={cn(
-                          "relative size-14 rounded-xxxs overflow-hidden cursor-pointer shrink-0 border-none transition-all",
+                          "relative size-14 rounded-subtle overflow-hidden cursor-pointer shrink-0 border-none transition-all",
                           isSelected
                             ? "ring-2 ring-white/90 opacity-100"
                             : "opacity-50 hover:opacity-90"
@@ -383,7 +384,7 @@ export function NewElementDialog({ open, onOpenChange, projectId: propProjectId 
                         <IconButton
                           type="button"
                           onClick={(e) => handleRemoveMedia(idx, e)}
-                          className="absolute top-0.5 right-0.5 size-4 p-0 rounded-full bg-black/70 text-xs"
+                          className="absolute top-0.5 right-0.5 size-4 p-0 rounded-sharp bg-black/70 ds-type-micro-tag"
                         >
                           ×
                         </IconButton>
@@ -400,7 +401,7 @@ export function NewElementDialog({ open, onOpenChange, projectId: propProjectId 
                       title="Ajouter un autre fichier"
                     >
                       <HugeIcon name="add-01" />
-                      <span className="text-[10px] font-medium">Add</span>
+                      <span className="ds-type-micro-tag">Add</span>
                     </DashedUploadSlot>
                   )}
                 </div>
@@ -412,9 +413,9 @@ export function NewElementDialog({ open, onOpenChange, projectId: propProjectId 
           <div className="w-full md:w-[320px] shrink-0 flex flex-col gap-4 overflow-y-auto pr-0.5 custom-scrollbar">
             {/* 1. Category Field (Predefined Select Component with blur variant) */}
             <div className="flex flex-col gap-1.5 w-full">
-              <label className="text-xs font-semibold text-white/90 pl-0.5">
+              <Label as="span" className="pl-0.5">
                 Category
-              </label>
+              </Label>
               <Select value={category} onValueChange={setCategory}>
                 <SelectTrigger variant="blur" className="w-full">
                   <SelectValue placeholder="Category" />
@@ -444,9 +445,9 @@ export function NewElementDialog({ open, onOpenChange, projectId: propProjectId 
                   if (error) setError(null);
                 }}
                 placeholder="Enter element name"
-                className="text-[14px]"
+                className="ds-type-small"
               />
-              <span className="text-[11.5px] text-cool-slate pl-0.5">
+              <span className="ds-type-small text-cool-slate pl-0.5">
                 The display name, e.g. Cal, Oli, Elena
               </span>
             </div>
@@ -473,7 +474,7 @@ export function NewElementDialog({ open, onOpenChange, projectId: propProjectId 
         <div className="flex items-center justify-between w-full mt-4 pt-1 shrink-0">
           <div className="flex-1 pr-4">
             {error && (
-              <span className="text-[13px] text-red-400 font-medium truncate block">
+              <span className="ds-type-small text-red-400 truncate block">
                 {error}
               </span>
             )}
@@ -496,7 +497,7 @@ export function NewElementDialog({ open, onOpenChange, projectId: propProjectId 
             >
               {isUploading ? (
                 <>
-                  <HugeIcon name="loading-03" className="text-base animate-spin" />
+                  <HugeIcon name="loading-03" size="md" className="animate-spin" />
                   <span>Creating...</span>
                 </>
               ) : (

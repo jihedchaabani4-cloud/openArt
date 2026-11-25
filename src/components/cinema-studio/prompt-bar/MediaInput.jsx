@@ -185,7 +185,7 @@ export function MediaInput({
           data-testid="media-input-uploading"
           role="status"
           aria-label={`Uploading ${label || "media"}`}
-          className="chip-container group size-12 relative rounded-xl overflow-hidden bg-white-5 border border-border-subtle flex items-center justify-center select-none"
+          className="chip-container group size-12 relative rounded-subtle overflow-hidden bg-white-5 border border-border-subtle flex items-center justify-center select-none"
         >
           {tempPreview && (
             <img
@@ -201,9 +201,9 @@ export function MediaInput({
           data-testid="media-input-failed"
           role="alert"
           aria-label={error || "Upload failed"}
-          className="chip-container group size-12 relative rounded-xl overflow-hidden bg-error/10 border border-error/30 flex flex-col items-center justify-center p-1 text-center select-none"
+          className="chip-container group size-12 relative rounded-subtle overflow-hidden bg-error/10 border border-error/30 flex flex-col items-center justify-center p-1 text-center select-none"
         >
-          <span className="ds-text-caption-s text-error font-medium leading-none mb-1">Failed</span>
+          <span className="ds-type-micro-tag text-error mb-1">Failed</span>
           <Button
             type="button"
             variant="secondary"

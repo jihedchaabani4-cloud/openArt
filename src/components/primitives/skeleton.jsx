@@ -26,11 +26,11 @@ function Skeleton({
         "bg-white/5 pointer-events-none",
         variant === "pulse" && "animate-pulse",
         variant === "shimmer" && "animate-shimmer bg-gradient-to-r from-white/5 via-white/10 to-white/5",
-        shape === "default" && "rounded-sm",
-        shape === "card" && "rounded-md",
+        shape === "default" && "rounded-subtle",
+        shape === "card" && "rounded-comfortable",
         shape === "circle" && "rounded-full",
-        shape === "badge" && "rounded-sm",
-        shape === "pill" && "rounded-full",
+        shape === "badge" && "rounded-sharp",
+        shape === "pill" && "rounded-subtle",
         className
       )}
       {...props}

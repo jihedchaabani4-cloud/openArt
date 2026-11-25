@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import {
   getItemMetadata,
+  getCachedImageDimensions,
   STUDIO_GRID_CONFIG,
   STUDIO_GRID_SPACING_CONFIG,
   getStudioGridDensity,
@@ -8,6 +9,8 @@ import {
   getResponsiveTargetRowHeight,
   setCachedImageDimensions,
   subscribeImageDimensions,
+  parseAspectRatioValue,
+  normalizeCssAspectRatio,
 } from "./displayUtils";
 
 describe("displayUtils - getItemMetadata aspect ratio resolution", () => {
@@ -102,6 +105,73 @@ describe("displayUtils - getItemMetadata aspect ratio resolution", () => {
 
     const meta = getItemMetadata(item, workflow);
     expect(meta.aspect).toBe("16/9");
+  });
+
+  it("ignores non-ratio strings like 'auto' and falls back to item's real dimensions", () => {
+    const item = {
+      id: "auto-item",
+      url: "https://example.com/auto-item.png",
+      status: "completed",
+      aspectRatio: "auto",
+      image: { dimensions: { width: 736, height: 1308 } },
+    };
+
+    const meta = getItemMetadata(item);
+    expect(meta.aspect).toBe("736/1308");
+  });
+
+  it("supports snake_case aspect_ratio and WxH ratio strings without misparsing", () => {
+    const snakeMeta = getItemMetadata({
+      id: "snake-1",
+      url: "https://example.com/snake.png",
+      status: "processing",
+      aspect_ratio: "9:16",
+    });
+    expect(snakeMeta.aspect).toBe("9/16");
+
+    expect(parseAspectRatioValue("9x16")?.ratio).toBeCloseTo(9 / 16, 4);
+    expect(normalizeCssAspectRatio("9:16")).toBe("9/16");
+    expect(normalizeCssAspectRatio("auto")).toBeNull();
+  });
+
+  it("prefers an item's own real pixel dimensions over parent workflow ratio", () => {
+    const workflow = {
+      id: "wf-char-parent",
+      workflow_type: "CHARACTER_SHEET",
+      generationConfig: { ratio: "16:9" },
+    };
+    const detailItem = {
+      id: "detail-portrait",
+      url: "https://example.com/detail-portrait.png",
+      status: "completed",
+      role: "detail",
+      width: 736,
+      height: 1308,
+    };
+
+    const meta = getItemMetadata(detailItem, workflow);
+    expect(meta.aspect).toBe("736/1308");
+  });
+
+  it("does not force 16/9 sheet fallback on character detail items without dimensions", () => {
+    const workflow = { id: "wf-char-only", workflow_type: "CHARACTER" };
+    const detailItem = {
+      id: "detail-no-dims",
+      url: "https://example.com/detail-no-dims.png",
+      status: "completed",
+      role: "detail",
+    };
+
+    const meta = getItemMetadata(detailItem, workflow);
+    expect(meta.aspect).toBeNull();
+  });
+
+  it("preserves cached dimensions across signed URL auth-token refreshes", () => {
+    const urlV1 = "https://storage.supabase.co/storage/v1/object/sign/media/signed-test.png?token=aaa&Expires=100";
+    const urlV2 = "https://storage.supabase.co/storage/v1/object/sign/media/signed-test.png?token=bbb&Expires=200";
+
+    setCachedImageDimensions(urlV1, 736, 1308);
+    expect(getCachedImageDimensions(urlV2)).toMatchObject({ width: 736, height: 1308, aspect: "736/1308" });
   });
 
   describe("STUDIO_GRID_CONFIG & STUDIO_GRID_SPACING_CONFIG - Space between media (S/M/L)", () => {

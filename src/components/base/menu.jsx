@@ -8,7 +8,7 @@ export const MENU_ANIMATION_CLASS =
   "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2";
 
 export const MENU_LABEL_CLASS =
-  "px-2 py-1 ds-text-caption-s font-medium text-text-secondary data-[inset]:pl-8";
+  "px-2 py-1 ds-label data-[inset]:pl-8";
 
 export const MENU_PANEL_DEFAULT_WIDTH = "w-56";
 
@@ -16,7 +16,7 @@ export const MENU_SEPARATOR_CLASS =
   "pointer-events-none m-0 h-px w-full shrink-0 bg-border-menu-subtle";
 
 export const MENU_SHORTCUT_CLASS =
-  "ml-auto ds-text-caption-s tracking-widest text-text-secondary font-mono";
+  "ml-auto ds-type-micro-tag text-text-secondary font-mono";
 
 export const MENU_INDICATOR_SLOT_CLASS =
   "pointer-events-none absolute left-2 flex size-4 items-center justify-center text-text-primary";
@@ -26,7 +26,7 @@ export function menuPanelClassName({ variant = "glass", className } = {}) {
     variant === "listbox" ? "surface-listbox" : "surface-glass";
 
   return cn(
-    "z-50 min-w-48 rounded-xl overflow-x-hidden overflow-y-auto bg-surface-menu-glass p-1.5 flex flex-col gap-0.5 font-sans antialiased text-text-primary outline-none",
+    "z-50 min-w-48 rounded-comfortable overflow-x-hidden overflow-y-auto bg-surface-menu-glass p-1.5 flex flex-col gap-0.5 font-sans antialiased text-text-primary outline-none",
     surfaceClass,
     MENU_ANIMATION_CLASS,
     className
@@ -40,7 +40,7 @@ export function menuItemClassName({
   className,
 } = {}) {
   return cn(
-    "ds-menu-item ds-text-caption-m font-normal group relative flex cursor-pointer items-center gap-2 rounded-lg text-text-primary font-sans antialiased outline-none select-none transition-colors",
+    "ds-menu-item ds-type-small group relative flex cursor-pointer items-center gap-2 rounded-subtle text-text-primary antialiased outline-none select-none transition-colors",
     "hover:bg-surface-tonal-hover focus:bg-surface-tonal-hover data-[highlighted]:bg-surface-tonal-hover data-[state=open]:bg-surface-tonal-hover",
     "data-[selected=true]:bg-surface-tonal-hover-strong aria-selected:bg-surface-tonal-hover-strong",
     selected && "bg-surface-tonal-hover-strong",
@@ -83,7 +83,8 @@ export function MenuCheckIcon({ className }) {
     <HugeIcon
       name="tick-02"
       size="sm"
-      className={cn("font-bold text-icon-primary", className)}
+      weight="bold"
+      className={cn("text-icon-primary", className)}
     />
   );
 }
@@ -139,7 +140,7 @@ export function MenuItemContent({
           {badge && <span className="shrink-0">{badge}</span>}
         </span>
         {subtitle && (
-          <span className="ds-text-caption-s font-normal text-text-secondary truncate">
+          <span className="ds-type-micro-tag text-text-secondary truncate">
             {subtitle}
           </span>
         )}

@@ -41,11 +41,11 @@ export function BentoFeatures() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="w-full h-full rounded-lg overflow-hidden relative border border-white/10 bg-omni-bg group shadow-none flex items-center justify-center"
+          className="w-full h-full rounded-comfortable overflow-hidden relative border border-white/10 bg-omni-bg group shadow-none flex items-center justify-center"
         >
           <img src="https://s.krea.ai/light-streak.webp" className="absolute z-0 h-full w-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700 pointer-events-none" loading="lazy" alt="" />
           <div className="absolute inset-0 bg-black/25 z-10 pointer-events-none" />
-          <span className="relative z-20 text-center text-xl md:text-2xl font-bold leading-tight tracking-tight text-white px-4">
+          <span className="relative z-20 text-center ds-type-card-title text-white px-4">
             Industry-leading<br />inference speed
           </span>
         </motion.div>
@@ -57,10 +57,10 @@ export function BentoFeatures() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.05 }}
-          className="w-full h-full rounded-lg overflow-hidden relative border border-white/5 bg-white p-5 flex flex-col items-center justify-center text-black shadow-none"
+          className="w-full h-full rounded-comfortable overflow-hidden relative border border-white/5 bg-white p-5 flex flex-col items-center justify-center text-black shadow-none"
         >
-          <span className="text-4xl md:text-5xl font-extrabold tracking-tight bg-gradient-to-br from-black to-black/60 bg-clip-text text-transparent">22K</span>
-          <span className="text-[11px] font-bold text-black/50 mt-1 text-center">Pixels upscaling</span>
+          <span className="ds-type-display-hero bg-gradient-to-br from-black to-black/60 bg-clip-text text-transparent">22K</span>
+          <span className="ds-type-micro-tag text-black/50 mt-1 text-center">Pixels upscaling</span>
         </motion.div>
       )}
 
@@ -70,10 +70,10 @@ export function BentoFeatures() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.1 }}
-          className="w-full h-full rounded-lg overflow-hidden relative border border-white/5 bg-white p-5 flex flex-col items-center justify-center text-black shadow-none"
+          className="w-full h-full rounded-comfortable overflow-hidden relative border border-white/5 bg-white p-5 flex flex-col items-center justify-center text-black shadow-none"
         >
-          <span className="text-4xl md:text-5xl font-extrabold tracking-tight bg-gradient-to-br from-black to-black/60 bg-clip-text text-transparent">Train</span>
-          <span className="text-[10px] font-bold text-black/45 mt-1 text-center leading-snug px-1">Fine-tune models with your own data</span>
+          <span className="ds-type-display-hero bg-gradient-to-br from-black to-black/60 bg-clip-text text-transparent">Train</span>
+          <span className="ds-type-micro-tag text-black/45 mt-1 text-center px-1">Fine-tune models with your own data</span>
         </motion.div>
       )}
 
@@ -86,21 +86,21 @@ export function BentoFeatures() {
           className="w-full h-full flex flex-col justify-between gap-2 pointer-events-auto"
         >
           {/* Top: 4K Native generation */}
-          <div className="relative h-[48%] rounded-lg overflow-hidden border border-white/10 bg-omni-bg group shadow-none flex flex-col items-center justify-center text-white">
+          <div className="relative h-[48%] rounded-comfortable overflow-hidden border border-white/10 bg-omni-bg group shadow-none flex flex-col items-center justify-center text-white">
             <img src="https://s.krea.ai/eye-macro.webp" className="absolute z-0 h-full w-full object-cover opacity-75 group-hover:scale-105 transition-transform duration-700 pointer-events-none" loading="lazy" alt="" />
             <div className="absolute inset-0 bg-black/15 z-10 pointer-events-none" />
-            <span className="relative z-20 text-3xl font-extrabold tracking-tight leading-none">4K</span>
-            <span className="relative z-20 text-[9px] font-semibold text-white/80 mt-0.5 text-center leading-none">Native image generation</span>
+            <span className="relative z-20 ds-type-sub-heading">4K</span>
+            <span className="relative z-20 ds-type-micro-tag text-white/80 mt-0.5 text-center">Native image generation</span>
           </div>
 
           {/* Bottom: Minimalist UI */}
-          <div className="relative h-[48%] rounded-lg overflow-hidden border border-white/10 bg-canvas-deep group flex items-center justify-center p-3 shadow-none">
+          <div className="relative h-[48%] rounded-comfortable overflow-hidden border border-white/10 bg-canvas-deep group flex items-center justify-center p-3 shadow-none">
             <img src="https://s.krea.ai/minimalistBase.webp" className="absolute z-0 h-full w-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700 pointer-events-none" loading="lazy" alt="" />
             <div className="absolute inset-0 bg-black/20 z-10 pointer-events-none" />
-            <div className="relative z-20 text-center text-lg font-bold text-white tracking-tight">
+            <div className="relative z-20 text-center ds-type-feature-title text-white">
               Minimalist UI
               <div
-                className="absolute -bottom-full left-0 right-0 -scale-y-100 text-lg font-bold opacity-30 blur-[2.5px] pointer-events-none select-none"
+                className="absolute -bottom-full left-0 right-0 -scale-y-100 ds-type-feature-title opacity-30 blur-[2.5px] pointer-events-none select-none"
                 aria-hidden="true"
                 style={{
                   background: "linear-gradient(to top, white 0%, transparent 80%)",
@@ -122,12 +122,12 @@ export function BentoFeatures() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.05 }}
-          className="w-full h-full rounded-lg overflow-hidden relative border border-white/10 bg-omni-bg group shadow-none flex flex-col items-center justify-center text-white"
+          className="w-full h-full rounded-comfortable overflow-hidden relative border border-white/10 bg-omni-bg group shadow-none flex flex-col items-center justify-center text-white"
         >
           <img src="https://s.krea.ai/krea1-example.webp" className="absolute z-0 h-full w-full object-cover opacity-85 group-hover:scale-105 transition-transform duration-700 pointer-events-none" loading="lazy" alt="" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent z-10 pointer-events-none" />
-          <span className="relative z-20 text-5xl md:text-6xl font-extrabold tracking-tight mb-1 leading-none">Level 1</span>
-          <span className="relative z-20 text-[10px] font-bold text-white/70 leading-none">Ultra-realistic flagship model</span>
+          <span className="relative z-20 ds-type-display-hero mb-1">Level 1</span>
+          <span className="relative z-20 ds-type-micro-tag text-white/70">Ultra-realistic flagship model</span>
         </motion.div>
       )}
 
@@ -140,15 +140,15 @@ export function BentoFeatures() {
           className="w-full h-full flex flex-col justify-between gap-2 pointer-events-auto"
         >
           {/* Top: Do not train */}
-          <div className="relative h-[48%] rounded-lg overflow-hidden border border-white/5 bg-white p-3 flex flex-col items-center justify-center text-black shadow-none">
-            <span className="text-lg font-extrabold tracking-tight bg-gradient-to-br from-black to-black/60 bg-clip-text text-transparent">Do not train</span>
-            <span className="text-[9px] font-bold text-black/50 mt-0.5 text-center leading-tight">Safely generate proprietary data</span>
+          <div className="relative h-[48%] rounded-comfortable overflow-hidden border border-white/5 bg-white p-3 flex flex-col items-center justify-center text-black shadow-none">
+            <span className="ds-type-feature-title bg-gradient-to-br from-black to-black/60 bg-clip-text text-transparent">Do not train</span>
+            <span className="ds-type-micro-tag text-black/50 mt-0.5 text-center">Safely generate proprietary data</span>
           </div>
 
           {/* Bottom: 64+ Models */}
-          <div className="relative h-[48%] rounded-lg overflow-hidden border border-white/5 bg-white p-3 flex flex-col items-center justify-center text-black shadow-none">
-            <span className="text-3xl font-extrabold tracking-tight bg-gradient-to-br from-black to-black/60 bg-clip-text text-transparent">64+</span>
-            <span className="text-[10px] font-bold text-black/50 mt-0.5">Models</span>
+          <div className="relative h-[48%] rounded-comfortable overflow-hidden border border-white/5 bg-white p-3 flex flex-col items-center justify-center text-black shadow-none">
+            <span className="ds-type-sub-heading bg-gradient-to-br from-black to-black/60 bg-clip-text text-transparent">64+</span>
+            <span className="ds-type-micro-tag text-black/50 mt-0.5">Models</span>
           </div>
         </motion.div>
       )}
@@ -159,11 +159,11 @@ export function BentoFeatures() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="w-full h-full rounded-lg overflow-hidden relative border border-white/10 bg-omni-bg group shadow-none flex flex-col justify-between"
+          className="w-full h-full rounded-comfortable overflow-hidden relative border border-white/10 bg-omni-bg group shadow-none flex flex-col justify-between"
         >
           <img src="https://s.krea.ai/asset-manager.webp" className="absolute z-0 h-full w-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700 pointer-events-none" loading="lazy" alt="" />
           <div className="absolute inset-0 bg-gradient-to-b from-black/85 via-black/20 to-transparent z-10 pointer-events-none" />
-          <span className="relative z-20 text-[11px] md:text-xs font-bold text-white tracking-tight p-4">
+          <span className="relative z-20 ds-type-micro-tag text-white p-4">
             Full-fledged asset manager
           </span>
         </motion.div>
@@ -175,9 +175,9 @@ export function BentoFeatures() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.05 }}
-          className="w-full h-full rounded-lg overflow-hidden relative border border-white/5 bg-white shadow-none flex flex-col items-center justify-between text-black p-4"
+          className="w-full h-full rounded-comfortable overflow-hidden relative border border-white/5 bg-white shadow-none flex flex-col items-center justify-between text-black p-4"
         >
-          <span className="text-[11px] md:text-xs font-bold tracking-tight">Bleeding Edge</span>
+          <span className="ds-type-micro-tag">Bleeding Edge</span>
           <svg viewBox="0 0 200 200" className="block select-none w-[68px] h-[68px]" width="68" height="68">
             <defs>
               <filter id="shadow-blur" x="-50%" y="-50%" width="200%" height="200%" filterUnits="objectBoundingBox">
@@ -204,7 +204,7 @@ export function BentoFeatures() {
             </g>
             <circle cx="100" cy="100" r="5" className="fill-accent-yellow"></circle>
           </svg>
-          <span className="text-[8px] text-black/55 font-bold tracking-tight text-center leading-none mb-0.5">
+          <span className="ds-type-micro-tag text-black/55 text-center mb-0.5">
             Access latest models on release day
           </span>
         </motion.div>
@@ -216,11 +216,11 @@ export function BentoFeatures() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.1 }}
-          className="w-full h-full rounded-lg overflow-hidden relative border border-white/10 bg-omni-bg group shadow-none flex flex-col justify-between"
+          className="w-full h-full rounded-comfortable overflow-hidden relative border border-white/10 bg-omni-bg group shadow-none flex flex-col justify-between"
         >
           <img src="https://s.krea.ai/isometricPromptStyles.webp" className="absolute z-0 h-full w-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700 pointer-events-none" loading="lazy" alt="" />
           <div className="absolute inset-0 bg-black/10 z-10 pointer-events-none" />
-          <span className="relative z-20 text-[11px] md:text-xs font-bold text-white tracking-tight p-4">
+          <span className="relative z-20 ds-type-micro-tag text-white p-4">
             1000+ styles
           </span>
         </motion.div>
@@ -232,11 +232,11 @@ export function BentoFeatures() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="w-full h-full rounded-lg overflow-hidden relative border border-white/10 bg-omni-bg group shadow-none flex flex-col justify-between"
+          className="w-full h-full rounded-comfortable overflow-hidden relative border border-white/10 bg-omni-bg group shadow-none flex flex-col justify-between"
         >
           <img src="https://s.krea.ai/isometricEditExample.webp" className="absolute z-0 h-full w-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700 pointer-events-none" loading="lazy" alt="" />
           <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/10 to-transparent z-10 pointer-events-none" />
-          <span className="relative z-20 text-[11px] md:text-xs font-bold text-white tracking-tight p-4">
+          <span className="relative z-20 ds-type-micro-tag text-white p-4">
             Image Editor
           </span>
         </motion.div>
@@ -248,18 +248,18 @@ export function BentoFeatures() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.05 }}
-          className="w-full h-full rounded-lg overflow-hidden relative border border-white/5 bg-white shadow-none flex flex-col justify-between text-black p-4"
+          className="w-full h-full rounded-comfortable overflow-hidden relative border border-white/5 bg-white shadow-none flex flex-col justify-between text-black p-4"
         >
-          <span className="text-[11px] md:text-xs font-bold tracking-tight">Lipsync</span>
+          <span className="ds-type-micro-tag">Lipsync</span>
           <div className="flex justify-center items-center gap-1.5 h-12 my-0.5">
-            <div className="w-1 bg-black rounded-full h-6 animate-[bounce_0.8s_infinite]" />
-            <div className="w-1 bg-black/70 rounded-full h-10 animate-[bounce_0.6s_infinite_0.1s]" />
-            <div className="w-1 bg-black rounded-full h-8 animate-[bounce_0.7s_infinite_0.2s]" />
-            <div className="w-1 bg-black/80 rounded-full h-5 animate-[bounce_0.9s_infinite_0.15s]" />
-            <div className="w-1 bg-black rounded-full h-9 animate-[bounce_0.5s_infinite_0.05s]" />
-            <div className="w-1 bg-black/60 rounded-full h-6 animate-[bounce_0.8s_infinite_0.25s]" />
+            <div className="w-1 bg-black rounded-sharp h-6 animate-[bounce_0.8s_infinite]" />
+            <div className="w-1 bg-black/70 rounded-sharp h-10 animate-[bounce_0.6s_infinite_0.1s]" />
+            <div className="w-1 bg-black rounded-sharp h-8 animate-[bounce_0.7s_infinite_0.2s]" />
+            <div className="w-1 bg-black/80 rounded-sharp h-5 animate-[bounce_0.9s_infinite_0.15s]" />
+            <div className="w-1 bg-black rounded-sharp h-9 animate-[bounce_0.5s_infinite_0.05s]" />
+            <div className="w-1 bg-black/60 rounded-sharp h-6 animate-[bounce_0.8s_infinite_0.25s]" />
           </div>
-          <span className="text-[8px] text-black/55 font-bold tracking-tight text-center leading-none">
+          <span className="ds-type-micro-tag text-black/55 text-center">
             Synchronized audio
           </span>
         </motion.div>
@@ -306,7 +306,7 @@ export function BentoFeatures() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-4xl md:text-5xl font-extrabold tracking-tighter text-white mb-2"
+            className="ds-type-display-hero text-white mb-2"
           >
             Designed for Creators
           </motion.h2>
@@ -315,7 +315,7 @@ export function BentoFeatures() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
-            className="text-base text-white/50 max-w-xl mx-auto font-medium"
+            className="ds-type-body text-white/50 max-w-xl mx-auto"
           >
             Experience next-generation tools built with industrial-grade AI and elegant design.
           </motion.p>

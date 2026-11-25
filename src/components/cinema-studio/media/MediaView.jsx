@@ -3,6 +3,11 @@
 
 import { useRef, useState, useEffect, useCallback, forwardRef, memo } from "react";
 import { cn } from "@/shared/lib/utils";
+import {
+  normalizeCssAspectRatio,
+  parseAspectRatioValue,
+  setCachedImageDimensions,
+} from "@/shared/lib/displayUtils";
 import { ProcessingCard } from "@/components/cinema-studio/media/ProcessingCard";
 import { UploadingCard } from "@/components/cinema-studio/media/UploadingCard";
 import {
@@ -275,7 +280,11 @@ export const CoreMediaItemPresenter = memo(
       workflow?.name ||
       workflow?.id ||
       null;
-    const displayAspect = propAspect || propAspectRatio || core.displayAspect;
+    const displayAspect =
+      normalizeCssAspectRatio(core.intrinsicAspect) ||
+      normalizeCssAspectRatio(propAspect) ||
+      normalizeCssAspectRatio(propAspectRatio) ||
+      normalizeCssAspectRatio(core.displayAspect);
 
     const actionRules = resolveStudioActions({
       workflow,
@@ -392,8 +401,10 @@ export const CoreMediaItemPresenter = memo(
     }, [onClick, workflow, core.targetItem, item, url]);
 
     const isContain = fit === "contain";
+    const resolvedAspectRatioNum =
+      parseAspectRatioValue(displayAspect)?.ratio ?? Number(core.aspectRatioNumber || 1);
     const isLandscapeContainFallback =
-      isContain && !isCompleted && Number(core.aspectRatioNumber || 1) > 1;
+      isContain && !isCompleted && resolvedAspectRatioNum > 1;
     const effectiveSelectionEnabled = Boolean(selectionEnabled && actionRules.can.select);
     const canNativeDrag = Boolean(draggable && !isSelectionMode && actionRules.can.drag);
     const hasContextMenu = Boolean(
@@ -448,7 +459,7 @@ export const CoreMediaItemPresenter = memo(
         ref={ref}
         data-selected={isSelected && !isInFlight ? "true" : undefined}
         className={cn(
-          "group relative select-none items-center justify-center overflow-hidden rounded-xxxs shadow-none transition-opacity duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
+          "group relative select-none items-center justify-center overflow-hidden rounded-comfortable shadow-none transition-opacity duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
           surface === "card"
             ? "bg-surface-card border-0"
             : isContain && isCompleted
@@ -456,8 +467,8 @@ export const CoreMediaItemPresenter = memo(
               : "bg-black/40",
           isContain && !isCompleted
             ? isLandscapeContainFallback
-              ? "flex w-full h-auto max-w-full max-h-full shrink-0 rounded-2xl"
-              : "flex h-full w-auto max-w-full max-h-full shrink-0 rounded-2xl"
+              ? "flex w-full h-auto max-w-full max-h-full shrink-0 rounded-comfortable"
+              : "flex h-full w-auto max-w-full max-h-full shrink-0 rounded-comfortable"
             : "flex w-full h-full",
           isInFlight
             ? "cursor-default"
@@ -485,7 +496,19 @@ export const CoreMediaItemPresenter = memo(
         <div className="relative flex items-center justify-center w-full h-full">
           {isCompleted && isVideo && (
             <video
-              ref={videoRef}
+              key={url}
+              ref={(el) => {
+                if (videoRef && typeof videoRef === "object") {
+                  videoRef.current = el;
+                }
+                if (el && el.readyState >= 1 && el.videoWidth > 0 && el.videoHeight > 0) {
+                  if (core.handleIntrinsicDimensions) {
+                    core.handleIntrinsicDimensions(el.videoWidth, el.videoHeight, url);
+                  } else if (url) {
+                    setCachedImageDimensions(url, el.videoWidth, el.videoHeight);
+                  }
+                }
+              }}
               src={url}
               loop
               playsInline
@@ -509,10 +532,19 @@ export const CoreMediaItemPresenter = memo(
                 <div className="absolute inset-0 bg-surface-panel animate-pulse" />
               )}
               <img
+                key={url}
                 ref={(el) => {
-                  if (el?.complete && el?.naturalWidth > 0) {
-                    if (el.naturalWidth && el.naturalHeight) {
-                      core.handleIntrinsicDimensions?.(el.naturalWidth, el.naturalHeight);
+                  if (
+                    el?.complete &&
+                    el?.naturalWidth > 0 &&
+                    el?.naturalHeight > 0 &&
+                    el.getAttribute("src") === url &&
+                    (!el.currentSrc || el.currentSrc === el.src)
+                  ) {
+                    if (core.handleIntrinsicDimensions) {
+                      core.handleIntrinsicDimensions(el.naturalWidth, el.naturalHeight, url);
+                    } else if (url) {
+                      setCachedImageDimensions(url, el.naturalWidth, el.naturalHeight);
                     }
                     if (core.isMediaLoaded === false) {
                       core.onMediaLoaded?.();
@@ -525,7 +557,11 @@ export const CoreMediaItemPresenter = memo(
                 onLoad={(e) => {
                   const img = e.currentTarget;
                   if (img?.naturalWidth && img?.naturalHeight) {
-                    core.handleIntrinsicDimensions?.(img.naturalWidth, img.naturalHeight);
+                    if (core.handleIntrinsicDimensions) {
+                      core.handleIntrinsicDimensions(img.naturalWidth, img.naturalHeight, url);
+                    } else if (url) {
+                      setCachedImageDimensions(url, img.naturalWidth, img.naturalHeight);
+                    }
                   }
                   core.onMediaLoaded?.();
                 }}
@@ -718,7 +754,7 @@ export const CoreMediaItemPresenter = memo(
             data-slot="card-selected-outline"
             aria-hidden="true"
             className={cn(
-              "pointer-events-none absolute inset-0 z-30 rounded-xxxs border border-text-primary/65 transition-opacity duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
+              "pointer-events-none absolute inset-0 z-30 rounded-comfortable border border-text-primary/65 transition-opacity duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
               outlineClassName,
               isSelected && !isInFlight ? "opacity-100" : "opacity-0"
             )}

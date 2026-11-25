@@ -27,7 +27,7 @@ export function AssetsSidebar({ hidden = false }) {
       }}
       animate={hidden ? "hidden" : "visible"}
       transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-      className="sticky top-[75px]  h-fit w-[228px] shrink-0  rounded-lg backdrop-blur-[80px] px-3 py-4"
+      className="sticky top-[75px]  h-fit w-[228px] shrink-0  rounded-comfortable backdrop-blur-[80px] px-3 py-4"
     >
       <div className="flex h-full flex-col">
         <div className="mb-5">
@@ -38,7 +38,7 @@ export function AssetsSidebar({ hidden = false }) {
             icon={(p) => <HugeIcon name="search-01" {...p} />}
             onClear={searchQuery ? () => setSearchQuery("") : undefined}
             clearIcon={(p) => <HugeIcon name="cancel-01" {...p} />}
-            className="h-10 rounded-lg px-3 text-[13px]"
+            className="h-10 rounded-subtle px-3 ds-type-small"
           />
         </div>
 

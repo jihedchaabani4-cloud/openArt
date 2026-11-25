@@ -46,7 +46,7 @@ export function HeroSection({ user, authLoading, onCTA }) {
               animate={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
               transition={{ duration: 1.4, delay: index * 0.04, ease: [0.16, 1, 0.3, 1] }}
               whileHover={{ scale: 1.03, y: -6, transition: { duration: 0.4, ease: "easeOut" } }}
-              className="group break-inside-avoid mb-3 lg:mb-4 rounded-lg overflow-hidden relative"
+              className="group break-inside-avoid mb-3 lg:mb-4 rounded-comfortable overflow-hidden relative"
               style={{ transformStyle: "preserve-3d" }}
             >
               <div className="absolute inset-0 bg-black/10 z-10 pointer-events-none" />
@@ -65,7 +65,7 @@ export function HeroSection({ user, authLoading, onCTA }) {
                 animate={{ scale: [1, 1.04, 1] }}
                 transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
               />
-              <div className="absolute inset-0 rounded-lg ring-1 ring-white/10 group-hover:ring-white/20 transition-all duration-500" />
+              <div className="absolute inset-0 rounded-comfortable ring-1 ring-white/10 group-hover:ring-white/20 transition-all duration-500" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-white/5" />
             </motion.div>
           ))}
@@ -80,7 +80,7 @@ export function HeroSection({ user, authLoading, onCTA }) {
           <div className="relative flex justify-center items-center">
             <div className="absolute w-[110%] h-[70%] bg-white/20 blur-[120px] rounded-full pointer-events-none" />
             <div className="absolute w-[80%] h-[50%] bg-white/30 blur-[120px] rounded-full pointer-events-none" />
-            <h1 className="text-[100px] md:text-[140px] lg:text-[200px] font-medium text-white tracking-tighter leading-none m-0 relative z-10 cursor-default flex items-center justify-center pointer-events-auto">
+            <h1 className="ds-type-display-hero text-white m-0 relative z-10 cursor-default flex items-center justify-center pointer-events-auto">
               {appName}
             </h1>
           </div>
@@ -89,7 +89,7 @@ export function HeroSection({ user, authLoading, onCTA }) {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.3 }}
-            className="mt-2 text-xl md:text-[28px] font-medium text-white/90 max-w-2xl px-6 leading-tight"
+            className="mt-2 ds-type-card-title text-white/90 max-w-2xl px-6"
           >
             Where the next wave of storytelling happens
           </motion.p>
@@ -104,10 +104,10 @@ export function HeroSection({ user, authLoading, onCTA }) {
               onClick={!authLoading ? onCTA : undefined}
               disabled={authLoading}
               variant="primary"
-              className="mt-8 flex items-center gap-2 h-10 px-6 text-sm"
+              className="mt-8 flex items-center gap-2 h-10 px-6 ds-type-button"
             >
               {authLoading ? (
-                <><HugeIcon name="loading-03" className="text-xl animate-spin" /> Connexion...</>
+                <><HugeIcon name="loading-03" size="xl" className="animate-spin" /> Connexion...</>
               ) : user ? (
                 "Cinema Studio"
               ) : (

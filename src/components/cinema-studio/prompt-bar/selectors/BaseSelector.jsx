@@ -93,7 +93,7 @@ export const BaseSelector = React.memo(function BaseSelector({
   return (
     <div
       className={cn(
-        "flex items-center gap-1 p-1 surface-glass bg-surface-menu-glass rounded-xl min-w-0 w-full select-none",
+        "flex items-center gap-1 p-1 surface-glass bg-surface-menu-glass rounded-comfortable min-w-0 w-full select-none",
         className
       )}
       role="radiogroup"
@@ -119,7 +119,7 @@ export const BaseSelector = React.memo(function BaseSelector({
               disabled={opt.disabled}
               style={itemStyle}
               className={cn(
-                "h-8 min-h-8 rounded-lg ds-text-caption-m font-medium transition-all flex items-center justify-center relative",
+                "h-8 min-h-8 rounded-subtle ds-type-small transition-all flex items-center justify-center relative",
                 compact ? "p-1.5 size-12 shrink-0 [&_svg]:size-full" : "flex-row gap-1.5 px-3 py-1 flex-1 min-w-fit",
                 visibleCount ? "flex-none" : !compact ? "flex-1 min-w-fit" : "",
                 isDragging && "pointer-events-none",
@@ -129,7 +129,7 @@ export const BaseSelector = React.memo(function BaseSelector({
               {opt.icon && (
                 <span
                   className={cn(
-                    "flex items-center justify-center text-base",
+                    "flex items-center justify-center ds-icon-md",
                     compact && "size-full"
                   )}
                 >

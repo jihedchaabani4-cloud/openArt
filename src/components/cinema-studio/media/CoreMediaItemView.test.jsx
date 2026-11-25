@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { render, screen, fireEvent, cleanup } from "@testing-library/react";
+import { render, screen, fireEvent, cleanup, act } from "@testing-library/react";
 import { CoreMediaItemView } from "./MediaView";
+import { getCachedImageDimensions } from "@/shared/lib/displayUtils";
 
 describe("CoreMediaItemView - Liked top-left indicator badge", () => {
   afterEach(() => {
@@ -114,7 +115,7 @@ describe("CoreMediaItemView - Liked top-left indicator badge", () => {
     expect(likedBadge).toBeDefined();
   });
 
-  it("uses rounded-xxxs border radius for canonical media geometry", () => {
+  it("uses rounded-comfortable border radius for canonical media geometry", () => {
     const { container } = render(
       <CoreMediaItemView
         src="https://example.com/test.png"
@@ -122,7 +123,7 @@ describe("CoreMediaItemView - Liked top-left indicator badge", () => {
       />
     );
     const card = container.firstChild;
-    expect(card.className).toContain("rounded-xxxs");
+    expect(card.className).toContain("rounded-comfortable");
     expect(card.className).not.toContain("rounded-2xl");
   });
 
@@ -150,7 +151,7 @@ describe("CoreMediaItemView - Liked top-left indicator badge", () => {
     expect(videoBadge).toBeDefined();
     expect(videoBadge.getAttribute("aria-label")).toBe("Video");
     expect(videoBadge.className).toContain("size-6");
-    expect(videoBadge.className).toContain("rounded-control");
+    expect(videoBadge.className).toContain("rounded-sharp");
     expect(videoBadge.className).toContain("bg-white");
     expect(videoBadge.className).toContain("text-black");
     expect(container.querySelector('[data-slot="media-bottom-right"]')?.contains(videoBadge)).toBe(true);
@@ -208,6 +209,85 @@ describe("CoreMediaItemView - Liked top-left indicator badge", () => {
 
       const card = container.firstChild;
       expect(card.style.aspectRatio).toBe("9/16");
+    });
+
+    it("normalizes colon ratio props like '9:16' to valid CSS '9/16'", () => {
+      const { container } = render(
+        <CoreMediaItemView
+          src="https://example.com/colon-ratio.png"
+          status="completed"
+          fit="cover"
+          aspect="9:16"
+        />
+      );
+
+      expect(container.firstChild.style.aspectRatio).toBe("9/16");
+    });
+
+    it("prefers verified natural image dimensions over stale propAspect after load", async () => {
+      const { container } = render(
+        <CoreMediaItemView
+          src="https://example.com/intrinsic-overrides-prop.png"
+          status="completed"
+          fit="cover"
+          aspect="16/9"
+        />
+      );
+
+      const img = container.querySelector("img");
+      await act(async () => {
+        Object.defineProperty(img, "complete", { configurable: true, value: true });
+        Object.defineProperty(img, "naturalWidth", { configurable: true, value: 736 });
+        Object.defineProperty(img, "naturalHeight", { configurable: true, value: 1308 });
+        fireEvent.load(img);
+      });
+
+      expect(container.firstChild.style.aspectRatio).toBe("736/1308");
+    });
+
+    it("does not poison the dimension cache for urlB with urlA's dims when src changes", async () => {
+      const urlA = "https://example.com/switch-a.png";
+      const urlB = "https://example.com/switch-b.png";
+
+      const { container, rerender } = render(
+        <CoreMediaItemView src={urlA} status="completed" />
+      );
+
+      const img = container.querySelector("img");
+      await act(async () => {
+        Object.defineProperty(img, "complete", { configurable: true, value: true });
+        Object.defineProperty(img, "naturalWidth", { configurable: true, value: 1920 });
+        Object.defineProperty(img, "naturalHeight", { configurable: true, value: 1080 });
+        fireEvent.load(img);
+      });
+      expect(getCachedImageDimensions(urlA)).toMatchObject({ width: 1920, height: 1080 });
+
+      rerender(<CoreMediaItemView src={urlB} status="completed" />);
+      expect(getCachedImageDimensions(urlB)).toBeNull();
+    });
+
+    it("caches natural dimensions under propSrc when propSrc overrides item.url", async () => {
+      const itemUrl = "https://example.com/item-orig-url.png";
+      const overrideSrc = "https://example.com/override-render-url.png";
+
+      const { container } = render(
+        <CoreMediaItemView
+          item={{ id: "override-item", url: itemUrl, status: "completed" }}
+          src={overrideSrc}
+          status="completed"
+        />
+      );
+
+      const img = container.querySelector("img");
+      await act(async () => {
+        Object.defineProperty(img, "complete", { configurable: true, value: true });
+        Object.defineProperty(img, "naturalWidth", { configurable: true, value: 720 });
+        Object.defineProperty(img, "naturalHeight", { configurable: true, value: 1280 });
+        fireEvent.load(img);
+      });
+
+      expect(getCachedImageDimensions(overrideSrc)).toMatchObject({ width: 720, height: 1280 });
+      expect(getCachedImageDimensions(itemUrl)).toBeNull();
     });
   });
 

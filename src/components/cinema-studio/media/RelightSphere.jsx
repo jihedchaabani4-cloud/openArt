@@ -486,7 +486,7 @@ export function RelightSphere({
       )}
     >
       {/* Full-Width Square 3D Studio Light Stage */}
-      <div className="relative w-full aspect-square rounded-2xl bg-surface-card border border-border-subtle flex items-center justify-center">
+      <div className="relative w-full aspect-square rounded-comfortable bg-surface-card border border-border-subtle flex items-center justify-center">
         {/* Top Tilt Up Arrow */}
         <IconButton
           type="button"
@@ -565,7 +565,7 @@ export function RelightSphere({
               data-slot="relight-subject-preview"
               className="pointer-events-none absolute z-10 flex items-center justify-center"
             >
-              <div className="relative size-16 rounded-xl overflow-hidden border border-border-subtle bg-canvas-deep flex items-center justify-center shadow-lg">
+              <div className="relative size-16 rounded-comfortable overflow-hidden border border-border-subtle bg-canvas-deep flex items-center justify-center shadow-lg">
                 {previewUrl ? (
                   /* eslint-disable-next-line @next/next/no-img-element */
                   <img
@@ -776,7 +776,7 @@ export function RelightSphere({
         {/* Bottom Centered Caption Inside Square */}
         <span
           data-slot="relight-direction-label"
-          className="pointer-events-none absolute bottom-1.5 inset-x-3 z-30 text-center ds-text-caption-s text-text-secondary font-medium truncate"
+          className="pointer-events-none absolute bottom-1.5 inset-x-3 z-30 text-center ds-type-micro-tag text-text-secondary truncate"
         >
           {directionLabel}
           {scene.isBack ? " (Behind)" : ""}

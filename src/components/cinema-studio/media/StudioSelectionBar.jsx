@@ -258,7 +258,7 @@ export function BulkMoveFolderDialog({
             <HugeIcon name="folder-01" />
             <span className="truncate flex-1">Root (All assets)</span>
             {isRootCurrent && (
-              <span className="ds-text-caption-s text-text-secondary shrink-0">Current</span>
+              <span className="ds-type-micro-tag text-text-secondary shrink-0">Current</span>
             )}
           </Button>
 
@@ -288,7 +288,7 @@ export function BulkMoveFolderDialog({
                 <HugeIcon name="folder-01" />
                 <span className="truncate flex-1">{label}</span>
                 {isCurrent && (
-                  <span className="ds-text-caption-s text-text-secondary shrink-0">Current</span>
+                  <span className="ds-type-micro-tag text-text-secondary shrink-0">Current</span>
                 )}
               </Button>
             );
@@ -526,11 +526,11 @@ function StudioSelectionBarContent({
         aria-label="Selection actions"
         data-slot="studio-selection-bar"
         data-selection-bar="true"
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 z-50 surface-glass bg-surface-menu-glass rounded-2xl px-2.5 py-2 flex items-center gap-1.5 max-w-[calc(100%-2rem)]"
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 z-50 surface-glass bg-surface-menu-glass rounded-comfortable px-2.5 py-2 flex items-center gap-1.5 max-w-[calc(100%-2rem)]"
       >
         {/* Left selection count pill */}
         <div className="flex items-center gap-1.5 pr-0.5">
-          <div className="size-6 rounded-md overflow-hidden bg-surface-tonal flex items-center justify-center shrink-0">
+          <div className="size-6 rounded-subtle overflow-hidden bg-surface-tonal flex items-center justify-center shrink-0">
             {lastSelectedEntry?.itemType === "collection" ? (
               <HugeIcon name="folder-01" size="xs" className="text-text-primary" />
             ) : lastSelectedEntry?.thumbUrl && !lastSelectedEntry?.isVideo ? (
@@ -546,7 +546,7 @@ function StudioSelectionBarContent({
             )}
           </div>
 
-          <span className="ds-text-caption-m font-medium text-text-primary whitespace-nowrap px-1">
+          <span className="ds-type-caption-label text-text-primary whitespace-nowrap px-1">
             {count} selected
           </span>
 
@@ -557,7 +557,7 @@ function StudioSelectionBarContent({
             disabled={isBusy}
             aria-label="Clear selection"
             title="Clear selection"
-            className="rounded-control"
+            className="rounded-subtle"
           >
             <HugeIcon name="cancel-01" />
           </IconButton>
@@ -573,7 +573,7 @@ function StudioSelectionBarContent({
               size="sm"
               onClick={bulkRestore}
               disabled={isBusy}
-              className="rounded-control"
+              className="rounded-subtle"
             >
               <HugeIcon name="restore-bin" />
               <span>{busyAction === "restore" ? "Restoring..." : "Restore"}</span>
@@ -585,7 +585,7 @@ function StudioSelectionBarContent({
               size="sm"
               onClick={openDeleteConfirm}
               disabled={isBusy}
-              className="rounded-control text-destructive"
+              className="rounded-subtle text-destructive"
             >
               <HugeIcon name="delete-02" />
               <span>{busyAction === "delete" ? "Deleting..." : "Delete permanently"}</span>
@@ -597,7 +597,7 @@ function StudioSelectionBarContent({
               size="sm"
               onClick={handleSelectAll}
               disabled={isBusy || allKeys.length === 0}
-              className="rounded-control"
+              className="rounded-subtle"
             >
               <span>Select all</span>
             </Button>
@@ -611,7 +611,7 @@ function StudioSelectionBarContent({
                 size="sm"
                 onClick={bulkDownload}
                 disabled={isBusy}
-                className="rounded-control"
+                className="rounded-subtle"
               >
                 <HugeIcon name="download-04" />
                 <span>{busyAction === "download" ? "Downloading..." : "Download"}</span>
@@ -625,7 +625,7 @@ function StudioSelectionBarContent({
                 size="sm"
                 onClick={openMoveDialog}
                 disabled={isBusy}
-                className="rounded-control"
+                className="rounded-subtle"
               >
                 <HugeIcon name="folder-transfer" />
                 <span>{busyAction === "move" ? "Moving..." : "Move to"}</span>
@@ -640,7 +640,7 @@ function StudioSelectionBarContent({
                 disabled={isBusy}
                 aria-label={isAllLiked ? "Unlike selected" : "Like selected"}
                 title={isAllLiked ? "Unlike selected" : "Like selected"}
-                className="rounded-control"
+                className="rounded-subtle"
               >
                 <HugeIcon name="favourite" filled={isAllLiked} />
               </IconButton>
@@ -653,7 +653,7 @@ function StudioSelectionBarContent({
               disabled={isBusy}
               aria-label="Delete selected"
               title="Delete selected"
-              className="rounded-control"
+              className="rounded-subtle"
             >
               <HugeIcon name="delete-02" />
             </IconButton>
@@ -666,7 +666,7 @@ function StudioSelectionBarContent({
                   disabled={isBusy}
                   aria-label="More selection actions"
                   title="More actions"
-                  className="rounded-control"
+                  className="rounded-subtle"
                 >
                   <HugeIcon name="more-horizontal" />
                 </IconButton>

@@ -35,18 +35,18 @@ export function FlowErrorTile({
               <div className="error-message flex flex-col items-start text-left w-full min-h-0 overflow-hidden">
                 <HugeIcon name="alert-02" className="error-icon shrink-0" />
                 <div
-                  className="error-title font-sans font-medium text-white tracking-normal text-sm leading-tight shrink-0"
+                  className="error-title ds-type-caption-label text-white shrink-0"
                 >
                   Failed
                 </div>
                 <div className="error-subtitle flex flex-col gap-1 mt-1 font-sans min-h-0 overflow-hidden">
                   <span
-                    className="error-message-text font-normal text-white/75 text-xs leading-snug line-clamp-2"
+                    className="error-message-text ds-type-small text-white/75 line-clamp-2"
                   >
                     {displayError}
                   </span>
                   <span
-                    className="disclaimer-message font-normal text-white/50 text-2xs leading-tight line-clamp-1"
+                    className="disclaimer-message ds-type-micro-tag text-white/50 line-clamp-1"
                   >
                     You have not been charged for this generation.
                   </span>
@@ -62,7 +62,7 @@ export function FlowErrorTile({
                   <Button
                     type="button"
                     variant="ghost"
-                    className="size-8 p-0 rounded-full"
+                    className="size-8 p-0 rounded-subtle"
                     aria-label="Reuse prompt"
                     title="Reuse prompt"
                     disabled={!canReusePrompt}
@@ -74,14 +74,14 @@ export function FlowErrorTile({
                       }
                     }}
                   >
-                    <HugeIcon name="undo" className="text-base" />
+                    <HugeIcon name="undo" size="md" />
                   </Button>
 
                   {/* 3. Delete Button */}
                   <Button
                     type="button"
                     variant="ghost"
-                    className="size-8 p-0 rounded-full"
+                    className="size-8 p-0 rounded-subtle"
                     aria-label="Delete"
                     title="Delete"
                     
@@ -90,7 +90,7 @@ export function FlowErrorTile({
                       onDelete?.(e);
                     }}
                   >
-                    <HugeIcon name="delete-02" className="text-base" />
+                    <HugeIcon name="delete-02" size="md" />
                   </Button>
                 </div>
               )}

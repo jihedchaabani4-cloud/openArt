@@ -6,7 +6,7 @@ const BADGE_VARIANTS = {
   glass: "ds-badge-glass",
   count: "ds-badge-count",
   secondary: "ds-badge bg-surface-secondary",
-  neon: "ds-badge bg-lime-400 text-black font-bold",
+  neon: "ds-badge bg-lime-400 text-black",
   yellow: "ds-badge bg-accent-yellow/15 text-accent-yellow",
   warning: "ds-badge bg-accent-yellow/15 text-accent-yellow",
   pro: "ds-badge bg-accent-yellow/15 text-accent-yellow",

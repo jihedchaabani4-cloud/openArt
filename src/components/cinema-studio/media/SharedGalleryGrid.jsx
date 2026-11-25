@@ -18,6 +18,8 @@ import {
   getResponsiveTargetRowHeight,
   getCachedImageDimensions,
   subscribeImageDimensions,
+  normalizeDimensionCacheKey,
+  parseAspectRatioValue,
   STUDIO_GRID_SIZE_STOPS,
 } from "@/shared/lib/displayUtils";
 import { clampAspectRatio, computeJustifiedRows } from "@/shared/lib/justifiedLayout";
@@ -359,30 +361,16 @@ export function resolveCachedWorkflowMediaItem(workflow) {
 }
 
 function parseAspectString(aspect) {
-  if (!aspect || aspect === "auto") return null;
-  if (typeof aspect === "number" && Number.isFinite(aspect) && aspect > 0) {
-    return aspect;
-  }
-  const str = String(aspect).trim();
-  const parts = str.split(/[:/]/);
-  if (parts.length === 2) {
-    const w = parseFloat(parts[0]);
-    const h = parseFloat(parts[1]);
-    if (Number.isFinite(w) && Number.isFinite(h) && w > 0 && h > 0) {
-      return w / h;
-    }
-  }
-  const num = parseFloat(str);
-  return Number.isFinite(num) && num > 0 ? num : null;
+  return parseAspectRatioValue(aspect)?.ratio ?? null;
 }
 
 /**
  * Computes clamped aspect ratio for a normalized MediaItem and optional parent workflow.
  * Precedence:
  *  1. Verified natural dimensions (getCachedImageDimensions)
- *  2. Explicit configured ratio (getItemMetadata().aspect — beats placeholder 1024x1024)
+ *  2. Explicit configured ratio / item dimensions (getItemMetadata().aspect — beats placeholder 1024x1024)
  *  3. Stored mediaItem.width / height
- *  4. Type fallback: video/character 16/9, element sheet 1/1, default 3/4
+ *  4. Type fallback: video/character sheet 16/9, element sheet 1/1, default 3/4
  */
 function computePhotoAspectRatio(mediaItem, workflow = null) {
   const natural = getCachedImageDimensions(mediaItem?.url);
@@ -404,13 +392,16 @@ function computePhotoAspectRatio(mediaItem, workflow = null) {
   }
 
   const isVideo = mediaItem?.kind === "video" || Boolean(meta?.isVideo);
+  const role = String(mediaItem?.role || mediaItem?.mediaRole || mediaItem?.raw?.role || "").trim().toLowerCase();
+  const isDetail = role === "detail" || role === "reference";
   const isChar =
-    workflow?.workflow_type === "CHARACTER" ||
-    workflow?.workflow_type === "CHARACTER_SHEET" ||
-    workflow?.is_character ||
-    workflow?.entity_type === "character" ||
-    mediaItem?.role === "sheet" ||
-    mediaItem?.mediaRole === "sheet";
+    !isDetail &&
+    (workflow?.workflow_type === "CHARACTER" ||
+      workflow?.workflow_type === "CHARACTER_SHEET" ||
+      workflow?.is_character ||
+      workflow?.entity_type === "character" ||
+      role === "sheet" ||
+      role === "turnaround");
   if (isVideo || isChar) {
     return clampAspectRatio(16 / 9);
   }
@@ -419,9 +410,7 @@ function computePhotoAspectRatio(mediaItem, workflow = null) {
     (workflow?.workflow_type === "ELEMENT_SHEET" ||
       workflow?.is_element ||
       workflow?.entity_type === "element") &&
-    mediaItem?.role !== "detail" &&
-    mediaItem?.mediaRole !== "detail" &&
-    mediaItem?.raw?.role !== "detail";
+    !isDetail;
   if (isElementSheet) {
     return clampAspectRatio(1);
   }
@@ -574,7 +563,8 @@ export const SharedGalleryGrid = React.memo(function SharedGalleryGrid({
   useEffect(() => {
     let rafId = null;
     const unsubscribe = subscribeImageDimensions((url) => {
-      if (!activeUrlsRef.current.has(url)) return;
+      const key = normalizeDimensionCacheKey(url);
+      if (!key || !activeUrlsRef.current.has(key)) return;
       if (rafId !== null) return;
       if (typeof requestAnimationFrame === "function") {
         rafId = requestAnimationFrame(() => {
@@ -701,7 +691,10 @@ export const SharedGalleryGrid = React.memo(function SharedGalleryGrid({
   useIsomorphicLayoutEffect(() => {
     const nextUrls = new Set();
     for (let i = 0; i < photos.length; i++) {
-      if (photos[i].url) nextUrls.add(photos[i].url);
+      if (photos[i].url) {
+        const key = normalizeDimensionCacheKey(photos[i].url);
+        if (key) nextUrls.add(key);
+      }
     }
     activeUrlsRef.current = nextUrls;
   }, [photos]);
@@ -938,7 +931,7 @@ export const SharedGalleryGrid = React.memo(function SharedGalleryGrid({
                       onToggleGroup={toggleGroup}
                     />
                   )}
-                  <h3 className="ds-text-caption-l font-semibold text-text-primary">
+                  <h3 className="ds-type-caption-label text-text-primary">
                     {section.label}
                   </h3>
                 </div>
@@ -952,7 +945,7 @@ export const SharedGalleryGrid = React.memo(function SharedGalleryGrid({
           ref={marqueeBoxRef}
           data-slot="marquee-selection-box"
           aria-hidden="true"
-          className="fixed pointer-events-none z-40 rounded-sm border border-dashed border-text-primary/70 bg-surface-tonal"
+          className="fixed pointer-events-none z-40 rounded-sharp border border-dashed border-text-primary/70 bg-surface-tonal"
         />
       )}
     </div>

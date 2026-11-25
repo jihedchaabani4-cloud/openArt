@@ -84,7 +84,7 @@ function getWorkflowThumbInfo(wf) {
  * Full-viewport 2-column studio editor architecture:
  * - Left Stage: Top close button + centered project workflow filmstrip (< [thumbs] >),
  *   full-bleed zoomable media preview, and bottom-right floating zoom controls (- / fit / +).
- * - Right Docked Sidebar (320px): Top More + Download bar, Edits / Info tabs, horizontal
+ * - Right Docked Sidebar (280px): Top More + Download bar, Edits / Info tabs, horizontal
  *   version history strip, and ghost-button edit tools swapping into Angles / Relight / Remove BG.
  */
 export default function AssetEditPage() {
@@ -571,7 +571,7 @@ export default function AssetEditPage() {
                 disabled={!prevWorkflow}
                 aria-label="Previous asset"
                 onClick={() => prevWorkflow && navigateToWorkflow(prevWorkflow, currentWorkflowIndex - 1)}
-                className="size-9 rounded-full shrink-0 text-icon-secondary hover:text-text-primary disabled:opacity-40"
+                className="size-9 rounded-subtle shrink-0 text-icon-secondary hover:text-text-primary disabled:opacity-40"
               >
                 <HugeIcon name="arrow-left-01" size="sm" />
               </IconButton>
@@ -627,7 +627,7 @@ export default function AssetEditPage() {
                           navigateToWorkflow(wf);
                         }}
                         className={cn(
-                          "group relative size-10 shrink-0 rounded-sm overflow-hidden bg-surface-tonal cursor-pointer transition-opacity duration-200 focus-workspace",
+                          "group relative size-10 shrink-0 rounded-sharp overflow-hidden bg-surface-tonal cursor-pointer transition-opacity duration-200 focus-workspace",
                           isCurrent
                             ? "opacity-100"
                             : "opacity-50 hover:opacity-80"
@@ -656,9 +656,9 @@ export default function AssetEditPage() {
                         {isVideo && (
                           <span
                             aria-hidden="true"
-                            className="pointer-events-none absolute bottom-0.5 right-0.5 flex size-4 items-center justify-center rounded-sm bg-black/60 text-white"
+                            className="pointer-events-none absolute bottom-0.5 right-0.5 flex size-4 items-center justify-center rounded-sharp bg-black/60 text-white"
                           >
-                            <HugeIcon name="play" className="text-[9px]" />
+                            <HugeIcon name="play" size="2xs" />
                           </span>
                         )}
                         {isCurrent && (
@@ -666,7 +666,7 @@ export default function AssetEditPage() {
                             layoutId="edit-switch-active-ring"
                             aria-hidden="true"
                             transition={{ type: "spring", stiffness: 420, damping: 34 }}
-                            className="pointer-events-none absolute inset-0 rounded-sm ring-1 ring-inset ring-white/50"
+                            className="pointer-events-none absolute inset-0 rounded-sharp ring-1 ring-inset ring-white/50"
                           />
                         )}
                       </button>
@@ -681,7 +681,7 @@ export default function AssetEditPage() {
                 disabled={!nextWorkflow}
                 aria-label="Next asset"
                 onClick={() => nextWorkflow && navigateToWorkflow(nextWorkflow, currentWorkflowIndex + 1)}
-                className="size-9 rounded-full shrink-0 text-icon-secondary hover:text-text-primary disabled:opacity-40"
+                className="size-9 rounded-subtle shrink-0 text-icon-secondary hover:text-text-primary disabled:opacity-40"
               >
                 <HugeIcon name="arrow-right-01" size="sm" />
               </IconButton>
@@ -707,7 +707,7 @@ export default function AssetEditPage() {
             <div
               role="group"
               aria-label="Preview zoom controls"
-              className="absolute bottom-4 right-4 z-10 flex items-center gap-0.5 rounded-xl bg-omni-bg border border-border-subtle p-1"
+              className="absolute bottom-4 right-4 z-10 flex items-center gap-0.5 rounded-comfortable bg-omni-bg border border-border-subtle p-1"
             >
               <IconButton
                 type="button"
@@ -751,7 +751,7 @@ export default function AssetEditPage() {
       </div>
 
       {/* ── Right Docked Sidebar (Full-Height Inspector & Edit Tools) ── */}
-      <aside className="w-full sm:w-[320px] shrink-0 h-full border-t sm:border-t-0 sm:border-l border-border-subtle bg-omni-bg overflow-hidden">
+      <aside className="ds-edit-sidebar-rail shrink-0 h-full border-t sm:border-t-0 sm:border-l border-border-subtle bg-omni-bg overflow-hidden">
         <AnimatePresence mode="wait" initial={false}>
           {canEditImage && activeEditTool === "angles" ? (
             <motion.div

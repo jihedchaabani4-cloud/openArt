@@ -152,7 +152,7 @@ function WorkflowMediaGalleryCard({
                 }}
                 title="Détacher vers un nouveau workflow"
               >
-                <HugeIcon name="scissor-01" className="text-sm" />
+                <HugeIcon name="scissor-01" size="sm" />
               </IconButton>
               
               <IconButton
@@ -163,15 +163,15 @@ function WorkflowMediaGalleryCard({
                 }}
                 title="Supprimer le média"
               >
-                <HugeIcon name="delete-02" className="text-sm" />
+                <HugeIcon name="delete-02" size="sm" />
               </IconButton>
             </ButtonGroup>
           </div>
         }
         topRight={
           iVideo ? (
-            <div className="p-1.5 bg-black/60 backdrop-blur-md rounded-full border border-white/10">
-              <HugeIcon name="play" className="text-xs text-white" />
+            <div className="p-1.5 bg-black/60 backdrop-blur-md rounded-sharp border border-white/10">
+              <HugeIcon name="play" size="xs" className="text-white" />
             </div>
           ) : null
         }
@@ -210,9 +210,9 @@ function WorkflowMediaGalleryCard({
             return (
               <div 
                 key={idx}
-                className="relative w-10 h-10 flex items-center justify-center rounded-sm overflow-hidden border border-white/10 bg-white/5 shrink-0"
+                className="relative w-10 h-10 flex items-center justify-center rounded-subtle overflow-hidden border border-white/10 bg-white/5 shrink-0"
               >
-                <HugeIcon name="image-02" className="absolute text-base text-white/20" />
+                <HugeIcon name="image-02" size="md" className="absolute text-white/20" />
                 <img 
                   src={refUrl} 
                   className="absolute inset-0 w-full h-full object-cover z-10" 
@@ -232,7 +232,7 @@ function WorkflowMediaGalleryCard({
         <div
           onClick={() => onToggleExpand(itemId)}
           className={cn(
-            "px-1 text-[11px] text-white font-medium transition-all duration-200 cursor-pointer select-none overflow-hidden",
+            "px-1 ds-type-micro-tag text-white transition-all duration-200 cursor-pointer select-none overflow-hidden",
             isExpanded ? "" : "max-h-[36px]"
           )}
           title={isExpanded ? "" : prompt}
@@ -242,14 +242,14 @@ function WorkflowMediaGalleryCard({
               token.type === "trait" ? (
                 <span
                   key={`${itemId}-trait-${index}`}
-                  className="inline-flex items-center rounded-md border border-white/10 bg-white/10 px-2 py-0.5 text-[10px] leading-none text-white/85"
+                  className="inline-flex items-center rounded-sharp border border-white/10 bg-white/10 px-2 py-0.5 ds-type-micro-tag text-white/85"
                 >
                   {token.value}
                 </span>
               ) : (
                 <span
                   key={`${itemId}-text-${index}`}
-                  className="text-[11px] leading-5 text-white/75"
+                  className="ds-type-micro-tag text-white/75"
                 >
                   {token.value}
                 </span>

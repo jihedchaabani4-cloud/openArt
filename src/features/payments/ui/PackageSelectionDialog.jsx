@@ -5,6 +5,7 @@ import Link from "next/link";
 import { HugeIcon } from "@/components/primitives/HugeIcon";
 import { Dialog, DialogContent, DialogTitle } from "@/components/primitives/dialog";
 import { Button } from "@/components/base/button";
+import { Label } from "@/components/base/label";
 import { cn } from "@/shared/lib/utils";
 import { usePackages, useCheckout } from "@/features/payments/api/paymentsApi";
 
@@ -142,7 +143,7 @@ function LeftPanel({ open }) {
     }, [activeIndex, open, showcaseImages]);
 
     return (
-        <div className="relative hidden h-[280px] sm:h-[360px] lg:h-full lg:min-h-[420px] w-full overflow-hidden rounded-lg lg:flex border border-white/10">
+        <div className="relative hidden h-[280px] sm:h-[360px] lg:h-full lg:min-h-[420px] w-full overflow-hidden rounded-comfortable lg:flex border border-white/10">
             <div className="relative size-full overflow-hidden">
                 <div className="absolute inset-0">
                     {previousImage ? (
@@ -169,18 +170,18 @@ function LeftPanel({ open }) {
                     />
                 </div>
                 <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-white/10" />
-                <div className="pointer-events-none absolute bottom-7 left-7 right-7 z-10 h-[2px] overflow-hidden rounded-full bg-white/20">
+                <div className="pointer-events-none absolute bottom-7 left-7 right-7 z-10 h-[2px] overflow-hidden rounded-sharp bg-white/20">
                     <div
-                        className="h-full rounded-full bg-white"
+                        className="h-full rounded-sharp bg-white"
                         style={{ width: `${progress}%` }}
                     />
                 </div>
                 <div className="relative z-10 flex h-full flex-col justify-end p-5 lg:p-6 pb-9 lg:pb-10">
                     <div className="space-y-2">
-                        <div className="flex w-fit items-center gap-2 text-xs font-semibold text-white/90 sm:text-sm">
+                        <div className="flex w-fit items-center gap-2 ds-type-caption-label text-white/90">
                             Premium creative access
                         </div>
-                        <p className="max-w-[280px] text-base font-semibold leading-tight tracking-tight text-white sm:text-lg">
+                        <p className="max-w-[280px] ds-type-feature-title text-white">
                             Unlock stronger image and video models for your workflow.
                         </p>
                     </div>
@@ -238,7 +239,7 @@ export function PackageSelectionDialog({
                     className="flex h-[min(740px,84vh)] w-[min(960px,94vw)] max-w-[960px] items-center justify-center overflow-hidden p-0"
                 >
                     <DialogTitle className="sr-only">Choose your package</DialogTitle>
-                    <HugeIcon name="loading-03" className="text-3xl animate-spin text-white/40" />
+                    <HugeIcon name="loading-03" size="2xl" className="animate-spin text-white/40" />
                 </DialogContent>
             </Dialog>
         );
@@ -259,10 +260,10 @@ export function PackageSelectionDialog({
 
                     <div className="flex min-h-0 flex-col justify-start px-4 pb-4 pt-5 sm:px-6 sm:pb-6 sm:pt-7 lg:px-7 lg:pt-10 xl:px-8">
                         <div className="max-w-[428px]">
-                            <h3 className="text-xl font-semibold leading-tight tracking-tight text-white sm:text-[22px]">
+                            <h3 className="ds-type-card-title text-white">
                                 Unlock more image and video power.
                             </h3>
-                            <p className="mt-2 max-w-[420px] text-xs font-normal leading-5 text-white/70">
+                            <p className="mt-2 max-w-[420px] ds-type-small text-white/70">
                                 Generate, edit, and scale high-quality images and videos with the models that matter most.
                             </p>
                         </div>
@@ -282,7 +283,7 @@ export function PackageSelectionDialog({
                                         variant="ghost"
                                         onClick={() => setSelectedPackageId(pkg.id)}
                                         className={cn(
-                                            "w-full h-auto p-3 sm:p-4 rounded-lg border text-left transition-all duration-200 block justify-start",
+                                            "w-full h-auto p-3 sm:p-4 rounded-comfortable border text-left transition-all duration-200 block justify-start",
                                             isSelected
                                                 ? "border-white/90 bg-surface-card"
                                                 : "border-white/10 bg-transparent hover:bg-white/5"
@@ -295,25 +296,25 @@ export function PackageSelectionDialog({
                                                     isSelected ? "border-white bg-white" : "border-white/20 bg-transparent"
                                                 )}
                                             >
-                                                {isSelected && <HugeIcon name="tick-02" className="text-xs font-bold text-black" />}
+                                                {isSelected && <HugeIcon name="tick-02" size="xs" weight="bold" className="text-black" />}
                                             </span>
 
                                             <div className="min-w-0 flex-1">
                                                 <div className="flex items-start justify-between gap-3 sm:gap-4">
                                                     <div>
                                                         <div className="flex flex-wrap items-center gap-2">
-                                                            <p className="text-[15px] font-medium leading-none tracking-tight text-white">
+                                                            <p className="ds-type-caption-label text-white">
                                                                 {pkg.label}
                                                             </p>
                                                             {tag === "Most popular" && (
-                                                                <span className="rounded-md bg-white/10 px-1.5 py-0.5 text-[10px] font-medium leading-none text-white/80">
+                                                                <span className="rounded-sharp bg-white/10 px-1.5 py-0.5 ds-type-micro-tag text-white/80">
                                                                     Economisez
                                                                 </span>
                                                             )}
                                                         </div>
 
                                                         {price && (
-                                                            <p className="mt-1 text-xs font-normal leading-none text-white/70">
+                                                            <p className="mt-1 ds-type-small text-white/70">
                                                                 {price}
                                                                 {getPlanSuffix(pkg)}
                                                             </p>
@@ -321,12 +322,12 @@ export function PackageSelectionDialog({
                                                     </div>
 
                                                     <div className="shrink-0 text-right">
-                                                        <p className="flex items-center justify-end gap-1 text-[13px] font-normal text-white">
-                                                            <HugeIcon name="star" className="text-[13px] text-white" />
+                                                        <p className="flex items-center justify-end gap-1 ds-type-small text-white">
+                                                            <HugeIcon name="star" size="sm" className="text-white" />
                                                             {creditsLabel}
                                                         </p>
                                                         {tenCreditsPrice && (
-                                                            <p className="mt-1 text-sm font-medium leading-none text-white">
+                                                            <p className="mt-1 ds-type-caption-label text-white">
                                                                 {tenCreditsPrice}
                                                             </p>
                                                         )}
@@ -334,8 +335,8 @@ export function PackageSelectionDialog({
                                                 </div>
 
                                                 {tag === "Most popular" && (
-                                                    <div className="mt-3 flex w-full items-start gap-1 rounded-md bg-white/5 border border-white/10 px-2 py-1.5 text-[10px] font-medium leading-3.5 text-white/70">
-                                                        <HugeIcon name="star" className="text-[12px] text-white mt-[2px] shrink-0" />
+                                                    <div className="mt-3 flex w-full items-start gap-1 rounded-subtle bg-white/5 border border-white/10 px-2 py-1.5 ds-type-micro-tag text-white/70">
+                                                        <HugeIcon name="star" size="xs" className="text-white mt-[2px] shrink-0" />
                                                         <span>
                                                             Most popular - Get the strongest value for image and video generation before it changes.
                                                         </span>
@@ -349,7 +350,7 @@ export function PackageSelectionDialog({
                         </div>
 
                         {selectedPackage && getPlanKind(selectedPackage) === "subscription" && (
-                            <p className="mt-4 text-center text-[11px] font-normal leading-5 text-white/60 lg:mt-5 lg:text-left">
+                            <p className="mt-4 text-center ds-type-micro-tag text-white/60 lg:mt-5 lg:text-left">
                                 With the selected plan,{" "}
                                 <span className="text-white">
                                     you will be charged {formatPrice(selectedPackage.price, selectedPackage.currency)} each billing cycle
@@ -361,10 +362,10 @@ export function PackageSelectionDialog({
                         {selectedPackage && (
                             <div className="mt-5 border-t border-white/10 pt-4 lg:mt-6">
                                 <div className="flex items-center justify-between gap-4">
-                                    <p className="text-xs font-medium tracking-tight text-white/40">
+                                    <Label as="span">
                                         Total Cost
-                                    </p>
-                                    <p className="text-sm font-semibold tracking-tight text-white">
+                                    </Label>
+                                    <p className="ds-type-caption-label text-white">
                                         {formatPrice(selectedPackage.price, selectedPackage.currency)}
                                     </p>
                                 </div>
@@ -381,18 +382,18 @@ export function PackageSelectionDialog({
                                         onBuy?.(selectedPackage.id);
                                     }
                                 }}
-                                className="relative h-12 w-full overflow-hidden rounded-sm px-5 py-3 text-sm font-semibold transition-all sm:h-14 sm:py-4 sm:text-base before:absolute before:left-[-40%] before:top-0 before:h-full before:w-[8%] before:skew-x-[-20deg] before:bg-gradient-to-r before:from-transparent before:via-white/50 before:to-transparent before:content-['']"
+                                className="relative h-12 w-full overflow-hidden rounded-subtle px-5 py-3 transition-all sm:h-14 sm:py-4 before:absolute before:left-[-40%] before:top-0 before:h-full before:w-[8%] before:skew-x-[-20deg] before:bg-gradient-to-r before:from-transparent before:via-white/50 before:to-transparent before:content-['']"
                             >
                                 {isPending && pendingPackageId === selectedPackage?.id ? (
-                                    <HugeIcon name="loading-03" className="text-lg animate-spin" />
+                                    <HugeIcon name="loading-03" size="lg" className="animate-spin" />
                                 ) : (
                                     "Continuer"
                                 )}
                             </Button>
                             <div className="flex w-full flex-col gap-1">
                                 <div className="flex w-full items-center justify-center gap-2">
-                                    <HugeIcon name="security-check" className="text-base" />
-                                    <p className="text-center text-[11px] font-normal text-white">
+                                    <HugeIcon name="security-check" size="md" />
+                                    <p className="text-center ds-type-micro-tag text-white">
                                         Paiement sur et securise
                                     </p>
                                 </div>
@@ -420,11 +421,11 @@ export function PackageSelectionDialog({
                                     <Link
                                         href="/pricing"
                                         onClick={() => onOpenChange?.(false)}
-                                        className="group inline-flex h-8 items-center justify-center gap-1.5 rounded-sm px-2.5 py-1.5 text-[13px] font-medium text-white transition-colors hover:bg-white/5"
+                                        className="group inline-flex h-8 items-center justify-center gap-1.5 rounded-subtle px-2.5 py-1.5 ds-type-small text-white transition-colors hover:bg-white/5"
                                     >
                                         <span className="relative">View all plans and features</span>
                                         <span className="relative">
-                                            <HugeIcon name="arrow-up-right-01" className="text-base text-white transition-colors group-hover:text-white/70" />
+                                            <HugeIcon name="arrow-up-right-01" size="md" className="text-white transition-colors group-hover:text-white/70" />
                                         </span>
                                     </Link>
                                 </div>

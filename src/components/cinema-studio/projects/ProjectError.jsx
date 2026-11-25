@@ -44,7 +44,7 @@ export function ProjectError({ error, reset: _reset, onRetry }) {
       exit={{ opacity: 0 }}
       className="w-full h-screen flex flex-col items-center justify-center text-white bg-background"
     >
-      <h2 className="mb-6 text-2xl font-medium tracking-tight text-white/90">
+      <h2 className="mb-6 ds-type-card-title text-white/90">
         Un problème est survenu.
       </h2>
       
@@ -53,7 +53,7 @@ export function ProjectError({ error, reset: _reset, onRetry }) {
           <Button
             type="button"
             variant="primary"
-            className="h-10 px-6 text-sm"
+            className="h-10 px-6"
             onClick={onRetry}
           >
             Réessayer
@@ -63,10 +63,10 @@ export function ProjectError({ error, reset: _reset, onRetry }) {
         <Button
           type="button"
           variant="outline"
-          className="h-10 px-6 text-sm"
+          className="h-10 px-6"
           onClick={handleBack}
         >
-          <HugeIcon name="arrow-left-02" className="text-base" />
+          <HugeIcon name="arrow-left-02" size="md" />
           Retour aux projets
         </Button>
       </div>

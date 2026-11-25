@@ -4,6 +4,7 @@ import * as React from "react";
 import { cn } from "@/shared/lib/utils";
 import { HugeIcon } from "@/components/primitives/HugeIcon";
 import { Button } from "@/components/base/button";
+import { Label } from "@/components/base/label";
 
 function renderIconNode(IconCandidate, props) {
   if (!IconCandidate) return null;
@@ -99,18 +100,18 @@ const Input = React.forwardRef(({
         )}
       >
         {label && (
-          <label className="ds-text-caption-m font-semibold text-text-primary">
+          <Label htmlFor={props.id} disabled={props.disabled}>
             {label}
-          </label>
+          </Label>
         )}
         <div 
           className={cn(
             isBare
               ? "ds-input-bare bg-transparent border-none outline-none shadow-none p-0 h-auto flex items-center justify-between w-full hover:bg-transparent focus-within:bg-transparent"
               : isGhost
-                ? "ds-input-ghost relative flex items-center justify-between w-full h-7 px-2.5 rounded-lg bg-white-5 hover:bg-ui-button-hover focus-within:bg-ui-button-hover border-none outline-none transition-colors"
+                ? "ds-input-ghost relative flex items-center justify-between w-full h-7 px-2.5 rounded-subtle bg-white-5 hover:bg-ui-button-hover focus-within:bg-ui-button-hover border-none outline-none transition-colors"
                 : isAccent
-                  ? "ds-input ds-input-accent ds-input-search relative flex items-center justify-between w-full h-7 px-2.5 rounded-lg bg-surface-card hover:bg-surface-tonal focus-within:bg-surface-tonal border-none outline-none transition-colors"
+                  ? "ds-input ds-input-accent ds-input-search relative flex items-center justify-between w-full h-7 px-2.5 rounded-subtle bg-surface-card hover:bg-surface-tonal focus-within:bg-surface-tonal border-none outline-none transition-colors"
                   : "ds-input relative flex items-center justify-between w-full border-none outline-none",
             className
           )}
@@ -131,7 +132,7 @@ const Input = React.forwardRef(({
           )}
 
           {hasPrefix && (
-            <span className="text-text-secondary select-none shrink-0 pointer-events-none mr-1 font-sans ds-text-caption-m font-normal">
+            <span className="text-text-secondary select-none shrink-0 pointer-events-none mr-1 ds-type-small">
               {prefixStr}
             </span>
           )}
@@ -142,7 +143,7 @@ const Input = React.forwardRef(({
             placeholder={placeholder}
             value={hasPrefix ? displayValue : value}
             onChange={handleChange}
-            className="bg-transparent border-none outline-none p-0 flex-1 placeholder:text-text-secondary text-text-primary ds-text-caption-m font-normal min-w-0 font-sans antialiased shadow-none cursor-text"
+            className="bg-transparent border-none outline-none p-0 flex-1 placeholder:text-text-secondary text-text-primary ds-type-small min-w-0 antialiased shadow-none cursor-text"
             {...props}
           />
 
@@ -151,7 +152,7 @@ const Input = React.forwardRef(({
               type="button"
               variant="ghost"
               onClick={onClear}
-              className="p-1 size-6 [--ds-icon-size:var(--icon-size-sm)] rounded-md shrink-0 ml-1 cursor-pointer hover:bg-ui-button-tonal"
+              className="p-1 size-6 [--ds-icon-size:var(--icon-size-sm)] rounded-subtle shrink-0 ml-1 cursor-pointer hover:bg-ui-button-tonal"
               aria-label="Clear input"
             >
               {ClearIcon ? (
@@ -167,7 +168,7 @@ const Input = React.forwardRef(({
               type="button"
               variant="ghost"
               onClick={handleEditClick}
-              className="flex items-center justify-center size-6 [--ds-icon-size:var(--icon-size-sm)] p-1 rounded-md shrink-0 ml-2 cursor-pointer hover:bg-ui-button-tonal"
+              className="flex items-center justify-center size-6 [--ds-icon-size:var(--icon-size-sm)] p-1 rounded-subtle shrink-0 ml-2 cursor-pointer hover:bg-ui-button-tonal"
               aria-label="Edit"
             >
               <HugeIcon name="pencil-edit-02" className="text-icon-secondary" />
@@ -189,13 +190,13 @@ const Input = React.forwardRef(({
       onChange={onChange}
       className={cn(
         isBare
-          ? "ds-input-bare bg-transparent border-none outline-none ds-text-caption-m font-normal text-text-primary placeholder:text-text-secondary focus:ring-0 hover:bg-transparent focus:bg-transparent p-0 shadow-none cursor-text disabled:opacity-50 font-sans antialiased"
+          ? "ds-input-bare bg-transparent border-none outline-none ds-type-small text-text-primary placeholder:text-text-secondary focus:ring-0 hover:bg-transparent focus:bg-transparent p-0 shadow-none cursor-text disabled:opacity-50 antialiased"
           : isOutline
-            ? "ds-input-outline flex w-full h-9 px-3 rounded-xl placeholder:text-text-secondary disabled:cursor-not-allowed disabled:opacity-50 cursor-text"
+            ? "ds-input-outline flex w-full h-9 px-3 rounded-subtle placeholder:text-text-secondary disabled:cursor-not-allowed disabled:opacity-50 cursor-text"
             : isGhost
-              ? "ds-input-ghost flex w-full h-7 px-2.5 rounded-lg bg-white-5 hover:bg-ui-button-hover focus:bg-ui-button-hover border-none outline-none placeholder:text-text-secondary text-text-primary ds-text-caption-m font-normal transition-colors cursor-text"
+              ? "ds-input-ghost flex w-full h-7 px-2.5 rounded-subtle bg-white-5 hover:bg-ui-button-hover focus:bg-ui-button-hover border-none outline-none placeholder:text-text-secondary text-text-primary ds-type-small transition-colors cursor-text"
               : isAccent
-                ? "ds-input ds-input-accent ds-input-search flex w-full h-7 px-2.5 rounded-lg bg-surface-card hover:bg-surface-tonal focus:bg-surface-tonal border-none outline-none placeholder:text-text-secondary text-text-primary ds-text-caption-m font-normal transition-colors cursor-text"
+                ? "ds-input ds-input-accent ds-input-search flex w-full h-7 px-2.5 rounded-subtle bg-surface-card hover:bg-surface-tonal focus:bg-surface-tonal border-none outline-none placeholder:text-text-secondary text-text-primary ds-type-small transition-colors cursor-text"
                 : "ds-input flex w-full border-none outline-none placeholder:text-text-secondary disabled:cursor-not-allowed disabled:opacity-50 cursor-text",
         className
       )}

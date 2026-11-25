@@ -176,7 +176,7 @@ const Folder = forwardRef(function Folder(
           aria-label={isExpanded ? "Collapse folder" : "Expand folder"}
           title={isExpanded ? "Collapse" : "Expand"}
           onClick={onToggleClick}
-          className="absolute inset-0 -m-0.5 flex items-center justify-center rounded-md bg-surface-tonal hover:bg-surface-tonal-hover text-icon-secondary hover:text-text-primary opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity duration-150"
+          className="absolute inset-0 -m-0.5 flex items-center justify-center rounded-sharp bg-surface-tonal hover:bg-surface-tonal-hover text-icon-secondary hover:text-text-primary opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity duration-150"
         >
           <HugeIcon
             name="arrow-right-01"

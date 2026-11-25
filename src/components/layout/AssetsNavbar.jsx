@@ -21,7 +21,7 @@ export function AssetsNavbar({ hidden = false }) {
         <div className="flex shrink-0 items-center gap-3">
           <Link
             href="/"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-sm text-white/72 transition hover:bg-white/5 hover:text-white"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-subtle text-white/72 transition hover:bg-white/5 hover:text-white"
             aria-label="Back to home"
           >
             <HugeIcon name="arrow-left-02" size="lg" />
@@ -31,7 +31,7 @@ export function AssetsNavbar({ hidden = false }) {
             href="/assets"
             className="flex items-center gap-3 transition-opacity hover:opacity-100"
           >
-            <span className="whitespace-nowrap text-3xl font-semibold tracking-tight">Your Library</span>
+            <span className="whitespace-nowrap ds-type-sub-heading">Your Library</span>
           </Link>
         </div>
 

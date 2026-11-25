@@ -178,7 +178,7 @@ export default function ElementsPage({ params }) {
                                     selectionEnabled={true}
                                 />
                                 {hasMore && (
-                                    <div className="flex justify-center pt-2 text-sm text-white/45">
+                                    <div className="flex justify-center pt-2 ds-type-small text-white/45">
                                         Scroll down to load more
                                     </div>
                                 )}
@@ -193,7 +193,7 @@ export default function ElementsPage({ params }) {
                         <Button
                             type="button"
                             variant="secondary"
-                            className="h-auto px-6 py-4 rounded-2xl bg-surface-secondary hover:bg-surface-secondary text-white/90 hover:text-white active:scale-95 border-none backdrop-blur-md text-sm font-medium"
+                            className="h-auto px-6 py-4 rounded-subtle bg-surface-secondary hover:bg-surface-secondary text-white/90 hover:text-white active:scale-95 border-none backdrop-blur-md ds-type-button"
                             onClick={() => setIsNewElementOpen(true)}
                         >
                             <HugeIcon name="add-01" />

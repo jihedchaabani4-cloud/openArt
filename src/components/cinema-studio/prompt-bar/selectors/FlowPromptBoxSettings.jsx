@@ -4,12 +4,12 @@ import { useMemo, useState } from "react";
 import { cn } from "@/shared/lib/utils";
 import { HugeIcon } from "@/components/primitives/HugeIcon";
 import { Button } from "@/components/base/button";
+import { Label } from "@/components/base/label";
 import { ButtonGroup } from "@/components/primitives/button-group";
 import { Switch } from "@/components/base/switch";
 import { Slider } from "@/components/primitives/slider";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/primitives/popover";
 import {
-  MENU_LABEL_CLASS,
   MenuItemContent,
   MenuSubChevronIcon,
   menuItemClassName,
@@ -108,17 +108,17 @@ export function FlowSelect({
             type="button"
             variant="dropdown-card"
             disabled={disabled}
-            className="w-full justify-between rounded-lg ds-text-caption-m data-[state=open]:bg-surface-tonal-hover"
+            className="w-full justify-between rounded-subtle ds-type-small data-[state=open]:bg-surface-tonal-hover"
             aria-label={ariaLabel || label || displayValue}
             data-state={open ? "open" : "closed"}
           >
             <div className="text-ellipsis overflow-hidden flex items-center gap-2">
               {icon}
-              <span className="flex min-w-0 flex-col items-start gap-0.5 font-medium">
+              <span className="flex min-w-0 flex-col items-start gap-0.5">
                 {label && (
-                  <span className="ds-text-caption-s text-text-secondary">{label}</span>
+                  <Label as="span">{label}</Label>
                 )}
-                <span className="max-w-full truncate ds-text-caption-m text-text-primary">
+                <span className="max-w-full truncate ds-type-small text-text-primary">
                   {displayValue}
                 </span>
               </span>
@@ -375,7 +375,7 @@ export function FlowPromptBoxSettings({
           <div
             role="radiogroup"
             aria-label="Mode"
-            className="flex items-center gap-1 p-0.5 bg-surface-card border border-border-menu-subtle rounded-lg w-full"
+            className="flex items-center gap-1 p-0.5 bg-surface-card border border-border-menu-subtle rounded-comfortable w-full"
           >
             {modeOptions.map((opt) => {
               const isChecked = activeMode === opt.value;
@@ -388,7 +388,7 @@ export function FlowPromptBoxSettings({
                   role="radio"
                   aria-pressed={isChecked}
                   aria-checked={isChecked}
-                  className="flex-1 rounded-lg ds-text-caption-m"
+                  className="flex-1 rounded-subtle ds-type-small"
                 >
                   <HugeIcon
                     name={opt.icon}
@@ -406,7 +406,7 @@ export function FlowPromptBoxSettings({
           <div
             role="radiogroup"
             aria-label="Type de vidéo"
-            className="flex items-center gap-1 p-0.5 bg-surface-card border border-border-menu-subtle rounded-lg w-full"
+            className="flex items-center gap-1 p-0.5 bg-surface-card border border-border-menu-subtle rounded-comfortable w-full"
           >
             {subModeOptions.map((opt) => {
               const isChecked = activeSubMode === opt.value;
@@ -419,7 +419,7 @@ export function FlowPromptBoxSettings({
                   role="radio"
                   aria-pressed={isChecked}
                   aria-checked={isChecked}
-                  className="flex-1 rounded-lg ds-text-caption-m"
+                  className="flex-1 rounded-subtle ds-type-small"
                 >
                   <HugeIcon
                     name={opt.icon}
@@ -440,7 +440,7 @@ export function FlowPromptBoxSettings({
             style={{
               gridTemplateColumns: `repeat(${Math.min(ratioOptions.length, 5)}, minmax(0, 1fr))`,
             }}
-            className="grid gap-1 p-0.5 bg-surface-card border border-border-menu-subtle rounded-lg w-full"
+            className="grid gap-1 p-0.5 bg-surface-card border border-border-menu-subtle rounded-comfortable w-full"
           >
             {ratioOptions.map((ratio) => {
               const isChecked = currentRatio === ratio;
@@ -455,13 +455,13 @@ export function FlowPromptBoxSettings({
                   role="radio"
                   aria-pressed={isChecked}
                   aria-checked={isChecked}
-                  className="w-full min-w-0 h-8 flex-col !gap-0.5 !py-0.5 !px-1 rounded-lg"
+                  className="w-full min-w-0 h-8 flex-col !gap-0.5 !py-0.5 !px-1 rounded-subtle"
                 >
                   <HugeIcon
                     name={iconName}
                     className="leading-none text-icon-primary"
                   />
-                  <span className="ds-text-caption-s leading-none text-text-primary">
+                  <span className="ds-type-micro-tag text-text-primary">
                     {ratio}
                   </span>
                 </Button>
@@ -506,7 +506,7 @@ export function FlowPromptBoxSettings({
                     role="radiogroup"
                     aria-label={def.label || key}
                     className={cn(
-                      "p-0.5 bg-surface-card border border-border-menu-subtle rounded-lg w-full max-w-full",
+                      "p-0.5 bg-surface-card border border-border-menu-subtle rounded-comfortable w-full max-w-full",
                       isGrid ? cn("grid", gridColsClass, "gap-1") : "flex items-center gap-1"
                     )}
                   >
@@ -532,7 +532,7 @@ export function FlowPromptBoxSettings({
                           aria-pressed={isChecked}
                           aria-checked={isChecked}
                           aria-description={infoText || undefined}
-                          className={cn(!isGrid ? "flex-1" : undefined, "rounded-lg ds-text-caption-m")}
+                          className={cn(!isGrid ? "flex-1" : undefined, "rounded-subtle ds-type-small")}
                         >
                           <span className="flex items-center justify-center gap-1 truncate w-full text-center">
                             <span className="truncate text-text-primary">{itemLabel}</span>
@@ -560,7 +560,7 @@ export function FlowPromptBoxSettings({
                 return (
                   <div
                     key={key}
-                    className="flex items-center justify-between min-h-[30px] px-2 py-1 rounded-lg ds-text-caption-m font-normal text-text-primary hover:bg-surface-tonal transition-colors"
+                    className="flex items-center justify-between min-h-[30px] px-2 py-1 rounded-subtle ds-type-small text-text-primary hover:bg-surface-tonal transition-colors"
                   >
                     <span className="truncate">
                       {def.label || key}
@@ -582,10 +582,10 @@ export function FlowPromptBoxSettings({
                 const numVal = val !== undefined && val !== null ? Number(val) : (def.default ?? min);
 
                 return (
-                  <div key={key} className="flex flex-col gap-1 py-1 rounded-lg">
-                    <div className={cn(MENU_LABEL_CLASS, "flex items-center justify-between py-0.5")}>
-                      <span>{def.label || key}</span>
-                      <span className="font-mono ds-text-caption-s text-text-primary tabular-nums">{numVal}</span>
+                  <div key={key} className="flex flex-col gap-1 py-1 rounded-subtle">
+                    <div className="flex items-center justify-between px-2 py-0.5">
+                      <Label as="span">{def.label || key}</Label>
+                      <span className="font-mono ds-type-micro-tag text-text-primary tabular-nums">{numVal}</span>
                     </div>
                     <div className="px-2 pb-1">
                       <Slider
@@ -647,7 +647,7 @@ export function FlowPromptBoxSettings({
             style={{
               gridTemplateColumns: `repeat(${Math.min(countOptions.length, 4)}, minmax(0, 1fr))`,
             }}
-            className="grid gap-1 p-0.5 bg-surface-card border border-border-menu-subtle rounded-lg w-full"
+            className="grid gap-1 p-0.5 bg-surface-card border border-border-menu-subtle rounded-comfortable w-full"
           >
             {countOptions.map((countVal) => {
               const isChecked = String(currentCountValue) === String(countVal);
@@ -661,7 +661,7 @@ export function FlowPromptBoxSettings({
                   role="radio"
                   aria-pressed={isChecked}
                   aria-checked={isChecked}
-                  className="w-full rounded-lg ds-text-caption-m"
+                  className="w-full rounded-subtle ds-type-small"
                 >
                   {countVal}
                 </Button>
@@ -673,13 +673,13 @@ export function FlowPromptBoxSettings({
         {/* ── 6. CREDIT COST LABEL ── */}
         {models && models.length > 0 && currentModel && (
           <div className="settings-credit-cost block text-center pt-1 pb-0.5">
-            <span className="credit-cost-label block ds-text-caption-s text-text-secondary">
+            <span className="credit-cost-label block ds-type-micro-tag text-text-secondary">
               <span>
                 La génération utilisera{" "}
                 <a
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="credit-cost-link text-text-primary underline underline-offset-2 hover:text-text-body-muted transition-colors font-medium"
+                  className="credit-cost-link ds-type-micro-tag text-text-primary underline underline-offset-2 hover:text-text-body-muted transition-colors"
                   href="https://support.google.com/googleone?p=g1_ai_credit_menu"
                 >
                   {displayCredits}&nbsp;{displayCredits === 1 ? "crédit" : "crédits"}
@@ -691,7 +691,7 @@ export function FlowPromptBoxSettings({
 
         {/* ── Empty notice if no models available for this mode ── */}
         {(!models || models.length === 0) && (
-          <div className="py-3 px-2 text-center ds-text-caption-s text-text-secondary">
+          <div className="py-3 px-2 text-center ds-type-small text-text-secondary">
             Aucun modèle disponible
           </div>
         )}

@@ -85,7 +85,7 @@ export function CharacterDetailsGallery({
           <Button
             type="button"
             variant="secondary"
-            className="rounded-full"
+            className="rounded-subtle"
             disabled={atLimit}
             onClick={() => fileInputRef.current?.click()}
             title={atLimit ? "Maximum 5 images autorisées" : "Importer depuis l'ordinateur"}
@@ -98,7 +98,7 @@ export function CharacterDetailsGallery({
             <Button
               type="button"
               variant="secondary"
-              className="rounded-full"
+              className="rounded-subtle"
               disabled={atLimit}
               onClick={onOpenAssets}
               title={atLimit ? "Maximum 5 images autorisées" : "Ajouter à partir du projet"}

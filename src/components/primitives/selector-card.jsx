@@ -45,7 +45,7 @@ function CardItem({ label, image, isSelected, onClick }) {
     >
       <div
         className={cn(
-          "relative size-34 rounded-md overflow-hidden transition-all duration-300",
+          "relative size-34 rounded-comfortable overflow-hidden transition-all duration-300",
           isSelected && "outline outline-2 outline-white"
         )}
       >
@@ -64,7 +64,7 @@ function CardItem({ label, image, isSelected, onClick }) {
       {label && (
         <span
           className={cn(
-            "text-2xs font-bold tracking-wide uppercase transition-colors duration-300 text-white"
+            "ds-type-micro-tag uppercase transition-colors duration-300 text-white"
           )}
         >
           {label}

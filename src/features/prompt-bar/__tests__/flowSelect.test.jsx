@@ -80,7 +80,7 @@ describe("FlowSelect component", () => {
     expect(listbox.getAttribute("data-slot")).toBe("popover-content");
     expect(listbox.className).toContain("bg-surface-menu-glass");
     expect(listbox.className).toContain("surface-listbox");
-    expect(listbox.className).toContain("rounded-xl");
+    expect(listbox.className).toContain("rounded-comfortable");
     expect(listbox.className).toContain("text-text-primary");
     expect(listbox.className).toContain("p-1.5");
     expect(listbox.style.width).toBe("240px");

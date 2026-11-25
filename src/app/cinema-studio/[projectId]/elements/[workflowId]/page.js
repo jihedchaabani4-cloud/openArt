@@ -126,7 +126,7 @@ export default function ElementWorkflowEditPage() {
 
             {/* Right Main Stage: Reference Photos Gallery */}
             <div className="lg:col-span-9 xl:col-span-9 flex flex-col gap-3 relative">
-              <div className="relative w-full rounded-2xl overflow-hidden bg-black/40 border border-white/5 min-h-[460px] p-5">
+              <div className="relative w-full rounded-comfortable overflow-hidden bg-black/40 border border-white/5 min-h-[460px] p-5">
                 <ElementDetailsGallery
                   workflow={workflow}
                   projectId={projectId}

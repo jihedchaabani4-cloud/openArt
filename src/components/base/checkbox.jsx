@@ -27,7 +27,8 @@ const Checkbox = React.forwardRef(({ className, size = "default", variant = "def
       <CheckboxPrimitive.Indicator data-slot="checkbox-indicator" className="flex items-center justify-center text-current">
         <HugeIcon
           name={isIndeterminate ? "minus-sign" : "tick-02"}
-          className={cn(isLg ? "text-sm font-bold" : "text-xs font-bold")}
+          size={isLg ? "sm" : "xs"}
+          weight="bold"
         />
       </CheckboxPrimitive.Indicator>
     </CheckboxPrimitive.Root>

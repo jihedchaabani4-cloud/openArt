@@ -45,7 +45,7 @@ afterEach(() => {
 
 const SHARED_PANEL_CLASSES = [
   "bg-surface-menu-glass",
-  "rounded-xl",
+  "rounded-comfortable",
   "overflow-x-hidden",
   "overflow-y-auto",
   "text-text-primary",
@@ -57,10 +57,9 @@ const SHARED_PANEL_CLASSES = [
 
 const SHARED_ITEM_CLASSES = [
   "ds-menu-item",
-  "ds-text-caption-m",
-  "font-normal",
+  "ds-type-small",
   "text-text-primary",
-  "rounded-lg",
+  "rounded-subtle",
   "gap-2",
   "hover:bg-surface-tonal",
   "[&_svg:not([class*='text-'])]:text-icon-primary",
@@ -101,8 +100,7 @@ describe("Unified Menu System — DropdownMenu, ContextMenu, and Select parity",
     expect(deleteItem?.className).toContain("data-[variant=destructive]:!text-error");
 
     const label = screen.getByText("Actions");
-    expect(label.className).toContain("text-text-secondary");
-    expect(label.className).toContain("font-medium");
+    expect(label.className).toContain("ds-label");
     expect(label.className).not.toContain("uppercase");
 
     const sep = content.querySelector('[data-slot="dropdown-menu-separator"]');
@@ -143,8 +141,7 @@ describe("Unified Menu System — DropdownMenu, ContextMenu, and Select parity",
     expect(deleteItem?.className).toContain("data-[variant=destructive]:!text-error");
 
     const label = screen.getByText("Context");
-    expect(label.className).toContain("text-text-secondary");
-    expect(label.className).toContain("font-medium");
+    expect(label.className).toContain("ds-label");
     expect(label.className).not.toContain("uppercase");
 
     const sep = content.querySelector('[data-slot="context-menu-separator"]');
@@ -189,8 +186,7 @@ describe("Unified Menu System — DropdownMenu, ContextMenu, and Select parity",
     expect(optionOne.className).not.toContain("capitalize");
 
     const label = screen.getByText("Choices");
-    expect(label.className).toContain("text-text-secondary");
-    expect(label.className).toContain("font-medium");
+    expect(label.className).toContain("ds-label");
     expect(label.className).not.toContain("uppercase");
 
     const sep = content.querySelector('[data-slot="select-separator"]');

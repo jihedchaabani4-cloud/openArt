@@ -1,0 +1,90 @@
+/* ==========================================================================
+   CANONICAL ICON SIZE & WEIGHT TOKENS (`src/styles/tokens/icons.css`)
+   Single source of truth for icon dimensions, optical scaling, and stroke weights.
+   ========================================================================== */
+
+@layer base {
+  :root,
+  html.dark,
+  :root.opus {
+    /* Optical compensation for Hugeicons glyph padding */
+    --icon-optical-scale: 1.12;
+
+    /* 8 Canonical Icon Sizes */
+    --icon-size-2xs: 0.625rem;   /* 10px — tiny badges, video play indicator */
+    --icon-size-xs: 0.75rem;     /* 12px — badges, checkboxes, radio dots, chevrons, xs controls */
+    --icon-size-sm: 0.875rem;    /* 14px — standard compact buttons, inputs, menus, tabs, dropdown chevrons */
+    --icon-size-md: 1rem;        /* 16px — default standalone icons, sidebar nav, toolbar & overlay icon buttons */
+    --icon-size-lg: 1.25rem;     /* 20px — large CTAs, edit sidebar tool row icons, dialog close */
+    --icon-size-xl: 1.5rem;      /* 24px — feature card icons, dropzone/upload icons, section accents */
+    --icon-size-2xl: 2rem;       /* 32px — empty-state & dialog hero icons */
+    --icon-size-3xl: 2.5rem;     /* 40px — large empty-state / landing hero icons */
+
+    /* 4 Canonical Icon Weights & SVG Stroke Widths */
+    --icon-weight-light: 300;
+    --icon-stroke-light: 1.25;
+    --icon-weight-regular: 400;
+    --icon-stroke-regular: 1.5;
+    --icon-weight-medium: 500;
+    --icon-stroke-medium: 1.75;
+    --icon-weight-bold: 700;
+    --icon-stroke-bold: 2.25;
+  }
+}
+
+/* Unlayered so it wins over external Hugeicons CDN `.hgi-stroke` and compensates optical padding */
+.huge-icon {
+  font-size: calc(var(--ds-icon-size, var(--icon-size-md)) * var(--icon-optical-scale));
+  font-weight: var(--ds-icon-weight, var(--icon-weight-regular));
+  width: 1em;
+  height: 1em;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+.huge-icon.absolute {
+  position: absolute;
+}
+
+@layer utilities {
+  /* Canonical Icon Size Utilities */
+  .ds-icon-2xs { --ds-icon-size: var(--icon-size-2xs); font-size: var(--icon-size-2xs); }
+  .ds-icon-xs { --ds-icon-size: var(--icon-size-xs); font-size: var(--icon-size-xs); }
+  .ds-icon-sm { --ds-icon-size: var(--icon-size-sm); font-size: var(--icon-size-sm); }
+  .ds-icon-md { --ds-icon-size: var(--icon-size-md); font-size: var(--icon-size-md); }
+  .ds-icon-lg { --ds-icon-size: var(--icon-size-lg); font-size: var(--icon-size-lg); }
+  .ds-icon-xl { --ds-icon-size: var(--icon-size-xl); font-size: var(--icon-size-xl); }
+  .ds-icon-2xl { --ds-icon-size: var(--icon-size-2xl); font-size: var(--icon-size-2xl); }
+  .ds-icon-3xl { --ds-icon-size: var(--icon-size-3xl); font-size: var(--icon-size-3xl); }
+
+  /* Canonical Icon Weight & SVG Stroke Utilities */
+  .ds-icon-weight-light {
+    --ds-icon-weight: var(--icon-weight-light);
+    --ds-icon-stroke: var(--icon-stroke-light);
+    font-weight: var(--icon-weight-light);
+  }
+  .ds-icon-weight-regular {
+    --ds-icon-weight: var(--icon-weight-regular);
+    --ds-icon-stroke: var(--icon-stroke-regular);
+    font-weight: var(--icon-weight-regular);
+  }
+  .ds-icon-weight-medium {
+    --ds-icon-weight: var(--icon-weight-medium);
+    --ds-icon-stroke: var(--icon-stroke-medium);
+    font-weight: var(--icon-weight-medium);
+  }
+  .ds-icon-weight-bold {
+    --ds-icon-weight: var(--icon-weight-bold);
+    --ds-icon-stroke: var(--icon-stroke-bold);
+    font-weight: var(--icon-weight-bold);
+  }
+
+  :is(.ds-icon-weight-light, .ds-icon-weight-regular, .ds-icon-weight-medium, .ds-icon-weight-bold) svg,
+  svg:is(.ds-icon-weight-light, .ds-icon-weight-regular, .ds-icon-weight-medium, .ds-icon-weight-bold) {
+    stroke-width: var(--ds-icon-stroke, var(--icon-stroke-regular));
+  }
+}

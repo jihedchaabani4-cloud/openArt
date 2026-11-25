@@ -9,12 +9,12 @@ import { Button } from "@/components/base/button";
  * Harmonized, vertically-centered, borderless empty state for Cinema Studio Elements.
  * Built with balanced, proportional typographic and iconographic hierarchy:
  * - Hero icon: 24px HugeIcon in 48px (size-12) circle (1:2 optical ratio)
- * - Hero Title: 18px semi-bold text-white tracking-tight
- * - Hero Subtitle: 14px (text-sm) regular text-white/50 leading-relaxed
+ * - Hero Title: canonical `.ds-type-feature-title` text-white
+ * - Hero Subtitle: canonical `.ds-type-small` text-white/50
  * - Card icon: 17px HugeIcon in 30px (size-[30px]) badge (balanced padding)
- * - Card title: 13.5px medium text-white/90 (full label visibility without cramped truncation)
+ * - Card title: canonical `.ds-type-caption-label` text-white/90
  * - Card visual: 135px WebP illustration centered
- * - CTA Button: 17px icon + 14px font in rounded pill
+ * - CTA Button: canonical `<Button variant="pill">` with 17px icon
  *
  * @param {Object} props
  * @param {() => void} [props.onCreateElement] Callback to trigger creating a new element
@@ -31,14 +31,15 @@ export function ElementsEmptyState({ onCreateElement, className = "" }) {
         <span className="size-12 flex items-center justify-center rounded-full bg-white/[0.06] border border-white/10 shrink-0">
           <HugeIcon
             name="at"
-            className="text-[24px] text-white leading-none"
+            size="xl"
+            className="text-white"
           />
         </span>
         <div className="flex flex-col items-center gap-1.5">
-          <p className="text-center font-semibold text-white text-[18px] tracking-tight leading-snug">
+          <p className="text-center ds-type-feature-title text-white">
             No elements yet
           </p>
-          <p className="text-center text-white/50 text-sm leading-relaxed max-w-xs">
+          <p className="text-center ds-type-small text-white/50 max-w-xs">
             Create element to use it consistently across all projects
           </p>
         </div>
@@ -59,16 +60,17 @@ export function ElementsEmptyState({ onCreateElement, className = "" }) {
               onCreateElement?.();
             }
           }}
-          className="group relative p-3.5 flex flex-col gap-2.5 overflow-hidden bg-white/[0.04] hover:bg-white/[0.07] transition-all duration-200 cursor-pointer h-[220px] rounded-2xl border border-white/10 shadow-none"
+          className="group relative p-3.5 flex flex-col gap-2.5 overflow-hidden bg-white/[0.04] hover:bg-white/[0.07] transition-all duration-200 cursor-pointer h-[220px] rounded-comfortable border border-white/10 shadow-none"
         >
           <div className="flex shrink-0 items-center gap-2.5 min-w-0">
             <span className="size-[30px] flex shrink-0 items-center justify-center rounded-full bg-white/[0.08] border-none">
               <HugeIcon
                 name="at"
-                className="text-[17px] text-white leading-none"
+                size="md"
+                className="text-white"
               />
             </span>
-            <p className="min-w-0 text-[13.5px] font-medium text-white/90 group-hover:text-white truncate transition-colors">
+            <p className="min-w-0 ds-type-caption-label text-white/90 group-hover:text-white truncate transition-colors">
               Create element
             </p>
           </div>
@@ -90,15 +92,16 @@ export function ElementsEmptyState({ onCreateElement, className = "" }) {
         </div>
 
         {/* Card 2: Add to prompt-box */}
-        <div className="p-3.5 flex flex-col gap-2.5 overflow-hidden bg-white/[0.04] h-[220px] rounded-2xl border border-white/10 shadow-none">
+        <div className="p-3.5 flex flex-col gap-2.5 overflow-hidden bg-white/[0.04] h-[220px] rounded-comfortable border border-white/10 shadow-none">
           <div className="flex shrink-0 items-center gap-2.5 min-w-0">
             <span className="size-[30px] flex shrink-0 items-center justify-center rounded-full bg-white/[0.08] border-none">
               <HugeIcon
                 name="sparkles"
-                className="text-[17px] text-white leading-none"
+                size="md"
+                className="text-white"
               />
             </span>
-            <p className="min-w-0 text-[13.5px] font-medium text-white/90 truncate">
+            <p className="min-w-0 ds-type-caption-label text-white/90 truncate">
               Add to prompt-box
             </p>
           </div>
@@ -119,15 +122,16 @@ export function ElementsEmptyState({ onCreateElement, className = "" }) {
         </div>
 
         {/* Card 3: Use for consistency */}
-        <div className="p-3.5 flex flex-col gap-2.5 overflow-hidden bg-white/[0.04] h-[220px] rounded-2xl border border-white/10 shadow-none">
+        <div className="p-3.5 flex flex-col gap-2.5 overflow-hidden bg-white/[0.04] h-[220px] rounded-comfortable border border-white/10 shadow-none">
           <div className="flex shrink-0 items-center gap-2.5 min-w-0">
             <span className="size-[30px] flex shrink-0 items-center justify-center rounded-full bg-white/[0.08] border-none">
               <HugeIcon
                 name="package"
-                className="text-[17px] text-white leading-none"
+                size="md"
+                className="text-white"
               />
             </span>
-            <p className="min-w-0 text-[13.5px] font-medium text-white/90 truncate">
+            <p className="min-w-0 ds-type-caption-label text-white/90 truncate">
               Use for consistency
             </p>
           </div>
@@ -156,7 +160,7 @@ export function ElementsEmptyState({ onCreateElement, className = "" }) {
       >
         <HugeIcon
           name="add-01"
-          className="text-[17px] leading-none"
+          size="md"
         />
         <span>Create element</span>
       </Button>

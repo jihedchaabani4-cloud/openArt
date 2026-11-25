@@ -14,14 +14,14 @@ export default function AssetDetailNavbar({ workflowId, userSlot = null }) {
         <div className="flex min-w-0 items-center gap-3">
           <Link
             href="/assets"
-            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-sm text-white/72 transition hover:bg-white/5 hover:text-white"
+            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-subtle text-white/72 transition hover:bg-white/5 hover:text-white"
             aria-label="Back to assets"
           >
             <HugeIcon name="arrow-left-02" size="lg" />
           </Link>
 
           <div className="flex min-w-0 items-center gap-3">
-            <div className="truncate text-lg font-semibold tracking-tight text-white">
+            <div className="truncate ds-type-feature-title text-white">
               {displayName}
             </div>
           </div>

@@ -77,7 +77,7 @@ export const EditableDisplayName = React.forwardRef(({
           onClick={handleStartEdit}
           aria-label="Edit display name"
           className={cn(
-            "inline-flex items-center min-w-0 max-w-full px-1.5 rounded-md truncate text-left text-text-primary",
+            "inline-flex items-center min-w-0 max-w-full px-1.5 rounded-subtle truncate text-left text-text-primary",
             "hover:bg-surface-card transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-heavy",
             inputClassName
           )}
@@ -91,7 +91,7 @@ export const EditableDisplayName = React.forwardRef(({
             <span
               aria-hidden="true"
               className={cn(
-                "invisible col-start-1 row-start-1 whitespace-pre px-2 ds-text-caption-m font-normal tracking-tight pointer-events-none select-none truncate overflow-hidden",
+                "invisible col-start-1 row-start-1 whitespace-pre px-2 ds-type-small pointer-events-none select-none truncate overflow-hidden",
                 inputClassName
               )}
             >
@@ -117,7 +117,7 @@ export const EditableDisplayName = React.forwardRef(({
               }}
               containerClassName="col-start-1 row-start-1 min-w-0"
               className={cn(
-                "w-full h-7 px-2 rounded-lg bg-surface-card ring-1 ring-border-subtle focus-within:ring-border-heavy text-text-primary transition-colors cursor-text",
+                "w-full h-7 px-2 rounded-subtle bg-surface-card ring-1 ring-border-subtle focus-within:ring-border-heavy text-text-primary transition-colors cursor-text",
                 inputClassName
               )}
               aria-label="Display name"

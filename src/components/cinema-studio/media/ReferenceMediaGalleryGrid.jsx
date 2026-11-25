@@ -109,7 +109,7 @@ export function ReferenceMediaCard({
                 >
                   <HugeIcon
                     name="bookmark-02"
-                    className="text-xs"
+                    size="xs"
                   />
                 </IconButton>
               )}
@@ -122,7 +122,7 @@ export function ReferenceMediaCard({
                   title="Supprimer l'image"
                   aria-label="Supprimer"
                 >
-                  <HugeIcon name="delete-02" className="text-xs hover:text-error" />
+                  <HugeIcon name="delete-02" size="xs" className="hover:text-error" />
                 </IconButton>
               )}
             </ButtonGroup>
@@ -132,7 +132,7 @@ export function ReferenceMediaCard({
       overlay={
         isLoadingThis ? (
           <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] z-30 flex items-center justify-center">
-            <HugeIcon name="loading-03" className="text-2xl text-white animate-spin" />
+            <HugeIcon name="loading-03" size="xl" className="text-white animate-spin" />
           </div>
         ) : null
       }

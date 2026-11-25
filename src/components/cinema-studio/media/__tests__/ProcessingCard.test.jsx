@@ -89,7 +89,7 @@ describe("ProcessingCard & MediaView processing wiring", () => {
     const reuseBtn = screen.getByRole("button", { name: "Reuse prompt" });
     expect(reuseBtn).toBeDefined();
     expect(reuseBtn.getAttribute("title")).toBe("Reuse prompt");
-    expect(reuseBtn.className).toContain("rounded-row");
+    expect(reuseBtn.className).toContain("rounded-subtle");
     expect(reuseBtn.querySelector('[data-icon-name="arrow-turn-backward"]')).not.toBeNull();
 
     fireEvent.click(reuseBtn);

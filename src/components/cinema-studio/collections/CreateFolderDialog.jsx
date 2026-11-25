@@ -7,6 +7,7 @@ import {
   DialogTitle,
 } from "@/components/primitives/dialog";
 import { Button } from "@/components/base/button";
+import { Label } from "@/components/base/label";
 import { Textarea } from "@/components/primitives/textarea";
 import { HugeIcon } from "@/components/primitives/HugeIcon";
 import { cn } from "@/shared/lib/utils";
@@ -147,7 +148,7 @@ export function CreateFolderDialog({
       >
         {/* Header */}
         <div className="flex w-full items-center justify-between gap-3">
-          <DialogTitle className="text-lg font-semibold text-on-surface tracking-tight">
+          <DialogTitle className="ds-type-feature-title text-on-surface">
             {resolvedTitle}
           </DialogTitle>
           <Button
@@ -155,7 +156,7 @@ export function CreateFolderDialog({
             variant="ghost"
             size="s"
             onClick={() => onOpenChange?.(false)}
-            className="size-8 rounded-full p-0 text-on-surface-subtle hover:text-on-surface"
+            className="size-8 rounded-subtle p-0 text-on-surface-subtle hover:text-on-surface"
             aria-label="Close"
           >
             <HugeIcon name="cancel-01" />
@@ -174,15 +175,15 @@ export function CreateFolderDialog({
               onChange={(e) => setName(e.target.value)}
               placeholder="My folder"
               type="text"
-              className="w-full text-center text-3xl font-semibold leading-9 tracking-tight text-on-surface bg-transparent outline-none caret-primary placeholder:text-on-surface-subtle disabled:opacity-50"
+              className="w-full text-center ds-type-sub-heading text-on-surface bg-transparent outline-none caret-primary placeholder:text-on-surface-subtle disabled:opacity-50"
             />
           </div>
 
           <div className="flex flex-col gap-2">
             {/* Description Section (Collapsible) */}
             <div className="flex flex-col">
-              <div className="flex min-h-8 w-full items-center justify-between gap-2 rounded-sm p-1">
-                <span className="text-sm font-medium text-on-surface-variant">Description</span>
+              <div className="flex min-h-8 w-full items-center justify-between gap-2 rounded-subtle p-1">
+                <Label as="span">Description</Label>
                 <Button
                   type="button"
                   variant="ghost"
@@ -190,7 +191,7 @@ export function CreateFolderDialog({
                   onClick={() => setIsDescriptionExpanded((prev) => !prev)}
                   aria-label={isDescriptionExpanded ? "Collapse description" : "Expand description"}
                   aria-expanded={isDescriptionExpanded}
-                  className="size-7 rounded-full p-0 text-on-surface-subtle hover:text-on-surface"
+                  className="size-7 rounded-subtle p-0 text-on-surface-subtle hover:text-on-surface"
                 >
                   <HugeIcon
                     name={isDescriptionExpanded ? "minus-sign" : "add-01"}
@@ -208,15 +209,15 @@ export function CreateFolderDialog({
                     minHeight={80}
                     maxHeight={160}
                     maxLength={2000}
-                    className="text-sm font-normal text-on-surface placeholder:text-on-surface-subtle"
+                    className="ds-type-small text-on-surface placeholder:text-on-surface-subtle"
                   />
                 </div>
               )}
             </div>
 
             {/* Color Palette Row */}
-            <div className="flex min-h-8 w-full items-center justify-between gap-2 rounded-sm p-1">
-              <span className="text-sm font-medium text-on-surface-variant">Color</span>
+            <div className="flex min-h-8 w-full items-center justify-between gap-2 rounded-subtle p-1">
+              <Label as="span">Color</Label>
               <div
                 className="flex min-w-0 items-center gap-1.5 flex-1 justify-end"
                 role="group"

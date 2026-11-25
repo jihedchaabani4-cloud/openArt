@@ -19,7 +19,7 @@ export function AssetsSelectionBar({
   return (
     <div className="fixed bottom-10 left-1/2 z-40 -translate-x-1/2">
       <div className="flex items-center gap-0.5 px-3 py-2">
-        <div className="px-1 py-2 text-sm font-semibold text-white/92">
+        <div className="px-1 py-2 ds-type-caption-label text-white/92">
           {selectedCount} selected
         </div>
 
@@ -27,7 +27,7 @@ export function AssetsSelectionBar({
           type="button"
           onClick={onDownloadSelected}
           variant="secondary"
-          className="h-10 px-6 text-sm"
+          className="h-10 px-6"
           disabled={isDownloading}
         >
           <HugeIcon name="download-04" />

@@ -148,7 +148,7 @@ export default function CharacterDetailPage() {
                   activeTab === "details"
                     ? (displayDetailImages.length === 0
                         ? "bg-transparent p-0 border-none"
-                        : "rounded-2xl overflow-hidden bg-black/40 border-none min-h-[460px] p-5")
+                        : "rounded-comfortable overflow-hidden bg-black/40 border-none min-h-[460px] p-5")
                     : "bg-transparent p-0 border-none"
                 )}
               >

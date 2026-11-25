@@ -3,6 +3,7 @@
 import * as React from "react";
 import { Button } from "@/components/base/button";
 import { IconButton } from "@/components/base/icon-button";
+import { Label } from "@/components/base/label";
 import { HugeIcon } from "@/components/primitives/HugeIcon";
 import { Slider } from "@/components/primitives/slider";
 import { RelightSphere } from "@/components/cinema-studio/media/RelightSphere";
@@ -118,12 +119,12 @@ export function RelightPanel({
       aria-label="Relight lighting editor"
       data-slot="relight-panel"
       className={cn(
-        "flex flex-col h-full w-full sm:w-[320px] rounded-2xl bg-omni-bg border border-border-subtle overflow-hidden",
+        "flex flex-col h-full ds-edit-sidebar-rail rounded-comfortable bg-omni-bg border border-border-subtle overflow-hidden",
         className
       )}
     >
       {/* Header */}
-      <header className="flex items-center justify-between gap-2 px-3 py-2.5 border-b border-border-subtle shrink-0">
+      <header className="flex items-center justify-between gap-2 px-4 py-3 border-b border-border-subtle shrink-0">
         <div className="flex items-center gap-2 min-w-0">
           <IconButton
             type="button"
@@ -135,7 +136,7 @@ export function RelightPanel({
             <HugeIcon name="arrow-left-01" size="sm" />
           </IconButton>
 
-          <h2 className="ds-text-caption-l font-semibold text-text-primary truncate">
+          <h2 className="ds-type-caption-label text-text-primary truncate">
             Relight
           </h2>
         </div>
@@ -170,9 +171,7 @@ export function RelightPanel({
         {/* Light Type: Soft vs Hard */}
         <div className="flex flex-col gap-1.5">
           <div className="flex items-center justify-between px-0.5">
-            <span className="ds-text-caption-s font-semibold uppercase tracking-wide text-text-secondary">
-              Light Type
-            </span>
+            <Label as="span">Light Type</Label>
             {!isDefault && (
               <Button
                 type="button"
@@ -180,6 +179,7 @@ export function RelightPanel({
                 size="xs"
                 disabled={isSubmitting}
                 onClick={handleReset}
+                className="ds-type-small"
               >
                 Reset
               </Button>
@@ -201,8 +201,8 @@ export function RelightPanel({
                   onClick={() => setSettings((prev) => ({ ...prev, light_type: opt.value }))}
                   className="w-full h-auto py-2 px-2.5 flex-col items-start gap-0.5 text-left"
                 >
-                  <span className="ds-text-caption-m font-semibold">{opt.label}</span>
-                  <span className={cn("ds-text-caption-s", active ? "opacity-70" : "text-text-secondary")}>
+                  <span className="ds-type-caption-label">{opt.label}</span>
+                  <span className={cn("ds-type-small", active ? "opacity-70" : "text-text-secondary")}>
                     {opt.hint}
                   </span>
                 </Button>
@@ -214,18 +214,16 @@ export function RelightPanel({
         {/* Light Color Swatches + Custom Color Picker (strict 6-digit #RRGGBB) */}
         <div className="flex flex-col gap-1.5" data-slot="relight-color-picker">
           <div className="flex items-center justify-between px-0.5">
-            <span className="ds-text-caption-s font-semibold uppercase tracking-wide text-text-secondary">
-              Light Color
-            </span>
+            <Label as="span">Light Color</Label>
             <span
               data-slot="relight-color-hex"
-              className="ds-text-caption-s font-mono tabular-nums text-text-primary"
+              className="ds-type-small font-mono tabular-nums text-text-primary"
             >
               {settings.color}
             </span>
           </div>
 
-          <div className="flex flex-wrap items-center gap-1.5 p-2 rounded-xl bg-surface-card border border-border-subtle">
+          <div className="flex flex-wrap items-center gap-1.5 p-2 rounded-comfortable bg-surface-card border border-border-subtle">
             {RELIGHT_COLOR_SWATCHES.map((swatch) => {
               const active = settings.color === swatch.hex;
               return (
@@ -254,7 +252,7 @@ export function RelightPanel({
               disabled={isSubmitting}
               onClick={() => colorInputRef.current?.click()}
               aria-label="Pick custom light color"
-              className="ml-auto"
+              className="ml-auto ds-type-small"
             >
               Custom
             </Button>
@@ -361,7 +359,7 @@ export function RelightPanel({
           variant="cta-lg"
           disabled={isBusy}
           onClick={handleSubmit}
-          className="w-full"
+          className="w-full h-9 ds-type-button"
         >
           {isBusy ? (
             <span>{isSubmitting ? "Starting…" : "Processing…"}</span>

@@ -1122,3 +1122,120 @@ describe("SharedGalleryGrid - multi-select & date-group tri-state checkbox", () 
     expect(uploadCard?.querySelector('[data-slot="card-selected-outline"]')).toBeNull();
   });
 });
+
+describe("SharedGalleryGrid - aspect ratio regression invariants", () => {
+  afterEach(() => {
+    cleanup();
+  });
+
+  it("reflows default MediaCard when MediaRenderer img loads true natural dimensions", async () => {
+    const url = "https://example.com/default-card-reflow.png";
+    const { container } = render(
+      <SharedGalleryGrid
+        items={[{ id: "img-default", url, status: "completed" }]}
+        defaultContainerWidth={1200}
+        gridSize="md"
+      />
+    );
+
+    const img = container.querySelector("img");
+    await act(async () => {
+      Object.defineProperty(img, "complete", { configurable: true, value: true });
+      Object.defineProperty(img, "naturalWidth", { configurable: true, value: 1920 });
+      Object.defineProperty(img, "naturalHeight", { configurable: true, value: 1080 });
+      fireEvent.load(img);
+    });
+
+    await waitFor(() => {
+      const slot = container.querySelector('[data-gallery-card="true"]');
+      expect(parseFloat(slot.style.width)).toBe(Math.round(280 * (16 / 9)));
+    });
+  });
+
+  it("reflows when item carries both image.url and image.generatedImage.url (URL ladder unity)", async () => {
+    const item = {
+      id: "img-nested-url",
+      status: "completed",
+      image: {
+        url: "https://example.com/nested-thumb.png",
+        generatedImage: { url: "https://example.com/nested-full.png" },
+      },
+    };
+
+    function MediaViewAdapter({ item: m, width, height }) {
+      return <MediaView item={m?.raw || m} status="completed" style={{ width, height }} />;
+    }
+
+    const { container } = render(
+      <SharedGalleryGrid
+        items={[item]}
+        CardComponent={MediaViewAdapter}
+        defaultContainerWidth={1200}
+        gridSize="md"
+      />
+    );
+
+    const img = container.querySelector("img");
+    expect(img.getAttribute("src")).toBe("https://example.com/nested-full.png");
+    await act(async () => {
+      Object.defineProperty(img, "complete", { configurable: true, value: true });
+      Object.defineProperty(img, "naturalWidth", { configurable: true, value: 1920 });
+      Object.defineProperty(img, "naturalHeight", { configurable: true, value: 1080 });
+      fireEvent.load(img);
+    });
+
+    await waitFor(() => {
+      const slot = container.querySelector('[data-gallery-card="true"]');
+      expect(parseFloat(slot.style.width)).toBe(Math.round(280 * (16 / 9)));
+    });
+  });
+
+  it("handles 'auto' with nested dims, '9x16' strings, character details, and signed URL token refreshes", () => {
+    const signedV1 = "https://storage.supabase.co/storage/v1/object/sign/media/grid-signed.png?token=old";
+    const signedV2 = "https://storage.supabase.co/storage/v1/object/sign/media/grid-signed.png?token=new";
+    setCachedImageDimensions(signedV1, 736, 1308);
+
+    const { container } = render(
+      <SharedGalleryGrid
+        workflow={{ id: "wf-char", workflow_type: "CHARACTER" }}
+        items={[
+          {
+            id: "auto-nested",
+            url: "https://example.com/auto-nested.png",
+            status: "completed",
+            aspectRatio: "auto",
+            image: { dimensions: { width: 736, height: 1308 } },
+          },
+          {
+            id: "x-ratio",
+            url: "https://example.com/x-ratio.png",
+            status: "completed",
+            aspectRatio: "9x16",
+          },
+          {
+            id: "char-detail",
+            url: "https://example.com/char-detail.png",
+            status: "completed",
+            role: "detail",
+          },
+          {
+            id: "signed-refresh",
+            url: signedV2,
+            status: "completed",
+          },
+        ]}
+        defaultContainerWidth={1200}
+        gridSize="md"
+      />
+    );
+
+    const slots = Array.from(container.querySelectorAll('[data-gallery-card="true"]'));
+    expect(slots).toHaveLength(4);
+
+    const ratios = slots.map((s) => parseFloat(s.style.width) / parseFloat(s.style.height));
+    expect(ratios[0]).toBeCloseTo(736 / 1308, 1);
+    expect(ratios[1]).toBeCloseTo(9 / 16, 1);
+    expect(ratios[2]).toBeCloseTo(3 / 4, 1); // detail falls back to 3:4, NOT 16:9 sheet
+    expect(ratios[3]).toBeCloseTo(736 / 1308, 1);
+  });
+});

@@ -7,7 +7,7 @@ export default function AppPage({ params }) {
     const slug = resolvedParams.slug;
 
     return (
-        <div className="flex h-full items-center justify-center text-white/40 text-sm">
+        <div className="flex h-full items-center justify-center text-white/40 ds-type-small">
             App &quot;{slug}&quot; not found.
         </div>
     );

@@ -31,7 +31,7 @@ describe("WorkflowTypeBadge", () => {
       const badge = screen.getByTitle(c.label);
       expect(badge.getAttribute("data-workflow-type")).toBe(c.type);
       expect(badge.className).toContain("size-6");
-      expect(badge.className).toContain("rounded-control");
+      expect(badge.className).toContain("rounded-sharp");
       expect(badge.className).toContain("bg-white");
       expect(badge.className).toContain("text-black");
       const icon = container.querySelector('[data-icon-provider="hugeicons"]');

@@ -191,8 +191,28 @@ export function toMediaItem(raw, context = {}) {
   const error = raw.error ?? raw.error_message ?? null;
   const status = normalizeMediaStatus(rawStatus, error, url);
 
-  const w = raw.width ?? raw.dimensions?.width ?? raw.params?.width ?? raw.meta_data?.width ?? raw.asset?.meta_data?.width ?? null;
-  const h = raw.height ?? raw.dimensions?.height ?? raw.params?.height ?? raw.meta_data?.height ?? raw.asset?.meta_data?.height ?? null;
+  const w =
+    raw.width ??
+    raw.dimensions?.width ??
+    raw.image?.dimensions?.width ??
+    raw.video?.dimensions?.width ??
+    raw.image?.generatedImage?.width ??
+    raw.video?.generatedVideo?.width ??
+    raw.params?.width ??
+    raw.meta_data?.width ??
+    raw.asset?.meta_data?.width ??
+    null;
+  const h =
+    raw.height ??
+    raw.dimensions?.height ??
+    raw.image?.dimensions?.height ??
+    raw.video?.dimensions?.height ??
+    raw.image?.generatedImage?.height ??
+    raw.video?.generatedVideo?.height ??
+    raw.params?.height ??
+    raw.meta_data?.height ??
+    raw.asset?.meta_data?.height ??
+    null;
   const width = typeof w === "number" && !isNaN(w) && w > 0 ? w : (Number(w) || null);
   const height = typeof h === "number" && !isNaN(h) && h > 0 ? h : (Number(h) || null);
 

@@ -43,7 +43,7 @@ export function ReferenceButton({
       onDrop={onDrop}
       className={cn(
         "group relative shrink-0",
-        "w-[50px] h-[50px] rounded-xl",
+        "w-[50px] h-[50px] rounded-subtle",
         "flex items-center justify-center",
         "bg-white-5 border border-border-subtle",
         "transition-all duration-200 ease-out",
@@ -60,8 +60,8 @@ export function ReferenceButton({
         <span
           className={cn(
             "pointer-events-none select-none",
-            "ds-text-caption-m text-text-secondary",
-            "tracking-[0.01em] whitespace-nowrap",
+            "ds-type-small text-text-secondary",
+            "whitespace-nowrap",
             "transition-all duration-200 ease-out",
             HoverContent
               ? "absolute group-hover:-translate-y-2 group-hover:opacity-0"
@@ -143,7 +143,7 @@ export function ViewReference({
       onMouseLeave={() => setIsHovered(false)}
       onClick={onClick}
       className={cn(
-        "group relative shrink-0 size-[50px] rounded-2xl [corner-shape:squircle] border-2 border-[color:var(--border-heavy)] [--rim:2px]",
+        "group relative shrink-0 size-[50px] rounded-subtle border-2 border-[color:var(--border-heavy)]",
         onClick && "cursor-pointer",
         className
       )}
@@ -152,7 +152,7 @@ export function ViewReference({
         <video
           src={src}
           aria-label={tooltipText}
-          className="block size-full object-cover overflow-hidden rounded-[calc(16px-var(--rim,0px))] [corner-shape:squircle] select-none pointer-events-none"
+          className="block size-full object-cover overflow-hidden rounded-sharp select-none pointer-events-none"
           autoPlay
           loop
           muted
@@ -163,7 +163,7 @@ export function ViewReference({
           src={src}
           alt={tooltipText}
           decoding="async"
-          className="block size-full object-cover overflow-hidden rounded-[calc(16px-var(--rim,0px))] [corner-shape:squircle] select-none pointer-events-none"
+          className="block size-full object-cover overflow-hidden rounded-sharp select-none pointer-events-none"
         />
       )}
 
@@ -175,7 +175,7 @@ export function ViewReference({
           e.stopPropagation();
           onRemove?.();
         }}
-        className="absolute -right-2 -top-[7px] grid size-5 cursor-pointer place-items-center rounded-full surface-glass bg-surface-menu-glass text-icon-primary hover:bg-surface-tonal-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-heavy transition-colors duration-200 z-10"
+        className="absolute -right-2 -top-[7px] grid size-5 cursor-pointer place-items-center rounded-subtle surface-glass bg-surface-menu-glass text-icon-primary hover:bg-surface-tonal-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-heavy transition-colors duration-200 z-10"
       >
         <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18" aria-hidden="true">
           <path fillRule="evenodd" clipRule="evenodd" d={REMOVE_ICON_PATH} />
@@ -192,11 +192,11 @@ export function ViewReference({
             transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
             className="absolute bottom-[calc(100%+12px)] left-1/2 -translate-x-1/2 z-[100] pointer-events-none flex flex-col items-center"
           >
-            <div className="surface-glass bg-surface-menu-glass rounded-xl p-1 overflow-hidden flex items-center justify-center">
+            <div className="surface-glass bg-surface-menu-glass rounded-comfortable p-1 overflow-hidden flex items-center justify-center">
               {isVideo ? (
                 <video
                   src={src}
-                  className="max-w-[200px] max-h-[280px] w-auto h-auto rounded-lg object-contain block"
+                  className="max-w-[200px] max-h-[280px] w-auto h-auto rounded-subtle object-contain block"
                   autoPlay
                   loop
                   muted
@@ -206,7 +206,7 @@ export function ViewReference({
                 <img
                   src={src}
                   alt=""
-                  className="max-w-[200px] max-h-[280px] w-auto h-auto rounded-lg object-contain block select-none pointer-events-none"
+                  className="max-w-[200px] max-h-[280px] w-auto h-auto rounded-subtle object-contain block select-none pointer-events-none"
                 />
               )}
             </div>

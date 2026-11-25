@@ -577,7 +577,7 @@ export function ImportMediaPopover({
       }}
       className={cn(
         !isPanel && "fixed bottom-24 left-1/2 -translate-x-1/2 z-50",
-        "flex flex-row gap-2 overflow-hidden surface-glass bg-surface-menu-glass rounded-xl p-1.5 text-text-primary font-sans antialiased"
+        "flex flex-row gap-2 overflow-hidden surface-glass bg-surface-menu-glass rounded-comfortable p-1.5 text-text-primary font-sans antialiased"
       )}
     >
       {/* Hidden file input */}
@@ -611,16 +611,17 @@ export function ImportMediaPopover({
                       setNavZone("sidebar");
                     }}
                     className={cn(
-                      "w-full !justify-start !h-8.5 ds-text-caption-m cursor-pointer group px-2.5 rounded-lg flex items-center gap-2.5 transition-colors",
-                      isActive ? "bg-surface-tonal-hover hover:bg-surface-tonal-hover text-text-primary font-medium" : "text-text-secondary hover:bg-surface-tonal hover:text-text-primary font-normal",
+                      "w-full !justify-start !h-8.5 cursor-pointer group px-2.5 rounded-subtle flex items-center gap-2.5 transition-colors",
+                      isActive ? "bg-surface-tonal-hover hover:bg-surface-tonal-hover text-text-primary ds-type-caption-label" : "text-text-secondary hover:bg-surface-tonal hover:text-text-primary ds-type-small",
                       isHighlighted && "ring-1 ring-inset ring-border-focus bg-surface-tonal-hover"
                     )}
                   >
                     <HugeIcon
                       name={cat.icon}
-                      className={cn("text-base shrink-0 transition-colors leading-none", isActive ? "text-icon-primary" : "text-icon-secondary group-hover:text-icon-primary")}
+                      size="md"
+                      className={cn("shrink-0 transition-colors", isActive ? "text-icon-primary" : "text-icon-secondary group-hover:text-icon-primary")}
                     />
-                    <span className="truncate leading-none">{cat.label}</span>
+                    <span className="truncate">{cat.label}</span>
                   </Button>
                 );
               })}
@@ -633,13 +634,14 @@ export function ImportMediaPopover({
               variant="ghost"
               disabled={isUploading}
               onClick={() => fileInputRef.current?.click()}
-              className="mt-auto w-full !justify-start !h-8.5 ds-text-caption-m font-normal gap-2.5 cursor-pointer px-2.5 rounded-lg flex items-center text-text-secondary hover:bg-surface-tonal hover:text-text-primary"
+              className="mt-auto w-full !justify-start !h-8.5 ds-type-small gap-2.5 cursor-pointer px-2.5 rounded-subtle flex items-center text-text-secondary hover:bg-surface-tonal hover:text-text-primary"
             >
               <HugeIcon
                 name={isUploading ? "loading-03" : "upload-04"}
-                className={cn("text-base shrink-0 leading-none", isUploading && "animate-spin text-text-disabled")}
+                size="md"
+                className={cn("shrink-0", isUploading && "animate-spin text-text-disabled")}
               />
-              <span className="truncate leading-none">{isUploading ? "Uploading..." : "Upload media"}</span>
+              <span className="truncate">{isUploading ? "Uploading..." : "Upload media"}</span>
             </Button>
           )}
         </div>
@@ -660,7 +662,7 @@ export function ImportMediaPopover({
             placeholder="Search assets"
             aria-label="Search assets"
             containerClassName="flex-1 min-w-0"
-            className="!h-8 px-2.5 rounded-lg bg-surface-card ds-text-caption-m"
+            className="!h-8 px-2.5 rounded-subtle bg-surface-card ds-type-small"
           />
 
           {/* Close Button */}
@@ -669,9 +671,9 @@ export function ImportMediaPopover({
             onClick={() => onOpenChange?.(false)}
             title="Close"
             aria-label="Close"
-            className="!size-8 rounded-lg shrink-0"
+            className="!size-8 rounded-subtle shrink-0"
           >
-            <HugeIcon name="cancel-01" className="text-base" />
+            <HugeIcon name="cancel-01" size="md" />
           </IconButton>
         </header>
 

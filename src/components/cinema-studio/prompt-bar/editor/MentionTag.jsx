@@ -17,10 +17,10 @@ export function MentionTag({ imageUrl, imageIndex: _imageIndex, imageName, onCli
       data-feature-chip={onClick ? "true" : undefined}
       className="cursor-pointer group select-none inline-block mx-[2px] transition-all"
     >
-      <span className="inline-flex align-middle items-center gap-1 rounded-md bg-surface-tonal overflow-hidden border border-border-subtle px-0.5 group-hover:border-border-heavy group-hover:bg-surface-tonal-hover transition-all">
+      <span className="inline-flex align-middle items-center gap-1 rounded-sharp bg-surface-tonal overflow-hidden border border-border-subtle px-0.5 group-hover:border-border-heavy group-hover:bg-surface-tonal-hover transition-all">
         
         {/* Thumbnail */}
-        <figure className="relative overflow-hidden bg-white-5 size-[18px] flex-shrink-0 rounded">
+        <figure className="relative overflow-hidden bg-white-5 size-[18px] flex-shrink-0 rounded-sharp">
           {imageUrl ? (
             <img
               src={imageUrl}
@@ -43,7 +43,7 @@ export function MentionTag({ imageUrl, imageIndex: _imageIndex, imageName, onCli
         </figure>
 
         {/* Label */}
-        <span className="truncate max-w-[80px] ds-text-caption-m font-medium text-text-primary pr-1 leading-none">
+        <span className="truncate max-w-[80px] ds-type-micro-tag text-text-primary pr-1">
           {imageName}
         </span>
 

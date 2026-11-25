@@ -1,11 +1,21 @@
 import { cn } from "@/shared/lib/utils";
 
 export const HUGE_ICON_SIZES = {
+  "2xs": "ds-icon-2xs",
   xs: "ds-icon-xs",
   sm: "ds-icon-sm",
   md: "ds-icon-md",
   lg: "ds-icon-lg",
   xl: "ds-icon-xl",
+  "2xl": "ds-icon-2xl",
+  "3xl": "ds-icon-3xl",
+};
+
+export const HUGE_ICON_WEIGHTS = {
+  light: "ds-icon-weight-light",
+  regular: "ds-icon-weight-regular",
+  medium: "ds-icon-weight-medium",
+  bold: "ds-icon-weight-bold",
 };
 
 const ALLOWED_VARIANTS = new Set(["stroke", "solid", "duotone", "twotone", "bulk"]);
@@ -18,16 +28,18 @@ const FILLED_SVG_PATHS = {
 
 /**
  * HugeIcon — Hugeicons icon-font primitive (Stroke Rounded by default).
- * Token-aligned sizing API (`xs`..`xl` + parent `--ds-icon-size` inheritance)
+ * Token-aligned sizing (`2xs`..`3xl` + parent `--ds-icon-size` inheritance) and
+ * weight (`light` | `regular` | `medium` | `bold`) backed by `src/styles/tokens/icons.css`,
  * with zero npm dependencies via the official Hugeicons CDN stylesheet in `app/layout.js`.
  * Pass `filled` for solid active states (e.g. liked `favourite` heart).
  *
- * Example: `<HugeIcon name="home-03" size="sm" />`
+ * Example: `<HugeIcon name="home-03" size="sm" weight="medium" />`
  */
 export const HugeIcon = ({
   iconName,
   name,
   size,
+  weight,
   variant = "stroke",
   filled = false,
   className,
@@ -37,6 +49,7 @@ export const HugeIcon = ({
   const normalizedName = rawName.replace(/^hgi-/, "");
   const safeVariant = ALLOWED_VARIANTS.has(variant) ? variant : "stroke";
   const sizeClass = size ? HUGE_ICON_SIZES[size] : undefined;
+  const weightClass = weight ? HUGE_ICON_WEIGHTS[weight] : undefined;
   const filledPath = filled ? FILLED_SVG_PATHS[normalizedName] : null;
 
   return (
@@ -46,6 +59,7 @@ export const HugeIcon = ({
       data-icon-provider="hugeicons"
       data-icon-name={normalizedName || undefined}
       data-size={sizeClass ? size : undefined}
+      data-weight={weightClass ? weight : undefined}
       data-filled={filledPath ? "true" : undefined}
       className={cn(
         "huge-icon notranslate relative select-none align-middle",
@@ -53,6 +67,7 @@ export const HugeIcon = ({
         !filledPath && `hgi-${safeVariant}`,
         !filledPath && normalizedName && `hgi-${normalizedName}`,
         sizeClass,
+        weightClass,
         className
       )}
       {...props}

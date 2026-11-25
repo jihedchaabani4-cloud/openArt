@@ -53,4 +53,32 @@ describe("Textarea component", () => {
     const textarea = screen.getByPlaceholderText("Custom notes...");
     expect(textarea.className).toContain("personality-textarea");
   });
+
+  it("renders outline variant using canonical Label primitive and muted labelExtra", () => {
+    render(
+      <Textarea
+        id="prompt-field"
+        variant="outline"
+        label="Prompt"
+        labelExtra="12/200"
+        placeholder="Describe background..."
+      />
+    );
+
+    const textarea = screen.getByLabelText("Prompt");
+    expect(textarea.getAttribute("id")).toBe("prompt-field");
+    expect(textarea.className).toContain("ds-type-small");
+
+    const labelEl = screen.getByText("Prompt");
+    expect(labelEl.tagName).toBe("LABEL");
+    expect(labelEl.getAttribute("for")).toBe("prompt-field");
+    expect(labelEl.getAttribute("data-slot")).toBe("label");
+    expect(labelEl.className).toContain("ds-label");
+
+    const extraEl = screen.getByText("12/200");
+    expect(extraEl.tagName).toBe("SPAN");
+    expect(extraEl.getAttribute("data-slot")).toBe("label");
+    expect(extraEl.className).toContain("ds-label");
+    expect(extraEl.className).toContain("tabular-nums");
+  });
 });

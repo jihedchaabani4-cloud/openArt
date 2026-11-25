@@ -20,18 +20,18 @@ export function NavbarTitle({
 }) {
   return (
     <div className={cn("flex items-center gap-2 min-w-0 select-none", className)}>
-      <span className="ds-text-caption-l font-semibold tracking-tight text-text-primary truncate">
+      <span className="ds-type-caption-label text-text-primary truncate">
         {children}
       </span>
 
       {badge && (
-        <span className="inline-flex items-center px-2 py-0.5 rounded-full ds-text-caption-s bg-surface-tonal text-text-body-muted border border-border-subtle">
+        <span className="inline-flex items-center px-2 py-0.5 rounded-sharp ds-type-micro-tag bg-surface-tonal text-text-body-muted border border-border-subtle">
           {badge}
         </span>
       )}
 
       {subtitle && (
-        <span className="ds-text-caption-m text-text-secondary truncate hidden sm:inline">
+        <span className="ds-type-small text-text-secondary truncate hidden sm:inline">
           {subtitle}
         </span>
       )}

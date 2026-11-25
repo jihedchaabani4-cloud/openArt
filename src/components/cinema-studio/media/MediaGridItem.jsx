@@ -4,7 +4,7 @@ import { TrashMediaGridCard } from "./TrashMediaGridCard";
 import { StudioMediaGridCard } from "./StudioMediaGridCard";
 
 // Canonical design tokens enforced across child cards:
-// - Corner radius geometry: rounded-xxxs
+// - Corner radius geometry: rounded-comfortable
 // - Action controls: ButtonGroup variant="pill"
 
 export const MediaGridItem = React.memo(function MediaGridItem(props) {

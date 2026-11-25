@@ -137,7 +137,7 @@ describe("12 Base UI Primitives & Official Variants Contract Suite", () => {
         </PillTabs>
       );
       const list = screen.getByRole("tablist");
-      expect(list.className).toContain("rounded-full");
+      expect(list.className).toContain("rounded-subtle");
       const pillTab = screen.getByRole("tab", { name: "Pill Tab" });
       expect(pillTab.className).toContain("ds-tab-pill");
       const compTab = screen.getByRole("tab", { name: "Composer Tab" });

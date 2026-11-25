@@ -158,10 +158,10 @@ export default function CharactersPage({ params }) {
                     >
                         {visibleSheets.length === 0 ? (
                             <div className="w-full flex flex-col items-center justify-center py-28 text-center">
-                                <p className="text-[18px] text-white/35 font-normal tracking-wide">
+                                <p className="ds-type-feature-title text-white/35">
                                     No characters yet
                                 </p>
-                                <p className="text-[13px] text-white/20 mt-1">
+                                <p className="ds-type-small text-white/20 mt-1">
                                     Click &quot;New character&quot; below to create your first character.
                                 </p>
                             </div>
@@ -177,7 +177,7 @@ export default function CharactersPage({ params }) {
                                     selectionEnabled={true}
                                 />
                                 {hasMore && (
-                                    <div className="flex justify-center pt-2 text-sm text-white/45">
+                                    <div className="flex justify-center pt-2 ds-type-small text-white/45">
                                         Scroll down to load more
                                     </div>
                                 )}
@@ -192,10 +192,10 @@ export default function CharactersPage({ params }) {
                         <Button
                             type="button"
                             onClick={() => router.push(`/cinema-studio/${projectId}/characters/new`)}
-                            className="flex items-center gap-2 px-6 py-4 h-auto rounded-full bg-surface-card hover:bg-surface-elevated text-white transition-all active:scale-95 border border-white/10 shadow-none cursor-pointer"
+                            className="flex items-center gap-2 px-6 py-4 h-auto rounded-subtle bg-surface-card hover:bg-surface-elevated text-white transition-all active:scale-95 border border-white/10 shadow-none cursor-pointer"
                         >
                             <HugeIcon name="add-01" />
-                            <span className="font-medium text-[15px]">New character</span>
+                            <span className="ds-type-button">New character</span>
                         </Button>
                     </div>
                 )}

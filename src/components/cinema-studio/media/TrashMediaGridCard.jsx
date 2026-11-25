@@ -161,7 +161,7 @@ export const TrashMediaGridCard = React.memo(function TrashMediaGridCard({
             <div className="transition-opacity duration-200 pointer-events-auto max-w-[calc(100%-40px)] opacity-0 group-hover:opacity-100">
               <span
                 title={displayName}
-                className="ds-text-caption-m font-medium text-white/90 truncate select-none block"
+                className="ds-type-small text-white/90 truncate select-none block"
               >
                 {displayName}
               </span>

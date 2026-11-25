@@ -206,7 +206,7 @@ describe("CollectionMediaGridItem", () => {
     expect(screen.getByText('Are you sure you want to delete collection "Landscapes Fail"?')).toBeDefined();
   });
 
-  it("renders rounded-xl folder card & selected outline, bottom progressive blur, larger title, and direct item counter", () => {
+  it("renders rounded-comfortable folder card & selected outline, bottom progressive blur, larger title, and direct item counter", () => {
     const { container } = render(
       <CollectionMediaGridItem
         collection={{ id: "folder-style-1", name: "Styled Folder" }}
@@ -219,13 +219,13 @@ describe("CollectionMediaGridItem", () => {
     );
 
     const card = container.firstChild;
-    expect(card.className).toContain("rounded-xl");
+    expect(card.className).toContain("rounded-comfortable");
     expect(card.className).not.toContain("rounded-xxxs");
     expect(container.querySelector("img")?.getAttribute("draggable")).toBe("false");
 
     const selectedOutline = container.querySelector('[data-slot="card-selected-outline"]');
     expect(selectedOutline).not.toBeNull();
-    expect(selectedOutline.className).toContain("rounded-xl");
+    expect(selectedOutline.className).toContain("rounded-comfortable");
     expect(selectedOutline.className).not.toContain("rounded-xxxs");
 
     const blurOverlay = container.querySelector('[data-slot="folder-bottom-blur"]');
@@ -255,7 +255,7 @@ describe("CollectionMediaGridItem", () => {
     );
 
     const card = container.firstChild;
-    expect(card.className).toContain("rounded-xl");
+    expect(card.className).toContain("rounded-comfortable");
     expect(card.className).toContain("bg-surface-card");
 
     const fallback = container.querySelector('[data-slot="folder-empty-fallback"]');

@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { Label } from "@/components/base/label";
 import { cn } from "@/shared/lib/utils";
 
 const Textarea = React.forwardRef(({
@@ -54,12 +55,12 @@ const Textarea = React.forwardRef(({
     <div 
       className={cn(
         isOutline
-          ? "ds-input-outline relative w-full rounded-xl p-3"
+          ? "ds-input-outline relative w-full rounded-subtle p-3"
           : isPersonality
-          ? "personality-textarea-wrapper relative w-full rounded-md bg-surface-container p-3.5 sm:p-4 transition-all border border-outline-variant hover:border-outline focus-within:border-primary focus-within:bg-surface-container-high"
+          ? "personality-textarea-wrapper relative w-full rounded-subtle bg-surface-container p-3.5 sm:p-4 transition-all border border-outline-variant hover:border-outline focus-within:border-primary focus-within:bg-surface-container-high"
           : isBlur
-          ? "relative w-full rounded-sm p-3 transition-all border border-outline-variant bg-surface-container hover:border-outline focus-within:border-primary"
-          : "relative w-full rounded-md bg-surface-container p-4 transition-all border border-outline-variant hover:border-outline focus-within:border-primary focus-within:bg-surface-container-high"
+          ? "relative w-full rounded-subtle p-3 transition-all border border-outline-variant bg-surface-container hover:border-outline focus-within:border-primary"
+          : "relative w-full rounded-subtle bg-surface-container p-4 transition-all border border-outline-variant hover:border-outline focus-within:border-primary focus-within:bg-surface-container-high"
       )}
       style={undefined}
     >
@@ -71,8 +72,8 @@ const Textarea = React.forwardRef(({
         placeholder={placeholder}
         className={cn(
           isOutline
-            ? "w-full bg-transparent ds-text-caption-m text-text-primary placeholder:text-text-secondary resize-none outline-none custom-scrollbar leading-relaxed font-sans disabled:opacity-50"
-            : "w-full bg-transparent text-xs sm:text-sm text-on-surface placeholder:text-on-surface-subtle resize-none outline-none custom-scrollbar leading-relaxed font-sans transition-all duration-150 ease-out",
+            ? "w-full bg-transparent ds-type-small text-text-primary placeholder:text-text-secondary resize-none outline-none custom-scrollbar font-sans disabled:opacity-50"
+            : "w-full bg-transparent ds-type-small text-on-surface placeholder:text-on-surface-subtle resize-none outline-none custom-scrollbar transition-all duration-150 ease-out",
           isPersonality && "personality-textarea text-on-surface",
           isOverflowing ? "overflow-y-auto" : "overflow-hidden",
           className
@@ -117,33 +118,22 @@ const Textarea = React.forwardRef(({
     return (
       <div className={cn("flex flex-col gap-1.5 w-full", containerClassName)}>
         {label && (
-          <label
-            htmlFor={props.id}
-            className={cn(
-              "flex items-center justify-between",
-              isOutline
-                ? "ds-text-caption-m font-normal text-text-secondary"
-                : "text-xs font-semibold text-on-surface"
-            )}
-          >
-            <span>{label}</span>
+          <div className="flex items-center justify-between gap-2">
+            <Label htmlFor={props.id} disabled={props.disabled}>
+              {label}
+            </Label>
             {labelExtra && (
-              <span
-                className={cn(
-                  "font-normal tabular-nums",
-                  isOutline ? "ds-text-caption-s text-text-secondary" : "text-on-surface-subtle"
-                )}
-              >
+              <Label as="span" disabled={props.disabled} className="tabular-nums">
                 {labelExtra}
-              </span>
+              </Label>
             )}
-          </label>
+          </div>
         )}
 
         {textareaElement}
 
         {hint && (
-          <p className="text-2xs text-on-surface-subtle leading-relaxed pt-0.5">
+          <p className="ds-type-micro-tag text-on-surface-subtle pt-0.5">
             {hint}
           </p>
         )}

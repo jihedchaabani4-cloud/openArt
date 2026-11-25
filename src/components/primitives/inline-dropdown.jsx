@@ -32,7 +32,7 @@ export function InlineDropdown({
       data-slot="inline-dropdown"
       data-state={isOpen ? "open" : "closed"}
       className={cn(
-        "w-full rounded-xl border border-border-menu-subtle bg-surface-card overflow-hidden transition-colors",
+        "w-full rounded-comfortable border border-border-menu-subtle bg-surface-card overflow-hidden transition-colors",
         className
       )}
       {...props}
@@ -42,7 +42,7 @@ export function InlineDropdown({
         className={cn(
           "flex items-center justify-between gap-1.5 w-full min-h-[36px] px-2 py-1 transition-colors",
           isOpen
-            ? "rounded-xl bg-surface-tonal hover:bg-surface-tonal-hover shadow-xs"
+            ? "rounded-comfortable bg-surface-tonal hover:bg-surface-tonal-hover shadow-xs"
             : "hover:bg-surface-tonal-hover",
           headerClassName
         )}
@@ -93,8 +93,8 @@ export const InlineDropdownItem = React.forwardRef(function InlineDropdownItem(
       data-slot="inline-dropdown-item"
       data-active={active ? "true" : undefined}
       className={cn(
-        "flex items-center gap-2 w-full min-h-[32px] px-2 py-1.5 rounded-lg text-left cursor-pointer transition-colors",
-        "font-sans ds-text-caption-l font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-heavy",
+        "flex items-center gap-2 w-full min-h-[32px] px-2 py-1.5 rounded-subtle text-left cursor-pointer transition-colors",
+        "ds-type-caption-label focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-heavy",
         active
           ? "bg-surface-tonal text-text-primary hover:bg-surface-tonal-hover"
           : "text-text-secondary hover:text-text-primary hover:bg-surface-tonal-hover",

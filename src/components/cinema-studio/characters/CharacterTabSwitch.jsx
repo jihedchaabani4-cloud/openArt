@@ -27,7 +27,7 @@ export function CharacterTabSwitch({
           aria-label="Body Sheet"
           className="gap-2 inline-flex items-center"
         >
-          <div className="size-6 rounded-xs overflow-hidden shrink-0 flex items-center justify-center">
+          <div className="size-6 rounded-sharp overflow-hidden shrink-0 flex items-center justify-center">
             {activeSheetSrc && !imageLoadError ? (
               <img
                 src={activeSheetSrc}
@@ -36,7 +36,7 @@ export function CharacterTabSwitch({
                 className="w-full h-full object-cover"
               />
             ) : (
-              <HugeIcon name="user-square" className="text-base" />
+              <HugeIcon name="user-square" size="md" />
             )}
           </div>
           <span>Body Sheet</span>
@@ -49,7 +49,7 @@ export function CharacterTabSwitch({
           aria-label="More Details"
           className="gap-2 inline-flex items-center"
         >
-          <div className="size-6 rounded-xs overflow-hidden shrink-0 flex items-center justify-center">
+          <div className="size-6 rounded-sharp overflow-hidden shrink-0 flex items-center justify-center">
             {firstDetailPhotoSrc ? (
               <img
                 src={firstDetailPhotoSrc}
@@ -57,7 +57,7 @@ export function CharacterTabSwitch({
                 className="w-full h-full object-cover"
               />
             ) : (
-              <HugeIcon name="user" className="text-base" />
+              <HugeIcon name="user" size="md" />
             )}
           </div>
           <span>More Details</span>

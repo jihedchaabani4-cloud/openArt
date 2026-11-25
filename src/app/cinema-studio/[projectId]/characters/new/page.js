@@ -58,12 +58,12 @@ function ArchetypeCard({ archetype, onClick, index, isGenerating, isDisabled }) 
       whileTap={!isDisabled && !isGenerating ? { scale: 0.98 } : {}}
       disabled={isDisabled || isGenerating}
       onClick={() => onClick(archetype)}
+      className="rounded-comfortable"
       style={{
         flex: "1 1 0px",
         minWidth: 0,
         height: "auto",
         padding: "1rem",
-        borderRadius: "1.5rem",
         display: "flex",
         alignItems: "center",
         gap: "0.75rem",
@@ -88,17 +88,17 @@ function ArchetypeCard({ archetype, onClick, index, isGenerating, isDisabled }) 
         src={archetype.image}
         alt={archetype.title}
         crossOrigin="anonymous"
-        className="size-[88px] shrink-0 rounded-[0.875rem] object-cover"
+        className="size-[88px] shrink-0 rounded-subtle object-cover"
       />
       <div className="flex min-w-0 flex-1 flex-col gap-1">
-        <span className="text-[0.9375rem] font-bold leading-5 text-white">
+        <span className="ds-type-caption-label text-white">
           {archetype.title}
         </span>
-        <span className="text-xs leading-[1.1rem] text-white/60">
+        <span className="ds-type-small text-white/60">
           {archetype.description}
         </span>
         {isGenerating && (
-          <ShineText className="text-[0.6875rem] font-medium pt-0.5">
+          <ShineText className="ds-type-micro-tag pt-0.5">
             Génération du prompt...
           </ShineText>
         )}
@@ -182,7 +182,7 @@ export default function NewCharacterPage() {
         <div className="w-full px-4 sm:px-8 py-8 flex flex-col gap-8 items-center justify-center min-h-[calc(100vh-240px)]">
           <AnimatePresence>
             {error && (
-              <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} className="text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-3 w-full max-w-[55rem]">
+              <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} className="ds-type-small text-red-400 bg-red-500/10 border border-red-500/20 rounded-comfortable px-4 py-3 w-full max-w-[55rem]">
                 {error}
               </motion.div>
             )}
@@ -190,15 +190,7 @@ export default function NewCharacterPage() {
 
           {/* ── Archetype Cards Grid & Centered Hero Generator ── */}
           <div className="flex flex-col items-center justify-center gap-6 text-center w-full">
-            <h1 style={{
-              textAlign: "center",
-              fontSize: "clamp(1.5rem, 2.5vw, 2rem)",
-              fontWeight: 400,
-              lineHeight: "1.6",
-              color: "rgba(255,255,255,0.55)",
-              maxWidth: "55rem",
-              margin: 0,
-            }}>
+            <h1 className="ds-type-card-title text-center text-muted-foreground max-w-4xl m-0">
               Build and reuse characters for consistent videos.<br />
               Use a sample prompt below, or create from scratch.
             </h1>

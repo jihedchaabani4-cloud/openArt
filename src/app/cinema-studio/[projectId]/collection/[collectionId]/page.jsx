@@ -304,7 +304,7 @@ export default function CollectionDetailPage({ params }) {
                     selectionEnabled={true}
                   />
                   {hasMore && (
-                    <div className="flex justify-center pt-2 text-sm text-white/45">
+                    <div className="flex justify-center pt-2 ds-type-small text-white/45">
                       Scroll down to load 30 more
                     </div>
                   )}
@@ -317,12 +317,12 @@ export default function CollectionDetailPage({ params }) {
                   exit={{ opacity: 0, scale: 1.05 }}
                   className="w-full min-h-[420px] flex flex-col items-center justify-center gap-4 text-center px-4"
                 >
-                  <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center">
-                    <HugeIcon name="folder-open" className="text-3xl text-white/40" />
+                  <div className="w-16 h-16 rounded-comfortable bg-white/5 border border-white/10 flex items-center justify-center">
+                    <HugeIcon name="folder-open" size="2xl" className="text-white/40" />
                   </div>
                   <div className="flex flex-col items-center gap-1.5 max-w-sm">
-                    <h3 className="text-lg font-medium text-white/90">This collection is empty</h3>
-                    <p className="text-sm text-white/45">
+                    <h3 className="ds-type-feature-title text-white/90">This collection is empty</h3>
+                    <p className="ds-type-small text-white/45">
                       Upload media or generate images and videos to add them to this collection.
                     </p>
                   </div>
@@ -330,9 +330,9 @@ export default function CollectionDetailPage({ params }) {
                     variant="primary"
                     onClick={() => fileInputRef.current?.click()}
                     disabled={isUploading}
-                    className="mt-2 h-9 px-4 rounded-sm gap-2 text-sm font-medium"
+                    className="mt-2 h-9 px-4 rounded-subtle gap-2 ds-type-button"
                   >
-                    <HugeIcon name="upload-04" className="text-base" />
+                    <HugeIcon name="upload-04" size="md" />
                     <span>Upload media</span>
                   </Button>
                 </motion.div>

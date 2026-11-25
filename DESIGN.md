@@ -8,7 +8,7 @@ This document defines the complete visual language, CSS/Tailwind tokens, typogra
 
 1. **Layered Translucent Dark Surfaces**: Instead of heavy solid borders everywhere, hierarchy is created by layering translucent white fills (`bg-white/5`, `bg-white/10`, `bg-white/15`, `bg-white/20`) with `backdrop-filter: blur(40px)` (`backdrop-blur-2xl`) over a matte charcoal canvas (`#1A1A1A`).
 2. **High-Contrast Primary Actions**: Primary calls-to-action and active states use pure white (`#FFFFFF` / `#FAFAFA`) with deep black/zinc text (`#000000` / `#18181B`) so the active element is unmistakable without relying on loud neon colors.
-3. **Soft Squircle Geometry**: Tactile controls use `10px` (`rounded-[10px]`) and `9999px` (`rounded-full`), media/upload slots use `16px` (`rounded-2xl`), and main content section cards use generous `28px` (`rounded-[28px]`) corners.
+3. **Strict 4-Token Corner Geometry (`src/styles/tokens/radius.css`)**: All rectangular surfaces use strictly `rounded-none` (`0px`), `rounded-sharp` (`4px` — badges, checkboxes, micro tags), `rounded-subtle` (`6px` — buttons, icon buttons, inputs, tabs, menus, rows), and `rounded-comfortable` (`8px` — cards, dialogs, popovers, upload slots, banners). `rounded-full` is reserved exclusively for true circles (avatars, switches, slider thumbs, radio dots, color swatches, status dots, circular spinners).
 4. **Dual Focus Strategy**:
    - **Workspace / Editor Surfaces**: Buttons inside main content panels use `focus-visible:ring-2 focus-visible:ring-white/70` (`rgba(255, 255, 255, 0.7)`).
    - **Toolbar / Chrome Controls**: Compact icon buttons use `focus-visible:ring-0` to avoid visual clutter during rapid mouse clicking.
@@ -55,88 +55,94 @@ This document defines the complete visual language, CSS/Tailwind tokens, typogra
 
 ---
 
-## 3. Typography System
+## 3. Typography System (2-Tier Token Architecture)
 
-- **Font Family**: `--font-geist-sans: "Geist Sans", "Inter", ui-sans-serif, system-ui, sans-serif`
-- **OpenType Stylistic Sets**: `font-variant-alternates: styleset(ss01, ss03, ss04, ss06, ss08);`
-- **Monospace Font**: `--font-geist-mono: "Geist Mono", ui-monospace, Consolas, monospace`
-- **Weights**: `--type-weight-regular: 400` · `--type-weight-medium: 500` · `--type-weight-semibold: 600` · `--type-weight-bold: 700` · `--type-weight-black: 900`
-- **Tracking**: `--type-tracking-tight: -0.075rem` · `--type-tracking-slight: -0.025rem` · `--type-tracking-heading: -0.02em` · `--type-tracking-body: -0.01em` · `--type-tracking-none: 0` · `--type-tracking-wide: 0.0125rem`
+- **Primary Sans Font Family**: `--font-sans: var(--font-inter), "Inter", var(--font-geist-sans), "Geist Sans", ui-sans-serif, system-ui, sans-serif` (`Inter` variable 100–900 loaded on `<html>` & `<body>` via `next/font/google`, supporting exact `450` weight for `micro-tag`; `Geist Sans` fallback)
+- **Monospace Font**: `--font-mono: var(--font-geist-mono), "Geist Mono", ui-monospace, Consolas, monospace`
+- **Tier 1 Source of Truth**: `src/styles/tokens/typography.css` (exact 10 canonical type tokens + `.ds-type-*` utility classes)
+- **Tier 2 Source of Truth**: `src/styles/tokens/text-roles.css` (semantic component text roles + `.ds-label*`)
+- **Strict Enforcement**: ONLY `typography.css` and `text-roles.css` define text sizing across the entire SaaS — including ALL sidebars (Edit Sidebar, Left Sidebar, Assets/Character/Element sidebars). Zero legacy aliases (`--type-size-*`, `--type-leading-*`, `.ds-text-caption-*`, `.ds-text-body-*`, `.ds-text-h-*`, `.ds-text-display`, `.ds-text-control`, `.text-h4..body-xs`), zero custom `clamp(...)` font sizes, and zero special sidebar typography rules are permitted.
 
-### 3.1 UI, Media & Body Scale (Fixed Across Viewports)
+### 3.1 Tier 1 — Exact 10-Token Typography Scale (`src/styles/tokens/typography.css`)
 
-| Class / Token | Size (`rem` / `px`) | Line Height | Weight | Tracking | Usage |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| `.ds-text-caption-s` (`--type-size-xxs`) | `0.625rem` (`10px`) | `0.875rem` (`14px`) | `500` | `0` | Micro badges, menu section headers, shortcuts, ratio tags, counters |
-| `.ds-text-caption-m` (`--type-size-xs`) | `0.75rem` (`12px`) | `1rem` (`16px`) | `400`–`600` | `0` | Unified compact studio chrome: buttons, sidebar nav & folders, menus & dropdown items, inputs, selects, pill tabs, media titles |
-| `.ds-text-control` (`--type-size-control`) | `0.8125rem` (`13px`) | `1.125rem` (`18px`) | `400` | `0` | Prompt bar editor text & placeholder (`PromptEditor.jsx`) |
-| `.ds-text-caption-l` (`--type-size-sm`) | `0.875rem` (`14px`) | `1.25rem` (`20px`) | `500` | `0` | Navbar project titles, top nav links, large marketing/auth CTAs (`cta-lg`) |
-| `.ds-text-body-s` (`--type-size-md`) | `1rem` (`16px`) | `1.5rem` (`24px`) | `400` | `-0.01em` | Standard editorial body text, dialog descriptions |
-| `.ds-text-body-m` (`--type-size-lg`) | `1.125rem` (`18px`) | `1.625rem` (`26px`) | `400` | `-0.01em` | Subtitles, lead copy |
-| `.ds-text-body-l` (`--type-size-body-l`) | `1.25rem` (`20px`) | `1.75rem` (`28px`) | `400` | `-0.01em` | Large editorial body |
+| # | Token Name | Utility Class | Size (`rem` / `px`) | Weight | Line Height | Tracking |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **01** | `display-hero` | `.ds-type-display-hero` | `3rem` (`48px`) | `400` | `1` | `-1.2px` |
+| **02** | `section-heading` | `.ds-type-section-heading` | `2.5rem` (`40px`) | `400` | `1.05` | `-1px` |
+| **03** | `sub-heading` | `.ds-type-sub-heading` | `2.25rem` (`36px`) | `400` | `1` | `-0.9px` |
+| **04** | `card-title` | `.ds-type-card-title` | `1.5rem` (`24px`) | `400` | `1` | `0` |
+| **05** | `feature-title` | `.ds-type-feature-title` | `1.25rem` (`20px`) | `400` | `1` | `0` |
+| **06** | `body` | `.ds-type-body` | `1rem` (`16px`) | `400` | `1.4` | `-0.16px` |
+| **07** | `button` | `.ds-type-button` | `0.875rem` (`14px`) | `600` | `1.25` | `0` |
+| **08** | `caption-label` | `.ds-type-caption-label` | `0.875rem` (`14px`) | `500` | `1.3` | `0.35px` |
+| **09** | `small` | `.ds-type-small` | `0.8125rem` (`13px`) | `400` | `1.3` | `-0.20px` |
+| **10** | `micro-tag` | `.ds-type-micro-tag` | `0.6875rem` (`11px`) | `450` | `1.3` | `0` |
 
-### 3.2 Icon Size Scale (`--icon-size-*`)
+Variable pattern: `--type-<name>-size`, `--type-<name>-weight`, `--type-<name>-leading`, `--type-<name>-tracking`.
 
-Icons use a single 5-step token scale calibrated to the ultra-compact unified studio typography scale. Base components set `--ds-icon-size` automatically so nested `GoogleIcon` (with no explicit `size` prop) and `<svg>` icons stay visually balanced with their paired text without per-call-site classes. Explicit `<GoogleIcon size="xs|sm|md|lg|xl" />` applies `.ds-icon-*` (`@layer utilities`) to override parent inheritance.
+### 3.2 Tier 2 — Semantic Component Text Roles (`src/styles/tokens/text-roles.css`)
 
-| Token / Utility Class | Size (`rem` / `px`) | Default Optical Size (`opsz`) | Paired Text Role & Usage |
+| Semantic Role / Class | Tier 1 Token | Color / Style | Usage |
 | :--- | :--- | :--- | :--- |
-| `--icon-size-xs` (`.ds-icon-xs`) | `0.75rem` (`12px`) | `20` | Micro badges (`10px`), checkboxes, radio dots, `xs` buttons & icon buttons (`24px`) |
-| `--icon-size-sm` (`.ds-icon-sm`) | `0.875rem` (`14px`) | `20` | Unified compact chrome: all standard buttons, icon buttons (`28px`), sidebar nav & folders (`30px`, `size-4` box, `wght 300`), menus & dropdown items (`30px`, `wght 300`, `#FFFFFF`, chevron/check `14px`), inputs, selects, pills & tabs (`12px` text) |
-| `--icon-size-md` (`.ds-icon-md`) | `1rem` (`16px`) | `20` | Media card overlay icon buttons (`.ds-icon-btn-overlay`, `32px`), `m` controls, `FolderGlyphIcon` (`16px`), standalone `GoogleIcon` fallback |
-| `--icon-size-lg` (`.ds-icon-lg`) | `1.125rem` (`18px`) | `20` | Large CTAs (`cta-lg` / `lg`, `40px`, `14px` text), `lg` icon buttons, dialog close |
-| `--icon-size-xl` (`.ds-icon-xl`) | `1.25rem` (`20px`) | `20` | Prominent standalone accent icons |
+| `<Label>` / `.ds-label` | `small` (`13px · 400 · 1.3 · -0.20px`) | `--role-label-color: var(--text-muted-fg)` (`#A1A1AA`), sentence case | Form, control, slider, and section labels (`variant="default"`) |
+| `<Label variant="caption">` / `.ds-label-caption` | `caption-label` (`14px · 500 · 1.3 · 0.35px`) | `var(--text-muted-fg)` (`#A1A1AA`) | Emphasized caption labels |
+| `<Label variant="primary">` / `.ds-label-primary` | `small` (`13px · 400 · 1.3 · -0.20px`) | `var(--text-primary)` (`#FFFFFF`) | High-emphasis inline labels |
+| `.ds-text-button` / `.ds-btn-*` | `button` (`14px · 600 · 1.25 · 0`) | Variant contract | Primary, secondary, tonal, outline, ghost, segmented, CTA buttons |
+| `.ds-text-button-sm` | `small` (`13px · 500 · 1.3 · -0.20px`) | Variant contract | Compact secondary buttons |
+| `.ds-text-nav` / `.ds-text-tab` / `.ds-nav-item` | `caption-label` (`14px · 500 · 1.3 · 0.35px`) | `var(--text-primary)` / `var(--text-secondary)` | Sidebar nav rows, inspector tabs, tool launcher rows |
+| `.ds-text-input` / `.ds-text-menu` / `.ds-input*` / `.ds-menu-item` | `small` (`13px · 400 · 1.3 · -0.20px`) | `var(--text-primary)` | Inputs, textareas, dropdown menu items, stepped slider labels/values |
+| `.ds-text-badge` / `.ds-badge*` | `micro-tag` (`11px · 450 · 1.3 · 0`) | Variant contract | Status badges, counters, compact 3-column preset chips |
+| `.ds-text-body` | `body` (`16px · 400 · 1.4 · -0.16px`) | `var(--text-body)` / `var(--text-primary)` | Standard editorial and dialog body copy |
 
-### 3.3 Component-to-Typography & Icon Default Contract (Unified Compact Higgsfield Density)
+### 3.3 Icon Size & Weight Token System (`src/styles/tokens/icons.css`)
 
-| Component / Chrome Area | Canonical Class / Token | Font Size / Leading | Weight | Default Icon Size | Control Height / Size |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **Standard Buttons** (`primary`, `secondary`, `tonal`, `filter-chip`, `ghost`, `outline`, `link`) | `.ds-btn-*` (`--type-size-xs`) | `12px` / `16px` | `500`–`600` | `14px` (`--icon-size-sm`) | `28px` (`h-7`), `px-2.5` (ghost `px-2`), `gap-1.5` (`6px`), `rounded-lg` (`8px`) |
-| **Compact Pill / Segmented Buttons** (`pill`, `segmented`) | `.ds-btn-pill`, `.ds-btn-segmented` | `12px` / `16px` | `500` | `14px` (`--icon-size-sm`) | `26px` (`pill`, `px-2.5`, `rounded-lg`) / `30px` (`segmented`) |
-| **Micro Buttons** (`xs`) | `Button size="xs"` (`--type-size-xxs`) | `10px` / `14px` | `500` | `12px` (`--icon-size-xs`) | `24px` (`h-6`) |
-| **Large CTA** (`cta-lg`, `lg` — marketing/auth only) | `.ds-btn-cta-lg` (`--type-size-sm`) | `14px` / `20px` | `600` | `18px` (`--icon-size-lg`) | `40px` (`h-10`) |
-| **Icon Buttons** (`ghost`, `tonal`, `outline`, `carousel`) | `.ds-icon-btn*` (`size="xs\|sm\|md\|lg"`) | — | — | `12px` / **`14px`** / `18px` | `24px` / **`28px`** (`rounded-lg`) / `40px` |
-| **Overlay Icon Button (Media Cards)** | `.ds-icon-btn-overlay` | — | — | `16px` (`--icon-size-md`) | `32px` (`rounded-[10px]`, transparent + `blur(16px → 80px)`) |
-| **Inputs & Search** (`.ds-input`, `.ds-input-ghost`, `.ds-input-accent`, `.ds-input-search`) | `--type-size-xs` | `12px` / `16px` | `400` | `14px` (`--icon-size-sm`, `size-3.5` SVG) | `28px` (`h-7`), `rounded-lg` (`8px`) |
-| **Prompt Bar Editor** (`PromptEditor.jsx`) | `.ds-text-control` (`--type-size-control`) | `13px` / `18px` | `400` | `14px`–`16px` | auto (`min-h-8`) |
-| **Menus & Dropdown Items** (`.ds-menu-item`) | `.ds-text-caption-m` (`--type-size-xs`) | `12px` / `16px` | `400` | `14px` (`--icon-size-sm`, `wght 300`, `size-3.5` SVG, `--icon-primary` `#FFFFFF`; chevron/check `14px`; radio dot `12px`) | `min-h: 30px`, `padding: 5px 8px`, `gap: 8px`, `rounded-lg` (panel `rounded-xl` `12px`, `p-1.5`, `gap-0.5`, `#23262A @ 75%`) |
-| **Menu Labels & Shortcuts** (`MENU_LABEL_CLASS`, `MENU_SHORTCUT_CLASS`) | `.ds-text-caption-s` (`--type-size-xxs`) | `10px` / `14px` | `600` / `500` | — | uppercase |
-| **Select Triggers & Pill Tabs** (`.ds-select-trigger`, `.ds-tab-pill`) | `--type-size-xs` | `12px` / `16px` | `500` | `14px` (`--icon-size-sm`) | `28px` (select & tab) |
-| **Sidebar Nav & Folder Rows** (`.ds-nav-item`, `LeftNavigationRail`, `FileTree`) | `.ds-nav-item` (`--type-size-xs`) | `12px` / `16px` | `500` | `14px` (`--icon-size-sm`, `size-4` box, `wght 300`; `FolderGlyphIcon` `16px`) | `30px`, `padding: 4px 8px`, `gap: 8px`, `rounded-lg` (`8px`), `border-transparent` → hover/active `bg-surface-nav-active` (`#27272A` @ 50%) + `border-border-structural` (`#27272A`) |
-| **Sidebar Section Headers & Groups** | `font-sans text-xs font-normal text-muted-foreground` | `12px` / `16px` | `400` | — | `gap-y-4` (`16px`) between sections, `gap-0.5` (`2px`) between nav items & inside `FileTree` |
-| **Top Navbar Title & Nav Links** (`NavbarTitle`, `ProjectsNavbar`) | `.ds-text-caption-l` (`--type-size-sm`) | `14px` / `20px` | `500`–`600` | `14px` chrome / `18px` brand | `28px` (`h-7` / `size-7`) action chrome |
-| **Prompt Bar Controls** (`PromptBarControlsRow`, `FlowPromptBoxSettings`, `MentionTag`, `ReferenceButton`) | `.ds-text-caption-m` / `.ds-text-caption-s` | `12px` (pills) / `10px` (ratios, labels) | `500` | `14px` segmented / `16px` card trigger | `30px` segmented / `44px` card trigger |
-| **Media Cards & Collection Titles** (`StudioMediaGridCard`, `TrashMediaGridCard`, `CollectionMediaGridItem`) | `.ds-text-caption-m` (`--type-size-xs`) | `12px` / `16px` | `500` | `16px` overlay btn / `14px` corner badge | `32px` overlay / `28px` badge |
-| **Badges & Status Pills** (`.ds-badge`, `.ds-badge-glass`, `.ds-badge-count`) | `.ds-text-caption-s` (`--type-size-xxs`) | `10px` / `14px` | `600` | `12px` (`--icon-size-xs`) | `18px`–`20px` |
-| **Dialog / Panel Titles** (`DialogTitle`) | `.ds-text-h-xxs` (`--type-size-h-xxs`) | `18px` → `20px` | `600` | `18px` close icon (`--icon-size-lg`) | — |
-| **Page Titles** (`h1`) | `.ds-text-h-xs` (`--type-size-h-xs`) | `20px` → `24px` | `600` | — | — |
+Single source of truth for icon dimensions, optical scaling (`--icon-optical-scale: 1.12`), and weights/SVG strokes. Base components set `--ds-icon-size` automatically so nested icons stay visually balanced with paired text. For explicit sizing or weight, use `<HugeIcon size="2xs|xs|sm|md|lg|xl|2xl|3xl" weight="light|regular|medium|bold" />` (never raw `text-*` or `font-bold` classes on `<HugeIcon>`).
 
-### 3.4 Responsive Heading & Display Scale (`<768px` → `≥768px` → `≥1280px`)
+| Token / Utility Class | Size (`rem` / `px`) | Usage |
+| :--- | :--- | :--- |
+| `--icon-size-2xs` (`.ds-icon-2xs`) | `0.625rem` (`10px`) | Tiny badges, video play indicator |
+| `--icon-size-xs` (`.ds-icon-xs`) | `0.75rem` (`12px`) | Badges, checkboxes, radio dots, chevrons, `xs` controls |
+| `--icon-size-sm` (`.ds-icon-sm`) | `0.875rem` (`14px`) | Standard compact buttons, inputs, menus, tabs, dropdown chevrons |
+| `--icon-size-md` (`.ds-icon-md`) | `1rem` (`16px`) | Default standalone icons, sidebar nav, toolbar & overlay icon buttons |
+| `--icon-size-lg` (`.ds-icon-lg`) | `1.25rem` (`20px`) | Large CTAs, edit sidebar tool row icons, dialog close |
+| `--icon-size-xl` (`.ds-icon-xl`) | `1.5rem` (`24px`) | Feature card icons, dropzone/upload icons, section accents |
+| `--icon-size-2xl` (`.ds-icon-2xl`) | `2rem` (`32px`) | Empty-state & dialog hero icons |
+| `--icon-size-3xl` (`.ds-icon-3xl`) | `2.5rem` (`40px`) | Large empty-state / landing hero icons |
 
-| Class / Token | Mobile → Tablet → Desktop | Line Height (Desktop) | Weight | Tracking |
-| :--- | :--- | :--- | :--- | :--- |
-| `.ds-text-h-xxs` | `18px → 20px → 20px` | `28px` (`1.75rem`) | `600` | `-0.01em` |
-| `.ds-text-h-xs` (`h1` page title) | `20px → 22px → 24px` | `30px` (`1.875rem`) | `600` | `-0.01em` |
-| `.ds-text-h-sm` | `24px → 26px → 28px` | `36px` (`2.25rem`) | `600` | `-0.02em` |
-| `.ds-text-h-md` | `32px → 36px → 40px` | `48px` (`3rem`) | `600` | `-0.02em` |
-| `.ds-text-h-lg` | `36px → 42px → 48px` | `56px` (`3.5rem`) | `700` | `-0.02em` |
-| `.ds-text-h-xl` | `48px → 56px → 64px` | `72px` (`4.5rem`) | `700` | `-0.02em` |
-| `.ds-text-h1` | `56px → 64px → 72px` | `80px` (`5rem`) | `700` | `-0.02em` |
-| `.ds-text-display` | `64px → 80px → 98px` | `100px` (`6.25rem`) | `700` | `-0.02em` |
+| Weight Prop / Utility Class | `--icon-weight-*` | `--icon-stroke-*` (SVG) | Usage |
+| :--- | :--- | :--- | :--- |
+| `light` (`.ds-icon-weight-light`) | `300` | `1.25` | Subtle decorative or lightweight chrome icons |
+| `regular` (`.ds-icon-weight-regular`) | `400` | `1.5` | Default icon weight (`.huge-icon` fallback) |
+| `medium` (`.ds-icon-weight-medium`) | `500` | `1.75` | Emphasized controls & active nav icons |
+| `bold` (`.ds-icon-weight-bold`) | `700` | `2.25` | Checkmarks, close/confirm indicators, high-contrast glyphs |
+
+### 3.4 Edit Inspector Sidebar Layout Geometry Contract (Scoped)
+
+The Asset Edit Page right inspector rail and its docked tool panels (`EditToolsSidebar`, `AnglesPanel`, `RelightPanel`, `RemoveBackgroundPanel`) use `--edit-sidebar-width` (`280px`) and `.ds-edit-sidebar-*` strictly for **layout geometry only** (width, height, padding, gap, hover surface). They define **zero** typography rules — all sidebar text uses the exact same canonical Tier 1 `.ds-type-*`, Tier 2 `.ds-text-*`, `<Button>`, and `<Label>` tokens as the rest of the SaaS.
+
+| Token / Class | Geometry Only (No Font Rules) | Paired Canonical Typography |
+| :--- | :--- | :--- |
+| `--edit-sidebar-width` | `280px` | Docked desktop (`≥640px`) inspector rail width (`256px` inner width with `p-3`) |
+| `.ds-edit-sidebar-rail` | `width: 100%` (`280px` at `≥640px`) | Container only (`@layer components` so `w-full` overrides when docked) |
+| `.ds-edit-sidebar-header` | `flex`, `items-center`, `gap: 4px`, `padding: 12px 16px` | Top header action row |
+| `.ds-edit-sidebar-action-btn` | `height: 32px`, `px: 12px`, `gap: 4px` | Inherits `<Button>` (`.ds-btn-*` → `button` `14px · 600 · 1.25`) |
+| `.ds-edit-sidebar-tabs` | `flex`, `items-center`, `height: 48px`, `gap: 4px`, `px: 8px` | Inspector tab bar container (`Edits` / `Info`) |
+| `.ds-edit-sidebar-tab` | `height: 28px`, `padding: 4px 8px`, `radius: --radius-subtle` | Paired with `.ds-text-tab` (`caption-label` `14px · 500 · 1.3 · 0.35px`) |
+| `.ds-edit-sidebar-tool-row` | `height: 40px`, `padding: 8px`, `gap: 4px`, `radius: --radius-subtle`, hover `--surface-tonal` | Inner label uses `.ds-type-caption-label` (`14px · 500 · 1.3 · 0.35px`) |
 
 ---
 
-## 4. Border Radius & Spacing Scale
+## 4. Strict 4-Token Border Radius System (`src/styles/tokens/radius.css`)
 
-| Radius Token | Pixel Value | Components Using This Radius |
+Defined via Tailwind v4 `@theme` in `src/styles/tokens/radius.css` so both CSS variables (`var(--radius-*)`) and native Tailwind classes (`rounded-none`, `rounded-sharp`, `rounded-subtle`, `rounded-comfortable`, plus directional variants like `rounded-t-comfortable`) share a single source of truth. Legacy Tailwind radius classes (`rounded-xs..3xl`, bare `rounded`) and arbitrary `rounded-[*]` values are forbidden.
+
+| Token / Class | Pixel Value | Components Using This Radius |
 | :--- | :--- | :--- |
-| `rounded-md` | `6px` (`0.375rem`) | Status badges (`Trial`, `Beta`), inline accordion header buttons |
-| `rounded-lg` | `8px` (`0.5rem`) | Standard buttons (`h-7`), compact pill buttons (`h-[26px]`), toolbar icon buttons (`size-7`), inputs (`h-7`), sidebar nav & folder rows (`.ds-nav-item`, `30px`), menu items (`.ds-menu-item`, `30px`), aspect-ratio list row buttons (`h-10 px-3 rounded-lg`) |
-| `rounded-[10px]` / `rounded-xl` | `10px` – `12px` | Overlay icon buttons (`size-8` `rounded-[10px]`), Status banner (`rounded-[10px]`), Dropdown / Context / Select menu panels (`rounded-xl` `12px`) |
-| `rounded-2xl` | `16px` (`1rem`) | Dashed upload slots (`size-16`, `h-[72px] w-24`), style preview thumbnails, Glass Dropdown containers |
-| `rounded-3xl` | `24px` (`1.5rem`) | Live 9:16 preview container (`border-2 border-white/10`), Onboarding popover |
-| `rounded-[28px]` | `28px` (`1.75rem`) | Main Frosted Section Cards (`bg-white/5 backdrop-blur-2xl px-8 py-6`) |
-| `rounded-full` | `9999px` | Pill Select Trigger (`h-7 w-[200px]`), Pill Tabs (`h-7`), Toggle Switch (`w-11 h-6`), Avatars |
+| `--radius-none` (`rounded-none`) | `0px` | Docked panels, full-bleed canvases, flush edge-to-edge containers |
+| `--radius-sharp` (`rounded-sharp`) | `4px` | Status badges (`.ds-badge*`), checkboxes (`.ds-checkbox`), `kbd`, micro tags/chips, tiny expand toggles |
+| `--radius-subtle` (`rounded-subtle`) | `6px` | All buttons (`.ds-btn-*` including pill, segmented, dropdown-card, nav), icon buttons (`.ds-icon-btn*` including overlay), inputs (`.ds-input*`), textareas, select triggers (`.ds-select-trigger`), pill/composer tabs (`.ds-tab-pill`, `.ds-composer-tab`), menu items (`.ds-menu-item`), list rows (`.ds-list-row`), stepped sliders, button groups |
+| `--radius-comfortable` (`rounded-comfortable`) | `8px` | Dialogs, popovers, hover cards, tooltips, dropdown/context/select menu panels, cards (`.ds-section-card`, `.ds-composer-card`, `.ds-media-card`, `.ds-thumb-card`), dashed upload slots (`.ds-upload-slot`), banners (`.ds-banner-accent`) |
+| `rounded-full` *(true circles only)* | `9999px` | Avatars, toggle switches & thumbs, default slider tracks & circular thumbs, radio dots, color swatches, status dots, circular counter badges (`.ds-badge-count`), circular spinners, scrollbar thumbs |
 
 ---
 
@@ -206,8 +212,7 @@ Paste this into your global CSS file (`globals.css`) to initialize the exact the
   body {
     background-color: var(--omni-bg);
     color: #FFFFFF;
-    font-family: "Geist Sans", "Inter", ui-sans-serif, system-ui, sans-serif;
-    font-variant-alternates: styleset(ss01, ss03, ss04, ss06, ss08);
+    font-family: var(--font-sans); /* var(--font-inter), "Inter", var(--font-geist-sans), "Geist Sans", ui-sans-serif, system-ui, sans-serif */
     -webkit-font-smoothing: antialiased;
   }
 }
@@ -226,15 +231,15 @@ Paste this into your global CSS file (`globals.css`) to initialize the exact the
 
 | # | Base Component | Variants | Core Classes & State Contract |
 | :--- | :--- | :--- | :--- |
-| **01** | **Button — Solid (Normal)** | `Primary White`, `Secondary Dark`, `CTA Large` | Primary: `h-7 (28px) px-2.5 gap-1.5 rounded-lg bg-white text-black text-xs font-semibold` (`14px` icon) • Secondary: `h-7 (28px) px-2.5 gap-1.5 rounded-lg text-xs font-medium` • CTA Large: `h-10 (40px) px-4 text-sm font-semibold` (`18px` icon) |
-| **02** | **Button — Tonal (Translucent)** | `Standard Tonal`, `Compact Pill` | `h-7 (28px) px-2.5 gap-1.5 rounded-lg bg-white/10 text-[#FAFAFA] text-xs font-medium hover:bg-white/15` (`14px` icon) (Pill: `h-[26px] px-2.5 gap-1.5 rounded-lg text-xs hover:bg-white/[0.18]`) |
-| **03** | **Button — Ghost (Transparent)** | `Ghost Button`, `Subtle Row`, `Text Link` | `h-7 (28px) px-2 gap-1.5 rounded-lg bg-transparent text-white text-xs font-medium hover:bg-white/10` (`14px` icon) (Link: `text-xs text-white/50 hover:text-white`) |
-| **04** | **Button — Outline (Bordered)** | `Outline Default`, `Sidebar Trigger` | `h-7 (28px) px-2.5 gap-1.5 rounded-lg border border-[#27272A] bg-transparent text-xs font-medium text-[#FAFAFA] hover:bg-[#27272A]/50` (`14px` icon) |
-| **05** | **Icon Button** | `Ghost Toolbar`, `Tonal Square`, `Outline Square`, `Overlay Blur` | `size-7 (28x28px) rounded-lg bg-transparent text-white hover:bg-white/15 disabled:opacity-50` (`14px` icon) (Overlay: `size-8 (32x32px) rounded-[10px] backdrop-blur(16px → 80px)`, `16px` icon) |
-| **06** | **Pill Select & Dropdown** | `Pill Trigger`, `Glass Menu Item`, `Checkmark Option` | Trigger: `h-7 (28px) w-[200px] rounded-full bg-white/10 pl-3 pr-2.5 text-xs font-medium hover:bg-white/15` (`14px` icon) • Panel: `rounded-xl (12px) p-1.5 gap-0.5 bg-surface-menu-glass (#23262A @ 75%, blur 40px)` • Menu Item: `min-h-[30px] px-2 py-[5px] gap-2 rounded-lg ds-text-caption-m (12px/16px, weight 400)` with `14px` `--icon-primary` (`#FFFFFF`, `wght 300`, `size-3.5` SVG) leading icons (`14px` submenu chevron/check) |
-| **07** | **Pill Tabs (Tablist)** | `Pill Tab Item`, `Segmented Switcher` | `h-7 (28px) rounded-full px-3 text-xs font-medium bg-white/10 text-white hover:bg-white/15 data-[state=active]:bg-white data-[state=active]:text-black` (`14px` icon) |
-| **08** | **Section Card & Composer Card** | `Frosted Card`, `Prompt Bar Card`, `Uppercase Accordion Trigger` | Card: `rounded-[28px] bg-white/5 backdrop-blur-2xl px-8 py-6` • Composer Card (`.ds-composer-card / .bg-card\/50`): `rounded-3xl bg-card/50 (#444444 @ 50%) p-2 border-border-weak` • Trigger: `h-6 w-full flex justify-between text-xs font-medium uppercase leading-4 tracking-[0.1px] text-white/50` |
-| **09** | **Dashed Upload / Media Slot** | `Square 64x64`, `Aspect 96x72` | `size-16` or `h-[72px] w-24` `rounded-2xl border border-dashed border-white/[0.18] bg-white/5 hover:bg-white/10` (Disabled: `cursor-not-allowed text-white/25`) |
-| **10** | **Interactive List / Setting Row** | `Compact Ratio Row`, `Thumbnail Preview Row` | Compact: `h-10 (40px) px-3 rounded-lg bg-transparent text-xs font-medium text-white hover:bg-white/5` • Preview: `group flex items-center justify-between gap-3` with `h-[72px] w-24 rounded-2xl border border-white/10 bg-white/5 group-hover:bg-white/10` |
-| **11** | **Switch, Input & Checkbox** | `Pill Switch`, `Ghost / Accent / Default Input`, `Checkbox` | Switch: `w-11 h-6 rounded-full bg-white/15 data-[checked]:bg-white` + thumb `size-[18px] bg-white data-[checked]:bg-[#09090B]` • Input: Default/Ghost/Accent `h-7 (28px) rounded-lg ds-text-caption-m (12px/16px, weight 400, 14px icon)` |
-| **12** | **Badge & Status Banner** | `Status Badge`, `Accent Banner` | Badge: `rounded-md px-1.5 py-0.5 ds-text-caption-s (10px/14px) font-semibold bg-white/10 text-[#FAFAFA]` • Banner: `rounded-[10px] bg-[#1A1A1A] bg-gradient-to-r from-[#FFC141]/10 to-[#FFC141]/10 pl-4` |
+| **01** | **Button — Solid (Normal)** | `Primary White`, `Secondary Dark`, `CTA Large` | Primary (`.ds-btn-primary`): `h-8 (32px) px-2.5 gap-1.5 rounded-subtle bg-white text-black` + Tier 1 `button` (`.ds-type-button`, `14px · 600 · 1.25`) + `--icon-size-sm` (`14px`) • Secondary (`.ds-btn-secondary`): `h-8 (32px) px-2.5 gap-1.5 rounded-subtle` + `button` + `--icon-size-sm` (`14px`) • CTA Large (`.ds-btn-cta-lg`): `h-10 (40px) px-4 rounded-subtle` + `button` + `--icon-size-lg` (`20px`) • Size modifiers: `xs` (`.ds-type-micro-tag`, `--icon-size-xs`), `sm` (`.ds-type-small`, `--icon-size-sm`), `lg` (`.ds-type-button`, `--icon-size-lg`) |
+| **02** | **Button — Tonal (Translucent)** | `Standard Tonal`, `Compact Pill` | Tonal (`.ds-btn-tonal`): `h-8 (32px) px-2.5 gap-1.5 rounded-subtle bg-white/10 text-[#FAFAFA] hover:bg-white/15` + `button` (`14px · 600 · 1.25`) + `--icon-size-sm` (`14px`) • Pill (`.ds-btn-pill`): `h-[30px] px-2.5 gap-1.5 rounded-subtle hover:bg-white/[0.18]` + `button` + `--icon-size-sm` (`14px`) |
+| **03** | **Button — Ghost (Transparent)** | `Ghost Button`, `Subtle Row`, `Text Link` | Ghost (`.ds-btn-ghost`): `h-8 (32px) px-2 gap-1.5 rounded-subtle bg-transparent text-white hover:bg-white/15` + `button` (`14px · 600 · 1.25`) + `--icon-size-sm` (`14px`) • Link (`.ds-btn-link`): `text-white/50 hover:text-white` + `button` + `--icon-size-sm` (`14px`) |
+| **04** | **Button — Outline (Bordered)** | `Outline Default`, `Sidebar Trigger` | Outline (`.ds-btn-outline`): `h-8 (32px) px-2.5 gap-1.5 rounded-subtle border border-[#27272A] bg-transparent text-[#FAFAFA] hover:bg-white/15` + `button` (`14px · 600 · 1.25`) + `--icon-size-sm` (`14px`) |
+| **05** | **Icon Button** | `Ghost Toolbar`, `Tonal Square`, `Outline Square`, `Overlay Blur` | Standard (`.ds-icon-btn*`): `size-8 (32x32px) rounded-subtle bg-transparent text-white hover:bg-white/15 disabled:opacity-50` + `--icon-size-sm` (`14px`; `xs` `24px`/`12px`, `lg` `40px`/`20px`) • Overlay (`.ds-icon-btn-overlay`): `size-8 (32x32px) rounded-subtle backdrop-blur(16px → 80px)` + `--icon-size-md` (`16px`) |
+| **06** | **Pill Select & Dropdown** | `Pill Trigger`, `Glass Menu Item`, `Checkmark Option` | Trigger (`.ds-select-trigger`): `h-7 (28px) w-[200px] rounded-subtle bg-white/10 pl-3 pr-2.5 hover:bg-white/15` + `small` (`13px · 1.3 · -0.20px`) + `--icon-size-sm` (`14px`) • Panel: `rounded-comfortable p-1.5 gap-0.5 bg-surface-menu-glass (#23262A @ 75%, blur 40px)` • Label (`MENU_LABEL_CLASS`): `.ds-label` (`small`, `#A1A1AA`, sentence case) • Menu Item (`.ds-menu-item`): `min-h-[30px] px-2 py-[5px] gap-2 rounded-subtle` + `.ds-type-small` (`13px · 400 · 1.3 · -0.20px`) + `--icon-size-sm` (`14px`, `--icon-primary`; `MenuCheckIcon` `weight="bold"` / `--icon-weight-bold`; `MenuRadioDotIcon` `--icon-size-xs` `12px`; shortcut & subtitle `.ds-type-micro-tag`) |
+| **07** | **Pill Tabs (Tablist)** | `Pill Tab Item`, `Segmented Switcher` | Pill Tab (`.ds-tab-pill`): `h-7 (28px) rounded-subtle px-3 bg-white/10 text-white hover:bg-white/15 data-[state=active]:bg-white data-[state=active]:text-black` + `caption-label` (`.ds-text-tab`, `14px · 500 · 1.3 · 0.35px`) + `--icon-size-sm` (`14px`) |
+| **08** | **Section Card & Composer Card** | `Frosted Card`, `Prompt Bar Card`, `Uppercase Accordion Trigger` | Card (`.ds-section-card`): `rounded-comfortable bg-white/5 backdrop-blur-2xl px-8 py-6` • Composer Card (`.ds-composer-card`): `rounded-comfortable bg-surface-menu-glass p-2` • Accordion Trigger (`.ds-accordion-trigger`): `h-6 w-full flex justify-between uppercase text-white/50` + `small` (`13px · 1.3 · -0.20px`) + `<HugeIcon size="md" />` (`16px`) |
+| **09** | **Dashed Upload / Media Slot** | `Square 64x64`, `Aspect 96x72` | `.ds-upload-slot`: `size-16` or `h-[72px] w-24` `rounded-comfortable border border-dashed border-white/[0.18] bg-white/5 hover:bg-white/10` (Disabled: `cursor-not-allowed text-white/25`) |
+| **10** | **Interactive List / Setting Row** | `Compact Ratio Row`, `Thumbnail Preview Row` | Compact (`.ds-list-row`): `h-10 (40px) px-3 rounded-subtle bg-transparent text-white hover:bg-white/5` + `small` (`13px · 1.3 · -0.20px`) • Preview: `group flex items-center justify-between gap-3` with `h-[72px] w-24 rounded-comfortable border border-white/10 bg-white/5 group-hover:bg-white/10` |
+| **11** | **Switch, Input, Checkbox & Label** | `Pill Switch`, `Ghost / Accent / Default Input`, `Checkbox`, `Label (default / caption / primary)` | Switch (`.ds-switch`): `w-11 h-6 rounded-full bg-white/15 data-[checked]:bg-white` + thumb `size-[18px] rounded-full bg-white data-[checked]:bg-[#09090B]` • Input (`.ds-input*`): `h-7 (28px) rounded-subtle` + `.ds-type-small` (`13px · 400 · 1.3 · -0.20px`) + `--icon-size-sm` (`14px`) • Checkbox (`.ds-checkbox`): `size-4`/`size-5` `rounded-sharp` + `<HugeIcon size="xs|sm" weight="bold" />` • Label (`@/components/base/label`, `.ds-label`): `default` uses `small` (`13px · 400 · 1.3 · -0.20px`, `#A1A1AA`), `caption` adds `.ds-label-caption` (`14px · 500 · 1.3 · 0.35px`), `primary` adds `.ds-label-primary` (`#FFFFFF`), sentence case (`as="label"\|"span"\|"div"`, `disabled`) |
+| **12** | **Badge & Status Banner** | `Status Badge`, `Accent Banner` | Badge (`.ds-badge`, `.ds-badge-glass`): `rounded-sharp px-1.5 py-0.5 bg-white/10 text-[#FAFAFA]` + `micro-tag` (`.ds-text-badge`, `11px · 450 · 1.3`) + `--icon-size-xs` (`12px`) • Counter (`.ds-badge-count`): `size-3.5 rounded-full` • Banner (`.ds-banner-accent`): `rounded-comfortable bg-[#1A1A1A] bg-gradient-to-r from-[#FFC141]/10 to-[#FFC141]/10 pl-4` |

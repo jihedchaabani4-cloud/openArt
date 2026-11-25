@@ -2,6 +2,7 @@
 
 import { HugeIcon } from "@/components/primitives/HugeIcon";
 import { Input } from "@/components/base/input";
+import { Label } from "@/components/base/label";
 import { Textarea } from "@/components/primitives/textarea";
 import { Button } from "@/components/base/button";
 
@@ -36,7 +37,7 @@ export function CharacterInfoSidebar({
             e.currentTarget.blur();
           }
         }}
-        className="text-[2rem] leading-[2.5rem] font-normal text-white"
+        className="ds-type-sub-heading text-white"
         containerClassName="w-full"
       />
 
@@ -60,12 +61,12 @@ export function CharacterInfoSidebar({
         <div className="flex flex-col gap-3 pt-3 mt-1">
           {features.length > 0 && (
             <div className="flex flex-col gap-1.5">
-              <span className="text-xs font-semibold text-white/70">Features</span>
+              <Label as="span">Features</Label>
               <div className="flex flex-wrap gap-1.5">
                 {features.map((f, i) => (
                   <span
                     key={i}
-                    className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs bg-white/5 text-white/80"
+                    className="inline-flex items-center gap-1 rounded-sharp px-2 py-0.5 ds-type-micro-tag bg-white/5 text-white/80"
                   >
                     {f}
                   </span>
@@ -77,7 +78,7 @@ export function CharacterInfoSidebar({
           {prompt && (
             <div className="flex flex-col gap-1">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-white/70">Prompt</span>
+                <Label as="span">Prompt</Label>
                 <Button
                   type="button"
                   variant="ghost"
@@ -87,13 +88,13 @@ export function CharacterInfoSidebar({
                   aria-label="Copy prompt"
                 >
                   {promptCopied ? (
-                    <HugeIcon name="tick-02" className="text-sm text-emerald-400" />
+                    <HugeIcon name="tick-02" size="sm" className="text-emerald-400" />
                   ) : (
-                    <HugeIcon name="copy-01" className="text-sm" />
+                    <HugeIcon name="copy-01" size="sm" />
                   )}
                 </Button>
               </div>
-              <p className="text-xs text-white/50 leading-relaxed line-clamp-3">{prompt}</p>
+              <p className="ds-type-small text-white/50 line-clamp-3">{prompt}</p>
             </div>
           )}
         </div>

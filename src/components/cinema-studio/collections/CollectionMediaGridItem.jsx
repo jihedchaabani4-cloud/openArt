@@ -377,7 +377,7 @@ export const CollectionMediaGridItem = React.memo(function CollectionMediaGridIt
         )}
         <span
           data-slot="folder-title"
-          className="ds-folder-title font-medium tracking-tight text-text-primary truncate"
+          className="ds-folder-title text-text-primary truncate"
           title={collectionTitleTooltip}
           onDoubleClick={
             interactive
@@ -394,7 +394,7 @@ export const CollectionMediaGridItem = React.memo(function CollectionMediaGridIt
       <span
         data-slot="folder-item-count"
         aria-label={`${directItemCount} ${directItemCount === 1 ? "item" : "items"}`}
-        className="ds-folder-count flex shrink-0 items-center gap-1 pb-0.5 font-medium text-text-primary/90 tabular-nums"
+        className="ds-folder-count flex shrink-0 items-center gap-1 pb-0.5 text-text-primary/90 tabular-nums"
       >
         <HugeIcon
           name="image-02"
@@ -421,7 +421,7 @@ export const CollectionMediaGridItem = React.memo(function CollectionMediaGridIt
         isSelectionMode={isSelectionMode}
         selectionEnabled={selectionEnabled}
         onToggleSelect={onToggleSelect}
-        outlineClassName="rounded-xl"
+        outlineClassName="rounded-comfortable"
         data-collection-drop-id={col?.id}
         data-draggable-card={canDrag ? "true" : undefined}
         onPointerDown={canDrag ? handlePointerDown : undefined}
@@ -430,7 +430,7 @@ export const CollectionMediaGridItem = React.memo(function CollectionMediaGridIt
         onDragLeave={isSelectionMode ? undefined : handleDragLeave}
         onDrop={isSelectionMode ? undefined : handleDrop}
         className={cn(
-          "shrink-0 rounded-xl",
+          "shrink-0 rounded-comfortable",
           canDrag ? "cursor-grab active:cursor-grabbing" : "cursor-pointer",
           !coverUrl && "border border-border-subtle",
           isDragOver && "ring-2 ring-text-primary",
@@ -569,16 +569,16 @@ export const CollectionMediaGridItem = React.memo(function CollectionMediaGridIt
             <div
               aria-hidden="true"
               data-slot="drag-stack-back"
-              className="absolute inset-0 translate-x-1.5 translate-y-1.5 rotate-3 rounded-xl bg-surface-card border border-border-subtle"
+              className="absolute inset-0 translate-x-1.5 translate-y-1.5 rotate-3 rounded-comfortable bg-surface-card border border-border-subtle"
             />
           )}
-          <div className="relative h-full w-full overflow-hidden rounded-xl border border-border-heavy bg-surface-secondary">
+          <div className="relative h-full w-full overflow-hidden rounded-comfortable border border-border-heavy bg-surface-secondary">
             <div className="absolute inset-0 bg-gradient-to-b from-white/5 via-transparent to-black/50" />
             <div className="absolute inset-x-2.5 bottom-2.5 flex items-end justify-between gap-2">
-              <h3 className="min-w-0 truncate ds-text-caption-m font-medium tracking-tight text-text-primary">
+              <h3 className="min-w-0 truncate ds-type-caption-label text-text-primary">
                 {collectionName}
               </h3>
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border-subtle bg-surface-secondary text-text-primary">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-subtle border border-border-subtle bg-surface-secondary text-text-primary">
                 <HugeIcon name="folder-01" size="md" />
               </div>
             </div>
@@ -586,7 +586,7 @@ export const CollectionMediaGridItem = React.memo(function CollectionMediaGridIt
           {dragCount > 1 && (
             <span
               data-slot="drag-count-badge"
-              className="absolute -top-2 -right-2 z-10 min-w-5 text-center bg-text-primary text-text-inverse rounded-full px-2 py-0.5 ds-text-caption-s font-semibold tabular-nums"
+              className="absolute -top-2 -right-2 z-10 min-w-5 text-center bg-text-primary text-text-inverse rounded-sharp px-2 py-0.5 ds-type-micro-tag tabular-nums"
             >
               {dragCount}
             </span>
@@ -598,7 +598,7 @@ export const CollectionMediaGridItem = React.memo(function CollectionMediaGridIt
               initial={{ opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.12 }}
-              className="absolute left-1/2 top-full mt-2 -translate-x-1/2 surface-glass border border-border-subtle text-text-primary rounded-full px-2.5 py-1 ds-text-caption-m font-medium whitespace-nowrap"
+              className="absolute left-1/2 top-full mt-2 -translate-x-1/2 surface-glass border border-border-subtle text-text-primary rounded-subtle px-2.5 py-1 ds-type-small whitespace-nowrap"
             >
               {dragTargetLabel}
             </motion.div>

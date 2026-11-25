@@ -153,11 +153,11 @@ export function PromptBarSlotsRow({
                     animate={{ opacity: 1, x: 0, scale: 1 }}
                     transition={{ duration: 0.24, ease: [0.25, 1, 0.5, 1] }}
                     onClick={() => onToggleReferenceUnstacked?.(false)}
-                    className="group relative flex cursor-pointer flex-col items-center justify-center rounded-[10px] text-[color:var(--text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--border-heavy)] self-stretch min-h-14 w-9.5 shrink-0"
+                    className="group relative flex cursor-pointer flex-col items-center justify-center rounded-subtle text-[color:var(--text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--border-heavy)] self-stretch min-h-14 w-9.5 shrink-0"
                   >
                     <span
                       aria-hidden="true"
-                      className="pointer-events-none absolute inset-0 rounded-[10px] bg-[color:var(--white-5)] transition-colors group-hover:bg-[color:var(--ui-button-hover)]"
+                      className="pointer-events-none absolute inset-0 rounded-subtle bg-[color:var(--white-5)] transition-colors group-hover:bg-[color:var(--ui-button-hover)]"
                     />
                     <span className="relative grid place-items-center">
                       <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24" aria-hidden="true">
@@ -208,7 +208,7 @@ export function PromptBarSlotsRow({
                                 opacity: 1,
                               }}
                               transition={CARD_SPRING_TRANSITION}
-                              className="relative size-[50px] rounded-2xl [corner-shape:squircle] border-2 border-[color:var(--border-heavy)] [--rim:2px]"
+                              className="relative size-[50px] rounded-subtle border-2 border-[color:var(--border-heavy)]"
                             >
                               {isVid ? (
                                 <video
@@ -217,13 +217,13 @@ export function PromptBarSlotsRow({
                                   loop
                                   autoPlay
                                   playsInline
-                                  className="block size-full object-cover overflow-hidden rounded-[calc(16px-var(--rim,0px))] [corner-shape:squircle]"
+                                  className="block size-full object-cover overflow-hidden rounded-sharp"
                                 />
                               ) : (
                                 <img
                                   alt={itemLabel}
                                   decoding="async"
-                                  className="block size-full object-cover overflow-hidden rounded-[calc(16px-var(--rim,0px))] [corner-shape:squircle]"
+                                  className="block size-full object-cover overflow-hidden rounded-sharp"
                                   src={src}
                                 />
                               )}
@@ -238,7 +238,7 @@ export function PromptBarSlotsRow({
                                   e.stopPropagation();
                                   handleRemoveReferenceItem?.(item, backendKey);
                                 }}
-                                className="absolute -right-2 -top-[7px] grid size-5 cursor-pointer place-items-center rounded-full surface-glass bg-surface-menu-glass text-icon-primary hover:bg-surface-tonal-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-heavy transition-colors duration-200 z-10"
+                                className="absolute -right-2 -top-[7px] grid size-5 cursor-pointer place-items-center rounded-subtle surface-glass bg-surface-menu-glass text-icon-primary hover:bg-surface-tonal-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-heavy transition-colors duration-200 z-10"
                               >
                                 <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18" aria-hidden="true">
                                   <path fillRule="evenodd" clipRule="evenodd" d={REMOVE_ICON_PATH} />
@@ -280,7 +280,7 @@ export function PromptBarSlotsRow({
                       setIsStackHovered(false);
                       onToggleReferenceUnstacked?.(true);
                     }}
-                    className="flex cursor-pointer items-center gap-2 rounded-[var(--radius-card)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--border-heavy)] focus-visible:ring-offset-4 focus-visible:ring-offset-transparent"
+                    className="flex cursor-pointer items-center gap-2 rounded-comfortable focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--border-heavy)] focus-visible:ring-offset-4 focus-visible:ring-offset-transparent"
                   >
                     <span className="relative h-11 w-14 shrink-0 block">
                       {stackLayers.map(({ item, idx, wrapperClass, rotate, scale, hoverScale, opacity, zIndex }) => {
@@ -295,7 +295,7 @@ export function PromptBarSlotsRow({
                             data-testid={`view-reference-${item.id || item.workflow_id || idx}`}
                             className={cn(
                               wrapperClass,
-                              "rounded-xl [corner-shape:squircle] border-2 border-[color:var(--border-heavy)] [--rim:2px] block"
+                              "rounded-subtle border-2 border-[color:var(--border-heavy)] block"
                             )}
                             style={{ zIndex }}
                             animate={{
@@ -312,13 +312,13 @@ export function PromptBarSlotsRow({
                                 loop
                                 autoPlay
                                 playsInline
-                                className="block size-full object-cover overflow-hidden rounded-[calc(12px-var(--rim,0px))] [corner-shape:squircle]"
+                                className="block size-full object-cover overflow-hidden rounded-sharp"
                               />
                             ) : (
                               <img
                                 alt=""
                                 decoding="async"
-                                className="block size-full object-cover overflow-hidden rounded-[calc(12px-var(--rim,0px))] [corner-shape:squircle]"
+                                className="block size-full object-cover overflow-hidden rounded-sharp"
                                 src={src}
                               />
                             )}
@@ -347,7 +347,7 @@ export function PromptBarSlotsRow({
                         onClearSlot?.(slot.role);
                       }
                     }}
-                    className="absolute -top-1.5 -right-1.5 grid size-5 cursor-pointer place-items-center rounded-full surface-glass bg-surface-menu-glass text-icon-primary hover:bg-surface-tonal-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-heavy transition-colors duration-200 z-40"
+                    className="absolute -top-1.5 -right-1.5 grid size-5 cursor-pointer place-items-center rounded-subtle surface-glass bg-surface-menu-glass text-icon-primary hover:bg-surface-tonal-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-heavy transition-colors duration-200 z-40"
                   >
                     <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18" aria-hidden="true">
                       <path fillRule="evenodd" clipRule="evenodd" d={REMOVE_ICON_PATH} />

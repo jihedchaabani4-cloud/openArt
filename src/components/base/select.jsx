@@ -41,10 +41,10 @@ const SelectTrigger = React.forwardRef(function SelectTrigger(
       className={cn(
         "cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 focus-workspace",
         isOutline
-          ? "ds-btn-outline inline-flex items-center justify-between w-auto h-7 px-2.5 ds-text-caption-m"
+          ? "ds-btn-outline inline-flex items-center justify-between w-auto h-7 px-2.5 ds-type-small"
           : isPill
             ? "ds-select-trigger"
-            : "ds-select-trigger w-auto px-2.5 rounded-lg",
+            : "ds-select-trigger w-auto px-2.5 rounded-subtle",
         className
       )}
       {...props}

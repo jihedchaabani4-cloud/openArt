@@ -153,7 +153,7 @@ describe("ElementDetailsGallery - Studio Media Grid Form", () => {
     const assetsBtn = screen.getByTitle("Ajouter à partir du projet");
     expect(uploadBtn).toBeDefined();
     expect(assetsBtn).toBeDefined();
-    expect(uploadBtn.className).toMatch(/rounded-full|ds-btn-pill/);
+    expect(uploadBtn.className).toMatch(/rounded-subtle|ds-btn-pill/);
   });
 
   it("renders minimal empty state without big clumsy banner when items is empty", () => {
@@ -245,17 +245,17 @@ describe("ElementDetailsGallery - Studio Media Grid Form", () => {
     expect(deleteBtns[0].querySelector('[data-icon-name="delete-02"]')).not.toBeNull();
   });
 
-  it("renders cards with rounded-xxxs border radius matching media item standard", () => {
+  it("renders cards with rounded-comfortable border radius matching media item standard", () => {
     const { container } = renderWithClient(
       <ReferenceMediaGalleryGrid
         items={mockItems}
       />
     );
 
-    const cards = container.querySelectorAll(".rounded-xxxs");
+    const cards = container.querySelectorAll(".rounded-comfortable");
     expect(cards.length).toBeGreaterThan(0);
     cards.forEach((card) => {
-      expect(card.className).toContain("rounded-xxxs");
+      expect(card.className).toContain("rounded-comfortable");
       expect(card.className).not.toContain("rounded-2xl");
     });
   });

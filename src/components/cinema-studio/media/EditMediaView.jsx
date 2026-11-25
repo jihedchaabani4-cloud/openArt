@@ -67,7 +67,7 @@ function VideoControlsBar({
   return (
     <div className="p-3 w-full transition-opacity duration-300">
       <div
-        className="flex items-center gap-2.5 p-2 px-3 bg-black/70 backdrop-blur-md border border-white/10 rounded-lg"
+        className="flex items-center gap-2.5 p-2 px-3 bg-black/70 backdrop-blur-md border border-white/10 rounded-comfortable"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Play/Pause */}
@@ -78,7 +78,7 @@ function VideoControlsBar({
           onClick={togglePlay}
           aria-label={isPlaying ? "Pause" : "Play"}
         >
-          {isPlaying ? <HugeIcon name="pause" className="text-sm text-white" /> : <HugeIcon name="play" className="text-sm text-white ml-0.5" />}
+          {isPlaying ? <HugeIcon name="pause" size="sm" className="text-white" /> : <HugeIcon name="play" size="sm" className="text-white ml-0.5" />}
         </Button>
 
         {/* Scrubber Track */}
@@ -96,7 +96,7 @@ function VideoControlsBar({
         </div>
 
         {/* Time label */}
-        <span className="text-[11px] font-mono text-white/70 select-none tabular-nums shrink-0">
+        <span className="ds-type-micro-tag font-mono text-white/70 select-none tabular-nums shrink-0">
           {currentTime} / {duration}
         </span>
 
@@ -108,7 +108,7 @@ function VideoControlsBar({
           onClick={toggleMute}
           aria-label={isMuted ? "Unmute" : "Mute"}
         >
-          {isMuted ? <HugeIcon name="volume-mute-02" className="text-sm text-white" /> : <HugeIcon name="volume-high" className="text-sm text-white" />}
+          {isMuted ? <HugeIcon name="volume-mute-02" size="sm" className="text-white" /> : <HugeIcon name="volume-high" size="sm" className="text-white" />}
         </Button>
 
         {/* Fullscreen */}
@@ -119,7 +119,7 @@ function VideoControlsBar({
           onClick={toggleFullscreen}
           aria-label="Fullscreen"
         >
-          <HugeIcon name="full-screen" className="text-sm text-white" />
+          <HugeIcon name="full-screen" size="sm" className="text-white" />
         </Button>
       </div>
     </div>

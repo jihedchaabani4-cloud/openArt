@@ -138,7 +138,7 @@ export function AssetsLibraryPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <p className="text-white/40 text-lg font-medium tracking-tight">Loading library...</p>
+        <p className="ds-type-feature-title text-white/40">Loading library...</p>
       </div>
     );
   }
@@ -147,7 +147,7 @@ export function AssetsLibraryPage() {
     <div className="relative min-h-screen bg-background text-white">
       <div className="w-full ">
         {filteredItems.length === 0 ? (
-          <div className=" py-16 text-center text-white/35">
+          <div className="py-16 text-center ds-type-body text-white/35">
             {items.length === 0 ? "No assets found." : "No assets match these filters."}
           </div>
         ) : (
@@ -165,7 +165,7 @@ export function AssetsLibraryPage() {
             </div>
             <div ref={loadMoreRef} className="h-8 w-full" />
             {isFetchingNextPage && (
-              <div className="pt-4 text-center text-sm text-white/45">
+              <div className="pt-4 text-center ds-type-small text-white/45">
                 Loading more assets...
               </div>
             )}

@@ -40,7 +40,7 @@ export function NavbarBackButton({
         disabled={disabled}
         className={cn(
           "cursor-pointer shrink-0 text-text-body-muted hover:text-text-primary transition-all",
-          children ? "h-7 max-h-full px-2.5 gap-1.5 ds-text-caption-m" : "size-7 max-h-full aspect-square p-0",
+          children ? "h-7 max-h-full px-2.5 gap-1.5" : "size-7 max-h-full aspect-square p-0",
           className
         )}
         onDragOver={onDragOver}
@@ -72,7 +72,7 @@ export function NavbarBackButton({
       disabled={disabled}
       className={cn(
         "cursor-pointer shrink-0 text-text-body-muted hover:text-text-primary transition-all",
-        children ? "h-7 max-h-full px-2.5 gap-1.5 ds-text-caption-m" : "size-7 max-h-full aspect-square p-0",
+        children ? "h-7 max-h-full px-2.5 gap-1.5" : "size-7 max-h-full aspect-square p-0",
         className
       )}
       onClick={handleClick}

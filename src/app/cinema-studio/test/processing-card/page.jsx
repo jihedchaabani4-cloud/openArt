@@ -37,26 +37,26 @@ export default function ProcessingCardTestPage() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-6">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold tracking-wider uppercase bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+              <span className="px-2.5 py-0.5 rounded-sharp ds-type-micro-tag uppercase bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
                 Interactive Test Lab
               </span>
-              <span className="text-[12px] text-white/40">Aurora Processing Animation</span>
+              <span className="ds-type-small text-white/40">Aurora Processing Animation</span>
             </div>
-            <h1 className="text-2xl font-bold tracking-tight">Processing Card Demo</h1>
-            <p className="text-sm text-white/50 mt-1">
+            <h1 className="ds-type-card-title">Processing Card Demo</h1>
+            <p className="ds-type-small text-white/50 mt-1">
               Exact reverse-engineered specs: neutral dark base, 10s non-linear orbital drift, 13s secondary blob, blur-3xl glow, minimal play icon & tabular % counter.
             </p>
           </div>
 
           {/* Controls Bar */}
-          <div className="flex flex-wrap items-center gap-3 bg-white/[0.04] p-3 rounded-lg border border-white/10">
+          <div className="flex flex-wrap items-center gap-3 bg-white/[0.04] p-3 rounded-comfortable border border-white/10">
             <Button
               type="button"
               variant={isAutoSimulating ? "secondary" : "outline"}
               onClick={() => setIsAutoSimulating(!isAutoSimulating)}
               className="gap-2"
             >
-              {isAutoSimulating ? <HugeIcon name="pause" className="text-sm" /> : <HugeIcon name="play" className="text-sm" />}
+              {isAutoSimulating ? <HugeIcon name="pause" size="sm" /> : <HugeIcon name="play" size="sm" />}
               {isAutoSimulating ? "Simulating (+1/+2% / 2s)" : "Paused"}
             </Button>
 
@@ -66,7 +66,7 @@ export default function ProcessingCardTestPage() {
               onClick={() => setProgress(29)}
               className="gap-1.5"
             >
-              <HugeIcon name="refresh" className="text-sm" />
+              <HugeIcon name="refresh" size="sm" />
               Reset (29%)
             </Button>
 
@@ -79,7 +79,7 @@ export default function ProcessingCardTestPage() {
             </Button>
 
             <div className="flex items-center gap-2 pl-2 border-l border-white/10">
-              <span className="text-xs text-white/50 font-mono tabular-nums">{progress}%</span>
+              <span className="ds-type-small text-white/50 font-mono tabular-nums">{progress}%</span>
               <input
                 type="range"
                 min="0"
@@ -98,10 +98,10 @@ export default function ProcessingCardTestPage() {
         {/* ── Main Showcase: Standard Video Card ── */}
         <section className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-base font-semibold text-white/90">
+            <h2 className="ds-type-body text-white/90">
               1. Primary Video Aspect Ratio (16:9 Aspect Video)
             </h2>
-            <span className="text-xs text-white/40">Default size: max-w-xl aspect-video</span>
+            <span className="ds-type-small text-white/40">Default size: max-w-xl aspect-video</span>
           </div>
 
           <div className="max-w-xl">
@@ -116,14 +116,14 @@ export default function ProcessingCardTestPage() {
 
         {/* ── Grid of Common Formats ── */}
         <section className="flex flex-col gap-4">
-          <h2 className="text-base font-semibold text-white/90">
+          <h2 className="ds-type-body text-white/90">
             2. Multi-Aspect Responsive Grid
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
             {/* 16:9 Video */}
             <div className="flex flex-col gap-2">
-              <span className="text-xs text-white/50 font-mono">16:9 (Landscape)</span>
+              <span className="ds-type-small text-white/50 font-mono">16:9 (Landscape)</span>
               <ProcessingCard
                 progress={progress}
                 aspectRatio="16/9"
@@ -134,7 +134,7 @@ export default function ProcessingCardTestPage() {
 
             {/* 1:1 Square */}
             <div className="flex flex-col gap-2">
-              <span className="text-xs text-white/50 font-mono">1:1 (Square)</span>
+              <span className="ds-type-small text-white/50 font-mono">1:1 (Square)</span>
               <ProcessingCard
                 progress={progress}
                 aspectRatio="1/1"
@@ -145,7 +145,7 @@ export default function ProcessingCardTestPage() {
 
             {/* 9:16 Portrait */}
             <div className="flex flex-col gap-2">
-              <span className="text-xs text-white/50 font-mono">9:16 (Portrait / Reel)</span>
+              <span className="ds-type-small text-white/50 font-mono">9:16 (Portrait / Reel)</span>
               <ProcessingCard
                 progress={progress}
                 aspectRatio="9/16"
@@ -156,7 +156,7 @@ export default function ProcessingCardTestPage() {
 
             {/* 21:9 Ultra-wide */}
             <div className="flex flex-col gap-2">
-              <span className="text-xs text-white/50 font-mono">21:9 (Cinematic)</span>
+              <span className="ds-type-small text-white/50 font-mono">21:9 (Cinematic)</span>
               <ProcessingCard
                 progress={progress}
                 aspectRatio="21/9"
@@ -169,14 +169,14 @@ export default function ProcessingCardTestPage() {
 
         {/* ── Studio Cards Integration ── */}
         <section className="flex flex-col gap-4">
-          <h2 className="text-base font-semibold text-white/90">
+          <h2 className="ds-type-body text-white/90">
             3. Integrated Cards in Processing State
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
             {/* Character Card in Processing */}
             <div className="flex flex-col gap-2">
-              <span className="text-xs text-white/50 font-mono">MediaGridItem (character processing)</span>
+              <span className="ds-type-small text-white/50 font-mono">MediaGridItem (character processing)</span>
               <MediaGridItem
                 workflow={{
                   id: "demo-char-processing",
@@ -192,7 +192,7 @@ export default function ProcessingCardTestPage() {
 
             {/* Element Card in Processing */}
             <div className="flex flex-col gap-2">
-              <span className="text-xs text-white/50 font-mono">MediaGridItem (element processing)</span>
+              <span className="ds-type-small text-white/50 font-mono">MediaGridItem (element processing)</span>
               <MediaGridItem
                 workflow={{
                   id: "demo-elem-processing",
@@ -207,7 +207,7 @@ export default function ProcessingCardTestPage() {
 
             {/* Completed Preview comparison */}
             <div className="flex flex-col gap-2">
-              <span className="text-xs text-white/50 font-mono">ProcessingCard without %</span>
+              <span className="ds-type-small text-white/50 font-mono">ProcessingCard without %</span>
               <ProcessingCard
                 showPlayIcon={showPlayIcon}
                 aspectRatio="370/240"
@@ -218,28 +218,28 @@ export default function ProcessingCardTestPage() {
         </section>
 
         {/* ── Specs Breakdown ── */}
-        <section className="p-6 rounded-2xl bg-white/[0.02] border border-white/10 flex flex-col gap-3">
-          <div className="flex items-center gap-2 text-white/80 font-medium text-sm">
-            <HugeIcon name="sparkles" className="text-base text-white/60" />
+        <section className="p-6 rounded-comfortable bg-white/[0.02] border border-white/10 flex flex-col gap-3">
+          <div className="flex items-center gap-2 text-white/80 ds-type-caption-label">
+            <HugeIcon name="sparkles" size="md" className="text-white/60" />
             Reverse Engineered Video Analysis Specifications
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-white/60">
-            <div className="flex flex-col gap-1 p-3 rounded-lg bg-black/40 border border-white/5">
-              <span className="text-white font-medium">Card Container</span>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 ds-type-small text-white/60">
+            <div className="flex flex-col gap-1 p-3 rounded-comfortable bg-black/40 border border-white/5">
+              <span className="ds-type-caption-label text-white">Card Container</span>
               <span>Background: <code className="text-white/80">bg-canvas-bg</code> (pure neutral dark)</span>
-              <span>Radius: <code className="text-white/80">rounded-2xl</code> (~16px)</span>
+              <span>Radius: <code className="text-white/80">rounded-comfortable</code> (8px)</span>
               <span>No skeleton shimmer, no spinner</span>
             </div>
-            <div className="flex flex-col gap-1 p-3 rounded-lg bg-black/40 border border-white/5">
-              <span className="text-white font-medium">Blobs Motion</span>
+            <div className="flex flex-col gap-1 p-3 rounded-comfortable bg-black/40 border border-white/5">
+              <span className="ds-type-caption-label text-white">Blobs Motion</span>
               <span>Blob A: 55% x 70%, 10s orbital loop</span>
               <span>Blob B: 40% x 50%, 13s loop (opacity 0.5)</span>
               <span>Blur: <code className="text-white/80">blur-3xl</code> (~64px ethereal glow)</span>
             </div>
-            <div className="flex flex-col gap-1 p-3 rounded-lg bg-black/40 border border-white/5">
-              <span className="text-white font-medium">Overlays</span>
+            <div className="flex flex-col gap-1 p-3 rounded-comfortable bg-black/40 border border-white/5">
+              <span className="ds-type-caption-label text-white">Overlays</span>
               <span>Top-left: Semi-transparent Play icon (~16px)</span>
-              <span>Top-right: <code className="text-white/80">11px font-medium text-white/60</code></span>
+              <span>Top-right: <code className="text-white/80">ds-type-micro-tag text-white/60</code></span>
               <span>Tabular numbers for smooth % incrementation</span>
             </div>
           </div>

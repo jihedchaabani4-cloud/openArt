@@ -72,7 +72,7 @@ export function UserDropdown({
       return (
         <div className={cn("ds-nav-item pointer-events-none", className)}>
           <span className="size-5 rounded-full animate-pulse bg-surface-card shrink-0" />
-          <span className={cn("h-3 w-20 rounded animate-pulse bg-surface-card", !expanded && "sr-only")} />
+          <span className={cn("h-3 w-20 rounded-sharp animate-pulse bg-surface-card", !expanded && "sr-only")} />
         </div>
       );
     }
@@ -103,7 +103,7 @@ export function UserDropdown({
             onClick={() => setLoginOpen(true)}
             variant="ghost"
             size="s"
-            className={cn("h-7 max-h-full px-3 ds-text-caption-m font-semibold text-text-primary", className)}
+            className={cn("h-7 max-h-full px-3 text-text-primary", className)}
           >
             Login
           </Button>
@@ -132,7 +132,7 @@ export function UserDropdown({
             >
               <Avatar className="size-5 rounded-full bg-transparent shrink-0">
                 <AvatarImage src={avatarUrl} alt={displayName} />
-                <AvatarFallback className="rounded-full bg-ui-button-tonal ds-text-caption-s font-semibold text-text-primary-soft">
+                <AvatarFallback className="rounded-full bg-ui-button-tonal ds-type-micro-tag text-text-primary-soft">
                   {initials}
                 </AvatarFallback>
               </Avatar>
@@ -142,7 +142,7 @@ export function UserDropdown({
               {expanded && (
                 <span
                   data-testid="sidebar-credits-badge"
-                  className="inline-flex items-center gap-1 rounded-md bg-surface-tonal px-1.5 py-0.5 ds-text-caption-s font-medium text-text-secondary tabular-nums shrink-0"
+                  className="inline-flex items-center gap-1 rounded-sharp bg-surface-tonal px-1.5 py-0.5 ds-type-micro-tag text-text-secondary tabular-nums shrink-0"
                 >
                   <HugeIcon name="flash" size="xs" className="text-icon-secondary" />
                   <span>{walletBalance}</span>
@@ -158,7 +158,7 @@ export function UserDropdown({
             >
               <Avatar className="size-full rounded-full bg-transparent">
                 <AvatarImage src={avatarUrl} alt={displayName} />
-                <AvatarFallback className="rounded-full bg-ui-button-tonal ds-text-caption-s font-semibold text-text-primary-soft">
+                <AvatarFallback className="rounded-full bg-ui-button-tonal ds-type-micro-tag text-text-primary-soft">
                   {initials}
                 </AvatarFallback>
               </Avatar>
@@ -170,30 +170,30 @@ export function UserDropdown({
           <div className="flex items-center gap-2.5 px-2 py-2">
             <Avatar className="size-9 rounded-full bg-transparent shrink-0">
               <AvatarImage src={avatarUrl} alt={displayName} />
-              <AvatarFallback className="rounded-full bg-primary text-primary-foreground ds-text-caption-m font-semibold">
+              <AvatarFallback className="rounded-full bg-primary text-primary-foreground ds-type-small">
                 {initials.slice(0, 1)}
               </AvatarFallback>
             </Avatar>
 
             <div className="min-w-0 flex-1">
-              <p className="truncate ds-text-caption-m font-medium leading-tight text-text-primary">
+              <p className="truncate ds-type-caption-label text-text-primary">
                 {displayName}
               </p>
-              <p className="truncate pt-0.5 ds-text-caption-s text-text-secondary">
+              <p className="truncate pt-0.5 ds-type-micro-tag text-text-secondary">
                 {email}
               </p>
             </div>
           </div>
 
-          <div className="mx-1 mb-1 flex flex-col gap-2.5 rounded-lg bg-surface-card p-3">
+          <div className="mx-1 mb-1 flex flex-col gap-2.5 rounded-comfortable bg-surface-card p-3">
             <div className="flex flex-col gap-0.5">
               <div className="flex items-center gap-2">
                 <HugeIcon name="ai-video" className="text-icon-primary" />
-                <span className="ds-text-caption-m font-medium text-text-primary">
+                <span className="ds-type-caption-label text-text-primary">
                   {walletBalance} Crédits IA
                 </span>
               </div>
-              <p className="ds-text-caption-s font-normal text-text-secondary">
+              <p className="ds-type-micro-tag text-text-secondary">
                 Les crédits sont actualisés quotidiennement
               </p>
             </div>
@@ -205,7 +205,7 @@ export function UserDropdown({
                 setDropdownOpen(false);
                 setTimeout(() => setIsPricingOpen(true), 150);
               }}
-              className="h-7 w-full ds-text-caption-m font-semibold"
+              className="h-7 w-full"
             >
               Upgrade
             </Button>

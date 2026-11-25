@@ -9,7 +9,7 @@ describe("NewCharacterPage generated-prompt shine", () => {
   );
 
   it("shows the generated-prompt label through ShineText while the request is in flight", () => {
-    expect(pageFile).toContain('<ShineText className="text-[0.6875rem] font-medium pt-0.5">');
+    expect(pageFile).toContain('<ShineText className="ds-type-micro-tag pt-0.5">');
     expect(pageFile).toContain("Génération du prompt...");
   });
 

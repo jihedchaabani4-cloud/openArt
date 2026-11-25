@@ -137,7 +137,7 @@ export function UploadingCard({
           />
           <span
             data-slot="uploading-progress-value"
-            className="ds-text-caption-s font-medium text-white tabular-nums leading-none whitespace-nowrap"
+            className="ds-type-micro-tag text-white tabular-nums whitespace-nowrap"
           >
             {isProcessingUpload ? "Processing" : `${resolvedPercent}%`}
           </span>

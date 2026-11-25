@@ -97,7 +97,7 @@ const INITIAL_REFERENCES = [
 ];
 
 const editorTheme = {
-  paragraph: "text-white/90 text-[14.5px] leading-relaxed",
+  paragraph: "text-white/90 ds-type-body",
 };
 
 function AtShortcutPlugin({ onTriggerMention, onMentionQueryChange, mentionOpen }) {
@@ -328,23 +328,23 @@ export default function TestMentionPage() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-white/10">
           <div>
             <div className="flex items-center gap-2 mb-1.5">
-              <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold tracking-wide bg-blue-500/20 text-blue-400 border border-blue-500/30">
+              <span className="px-2 py-0.5 rounded-sharp ds-type-micro-tag bg-blue-500/20 text-blue-400 border border-blue-500/30">
                 PROMPT BAR EXPERIMENTAL LAB
               </span>
-              <span className="text-white/40 text-[12px]">•</span>
-              <span className="text-white/50 text-[12px]">Interactive Mention UI Comparison</span>
+              <span className="text-white/40 ds-type-small">•</span>
+              <span className="text-white/50 ds-type-small">Interactive Mention UI Comparison</span>
             </div>
-            <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-white flex items-center gap-2.5">
-              <HugeIcon name="at" className="text-[28px] text-blue-400" />
+            <h1 className="ds-type-card-title text-white flex items-center gap-2.5">
+              <HugeIcon name="at" size="2xl" className="text-blue-400" />
               Mention Component Test Arena
             </h1>
-            <p className="text-white/60 text-[13.5px] mt-1">
-              Compare the in-editor floating dropdown (<span className="text-white font-medium">Version 1</span>) against the top-panel shell zone (<span className="text-white font-medium">Version 2</span>).
+            <p className="text-white/60 ds-type-small mt-1">
+              Compare the in-editor floating dropdown (<span className="ds-type-caption-label text-white">Version 1</span>) against the top-panel shell zone (<span className="ds-type-caption-label text-white">Version 2</span>).
             </p>
           </div>
 
           {/* View Mode Switcher */}
-          <div className="flex items-center gap-1 p-1 rounded-2xl bg-omni-bg border border-white/10 shrink-0 self-start md:self-auto">
+          <div className="flex items-center gap-1 p-1 rounded-comfortable bg-omni-bg border border-white/10 shrink-0 self-start md:self-auto">
             <Button
               type="button"
               variant={activeTab === "both" ? "primary" : "ghost"}
@@ -370,20 +370,20 @@ export default function TestMentionPage() {
         </div>
 
         {/* Global Reference Store Bar */}
-        <div className="mt-4 p-4 rounded-2xl bg-omni-bg/60 border border-white/5 backdrop-blur-md flex flex-wrap items-center justify-between gap-3">
+        <div className="mt-4 p-4 rounded-comfortable bg-omni-bg/60 border border-white/5 backdrop-blur-md flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <span className="text-[12px] font-semibold text-white/70 uppercase tracking-wider flex items-center gap-1.5">
-              <HugeIcon name="album-02" className="text-[16px] text-white/50" />
+            <span className="ds-type-caption-label text-white/70 flex items-center gap-1.5">
+              <HugeIcon name="album-02" size="md" className="text-white/50" />
               Active References Pool ({references.length}):
             </span>
             <div className="flex items-center gap-1.5 flex-wrap">
               {references.map((ref) => (
                 <div
                   key={ref.id}
-                  className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-white/5 border border-white/10 text-[11px] text-white/90"
+                  className="flex items-center gap-1.5 px-2 py-1 rounded-subtle bg-white/5 border border-white/10 ds-type-micro-tag text-white/90"
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={ref.url} alt="" className="size-4 rounded object-cover" />
+                  <img src={ref.url} alt="" className="size-4 rounded-sharp object-cover" />
                   <span className="truncate max-w-[100px]">{ref.displayName}</span>
                 </div>
               ))}
@@ -394,16 +394,16 @@ export default function TestMentionPage() {
             <Button
               type="button"
               variant="secondary"
-              className="h-6 px-2 text-xs"
+              className="h-6 px-2 ds-type-small"
               onClick={handleAddSample}
             >
-              <HugeIcon name="add-01" className="text-[14px]" />
+              <HugeIcon name="add-01" size="sm" />
               Add Sample
             </Button>
             <Button
               type="button"
               variant="ghost"
-              className="h-6 px-2 text-xs"
+              className="h-6 px-2 ds-type-small"
               onClick={handleResetReferences}
             >
               Reset Pool
@@ -416,21 +416,21 @@ export default function TestMentionPage() {
       <div className={`max-w-6xl mx-auto grid gap-8 ${activeTab === "both" ? "grid-cols-1 lg:grid-cols-2" : "grid-cols-1"}`}>
         {/* ── VERSION 1 CARD ── */}
         {(activeTab === "both" || activeTab === "v1") && (
-          <div className="flex flex-col gap-4 rounded-2xl bg-omni-bg/90 border border-white/10 p-6 shadow-none relative">
+          <div className="flex flex-col gap-4 rounded-comfortable bg-omni-bg/90 border border-white/10 p-6 shadow-none relative">
             {/* Header Badge */}
             <div className="flex items-center justify-between pb-3 border-b border-white/5">
               <div className="flex items-center gap-2.5">
-                <span className="size-8 rounded-lg bg-purple-500/20 text-purple-400 border border-purple-500/30 flex items-center justify-center font-bold text-[13px]">
+                <span className="size-8 rounded-subtle bg-purple-500/20 text-purple-400 border border-purple-500/30 flex items-center justify-center ds-type-button">
                   V1
                 </span>
                 <div>
-                  <h2 className="text-base font-semibold text-white flex items-center gap-2">
+                  <h2 className="ds-type-body text-white flex items-center gap-2">
                     In-Editor Floating Dropdown
-                    <span className="px-2 py-0.5 rounded-full text-[10px] bg-purple-500/20 text-purple-300 font-mono">
+                    <span className="px-2 py-0.5 rounded-sharp ds-type-micro-tag bg-purple-500/20 text-purple-300 font-mono">
                       MentionPlugin.jsx
                     </span>
                   </h2>
-                  <p className="text-white/40 text-[11.5px]">
+                  <p className="text-white/40 ds-type-micro-tag">
                     Opens at exact caret coordinates inside textarea. Full keyboard navigation.
                   </p>
                 </div>
@@ -438,28 +438,28 @@ export default function TestMentionPage() {
             </div>
 
             {/* Instruction Callout */}
-            <div className="p-3 rounded-2xl bg-purple-500/10 border border-purple-500/20 text-[12px] text-purple-200/90 flex items-start gap-2.5">
-              <HugeIcon name="information-circle" className="text-[18px] shrink-0 text-purple-300 mt-0.5" />
+            <div className="p-3 rounded-comfortable bg-purple-500/10 border border-purple-500/20 ds-type-small text-purple-200/90 flex items-start gap-2.5">
+              <HugeIcon name="information-circle" size="lg" className="shrink-0 text-purple-300 mt-0.5" />
               <div>
-                <p className="font-semibold text-white">How to test:</p>
+                <p className="ds-type-caption-label text-white">How to test:</p>
                 <p className="mt-0.5">
-                  Click inside the input below and type <kbd className="px-1.5 py-0.5 bg-black/40 rounded border border-white/20 font-mono text-purple-200">@</kbd>.
-                  The floating menu will appear directly under your cursor. Use <kbd className="px-1 py-0.5 bg-black/40 rounded border border-white/20 text-[10px]">↑</kbd> <kbd className="px-1 py-0.5 bg-black/40 rounded border border-white/20 text-[10px]">↓</kbd> and <kbd className="px-1 py-0.5 bg-black/40 rounded border border-white/20 text-[10px]">Enter</kbd> to insert.
+                  Click inside the input below and type <kbd className="px-1.5 py-0.5 bg-black/40 rounded-sharp border border-white/20 font-mono text-purple-200">@</kbd>.
+                  The floating menu will appear directly under your cursor. Use <kbd className="px-1 py-0.5 bg-black/40 rounded-sharp border border-white/20 ds-type-micro-tag">↑</kbd> <kbd className="px-1 py-0.5 bg-black/40 rounded-sharp border border-white/20 ds-type-micro-tag">↓</kbd> and <kbd className="px-1 py-0.5 bg-black/40 rounded-sharp border border-white/20 ds-type-micro-tag">Enter</kbd> to insert.
                 </p>
               </div>
             </div>
 
             {/* Interactive Prompt Bar Shell */}
             <div className="relative mt-2">
-              <div className="rounded-2xl bg-omni-bg/80 backdrop-blur-xl border border-white/10 p-4 shadow-none focus-within:border-white/30 transition-all">
+              <div className="rounded-comfortable bg-omni-bg/80 backdrop-blur-xl border border-white/10 p-4 shadow-none focus-within:border-white/30 transition-all">
                 <LexicalComposer initialConfig={initialConfigV1}>
                   <div className="relative min-h-[70px] w-full">
                     <RichTextPlugin
                       contentEditable={
-                        <ContentEditable className="outline-none text-white text-[14.5px] leading-relaxed min-h-[60px] py-1" />
+                        <ContentEditable className="outline-none text-white ds-type-body min-h-[60px] py-1" />
                       }
                       placeholder={
-                        <span className="absolute top-1 left-0 text-white/30 text-[14.5px] pointer-events-none">
+                        <span className="absolute top-1 left-0 text-white/30 ds-type-body pointer-events-none">
                           Type @ to trigger floating mention...
                         </span>
                       }
@@ -482,14 +482,14 @@ export default function TestMentionPage() {
 
                 {/* Bottom Bar Details */}
                 <div className="pt-3 mt-2 border-t border-white/5 flex items-center justify-between">
-                  <div className="flex items-center gap-1.5 text-[11px] text-white/40">
-                    <HugeIcon name="keyboard" className="text-[14px]" />
+                  <div className="flex items-center gap-1.5 ds-type-micro-tag text-white/40">
+                    <HugeIcon name="keyboard" size="sm" />
                     <span>Trigger: Typing @</span>
                   </div>
                   <Button
                     type="button"
                     variant="primary"
-                    className="h-6 px-2 text-xs"
+                    className="h-6 px-2 ds-type-small"
                     onClick={() => alert(`Submitted V1 prompt: ${v1RawOutput}`)}
                   >
                     Generate
@@ -499,12 +499,12 @@ export default function TestMentionPage() {
             </div>
 
             {/* Live Serialized Prompt Output */}
-            <div className="mt-2 p-3 rounded-2xl bg-black/40 border border-white/5">
-              <div className="text-[10px] uppercase tracking-wider font-semibold text-white/40 mb-1 flex items-center justify-between">
+            <div className="mt-2 p-3 rounded-comfortable bg-black/40 border border-white/5">
+              <div className="ds-type-micro-tag uppercase text-white/40 mb-1 flex items-center justify-between">
                 <span>Serialized Prompt Output:</span>
                 <span className="font-mono text-purple-300">Lexical TextNode / MentionNode</span>
               </div>
-              <div className="font-mono text-[12px] text-purple-200/90 break-all select-all min-h-[20px]">
+              <div className="font-mono ds-type-small text-purple-200/90 break-all select-all min-h-[20px]">
                 {v1RawOutput || <span className="text-white/20 italic">Empty prompt...</span>}
               </div>
             </div>
@@ -513,21 +513,21 @@ export default function TestMentionPage() {
 
         {/* ── VERSION 2 CARD ── */}
         {(activeTab === "both" || activeTab === "v2") && (
-          <div className="flex flex-col gap-4 rounded-2xl bg-omni-bg/90 border border-white/10 p-6 shadow-none relative">
+          <div className="flex flex-col gap-4 rounded-comfortable bg-omni-bg/90 border border-white/10 p-6 shadow-none relative">
             {/* Header Badge */}
             <div className="flex items-center justify-between pb-3 border-b border-white/5">
               <div className="flex items-center gap-2.5">
-                <span className="size-8 rounded-lg bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 flex items-center justify-center font-bold text-[13px]">
+                <span className="size-8 rounded-subtle bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 flex items-center justify-center ds-type-button">
                   V2
                 </span>
                 <div>
-                  <h2 className="text-base font-semibold text-white flex items-center gap-2">
+                  <h2 className="ds-type-body text-white flex items-center gap-2">
                     Krea-Style Mention Menu & Prompt Bar
-                    <span className="px-2 py-0.5 rounded-full text-[10px] bg-cyan-500/20 text-cyan-300 font-mono">
+                    <span className="px-2 py-0.5 rounded-sharp ds-type-micro-tag bg-cyan-500/20 text-cyan-300 font-mono">
                       AtMentionMenu.jsx
                     </span>
                   </h2>
-                  <p className="text-white/40 text-[11.5px]">
+                  <p className="text-white/40 ds-type-micro-tag">
                     Floating top panel matching prompt bar style with Add (Files & Asset library) and zero borders.
                   </p>
                 </div>
@@ -535,12 +535,12 @@ export default function TestMentionPage() {
             </div>
 
             {/* Instruction Callout */}
-            <div className="p-3 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 text-[12px] text-cyan-200/90 flex items-start gap-2.5">
-              <HugeIcon name="information-circle" className="text-[18px] shrink-0 text-cyan-300 mt-0.5" />
+            <div className="p-3 rounded-comfortable bg-cyan-500/10 border border-cyan-500/20 ds-type-small text-cyan-200/90 flex items-start gap-2.5">
+              <HugeIcon name="information-circle" size="lg" className="shrink-0 text-cyan-300 mt-0.5" />
               <div>
-                <p className="font-semibold text-white">How to test:</p>
+                <p className="ds-type-caption-label text-white">How to test:</p>
                 <p className="mt-0.5">
-                  Click inside the input below and type <kbd className="px-1.5 py-0.5 bg-black/40 rounded border border-white/20 font-mono text-cyan-200">@</kbd> (or click the @ button).
+                  Click inside the input below and type <kbd className="px-1.5 py-0.5 bg-black/40 rounded-sharp border border-white/20 font-mono text-cyan-200">@</kbd> (or click the @ button).
                   The top panel appears above the prompt bar. Select an asset with click or arrow keys.
                 </p>
               </div>
@@ -550,15 +550,15 @@ export default function TestMentionPage() {
             <div className="relative mt-2 flex flex-col items-center gap-2 w-full" ref={v2AnchorRef}>
 
               {/* Prompt Bar Shell (Border-free and shadow-free matching prompt bar) */}
-              <div className="w-full rounded-2xl bg-(--background-state-90) backdrop-blur-80 p-3.5 shadow-none transition-all border-0">
+              <div className="w-full rounded-comfortable bg-(--background-state-90) backdrop-blur-80 p-3.5 shadow-none transition-all border-0">
                 <LexicalComposer initialConfig={initialConfigV2}>
                   <div className="relative min-h-[50px] w-full px-1">
                     <RichTextPlugin
                       contentEditable={
-                        <ContentEditable className="outline-none text-white text-[15px] leading-relaxed min-h-[46px] py-1" />
+                        <ContentEditable className="outline-none text-white ds-type-body min-h-[46px] py-1" />
                       }
                       placeholder={
-                        <span className="absolute top-1 left-1 text-white/30 text-[15px] pointer-events-none">
+                        <span className="absolute top-1 left-1 text-white/30 ds-type-body pointer-events-none">
                           Type @ to trigger mention menu...
                         </span>
                       }
@@ -595,7 +595,7 @@ export default function TestMentionPage() {
                     onClick={() => setV2PanelOpen(true)}
                     title="Add media, reference or connector"
                   >
-                    <HugeIcon name="add-01" className="text-[18px]" />
+                    <HugeIcon name="add-01" size="lg" />
                   </IconButton>
 
                   <div className="flex items-center gap-2">
@@ -605,9 +605,9 @@ export default function TestMentionPage() {
                       variant="pill"
                       className="gap-1.5"
                     >
-                      <span className="font-semibold text-white">Auto</span>
+                      <span className="ds-type-button text-white">Auto</span>
                       <span className="text-white/60">Medium</span>
-                      <HugeIcon name="arrow-down-01" className="text-[15px] text-white/40" />
+                      <HugeIcon name="arrow-down-01" size="md" className="text-white/40" />
                     </Button>
 
                     {/* Microphone Voice Button */}
@@ -616,7 +616,7 @@ export default function TestMentionPage() {
                       variant="ghost"
                       title="Voice Input"
                     >
-                      <HugeIcon name="mic-01" className="text-[18px]" />
+                      <HugeIcon name="mic-01" size="lg" />
                     </IconButton>
 
                     {/* Circular White Action Button with Black '+' */}
@@ -626,7 +626,7 @@ export default function TestMentionPage() {
                       onClick={() => alert(`Submitted prompt: ${v2RawOutput}`)}
                       title="Generate"
                     >
-                      <HugeIcon name="add-01" className="text-[20px] font-bold" />
+                      <HugeIcon name="add-01" size="lg" weight="bold" />
                     </IconButton>
                   </div>
                 </div>
@@ -634,12 +634,12 @@ export default function TestMentionPage() {
             </div>
 
             {/* Live Serialized Prompt Output */}
-            <div className="mt-2 p-3 rounded-2xl bg-black/40 border border-white/5">
-              <div className="text-[10px] uppercase tracking-wider font-semibold text-white/40 mb-1 flex items-center justify-between">
+            <div className="mt-2 p-3 rounded-comfortable bg-black/40 border border-white/5">
+              <div className="ds-type-micro-tag uppercase text-white/40 mb-1 flex items-center justify-between">
                 <span>Serialized Prompt Output:</span>
                 <span className="font-mono text-cyan-300">Lexical TextNode / MentionNode</span>
               </div>
-              <div className="font-mono text-[12px] text-cyan-200/90 break-all select-all min-h-[20px]">
+              <div className="font-mono ds-type-small text-cyan-200/90 break-all select-all min-h-[20px]">
                 {v2RawOutput || <span className="text-white/20 italic">Empty prompt...</span>}
               </div>
             </div>
@@ -648,16 +648,16 @@ export default function TestMentionPage() {
       </div>
 
       {/* Feature Comparison Table */}
-      <div className="max-w-6xl mx-auto mt-12 p-6 rounded-2xl bg-omni-bg/80 border border-white/10 backdrop-blur-xl">
-        <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-          <HugeIcon name="table" className="text-[20px] text-white/70" />
+      <div className="max-w-6xl mx-auto mt-12 p-6 rounded-comfortable bg-omni-bg/80 border border-white/10 backdrop-blur-xl">
+        <h3 className="ds-type-feature-title text-white mb-4 flex items-center gap-2">
+          <HugeIcon name="table" size="lg" className="text-white/70" />
           Comparison Breakdown
         </h3>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-[13px]">
+          <table className="w-full text-left ds-type-small">
             <thead>
-              <tr className="border-b border-white/10 text-white/40 text-[11px] uppercase tracking-wider">
+              <tr className="border-b border-white/10 text-white/40 ds-type-micro-tag uppercase">
                 <th className="pb-3 pr-4">Feature / Behavior</th>
                 <th className="pb-3 px-4 text-purple-300">Version 1 (Floating Caret Popover)</th>
                 <th className="pb-3 pl-4 text-cyan-300">Version 2 (Top Panel Shelf Zone)</th>
@@ -665,27 +665,27 @@ export default function TestMentionPage() {
             </thead>
             <tbody className="divide-y divide-white/5 text-white/80">
               <tr>
-                <td className="py-3 pr-4 font-medium text-white">Visual Anchor</td>
+                <td className="py-3 pr-4 ds-type-caption-label text-white">Visual Anchor</td>
                 <td className="py-3 px-4 text-white/70">Floats directly under the typing caret inside the text area.</td>
                 <td className="py-3 pl-4 text-white/70">Floats centered above the entire PromptBar container.</td>
               </tr>
               <tr>
-                <td className="py-3 pr-4 font-medium text-white">Trigger Experience</td>
-                <td className="py-3 px-4 text-white/70">Typing <kbd className="px-1 py-0.5 rounded bg-white/10 font-mono text-[11px]">@</kbd> queries dynamically as you keep typing letters.</td>
-                <td className="py-3 pl-4 text-white/70">Typing <kbd className="px-1 py-0.5 rounded bg-white/10 font-mono text-[11px]">@</kbd> pops open a full panel menu with search bar.</td>
+                <td className="py-3 pr-4 ds-type-caption-label text-white">Trigger Experience</td>
+                <td className="py-3 px-4 text-white/70">Typing <kbd className="px-1 py-0.5 rounded-sharp bg-white/10 font-mono ds-type-micro-tag">@</kbd> queries dynamically as you keep typing letters.</td>
+                <td className="py-3 pl-4 text-white/70">Typing <kbd className="px-1 py-0.5 rounded-sharp bg-white/10 font-mono ds-type-micro-tag">@</kbd> pops open a full panel menu with search bar.</td>
               </tr>
               <tr>
-                <td className="py-3 pr-4 font-medium text-white">Keyboard Navigation</td>
+                <td className="py-3 pr-4 ds-type-caption-label text-white">Keyboard Navigation</td>
                 <td className="py-3 px-4 text-white/70">↑, ↓, Enter, Tab, Escape natively inside the Lexical flow.</td>
                 <td className="py-3 pl-4 text-white/70">Dedicated search filter input + keyboard list selection.</td>
               </tr>
               <tr>
-                <td className="py-3 pr-4 font-medium text-white">Mobile / Narrow Viewports</td>
+                <td className="py-3 pr-4 ds-type-caption-label text-white">Mobile / Narrow Viewports</td>
                 <td className="py-3 px-4 text-white/70">Compact popup, bound to cursor bounds.</td>
                 <td className="py-3 pl-4 text-white/70">Expansive top panel, easy to tap touch targets.</td>
               </tr>
               <tr>
-                <td className="py-3 pr-4 font-medium text-white">Chip Generation</td>
+                <td className="py-3 pr-4 ds-type-caption-label text-white">Chip Generation</td>
                 <td className="py-3 px-4 text-white/70">Replaces typed <code className="text-purple-300">@query</code> with <code className="text-purple-300">&lt;MentionTag&gt;</code> badge.</td>
                 <td className="py-3 pl-4 text-white/70">Inserts <code className="text-cyan-300">&lt;MentionTag&gt;</code> badge at cursor position.</td>
               </tr>

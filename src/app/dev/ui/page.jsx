@@ -30,6 +30,7 @@ import {
   InteractiveListRow,
   Switch,
   Input,
+  Label,
   Checkbox,
   Badge,
   StatusBanner,
@@ -75,14 +76,14 @@ export default function DesignSystemShowcasePage() {
       {/* Top Header */}
       <header className="h-16 border-b border-white/10 px-6 flex items-center justify-between bg-black/60 backdrop-blur-md sticky top-0 z-40">
         <div className="flex items-center gap-3">
-          <div className="size-8 rounded-sm bg-lime-400 text-black flex items-center justify-center font-bold text-sm">
+          <div className="size-8 rounded-subtle bg-lime-400 text-black flex items-center justify-center ds-type-button">
             DS
           </div>
           <div>
-            <h1 className="text-sm font-semibold text-white leading-none">
+            <h1 className="ds-type-caption-label text-white">
               Labveil Design System
             </h1>
-            <p className="text-xs text-muted-foreground mt-1">
+            <p className="ds-type-small text-muted-foreground mt-1">
               Living Component Showcase &amp; 12 Base UI Primitives
             </p>
           </div>
@@ -97,15 +98,15 @@ export default function DesignSystemShowcasePage() {
       <div className="flex-1 flex flex-col md:flex-row">
         {/* Navigation Sidebar */}
         <aside className="w-full md:w-[224px] relative border-b md:border-b-0 md:border-r border-white/10 p-4 shrink-0 bg-card/40 flex flex-col gap-1">
-          <div className="text-xs font-semibold text-muted-foreground px-3 py-2 uppercase tracking-wider">
+          <Label as="div" className="px-3 py-2">
             12 Base Primitives
-          </div>
+          </Label>
           <Button
             variant={activeSection === "buttons" ? "secondary" : "ghost"}
             onClick={() => setActiveSection("buttons")}
             className="w-full justify-start gap-2"
           >
-            <HugeIcon name="cursor-rectangle-selection-01" className="text-base" />
+            <HugeIcon name="cursor-rectangle-selection-01" size="md" />
             <span>Buttons &amp; Actions</span>
           </Button>
           <Button
@@ -113,7 +114,7 @@ export default function DesignSystemShowcasePage() {
             onClick={() => setActiveSection("forms")}
             className="w-full justify-start gap-2"
           >
-            <HugeIcon name="note-edit" className="text-base" />
+            <HugeIcon name="note-edit" size="md" />
             <span>Form Inputs</span>
           </Button>
           <Button
@@ -121,7 +122,7 @@ export default function DesignSystemShowcasePage() {
             onClick={() => setActiveSection("overlays")}
             className="w-full justify-start gap-2"
           >
-            <HugeIcon name="layers-01" className="text-base" />
+            <HugeIcon name="layers-01" size="md" />
             <span>Overlays &amp; Dialogs</span>
           </Button>
           <Button
@@ -129,7 +130,7 @@ export default function DesignSystemShowcasePage() {
             onClick={() => setActiveSection("navigation")}
             className="w-full justify-start gap-2"
           >
-            <HugeIcon name="browser" className="text-base" />
+            <HugeIcon name="browser" size="md" />
             <span>Navigation &amp; Tabs</span>
           </Button>
           <Button
@@ -137,7 +138,7 @@ export default function DesignSystemShowcasePage() {
             onClick={() => setActiveSection("cards")}
             className="w-full justify-start gap-2"
           >
-            <HugeIcon name="dashboard-square-01" className="text-base" />
+            <HugeIcon name="dashboard-square-01" size="md" />
             <span>Cards &amp; Containers</span>
           </Button>
           <Button
@@ -145,7 +146,7 @@ export default function DesignSystemShowcasePage() {
             onClick={() => setActiveSection("feedback")}
             className="w-full justify-start gap-2"
           >
-            <HugeIcon name="analytics-up" className="text-base" />
+            <HugeIcon name="analytics-up" size="md" />
             <span>Feedback &amp; Skeletons</span>
           </Button>
           <Button
@@ -153,7 +154,7 @@ export default function DesignSystemShowcasePage() {
             onClick={() => setActiveSection("tokens")}
             className="w-full justify-start gap-2"
           >
-            <HugeIcon name="paint-board" className="text-base" />
+            <HugeIcon name="paint-board" size="md" />
             <span>Design Tokens</span>
           </Button>
         </aside>
@@ -164,82 +165,82 @@ export default function DesignSystemShowcasePage() {
           {activeSection === "buttons" && (
             <div className="flex flex-col gap-8">
               <div>
-                <h2 className="text-xl font-bold">Button &amp; IconButton Primitives</h2>
-                <p className="text-sm text-muted-foreground mt-1">
+                <h2 className="ds-type-feature-title">Button &amp; IconButton Primitives</h2>
+                <p className="ds-type-small text-muted-foreground mt-1">
                   100% token-based .ds-btn-* and .ds-icon-btn-* variants with focus-workspace / focus-chrome.
                 </p>
               </div>
 
               {/* All Official Button Variants */}
               <div className="flex flex-col gap-3">
-                <h3 className="text-sm font-semibold text-white/90">Official Button Variants (Default vs Disabled)</h3>
+                <h3 className="ds-type-caption-label text-white/90">Official Button Variants (Default vs Disabled)</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                  <div className="flex flex-col gap-2 p-3 rounded-xl bg-white/5 border border-white/5">
-                    <span className="text-xs text-white/50 font-mono">primary (.ds-btn-primary)</span>
+                  <div className="flex flex-col gap-2 p-3 rounded-comfortable bg-white/5 border border-white/5">
+                    <span className="ds-type-small text-white/50 font-mono">primary (.ds-btn-primary)</span>
                     <div className="flex items-center gap-2">
                       <Button variant="primary">Generate</Button>
                       <Button variant="primary" disabled>Disabled</Button>
                     </div>
                   </div>
 
-                  <div className="flex flex-col gap-2 p-3 rounded-xl bg-white/5 border border-white/5">
-                    <span className="text-xs text-white/50 font-mono">cta-lg (.ds-btn-cta-lg)</span>
+                  <div className="flex flex-col gap-2 p-3 rounded-comfortable bg-white/5 border border-white/5">
+                    <span className="ds-type-small text-white/50 font-mono">cta-lg (.ds-btn-cta-lg)</span>
                     <div className="flex items-center gap-2">
                       <Button variant="cta-lg">Get Started</Button>
                       <Button variant="cta-lg" disabled>Disabled</Button>
                     </div>
                   </div>
 
-                  <div className="flex flex-col gap-2 p-3 rounded-xl bg-white/5 border border-white/5">
-                    <span className="text-xs text-white/50 font-mono">secondary (.ds-btn-secondary)</span>
+                  <div className="flex flex-col gap-2 p-3 rounded-comfortable bg-white/5 border border-white/5">
+                    <span className="ds-type-small text-white/50 font-mono">secondary (.ds-btn-secondary)</span>
                     <div className="flex items-center gap-2">
                       <Button variant="secondary">Cancel</Button>
                       <Button variant="secondary" disabled>Disabled</Button>
                     </div>
                   </div>
 
-                  <div className="flex flex-col gap-2 p-3 rounded-xl bg-white/5 border border-white/5">
-                    <span className="text-xs text-white/50 font-mono">tonal (.ds-btn-tonal)</span>
+                  <div className="flex flex-col gap-2 p-3 rounded-comfortable bg-white/5 border border-white/5">
+                    <span className="ds-type-small text-white/50 font-mono">tonal (.ds-btn-tonal)</span>
                     <div className="flex items-center gap-2">
                       <Button variant="tonal">Tonal Action</Button>
                       <Button variant="tonal" disabled>Disabled</Button>
                     </div>
                   </div>
 
-                  <div className="flex flex-col gap-2 p-3 rounded-xl bg-white/5 border border-white/5">
-                    <span className="text-xs text-white/50 font-mono">pill (.ds-btn-pill)</span>
+                  <div className="flex flex-col gap-2 p-3 rounded-comfortable bg-white/5 border border-white/5">
+                    <span className="ds-type-small text-white/50 font-mono">pill (.ds-btn-pill)</span>
                     <div className="flex items-center gap-2">
                       <Button variant="pill">Pill Filter</Button>
                       <Button variant="pill" disabled>Disabled</Button>
                     </div>
                   </div>
 
-                  <div className="flex flex-col gap-2 p-3 rounded-xl bg-white/5 border border-white/5">
-                    <span className="text-xs text-white/50 font-mono">filter-chip (.ds-filter-chip)</span>
+                  <div className="flex flex-col gap-2 p-3 rounded-comfortable bg-white/5 border border-white/5">
+                    <span className="ds-type-small text-white/50 font-mono">filter-chip (.ds-filter-chip)</span>
                     <div className="flex items-center gap-2">
                       <Button variant="filter-chip">Active Tag</Button>
                       <Button variant="filter-chip" disabled>Disabled</Button>
                     </div>
                   </div>
 
-                  <div className="flex flex-col gap-2 p-3 rounded-xl bg-white/5 border border-white/5">
-                    <span className="text-xs text-white/50 font-mono">outline (.ds-btn-outline)</span>
+                  <div className="flex flex-col gap-2 p-3 rounded-comfortable bg-white/5 border border-white/5">
+                    <span className="ds-type-small text-white/50 font-mono">outline (.ds-btn-outline)</span>
                     <div className="flex items-center gap-2">
                       <Button variant="outline">Settings</Button>
                       <Button variant="outline" disabled>Disabled</Button>
                     </div>
                   </div>
 
-                  <div className="flex flex-col gap-2 p-3 rounded-xl bg-white/5 border border-white/5">
-                    <span className="text-xs text-white/50 font-mono">ghost (.ds-btn-ghost)</span>
+                  <div className="flex flex-col gap-2 p-3 rounded-comfortable bg-white/5 border border-white/5">
+                    <span className="ds-type-small text-white/50 font-mono">ghost (.ds-btn-ghost)</span>
                     <div className="flex items-center gap-2">
                       <Button variant="ghost">Ghost Row</Button>
                       <Button variant="ghost" disabled>Disabled</Button>
                     </div>
                   </div>
 
-                  <div className="flex flex-col gap-2 p-3 rounded-xl bg-white/5 border border-white/5">
-                    <span className="text-xs text-white/50 font-mono">link (.ds-btn-link)</span>
+                  <div className="flex flex-col gap-2 p-3 rounded-comfortable bg-white/5 border border-white/5">
+                    <span className="ds-type-small text-white/50 font-mono">link (.ds-btn-link)</span>
                     <div className="flex items-center gap-2">
                       <Button variant="link">Documentation</Button>
                       <Button variant="link" disabled>Disabled</Button>
@@ -250,10 +251,10 @@ export default function DesignSystemShowcasePage() {
 
               {/* Official IconButton Variants */}
               <div className="flex flex-col gap-3">
-                <h3 className="text-sm font-semibold text-white/90">Official IconButton Variants (.focus-chrome)</h3>
-                <div className="flex flex-wrap items-center gap-4 p-4 rounded-xl bg-white/5 border border-white/5">
+                <h3 className="ds-type-caption-label text-white/90">Official IconButton Variants (.focus-chrome)</h3>
+                <div className="flex flex-wrap items-center gap-4 p-4 rounded-comfortable bg-white/5 border border-white/5">
                   <div className="flex flex-col items-center gap-1.5">
-                    <span className="text-xs text-white/50 font-mono">ghost</span>
+                    <span className="ds-type-small text-white/50 font-mono">ghost</span>
                     <div className="flex items-center gap-2">
                       <IconButton aria-label="Settings Ghost">
                         <HugeIcon name="settings-02" />
@@ -265,7 +266,7 @@ export default function DesignSystemShowcasePage() {
                   </div>
 
                   <div className="flex flex-col items-center gap-1.5">
-                    <span className="text-xs text-white/50 font-mono">tonal</span>
+                    <span className="ds-type-small text-white/50 font-mono">tonal</span>
                     <div className="flex items-center gap-2">
                       <IconButton variant="tonal" aria-label="Add Media">
                         <HugeIcon name="add-01" />
@@ -277,7 +278,7 @@ export default function DesignSystemShowcasePage() {
                   </div>
 
                   <div className="flex flex-col items-center gap-1.5">
-                    <span className="text-xs text-white/50 font-mono">outline</span>
+                    <span className="ds-type-small text-white/50 font-mono">outline</span>
                     <div className="flex items-center gap-2">
                       <IconButton variant="outline" aria-label="Filter Outline">
                         <HugeIcon name="sliders-horizontal" />
@@ -289,7 +290,7 @@ export default function DesignSystemShowcasePage() {
                   </div>
 
                   <div className="flex flex-col items-center gap-1.5">
-                    <span className="text-xs text-white/50 font-mono">carousel</span>
+                    <span className="ds-type-small text-white/50 font-mono">carousel</span>
                     <div className="flex items-center gap-2">
                       <IconButton variant="carousel" aria-label="Prev">
                         <HugeIcon name="arrow-left-01" />
@@ -304,7 +305,7 @@ export default function DesignSystemShowcasePage() {
 
               {/* Segmented ButtonGroup */}
               <div className="flex flex-col gap-3">
-                <h3 className="text-sm font-semibold text-white/90">Segmented ButtonGroup</h3>
+                <h3 className="ds-type-caption-label text-white/90">Segmented ButtonGroup</h3>
                 <ButtonGroup>
                   <Button variant="ghost" className="size-8 p-0" aria-label="Thumb Up">
                     <HugeIcon name="thumbs-up" />
@@ -324,20 +325,20 @@ export default function DesignSystemShowcasePage() {
           {activeSection === "forms" && (
             <div className="flex flex-col gap-6">
               <div>
-                <h2 className="text-xl font-bold">Form Controls &amp; Inputs</h2>
-                <p className="text-sm text-muted-foreground mt-1">
+                <h2 className="ds-type-feature-title">Form Controls &amp; Inputs</h2>
+                <p className="ds-type-small text-muted-foreground mt-1">
                   Accessible, encapsulated form controls (.ds-input, .ds-switch, .ds-checkbox).
                 </p>
               </div>
 
               {/* Text Input Variants */}
               <div className="flex flex-col gap-3">
-                <h3 className="text-sm font-semibold text-white/90">Input Variants</h3>
+                <h3 className="ds-type-caption-label text-white/90">Input Variants</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Input label="Default Input" placeholder="Enter title..." />
                   <Input variant="search" placeholder="Search prompts (bg-accent/50)..." />
-                  <div className="ds-composer-well rounded-xl p-2 flex items-center gap-2">
-                    <HugeIcon name="sparkles" className="text-base text-white/50" />
+                  <div className="ds-composer-well rounded-comfortable p-2 flex items-center gap-2">
+                    <HugeIcon name="sparkles" size="md" className="text-white/50" />
                     <Input variant="ghost" placeholder="Type prompt inside composer well (ghost)..." />
                   </div>
                   <Input label="Disabled State" placeholder="Cannot edit..." disabled />
@@ -346,61 +347,61 @@ export default function DesignSystemShowcasePage() {
 
               {/* Textarea */}
               <div className="flex flex-col gap-3">
-                <h3 className="text-sm font-semibold text-white/90">Auto-Resizing Textarea</h3>
+                <h3 className="ds-type-caption-label text-white/90">Auto-Resizing Textarea</h3>
                 <Textarea label="Prompt Instruction" placeholder="Describe the scene..." minHeight={100} />
               </div>
 
               {/* Toggles, Checkboxes & Radios */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 p-4 rounded-xl bg-card border border-white/5">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 p-4 rounded-comfortable bg-card border border-white/5">
                 {/* Switches */}
                 <div className="flex flex-col gap-3">
-                  <span className="text-xs font-semibold text-muted-foreground">Switches (.ds-switch)</span>
+                  <Label as="span">Switches (.ds-switch)</Label>
                   <div className="flex items-center gap-3">
                     <Switch checked={switchChecked} onCheckedChange={setSwitchChecked} />
-                    <span className="text-xs">Standard Active</span>
+                    <span className="ds-type-small">Standard Active</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <Switch size="sm" checked={neonSwitch} onCheckedChange={setNeonSwitch} />
-                    <span className="text-xs">Small Switch</span>
+                    <span className="ds-type-small">Small Switch</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <Switch disabled />
-                    <span className="text-xs text-white/40">Disabled</span>
+                    <span className="ds-type-small text-white/40">Disabled</span>
                   </div>
                 </div>
 
                 {/* Checkboxes */}
                 <div className="flex flex-col gap-3">
-                  <span className="text-xs font-semibold text-muted-foreground">Checkboxes (.ds-checkbox)</span>
+                  <Label as="span">Checkboxes (.ds-checkbox)</Label>
                   <div className="flex items-center gap-3">
                     <Checkbox id="cb1" checked={checkboxChecked} onCheckedChange={setCheckboxChecked} />
-                    <label htmlFor="cb1" className="text-xs cursor-pointer">Default Box</label>
+                    <Label htmlFor="cb1" variant="primary" className="cursor-pointer">Default Box</Label>
                   </div>
                   <div className="flex items-center gap-3">
                     <Checkbox id="cb2" variant="circle" checked={circleChecked} onCheckedChange={setCircleChecked} />
-                    <label htmlFor="cb2" className="text-xs cursor-pointer">Circle Variant (Media)</label>
+                    <Label htmlFor="cb2" variant="primary" className="cursor-pointer">Circle Variant (Media)</Label>
                   </div>
                   <div className="flex items-center gap-3">
                     <Checkbox id="cb3" size="lg" checked={neonCheckbox} onCheckedChange={setNeonCheckbox} />
-                    <label htmlFor="cb3" className="text-xs cursor-pointer">Large Size</label>
+                    <Label htmlFor="cb3" variant="primary" className="cursor-pointer">Large Size</Label>
                   </div>
                   <div className="flex items-center gap-3">
                     <Checkbox id="cb4" disabled />
-                    <label htmlFor="cb4" className="text-xs text-white/40">Disabled</label>
+                    <Label htmlFor="cb4" disabled>Disabled</Label>
                   </div>
                 </div>
 
                 {/* RadioGroup */}
                 <div className="flex flex-col gap-3">
-                  <span className="text-xs font-semibold text-muted-foreground">Radio Group</span>
+                  <Label as="span">Radio Group</Label>
                   <RadioGroup value={radioVal} onValueChange={setRadioVal}>
                     <div className="flex items-center gap-2">
                       <RadioGroupItem value="opt1" id="r1" />
-                      <label htmlFor="r1" className="text-xs cursor-pointer">Option One</label>
+                      <Label htmlFor="r1" variant="primary" className="cursor-pointer">Option One</Label>
                     </div>
                     <div className="flex items-center gap-2">
                       <RadioGroupItem value="opt2" id="r2" />
-                      <label htmlFor="r2" className="text-xs cursor-pointer">Option Two</label>
+                      <Label htmlFor="r2" variant="primary" className="cursor-pointer">Option Two</Label>
                     </div>
                   </RadioGroup>
                 </div>
@@ -412,8 +413,8 @@ export default function DesignSystemShowcasePage() {
           {activeSection === "overlays" && (
             <div className="flex flex-col gap-6">
               <div>
-                <h2 className="text-xl font-bold">Overlays &amp; Floating Panels</h2>
-                <p className="text-sm text-muted-foreground mt-1">
+                <h2 className="ds-type-feature-title">Overlays &amp; Floating Panels</h2>
+                <p className="ds-type-small text-muted-foreground mt-1">
                   Glassmorphic modals, floating dropdowns, and contextual popovers.
                 </p>
               </div>
@@ -488,8 +489,8 @@ export default function DesignSystemShowcasePage() {
                   </PopoverTrigger>
                   <PopoverContent>
                     <div className="flex flex-col gap-2">
-                      <span className="text-xs font-semibold">Filter Generations</span>
-                      <p className="text-xs text-muted-foreground">Adjust display settings.</p>
+                      <span className="ds-type-caption-label">Filter Generations</span>
+                      <p className="ds-type-small text-muted-foreground">Adjust display settings.</p>
                       <Button variant="primary" size="sm" className="mt-2">Apply</Button>
                     </div>
                   </PopoverContent>
@@ -512,22 +513,22 @@ export default function DesignSystemShowcasePage() {
           {activeSection === "navigation" && (
             <div className="flex flex-col gap-6">
               <div>
-                <h2 className="text-xl font-bold">Tabs &amp; Segmented Navigation</h2>
-                <p className="text-sm text-muted-foreground mt-1">
+                <h2 className="ds-type-feature-title">Tabs &amp; Segmented Navigation</h2>
+                <p className="ds-type-small text-muted-foreground mt-1">
                   Canonical tab treatments: Pill Tabs (.ds-tab-pill) and Studio Composer Tabs (.ds-composer-tab).
                 </p>
               </div>
 
               {/* Segmented Pill Tabs */}
               <div className="flex flex-col gap-2">
-                <span className="text-xs font-semibold text-muted-foreground">Segmented Pills (.ds-tab-pill)</span>
+                <Label as="span">Segmented Pills (.ds-tab-pill)</Label>
                 <PillTabs defaultValue="all">
                   <PillTabsList variant="segmented">
                     <PillTabsTrigger value="all" variant="pill">All Media</PillTabsTrigger>
                     <PillTabsTrigger value="images" variant="pill">Images</PillTabsTrigger>
                     <PillTabsTrigger value="videos" variant="pill">Videos</PillTabsTrigger>
                   </PillTabsList>
-                  <PillTabsContent value="all" className="p-3 text-xs text-muted-foreground">
+                  <PillTabsContent value="all" className="p-3 ds-type-small text-muted-foreground">
                     All generation assets displayed.
                   </PillTabsContent>
                 </PillTabs>
@@ -535,14 +536,14 @@ export default function DesignSystemShowcasePage() {
 
               {/* Composer Studio Tabs */}
               <div className="flex flex-col gap-2">
-                <span className="text-xs font-semibold text-muted-foreground">Composer Studio Tabs (.ds-composer-tab)</span>
+                <Label as="span">Composer Studio Tabs (.ds-composer-tab)</Label>
                 <PillTabs defaultValue="prompt">
                   <PillTabsList>
                     <PillTabsTrigger value="prompt" variant="composer">Prompt</PillTabsTrigger>
                     <PillTabsTrigger value="traits" variant="composer">Traits</PillTabsTrigger>
                     <PillTabsTrigger value="camera" variant="composer">Camera</PillTabsTrigger>
                   </PillTabsList>
-                  <PillTabsContent value="prompt" className="p-3 text-xs text-muted-foreground">
+                  <PillTabsContent value="prompt" className="p-3 ds-type-small text-muted-foreground">
                     Studio prompt panel options.
                   </PillTabsContent>
                 </PillTabs>
@@ -554,36 +555,36 @@ export default function DesignSystemShowcasePage() {
           {activeSection === "cards" && (
             <div className="flex flex-col gap-6">
               <div>
-                <h2 className="text-xl font-bold">Cards, Accordions &amp; Media Slots</h2>
-                <p className="text-sm text-muted-foreground mt-1">
+                <h2 className="ds-type-feature-title">Cards, Accordions &amp; Media Slots</h2>
+                <p className="ds-type-small text-muted-foreground mt-1">
                   SectionCard (.ds-section-card, .ds-composer-card, .ds-media-card), DashedUploadSlot &amp; InteractiveListRow.
                 </p>
               </div>
 
               {/* SectionCard Variants */}
               <div className="flex flex-col gap-3">
-                <h3 className="text-sm font-semibold text-white/90">SectionCard Variants</h3>
+                <h3 className="ds-type-caption-label text-white/90">SectionCard Variants</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <SectionCard variant="frosted">
-                    <span className="text-xs font-semibold text-white">Frosted SectionCard</span>
-                    <p className="text-xs text-muted-foreground mt-1">.ds-section-card with blur(40px)</p>
+                    <span className="ds-type-caption-label text-white">Frosted SectionCard</span>
+                    <p className="ds-type-small text-muted-foreground mt-1">.ds-section-card with blur(40px)</p>
                   </SectionCard>
 
                   <SectionCard variant="composer">
-                    <span className="text-xs font-semibold text-white">Composer SectionCard</span>
-                    <p className="text-xs text-muted-foreground mt-1">.ds-composer-card prompt well</p>
+                    <span className="ds-type-caption-label text-white">Composer SectionCard</span>
+                    <p className="ds-type-small text-muted-foreground mt-1">.ds-composer-card prompt well</p>
                   </SectionCard>
 
                   <SectionCard variant="media">
-                    <span className="text-xs font-semibold text-white">Media SectionCard</span>
-                    <p className="text-xs text-muted-foreground mt-1">.ds-media-card preview tile</p>
+                    <span className="ds-type-caption-label text-white">Media SectionCard</span>
+                    <p className="ds-type-small text-muted-foreground mt-1">.ds-media-card preview tile</p>
                   </SectionCard>
                 </div>
               </div>
 
               {/* Accordion Primitive */}
               <div className="flex flex-col gap-3">
-                <h3 className="text-sm font-semibold text-white/90">Accordion Trigger (.ds-accordion-trigger)</h3>
+                <h3 className="ds-type-caption-label text-white/90">Accordion Trigger (.ds-accordion-trigger)</h3>
                 <Accordion type="single" collapsible defaultValue="acc-1" className="w-full">
                   <AccordionItem value="acc-1">
                     <AccordionTrigger>Generation Settings</AccordionTrigger>
@@ -594,40 +595,40 @@ export default function DesignSystemShowcasePage() {
 
               {/* DashedUploadSlot Sizes & States */}
               <div className="flex flex-col gap-3">
-                <h3 className="text-sm font-semibold text-white/90">DashedUploadSlot (.ds-upload-slot)</h3>
+                <h3 className="ds-type-caption-label text-white/90">DashedUploadSlot (.ds-upload-slot)</h3>
                 <div className="flex flex-wrap items-center gap-4">
                   <DashedUploadSlot size="square">
                     <input type="file" className="hidden" aria-hidden="true" />
-                    <HugeIcon name="add-01" className="text-lg" />
-                    <span className="text-2xs">Square</span>
+                    <HugeIcon name="add-01" size="lg" />
+                    <span className="ds-type-micro-tag">Square</span>
                   </DashedUploadSlot>
                   <DashedUploadSlot size="aspect">
-                    <HugeIcon name="cloud-upload" className="text-lg" />
-                    <span className="text-2xs">96x72 Aspect</span>
+                    <HugeIcon name="cloud-upload" size="lg" />
+                    <span className="ds-type-micro-tag">96x72 Aspect</span>
                   </DashedUploadSlot>
                   <DashedUploadSlot size="aspect" disabled>
-                    <HugeIcon name="lock-password" className="text-lg text-white/30" />
-                    <span className="text-2xs text-white/30">Disabled</span>
+                    <HugeIcon name="lock-password" size="lg" className="text-white/30" />
+                    <span className="ds-type-micro-tag text-white/30">Disabled</span>
                   </DashedUploadSlot>
                 </div>
               </div>
 
               {/* InteractiveListRow Variants */}
               <div className="flex flex-col gap-3">
-                <h3 className="text-sm font-semibold text-white/90">InteractiveListRow (.ds-list-row)</h3>
+                <h3 className="ds-type-caption-label text-white/90">InteractiveListRow (.ds-list-row)</h3>
                 <div className="flex flex-col gap-2">
                   <InteractiveListRow variant="compact">
-                    <span className="text-xs font-medium">Aspect Ratio 16:9</span>
-                    <span className="text-xs text-white/50">Default</span>
+                    <span className="ds-type-small">Aspect Ratio 16:9</span>
+                    <span className="ds-type-small text-white/50">Default</span>
                   </InteractiveListRow>
                   <InteractiveListRow variant="thumbnail">
                     <div className="flex items-center gap-3">
-                      <div className="size-10 rounded-lg bg-white/10 flex items-center justify-center">
-                        <HugeIcon name="image-02" className="text-base" />
+                      <div className="size-10 rounded-subtle bg-white/10 flex items-center justify-center">
+                        <HugeIcon name="image-02" size="md" />
                       </div>
                       <div className="flex flex-col">
-                        <span className="text-xs font-medium">Cyberpunk Hero Avatar</span>
-                        <span className="text-2xs text-white/50">Thumbnail preview item</span>
+                        <span className="ds-type-small">Cyberpunk Hero Avatar</span>
+                        <span className="ds-type-micro-tag text-white/50">Thumbnail preview item</span>
                       </div>
                     </div>
                     <Badge variant="glass">Active</Badge>
@@ -641,19 +642,19 @@ export default function DesignSystemShowcasePage() {
           {activeSection === "feedback" && (
             <div className="flex flex-col gap-6">
               <div>
-                <h2 className="text-xl font-bold">Feedback, Badges &amp; Status Banners</h2>
-                <p className="text-sm text-muted-foreground mt-1">
+                <h2 className="ds-type-feature-title">Feedback, Badges &amp; Status Banners</h2>
+                <p className="ds-type-small text-muted-foreground mt-1">
                   Badges (.ds-badge, .ds-badge-glass, .ds-badge-count) and StatusBanner (.ds-banner-accent).
                 </p>
               </div>
 
               {/* StatusBanner */}
               <div className="flex flex-col gap-3">
-                <h3 className="text-sm font-semibold text-white/90">StatusBanner (.ds-banner-accent)</h3>
+                <h3 className="ds-type-caption-label text-white/90">StatusBanner (.ds-banner-accent)</h3>
                 <StatusBanner>
                   <div className="flex items-center gap-2">
                     <HugeIcon name="flash" className="text-amber-400" />
-                    <span className="text-xs font-medium">Generation queue is running at high speed</span>
+                    <span className="ds-type-small">Generation queue is running at high speed</span>
                   </div>
                   <Button variant="outline" size="sm">View Tasks</Button>
                 </StatusBanner>
@@ -661,12 +662,12 @@ export default function DesignSystemShowcasePage() {
 
               {/* Badges Matrix */}
               <div className="flex flex-col gap-3">
-                <h3 className="text-sm font-semibold text-white/90">Badge Variants</h3>
+                <h3 className="ds-type-caption-label text-white/90">Badge Variants</h3>
                 <div className="flex flex-wrap items-center gap-3">
                   <Badge variant="default">Default (.ds-badge)</Badge>
                   <Badge variant="glass">Glass (.ds-badge-glass)</Badge>
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-white/50">Count:</span>
+                    <span className="ds-type-small text-white/50">Count:</span>
                     <Badge variant="count">4</Badge>
                   </div>
                   <Badge variant="secondary">Secondary</Badge>
@@ -680,7 +681,7 @@ export default function DesignSystemShowcasePage() {
 
               {/* Skeletons */}
               <div className="flex flex-col gap-3">
-                <h3 className="text-sm font-semibold text-white/90">Shimmer Skeletons</h3>
+                <h3 className="ds-type-caption-label text-white/90">Shimmer Skeletons</h3>
                 <div className="flex flex-col gap-2 max-w-sm">
                   <Skeleton variant="shimmer" className="h-4 w-3/4" />
                   <Skeleton variant="shimmer" className="h-4 w-1/2" />
@@ -693,31 +694,31 @@ export default function DesignSystemShowcasePage() {
           {activeSection === "tokens" && (
             <div className="flex flex-col gap-6">
               <div>
-                <h2 className="text-xl font-bold">Design Tokens Hierarchy</h2>
-                <p className="text-sm text-muted-foreground mt-1">
+                <h2 className="ds-type-feature-title">Design Tokens Hierarchy</h2>
+                <p className="ds-type-small text-muted-foreground mt-1">
                   Canonical single source of truth for surfaces, radiuses, and semantic accents.
                 </p>
               </div>
 
               {/* Surface Palette */}
               <div className="flex flex-col gap-3">
-                <h3 className="text-sm font-semibold text-white/90">Surface Ladder (Dark First)</h3>
+                <h3 className="ds-type-caption-label text-white/90">Surface Ladder (Dark First)</h3>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  <div className="p-3 rounded-xl bg-omni-bg border border-white/10">
-                    <span className="text-xs font-semibold block">Omni Root</span>
-                    <span className="text-xs text-muted-foreground">--omni-bg</span>
+                  <div className="p-3 rounded-comfortable bg-omni-bg border border-white/10">
+                    <span className="ds-type-caption-label block">Omni Root</span>
+                    <span className="ds-type-small text-muted-foreground">--omni-bg</span>
                   </div>
-                  <div className="p-3 rounded-xl bg-body-root border border-white/10">
-                    <span className="text-xs font-semibold block">Body Root</span>
-                    <span className="text-xs text-muted-foreground">--body-bg</span>
+                  <div className="p-3 rounded-comfortable bg-body-root border border-white/10">
+                    <span className="ds-type-caption-label block">Body Root</span>
+                    <span className="ds-type-small text-muted-foreground">--body-bg</span>
                   </div>
-                  <div className="p-3 rounded-xl bg-canvas-deep border border-white/10">
-                    <span className="text-xs font-semibold block">Canvas Deep</span>
-                    <span className="text-xs text-muted-foreground">--canvas-bg</span>
+                  <div className="p-3 rounded-comfortable bg-canvas-deep border border-white/10">
+                    <span className="ds-type-caption-label block">Canvas Deep</span>
+                    <span className="ds-type-small text-muted-foreground">--canvas-bg</span>
                   </div>
-                  <div className="p-3 rounded-xl surface-glass">
-                    <span className="text-xs font-semibold block">Glass</span>
-                    <span className="text-xs text-muted-foreground">surface-glass</span>
+                  <div className="p-3 rounded-comfortable surface-glass">
+                    <span className="ds-type-caption-label block">Glass</span>
+                    <span className="ds-type-small text-muted-foreground">surface-glass</span>
                   </div>
                 </div>
               </div>

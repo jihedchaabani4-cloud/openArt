@@ -21,7 +21,7 @@ const Card = React.forwardRef(function Card(
       tabIndex={interactive ? 0 : undefined}
       role={interactive ? "button" : undefined}
       className={cn(
-        "rounded-md sm:rounded-[28px] bg-surface-card backdrop-blur-2xl text-text-primary hover:bg-ui-button-tonal transition-all font-sans antialiased overflow-hidden flex flex-col relative border border-border-weak",
+        "rounded-comfortable bg-surface-card backdrop-blur-2xl text-text-primary hover:bg-ui-button-tonal transition-all font-sans antialiased overflow-hidden flex flex-col relative border border-border-weak",
         interactive && "cursor-pointer hover:border-border-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-heavy active:scale-95",
         className
       )}
@@ -58,7 +58,7 @@ const CardTitle = React.forwardRef(function CardTitle(
     <h3
       ref={ref}
       data-slot="card-title"
-      className={cn("text-base font-semibold tracking-tight text-text-primary leading-snug", className)}
+      className={cn("ds-type-feature-title text-text-primary", className)}
       {...props}
     />
   );
@@ -73,7 +73,7 @@ const CardDescription = React.forwardRef(function CardDescription(
     <p
       ref={ref}
       data-slot="card-description"
-      className={cn("text-xs text-text-secondary leading-relaxed", className)}
+      className={cn("ds-type-small text-text-secondary", className)}
       {...props}
     />
   );

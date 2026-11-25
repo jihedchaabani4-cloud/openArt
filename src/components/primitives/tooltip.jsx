@@ -4,7 +4,7 @@
  * ═══════════════════════════════════════════════════════════════════════════════
  * STRICT ARCHITECTURAL RULES:
  * 1. ZERO CALL-SITE RESTYLING: Never add ad-hoc background, border, or corner classes.
- * 2. USE CANONICAL TOKENS: `rounded-sm`, dark surface container, text-xs/2xs.
+ * 2. USE CANONICAL TOKENS: `rounded-comfortable`, dark surface container, `.ds-type-small`.
  * ═══════════════════════════════════════════════════════════════════════════════
  */
 
@@ -54,7 +54,7 @@ function TooltipContent({
         data-slot="tooltip-content"
         sideOffset={sideOffset}
         className={cn(
-          "z-50 overflow-hidden rounded-md border border-qc-border-subtle bg-surface-card px-2.5 py-1 text-xs font-medium text-qc-text-primary shadow-none animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
+          "z-50 overflow-hidden rounded-comfortable border border-qc-border-subtle bg-surface-card px-2.5 py-1 ds-type-small text-qc-text-primary shadow-none animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
           className
         )}
         {...props}

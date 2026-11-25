@@ -27,7 +27,7 @@ import {
 import { SHINE_TEXT_SWEEP_MS } from "@/components/primitives/ShineText";
 
 const theme = {
-  paragraph: "ds-text-control font-normal text-text-primary",
+  paragraph: "ds-type-small text-text-primary",
 };
 
 // ── Sync external value + Enter to submit ────────────────────────────────────
@@ -308,14 +308,14 @@ export function PromptEditor({
           contentEditable={
             <ContentEditable
               className={cn(
-                "ds-text-control font-normal bg-transparent outline-none text-text-primary py-1.5 w-full min-h-full break-words",
+                "ds-type-small bg-transparent outline-none text-text-primary py-1.5 w-full min-h-full break-words",
                 sweeping && "shine-text--sweep shine-text--sweep--once"
               )}
             />
           }
           placeholder={
             !value && (
-              <span className="absolute top-1.5 left-0 ds-text-control font-normal text-text-secondary pointer-events-none">
+              <span className="absolute top-1.5 left-0 ds-type-small text-text-secondary pointer-events-none">
                 {placeholder}
               </span>
             )

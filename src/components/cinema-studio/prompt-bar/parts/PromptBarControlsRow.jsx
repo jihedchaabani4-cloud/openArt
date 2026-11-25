@@ -50,13 +50,13 @@ export function PromptBarControlsRow({
                 <img
                   src={currentModelIcon}
                   alt=""
-                  className="size-4 rounded-sm object-contain brightness-0 invert shrink-0"
+                  className="size-4 rounded-sharp object-contain brightness-0 invert shrink-0"
                   onError={(e) => {
                     e.currentTarget.style.display = "none";
                   }}
                 />
               )}
-              <span className="ds-text-caption-m font-medium truncate text-text-primary">
+              <span className="ds-type-small truncate text-text-primary">
                 {currentModel.name || currentModel.displayName || currentModel.id}
               </span>
             </div>
@@ -95,12 +95,12 @@ export function PromptBarControlsRow({
         title={estimatedCredits > 0 ? `Generate (${estimatedCredits} cr)` : "Generate"}
         onClick={handleGenerate}
         disabled={isGenerateDisabled}
-        className="size-8 p-0 rounded-full shrink-0"
+        className="size-8 p-0 rounded-subtle shrink-0"
       >
         {isGenerating ? (
           <span className="size-3.5 rounded-full border-2 border-text-inverse/30 border-t-text-inverse animate-spin" />
         ) : (
-          <HugeIcon name="arrow-right-02" className="shrink-0 font-bold" />
+          <HugeIcon name="arrow-right-02" weight="bold" className="shrink-0" />
         )}
       </Button>
     </div>

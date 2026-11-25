@@ -35,10 +35,10 @@ const EmptyState = () => (
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-            className="flex flex-col items-center gap-3 px-8 py-6 rounded-2xl border border-dashed border-white/[0.08]"
+            className="flex flex-col items-center gap-3 px-8 py-6 rounded-comfortable border border-dashed border-white/[0.08]"
         >
             <div className="flex flex-col items-center gap-1">
-                <p className="text-[18px] text-white/60 font-normal tracking-wide text-center">
+                <p className="ds-type-feature-title text-white/60 text-center">
                     Start creating or drop media
                 </p>
             </div>
@@ -295,7 +295,7 @@ export default function AssetsPage({ params }) {
                                         selectionEnabled={true}
                                     />
                                     {hasMore && (
-                                        <div className="flex justify-center pt-2 text-sm text-white/45">
+                                        <div className="flex justify-center pt-2 ds-type-small text-white/45">
                                             Scroll down to load 30 more
                                         </div>
                                     )}

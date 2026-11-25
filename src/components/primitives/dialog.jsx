@@ -61,7 +61,7 @@ function DialogContent({
             z-50 fixed top-1/2 left-1/2
             -translate-x-1/2 -translate-y-1/2
             w-full max-w-[calc(100%-2rem)] sm:max-w-lg p-6
-            rounded-3xl border border-white/10 outline-none
+            rounded-comfortable border border-white/10 outline-none
             bg-[color:var(--ui-menu-background)]/70 backdrop-blur-2xl text-white
             shadow-xl
             data-[state=open]:animate-in
@@ -84,7 +84,7 @@ function DialogContent({
             -translate-x-1/2 translate-y-0 
             w-75 max-w-[95%]
             h-auto max-h-[60vh]
-            rounded-3xl bg-[color:var(--ui-menu-background)]/70 backdrop-blur-2xl text-white shadow-xl border border-white/10 overflow-hidden
+            rounded-comfortable bg-[color:var(--ui-menu-background)]/70 backdrop-blur-2xl text-white shadow-xl border border-white/10 overflow-hidden
             flex flex-col
             data-[state=open]:animate-in
             data-[state=closed]:animate-out
@@ -101,7 +101,7 @@ function DialogContent({
             fixed top-1/2 left-1/2
             -translate-x-1/2 -translate-y-1/2
             w-[min(780px,calc(100%-2rem))] h-[min(580px,90vh)]
-            rounded-[var(--radius-3xl)] border border-white/10 shadow-xl
+            rounded-comfortable border border-white/10 shadow-xl
             data-[state=open]:animate-in
             data-[state=closed]:animate-out
           `,
@@ -111,7 +111,7 @@ function DialogContent({
             fixed top-1/2 left-1/2
             -translate-x-1/2 -translate-y-1/2
             w-full max-w-64 max-h-50
-            rounded-3xl border border-white/10 p-6 shadow-xl
+            rounded-comfortable border border-white/10 p-6 shadow-xl
             data-[state=open]:animate-in
             data-[state=closed]:animate-out
           `,
@@ -120,7 +120,7 @@ function DialogContent({
             z-50 fixed top-1/2 left-1/2
             -translate-x-1/2 -translate-y-1/2
             w-96 max-w-full p-6
-            rounded-3xl border border-white/10 outline-none
+            rounded-comfortable border border-white/10 outline-none
             bg-[color:var(--ui-menu-background)]/70 backdrop-blur-2xl text-white
             shadow-xl
             data-[state=open]:animate-in
@@ -135,7 +135,7 @@ function DialogContent({
             z-50 fixed top-1/2 left-1/2
             -translate-x-1/2 -translate-y-1/2
             w-112 max-w-[calc(100vw-2rem)] max-h-[85vh] p-6 overflow-hidden
-            rounded-3xl border border-white/10 outline-none
+            rounded-comfortable border border-white/10 outline-none
             bg-[color:var(--ui-menu-background)]/70 backdrop-blur-2xl text-white
             shadow-xl flex flex-col
             data-[state=open]:animate-in
@@ -203,7 +203,7 @@ function DialogTitle({ className, ...props }) {
   return (
     <DialogPrimitive.Title
       data-slot="dialog-title"
-      className={cn("ds-text-h-xxs text-on-surface font-sans", className)}
+      className={cn("ds-type-feature-title text-on-surface", className)}
       {...props}
     />
   )
@@ -214,7 +214,7 @@ function DialogDescription({ className, ...props }) {
   return (
     <DialogPrimitive.Description
       data-slot="dialog-description"
-      className={cn("text-sm text-on-surface-variant leading-relaxed", className)}
+      className={cn("ds-type-small text-on-surface-variant", className)}
       {...props}
     />
   )

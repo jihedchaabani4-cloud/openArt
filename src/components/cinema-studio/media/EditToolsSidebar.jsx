@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Button } from "@/components/base/button";
+import { Label } from "@/components/base/label";
 import { HugeIcon } from "@/components/primitives/HugeIcon";
 import {
   DropdownMenu,
@@ -108,14 +109,13 @@ export function EditToolsSidebar({
       )}
     >
       {/* Top Action Header: Secondary More Menu + Primary White Download CTA */}
-      <header className="px-3 py-2.5 border-b border-border-subtle flex items-center gap-2 shrink-0">
+      <header className="ds-edit-sidebar-header border-b border-border-subtle shrink-0">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
               type="button"
               variant="tonal"
-              size="s"
-              className="flex-1 justify-center ds-text-caption-m font-medium"
+              className="flex-1 justify-center ds-edit-sidebar-action-btn"
             >
               More
             </Button>
@@ -145,10 +145,9 @@ export function EditToolsSidebar({
         <Button
           type="button"
           variant="primary"
-          size="s"
           disabled={isDownloading || !activeMeta?.url}
           onClick={onDownload}
-          className="flex-1 justify-center ds-text-caption-m font-semibold"
+          className="flex-1 justify-center ds-edit-sidebar-action-btn"
         >
           {isDownloading ? "Downloading…" : "Download"}
         </Button>
@@ -158,7 +157,7 @@ export function EditToolsSidebar({
       <div
         role="tablist"
         aria-label="Inspector sections"
-        className="px-3 pt-2.5 pb-1 flex items-center gap-1 shrink-0"
+        className="ds-edit-sidebar-tabs shrink-0"
       >
         {[
           { id: "edits", label: "Edits" },
@@ -172,13 +171,12 @@ export function EditToolsSidebar({
               role="tab"
               aria-selected={isSelected}
               variant="ghost"
-              size="sm"
               onClick={() => setActiveTab(tab.id)}
               className={cn(
-                "px-2.5 rounded-lg ds-text-caption-m",
+                "ds-edit-sidebar-tab ds-text-tab",
                 isSelected
-                  ? "text-text-primary font-semibold bg-surface-tonal"
-                  : "text-text-secondary font-normal"
+                  ? "bg-surface-tonal text-text-primary"
+                  : "text-text-secondary hover:bg-surface-tonal hover:text-text-primary"
               )}
             >
               {tab.label}
@@ -192,7 +190,7 @@ export function EditToolsSidebar({
         <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col">
           {/* Version History Thumbnail Strip */}
           {versionItems.length > 0 && (
-            <div className="px-3 py-2.5 border-b border-border-subtle shrink-0">
+            <div className="px-4 py-2.5 border-b border-border-subtle shrink-0">
               <div
                 className="flex items-center gap-2 overflow-x-auto custom-scrollbar pb-0.5"
                 role="listbox"
@@ -226,7 +224,7 @@ export function EditToolsSidebar({
                       aria-label={`Version ${idx + 1}${isPrimary ? " (current)" : ""}`}
                       onClick={() => onSelectVersion?.(item)}
                       className={cn(
-                        "relative size-12 rounded-lg overflow-hidden shrink-0 bg-surface-card border transition-all cursor-pointer focus-workspace",
+                        "relative size-12 rounded-subtle overflow-hidden shrink-0 bg-surface-card border transition-all cursor-pointer focus-workspace",
                         isActive
                           ? "border-white ring-1 ring-white"
                           : "border-border-subtle opacity-75 hover:opacity-100"
@@ -259,9 +257,9 @@ export function EditToolsSidebar({
                       {isVideoItem && (
                         <span
                           aria-hidden="true"
-                          className="pointer-events-none absolute bottom-0.5 right-0.5 flex size-4 items-center justify-center rounded-sm bg-black/60 text-white"
+                          className="pointer-events-none absolute bottom-0.5 right-0.5 flex size-4 items-center justify-center rounded-sharp bg-black/60 text-white"
                         >
-                          <HugeIcon name="play" className="text-[9px]" />
+                          <HugeIcon name="play" size="2xs" />
                         </span>
                       )}
                     </button>
@@ -271,51 +269,51 @@ export function EditToolsSidebar({
             </div>
           )}
 
-          {/* Edit Tools List (exact LeftNavigationRail variant="nav" compact row size) */}
+          {/* Edit Tools List */}
           <nav
             aria-label="Edit tools"
-            className="p-2 flex flex-col gap-0.5"
+            className="px-2 pt-2 pb-3 flex flex-col"
           >
             {canEditImage ? (
               tools.map((tool) => (
                 <Button
                   key={tool.id}
                   type="button"
-                  variant="nav"
+                  variant="ghost"
                   onClick={() => onSelectTool?.(tool.id)}
-                  className="group overflow-hidden ds-text-caption-m font-medium"
+                  className="ds-edit-sidebar-tool-row"
                 >
-                  <span className="relative size-5 flex items-center justify-center shrink-0">
-                    <HugeIcon name={tool.icon} size="sm" className="text-icon-primary" />
+                  <span className="flex items-center gap-1 min-w-0">
+                    <span className="size-6 flex items-center justify-center shrink-0">
+                      <HugeIcon name={tool.icon} size="md" className="text-icon-primary" />
+                    </span>
+                    <span className="truncate ds-type-caption-label">
+                      {tool.label}
+                    </span>
                   </span>
-                  <span className="truncate flex-1 text-left">
-                    {tool.label}
+                  <span className="size-4 flex items-center justify-center shrink-0">
+                    <HugeIcon name="arrow-right-01" size="xs" className="text-icon-secondary" />
                   </span>
-                  <HugeIcon
-                    name="arrow-right-01"
-                    size="xs"
-                    className="text-icon-secondary shrink-0"
-                  />
                 </Button>
               ))
             ) : (
-              <p className="px-2 py-3 ds-text-caption-s text-text-secondary">
+              <p className="px-2 py-3 ds-type-small text-text-secondary">
                 Image editing tools are available for active image assets.
               </p>
             )}
           </nav>
         </div>
       ) : (
-        <div className="flex-1 overflow-y-auto custom-scrollbar p-3 flex flex-col gap-3">
+        <div className="flex-1 overflow-y-auto custom-scrollbar px-4 py-3 flex flex-col gap-3">
           {/* Editable Title */}
           <div className="flex flex-col gap-1">
-            <span className="ds-text-caption-s text-text-secondary">Title</span>
+            <Label as="span">Title</Label>
             <EditableDisplayName
               ref={nameRef}
               displayName={displayTitle}
               placeholder="Untitled Workflow"
               onSave={onRenameWorkflow}
-              inputClassName="ds-text-caption-m font-medium text-text-primary w-full"
+              inputClassName="ds-type-small text-text-primary w-full"
             />
           </div>
 
@@ -323,28 +321,28 @@ export function EditToolsSidebar({
           <div className="flex flex-col gap-2 pt-2 border-t border-border-subtle">
             {modelName && (
               <div className="flex items-center justify-between gap-2">
-                <span className="ds-text-caption-s text-text-secondary">Model</span>
-                <span className="ds-text-caption-m text-text-primary truncate">{modelName}</span>
+                <Label as="span">Model</Label>
+                <span className="ds-type-small text-text-primary truncate">{modelName}</span>
               </div>
             )}
             {width && height && (
               <div className="flex items-center justify-between gap-2">
-                <span className="ds-text-caption-s text-text-secondary">Dimensions</span>
-                <span className="ds-text-caption-m text-text-primary tabular-nums">
+                <Label as="span">Dimensions</Label>
+                <span className="ds-type-small text-text-primary tabular-nums">
                   {width} × {height}
                 </span>
               </div>
             )}
             <div className="flex items-center justify-between gap-2">
-              <span className="ds-text-caption-s text-text-secondary">Versions</span>
-              <span className="ds-text-caption-m text-text-primary tabular-nums">
+              <Label as="span">Versions</Label>
+              <span className="ds-type-small text-text-primary tabular-nums">
                 {versionItems.length}
               </span>
             </div>
             {activeMeta?.status && (
               <div className="flex items-center justify-between gap-2">
-                <span className="ds-text-caption-s text-text-secondary">Status</span>
-                <span className="ds-text-caption-m text-text-primary capitalize">
+                <Label as="span">Status</Label>
+                <span className="ds-type-small text-text-primary capitalize">
                   {activeMeta.status}
                 </span>
               </div>
@@ -353,8 +351,8 @@ export function EditToolsSidebar({
 
           {promptText && (
             <div className="flex flex-col gap-1 pt-2 border-t border-border-subtle">
-              <span className="ds-text-caption-s text-text-secondary">Prompt</span>
-              <p className="ds-text-caption-m text-text-primary leading-relaxed break-words">
+              <Label as="span">Prompt</Label>
+              <p className="ds-type-small text-text-primary break-words">
                 {promptText}
               </p>
             </div>

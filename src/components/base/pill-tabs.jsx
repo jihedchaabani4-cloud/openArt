@@ -21,7 +21,7 @@ const PillTabsList = React.forwardRef(function PillTabsList(
       data-variant={variant}
       className={cn(
         "inline-flex items-center gap-1",
-        isSegmented && "p-1 rounded-full bg-white/5 border border-white/10",
+        isSegmented && "p-1 rounded-subtle bg-white/5 border border-white/10",
         className
       )}
       {...props}

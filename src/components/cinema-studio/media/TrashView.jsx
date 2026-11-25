@@ -49,7 +49,7 @@ export function TrashView({ projectId }) {
       <div className="flex h-full w-full overflow-hidden text-white bg-background relative">
         <main className="flex-1 flex flex-col items-center justify-center min-h-[400px] text-white/60">
           <div className="w-8 h-8 border-2 border-white/20 border-t-white rounded-full animate-spin mb-4" />
-          <p className="text-sm">Chargement de la corbeille...</p>
+          <p className="ds-type-small">Chargement de la corbeille...</p>
         </main>
       </div>
     );
@@ -59,9 +59,9 @@ export function TrashView({ projectId }) {
     return (
       <div className="flex h-full w-full overflow-hidden text-white bg-background relative">
         <main className="flex-1 flex flex-col items-center justify-center min-h-[400px] p-6 text-center">
-          <HugeIcon name="alert-circle" className="text-4xl text-red-400 mb-3" />
-          <p className="text-base text-white/90 mb-1">Impossible de charger la corbeille</p>
-          <p className="text-sm text-cool-slate mb-4">{error?.message || "Une erreur est survenue."}</p>
+          <HugeIcon name="alert-circle" size="3xl" className="text-red-400 mb-3" />
+          <p className="ds-type-body text-white/90 mb-1">Impossible de charger la corbeille</p>
+          <p className="ds-type-small text-cool-slate mb-4">{error?.message || "Une erreur est survenue."}</p>
           <Button variant="outline" onClick={() => refetch()}>
             Réessayer
           </Button>
@@ -112,7 +112,7 @@ export function TrashView({ projectId }) {
                   className="flex-1 flex flex-col items-center justify-center min-h-96 w-full my-auto"
                 >
                   <div className="flex flex-col items-center gap-1">
-                    <p className="text-lg text-cool-slate font-normal tracking-wide text-center">
+                    <p className="ds-type-feature-title text-cool-slate text-center">
                       {Boolean(filters?.prompt?.trim()) && (data?.projectContents?.trashedWorkflows?.length || 0) > 0
                         ? "Aucun élément ne correspond à votre recherche"
                         : "La corbeille est vide"}

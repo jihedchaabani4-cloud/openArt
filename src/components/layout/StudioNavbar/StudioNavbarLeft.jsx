@@ -261,7 +261,7 @@ export function StudioNavbarLeft({
                     ) : isCollectionPage ? (
                         <nav
                             aria-label="Folder path"
-                            className="flex min-w-0 items-center gap-1.5 ds-text-caption-l font-semibold tracking-tight leading-none overflow-hidden"
+                            className="flex min-w-0 items-center gap-1.5 ds-type-caption-label overflow-hidden"
                         >
                             <button
                                 type="button"
@@ -289,7 +289,7 @@ export function StudioNavbarLeft({
                                 displayName={displayName}
                                 placeholder="Untitled collection"
                                 onSave={handleSaveName}
-                                inputClassName="ds-text-caption-l font-semibold tracking-tight max-w-[160px] sm:max-w-[220px] text-text-primary focus:text-text-primary transition-all h-7"
+                                inputClassName="ds-type-caption-label max-w-[160px] sm:max-w-[220px] text-text-primary focus:text-text-primary transition-all h-7"
                             />
                         </nav>
                     ) : pathname.includes("/elements") ? (

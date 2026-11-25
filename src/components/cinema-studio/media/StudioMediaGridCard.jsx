@@ -542,7 +542,7 @@ export const StudioMediaGridCard = React.memo(function StudioMediaGridCard({
                   e.stopPropagation();
                   startRename();
                 }}
-                className="ds-text-caption-m font-medium text-white/90 truncate cursor-text select-none block"
+                className="ds-type-small text-white/90 truncate cursor-text select-none block"
               >
                 {truncatedDisplayName}
               </span>
@@ -629,10 +629,10 @@ export const StudioMediaGridCard = React.memo(function StudioMediaGridCard({
             <div
               aria-hidden="true"
               data-slot="drag-stack-back"
-              className="absolute inset-0 translate-x-1.5 translate-y-1.5 rotate-3 rounded-lg bg-surface-card border border-border-subtle"
+              className="absolute inset-0 translate-x-1.5 translate-y-1.5 rotate-3 rounded-comfortable bg-surface-card border border-border-subtle"
             />
           )}
-          <div className="relative w-full h-full rounded-lg overflow-hidden border border-border-heavy bg-surface-secondary">
+          <div className="relative w-full h-full rounded-comfortable overflow-hidden border border-border-heavy bg-surface-secondary">
             {isVideo
               ? <video src={url} className="w-full h-full object-cover" muted loop autoPlay playsInline />
               : <img src={url} className="w-full h-full object-cover" alt="" />
@@ -641,7 +641,7 @@ export const StudioMediaGridCard = React.memo(function StudioMediaGridCard({
           {dragCount > 1 && (
             <span
               data-slot="drag-count-badge"
-              className="absolute -top-2 -right-2 z-10 min-w-5 text-center bg-text-primary text-text-inverse rounded-full px-2 py-0.5 ds-text-caption-s font-semibold tabular-nums"
+              className="absolute -top-2 -right-2 z-10 min-w-5 text-center bg-text-primary text-text-inverse rounded-sharp px-2 py-0.5 ds-type-micro-tag tabular-nums"
             >
               {dragCount}
             </span>
@@ -653,7 +653,7 @@ export const StudioMediaGridCard = React.memo(function StudioMediaGridCard({
               initial={{ opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.12 }}
-              className="absolute left-1/2 top-full mt-2 -translate-x-1/2 surface-glass border border-border-subtle text-text-primary rounded-full px-2.5 py-1 ds-text-caption-m font-medium whitespace-nowrap"
+              className="absolute left-1/2 top-full mt-2 -translate-x-1/2 surface-glass border border-border-subtle text-text-primary rounded-subtle px-2.5 py-1 ds-type-small whitespace-nowrap"
             >
               {dragTargetLabel}
             </motion.div>

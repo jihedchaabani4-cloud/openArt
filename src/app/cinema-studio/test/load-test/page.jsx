@@ -18,6 +18,7 @@ import { HugeIcon } from "@/components/primitives/HugeIcon";
 import { Button } from "@/components/base/button";
 import { IconButton } from "@/components/base/icon-button";
 import { Input } from "@/components/base/input";
+import { Label } from "@/components/base/label";
 import { Switch } from "@/components/base/switch";
 import { Badge } from "@/components/base/badge";
 import { SectionCard } from "@/components/base/section-card";
@@ -589,8 +590,8 @@ export default function LoadTestPage() {
                   </Badge>
                 )}
               </div>
-              <h1 className="ds-text-h-md text-text-primary">Multi-Account API Load & Stress Test Lab</h1>
-              <p className="ds-text-caption-l text-text-secondary">
+              <h1 className="ds-type-section-heading text-text-primary">Multi-Account API Load & Stress Test Lab</h1>
+              <p className="ds-type-caption-label text-text-secondary">
                 Connect multiple Google accounts into one shared test pool and attack the real API simultaneously in a single test run.
               </p>
             </div>
@@ -642,24 +643,24 @@ export default function LoadTestPage() {
           <div className="flex flex-col gap-3 pt-4 border-t border-border-subtle">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="ds-text-caption-m font-semibold text-text-secondary uppercase">
+                <Label as="span">
                   Connected Google Accounts ({selectedAccounts.length} / {accounts.length} active for test)
-                </span>
+                </Label>
                 {currentBrowserUser?.email && (
                   <Badge variant="default" size="sm">
                     Browser cookie: {currentBrowserUser.email}
                   </Badge>
                 )}
               </div>
-              <span className="ds-text-caption-s text-text-secondary">
+              <span className="ds-type-micro-tag text-text-secondary">
                 Need another Gmail? Sign in via popup, or open this URL in Incognito / another Chrome profile and click Connect Google — it joins this same pool automatically.
               </span>
             </div>
 
             {accounts.length === 0 ? (
-              <div className="p-4 rounded-2xl bg-surface-card border border-border-subtle flex flex-wrap items-center justify-between gap-3">
-                <p className="ds-text-caption-l text-text-secondary">
-                  No Google accounts in the pool yet. Click <span className="text-text-primary font-semibold">+ Connect Google Account</span> to sign in and add your first Google account.
+              <div className="p-4 rounded-comfortable bg-surface-card border border-border-subtle flex flex-wrap items-center justify-between gap-3">
+                <p className="ds-type-caption-label text-text-secondary">
+                  No Google accounts in the pool yet. Click <span className="ds-type-caption-label text-text-primary">+ Connect Google Account</span> to sign in and add your first Google account.
                 </p>
               </div>
             ) : (
@@ -669,9 +670,9 @@ export default function LoadTestPage() {
                   return (
                     <div
                       key={acc.id}
-                      className="px-4 py-3 rounded-2xl bg-surface-card border border-border-subtle flex items-center justify-between gap-3"
+                      className="px-4 py-3 rounded-comfortable bg-surface-card border border-border-subtle flex items-center justify-between gap-3"
                     >
-                      <label className="flex items-center gap-3 min-w-0 cursor-pointer flex-1">
+                      <Label className="flex items-center gap-3 min-w-0 cursor-pointer flex-1">
                         <Switch
                           checked={enabled}
                           onCheckedChange={(checked) =>
@@ -680,15 +681,15 @@ export default function LoadTestPage() {
                           disabled={isRunning}
                         />
                         <div className="flex flex-col min-w-0">
-                          <span className="ds-text-caption-l font-semibold text-text-primary truncate">
+                          <span className="ds-type-caption-label text-text-primary truncate">
                             {acc.email}
                           </span>
-                          <span className="ds-text-caption-s text-text-secondary truncate">
+                          <span className="ds-type-micro-tag text-text-secondary truncate">
                             {acc.name ? `${acc.name} · ` : ""}
                             {enabled ? "Included in run" : "Paused"}
                           </span>
                         </div>
-                      </label>
+                      </Label>
                       <IconButton
                         type="button"
                         variant="ghost"
@@ -706,7 +707,7 @@ export default function LoadTestPage() {
             )}
 
             {accountFeedback && (
-              <p className="ds-text-caption-m text-text-secondary">{accountFeedback}</p>
+              <p className="ds-type-small text-text-secondary">{accountFeedback}</p>
             )}
           </div>
         </SectionCard>
@@ -715,9 +716,9 @@ export default function LoadTestPage() {
         <SectionCard className="flex flex-col gap-5">
           <div className="flex flex-col gap-2">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <span className="ds-text-caption-m font-semibold text-text-secondary uppercase">
+              <Label as="span">
                 Quick Presets (Per Google Account)
-              </span>
+              </Label>
               {selectedAccounts.length > 1 && (
                 <Badge variant="warning">
                   × {selectedAccounts.length} Google accounts simultaneously
@@ -809,9 +810,9 @@ export default function LoadTestPage() {
             />
 
             <div className="flex flex-col gap-1.5">
-              <label className="ds-text-caption-m font-semibold text-text-primary">
+              <Label variant="primary">
                 Generation Model
-              </label>
+              </Label>
               {models.length > 0 ? (
                 <Select value={selectedModel} onValueChange={setSelectedModel} disabled={isRunning}>
                   <SelectTrigger className="w-full h-9">
@@ -837,9 +838,9 @@ export default function LoadTestPage() {
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label className="ds-text-caption-m font-semibold text-text-primary">
+              <Label variant="primary">
                 Aspect Ratio
-              </label>
+              </Label>
               <Select value={generateRatio} onValueChange={setGenerateRatio} disabled={isRunning}>
                 <SelectTrigger className="w-full h-9">
                   <SelectValue placeholder="1:1" />
@@ -857,14 +858,14 @@ export default function LoadTestPage() {
 
           <div className="flex flex-wrap items-center justify-between gap-4 pt-3 border-t border-border-subtle">
             <div className="flex flex-wrap items-center gap-5">
-              <label className="inline-flex items-center gap-2.5 cursor-pointer">
+              <Label variant="primary" className="gap-2.5 cursor-pointer">
                 <Switch
                   checked={createProjectStage}
                   onCheckedChange={setCreateProjectStage}
                   disabled={isRunning}
                 />
-                <span className="ds-text-caption-l text-text-primary">Create Project</span>
-              </label>
+                <span className="ds-type-caption-label text-text-primary">Create Project</span>
+              </Label>
 
               {!createProjectStage && selectedAccounts.length <= 1 && (
                 <Input
@@ -877,50 +878,50 @@ export default function LoadTestPage() {
                 />
               )}
 
-              <label className="inline-flex items-center gap-2.5 cursor-pointer">
+              <Label variant="primary" className="gap-2.5 cursor-pointer">
                 <Switch
                   checked={createFoldersStage}
                   onCheckedChange={setCreateFoldersStage}
                   disabled={isRunning}
                 />
-                <span className="ds-text-caption-l text-text-primary">Create Folders</span>
-              </label>
+                <span className="ds-type-caption-label text-text-primary">Create Folders</span>
+              </Label>
 
-              <label className="inline-flex items-center gap-2.5 cursor-pointer">
+              <Label variant="primary" className="gap-2.5 cursor-pointer">
                 <Switch
                   checked={moveMediaStage}
                   onCheckedChange={setMoveMediaStage}
                   disabled={isRunning}
                 />
-                <span className="ds-text-caption-l text-text-primary">Move Media</span>
-              </label>
+                <span className="ds-type-caption-label text-text-primary">Move Media</span>
+              </Label>
 
-              <label className="inline-flex items-center gap-2.5 cursor-pointer">
+              <Label variant="primary" className="gap-2.5 cursor-pointer">
                 <Switch
                   checked={moveFolderStage}
                   onCheckedChange={setMoveFolderStage}
                   disabled={isRunning}
                 />
-                <span className="ds-text-caption-l text-text-primary">Move Folders</span>
-              </label>
+                <span className="ds-type-caption-label text-text-primary">Move Folders</span>
+              </Label>
 
-              <label className="inline-flex items-center gap-2.5 cursor-pointer">
+              <Label variant="primary" className="gap-2.5 cursor-pointer">
                 <Switch
                   checked={deleteMediaStage}
                   onCheckedChange={setDeleteMediaStage}
                   disabled={isRunning}
                 />
-                <span className="ds-text-caption-l text-text-primary">Delete Media</span>
-              </label>
+                <span className="ds-type-caption-label text-text-primary">Delete Media</span>
+              </Label>
 
-              <label className="inline-flex items-center gap-2.5 cursor-pointer">
+              <Label variant="primary" className="gap-2.5 cursor-pointer">
                 <Switch
                   checked={cleanupProjectStage}
                   onCheckedChange={setCleanupProjectStage}
                   disabled={isRunning}
                 />
-                <span className="ds-text-caption-l text-text-primary">Auto-Cleanup Project</span>
-              </label>
+                <span className="ds-type-caption-label text-text-primary">Auto-Cleanup Project</span>
+              </Label>
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
@@ -972,54 +973,54 @@ export default function LoadTestPage() {
           </div>
 
           {actionMessage && (
-            <p className="ds-text-caption-m text-accent-yellow">{actionMessage}</p>
+            <p className="ds-type-small text-accent-yellow">{actionMessage}</p>
           )}
         </SectionCard>
 
         {/* Live Telemetry Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-          <div className="p-4 rounded-2xl bg-surface-card border border-border-subtle flex flex-col gap-1">
-            <span className="ds-text-caption-s text-text-secondary uppercase">Elapsed / Progress</span>
-            <span className="ds-text-h-sm font-mono tabular-nums text-text-primary">
+          <div className="p-4 rounded-comfortable bg-surface-card border border-border-subtle flex flex-col gap-1">
+            <span className="ds-type-micro-tag text-text-secondary uppercase">Elapsed / Progress</span>
+            <span className="ds-type-sub-heading font-mono tabular-nums text-text-primary">
               {formatElapsed(snapshot?.elapsedMs)} ({progressPct}%)
             </span>
-            <span className="ds-text-caption-s text-text-secondary font-mono tabular-nums truncate">
+            <span className="ds-type-micro-tag text-text-secondary font-mono tabular-nums truncate">
               {snapshot?.completedOps ?? 0} / {snapshot?.plannedOps ?? 0} reqs · {snapshot?.currentStage || "idle"}
             </span>
           </div>
 
-          <div className="p-4 rounded-2xl bg-surface-card border border-border-subtle flex flex-col gap-1">
-            <span className="ds-text-caption-s text-text-secondary uppercase">Success Rate</span>
-            <span className="ds-text-h-sm font-mono tabular-nums text-text-primary">
+          <div className="p-4 rounded-comfortable bg-surface-card border border-border-subtle flex flex-col gap-1">
+            <span className="ds-type-micro-tag text-text-secondary uppercase">Success Rate</span>
+            <span className="ds-type-sub-heading font-mono tabular-nums text-text-primary">
               {successRate}
             </span>
-            <span className="ds-text-caption-s text-text-secondary font-mono tabular-nums">
+            <span className="ds-type-micro-tag text-text-secondary font-mono tabular-nums">
               {overall?.ok ?? 0} ok · {overall?.failed ?? 0} failed
             </span>
           </div>
 
-          <div className="p-4 rounded-2xl bg-surface-card border border-border-subtle flex flex-col gap-1">
-            <span className="ds-text-caption-s text-text-secondary uppercase">Latency (Avg / p50 / p95)</span>
-            <span className="ds-text-h-sm font-mono tabular-nums text-text-primary">
+          <div className="p-4 rounded-comfortable bg-surface-card border border-border-subtle flex flex-col gap-1">
+            <span className="ds-type-micro-tag text-text-secondary uppercase">Latency (Avg / p50 / p95)</span>
+            <span className="ds-type-sub-heading font-mono tabular-nums text-text-primary">
               {overall?.avgMs ?? 0} ms
             </span>
-            <span className="ds-text-caption-s text-text-secondary font-mono tabular-nums">
+            <span className="ds-type-micro-tag text-text-secondary font-mono tabular-nums">
               p50 {overall?.p50Ms ?? 0} · p95 {overall?.p95Ms ?? 0} · max {overall?.maxMs ?? 0} ms
             </span>
           </div>
 
-          <div className="p-4 rounded-2xl bg-surface-card border border-border-subtle flex flex-col gap-1">
-            <span className="ds-text-caption-s text-text-secondary uppercase">Combined Throughput</span>
-            <span className="ds-text-h-sm font-mono tabular-nums text-text-primary">
+          <div className="p-4 rounded-comfortable bg-surface-card border border-border-subtle flex flex-col gap-1">
+            <span className="ds-type-micro-tag text-text-secondary uppercase">Combined Throughput</span>
+            <span className="ds-type-sub-heading font-mono tabular-nums text-text-primary">
               {snapshot?.throughputPerMin ?? 0} req/min
             </span>
-            <span className="ds-text-caption-s text-text-secondary truncate">
+            <span className="ds-type-micro-tag text-text-secondary truncate">
               Accounts: {snapshot?.accountCount ?? selectedAccounts.length} · Projects: {snapshot?.createdProjects?.length ?? 0}
             </span>
           </div>
 
-          <div className="p-4 rounded-2xl bg-surface-card border border-border-subtle flex flex-col gap-1">
-            <span className="ds-text-caption-s text-text-secondary uppercase">Errors (429 / 409 / 5xx)</span>
+          <div className="p-4 rounded-comfortable bg-surface-card border border-border-subtle flex flex-col gap-1">
+            <span className="ds-type-micro-tag text-text-secondary uppercase">Errors (429 / 409 / 5xx)</span>
             <div className="flex flex-wrap items-center gap-1.5 pt-1">
               <Badge variant={(overall?.status429 || 0) > 0 ? "warning" : "default"}>
                 429: {overall?.status429 ?? 0}
@@ -1031,7 +1032,7 @@ export default function LoadTestPage() {
                 5xx: {overall?.status5xx ?? 0}
               </Badge>
             </div>
-            <span className="ds-text-caption-s text-text-secondary font-mono tabular-nums">
+            <span className="ds-type-micro-tag text-text-secondary font-mono tabular-nums">
               Media: {snapshot?.createdWorkflowIds?.length ?? 0} · Folders: {snapshot?.createdFolderIds?.length ?? 0}
             </span>
           </div>
@@ -1041,8 +1042,8 @@ export default function LoadTestPage() {
         {snapshot?.accounts?.length > 0 && (
           <SectionCard className="flex flex-col gap-3">
             <div className="flex items-center justify-between">
-              <h2 className="ds-text-h-xs text-text-primary">Per-Account Breakdown</h2>
-              <span className="ds-text-caption-m text-text-secondary">
+              <h2 className="ds-type-card-title text-text-primary">Per-Account Breakdown</h2>
+              <span className="ds-type-small text-text-secondary">
                 {snapshot.accounts.length} Google account(s) running concurrently
               </span>
             </div>
@@ -1050,7 +1051,7 @@ export default function LoadTestPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="border-b border-border-subtle ds-text-caption-s text-text-secondary uppercase">
+                  <tr className="border-b border-border-subtle ds-type-micro-tag text-text-secondary uppercase">
                     <th className="py-2 pr-4">Google Account</th>
                     <th className="py-2 px-2">Status</th>
                     <th className="py-2 px-2">Stage</th>
@@ -1064,12 +1065,12 @@ export default function LoadTestPage() {
                     <th className="py-2 pl-2">Project</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-border-subtle ds-text-caption-m font-mono tabular-nums">
+                <tbody className="divide-y divide-border-subtle ds-type-small font-mono tabular-nums">
                   {snapshot.accounts.map((acc) => {
                     const isCleaned = Boolean(acc.projectId && cleanedProjects[acc.projectId]);
                     return (
                       <tr key={acc.id}>
-                        <td className="py-2.5 pr-4 font-sans text-text-primary font-medium">{acc.email}</td>
+                        <td className="py-2.5 pr-4 ds-type-caption-label text-text-primary">{acc.email}</td>
                         <td className="py-2.5 px-2">
                           <Badge variant={getStatusBadgeVariant(acc.status)} size="sm">
                             {acc.status}
@@ -1122,8 +1123,8 @@ export default function LoadTestPage() {
         {/* Per-Stage Breakdown Table */}
         <SectionCard className="flex flex-col gap-3">
           <div className="flex items-center justify-between">
-            <h2 className="ds-text-h-xs text-text-primary">Per-Stage Breakdown (Combined)</h2>
-            <span className="ds-text-caption-m text-text-secondary">
+            <h2 className="ds-type-card-title text-text-primary">Per-Stage Breakdown (Combined)</h2>
+            <span className="ds-type-small text-text-secondary">
               Exact stats computed across all {snapshot?.totalLogged ?? 0} requests
             </span>
           </div>
@@ -1131,7 +1132,7 @@ export default function LoadTestPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-border-subtle ds-text-caption-s text-text-secondary uppercase">
+                <tr className="border-b border-border-subtle ds-type-micro-tag text-text-secondary uppercase">
                   <th className="py-2 pr-4">Stage</th>
                   <th className="py-2 px-2">Total</th>
                   <th className="py-2 px-2">OK</th>
@@ -1146,12 +1147,12 @@ export default function LoadTestPage() {
                   <th className="py-2 pl-2">Max (ms)</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border-subtle ds-text-caption-m font-mono tabular-nums">
+              <tbody className="divide-y divide-border-subtle ds-type-small font-mono tabular-nums">
                 {STAGE_LABELS.map(([key, label]) => {
                   const row = snapshot?.stages?.[key];
                   return (
                     <tr key={key}>
-                      <td className="py-2.5 pr-4 font-sans text-text-primary font-medium">{label}</td>
+                      <td className="py-2.5 pr-4 ds-type-caption-label text-text-primary">{label}</td>
                       <td className="py-2.5 px-2 text-text-primary">{row?.total ?? 0}</td>
                       <td className="py-2.5 px-2 text-emerald-400">{row?.ok ?? 0}</td>
                       <td className="py-2.5 px-2 text-error">{row?.failed ?? 0}</td>
@@ -1174,22 +1175,22 @@ export default function LoadTestPage() {
         {/* Live Request Log */}
         <SectionCard className="flex flex-col gap-3">
           <div className="flex items-center justify-between">
-            <h2 className="ds-text-h-xs text-text-primary">Live Request Log</h2>
-            <span className="ds-text-caption-m text-text-secondary">
+            <h2 className="ds-type-card-title text-text-primary">Live Request Log</h2>
+            <span className="ds-type-small text-text-secondary">
               Showing latest {snapshot?.recentLog?.length ?? 0} of {snapshot?.totalLogged ?? 0} requests
             </span>
           </div>
 
           <div className="max-h-96 overflow-y-auto custom-scrollbar flex flex-col divide-y divide-border-subtle">
             {!snapshot?.recentLog?.length ? (
-              <p className="py-8 text-center ds-text-caption-l text-text-secondary">
+              <p className="py-8 text-center ds-type-caption-label text-text-secondary">
                 No requests recorded yet. Connect 1+ Google accounts above and click Start Test.
               </p>
             ) : (
               snapshot.recentLog.map((entry) => (
                 <div
                   key={entry.id}
-                  className="py-2 flex flex-wrap items-center justify-between gap-2 ds-text-caption-m font-mono tabular-nums"
+                  className="py-2 flex flex-wrap items-center justify-between gap-2 ds-type-small font-mono tabular-nums"
                 >
                   <div className="flex flex-wrap items-center gap-2 min-w-0">
                     <span className="text-text-disabled">#{entry.id}</span>

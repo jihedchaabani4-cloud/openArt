@@ -11,6 +11,7 @@ export * from "./dashed-upload-slot";
 export * from "./interactive-list-row";
 export * from "./switch";
 export * from "./input";
+export * from "./label";
 export * from "./checkbox";
 export * from "./badge";
 export { Slider } from "@/components/primitives/slider";

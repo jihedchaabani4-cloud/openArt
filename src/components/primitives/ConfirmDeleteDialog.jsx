@@ -52,12 +52,12 @@ export function ConfirmDeleteDialog({
       >
         <div className="flex flex-col items-center text-center">
           <div className="mb-3">
-            <HugeIcon name="alert-02" className="text-3xl text-danger" />
+            <HugeIcon name="alert-02" size="2xl" className="text-danger" />
           </div>
           
           <DialogHeader className="space-y-1">
             <DialogTitle className="sr-only">{title || "Confirm Deletion"}</DialogTitle>
-            <DialogDescription className="text-white/90 text-sm font-normal text-center leading-snug">
+            <DialogDescription className="text-white/90 ds-type-small text-center">
               {description}
             </DialogDescription>
           </DialogHeader>

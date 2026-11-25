@@ -41,7 +41,7 @@ export function ProjectCard({ project, onDelete, onRename }) {
             >
                 <Link href={`/cinema-studio/${project.project_id}`} className="block">
                     <Card.Canvas
-                        className="relative overflow-hidden rounded-xxxs aspect-[1.6/1] bg-surface-sunken"
+                        className="relative overflow-hidden rounded-comfortable aspect-[1.6/1] bg-surface-sunken"
                         onMouseEnter={() => {
                             if (isVideoThumbnail) {
                                 videoRef.current?.play().catch(() => {})
@@ -82,7 +82,7 @@ export function ProjectCard({ project, onDelete, onRename }) {
                 </Link>
 
                 {/* Footer Actions Row */}
-                <div className="flex items-center justify-between px-5 py-3 transition-colors rounded-lg duration-300 group-hover:bg-surface-elevated">
+                <div className="flex items-center justify-between px-5 py-3 transition-colors rounded-subtle duration-300 group-hover:bg-surface-elevated">
                     <div className="flex items-center gap-2 flex-1 min-w-0">
                         <EditableDisplayName
                             ref={editRef}
@@ -90,7 +90,7 @@ export function ProjectCard({ project, onDelete, onRename }) {
                             onSave={(newName) => onRename(project.project_id, newName)}
                             onEditChange={(val) => setIsEditing(val)}
                             className="w-full"
-                            inputClassName="text-xs font-medium tracking-tight text-white !px-0 bg-transparent"
+                            inputClassName="ds-type-small text-white !px-0 bg-transparent"
                         />
                         {!isEditing && (
                             <Button

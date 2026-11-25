@@ -332,7 +332,7 @@ export function NavbarFilterDropdown({ availableModels = EMPTY_LIST }) {
                   )}
                 </>
               ) : (
-                <div className="px-2 py-2 ds-text-caption-s text-text-secondary">
+                <div className="px-2 py-2 ds-type-micro-tag text-text-secondary">
                   {mergedModels.length === 0 ? "No models yet" : "No models found"}
                 </div>
               )}

@@ -227,7 +227,7 @@ export function MoveToDialog({
         {isMatch && (
           <div
             className={cn(
-              "group relative flex h-9 min-w-0 items-center gap-1.5 rounded-lg py-1 pr-1.5 transition-colors select-none",
+              "group relative flex h-9 min-w-0 items-center gap-1.5 rounded-subtle py-1 pr-1.5 transition-colors select-none",
               getIndentClass(depth),
               isSelected
                 ? "bg-white/10 text-on-surface"
@@ -247,7 +247,7 @@ export function MoveToDialog({
                 size="s"
                 onClick={(e) => toggleExpand(node.id, e)}
                 aria-label={isExpanded ? `Collapse ${nodeName}` : `Expand ${nodeName}`}
-                className="size-6 p-0 shrink-0 text-on-surface-subtle hover:text-on-surface rounded"
+                className="size-6 p-0 shrink-0 text-on-surface-subtle hover:text-on-surface rounded-subtle"
               >
                 <HugeIcon
                   name={isExpanded ? "arrow-down-01" : "arrow-right-01"}
@@ -261,18 +261,18 @@ export function MoveToDialog({
             <FolderGlyphIcon color={node.color} size={18} className="shrink-0" />
 
             {/* Folder Title */}
-            <span className="truncate flex-1 text-sm font-medium text-left">
+            <span className="truncate flex-1 ds-type-small text-left">
               {nodeName}
             </span>
 
             {/* Disabled / Current Status Badge */}
             {isCurrentParent && (
-              <span className="text-xxs px-1.5 py-0.5 rounded bg-white/5 text-on-surface-subtle shrink-0">
+              <span className="ds-type-micro-tag px-1.5 py-0.5 rounded-sharp bg-white/5 text-on-surface-subtle shrink-0">
                 Current
               </span>
             )}
             {isSelfOrDescendant && (
-              <span className="text-xxs px-1.5 py-0.5 rounded bg-white/5 text-on-surface-subtle shrink-0">
+              <span className="ds-type-micro-tag px-1.5 py-0.5 rounded-sharp bg-white/5 text-on-surface-subtle shrink-0">
                 Cannot move here
               </span>
             )}
@@ -290,9 +290,9 @@ export function MoveToDialog({
                   setExpandedFolderIds((prev) => new Set([...prev, node.id]));
                 }}
                 title={`Create subfolder in ${nodeName}`}
-                className="opacity-0 group-hover:opacity-100 size-6 p-0 text-on-surface-subtle hover:text-on-surface rounded shrink-0 ml-auto"
+                className="opacity-0 group-hover:opacity-100 size-6 p-0 text-on-surface-subtle hover:text-on-surface rounded-subtle shrink-0 ml-auto"
               >
-                <HugeIcon name="add-01" className="text-sm" />
+                <HugeIcon name="add-01" size="sm" />
               </Button>
             )}
           </div>
@@ -317,7 +317,7 @@ export function MoveToDialog({
                 if (e.key === "Escape") setCreatingInFolderId(null);
               }}
               placeholder="New folder name..."
-              className="flex-1 bg-surface-elevated text-on-surface text-xs rounded px-2 py-1 outline-none border border-border focus:border-white/30"
+              className="flex-1 bg-surface-elevated text-on-surface ds-type-small rounded-subtle px-2 py-1 outline-none border border-border focus:border-white/30"
             />
             <Button
               type="button"
@@ -325,7 +325,7 @@ export function MoveToDialog({
               size="s"
               disabled={!newSubfolderName.trim() || isCreating}
               onClick={() => handleCreateSubfolder(node.id)}
-              className="text-xs px-2 h-7"
+              className="ds-type-small px-2 h-7"
             >
               Add
             </Button>
@@ -336,7 +336,7 @@ export function MoveToDialog({
               onClick={() => setCreatingInFolderId(null)}
               className="size-7 p-0 text-on-surface-subtle"
             >
-              <HugeIcon name="cancel-01" className="text-sm" />
+              <HugeIcon name="cancel-01" size="sm" />
             </Button>
           </div>
         )}
@@ -360,7 +360,7 @@ export function MoveToDialog({
       >
         {/* Header */}
         <div className="flex items-center justify-between px-5 pt-4 pb-2">
-          <DialogTitle className="text-base font-semibold text-on-surface">
+          <DialogTitle className="ds-type-feature-title text-on-surface">
             Move to
           </DialogTitle>
           <DialogDescription className="sr-only">
@@ -371,7 +371,7 @@ export function MoveToDialog({
             variant="ghost"
             size="s"
             onClick={() => onOpenChange?.(false)}
-            className="size-7 rounded-full p-0 text-on-surface-subtle hover:text-on-surface"
+            className="size-7 rounded-subtle p-0 text-on-surface-subtle hover:text-on-surface"
             aria-label="Close"
           >
             <HugeIcon name="cancel-01" />
@@ -380,14 +380,14 @@ export function MoveToDialog({
 
         {/* Search Row */}
         <div className="px-5 pt-2 pb-2 flex items-center shrink-0">
-          <div className="flex h-9 w-full items-center gap-2 rounded-xl border border-border/60 bg-surface-container-high px-2.5 min-w-0">
+          <div className="flex h-9 w-full items-center gap-2 rounded-subtle border border-border/60 bg-surface-container-high px-2.5 min-w-0">
             <HugeIcon name="search-01" className="text-on-surface-subtle shrink-0" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Find folder.."
-              className="min-w-0 flex-1 bg-transparent text-xs text-on-surface outline-none placeholder:text-on-surface-subtle"
+              className="min-w-0 flex-1 bg-transparent ds-type-small text-on-surface outline-none placeholder:text-on-surface-subtle"
             />
             {searchQuery && (
               <Button
@@ -397,7 +397,7 @@ export function MoveToDialog({
                 onClick={() => setSearchQuery("")}
                 className="size-5 p-0 text-on-surface-subtle hover:text-on-surface"
               >
-                <HugeIcon name="cancel-01" className="text-xs" />
+                <HugeIcon name="cancel-01" size="xs" />
               </Button>
             )}
           </div>
@@ -412,7 +412,7 @@ export function MoveToDialog({
                 if (currentParentId) setSelectedTargetId(null);
               }}
               className={cn(
-                "group relative flex h-9 min-w-0 items-center gap-1.5 rounded-lg py-1 pr-1.5 pl-2 transition-colors select-none",
+                "group relative flex h-9 min-w-0 items-center gap-1.5 rounded-subtle py-1 pr-1.5 pl-2 transition-colors select-none",
                 selectedTargetId === null
                   ? "bg-white/10 text-on-surface"
                   : !currentParentId
@@ -422,11 +422,11 @@ export function MoveToDialog({
             >
               <span className="size-6 shrink-0" />
               <FolderGlyphIcon color={null} size={18} className="shrink-0" />
-              <span className="truncate flex-1 text-sm font-medium text-left">
+              <span className="truncate flex-1 ds-type-small text-left">
                 {rootDisplayTitle}
               </span>
               {!currentParentId && (
-                <span className="text-xxs px-1.5 py-0.5 rounded bg-white/5 text-on-surface-subtle shrink-0">
+                <span className="ds-type-micro-tag px-1.5 py-0.5 rounded-sharp bg-white/5 text-on-surface-subtle shrink-0">
                   Current
                 </span>
               )}
@@ -437,7 +437,7 @@ export function MoveToDialog({
           {folderTree.length > 0 ? (
             folderTree.map((rootNode) => renderFolderRow(rootNode, 0))
           ) : (
-            <div className="py-8 text-center text-xs text-on-surface-subtle">
+            <div className="py-8 text-center ds-type-small text-on-surface-subtle">
               No folders found
             </div>
           )}
@@ -450,7 +450,7 @@ export function MoveToDialog({
             variant="ghost"
             size="m"
             onClick={() => onOpenChange?.(false)}
-            className="text-sm px-4 text-on-surface-subtle hover:text-on-surface"
+            className="px-4 text-on-surface-subtle hover:text-on-surface"
           >
             Cancel
           </Button>
@@ -460,7 +460,7 @@ export function MoveToDialog({
             size="m"
             disabled={isMoveDisabled}
             onClick={handleConfirmMove}
-            className="text-sm px-5 font-semibold min-w-[5rem]"
+            className="px-5 min-w-[5rem]"
           >
             {isMoving ? "Moving..." : "Move"}
           </Button>

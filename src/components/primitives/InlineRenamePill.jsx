@@ -82,7 +82,7 @@ export function InlineRenamePill({
       onDragStart={(e) => { e.preventDefault(); e.stopPropagation(); }}
       className={cn(
         "flex items-center gap-3.5",
-        "bg-surface-container border border-outline-variant rounded-md",
+        "bg-surface-container border border-outline-variant rounded-subtle",
         "px-5 py-3",
         "shadow-none",
         "min-w-100 max-w-140",
@@ -102,7 +102,7 @@ export function InlineRenamePill({
         disabled={isSaving}
         className={cn(
           "flex-1 min-w-0 bg-transparent border-none outline-none",
-          "text-white text-sm font-medium leading-normal",
+          "text-white ds-type-small",
           "placeholder-white/35 focus:outline-none focus:ring-0",
           isSaving && "opacity-50"
         )}
@@ -120,9 +120,9 @@ export function InlineRenamePill({
           className="size-7 p-0"
         >
           {isSaving ? (
-            <HugeIcon name="loading-03" className="text-base animate-spin text-white" />
+            <HugeIcon name="loading-03" size="md" className="animate-spin text-white" />
           ) : (
-            <HugeIcon name="tick-02" className="text-base font-bold" />
+            <HugeIcon name="tick-02" size="md" weight="bold" />
           )}
         </Button>
 
@@ -135,7 +135,7 @@ export function InlineRenamePill({
           aria-label="Cancel"
           className="size-7 p-0"
         >
-          <HugeIcon name="cancel-01" className="text-base font-bold" />
+          <HugeIcon name="cancel-01" size="md" weight="bold" />
         </Button>
       </div>
     </div>

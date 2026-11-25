@@ -11,8 +11,8 @@ import {
 } from "lexical";
 import { $createMentionNode } from "./MentionNode";
 import { HugeIcon } from "@/components/primitives/HugeIcon";
+import { Label } from "@/components/base/label";
 import {
-  MENU_LABEL_CLASS,
   MENU_PANEL_DEFAULT_WIDTH,
   MENU_SEPARATOR_CLASS,
   MenuItemContent,
@@ -199,14 +199,14 @@ export function MentionPlugin({ references = [], onOpenMediaLibrary }) {
       style={{ top: pos.top, left: pos.left }}
       className={menuPanelClassName({ className: cn("absolute z-[9999]", MENU_PANEL_DEFAULT_WIDTH) })}
     >
-      <div className={cn(MENU_LABEL_CLASS, "flex items-center justify-between")}>
-        <span>Mention Reference</span>
-        {query && <span className="ds-text-caption-s text-text-body-muted font-mono">@{query}</span>}
+      <div className="px-2 py-1 flex items-center justify-between">
+        <Label as="span">Mention Reference</Label>
+        {query && <span className="ds-type-micro-tag text-text-body-muted font-mono">@{query}</span>}
       </div>
 
       <div className="flex flex-col gap-0.5 max-h-56 overflow-y-auto custom-scrollbar">
         {filtered.length === 0 ? (
-          <div className="px-3 py-3 text-center ds-text-caption-s text-text-secondary">
+          <div className="px-3 py-3 text-center ds-type-small text-text-secondary">
             No matching references
           </div>
         ) : (
@@ -227,7 +227,7 @@ export function MentionPlugin({ references = [], onOpenMediaLibrary }) {
                   selected: isSelected,
                 })}
               >
-                <div className="shrink-0 size-7 rounded-lg overflow-hidden bg-surface-tonal border border-border-menu-subtle flex items-center justify-center">
+                <div className="shrink-0 size-7 rounded-subtle overflow-hidden bg-surface-tonal border border-border-menu-subtle flex items-center justify-center">
                   {imgUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={imgUrl} alt="" className="size-full object-cover" />
@@ -236,10 +236,10 @@ export function MentionPlugin({ references = [], onOpenMediaLibrary }) {
                   )}
                 </div>
                 <div className="flex flex-col min-w-0 flex-1">
-                  <span className="ds-text-caption-m font-medium text-text-primary truncate leading-tight">
+                  <span className="ds-type-small text-text-primary truncate">
                     {title}
                   </span>
-                  <span className="ds-text-caption-s text-text-secondary truncate">
+                  <span className="ds-type-micro-tag text-text-secondary truncate">
                     {sub}
                   </span>
                 </div>
@@ -270,7 +270,7 @@ export function MentionPlugin({ references = [], onOpenMediaLibrary }) {
       </div>
 
       <div className={MENU_SEPARATOR_CLASS} />
-      <div className="px-2 py-1 flex items-center justify-between ds-text-caption-s text-text-disabled">
+      <div className="px-2 py-1 flex items-center justify-between ds-type-micro-tag text-text-disabled">
         <span>Use ↑↓ to navigate</span>
         <span>↵ Enter to select</span>
       </div>

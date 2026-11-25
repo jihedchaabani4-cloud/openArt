@@ -9,7 +9,7 @@ import { MediaView } from "./MediaView";
 
 /**
  * MediaViewCard - High-end, clean media display and selection tile
- * Modeled after Cinema Studio's MediaGridItem (rounded-xxxs, video hover scrub, sleek shadow)
+ * Modeled after Cinema Studio's MediaGridItem (rounded-comfortable, video hover scrub, sleek shadow)
  * Delegates media rendering and playback to CoreMediaItemView while owning
  * Picker-specific selection, highlight, disabled states, ref forwarding, and badges.
  */
@@ -142,7 +142,7 @@ export const MediaViewCard = React.forwardRef(function MediaViewCard({
         aspectRatio: aspectRatio || undefined,
       }}
       className={cn(
-        "group relative rounded-xxxs overflow-hidden bg-canvas-bg select-none border-none p-0 block text-left outline-none h-auto transition-none",
+        "group relative rounded-comfortable overflow-hidden bg-canvas-bg select-none border-none p-0 block text-left outline-none h-auto transition-none",
         "shadow-none",
         isHighlighted
           ? "ring-2 ring-white shadow-none z-10"
@@ -185,21 +185,21 @@ export const MediaViewCard = React.forwardRef(function MediaViewCard({
       >
       {/* Video Indicator Corner Badge */}
       {effectiveIsVideo && (
-        <div className="absolute bottom-2.5 right-2.5 z-20 flex items-center justify-center w-7 h-7 rounded-full bg-black/40 backdrop-blur-md border border-white/10 pointer-events-none shadow-none">
+        <div className="absolute bottom-2.5 right-2.5 z-20 flex items-center justify-center w-7 h-7 rounded-sharp bg-black/40 backdrop-blur-md border border-white/10 pointer-events-none shadow-none">
           <HugeIcon name="play" size="xs" className="text-white" />
         </div>
       )}
 
       {/* Character Indicator Corner Badge */}
       {isCharacter && !effectiveIsVideo && (
-        <div className="absolute bottom-2.5 right-2.5 z-20 flex items-center justify-center w-7 h-7 rounded-full bg-black/40 backdrop-blur-md border border-white/10 pointer-events-none shadow-none text-white">
+        <div className="absolute bottom-2.5 right-2.5 z-20 flex items-center justify-center w-7 h-7 rounded-sharp bg-black/40 backdrop-blur-md border border-white/10 pointer-events-none shadow-none text-white">
           <HugeIcon name="user" size="sm" />
         </div>
       )}
 
       {/* Element Indicator Corner Badge */}
       {isElement && !isCharacter && !effectiveIsVideo && (
-        <div className="absolute bottom-2.5 right-2.5 z-20 flex items-center justify-center w-7 h-7 rounded-full bg-black/40 backdrop-blur-md border border-white/10 pointer-events-none shadow-none text-white">
+        <div className="absolute bottom-2.5 right-2.5 z-20 flex items-center justify-center w-7 h-7 rounded-sharp bg-black/40 backdrop-blur-md border border-white/10 pointer-events-none shadow-none text-white">
           <HugeIcon name="shapes" size="sm" />
         </div>
       )}
@@ -207,7 +207,7 @@ export const MediaViewCard = React.forwardRef(function MediaViewCard({
 
       {/* Selection Overlay & Checkmark */}
       {isSelected && (
-        <div className="absolute inset-0 bg-white/10 flex items-center justify-center z-20 pointer-events-none rounded-xxxs">
+        <div className="absolute inset-0 bg-white/10 flex items-center justify-center z-20 pointer-events-none rounded-comfortable">
           <div className="w-7 h-7 bg-white text-black rounded-full flex items-center justify-center shadow-none">
             <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
               <path d="M13.485 3.485a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0l-3.25-3.25a.75.75 0 1 1 1.06-1.06L5.75 10.19l6.72-6.705a.75.75 0 0 1 1.015 0z" />

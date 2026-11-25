@@ -38,7 +38,7 @@ describe("Form Controls & Menus — Runway Flat Surface Architecture", () => {
       const { container } = render(
         <Textarea label="Prompt" placeholder="Describe the scene..." />
       );
-      const wrapper = container.querySelector(".rounded-md");
+      const wrapper = container.querySelector(".rounded-subtle");
       expect(wrapper).not.toBeNull();
       expect(wrapper?.className).toContain("bg-surface-container");
       expect(wrapper?.className).toContain("border-outline-variant");
@@ -52,7 +52,7 @@ describe("Form Controls & Menus — Runway Flat Surface Architecture", () => {
       const { container } = render(
         <Textarea variant="blur" placeholder="Blur textarea" />
       );
-      const wrapper = container.querySelector(".rounded-sm");
+      const wrapper = container.querySelector(".rounded-subtle");
       expect(wrapper).not.toBeNull();
       expect(wrapper?.className).toContain("bg-surface-container");
       expect(wrapper?.className).toContain("border-outline-variant");

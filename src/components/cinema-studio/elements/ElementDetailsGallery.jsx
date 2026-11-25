@@ -109,13 +109,13 @@ export function ElementDetailsGallery({
       ) : (
         /* Minimal sleek studio empty state (no big clumsy banner) */
         <div className="w-full flex-1 flex flex-col items-center justify-center py-16 px-4 text-center">
-          <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-4 text-white/40 shadow-inner">
-            <HugeIcon name="image-01" className="text-[28px]" />
+          <div className="w-14 h-14 rounded-comfortable bg-white/5 border border-white/10 flex items-center justify-center mb-4 text-white/40 shadow-inner">
+            <HugeIcon name="image-01" size="2xl" />
           </div>
-          <h4 className="text-base font-medium text-white/80 mb-1">
+          <h4 className="ds-type-body text-white/80 mb-1">
             Aucune image de référence
           </h4>
-          <p className="text-xs text-white/40 max-w-sm mb-6 leading-relaxed">
+          <p className="ds-type-small text-white/40 max-w-sm mb-6">
             Ajoutez jusqu'à 6 images pour définir les caractéristiques visuelles, matériaux et angles de cet élément.
           </p>
           <div className="flex items-center gap-3">

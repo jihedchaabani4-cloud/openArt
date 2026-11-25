@@ -7,18 +7,19 @@ import {
   PopoverContent,
 } from "@/components/primitives/popover";
 import { IconButton } from "@/components/base/icon-button";
+import { Label } from "@/components/base/label";
 import { cn } from "@/shared/lib/utils";
 
 function ShortcutRow({ label, keys }) {
   const list = Array.isArray(keys) ? keys : [keys];
   return (
-    <div className="flex items-center justify-between px-2 py-1 rounded-lg hover:bg-white/5 transition-colors">
-      <span className="text-xs text-white/70 font-normal leading-none font-sans antialiased">{label}</span>
+    <div className="flex items-center justify-between px-2 py-1 rounded-subtle hover:bg-white/5 transition-colors">
+      <span className="ds-type-small text-white/70 antialiased">{label}</span>
       <div className="flex items-center gap-1 shrink-0">
         {list.map((k, i) => (
           <kbd
             key={i}
-            className="px-1.5 py-0.5 min-w-4 text-xs font-mono font-medium text-white/90 bg-white/10 rounded border border-white/10 flex items-center justify-center leading-none select-none"
+            className="px-1.5 py-0.5 min-w-4 ds-type-micro-tag font-mono text-white/90 bg-white/10 rounded-sharp border border-white/10 flex items-center justify-center select-none"
           >
             {k}
           </kbd>
@@ -44,11 +45,11 @@ export function KeyboardShortcutsHelp({ className }) {
       <PopoverTrigger asChild>
         <IconButton
           variant={open ? "tonal" : "ghost"}
-          className={cn("size-8 p-0 font-mono text-sm shrink-0", className)}
+          className={cn("size-8 p-0 font-mono ds-type-small shrink-0", className)}
           aria-label="Keyboard Shortcuts"
           title="Keyboard Shortcuts"
         >
-          <span className="font-mono text-sm font-semibold leading-none">?</span>
+          <span className="ds-type-button font-mono">?</span>
         </IconButton>
       </PopoverTrigger>
       <PopoverContent
@@ -56,20 +57,20 @@ export function KeyboardShortcutsHelp({ className }) {
         side="bottom"
         sideOffset={6}
         onMouseLeave={() => setOpen(false)}
-        className="z-50 w-64 bg-ui-menu-background p-2 [--blur:40px] border border-border-weak rounded-[var(--radius-3xl)] shadow-none text-text-primary select-none"
+        className="z-50 w-64 bg-ui-menu-background p-2 [--blur:40px] border border-border-weak rounded-comfortable shadow-none text-text-primary select-none"
       >
         {/* Header */}
         <div className="flex items-center justify-between px-2 pt-0.5 pb-2 mb-1 border-b border-white/10">
-          <span className="text-xs font-medium text-white/90 font-sans antialiased">Shortcuts</span>
-          <span className="text-[10px] text-white/40 uppercase tracking-wider font-mono font-semibold">Help</span>
+          <span className="ds-type-caption-label text-white/90 antialiased">Shortcuts</span>
+          <span className="ds-type-micro-tag text-white/40 font-mono">Help</span>
         </div>
 
         {/* Content */}
         <div className="flex flex-col gap-0.5">
           {/* Assets Section */}
-          <div className="text-[10px] font-semibold text-white/40 px-2 pt-1 pb-0.5 uppercase tracking-wider font-sans antialiased">
+          <Label as="div" className="px-2 pt-1 pb-0.5">
             Assets
-          </div>
+          </Label>
           <ShortcutRow label="Navigate" keys={["↑", "↓", "←", "→"]} />
           <ShortcutRow label="Multi-select" keys="Space" />
           <ShortcutRow label="Add to prompt" keys="↵" />
@@ -78,18 +79,18 @@ export function KeyboardShortcutsHelp({ className }) {
           <div className="my-1 border-t border-white/10" />
 
           {/* Categories Section */}
-          <div className="text-[10px] font-semibold text-white/40 px-2 pt-0.5 pb-0.5 uppercase tracking-wider font-sans antialiased">
+          <Label as="div" className="px-2 pt-0.5 pb-0.5">
             Categories
-          </div>
+          </Label>
           <ShortcutRow label="Switch" keys={["↑", "↓"]} />
           <ShortcutRow label="Enter" keys={["→", "Tab"]} />
 
           <div className="my-1 border-t border-white/10" />
 
           {/* General Section */}
-          <div className="text-[10px] font-semibold text-white/40 px-2 pt-0.5 pb-0.5 uppercase tracking-wider font-sans antialiased">
+          <Label as="div" className="px-2 pt-0.5 pb-0.5">
             General
-          </div>
+          </Label>
           <ShortcutRow label="Search" keys="/" />
           <ShortcutRow label="Close" keys="Esc" />
         </div>

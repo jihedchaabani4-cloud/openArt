@@ -27,12 +27,12 @@ export function AssetsGroupSection({
           aria-label={`Select ${group.label}`}
         >
           {isAllSelected ? (
-            <HugeIcon name="tick-02" className="text-sm font-bold" />
+            <HugeIcon name="tick-02" size="sm" weight="bold" />
           ) : isPartiallySelected ? (
-            <HugeIcon name="minus-sign" className="text-sm font-bold" />
+            <HugeIcon name="minus-sign" size="sm" weight="bold" />
           ) : null}
         </Button>
-        <h2 className="text-2xl font-semibold tracking-tight text-on-surface">
+        <h2 className="ds-type-card-title text-on-surface">
           {group.label}
         </h2>
       </div>

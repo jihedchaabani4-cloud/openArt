@@ -129,7 +129,7 @@ describe("FileTree Component (shadcn.io/ui/file-tree)", () => {
     expect(container.querySelector('[data-testid="amber-icon"]')).toBeDefined();
   });
 
-  it("uses .ds-nav-item contract with size-4 icon container, gap-0.5, and rounded-lg by default", () => {
+  it("uses .ds-nav-item contract with size-4 icon container, gap-0.5, and rounded-subtle by default", () => {
     const { container } = render(
       <FileTree selectedId="f-active" initialExpandedItems={["f-parent"]}>
         <FileTreeFolder value="f-parent" element="Parent Folder">
@@ -145,7 +145,7 @@ describe("FileTree Component (shadcn.io/ui/file-tree)", () => {
     expect(items).toHaveLength(2);
     items.forEach((item) => {
       expect(item.className).toContain("ds-nav-item");
-      expect(item.className).toContain("rounded-lg");
+      expect(item.className).toContain("rounded-subtle");
       expect(item.className).not.toContain("h-8");
       const iconWrapper = item.firstElementChild;
       expect(iconWrapper?.className).toContain("size-4");

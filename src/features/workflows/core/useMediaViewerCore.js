@@ -65,9 +65,12 @@ export function useMediaViewerCore({ workflow, item: propItem = null, mediaId = 
     const meta = targetItem
       ? getItemMetadata(targetItem, workflow)
       : { status: "empty", url: null, isVideo: false, aspect: null, prompt: "" };
-    if (src && !meta.url) {
-      meta.url = src;
-      if (meta.status === "empty") meta.status = "completed";
+    if (src) {
+      return {
+        ...meta,
+        url: src,
+        status: meta.status === "empty" ? "completed" : meta.status,
+      };
     }
     return meta;
   }, [targetItem, workflow, src]);
@@ -77,20 +80,34 @@ export function useMediaViewerCore({ workflow, item: propItem = null, mediaId = 
 
   // ── Intrinsic Dimensions & Pixel-Perfect Aspect Ratio ──
   const cachedDim = url ? getCachedImageDimensions(url) : null;
-  const [intrinsicAspect, setIntrinsicAspect] = useState(
-    () => (cachedDim ? `${cachedDim.width}/${cachedDim.height}` : null)
-  );
-  const [intrinsicSize, setIntrinsicSize] = useState(
-    () => (cachedDim ? { width: cachedDim.width, height: cachedDim.height } : null)
-  );
+  const [intrinsicState, setIntrinsicState] = useState(() => ({
+    url,
+    aspect: cachedDim ? `${cachedDim.width}/${cachedDim.height}` : null,
+    size: cachedDim ? { width: cachedDim.width, height: cachedDim.height } : null,
+  }));
 
-  const handleIntrinsicDimensions = useCallback((w, h) => {
+  const handleIntrinsicDimensions = useCallback((w, h, sourceUrl = null) => {
     if (!w || !h) return;
+    const targetUrl = sourceUrl || url;
+    if (sourceUrl && url && sourceUrl !== url) return;
     const cssAspect = intrinsicSizeToCssAspect(w, h);
-    setIntrinsicAspect((prev) => (prev === cssAspect ? prev : cssAspect));
-    setIntrinsicSize((prev) => (prev?.width === w && prev?.height === h ? prev : { width: w, height: h }));
-    if (url) {
-      setCachedImageDimensions(url, w, h);
+    setIntrinsicState((prev) => {
+      if (
+        prev.url === targetUrl &&
+        prev.aspect === cssAspect &&
+        prev.size?.width === w &&
+        prev.size?.height === h
+      ) {
+        return prev;
+      }
+      return {
+        url: targetUrl,
+        aspect: cssAspect,
+        size: { width: w, height: h },
+      };
+    });
+    if (targetUrl) {
+      setCachedImageDimensions(targetUrl, w, h);
     }
   }, [url]);
 
@@ -98,17 +115,32 @@ export function useMediaViewerCore({ workflow, item: propItem = null, mediaId = 
     if (url) {
       const dim = getCachedImageDimensions(url);
       if (dim) {
-        setIntrinsicAspect(`${dim.width}/${dim.height}`);
-        setIntrinsicSize({ width: dim.width, height: dim.height });
+        setIntrinsicState({
+          url,
+          aspect: `${dim.width}/${dim.height}`,
+          size: { width: dim.width, height: dim.height },
+        });
       } else {
-        setIntrinsicAspect(null);
-        setIntrinsicSize(null);
+        setIntrinsicState({ url, aspect: null, size: null });
       }
     } else {
-      setIntrinsicAspect(null);
-      setIntrinsicSize(null);
+      setIntrinsicState({ url: null, aspect: null, size: null });
     }
   }, [url]);
+
+  const cachedWidth = cachedDim?.width ?? null;
+  const cachedHeight = cachedDim?.height ?? null;
+  const intrinsicAspect =
+    intrinsicState.url === url
+      ? intrinsicState.aspect
+      : (cachedWidth && cachedHeight ? `${cachedWidth}/${cachedHeight}` : null);
+  const intrinsicSize = useMemo(
+    () =>
+      intrinsicState.url === url
+        ? intrinsicState.size
+        : (cachedWidth && cachedHeight ? { width: cachedWidth, height: cachedHeight } : null),
+    [intrinsicState.url, intrinsicState.size, url, cachedWidth, cachedHeight]
+  );
 
   const displayAspect = intrinsicAspect || metaAspect || null;
 

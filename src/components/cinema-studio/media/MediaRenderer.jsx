@@ -4,25 +4,21 @@
 import React from "react";
 import { HugeIcon } from "@/components/primitives/HugeIcon";
 import { cn } from "@/shared/lib/utils";
+import {
+  normalizeCssAspectRatio,
+  setCachedImageDimensions,
+} from "@/shared/lib/displayUtils";
 import { ProcessingCard } from "./ProcessingCard";
 import { UploadingCard } from "./UploadingCard";
 
 /**
- * Normalizes aspect ratio strings (e.g. '16/9' -> '16 / 9').
+ * Normalizes aspect ratio strings (e.g. '16/9' or '16:9' -> '16 / 9').
  *
  * @param {string|number|null} ar
  * @returns {string|null}
  */
 function normalizeAspectRatio(ar) {
-  if (!ar) return null;
-  const str = String(ar).trim();
-  if (str.includes("/")) {
-    return str
-      .split("/")
-      .map((part) => part.trim())
-      .join(" / ");
-  }
-  return str;
+  return normalizeCssAspectRatio(ar);
 }
 
 /**
@@ -51,6 +47,7 @@ export const MediaRenderer = React.memo(
     playsInline = true,
     fallbackText,
     onLoad,
+    onLoadedMetadata,
     onError,
     ...props
   },
@@ -133,8 +130,8 @@ export const MediaRenderer = React.memo(
         style={containerStyle}
         {...props}
       >
-        <HugeIcon name="image-not-found-01" className="text-3xl text-red-400 mb-2" />
-        <span className="text-xs font-medium line-clamp-2">
+        <HugeIcon name="image-not-found-01" size="2xl" className="text-red-400 mb-2" />
+        <span className="ds-type-small line-clamp-2">
           {error || fallbackText || "Generation failed"}
         </span>
       </div>
@@ -155,8 +152,8 @@ export const MediaRenderer = React.memo(
         style={containerStyle}
         {...props}
       >
-        <HugeIcon name="image-not-found-02" className="text-3xl text-white/50 mb-2" />
-        <span className="text-xs font-medium">
+        <HugeIcon name="image-not-found-02" size="2xl" className="text-white/50 mb-2" />
+        <span className="ds-type-small">
           {fallbackText || "No media available"}
         </span>
       </div>
@@ -172,6 +169,12 @@ export const MediaRenderer = React.memo(
         style={containerStyle}
       >
         <video
+          key={url}
+          ref={(el) => {
+            if (el && el.readyState >= 1 && el.videoWidth > 0 && el.videoHeight > 0) {
+              setCachedImageDimensions(url, el.videoWidth, el.videoHeight);
+            }
+          }}
           src={url}
           poster={thumbUrl || undefined}
           autoPlay={autoPlay}
@@ -179,6 +182,13 @@ export const MediaRenderer = React.memo(
           loop={loop}
           muted={muted}
           playsInline={playsInline}
+          onLoadedMetadata={(e) => {
+            const v = e.currentTarget;
+            if (v?.videoWidth && v?.videoHeight) {
+              setCachedImageDimensions(url, v.videoWidth, v.videoHeight);
+            }
+            onLoadedMetadata?.(e);
+          }}
           onLoadedData={onLoad}
           onError={onError}
           className={cn("h-full w-full", {
@@ -200,10 +210,28 @@ export const MediaRenderer = React.memo(
       style={containerStyle}
     >
       <img
+        key={url}
+        ref={(el) => {
+          if (
+            el?.complete &&
+            el?.naturalWidth > 0 &&
+            el?.naturalHeight > 0 &&
+            el.getAttribute("src") === url &&
+            (!el.currentSrc || el.currentSrc === el.src)
+          ) {
+            setCachedImageDimensions(url, el.naturalWidth, el.naturalHeight);
+          }
+        }}
         src={url}
         alt={displayName}
         loading="lazy"
-        onLoad={onLoad}
+        onLoad={(e) => {
+          const img = e.currentTarget;
+          if (img?.naturalWidth && img?.naturalHeight) {
+            setCachedImageDimensions(url, img.naturalWidth, img.naturalHeight);
+          }
+          onLoad?.(e);
+        }}
         onError={onError}
         className={cn("h-full w-full transition-opacity duration-200", {
           "object-cover": objectFit === "cover",

@@ -58,7 +58,7 @@ export function CharacterPromptBar({
             variant="ghost"
             data-state={featureEditorOpen ? "open" : "closed"}
             className={cn(
-              "rounded-lg ds-text-caption-m font-medium",
+              "rounded-subtle ds-type-small",
               featureEditorOpen
                 ? "text-text-primary"
                 : "text-text-secondary hover:text-text-primary"

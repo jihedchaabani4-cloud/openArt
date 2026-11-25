@@ -35,7 +35,7 @@ function AssetDetailState({ message = null }) {
   return (
     <div className="flex min-h-[calc(100vh-75px)] w-full items-center justify-center px-6">
       {message ? (
-        <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-6 py-5 text-sm text-white/45">
+        <div className="rounded-comfortable border border-white/10 bg-white/[0.03] px-6 py-5 ds-type-small text-white/45">
           {message}
         </div>
       ) : null}
@@ -46,7 +46,7 @@ function AssetDetailState({ message = null }) {
 function MediaViewer({ media, alt, isVideo }) {
   if (!media?.url) {
     return (
-      <div className="flex h-[70vh] min-h-[420px] w-full items-center justify-center text-white/35">
+      <div className="flex h-[70vh] min-h-[420px] w-full items-center justify-center ds-type-small text-white/35">
         No preview available for this asset.
       </div>
     );
@@ -66,7 +66,7 @@ function MediaViewer({ media, alt, isVideo }) {
         autoPlay
         loop
         playsInline
-        className="block bg-black object-contain rounded-xxxs"
+        className="block bg-black object-contain rounded-none"
         style={viewerStyle}
       />
     );
@@ -76,7 +76,7 @@ function MediaViewer({ media, alt, isVideo }) {
     <img
       src={media.url}
       alt={alt}
-      className="block bg-black object-contain rounded-xxxs"
+      className="block bg-black object-contain rounded-none"
       style={viewerStyle}
     />
   );
@@ -110,7 +110,7 @@ export function AssetDetailPage({ workflowId }) {
   return (
     <div className="flex min-h-[calc(100vh-75px)] w-full items-center justify-center bg-background px-4 py-4 text-white xl:px-6">
       <div className="flex max-w-full justify-center">
-        <div className="inline-flex max-w-full items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-black shadow-none">
+        <div className="inline-flex max-w-full items-center justify-center overflow-hidden rounded-comfortable border border-white/10 bg-black shadow-none">
           <MediaViewer media={media} alt={viewerAlt} isVideo={isVideo} />
         </div>
       </div>

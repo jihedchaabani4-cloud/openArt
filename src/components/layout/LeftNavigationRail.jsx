@@ -7,6 +7,7 @@ import { HugeIcon } from "@/components/primitives/HugeIcon";
 import { Button } from "@/components/base/button";
 import { IconButton } from "@/components/base/icon-button";
 import { Input } from "@/components/base/input";
+import { Label } from "@/components/base/label";
 import { FileTree, FileTreeFolder, FileTreeItem } from "@/components/primitives/file-tree";
 import { FolderGlyphIcon } from "@/components/primitives/FolderGlyphIcon";
 import {
@@ -304,9 +305,9 @@ export function LeftNavigationRail() {
     }
   };
 
-  const renderProjectMenuItems = ({ Label, Item, Separator }) => (
+  const renderProjectMenuItems = ({ Label: MenuLabel, Item, Separator }) => (
     <>
-      <Label>Actions</Label>
+      <MenuLabel>Actions</MenuLabel>
       <Item onSelect={() => handleOpenProjectInNewTab(selectedProjectId)}>
         <MenuItemContent icon="link-square-02">Open in new tab</MenuItemContent>
       </Item>
@@ -488,7 +489,7 @@ export function LeftNavigationRail() {
           <span
             aria-hidden="true"
             data-testid={`sidebar-count-${item.id}`}
-            className="ds-text-caption-s text-text-tertiary tabular-nums shrink-0"
+            className="ds-type-micro-tag text-text-tertiary tabular-nums shrink-0"
           >
             {item.count}
           </span>
@@ -515,7 +516,7 @@ export function LeftNavigationRail() {
           <span
             aria-hidden="true"
             data-testid={`sidebar-folder-count-${node.id}`}
-            className="ds-text-caption-s text-text-tertiary tabular-nums shrink-0"
+            className="ds-type-micro-tag text-text-tertiary tabular-nums shrink-0"
           >
             {directCount}
           </span>
@@ -643,7 +644,7 @@ export function LeftNavigationRail() {
         maxWidth: `${MAX_EXPANDED_WIDTH}px`,
       }}
       className={cn(
-        "h-full shrink-0 relative z-40 bg-transparent flex flex-col gap-y-4 select-none px-2 py-3 rounded-2xl border border-border-subtle",
+        "h-full shrink-0 relative z-40 bg-transparent flex flex-col gap-y-4 select-none px-2 py-3 rounded-comfortable border border-border-subtle",
         isResizing ? "transition-none" : "transition-[width] duration-200 ease-out"
       )}
     >
@@ -664,7 +665,7 @@ export function LeftNavigationRail() {
               type="button"
               variant="tonal"
               onClick={handleToggleExpand}
-              className={cn("shrink-0 rounded-lg", !isExpanded && "ml-1")}
+              className={cn("shrink-0 rounded-subtle", !isExpanded && "ml-1")}
               title={isExpanded ? "Réduire la barre" : "Développer la barre"}
               aria-label={isExpanded ? "Réduire la barre" : "Développer la barre"}
             >
@@ -709,7 +710,7 @@ export function LeftNavigationRail() {
                               }
                             }}
                             aria-label="Nom du projet"
-                            className="h-7 px-1.5 py-0 ds-text-caption-l flex-1 min-w-0 rounded-md"
+                            className="h-7 px-1.5 py-0 ds-type-caption-label flex-1 min-w-0 rounded-subtle"
                           />
                         </div>
                       ) : (
@@ -729,7 +730,7 @@ export function LeftNavigationRail() {
                           <span className="relative size-5 flex items-center justify-center shrink-0 text-icon-primary">
                             <HugeIcon name="film-02" />
                           </span>
-                          <span className="truncate flex-1 font-sans ds-text-caption-l font-medium text-text-primary">
+                          <span className="truncate flex-1 ds-type-caption-label text-text-primary">
                             {activeProjectName}
                           </span>
                           {chevron}
@@ -745,7 +746,7 @@ export function LeftNavigationRail() {
                             size="xs"
                             aria-label="Actions du projet"
                             title="Actions du projet"
-                            className="shrink-0 rounded-md text-muted-foreground hover:text-text-primary"
+                            className="shrink-0 rounded-subtle text-muted-foreground hover:text-text-primary"
                           >
                             <HugeIcon name="more-vertical" />
                           </IconButton>
@@ -841,9 +842,9 @@ export function LeftNavigationRail() {
         >
           {isExpanded && (
             <div className="flex items-center justify-between w-full px-2 shrink-0">
-              <p className="font-sans text-sm font-normal text-muted-foreground">
+              <Label as="span">
                 Folders
-              </p>
+              </Label>
             </div>
           )}
 

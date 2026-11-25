@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { LoadingScreen } from "@/components/primitives/LoadingScreen";
 import { Input } from "@/components/base/input";
+import { Label } from "@/components/base/label";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 const DOMAIN_SERVER = process.env.NEXT_PUBLIC_DOMAIN_SERVER;
@@ -78,23 +79,23 @@ export default function LoginPage() {
                 initial={{ scale: 0.8 }}
                 animate={{ scale: 1 }}
                 transition={{ type: "spring", bounce: 0.5 }}
-                className="flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-tr from-purple-500 to-blue-500 shadow-none border border-white/10"
+                className="flex items-center justify-center w-16 h-16 rounded-comfortable bg-gradient-to-tr from-purple-500 to-blue-500 shadow-none border border-white/10"
               >
-                <HugeIcon name="sparkles" className="text-3xl text-white" />
+                <HugeIcon name="sparkles" size="2xl" className="text-white" />
               </motion.div>
             </div>
 
             {/* Card Container */}
-            <div className="bg-surface-panel border border-white/10 p-8 rounded-2xl shadow-none relative overflow-hidden">
+            <div className="bg-surface-panel border border-white/10 p-8 rounded-comfortable shadow-none relative overflow-hidden">
               
               {/* Shine effect on card */}
               <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
               
               <div className="text-center mb-8">
-                <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-white/60 mb-2">
+                <h1 className="ds-type-sub-heading bg-clip-text text-transparent bg-gradient-to-r from-white to-white/60 mb-2">
                   Welcome back
                 </h1>
-                <p className="text-white/50 text-sm">
+                <p className="text-white/50 ds-type-small">
                   Enter your details to access your studio.
                 </p>
               </div>
@@ -103,16 +104,17 @@ export default function LoginPage() {
                 
                 {/* Email Field */}
                 <div className="space-y-2">
-                  <label className="text-xs font-medium text-white/70 ml-1">Email Address</label>
+                  <Label htmlFor="login-email" className="ml-1">Email Address</Label>
                   <div className="relative group">
                     <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                      <HugeIcon name="mail-01" className="text-xl text-white/40 group-focus-within:text-purple-400 transition-colors" />
+                      <HugeIcon name="mail-01" size="xl" className="text-white/40 group-focus-within:text-purple-400 transition-colors" />
                     </div>
                     <Input
+                      id="login-email"
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full pl-11 pr-4 py-3 bg-black/40 border border-white/10 rounded-sm text-white placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-white/20 transition-all text-sm min-h-0"
+                      className="w-full pl-11 pr-4 py-3 bg-black/40 border border-white/10 rounded-subtle text-white placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-white/20 transition-all ds-type-small min-h-0"
                       placeholder="name@example.com"
                       required
                     />
@@ -122,18 +124,19 @@ export default function LoginPage() {
                 {/* Password Field */}
                 <div className="space-y-2">
                   <div className="flex justify-between items-center ml-1">
-                    <label className="text-xs font-medium text-white/70">Password</label>
-                    <a href="#" className="text-xs text-purple-400 hover:text-purple-300 transition-colors">Forgot password?</a>
+                    <Label htmlFor="login-password">Password</Label>
+                    <a href="#" className="ds-type-small text-purple-400 hover:text-purple-300 transition-colors">Forgot password?</a>
                   </div>
                   <div className="relative group">
                     <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                      <HugeIcon name="lock-password" className="text-xl text-white/40 group-focus-within:text-purple-400 transition-colors" />
+                      <HugeIcon name="lock-password" size="xl" className="text-white/40 group-focus-within:text-purple-400 transition-colors" />
                     </div>
                     <Input
+                      id="login-password"
                       type="password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="w-full pl-11 pr-4 py-3 bg-black/40 border border-white/10 rounded-sm text-white placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-white/20 transition-all text-sm min-h-0"
+                      className="w-full pl-11 pr-4 py-3 bg-black/40 border border-white/10 rounded-subtle text-white placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-white/20 transition-all ds-type-small min-h-0"
                       placeholder="••••••••"
                       required
                     />
@@ -145,7 +148,7 @@ export default function LoginPage() {
                   <motion.div
                     initial={{ opacity: 0, y: -8 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-3 text-center"
+                    className="ds-type-small text-red-400 bg-red-500/10 border border-red-500/20 rounded-comfortable px-4 py-3 text-center"
                   >
                     {error}
                   </motion.div>
@@ -159,7 +162,7 @@ export default function LoginPage() {
                   onHoverStart={() => setIsHovered(true)}
                   onHoverEnd={() => setIsHovered(false)}
                   disabled={isLoading}
-                  className="w-full mt-6 bg-white text-black font-semibold py-3 rounded-sm flex items-center justify-center space-x-2 shadow-none border border-white/10 overflow-hidden relative group disabled:opacity-60 disabled:cursor-not-allowed text-sm"
+                  className="w-full mt-6 bg-white text-black ds-type-button py-3 rounded-subtle flex items-center justify-center space-x-2 shadow-none border border-white/10 overflow-hidden relative group disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   <span className="relative z-10 flex items-center gap-2">
                     Sign In
@@ -167,7 +170,7 @@ export default function LoginPage() {
                       animate={{ x: isHovered ? 4 : 0 }}
                       transition={{ type: "spring", stiffness: 300 }}
                     >
-                      <HugeIcon name="arrow-right-02" className="text-base" />
+                      <HugeIcon name="arrow-right-02" size="md" />
                     </motion.div>
                   </span>
                   
@@ -179,7 +182,7 @@ export default function LoginPage() {
               {/* Divider */}
               <div className="flex items-center my-6">
                 <div className="flex-grow border-t border-white/10"></div>
-                <span className="mx-4 text-xs text-white/40">OR CONTINUE WITH</span>
+                <span className="mx-4 ds-type-micro-tag text-white/40">OR CONTINUE WITH</span>
                 <div className="flex-grow border-t border-white/10"></div>
               </div>
 
@@ -190,29 +193,29 @@ export default function LoginPage() {
                   onClick={handleMicrosoftLogin}
                   whileHover={{ scale: 1.02, backgroundColor: "rgba(255,255,255,0.1)" }}
                   whileTap={{ scale: 0.98 }}
-                  className="flex items-center justify-center gap-2 py-2.5 bg-white/[0.03] border border-white/10 rounded-sm transition-colors"
+                  className="flex items-center justify-center gap-2 py-2.5 bg-white/[0.03] border border-white/10 rounded-subtle transition-colors"
                 >
-                  <HugeIcon name="laptop" className="text-xl text-white/80" />
-                  <span className="text-sm font-medium text-white/80">Microsoft</span>
+                  <HugeIcon name="laptop" size="xl" className="text-white/80" />
+                  <span className="ds-type-button text-white/80">Microsoft</span>
                 </motion.button>
                 <motion.button 
                   type="button"
                   onClick={handleGoogleLogin}
                   whileHover={{ scale: 1.02, backgroundColor: "rgba(255,255,255,0.1)" }}
                   whileTap={{ scale: 0.98 }}
-                  className="flex items-center justify-center gap-2 py-2.5 bg-white/[0.03] border border-white/10 rounded-sm transition-colors"
+                  className="flex items-center justify-center gap-2 py-2.5 bg-white/[0.03] border border-white/10 rounded-subtle transition-colors"
                 >
-                  <HugeIcon name="globe-02" className="text-xl text-white/80" />
-                  <span className="text-sm font-medium text-white/80">Google</span>
+                  <HugeIcon name="globe-02" size="xl" className="text-white/80" />
+                  <span className="ds-type-button text-white/80">Google</span>
                 </motion.button>
               </div>
 
             </div>
 
             {/* Footer Link */}
-            <p className="text-center text-sm text-white/50 mt-8">
+            <p className="text-center ds-type-small text-white/50 mt-8">
               Don't have an account?{" "}
-              <Link href="/register" className="text-purple-400 hover:text-purple-300 font-medium transition-colors">
+              <Link href="/register" className="ds-type-caption-label text-purple-400 hover:text-purple-300 transition-colors">
                 Sign up now
               </Link>
             </p>

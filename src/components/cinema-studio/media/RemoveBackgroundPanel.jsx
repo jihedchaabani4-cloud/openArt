@@ -6,7 +6,7 @@ import { Button } from "@/components/base/button";
 import { IconButton } from "@/components/base/icon-button";
 import { Switch } from "@/components/base/switch";
 import { Input } from "@/components/base/input";
-import { MENU_LABEL_CLASS } from "@/components/base/menu";
+import { Label } from "@/components/base/label";
 import { HugeIcon } from "@/components/primitives/HugeIcon";
 import { Slider } from "@/components/primitives/slider";
 import { Textarea } from "@/components/primitives/textarea";
@@ -175,12 +175,12 @@ export function RemoveBackgroundPanel({
       aria-label="Remove background editor"
       data-slot="remove-background-panel"
       className={cn(
-        "flex flex-col h-full w-full sm:w-[320px] rounded-2xl bg-omni-bg border border-border-subtle overflow-hidden",
+        "flex flex-col h-full ds-edit-sidebar-rail rounded-comfortable bg-omni-bg border border-border-subtle overflow-hidden",
         className
       )}
     >
       {/* Header */}
-      <header className="flex items-center justify-between gap-2 px-3 py-2.5 border-b border-border-subtle shrink-0">
+      <header className="flex items-center justify-between gap-2 px-4 py-3 border-b border-border-subtle shrink-0">
         <div className="flex items-center gap-2 min-w-0">
           <IconButton
             type="button"
@@ -192,7 +192,7 @@ export function RemoveBackgroundPanel({
             <HugeIcon name="arrow-left-01" size="sm" />
           </IconButton>
 
-          <h2 className="ds-text-caption-m font-semibold text-text-primary truncate">
+          <h2 className="ds-type-caption-label text-text-primary truncate">
             Remove Background
           </h2>
         </div>
@@ -212,11 +212,11 @@ export function RemoveBackgroundPanel({
       <div className="flex-1 overflow-y-auto custom-scrollbar p-3 flex flex-col gap-3">
         {/* 1. Model Selector Dropdown (reused Prompt Bar FlowSelect) */}
         {isLoadingModels ? (
-          <div className="py-3 px-2 text-center ds-text-caption-s text-text-secondary">
+          <div className="py-3 px-2 text-center ds-type-small text-text-secondary">
             Loading models…
           </div>
         ) : models.length === 0 ? (
-          <div className="py-3 px-2 text-center ds-text-caption-s text-text-secondary">
+          <div className="py-3 px-2 text-center ds-type-small text-text-secondary">
             No background removal models available.
           </div>
         ) : (
@@ -226,7 +226,7 @@ export function RemoveBackgroundPanel({
             items={modelSelectItems}
             label="Model"
             displayValue={selectedModel?.displayName || selectedModel?.key || "Model"}
-            width={294}
+            width={256}
             maxHeightLimit={320}
             side="bottom"
             align="start"
@@ -289,11 +289,15 @@ export function RemoveBackgroundPanel({
                 return (
                   <div
                     key={key}
-                    className="flex items-center justify-between min-h-[30px] px-2 py-1 rounded-lg ds-text-caption-m font-normal text-text-primary hover:bg-surface-tonal transition-colors"
+                    className="flex items-center justify-between min-h-8 px-2 py-1 rounded-subtle hover:bg-surface-tonal transition-colors"
                   >
-                    <label htmlFor={fieldId} className="truncate cursor-pointer">
+                    <Label
+                      htmlFor={fieldId}
+                      disabled={isSubmitting}
+                      className="block min-w-0 truncate cursor-pointer"
+                    >
                       {label}
-                    </label>
+                    </Label>
                     <Switch
                       id={fieldId}
                       checked={Boolean(val)}
@@ -310,11 +314,13 @@ export function RemoveBackgroundPanel({
                 if (def.values.length <= 3) {
                   return (
                     <div key={key} className="flex flex-col gap-1">
-                      <span className={cn(MENU_LABEL_CLASS, "px-1 py-0")}>{label}</span>
+                      <Label as="span" className="px-1">
+                        {label}
+                      </Label>
                       <div
                         role="radiogroup"
                         aria-label={label}
-                        className="flex items-center gap-1 p-0.5 bg-surface-card border border-border-menu-subtle rounded-lg w-full"
+                        className="flex items-center gap-1 p-0.5 bg-surface-card border border-border-menu-subtle rounded-subtle w-full"
                       >
                         {def.values.map((option) => {
                           const optionVal = typeof option === "object" ? option.value : option;
@@ -331,7 +337,12 @@ export function RemoveBackgroundPanel({
                               aria-checked={isChecked}
                               disabled={isSubmitting}
                               onClick={() => handleParamChange(key, optionVal)}
-                              className="flex-1 rounded-lg ds-text-caption-m"
+                              className={cn(
+                                "flex-1 rounded-subtle",
+                                def.values.length === 3
+                                  ? "px-1.5 ds-type-micro-tag"
+                                  : "px-2 ds-type-small"
+                              )}
                             >
                               {optionLabel}
                             </Button>
@@ -358,7 +369,7 @@ export function RemoveBackgroundPanel({
                     items={items}
                     label={label}
                     displayValue={activeItem?.label || String(val ?? def.values[0])}
-                    width={294}
+                    width={256}
                     side="bottom"
                     align="start"
                     sideOffset={6}
@@ -386,10 +397,10 @@ export function RemoveBackgroundPanel({
                         : 0.1;
                   const numericVal = Number.isFinite(Number(val)) ? Number(val) : def.min;
                   return (
-                    <div key={key} className="flex flex-col gap-1 py-1 rounded-lg">
-                      <div className={cn(MENU_LABEL_CLASS, "flex items-center justify-between py-0.5")}>
-                        <span>{label}</span>
-                        <span className="font-mono ds-text-caption-s text-text-primary tabular-nums">
+                    <div key={key} className="flex flex-col gap-1 py-1 rounded-subtle">
+                      <div className="px-2 py-0.5 flex items-center justify-between">
+                        <Label as="span">{label}</Label>
+                        <span className="font-mono ds-type-small text-text-primary tabular-nums">
                           {numericVal}
                         </span>
                       </div>
@@ -411,9 +422,9 @@ export function RemoveBackgroundPanel({
 
                 return (
                   <div key={key} className="flex flex-col gap-1">
-                    <label htmlFor={fieldId} className={cn(MENU_LABEL_CLASS, "px-1 py-0")}>
+                    <Label htmlFor={fieldId} disabled={isSubmitting} className="px-1">
                       {label}
-                    </label>
+                    </Label>
                     <Input
                       id={fieldId}
                       variant="outline"
@@ -432,9 +443,9 @@ export function RemoveBackgroundPanel({
               // String -> Base UI Input (outline variant)
               return (
                 <div key={key} className="flex flex-col gap-1">
-                  <label htmlFor={fieldId} className={cn(MENU_LABEL_CLASS, "px-1 py-0")}>
+                  <Label htmlFor={fieldId} disabled={isSubmitting} className="px-1">
                     {label}
-                  </label>
+                  </Label>
                   <Input
                     id={fieldId}
                     variant="outline"
@@ -458,7 +469,7 @@ export function RemoveBackgroundPanel({
           variant="cta-lg"
           disabled={!canSubmit}
           onClick={handleSubmit}
-          className="w-full justify-center gap-2"
+          className="w-full h-9 justify-center gap-2 ds-type-button"
         >
           <span>
             {isSubmitting

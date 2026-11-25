@@ -22,8 +22,8 @@ export default function HomePage() {
         className="min-h-screen bg-background flex flex-col items-center justify-center text-white/50"
         suppressHydrationWarning
       >
-        <HugeIcon name="loading-03" className="text-4xl animate-spin text-white mb-4" />
-        <span>Chargement...</span>
+        <HugeIcon name="loading-03" size="3xl" className="animate-spin text-white mb-4" />
+        <span className="ds-type-small">Chargement...</span>
       </div>
     );
   }

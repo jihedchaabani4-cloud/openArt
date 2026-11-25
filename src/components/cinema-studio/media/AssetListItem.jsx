@@ -34,16 +34,16 @@ export function AssetListItem({
         }
       }}
       className={cn(
-        "ds-pop-press !h-10 w-full !justify-start gap-2.5 p-1 pr-2.5 rounded-lg text-left select-none",
+        "ds-pop-press !h-10 w-full !justify-start gap-2.5 p-1 pr-2.5 rounded-subtle text-left select-none",
         isActive
-          ? "animate-button-pop !bg-white/[0.16] hover:!bg-white/20 text-white font-medium"
-          : "text-white/80 hover:!bg-white/10 hover:text-white font-normal",
+          ? "animate-button-pop !bg-white/[0.16] hover:!bg-white/20 text-white"
+          : "text-white/80 hover:!bg-white/10 hover:text-white",
         isDisabled && "opacity-50",
         className
       )}
     >
       {/* Thumbnail */}
-      <div className="size-8 rounded-md overflow-hidden bg-white/5 shrink-0 relative flex items-center justify-center">
+      <div className="size-8 rounded-subtle overflow-hidden bg-white/5 shrink-0 relative flex items-center justify-center">
         {isVideo ? (
           <video src={itemUrl} className="w-full h-full object-cover" muted />
         ) : (
@@ -52,7 +52,12 @@ export function AssetListItem({
       </div>
 
       {/* Asset Title */}
-      <span className="flex-1 min-w-0 ds-text-caption-l truncate font-sans antialiased">
+      <span
+        className={cn(
+          "flex-1 min-w-0 truncate antialiased",
+          isActive ? "ds-type-caption-label" : "ds-type-small"
+        )}
+      >
         {title}
       </span>
     </Button>

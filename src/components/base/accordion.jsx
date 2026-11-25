@@ -49,7 +49,8 @@ const AccordionTrigger = React.forwardRef(function AccordionTrigger(
         {icon ?? (
           <HugeIcon
             name="arrow-down-01"
-            className={cn("text-base transition-transform duration-200", iconClassName)}
+            size="md"
+            className={cn("transition-transform duration-200", iconClassName)}
           />
         )}
       </AccordionPrimitive.Trigger>
@@ -71,7 +72,7 @@ const AccordionContent = React.forwardRef(function AccordionContent(
       ref={ref}
       data-slot="accordion-content"
       className={cn(
-        "overflow-hidden text-sm text-white/70 data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down pt-3",
+        "overflow-hidden ds-type-small text-white/70 data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down pt-3",
         className
       )}
       {...props}

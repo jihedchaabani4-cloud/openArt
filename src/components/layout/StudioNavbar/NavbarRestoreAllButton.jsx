@@ -38,7 +38,7 @@ export function NavbarRestoreAllButton() {
       variant="outline"
       onClick={handleRestoreAll}
       disabled={isPending || !hasTrashed}
-      className="flex items-center gap-1.5 cursor-pointer h-7 max-h-full ds-text-caption-m"
+      className="flex items-center gap-1.5 cursor-pointer h-7 max-h-full"
     >
       <HugeIcon name="restore-bin" />
       <span>{isPending ? "Restauration..." : "Tout restaurer"}</span>

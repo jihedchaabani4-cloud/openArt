@@ -1,0 +1,16 @@
+/* ==========================================================================
+   CANONICAL 4-TOKEN BORDER-RADIUS SYSTEM (`src/styles/tokens/radius.css`)
+   Single source of truth for all rectangular UI corner radii.
+   Tailwind v4 `@theme` exposes both `var(--radius-*)` CSS custom properties
+   and native utilities (`rounded-none`, `rounded-sharp`, `rounded-subtle`,
+   `rounded-comfortable`, plus directional variants like `rounded-t-comfortable`).
+   `rounded-full` is reserved strictly for true circles (avatars, switches,
+   slider thumbs, radio dots, color swatches, status dots, circular spinners).
+   ========================================================================== */
+
+@theme {
+  --radius-none: 0px;
+  --radius-sharp: 4px;
+  --radius-subtle: 6px;
+  --radius-comfortable: 8px;
+}

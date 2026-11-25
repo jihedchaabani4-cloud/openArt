@@ -119,7 +119,7 @@ export function SelectorSlide({
   return (
     <div className="flex flex-col w-full select-none py-6">
       {title && (
-        <p className="text-xl font-semibold text-white/70 text-center leading-7 tracking-tight mb-3">
+        <p className="ds-type-feature-title text-white/70 text-center mb-3">
           {title}
         </p>
       )}
@@ -177,7 +177,7 @@ export function SelectorSlide({
                 key={String(step.value)}
                 type="button"
                 onClick={() => snapToIndex(i)}
-                className="absolute top-0 -translate-x-1/2 whitespace-nowrap cursor-pointer text-xl font-medium leading-7 tracking-tight bg-transparent border-none p-0"
+                className="absolute top-0 -translate-x-1/2 whitespace-nowrap cursor-pointer ds-type-feature-title bg-transparent border-none p-0"
                 style={{ left: i * stepSpacing }}
                 animate={getLabelAnim(dist)}
                 transition={{

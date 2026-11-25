@@ -466,7 +466,7 @@ function PromptBarPlatformInner({
         <fieldset
           data-source="reference"
           className={cn(
-            "relative grid grid-cols-1 grid-rows-1 min-w-0 flex-1 overflow-visible rounded-xl bg-white-5 transition-[height] duration-200 ease-out",
+            "relative grid grid-cols-1 grid-rows-1 min-w-0 flex-1 overflow-visible rounded-comfortable bg-white-5 transition-[height] duration-200 ease-out",
             showUnstackedReferenceTray
               ? "min-h-17 h-auto"
               : isPromptExpanded
@@ -520,7 +520,7 @@ function PromptBarPlatformInner({
               )}
 
               {layout.showPromptInput && (
-                <div className="min-w-0 min-h-0 flex-1 h-full flex flex-col px-1.5 py-0.5 overflow-hidden font-sans antialiased ds-text-caption-m">
+                <div className="min-w-0 min-h-0 flex-1 h-full flex flex-col px-1.5 py-0.5 overflow-hidden font-sans antialiased ds-type-small">
                   <div ref={editorContainerRef} className="flex-1 h-full min-h-0 overflow-y-auto custom-scrollbar">
                     <PromptEditor
                       value={prompt}
